@@ -639,6 +639,7 @@ DashBoard::DashBoard(QObject *parent)
     ,m_Knock_cyl3()
     ,m_Knock_cyl4()
 
+    ,m_Cruisecontrol()
 {
 
 }
@@ -5466,6 +5467,14 @@ void DashBoard::setlostsynccount(const qreal &lostsynccount)
             m_Knock_cyl4 = Knock_cyl4;
             emit Knock_cyl4Changed(Knock_cyl4);
         }
+        void DashBoard::setCruisecontrol(const int &Cruisecontrol)
+        {
+            if(m_Cruisecontrol == Cruisecontrol)
+                return;
+            m_Cruisecontrol = Cruisecontrol;
+            emit CruisecontrolChanged(Cruisecontrol);
+        }
+
 
 // Odometer
 qreal DashBoard::Odo() const { return m_Odo; }
@@ -6076,3 +6085,4 @@ qreal DashBoard::Knock_cyl1() const {return m_Knock_cyl1;}
 qreal DashBoard::Knock_cyl2() const {return m_Knock_cyl2;}
 qreal DashBoard::Knock_cyl3() const {return m_Knock_cyl3;}
 qreal DashBoard::Knock_cyl4() const {return m_Knock_cyl4;}
+int DashBoard::Cruisecontrol() const {return m_Cruisecontrol;}

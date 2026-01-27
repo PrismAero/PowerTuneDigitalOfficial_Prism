@@ -1305,6 +1305,9 @@ void udpreceiver::processPendingDatagrams()
         case 953:
             m_dashboard->setCalibrationSelect(Value);
             break;
+        case 954:
+            m_dashboard->setCruisecontrol(Value);
+            break;
         case 999:
             m_dashboard->setfrequencyDIEX1(Value);
             break;

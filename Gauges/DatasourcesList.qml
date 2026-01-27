@@ -2235,6 +2235,18 @@ ListModel {
         supportedECUs: "PowerTune"
     }
     ListElement {
+        sourcename:"Cruisecontrol"
+        defaultsymbol: " "
+        titlename:"Cruisecontrol"
+        decimalpoints : "0"
+        maxvalue : "15"
+        stepsize : "1"
+        divisor : "1"
+        supportedECUs: "PowerTune"
+    }
+
+
+    ListElement {
         sourcename:"laptime"
         defaultsymbol: " "
         titlename:"Lap Time"

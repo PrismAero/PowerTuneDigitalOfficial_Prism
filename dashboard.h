@@ -474,6 +474,8 @@ class DashBoard : public QObject
     Q_PROPERTY(qreal Knock_cyl2 READ Knock_cyl2 WRITE setKnock_cyl2 NOTIFY Knock_cyl2Changed)
     Q_PROPERTY(qreal Knock_cyl3 READ Knock_cyl3 WRITE setKnock_cyl3 NOTIFY Knock_cyl3Changed)
     Q_PROPERTY(qreal Knock_cyl4 READ Knock_cyl4 WRITE setKnock_cyl4 NOTIFY Knock_cyl4Changed)
+    Q_PROPERTY(int Cruisecontrol READ Cruisecontrol WRITE setCruisecontrol NOTIFY CruisecontrolChanged)
+
 
 
 
@@ -1338,7 +1340,7 @@ class DashBoard : public QObject
     void setKnock_cyl2(const qreal &Knock_cyl2);
     void setKnock_cyl3(const qreal &Knock_cyl3);
     void setKnock_cyl4(const qreal &Knock_cyl4);
-
+    void setCruisecontrol(const int &Cruisecontrol);
 
 
 
@@ -1960,7 +1962,7 @@ class DashBoard : public QObject
     qreal Knock_cyl2()const;
     qreal Knock_cyl3()const;
     qreal Knock_cyl4()const;
-
+    int Cruisecontrol()const;
 signals:
 
     //Odometer
@@ -2580,7 +2582,7 @@ signals:
     void Knock_cyl2Changed(qreal Knock_cyl2);
     void Knock_cyl3Changed(qreal Knock_cyl3);
     void Knock_cyl4Changed(qreal Knock_cyl4);
-
+    void CruisecontrolChanged(int Cruisecontrol);
 
 private:
     // Odometer
@@ -3206,6 +3208,7 @@ private:
     qreal m_Knock_cyl2;
     qreal m_Knock_cyl3;
     qreal m_Knock_cyl4;
+    int m_Cruisecontrol;
 };
 
 #endif // DASHBOARD_H
