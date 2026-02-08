@@ -1661,7 +1661,7 @@ ListModel {
     ListElement {
         sourcename:"FuelPress2"
         defaultsymbol: "kPa"
-        titlename:"Fuel Pres."
+        titlename:"Fuel Pres.2"
         decimalpoints : "0"
         maxvalue : "400"
         stepsize : "100"
