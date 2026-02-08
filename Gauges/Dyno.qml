@@ -1,6 +1,6 @@
-import QtQuick 2.8
+import QtQuick 2.15
 import QtCharts 2.1
-import QtQuick.Controls 2.1
+import QtQuick.Controls 2.15
 
 Item {
     anchors.fill: parent

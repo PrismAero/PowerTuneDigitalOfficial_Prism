@@ -1,4 +1,4 @@
-import QtQuick 2.8
+import QtQuick 2.15
 
 
 
@@ -19,14 +19,14 @@ Item {
         onRpmStage3Changed :rpmwarn3 = Dashboard.rpmStage3
         onRpmStage4Changed :rpmwarn4 = Dashboard.rpmStage4
         onRpmChanged: {
-            if (Dashboard.rpm > rpmwarn1) {led1.source = "qrc:/graphics/ledgreen.png",led8.source = "qrc:/graphics/ledgreen.png"};
-            if (Dashboard.rpm > rpmwarn2) {led2.source = "qrc:/graphics/ledgreen.png",led7.source = "qrc:/graphics/ledgreen.png"};
-            if (Dashboard.rpm > rpmwarn3) {led3.source = "qrc:/graphics/ledyellow.png",led6.source = "qrc:/graphics/ledyellow.png"};
-            if (Dashboard.rpm > rpmwarn4) {led4.source = "qrc:/graphics/ledred.png",led5.source = "qrc:/graphics/ledred.png"};
-            if (Dashboard.rpm < rpmwarn1) {led1.source = "qrc:/graphics/ledoff.png",led8.source = "qrc:/graphics/ledoff.png"};
-            if (Dashboard.rpm < rpmwarn2) {led2.source = "qrc:/graphics/ledoff.png",led7.source = "qrc:/graphics/ledoff.png"};
-            if (Dashboard.rpm < rpmwarn3) {led3.source = "qrc:/graphics/ledoff.png",led6.source = "qrc:/graphics/ledoff.png"};
-            if (Dashboard.rpm < rpmwarn4) {led4.source = "qrc:/graphics/ledoff.png",led5.source = "qrc:/graphics/ledoff.png"};
+            if (Dashboard.rpm > rpmwarn1) {led1.source = "qrc:/Resources/graphics/ledgreen.png",led8.source = "qrc:/Resources/graphics/ledgreen.png"};
+            if (Dashboard.rpm > rpmwarn2) {led2.source = "qrc:/Resources/graphics/ledgreen.png",led7.source = "qrc:/Resources/graphics/ledgreen.png"};
+            if (Dashboard.rpm > rpmwarn3) {led3.source = "qrc:/Resources/graphics/ledyellow.png",led6.source = "qrc:/Resources/graphics/ledyellow.png"};
+            if (Dashboard.rpm > rpmwarn4) {led4.source = "qrc:/Resources/graphics/ledred.png",led5.source = "qrc:/Resources/graphics/ledred.png"};
+            if (Dashboard.rpm < rpmwarn1) {led1.source = "qrc:/Resources/graphics/ledoff.png",led8.source = "qrc:/Resources/graphics/ledoff.png"};
+            if (Dashboard.rpm < rpmwarn2) {led2.source = "qrc:/Resources/graphics/ledoff.png",led7.source = "qrc:/Resources/graphics/ledoff.png"};
+            if (Dashboard.rpm < rpmwarn3) {led3.source = "qrc:/Resources/graphics/ledoff.png",led6.source = "qrc:/Resources/graphics/ledoff.png"};
+            if (Dashboard.rpm < rpmwarn4) {led4.source = "qrc:/Resources/graphics/ledoff.png",led5.source = "qrc:/Resources/graphics/ledoff.png"};
         }
 
     }

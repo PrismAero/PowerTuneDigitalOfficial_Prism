@@ -1,5 +1,5 @@
-import QtQuick 2.8
-import QtQuick.Controls 2.1
+import QtQuick 2.15
+import QtQuick.Controls 2.15
 import Qt.labs.settings 1.0
 import "qrc:/Translator.js" as Translator
 Rectangle {
@@ -112,31 +112,31 @@ Rectangle {
             spacing: parent.width * 0.05
             Image {
                 id:contactQR
-                source: "qrc:/graphics/contactQR.png" // Replace with your image file path
+                source: "qrc:/Resources/graphics/contactQR.png" // Replace with your image file path
                 width: helpBackground.width * 0.16 //256
                 height: helpBackground.width * 0.16 //256 // Adjust as needed
             }
             Image {
                 id:facebookQR
-                source: "qrc:/graphics/facebookQR.png" // Replace with your image file path
+                source: "qrc:/Resources/graphics/facebookQR.png" // Replace with your image file path
                 width: helpBackground.width * 0.16 //256
                 height: helpBackground.width * 0.16 //256 // Adjust as needed
             }
             Image {
                 id:instagramQR
-                source: "qrc:/graphics/instagramQR.png" // Replace with your image file path
+                source: "qrc:/Resources/graphics/instagramQR.png" // Replace with your image file path
                 width: helpBackground.width * 0.16 //256
                 height: helpBackground.width * 0.16 //256 // Adjust as needed
             }
             Image {
                 id:userManualQR
-                source: "qrc:/graphics/userManualQR.png" // Replace with your image file path
+                source: "qrc:/Resources/graphics/userManualQR.png" // Replace with your image file path
                 width: helpBackground.width * 0.16 //256
                 height: helpBackground.width * 0.16 //256 // Adjust as needed
             }
             Image {
                 id:reviewQR
-                source: "qrc:/graphics/warrantyQR.png" // Replace with your image file path
+                source: "qrc:/Resources/graphics/warrantyQR.png" // Replace with your image file path
                 width: helpBackground.width * 0.16 //256
                 height: helpBackground.width * 0.16 //256 // Adjust as needed
             }

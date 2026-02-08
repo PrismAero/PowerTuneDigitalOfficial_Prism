@@ -1,8 +1,8 @@
-import QtQuick 2.8
+import QtQuick 2.15
 import QtQuick.Extras 1.4
 import QtQuick.Dialogs 1.0
 import QtQuick.Controls.Styles 1.4
-import QtQuick.Controls 2.1
+import QtQuick.Controls 2.15
 import QtQuick.Controls.Material 2.0
 import QtQml.Models 2.3
 import Qt.labs.settings 1.0
@@ -299,7 +299,7 @@ Item {
                 height: width
                 fillMode: Image.PreserveAspectFit
                 anchors.centerIn: parent
-                source: "qrc:/graphics/Tacho_Mitte.png"
+                source: "qrc:/Resources/graphics/Tacho_Mitte.png"
 
             }
             Text {
@@ -366,7 +366,7 @@ Item {
                 height: width
                 fillMode: Image.PreserveAspectFit
                 anchors.centerIn: parent
-                source: "qrc:/graphics/Tacho_Mitte.png"
+                source: "qrc:/Resources/graphics/Tacho_Mitte.png"
             }
             Text {
                 id: revinnertesxt
@@ -675,10 +675,8 @@ Item {
 
                         }
                         if(userDash.children[i].information === "Bar gauge"){
-                            //console.log(userDash.children[i].information +" " + userDash.children[i].title +  " Item no." + i)
                         }
                         if(userDash.children[i].information === "Round gauge"){
-                            //console.log(userDash.children[i].information +" " + userDash.children[i].title +  " Item no." + i)
                         }
                     }
 

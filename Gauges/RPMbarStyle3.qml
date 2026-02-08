@@ -1,6 +1,6 @@
-import QtQuick 2.8
+import QtQuick 2.15
 import QtQuick.Extras 1.4
-import QtQuick.Controls 2.1
+import QtQuick.Controls 2.15
 import QtQuick.Controls.Styles 1.4
 
 
@@ -11,7 +11,7 @@ Item {
       Image
       {
         id:groove1
-        source:"qrc:/graphics/fueltechempty.png"
+        source:"qrc:/Resources/graphics/fueltechempty.png"
         width: parent.width
         height: parent.width /4
         anchors.top:parent.top
@@ -34,7 +34,7 @@ Item {
                 anchors.left:parent.left
                 width: groove1.width
                 height: groove1.height
-                source:"qrc:/graphics/fueltechfill.png"
+                source:"qrc:/Resources/graphics/fueltechfill.png"
                 smooth: true
                 z: 1
               }

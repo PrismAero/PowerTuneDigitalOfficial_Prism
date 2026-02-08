@@ -1,9 +1,9 @@
-import QtQuick 2.8
-import QtQuick.Window 2.2
+import QtQuick 2.15
+import QtQuick.Window 2.15
 import QtGraphicalEffects 1.0
 import QtQuick.Controls 1.4
 import QtQuick.Controls.Styles 1.4
-import QtQuick.Controls 2.1
+import QtQuick.Controls 2.15
 import QtQuick.Extras 1.4
 import com.powertune 1.0
 
@@ -70,7 +70,7 @@ color: "darkgrey"
 Image
     {
       id: rpmDash
-      source:"qrc:/graphics/Racedash.png"
+      source:"qrc:/Resources/graphics/Racedash.png"
       anchors.fill: parent
       smooth: true
  }

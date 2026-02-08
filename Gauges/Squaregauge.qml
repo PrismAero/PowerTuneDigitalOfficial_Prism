@@ -1,6 +1,6 @@
-import QtQuick 2.8
+import QtQuick 2.15
 import QtGraphicalEffects 1.0
-import QtQuick.Controls 2.1
+import QtQuick.Controls 2.15
 import QtQuick.Controls.Styles 1.4
 import QtQuick.Extras 1.4
 import "qrc:/Translator.js" as Translator
@@ -59,10 +59,6 @@ Rectangle {
 
     // Everytime the value changes do the maths with the Scale and Offset then change the text to read the new value
     // onMainvalueChanged: {
-    //     console.log("Main Value Field: " + mainvalue)
-    //     console.log("Gauge Scale Offset: " + gaugeScaleOffset)
-    //     console.log(mainvaluetextfield.text)
-    //     console.log("Scale Value: " + scaleValue)
     //     if(scaleValue > 0 && offsetValueMultiply > 0){
     //         gaugeScaleOffset = (mainvalue + scaleValue) * offsetValueMultiply
     //         mainvaluetextfield.text = gaugeScaleOffset.toFixed(decimalpoints)
@@ -407,7 +403,6 @@ Rectangle {
     }
     function toggledecimal2()
     {
-        //console.log("toggle sec decimal "+decimalpoints2)
         if (decimalpoints2 < 4)
         {
             secondaryvaluetextfield.text =  Qt.binding(function(){return Dashboard[secvaluename].toFixed(decimalpoints2)});
@@ -1231,7 +1226,6 @@ Rectangle {
     //             gaugeSettings.scaleValueStored = scaleNameChange.text
     //             scaleValue = scaleNameChange.text
     //             //gauge1.value += scaleValue
-    //             console.log("Scale Value: " + scaleValue + " " + gaugeSettings.scaleValueStored)
     //         }
     //     }
     //     Button{
@@ -1246,7 +1240,6 @@ Rectangle {
     //             scaleNameChange.text = scaleValue
     //             //gauge1.value = scaleNameChange.text
     //             gaugeSettings.scaleValueStored = scaleNameChange.text
-    //             console.log("Reset Scale Value: " + scaleValue)
     //         }
     //     }
     // }
@@ -1271,7 +1264,6 @@ Rectangle {
     //             hidemenues();
     //             gaugeSettings.offsetValueMultiplyStored = offsetNameChange.text
     //             offsetValueMultiply = offsetNameChange.text
-    //             console.log("Offset Multiply Value: " + offsetValueMultiply + " " + gaugeSettings.offsetValueDivideStored)
     //         }
     //     }
     //     Button{
@@ -1284,7 +1276,6 @@ Rectangle {
     //             hidemenues();
     //             gaugeSettings.offsetValueDivideStored = offsetNameChange.text
     //             offsetValueDivide = offsetNameChange.text
-    //             console.log("Offset Divide Value: " + offsetValueDivide + " " + gaugeSettings.offsetValueDivideStored)
     //         }
     //     }
     //     Button{
@@ -1300,7 +1291,6 @@ Rectangle {
     //             offsetValueDivide = offsetNameChange.text
     //             gaugeSettings.offsetValueMultiplyStored = offsetNameChange.text
     //             gaugeSettings.offsetValueDivideStored = offsetNameChange.text
-    //             console.log("Reset Offset Value: " + offsetValueMultiply + " " + offsetValueDivide)
     //         }
     //     }
     // }

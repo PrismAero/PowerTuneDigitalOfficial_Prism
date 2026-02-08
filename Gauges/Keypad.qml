@@ -1,5 +1,5 @@
-import QtQuick 2.8
-import QtQuick.Controls 2.1
+import QtQuick 2.15
+import QtQuick.Controls 2.15
 import Qt.labs.settings 1.0
 import QtQuick.Controls.Styles 1.4
 
@@ -53,7 +53,7 @@ Item {
                 border.width: keypad.width / 60
                 }
             Image{
-                source: "qrc:/graphics/fanIcon.jpg"
+                source: "qrc:/Resources/graphics/fanIcon.jpg"
                 //anchors.fill: plusBrightness
                 width: keypadButton3.width
                 height: keypadButton3.height

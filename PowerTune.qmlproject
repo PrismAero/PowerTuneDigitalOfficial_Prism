@@ -1,0 +1,150 @@
+/*
+ * PowerTune Qt Design Studio Project
+ *
+ * This .qmlproject file configures the PowerTune automotive dashboard
+ * application for use with Qt Design Studio.
+ *
+ * Project: PowerTune Digital - Prism
+ * Platform: Raspberry Pi (Linux embedded)
+ * Qt Version: Qt 5.15+ with QML/Quick
+ */
+
+import QmlProject 1.1
+
+Project {
+    // * Main entry point for the application
+    mainFile: "QML/main.qml"
+
+    // * QML import paths for module resolution
+    importPaths: [ ".", "QML", "Gauges", "Settings", "GPSTracks" ]
+
+    /* QML Source Files - QML Module */
+    QmlFiles {
+        directory: "QML"
+    }
+
+    /* QML Source Files - Gauges Module */
+    QmlFiles {
+        directory: "Gauges"
+    }
+
+    /* QML Source Files - Settings Module */
+    QmlFiles {
+        directory: "Settings"
+    }
+
+    /* QML Source Files - GPS Tracks Module */
+    QmlFiles {
+        directory: "GPSTracks"
+    }
+
+    /* JavaScript Files - QML Module */
+    JavaScriptFiles {
+        directory: "QML"
+    }
+
+    /* JavaScript Files - Gauges Module */
+    JavaScriptFiles {
+        directory: "Gauges"
+    }
+
+    /* JavaScript Files - Settings Module */
+    JavaScriptFiles {
+        directory: "Settings"
+    }
+
+    /* Image Assets - Graphics */
+    ImageFiles {
+        directory: "Resources/graphics"
+    }
+
+    /* Image Assets - Flag Icons */
+    ImageFiles {
+        directory: "Resources/graphics/Flags"
+    }
+
+    /* Image Assets - Logo */
+    ImageFiles {
+        directory: "Resources/Logo"
+    }
+
+    /* Font Files - Main Fonts */
+    Files {
+        filter: "*.ttf;*.otf;*.TTF;*.OTF"
+        directory: "Resources/fonts"
+    }
+
+    /* Font Files - DejaVu */
+    Files {
+        filter: "*.ttf"
+        directory: "Resources/fonts/truetype/dejavu"
+    }
+
+    /* Font Files - Liberation */
+    Files {
+        filter: "*.ttf"
+        directory: "Resources/fonts/truetype/liberation"
+    }
+
+    /* Font Files - MS TrueType Core */
+    Files {
+        filter: "*.ttf"
+        directory: "Resources/fonts/truetype/msttcorefonts"
+    }
+
+    /* Sound Files */
+    Files {
+        filter: "*.wav;*.mp3;*.ogg"
+        directory: "Resources/Sounds"
+    }
+
+    /* Track Data Files */
+    Files {
+        filter: "*.txt"
+        directory: "Resources/KTracks"
+    }
+
+    /* Track Data Files - Subdirectories */
+    Files {
+        filter: "*.txt"
+        directory: "Resources/KTracks/Australia"
+    }
+
+    Files {
+        filter: "*.txt"
+        directory: "Resources/KTracks/Japan"
+    }
+
+    Files {
+        filter: "*.txt"
+        directory: "Resources/KTracks/USA"
+    }
+
+    Files {
+        filter: "*.txt"
+        directory: "Resources/KTracks/Canada"
+    }
+
+    Files {
+        filter: "*.txt"
+        directory: "Resources/KTracks/New Zealand"
+    }
+
+    Files {
+        filter: "*.txt"
+        directory: "Resources/KTracks/Malaysia"
+    }
+
+    /* Example Dashboard Files */
+    Files {
+        filter: "*.txt;*.png"
+        directory: "Resources/exampleDash"
+    }
+
+    /* Environment Configuration for Live Preview */
+    Environment {
+        QT_QUICK_CONTROLS_CONF: "qtquickcontrols2.conf"
+        QT_IM_MODULE: "qtvirtualkeyboard"
+        QT_AUTO_SCREEN_SCALE_FACTOR: "1"
+    }
+}

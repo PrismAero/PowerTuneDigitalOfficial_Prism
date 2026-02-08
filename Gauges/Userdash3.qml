@@ -1,8 +1,8 @@
-import QtQuick 2.8
+import QtQuick 2.15
 import QtQuick.Extras 1.4
 import QtQuick.Dialogs 1.0
 import QtQuick.Controls.Styles 1.4
-import QtQuick.Controls 2.1
+import QtQuick.Controls 2.15
 import QtQuick.Controls.Material 2.0
 import QtQml.Models 2.3
 import Qt.labs.settings 1.0
@@ -112,29 +112,24 @@ Item {
 
                 if (dashvalue.textAt(0) === "Bar gauge")
                 {
-                    //  console.log("Create Bar Gauge")
                     CreateBargaugeScript.createVerticalGauge(dashvalue.textAt(1),dashvalue.textAt(2),dashvalue.textAt(3),dashvalue.textAt(4),dashvalue.textAt(5),dashvalue.textAt(6),dashvalue.textAt(7),dashvalue.textAt(8),dashvalue.textAt(9),dashvalue.textAt(10),dashvalue.textAt(11));
                 }
                 if (dashvalue.textAt(0) === "Round gauge")
                 {
-                    //console.log("create Round Gauge")
                     CreateRoundgaugeScript.createRoundGauge(dashvalue.textAt(1),dashvalue.textAt(2),dashvalue.textAt(3),dashvalue.textAt(4),dashvalue.textAt(5),dashvalue.textAt(6),dashvalue.textAt(7),dashvalue.textAt(8),dashvalue.textAt(9),dashvalue.textAt(10),dashvalue.textAt(11),dashvalue.textAt(12),dashvalue.textAt(13),dashvalue.textAt(14),dashvalue.textAt(15),dashvalue.textAt(16),dashvalue.textAt(17),dashvalue.textAt(18),dashvalue.textAt(19),dashvalue.textAt(20),dashvalue.textAt(21),dashvalue.textAt(22),dashvalue.textAt(23),dashvalue.textAt(24),dashvalue.textAt(25),dashvalue.textAt(26),dashvalue.textAt(27),dashvalue.textAt(28),dashvalue.textAt(29),dashvalue.textAt(30),dashvalue.textAt(31),dashvalue.textAt(32),dashvalue.textAt(33),dashvalue.textAt(34),dashvalue.textAt(35),dashvalue.textAt(36),dashvalue.textAt(37),dashvalue.textAt(38),dashvalue.textAt(39),dashvalue.textAt(40),dashvalue.textAt(41),dashvalue.textAt(42),dashvalue.textAt(43),dashvalue.textAt(44),dashvalue.textAt(45),dashvalue.textAt(46),dashvalue.textAt(47),dashvalue.textAt(48),(dashvalue.textAt(49).toLowerCase() === 'true' ? true : false),(dashvalue.textAt(50).toLowerCase() === 'true' ? true : false),(dashvalue.textAt(51).toLowerCase() === 'true' ? true : false),dashvalue.textAt(52),dashvalue.textAt(53),dashvalue.textAt(54),dashvalue.textAt(55),(dashvalue.textAt(56).toLowerCase() === 'true' ? true : false),dashvalue.textAt(57),dashvalue.textAt(58),dashvalue.textAt(59),dashvalue.textAt(60),dashvalue.textAt(61),dashvalue.textAt(62),dashvalue.textAt(63),dashvalue.textAt(64),dashvalue.textAt(65),(dashvalue.textAt(66).toLowerCase() === 'true' ? true : false));
                 }
 
                 if (dashvalue.textAt(0) === "Square gauge")
                 {
-                    //console.log("create Square Gauge")
                     CreateSquareGaugeScript.createSquareGauge(dashvalue.textAt(1),dashvalue.textAt(2),dashvalue.textAt(3),dashvalue.textAt(4),dashvalue.textAt(5),dashvalue.textAt(6),dashvalue.textAt(7),dashvalue.textAt(8),(dashvalue.textAt(9).toLowerCase() === 'true' ? true : false),(dashvalue.textAt(10).toLowerCase() === 'true' ? true : false),(dashvalue.textAt(11).toLowerCase() === 'true' ? true : false),dashvalue.textAt(12),dashvalue.textAt(13),dashvalue.textAt(14),dashvalue.textAt(15),dashvalue.textAt(16),dashvalue.textAt(17),dashvalue.textAt(18),dashvalue.textAt(19),dashvalue.textAt(20),dashvalue.textAt(21),dashvalue.textAt(22),dashvalue.textAt(23),dashvalue.textAt(24),dashvalue.textAt(25),dashvalue.textAt(26),dashvalue.textAt(27),dashvalue.textAt(28));
                 }
 
                 if (dashvalue.textAt(0) === "gauge image")
                 {
-                    // console.log("Create image")
                     CreatePictureScript.createPicture(dashvalue.textAt(1),dashvalue.textAt(2),dashvalue.textAt(3),dashvalue.textAt(4));
                 }
                 if (dashvalue.textAt(0) === "Text label gauge")
                 {
-                    //console.log("Create Text label")
                     CreateTextScript.createText(dashvalue.textAt(1),dashvalue.textAt(2),dashvalue.textAt(3),dashvalue.textAt(4),dashvalue.textAt(5),dashvalue.textAt(6),dashvalue.textAt(7),(dashvalue.textAt(8).toLowerCase() === 'true' ? true : false),dashvalue.textAt(9),dashvalue.textAt(10),dashvalue.textAt(11));
                 }
                 if (dashvalue.textAt(0) === "State gauge")
@@ -180,17 +175,17 @@ Item {
             }
             case 2:
             {
-                rpmbarloader.source = "qrc:/Gauges/RPMBARStyle2.qml"
+                rpmbarloader.source = "qrc:/Gauges/RPMBarStyle2.qml"
                 break;
             }
             case 3:
             {
-                rpmbarloader.source = "qrc:/Gauges/RPMbarStyle3.qml"
+                rpmbarloader.source = "qrc:/Gauges/RPMBarStyle3.qml"
                 break;
             }
             case 4:
             {
-                rpmbarloader.source = "qrc:/Gauges/RPMbar.qml"
+                rpmbarloader.source = "qrc:/Gauges/RPMBar.qml"
                 break;
             }
             }
@@ -456,7 +451,7 @@ Item {
 
             // Filter and sort the model alphabetically
             property ListModel filteredModel: {
-                var filteredModel = Qt.createQmlObject('import QtQuick 2.8; ListModel {}', cbx_sources);
+                var filteredModel = Qt.createQmlObject('import QtQuick 2.15; ListModel {}', cbx_sources);
                 // Add a Dynamic Filter via Dashboard String
                 var filterValues = ["Microtech"];
 
@@ -607,7 +602,7 @@ Item {
                 text: Translator.translate("Image", Dashboard.language)
                 font.pixelSize: mainwindow.width * 0.015
                 onClicked: {
-                    CreatePictureScript.createPicture(10,10,100,"qrc:/graphics/slectImage.png")
+                    CreatePictureScript.createPicture(10,10,100,"qrc:/Resources/graphics/slectImage.png")
                     squaregaugemenu.visible = false;
                     selectcolor.visible =false;
                     Dashboard.setdraggable(0);
@@ -621,7 +616,7 @@ Item {
                 font.pixelSize: mainwindow.width * 0.015
                 onClicked: {
                    // console.log("create State gauge ");
-                    CreateStatePictureScript.createPicture(10,10,100,"speed",1,"qrc:/graphics/selectStateImage.png","qrc:/graphics/selectStateImage.png");
+                    CreateStatePictureScript.createPicture(10,10,100,"speed",1,"qrc:/Resources/graphics/selectStateImage.png","qrc:/Resources/graphics/selectStateImage.png");
                     squaregaugemenu.visible = false;
                     selectcolor.visible =false;
                     Dashboard.setdraggable(0);
@@ -635,7 +630,7 @@ Item {
                 font.pixelSize: mainwindow.width * 0.015
                 onClicked: {
                    // console.log("create State gauge ");
-                    CreateStateGIFScript.createPicture(10,10,100,"speed",1,"qrc:/graphics/StateGIF.gif","qrc:/graphics/StateGIF.gif,0");
+                    CreateStateGIFScript.createPicture(10,10,100,"speed",1,"qrc:/Resources/graphics/StateGIF.gif","qrc:/Resources/graphics/StateGIF.gif,0");
                     squaregaugemenu.visible = false;
                     selectcolor.visible =false;
                     Dashboard.setdraggable(0);
@@ -931,7 +926,6 @@ Item {
     }
     function createDash()
     {
-        //console.log("create Dashboard")
 
         for (var i=0; i<gaugelist.rowCount(); ++i)
         {

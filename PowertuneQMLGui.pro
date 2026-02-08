@@ -14,67 +14,74 @@ static {
     QTPLUGIN += qtvirtualkeyboardplugin
 }
 
+# * Include paths for organized directory structure
+INCLUDEPATH += \
+    Core \
+    ECU \
+    Hardware \
+    Utils
 
 SOURCES += main.cpp \
-    Extender.cpp \
-    dashboard.cpp \
-    downloadmanager.cpp \
-    iomapdata.cpp \
-    parsegithubdata.cpp \
-    serialport.cpp \
-    appsettings.cpp \
-    gopro.cpp \
-    gps.cpp \
-    sensors.cpp \
-    datalogger.cpp \
-    Apexi.cpp \
-    AdaptronicSelect.cpp \
-    connect.cpp \
-    calculations.cpp \
-    shcalc.cpp \
-    textprogressbar.cpp \
-    udpreceiver.cpp \
-    arduino.cpp \
-    wifiscanner.cpp
+    Core/connect.cpp \
+    Core/dashboard.cpp \
+    Core/serialport.cpp \
+    Core/appsettings.cpp \
+    ECU/Apexi.cpp \
+    ECU/AdaptronicSelect.cpp \
+    ECU/arduino.cpp \
+    Hardware/Extender.cpp \
+    Hardware/gopro.cpp \
+    Hardware/gps.cpp \
+    Hardware/sensors.cpp \
+    Utils/DataLogger.cpp \
+    Utils/Calculations.cpp \
+    Utils/downloadmanager.cpp \
+    Utils/iomapdata.cpp \
+    Utils/ParseGithubData.cpp \
+    Utils/shcalc.cpp \
+    Utils/textprogressbar.cpp \
+    Utils/UDPReceiver.cpp \
+    Utils/wifiscanner.cpp \
+    Utils/Speedo.cpp
 
 
 RESOURCES += qml.qrc
 
 # Additional import path used to resolve QML modules in Qt Creator's code model
-QML_IMPORT_PATH =
+QML_IMPORT_PATH = QML Gauges Settings GPSTracks
 
 # Default rules for deployment.
 include(deployment.pri)
 
 HEADERS += \
-    Extender.h \
-    dashboard.h \
-    downloadmanager.h \
-    iomapdata.h \
-    parsegithubdata.h \
-    serialport.h \
-    appsettings.h \
-    gopro.h \
-    gps.h \
-    sensors.h \
-    datalogger.h \
-    Apexi.h \
-    AdaptronicSelect.h \
-    connect.h \
-    calculations.h \
-    shcalc.h \
-    textprogressbar.h \
-    udpreceiver.h \
-    arduino.h \
-    wifiscanner.h
+    Core/connect.h \
+    Core/dashboard.h \
+    Core/serialport.h \
+    Core/appsettings.h \
+    ECU/Apexi.h \
+    ECU/AdaptronicSelect.h \
+    ECU/arduino.h \
+    ECU/obd.h \
+    Hardware/Extender.h \
+    Hardware/gopro.h \
+    Hardware/gps.h \
+    Hardware/sensors.h \
+    Utils/DataLogger.h \
+    Utils/Calculations.h \
+    Utils/downloadmanager.h \
+    Utils/iomapdata.h \
+    Utils/ParseGithubData.h \
+    Utils/shcalc.h \
+    Utils/textprogressbar.h \
+    Utils/UDPReceiver.h \
+    Utils/wifiscanner.h
 
 
 FORMS +=
 
 DISTFILES += \
-    KTracks/Australia/KimTestTrack - Copy.txt \
-    KTracks/Australia/stupid2.txt \
-    KTracks/Australia/stupid3.txt \
-    KTracks/Australia/stupid4.txt
-
+    Resources/KTracks/Australia/KimTestTrack - Copy.txt \
+    Resources/KTracks/Australia/stupid2.txt \
+    Resources/KTracks/Australia/stupid3.txt \
+    Resources/KTracks/Australia/stupid4.txt
 

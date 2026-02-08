@@ -1,9 +1,9 @@
-import QtQuick 2.9
+import QtQuick 2.15
 import QtLocation 5.9
 import QtPositioning 5.9
-import QtQuick.Controls 2.2
+import QtQuick.Controls 2.15
 import QtQuick.Controls.Styles 1.4
-import QtQuick.Layouts 1.0
+import QtQuick.Layouts 1.15
 import QtQuick.XmlListModel 2.0
 import IMD 1.0
 

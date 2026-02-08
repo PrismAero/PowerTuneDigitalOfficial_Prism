@@ -1,10 +1,10 @@
-import QtQuick 2.5
-import QtQuick.Window 2.2
+import QtQuick 2.15
+import QtQuick.Window 2.15
 import QtGraphicalEffects 1.0
 import QtQuick.Controls 1.4
 import QtQuick.Controls.Styles 1.4
-import QtQuick 2.8
-import QtQuick.Controls 2.1
+import QtQuick 2.15
+import QtQuick.Controls 2.15
 import QtQuick.Extras 1.4
 import com.powertune 1.0
 Rectangle {
@@ -147,7 +147,7 @@ Rectangle {
     Image
     {
       id:groove1
-      source:"qrc:/graphics/RPM_BG.png"
+      source:"qrc:/Resources/graphics/RPM_BG.png"
       anchors.top:parent.top
       anchors.left:parent.left
       smooth: true
@@ -178,7 +178,7 @@ Rectangle {
               id:speedarcfill
               anchors.top:parent.top
               anchors.left:parent.left
-              source:"qrc:/graphics/RPM_Fill.png"
+              source:"qrc:/Resources/graphics/RPM_Fill.png"
               smooth: true
               width: groove1.width
               height: groove1.height

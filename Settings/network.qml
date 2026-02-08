@@ -1,5 +1,5 @@
-import QtQuick 2.8
-import QtQuick.Controls 2.1
+import QtQuick 2.15
+import QtQuick.Controls 2.15
 import Qt.labs.settings 1.0
 import QtQuick.Controls 1.4 as Quick1
 import QtQuick.Controls.Styles 1.4

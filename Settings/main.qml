@@ -1,5 +1,5 @@
-import QtQuick 2.8
-import QtQuick.Controls 2.1
+import QtQuick 2.15
+import QtQuick.Controls 2.15
 import QtMultimedia 5.8
 import Qt.labs.settings 1.0
 import "qrc:/Translator.js" as Translator
@@ -52,7 +52,7 @@ Rectangle {
         }
         SoundEffect {
             id: warnsound
-            source: "qrc:/Sounds/alarm.wav"
+            source: "qrc:/Resources/Sounds/alarm.wav"
         }
 
         Connections {
@@ -137,7 +137,6 @@ Rectangle {
                     property bool initialized: false
                     onCurrentIndexChanged:{ if (initialized)
                                                AppSettings.setBaudRate(currentIndex)
-                        //console.log("Index Changed ECU Selection")
                     }
                     Component.onCompleted: {
                         currentIndex = AppSettings.getBaudRate()
@@ -310,7 +309,6 @@ Rectangle {
                     onCurrentIndexChanged: {
                         if (initialized)
                             AppSettings.setECU(currentIndex), Dashboard.setecu(ecuSelect.currentIndex)
-                        //console.log("setting ecu" +Dashboard.ecu)
                     }
                     Component.onCompleted: {
                         currentIndex = AppSettings.getECU(), Dashboard.setecu(ecuSelect.currentIndex), initialized = true
@@ -539,11 +537,9 @@ Rectangle {
                     }
                     onClicked: {
 
-                        ////console.log("clicked GPS")
                         connectButtonGPS.enabled = false
                         disconnectButtonGPS.enabled = true
                         autoconnectGPS.auto()
-                        ////console.log("gps disconnect enabled")
                     }
                 }
                 Button {
@@ -756,7 +752,7 @@ Rectangle {
                 }
                 Text {
 
-                    text: " V 1.99n " + Dashboard.Platform
+                    text: " V 1.99F " + Dashboard.Platform
 
                     color: "white"
                     font.pixelSize: windowbackround.width / 55
@@ -991,19 +987,18 @@ Rectangle {
                     }
 
                     model: [
-                        {name: "English", flag: "qrc:/graphics/Flags/us.png"},
-                        {name: "Deutsch", flag: "qrc:/graphics/Flags/de.png"},
-                        {name: "日本語", flag: "qrc:/graphics/Flags/jp.png"},
-                        {name: "Español", flag: "qrc:/graphics/Flags/es.png"}
+                        {name: "English", flag: "qrc:/Resources/graphics/Flags/us.png"},
+                        {name: "Deutsch", flag: "qrc:/Resources/graphics/Flags/de.png"},
+                        {name: "日本語", flag: "qrc:/Resources/graphics/Flags/jp.png"},
+                        {name: "Español", flag: "qrc:/Resources/graphics/Flags/es.png"}
                         //For Later Use
-                        //{name: "Français", flag: "qrc:/graphics/Flags/fr.png"},
-                        //{name: "العربية", flag: "qrc:/graphics/Flags/ae.png"}
+                        //{name: "Français", flag: "qrc:/Resources/graphics/Flags/fr.png"},
+                        //{name: "العربية", flag: "qrc:/Resources/graphics/Flags/ae.png"}
                     ]
 
                     onCurrentIndexChanged: {
                         functLanguageselect.languageselectfunct()
                         changeweighttext.changetext()
-                        //console.log("Language combobox index")
                     }
 
                     delegate: Item {
@@ -1181,4 +1176,3 @@ Designer {
     D{i:0;autoSize:true;height:480;width:640}
 }
 ##^##*/
-

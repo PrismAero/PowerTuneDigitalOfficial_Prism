@@ -1,0 +1,7 @@
+# PowerTune GPS Tracks Module
+# This qmldir file registers GPS track components for QML import
+
+module GPSTracks
+
+# GPS Track Components
+Laptimer 1.0 Laptimer.qml

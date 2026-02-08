@@ -3,7 +3,7 @@ var component;
 var gauge;
 
 function createVerticalGauge(setWidth,setHeight,setX,setY,setMinValue,setMaxValue,setDecPlace,setUnit,SetValueProperty,SetWarnvaluehigh,Setwarnvaluelow) {
-    component = Qt.createComponent("Verticalbargauge.qml");
+    component = Qt.createComponent("VerticalBarGauge.qml");
     if (component.status === Component.Ready)
         finishCreation(setWidth,setHeight,setX,setY,setMinValue,setMaxValue,setDecPlace,setUnit,SetValueProperty,SetWarnvaluehigh,Setwarnvaluelow);
     else

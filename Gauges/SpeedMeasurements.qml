@@ -1,7 +1,7 @@
-import QtQuick 2.9
-import QtQuick.Controls 2.2
+import QtQuick 2.15
+import QtQuick.Controls 2.15
 import QtQuick.Controls.Styles 1.4
-import QtQuick.Layouts 1.0
+import QtQuick.Layouts 1.15
 
 
 Rectangle {
@@ -53,12 +53,11 @@ Rectangle {
         id: reactiontimecheck
         function start()
         {
-           // console.log("Reactiontime changed")
         if (Dashboard.reactiontime < 0 )
        {
             //reactiotimertimetext.color = "red"
             //reactiotimertext.color = "red"
-            redled.source = "qrc:/graphics/ledred.png"
+            redled.source = "qrc:/Resources/graphics/ledred.png"
         }
         }
     }
@@ -537,9 +536,9 @@ Row{
             running: false
             onTriggered: {
             startmeasurement = 1;
-            stagelight1.source = "qrc:/graphics/ledoff.png"
-            stagelight2 .source = "qrc:/graphics/ledoff.png"
-            orangeled1.source = "qrc:/graphics/ledyellow.png"
+            stagelight1.source = "qrc:/Resources/graphics/ledoff.png"
+            stagelight2 .source = "qrc:/Resources/graphics/ledoff.png"
+            orangeled1.source = "qrc:/Resources/graphics/ledyellow.png"
             measurements.color = "#ffb366"
             sliptextcolor = "transparent"
             orange1.running = true
@@ -555,8 +554,8 @@ Row{
             measurements.color = "#ffd966"
             sliptextcolor = "transparent"
             orange2.running = true
-            orangeled1.source = "qrc:/graphics/ledoff.png"
-            orangeled2.source = "qrc:/graphics/ledyellow.png"
+            orangeled1.source = "qrc:/Resources/graphics/ledoff.png"
+            orangeled2.source = "qrc:/Resources/graphics/ledyellow.png"
             }
         }
     }
@@ -570,8 +569,8 @@ Row{
 
                 measurements.color = "yellow"
                 sliptextcolor = "transparent"
-                orangeled2.source = "qrc:/graphics/ledoff.png"
-                orangeled3.source = "qrc:/graphics/ledyellow.png"
+                orangeled2.source = "qrc:/Resources/graphics/ledoff.png"
+                orangeled3.source = "qrc:/Resources/graphics/ledyellow.png"
             }
         }
     }
@@ -582,8 +581,8 @@ Row{
             running: false
             onTriggered: {
                 backroundcolortimer.running = true
-                orangeled3.source = "qrc:/graphics/ledoff.png"
-                greenled.source = "qrc:/graphics/ledgreen.png"
+                orangeled3.source = "qrc:/Resources/graphics/ledoff.png"
+                greenled.source = "qrc:/Resources/graphics/ledgreen.png"
                 measurements.color = "limegreen"
                 sliptextcolor = "transparent"
                 calculationtimer.running = true
@@ -641,11 +640,11 @@ Row{
             Dashboard.reactiontime = 0;
         startmeasurement = 0;
         measurementstarted = 0;
-        greenled.source = "qrc:/graphics/ledoff.png"
-        redled.source = "qrc:/graphics/ledoff.png"
-        stagelight1.source = "qrc:/graphics/ledyellow.png"
-        stagelight2 .source = "qrc:/graphics/ledyellow.png"
-        redled.source = "qrc:/graphics/ledoff.png"
+        greenled.source = "qrc:/Resources/graphics/ledoff.png"
+        redled.source = "qrc:/Resources/graphics/ledoff.png"
+        stagelight1.source = "qrc:/Resources/graphics/ledyellow.png"
+        stagelight2 .source = "qrc:/Resources/graphics/ledyellow.png"
+        redled.source = "qrc:/Resources/graphics/ledoff.png"
         stagelight.running = true;
         measurements.color = "orange"
         sliptextcolor = "transparent"

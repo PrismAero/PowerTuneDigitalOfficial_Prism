@@ -1,10 +1,10 @@
-import QtQuick 2.8
+import QtQuick 2.15
 import QtQuick.Controls 1.4
-import QtQuick.Controls 2.2
+import QtQuick.Controls 2.15
 import Qt.labs.folderlistmodel 2.1
 import QtQuick.Extras 1.4
 import QtMultimedia 5.8
-import QtQuick.Window 2.10 //compatibility with QT 5.10
+import QtQuick.Window 2.15 //compatibility with QT 5.10
 
 Rectangle {
     //width: 800
@@ -91,7 +91,7 @@ Rectangle {
                 anchors.horizontalCenter: parent.horizontalCenter
                 fillMode: Image.PreserveAspectFit
                 //just a placeholder for now
-                source: "qrc:/graphics/Tacho_Mitte.png"
+                source: "qrc:/Resources/graphics/Tacho_Mitte.png"
             }
             Rectangle{
                 id:buttons
@@ -104,7 +104,7 @@ Rectangle {
                     width: parent.width /5
                     height: width
                     fillMode: Image.PreserveAspectFit
-                    source: "qrc:/graphics/previous.png"
+                    source: "qrc:/Resources/graphics/previous.png"
 
                     MouseArea {
                         anchors.fill: parent
@@ -117,17 +117,17 @@ Rectangle {
                     width: parent.width /5
                     height: width
                     fillMode: Image.PreserveAspectFit
-                    source: "qrc:/graphics/play.png"
+                    source: "qrc:/Resources/graphics/play.png"
 
                     MouseArea {
                         anchors.fill: parent
                         onClicked: {
                             if(playMusic.status == 6) {
                                 playMusic.stop()
-                                playpause.source = "qrc:/graphics/play.png"
+                                playpause.source = "qrc:/Resources/graphics/play.png"
                             } else {
                                 playMusic.play()
-                                playpause.source = "qrc:/graphics/pause.png"
+                                playpause.source = "qrc:/Resources/graphics/pause.png"
                                 console.log(playMusic.metaData.title)
                                 console.log(playMusic.metaData.albumTitle)
                                 console.log(playMusic.metaData.genre)
@@ -142,7 +142,7 @@ Rectangle {
                     width: parent.width /5
                     height: width
                     fillMode: Image.PreserveAspectFit
-                    source: "qrc:/graphics/next.png"
+                    source: "qrc:/Resources/graphics/next.png"
 
                     MouseArea {
                         anchors.fill: parent

@@ -1,4 +1,4 @@
-import QtQuick 2.8
+import QtQuick 2.15
 /*
 Supported ECU List completed for :
 Haltech V2
@@ -1048,18 +1048,6 @@ ListModel {
         divisor : "1"
         supportedECUs: "ECU Master"
     }
-
-    ListElement {
-        sourcename:"engineprotectionreason"
-        defaultsymbol: ""
-        titlename:"Engine Protection Reason"
-        decimalpoints : "4"
-        maxvalue : "1"
-        stepsize : "1"
-        divisor : "1"
-        supportedECUs: "HaltechV2"
-    }
-
     ListElement {
         sourcename:"egt1"
         defaultsymbol: "°C"
@@ -1659,16 +1647,6 @@ ListModel {
         supportedECUs: "HaltechV2,Microtech,ECU Master,EMTRON,Syvecs S7"
     }
     ListElement {
-        sourcename:"FuelPress2"
-        defaultsymbol: "kPa"
-        titlename:"Fuel Pres.2"
-        decimalpoints : "0"
-        maxvalue : "400"
-        stepsize : "100"
-        divisor : "1"
-        supportedECUs: "HaltechV2,Microtech,ECU Master,EMTRON,Syvecs S7"
-    }
-    ListElement {
         sourcename:"Fueltemp"
         defaultsymbol: "°C"
         titlename:"Fuel T."
@@ -2244,18 +2222,6 @@ ListModel {
         divisor : "1"
         supportedECUs: "PowerTune"
     }
-    ListElement {
-        sourcename:"Cruisecontrol"
-        defaultsymbol: " "
-        titlename:"Cruisecontrol"
-        decimalpoints : "0"
-        maxvalue : "15"
-        stepsize : "1"
-        divisor : "1"
-        supportedECUs: "PowerTune"
-    }
-
-
     ListElement {
         sourcename:"laptime"
         defaultsymbol: " "

@@ -1,7 +1,7 @@
-import QtQuick 2.5
-import QtQuick.Controls 2.1
+import QtQuick 2.15
+import QtQuick.Controls 2.15
 import "qrc:/Translator.js" as Translator
-import QtQuick.Window 2.10 //compatibility with QT 5.10
+import QtQuick.Window 2.15 //compatibility with QT 5.10
 
 Item {
     id: statepicture

@@ -1,7 +1,7 @@
-import QtQuick 2.8
+import QtQuick 2.15
 import QtLocation 5.9
 import QtPositioning 5.9
-import QtQuick.Controls 2.1
+import QtQuick.Controls 2.15
 
 Rectangle {
     id: mapItem

@@ -1,7 +1,7 @@
 var component;
 var gauge;
 function createPicture(setX,setY,setpictureheight,setValuePropertyMain,settriggervalue,setstatepicturesourceoff,setstatepicturesourceon) {
-    component = Qt.createComponent("Statepicture.qml");
+    component = Qt.createComponent("StatePicture.qml");
     if (component.status === Component.Ready){
         //console.log("creating State Pic")
         //console.log("Create trigger:",settriggervalue);

@@ -3,7 +3,7 @@ Gauge Needle that moves from -90 degrees to 270 degrees which pulls a red Tail
 modified code from 
 https://github.com/alex-adam/Tesla 
 */
-import QtQuick 2.8
+import QtQuick 2.15
 import QtGraphicalEffects 1.0
 
 Canvas {

@@ -1,5 +1,5 @@
-import QtQuick 2.8
-import QtQuick.Controls 2.1
+import QtQuick 2.15
+import QtQuick.Controls 2.15
 import Qt.labs.settings 1.0
 import QtMultimedia 5.8
 import "qrc:/Translator.js" as Translator
@@ -76,7 +76,6 @@ Rectangle {
 
         while (dashView.count > numberofdashes.currentIndex + 2) {
             dashView.takeItem(dashView.count - 2)
-            ////console.log("removing", dashView.count -2)
         }
 
         //Adding Dashes back
@@ -92,7 +91,6 @@ Rectangle {
             case 3:
             {
                 dashView.insertItem(2, thirdPageLoader)
-                ////console.log("add 3rd page", dashView.count)
                 break
             }
             case 4:

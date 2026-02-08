@@ -1,7 +1,7 @@
-import QtQuick 2.8
+import QtQuick 2.15
 import QtQuick.Extras 1.4
-import QtQuick.Controls 2.1
-import QtQuick.Window 2.10
+import QtQuick.Controls 2.15
+import QtQuick.Window 2.15
 
 
 

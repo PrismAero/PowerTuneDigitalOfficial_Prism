@@ -1,5 +1,5 @@
-import QtQuick 2.8
-import QtQuick.Controls 2.1
+import QtQuick 2.15
+import QtQuick.Controls 2.15
 import Qt.labs.settings 1.0
 
 Rectangle {
@@ -18,15 +18,12 @@ Rectangle {
             pageLoader.source = "qrc:/AnalogInputs.qml"
         }
         if (Dashboard.ecu == "1") {
-            //console.log("Loadersource changing")
             pageLoader.source = "qrc:/AnalogInputs.qml"
         }
         if (Dashboard.ecu == "2") {
-            //console.log("Loadersource changing")
             pageLoader.source = "qrc:/ConsultRegs.qml"
         }
         if (Dashboard.ecu == "3") {
-            //console.log("Loadersource changing")
             pageLoader.source = "qrc:/OBDPIDS.qml"
         }
         if (Dashboard.ecu == "4") {
@@ -37,7 +34,6 @@ Rectangle {
     Connections {
         target: Dashboard
         onEcuChanged: {
-            ////console.log("Loadersource changing")
             loadersource()
 
         }

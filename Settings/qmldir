@@ -1,0 +1,19 @@
+# PowerTune Settings Module
+# This qmldir file registers all settings components for QML import
+
+module Settings
+
+# Settings Components
+DashSelector 1.0 DashSelector.qml
+DashSelectorWidget 1.0 DashSelectorWidget.qml
+CanMonitor 1.0 CanMonitor.qml
+analog 1.0 analog.qml
+help 1.0 help.qml
+network 1.0 network.qml
+rpm 1.0 rpm.qml
+sensehat 1.0 sensehat.qml
+speed 1.0 speed.qml
+startup 1.0 startup.qml
+warn_gear 1.0 warn_gear.qml
+WifiCountryList 1.0 WifiCountryList.qml
+SettingsMain 1.0 main.qml

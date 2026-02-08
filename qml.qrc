@@ -1,7 +1,18 @@
 <RCC>
     <qresource prefix="/">
-        <file>main.qml</file>
-        <file>SerialSettings.qml</file>
+        <!-- QML Files -->
+        <file>QML/main.qml</file>
+        <file>QML/SerialSettings.qml</file>
+        <file>QML/Intro.qml</file>
+        <file>QML/AnalogInputs.qml</file>
+        <file>QML/BrightnessPopUp.qml</file>
+        <file>QML/ConsultRegs.qml</file>
+        <file>QML/ExBoardAnalog.qml</file>
+        <file>QML/Laptimecontainer.qml</file>
+        <file>QML/OBDPIDS.qml</file>
+        <file>QML/Translator.js</file>
+
+        <!-- Settings -->
         <file>Settings/main.qml</file>
         <file>Settings/DashSelector.qml</file>
         <file>Settings/sensehat.qml</file>
@@ -13,14 +24,15 @@
         <file>Settings/network.qml</file>
         <file>Settings/WifiCountryList.qml</file>
         <file>Settings/DashSelectorWidget.qml</file>
-        <file>graphics/Tacho_Mitte.png</file>
+        <file>Settings/CanMonitor.qml</file>
+        <file>Settings/help.qml</file>
+
+        <!-- Gauges -->
         <file>Gauges/DashboardGaugeStyle.qml</file>
         <file>Gauges/TachometerStyle.qml</file>
         <file>Gauges/PFCSensors.qml</file>
         <file>Gauges/BarGauge.qml</file>
         <file>Gauges/GPS.qml</file>
-        <file>graphics/Racedash800x480.png</file>
-        <file>graphics/MainDash.png</file>
         <file>Gauges/GaugeNeedle_minus90to180.qml</file>
         <file>Gauges/GaugeNeedle_minus180to90.qml</file>
         <file>Gauges/Charts.qml</file>
@@ -29,116 +41,118 @@
         <file>Gauges/createverticalbargauge.js</file>
         <file>Gauges/Dyno.qml</file>
         <file>Gauges/Camera.qml</file>
-        <file>graphics/vertrevcanvas.png</file>
         <file>Gauges/Cluster.qml</file>
-        <file>Gauges/Squaregauge.qml</file>
-        <file>Sounds/alarm.wav</file>
-        <file>graphics/next.png</file>
-        <file>graphics/pause.png</file>
-        <file>graphics/play.png</file>
-        <file>graphics/previous.png</file>
+        <file>Gauges/SquareGauge.qml</file>
         <file>Gauges/Mediaplayer.qml</file>
         <file>Gauges/Screentoggle.qml</file>
         <file>Gauges/ConsultTest.qml</file>
         <file>Gauges/HaltechFlags.qml</file>
-        <file>graphics/ledgreen.png</file>
-        <file>graphics/ledoff.png</file>
-        <file>graphics/ledred.png</file>
-        <file>graphics/ledyellow.png</file>
-        <file>graphics/RPM_BG.png</file>
-        <file>graphics/RPM_Fill.png</file>
-        <file>graphics/empty.png</file>
-        <file>graphics/fill.png</file>
-        <file>Gauges/RPMbar.qml</file>
+        <file>Gauges/RPMBar.qml</file>
         <file>Gauges/ShiftLights.qml</file>
-        <file>graphics/fueltechempty.png</file>
-        <file>graphics/fueltechfill.png</file>
         <file>Gauges/Warning.qml</file>
         <file>Gauges/WarningLoader.qml</file>
-        <file>graphics/Racedash.png</file>
         <file>Gauges/RPMBarStyle1.qml</file>
-        <file>Gauges/RPMBARStyle2.qml</file>
-        <file>OBDPIDS.qml</file>
-        <file>ConsultRegs.qml</file>
-        <file>GPSTracks/Laptimer.qml</file>
+        <file>Gauges/RPMBarStyle2.qml</file>
+        <file>Gauges/RPMBarStyle3.qml</file>
         <file>Gauges/Userdash1.qml</file>
         <file>Gauges/Userdash2.qml</file>
         <file>Gauges/Userdash3.qml</file>
         <file>Gauges/createsquaregaugeUserDash.js</file>
-        <file>Gauges/RPMbarStyle3.qml</file>
-        <file>graphics/MainDashnew.png</file>
-        <file>graphics/Logo.png</file>
-        <file>Intro.qml</file>
         <file>Gauges/DatasourcesList.qml</file>
         <file>Gauges/ColorList.qml</file>
         <file>Gauges/ColorpickerCombobox.qml</file>
         <file>Gauges/RoundGauge.qml</file>
-        <file>Gauges/Verticalbargauge.qml</file>
+        <file>Gauges/VerticalBarGauge.qml</file>
         <file>Gauges/createRoundGauge.js</file>
-        <file>graphics/needle.svg</file>
-        <file>graphics/RoungGaugeRing.png</file>
         <file>Gauges/MyTextLabel.qml</file>
         <file>Gauges/createText.js</file>
         <file>Gauges/createPicture.js</file>
         <file>Gauges/Picture.qml</file>
-        <file>graphics/slectImage.png</file>
-        <file>AnalogInputs.qml</file>
-        <file>Gauges/Statepicture.qml</file>
+        <file>Gauges/StatePicture.qml</file>
         <file>Gauges/createStatePicture.js</file>
-        <file>graphics/selectStateImage.png</file>
-        <file>graphics/brightness.png</file>
         <file>Gauges/SpeedMeasurements.qml</file>
-        <file>graphics/green_Light.png</file>
         <file>Gauges/StateGIF.qml</file>
         <file>Gauges/createStateGIF.js</file>
-        <file>graphics/StateGIF.gif</file>
-        <file>KTracks/Countries.txt</file>
-        <file>KTracks/Australia/Luddenham.txt</file>
-        <file>KTracks/Australia/Archer Field Drift Park.txt</file>
-        <file>KTracks/Canada/Toronto Motorsports Park.txt</file>
-        <file>KTracks/Australia/Lakeside Park.txt</file>
-        <file>KTracks/Japan/Mt Haruna (Akina).txt</file>
-        <file>KTracks/Australia/Barbagallo Large.txt</file>
-        <file>KTracks/New Zealand/Bruce McLaren Motorsportpark Large.txt</file>
-        <file>KTracks/Japan/Tsukuba Circuit.txt</file>
-        <file>KTracks/Malaysia/Sepang F1 Circuit.txt</file>
-        <file>KTracks/Australia/Queensland Layout 1.txt</file>
-        <file>KTracks/Australia/Queensland Layout 2.txt</file>
-        <file>KTracks/Australia/Queensland Layout 3.txt</file>
-        <file>KTracks/Australia/Wakefield inner Circuit.txt</file>
-        <file>KTracks/Australia/Wakefield outer Circuit.txt</file>
-        <file>KTracks/Australia/Collie Motorplex.txt</file>
-        <file>KTracks/New Zealand/Pukekohe Park Raceway.txt</file>
-        <file>KTracks/Australia/Carnell Raceway.txt</file>
-        <file>KTracks/USA/Button Willow 1.txt</file>
-        <file>KTracks/Australia/Morgan Park B.txt</file>
-        <file>KTracks/Australia/Morgan Park D.txt</file>
-        <file>KTracks/Australia/Morgan Park E.txt</file>
-        <file>KTracks/Australia/Morgan Park K.txt</file>
-        <file>KTracks/Canada/Colabogie Big.txt</file>
-        <file>KTracks/USA/Laguna Seca.txt</file>
-        <file>KTracks/Australia/Eastern Creek GP Circuit.txt</file>
-        <file>KTracks/Australia/The Bend International Circuit.txt</file>
-        <file>KTracks/Australia/The Bend West Circuit.txt</file>
-        <file>ExBoardAnalog.qml</file>
         <file>Gauges/TyreMonitor.qml</file>
-        <file>Settings/CanMonitor.qml</file>
-        <file>Translator.js</file>
-        <file>graphics/Flags/de.png</file>
-        <file>graphics/Flags/es.png</file>
-        <file>graphics/Flags/jp.png</file>
-        <file>graphics/Flags/us.png</file>
-        <file>graphics/Flags/fr.png</file>
-        <file>graphics/Flags/ae.png</file>
-        <file>BrightnessPopUp.qml</file>
-        <file>Settings/help.qml</file>
-        <file>graphics/contactQR.png</file>
-        <file>graphics/facebookQR.png</file>
-        <file>graphics/instagramQR.png</file>
-        <file>graphics/warrantyQR.png</file>
-        <file>graphics/userManualQR.png</file>
-        <file>graphics/brightnessIncrease.png</file>
-        <file>graphics/brightnessDecrease.png</file>
         <file>Gauges/Keypad.qml</file>
+
+        <!-- GPS Tracks -->
+        <file>GPSTracks/Laptimer.qml</file>
+
+        <!-- Resources/Graphics -->
+        <file>Resources/graphics/Tacho_Mitte.png</file>
+        <file>Resources/graphics/Racedash800x480.png</file>
+        <file>Resources/graphics/MainDash.png</file>
+        <file>Resources/graphics/vertrevcanvas.png</file>
+        <file>Resources/graphics/next.png</file>
+        <file>Resources/graphics/pause.png</file>
+        <file>Resources/graphics/play.png</file>
+        <file>Resources/graphics/previous.png</file>
+        <file>Resources/graphics/ledgreen.png</file>
+        <file>Resources/graphics/ledoff.png</file>
+        <file>Resources/graphics/ledred.png</file>
+        <file>Resources/graphics/ledyellow.png</file>
+        <file>Resources/graphics/RPM_BG.png</file>
+        <file>Resources/graphics/RPM_Fill.png</file>
+        <file>Resources/graphics/empty.png</file>
+        <file>Resources/graphics/fill.png</file>
+        <file>Resources/graphics/fueltechempty.png</file>
+        <file>Resources/graphics/fueltechfill.png</file>
+        <file>Resources/graphics/Racedash.png</file>
+        <file>Resources/graphics/MainDashnew.png</file>
+        <file>Resources/graphics/Logo.png</file>
+        <file>Resources/graphics/needle.svg</file>
+        <file>Resources/graphics/RoungGaugeRing.png</file>
+        <file>Resources/graphics/slectImage.png</file>
+        <file>Resources/graphics/selectStateImage.png</file>
+        <file>Resources/graphics/brightness.png</file>
+        <file>Resources/graphics/green_Light.png</file>
+        <file>Resources/graphics/StateGIF.gif</file>
+        <file>Resources/graphics/contactQR.png</file>
+        <file>Resources/graphics/facebookQR.png</file>
+        <file>Resources/graphics/instagramQR.png</file>
+        <file>Resources/graphics/warrantyQR.png</file>
+        <file>Resources/graphics/userManualQR.png</file>
+        <file>Resources/graphics/brightnessIncrease.png</file>
+        <file>Resources/graphics/brightnessDecrease.png</file>
+        <file>Resources/graphics/Flags/de.png</file>
+        <file>Resources/graphics/Flags/es.png</file>
+        <file>Resources/graphics/Flags/jp.png</file>
+        <file>Resources/graphics/Flags/us.png</file>
+        <file>Resources/graphics/Flags/fr.png</file>
+        <file>Resources/graphics/Flags/ae.png</file>
+
+        <!-- Resources/Sounds -->
+        <file>Resources/Sounds/alarm.wav</file>
+
+        <!-- Resources/KTracks -->
+        <file>Resources/KTracks/Countries.txt</file>
+        <file>Resources/KTracks/Australia/Luddenham.txt</file>
+        <file>Resources/KTracks/Australia/Archer Field Drift Park.txt</file>
+        <file>Resources/KTracks/Canada/Toronto Motorsports Park.txt</file>
+        <file>Resources/KTracks/Australia/Lakeside Park.txt</file>
+        <file>Resources/KTracks/Japan/Mt Haruna (Akina).txt</file>
+        <file>Resources/KTracks/Australia/Barbagallo Large.txt</file>
+        <file>Resources/KTracks/New Zealand/Bruce McLaren Motorsportpark Large.txt</file>
+        <file>Resources/KTracks/Japan/Tsukuba Circuit.txt</file>
+        <file>Resources/KTracks/Malaysia/Sepang F1 Circuit.txt</file>
+        <file>Resources/KTracks/Australia/Queensland Layout 1.txt</file>
+        <file>Resources/KTracks/Australia/Queensland Layout 2.txt</file>
+        <file>Resources/KTracks/Australia/Queensland Layout 3.txt</file>
+        <file>Resources/KTracks/Australia/Wakefield inner Circuit.txt</file>
+        <file>Resources/KTracks/Australia/Wakefield outer Circuit.txt</file>
+        <file>Resources/KTracks/Australia/Collie Motorplex.txt</file>
+        <file>Resources/KTracks/New Zealand/Pukekohe Park Raceway.txt</file>
+        <file>Resources/KTracks/Australia/Carnell Raceway.txt</file>
+        <file>Resources/KTracks/USA/Button Willow 1.txt</file>
+        <file>Resources/KTracks/Australia/Morgan Park B.txt</file>
+        <file>Resources/KTracks/Australia/Morgan Park D.txt</file>
+        <file>Resources/KTracks/Australia/Morgan Park E.txt</file>
+        <file>Resources/KTracks/Australia/Morgan Park K.txt</file>
+        <file>Resources/KTracks/Canada/Colabogie Big.txt</file>
+        <file>Resources/KTracks/USA/Laguna Seca.txt</file>
+        <file>Resources/KTracks/Australia/Eastern Creek GP Circuit.txt</file>
+        <file>Resources/KTracks/Australia/The Bend International Circuit.txt</file>
+        <file>Resources/KTracks/Australia/The Bend West Circuit.txt</file>
     </qresource>
 </RCC>

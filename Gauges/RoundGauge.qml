@@ -1,5 +1,5 @@
-import QtQuick 2.8
-import QtQuick.Controls 2.3
+import QtQuick 2.15
+import QtQuick.Controls 2.15
 import QtQuick.Controls.Styles 1.4
 import QtQuick.Extras 1.4
 import QtQuick.Extras.Private 1.0
@@ -332,7 +332,6 @@ Rectangle{
                     }
 
                     onPaint: {
-                       // console.log(gauge.value)
                         var ctx = getContext("2d");
                         var gradient2;
                         gradient2 = ctx.createRadialGradient((parent.width / 2),(parent.height / 2), 0, (parent.width / 2),(parent.height / 2),parent.height );
@@ -388,7 +387,7 @@ Rectangle{
         id: ring
         anchors.fill: parent
         visible: ringvisible
-        source: "qrc:/graphics/RoungGaugeRing.png"
+        source: "qrc:/Resources/graphics/RoungGaugeRing.png"
     }
     Item {
         id: menustructure
@@ -1701,7 +1700,6 @@ Rectangle{
                 font.pixelSize: 15
                 currentIndex: 1
                 onCurrentIndexChanged: {labelfont = labelfontselect.textAt(labelfontselect.currentIndex)
-                //console.log("font changed")
                 }
                 delegate:
                     ItemDelegate {
