@@ -10,6 +10,14 @@
 #include <QModbusRtuSerialMaster>
 
 
+AdaptronicSelect::AdaptronicSelect(QObject *parent)
+    : QObject(parent)
+    , m_dashboard(nullptr)
+    , lastRequest(nullptr)
+    , modbusDevice(nullptr)
+{
+}
+
 AdaptronicSelect::~AdaptronicSelect()
 {
 
@@ -39,7 +47,7 @@ void AdaptronicSelect::openConnection(const QString &portName)
     if (!modbusDevice)
     {
     modbusDevice = new QModbusRtuSerialMaster(this);
-    connect(this,SIGNAL(sig_adaptronicReadFinished()),this,SLOT(AdaptronicStartStream()));
+    connect(this, &AdaptronicSelect::sig_adaptronicReadFinished, this, &AdaptronicSelect::AdaptronicStartStream);
     qDebug() << "Modbusdevice created" ;
     }
 

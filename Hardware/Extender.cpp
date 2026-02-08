@@ -31,7 +31,7 @@ int frequencymask = 127;
 
 Extender::Extender(QObject *parent)
     : QObject(parent)
-    , m_dashboard(Q_NULLPTR)
+    , m_dashboard(nullptr)
 
 {
 }

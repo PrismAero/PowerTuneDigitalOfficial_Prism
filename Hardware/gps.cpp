@@ -44,7 +44,7 @@ QString setbaudrate;
 
 GPS::GPS(QObject *parent)
     : QObject(parent)
-    , m_dashboard(Q_NULLPTR)
+    , m_dashboard(nullptr)
 {
 }
 
@@ -58,7 +58,7 @@ void GPS::initSerialPort()
 {
     // qDebug() << "Initialize Serial Port" ;
     m_serialport = new SerialPort(this);
-    connect(this->m_serialport, SIGNAL(readyRead()), this, SLOT(readyToRead()));
+    connect(m_serialport, &QSerialPort::readyRead, this, &GPS::readyToRead);
  //   connect(m_serialport, static_cast<void (QSerialPort::*)(QSerialPort::SerialPortError)>(&QSerialPort::error),
  //           this, &GPS::handleError);
     connect(&m_timeouttimer, &QTimer::timeout, this, &GPS::handleTimeout);
@@ -154,9 +154,8 @@ void GPS::setGPSOnly()
 void GPS::closeConnection()
 {
     // qDebug() << "close connection " ;
-    disconnect(this->m_serialport, SIGNAL(readyRead()), this, SLOT(readyToRead()));
-    disconnect(m_serialport, static_cast<void (QSerialPort::*)(QSerialPort::SerialPortError)>(&QSerialPort::error),
-               this, &GPS::handleError);
+    disconnect(m_serialport, &QSerialPort::readyRead, this, &GPS::readyToRead);
+    disconnect(m_serialport, &QSerialPort::errorOccurred, this, &GPS::handleError);
     disconnect(&m_timeouttimer, &QTimer::timeout, this, &GPS::handleTimeout);
     m_serialport->close();
     m_dashboard->setgpsFIXtype("");
@@ -285,7 +284,7 @@ void GPS::handleTimeout()
     m_dashboard->setgpsTime("0");
     m_dashboard->setgpsHDOP(0);
     //wait 2 seconds before reconnecting
-    QTimer::singleShot(2000, this, SLOT(handleReconnect()));
+    QTimer::singleShot(2000, this, &GPS::handleReconnect);
 }
 
 void GPS::handleReconnect()

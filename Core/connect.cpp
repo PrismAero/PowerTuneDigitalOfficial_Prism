@@ -44,6 +44,7 @@
 #include <QTextStream>
 #include <QByteArrayMatcher>
 #include <QProcess>
+#include <QRegularExpression>
 
 int ecu; //0=apex, 1=adaptronic;2= OBD; 3= Dicktator ECU
 int logging; // 0 Logging off , 1 Logging to file
@@ -59,19 +60,19 @@ QString dashfilename3;
 
 Connect::Connect(QObject *parent) :
     QObject(parent),
-    m_serialport(Q_NULLPTR),
-    m_dashBoard(Q_NULLPTR),
-    m_gopro(Q_NULLPTR),
-    m_gps(Q_NULLPTR),
-    m_udpreceiver(Q_NULLPTR),
-    m_adaptronicselect(Q_NULLPTR),
-    m_apexi(Q_NULLPTR),
-    m_sensors(Q_NULLPTR),
-    m_datalogger(Q_NULLPTR),
-    m_calculations(Q_NULLPTR),
-    m_arduino(Q_NULLPTR),
-    m_wifiscanner(Q_NULLPTR),
-    m_extender(Q_NULLPTR)
+    m_serialport(nullptr),
+    m_dashBoard(nullptr),
+    m_gopro(nullptr),
+    m_gps(nullptr),
+    m_udpreceiver(nullptr),
+    m_adaptronicselect(nullptr),
+    m_apexi(nullptr),
+    m_sensors(nullptr),
+    m_datalogger(nullptr),
+    m_calculations(nullptr),
+    m_arduino(nullptr),
+    m_wifiscanner(nullptr),
+    m_extender(nullptr)
 
 {
 
@@ -104,7 +105,7 @@ Connect::Connect(QObject *parent) :
     fileModel->setRootPath(mPath);
 
     QQmlApplicationEngine *engine = dynamic_cast<QQmlApplicationEngine*>( parent );
-    if (engine == Q_NULLPTR)
+    if (engine == nullptr)
         return;
     engine->rootContext()->setContextProperty("Dashboard", m_dashBoard);
     engine->rootContext()->setContextProperty("Extender2", m_extender);
@@ -134,14 +135,14 @@ void Connect::saveDashtoFile(const QString &filename,const QString &dashstring)
         // qDebug()<<"Filename" << filename + "txt";
     QString fixformat = dashstring;
     fixformat.replace(",,",", ,");
-    QStringList fields = fixformat.split(QRegExp("[\r\n]"));
+    QStringList fields = fixformat.split(QRegularExpression("[\r\n]"));
     QFile file( "/home/pi/UserDashboards/"+filename + ".txt" );
     //QFile file(filename + ".txt" );
     file.remove(); //remove file if it exists to avoid appending of existing file
     if ( file.open(QIODevice::ReadWrite) )
     {
         QTextStream stream( &file );
-        stream << fixformat << endl;
+        stream << fixformat << Qt::endl;
     }
     file.close();
 }
@@ -220,7 +221,7 @@ void Connect::readMaindashsetup()
         while (!in.atEnd())
         {
             QString line = in.readLine();
-            QStringList list = line.split(QRegExp("\\,"));
+            QStringList list = line.split(QRegularExpression("\\,"));
             m_dashBoard->setmaindashsetup(list);
         }
         inputFile.close();
@@ -242,13 +243,13 @@ void Connect::readdashsetup3()
             QString line = in.readLine();
             QStringList list;
             //if (line.contains("gauge")){
-            list = line.split(QRegExp("\\,"));
+            list = line.split(QRegularExpression("\\,"));
             //}
             /*
             else
             {
              line.prepend("Square gauge,");
-             list = line.split(QRegExp("\\,"));
+             list = line.split(QRegularExpression("\\,"));
             }*/
             list.removeAll(QString(""));
             m_dashBoard->setdashsetup3(list);
@@ -272,13 +273,13 @@ void Connect::readdashsetup2()
             QString line = in.readLine();
             QStringList list;
             //if (line.contains("gauge")){
-            list = line.split(QRegExp("\\,"));
+            list = line.split(QRegularExpression("\\,"));
             //}
             /*
             else
             {
              line.prepend("Square gauge,");
-             list = line.split(QRegExp("\\,"));
+             list = line.split(QRegularExpression("\\,"));
             }*/
             list.removeAll(QString(""));
             m_dashBoard->setdashsetup2(list);
@@ -302,13 +303,13 @@ void Connect::readdashsetup1()
             QString line = in.readLine();
             QStringList list;
             //if (line.contains("gauge")){
-            list = line.split(QRegExp("\\,"));
+            list = line.split(QRegularExpression("\\,"));
             //}
             /*
             else
             {
              line.prepend("Square gauge,");
-             list = line.split(QRegExp("\\,"));
+             list = line.split(QRegularExpression("\\,"));
             }*/
             list.removeAll(QString(""));
             m_dashBoard->setdashsetup1(list);
@@ -413,7 +414,7 @@ void Connect::getPorts()
     }
     setPortsNames(PortList);
     // Check available ports every 1000 ms
-    QTimer::singleShot(1000, this, SLOT(getPorts()));
+    QTimer::singleShot(1000, this, &Connect::getPorts);
 }
 //function for flushing all Connect buffers
 void Connect::clear() const
@@ -436,7 +437,7 @@ void Connect::checkOBDReg()
         while (!in.atEnd())
         {
             QString line = in.readLine();
-            list = line.split(QRegExp("\\,"));
+            list = line.split(QRegularExpression("\\,"));
         }
         inputFile.close();
     }
@@ -464,7 +465,7 @@ void Connect::checkReg()
         while (!in.atEnd())
         {
             QString line = in.readLine();
-            list = line.split(QRegExp("\\,"));
+            list = line.split(QRegularExpression("\\,"));
         }
         inputFile.close();
     }
@@ -935,23 +936,23 @@ void Connect::daemonstartup(const int &daemon)
         mFile.open(QIODevice::ReadWrite | QIODevice::Truncate | QIODevice::Text);
         QTextStream out(&mFile);
         out << "#!/bin/sh"
-            << endl
+            << Qt::endl
             << "sudo ifdown can0"
-            << endl
+            << Qt::endl
             << "sudo ifup can0"
-            << endl
+            << Qt::endl
             << "#PLMS Consult Cable drivers"
-            << endl
+            << Qt::endl
             << "sudo modprobe ftdi_sio"
-            << endl
+            << Qt::endl
             << "sudo sh -c 'echo \"0403 c7d9\" > /sys/bus/usb-serial/drivers/ftdi_sio/new_id'"
-            << endl
+            << Qt::endl
             << "sleep 1.5"
-            << endl
+            << Qt::endl
             << "cd /home/pi/daemons"
-            << endl
+            << Qt::endl
             << daemonstart
-            << endl;
+            << Qt::endl;
         mFile.close();
     }
     else
@@ -960,15 +961,15 @@ void Connect::daemonstartup(const int &daemon)
         mFile.open(QIODevice::ReadWrite | QIODevice::Truncate | QIODevice::Text);
         QTextStream out(&mFile);
         out << "#!/bin/sh"
-            << endl
+            << Qt::endl
             << "sudo ifdown can0"
-            << endl
+            << Qt::endl
             << "sudo ifup can0"
-            << endl
+            << Qt::endl
             << "cd /home/pi/daemons"
-            << endl
+            << Qt::endl
             << daemonstart
-            << endl;
+            << Qt::endl;
         mFile.close();
     }
 
@@ -1000,23 +1001,23 @@ void Connect::canbitratesetup(const int &cansetting)
     {
         QTextStream out(&mFile);
         out << "# interfaces(5) file used by ifup(8) and ifdown(8)"
-            << endl
+            << Qt::endl
             << "# Please note that this file is written to be used with dhcpcd"
-            << endl
+            << Qt::endl
             << "# For static IP, consult /etc/dhcpcd.conf and 'man dhcpcd.conf'"
-            << endl
+            << Qt::endl
             << "# Include files from /etc/network/interfaces.d:"
-            << endl
+            << Qt::endl
             << "source-directory /etc/network/interfaces.d"
-            << endl
+            << Qt::endl
             << "#Automatically start CAN Interface"
-            << endl
+            << Qt::endl
             << "auto can0"
-            << endl
+            << Qt::endl
             << "iface can0 can static"
-            << endl
+            << Qt::endl
             << "bitrate " << canbitrate
-            << endl;
+            << Qt::endl;
     }
     else
     {
@@ -1024,51 +1025,51 @@ void Connect::canbitratesetup(const int &cansetting)
 
         QTextStream out(&mFile);
         out << "#!/bin/sh"
-            << endl
+            << Qt::endl
             << "# /etc/network/interfaces -- configuration file for ifup(8), ifdown(8)"
-            << endl
+            << Qt::endl
             <<"# The loopback interface"
-              << endl
+              << Qt::endl
             <<"auto lo"
-             << endl
+             << Qt::endl
             <<"iface lo inet loopback"
-            << endl
+            << Qt::endl
             <<"# Wireless interfaces"
-            << endl
+            << Qt::endl
             << "auto wlan0"
-            << endl
+            << Qt::endl
             <<"    iface wlan0 inet dhcp"
-            << endl
+            << Qt::endl
             <<"    hostname PowerTuneDigital"
-            << endl
+            << Qt::endl
             <<"    wireless_mode managed"
-            << endl
+            << Qt::endl
             << "   wireless_essid any"
-            << endl
+            << Qt::endl
             << "   wpa-driver wext"
-            << endl
+            << Qt::endl
             <<"    wpa-conf /etc/wpa_supplicant.conf"
-            << endl
+            << Qt::endl
             <<"    iface atml0 inet dhcp"
-            << endl
+            << Qt::endl
             <<"# Wired or wireless interfaces"
-            << endl
+            << Qt::endl
             <<"auto eth0"
-            << endl
+            << Qt::endl
             <<"    iface eth0 inet dhcp"
-            << endl
+            << Qt::endl
             <<"# Automatically start CAN Interface"
-            << endl
+            << Qt::endl
             <<"    auto can0"
-            << endl
+            << Qt::endl
             <<"   iface can0 inet manual"
-            << endl
+            << Qt::endl
             <<"    pre-up /sbin/ip link set can0 type can bitrate "<< canbitrate
-            << endl
+            << Qt::endl
             <<"    up /sbin/ifconfig can0 up"
-            << endl
+            << Qt::endl
             <<"    down /sbin/ifconfig can0 down"
-            << endl;
+            << Qt::endl;
 
     }
 
@@ -1338,8 +1339,8 @@ void Connect::update()
         p->start("/home/pi/src/updatePowerTune.sh", QStringList() << "echo" << "hye" );
         p->waitForStarted();
 
-        connect( p, SIGNAL(readyReadStandardOutput()), this, SLOT(processOutput()) );
-        //connect( p, SIGNAL(readyReadStandardError()), this, SLOT(ReadErr()) );
+        connect(p, &QProcess::readyReadStandardOutput, this, &Connect::processOutput);
+        // connect(p, &QProcess::readyReadStandardError, this, &Connect::ReadErr);
     }
 }
 
@@ -1403,8 +1404,8 @@ void Connect::candump()
         p->start( "/home/pi/daemons/OBD /dev/ttyUSB0", QStringList() << "echo" << "hye" );
         p->waitForStarted();
 
-        connect( p, SIGNAL(readyReadStandardOutput()), this, SLOT(processOutput()) );
-        //connect( p, SIGNAL(readyReadStandardError()), this, SLOT(ReadErr()) );
+        connect(p, &QProcess::readyReadStandardOutput, this, &Connect::processOutput);
+        // connect(p, &QProcess::readyReadStandardError, this, &Connect::ReadErr);
     }
 }
 void Connect::minicom()
@@ -1418,8 +1419,8 @@ void Connect::minicom()
         p->start( "minicom", QStringList() << "echo" << "hye" );
         p->waitForStarted();
 
-        connect( p, SIGNAL(readyReadStandardOutput()), this, SLOT(processOutput()) );
-        //connect( p, SIGNAL(readyReadStandardError()), this, SLOT(ReadErr()) );
+        connect(p, &QProcess::readyReadStandardOutput, this, &Connect::processOutput);
+        // connect(p, &QProcess::readyReadStandardError, this, &Connect::ReadErr);
     }
 }
 

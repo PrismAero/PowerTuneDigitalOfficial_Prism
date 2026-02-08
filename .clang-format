@@ -1,0 +1,139 @@
+# .clang-format configuration for PowerTune Qt project
+# Based on Qt coding style with some modifications for readability
+
+---
+Language: Cpp
+BasedOnStyle: LLVM
+
+# * Indentation
+IndentWidth: 4
+TabWidth: 4
+UseTab: Never
+IndentCaseLabels: false
+IndentPPDirectives: BeforeHash
+IndentWrappedFunctionNames: false
+NamespaceIndentation: None
+
+# * Alignment
+AlignAfterOpenBracket: Align
+AlignConsecutiveAssignments: false
+AlignConsecutiveDeclarations: false
+AlignConsecutiveMacros: true
+AlignEscapedNewlines: Right
+AlignOperands: true
+AlignTrailingComments: true
+
+# * Line Breaking
+ColumnLimit: 120
+AllowAllParametersOfDeclarationOnNextLine: true
+AllowShortBlocksOnASingleLine: Empty
+AllowShortCaseLabelsOnASingleLine: false
+AllowShortFunctionsOnASingleLine: Inline
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLambdasOnASingleLine: All
+AllowShortLoopsOnASingleLine: false
+AlwaysBreakAfterReturnType: None
+AlwaysBreakBeforeMultilineStrings: false
+AlwaysBreakTemplateDeclarations: Yes
+BinPackArguments: true
+BinPackParameters: true
+BreakBeforeBinaryOperators: None
+BreakBeforeBraces: Custom
+BraceWrapping:
+  AfterCaseLabel: false
+  AfterClass: true
+  AfterControlStatement: Never
+  AfterEnum: false
+  AfterFunction: true
+  AfterNamespace: false
+  AfterStruct: true
+  AfterUnion: false
+  AfterExternBlock: false
+  BeforeCatch: false
+  BeforeElse: false
+  BeforeLambdaBody: false
+  BeforeWhile: false
+  IndentBraces: false
+  SplitEmptyFunction: false
+  SplitEmptyRecord: false
+  SplitEmptyNamespace: false
+BreakBeforeTernaryOperators: true
+BreakConstructorInitializers: BeforeColon
+BreakInheritanceList: BeforeColon
+BreakStringLiterals: true
+
+# * Spacing
+Cpp11BracedListStyle: true
+DerivePointerAlignment: false
+PointerAlignment: Right
+ReferenceAlignment: Right
+SpaceAfterCStyleCast: false
+SpaceAfterLogicalNot: false
+SpaceAfterTemplateKeyword: true
+SpaceBeforeAssignmentOperators: true
+SpaceBeforeCpp11BracedList: false
+SpaceBeforeCtorInitializerColon: true
+SpaceBeforeInheritanceColon: true
+SpaceBeforeParens: ControlStatements
+SpaceBeforeRangeBasedForLoopColon: true
+SpaceBeforeSquareBrackets: false
+SpaceInEmptyBlock: false
+SpaceInEmptyParentheses: false
+SpacesBeforeTrailingComments: 2
+SpacesInAngles: false
+SpacesInCStyleCastParentheses: false
+SpacesInConditionalStatement: false
+SpacesInContainerLiterals: false
+SpacesInParentheses: false
+SpacesInSquareBrackets: false
+
+# * Include Sorting
+SortIncludes: CaseSensitive
+IncludeBlocks: Regroup
+IncludeCategories:
+  # * Qt headers
+  - Regex: '^<Q[A-Z]'
+    Priority: 2
+    SortPriority: 2
+  # * Project headers (quoted)
+  - Regex: '^"'
+    Priority: 1
+    SortPriority: 1
+  # * System headers
+  - Regex: '^<'
+    Priority: 3
+    SortPriority: 3
+
+# * Other
+AccessModifierOffset: -4
+CompactNamespaces: false
+ConstructorInitializerAllOnOneLineOrOnePerLine: true
+ConstructorInitializerIndentWidth: 4
+ContinuationIndentWidth: 4
+FixNamespaceComments: true
+IncludeIsMainRegex: '(_test)?$'
+IndentExternBlock: NoIndent
+KeepEmptyLinesAtTheStartOfBlocks: false
+MaxEmptyLinesToKeep: 2
+ReflowComments: true
+SortUsingDeclarations: true
+
+# * Qt-specific handling
+# These help with Q_OBJECT, signals, slots, etc.
+MacroBlockBegin: ''
+MacroBlockEnd: ''
+StatementMacros:
+  - Q_OBJECT
+  - Q_PROPERTY
+  - Q_INVOKABLE
+  - Q_SIGNAL
+  - Q_SLOT
+  - Q_SIGNALS
+  - Q_SLOTS
+  - Q_EMIT
+  - Q_UNUSED
+  - Q_DECLARE_FLAGS
+  - Q_DECLARE_OPERATORS_FOR_FLAGS
+  - QT_BEGIN_NAMESPACE
+  - QT_END_NAMESPACE
+...

@@ -24,7 +24,7 @@
 
 Sensors::Sensors(QObject *parent)
     : QObject(parent)
-    , m_dashboard(Q_NULLPTR)
+    , m_dashboard(nullptr)
 
 {
 
@@ -32,16 +32,16 @@ Sensors::Sensors(QObject *parent)
 Sensors::Sensors(DashBoard *dashboard, QObject *parent)
     : QObject(parent)
     , m_dashboard(dashboard)
-    , Compass(Q_NULLPTR)
-    , Accelerometer(Q_NULLPTR)
-    , Gyroscope(Q_NULLPTR)
-    , AmbientTemperatureSensor(Q_NULLPTR)
-    , PressureSensor(Q_NULLPTR)
-    , compass_reading(Q_NULLPTR)
-    , accel_reading(Q_NULLPTR)
-    , gyro_reading(Q_NULLPTR)
-    , temp_reading(Q_NULLPTR)
-    , press_reading(Q_NULLPTR)
+    , Compass(nullptr)
+    , Accelerometer(nullptr)
+    , Gyroscope(nullptr)
+    , AmbientTemperatureSensor(nullptr)
+    , PressureSensor(nullptr)
+    , compass_reading(nullptr)
+    , accel_reading(nullptr)
+    , gyro_reading(nullptr)
+    , temp_reading(nullptr)
+    , press_reading(nullptr)
 
 
 {
@@ -50,24 +50,24 @@ void Sensors::Comp()
 {
     qDebug() << "start compass";
     Compass = new QCompass(this);
-    connect(Compass, SIGNAL(readingChanged()), this, SLOT(updateCompass()));
-    connect(Compass, SIGNAL(sensorError(int)), this, SLOT(error(int)));
+    connect(Compass, &QCompass::readingChanged, this, &Sensors::updateCompass);
+    connect(Compass, &QCompass::sensorError, this, &Sensors::error);
     Compass->setDataRate(1);
     Compass->start();
 }
 void Sensors::Accel()
 {
 Accelerometer = new QAccelerometer(this);
-connect(Accelerometer, SIGNAL(readingChanged()), this, SLOT(updateAccel()));
-connect(Accelerometer, SIGNAL(sensorError(int)), this, SLOT(error(int)));
+connect(Accelerometer, &QAccelerometer::readingChanged, this, &Sensors::updateAccel);
+connect(Accelerometer, &QAccelerometer::sensorError, this, &Sensors::error);
 Accelerometer->setDataRate(1);
 Accelerometer->start();
 }
 void Sensors::Gyro()
 {
 Gyroscope = new QGyroscope(this);
-connect(Gyroscope, SIGNAL(readingChanged()), this, SLOT(updateGyro()));
-connect(Gyroscope, SIGNAL(sensorError(int)), this, SLOT(error(int)));
+connect(Gyroscope, &QGyroscope::readingChanged, this, &Sensors::updateGyro);
+connect(Gyroscope, &QGyroscope::sensorError, this, &Sensors::error);
 Gyroscope->setDataRate(1);
 Gyroscope->start();
 }
@@ -75,16 +75,16 @@ Gyroscope->start();
 void Sensors::Temperature()
 {
 AmbientTemperatureSensor = new QAmbientTemperatureSensor(this);
-connect(AmbientTemperatureSensor, SIGNAL(readingChanged()), this, SLOT(updateAmbientSens()));
-connect(AmbientTemperatureSensor, SIGNAL(sensorError(int)), this, SLOT(error(int)));
+connect(AmbientTemperatureSensor, &QAmbientTemperatureSensor::readingChanged, this, &Sensors::updateAmbientSens);
+connect(AmbientTemperatureSensor, &QAmbientTemperatureSensor::sensorError, this, &Sensors::error);
         AmbientTemperatureSensor->setDataRate(1);
         AmbientTemperatureSensor->start();
 }
 void Sensors::Pressure()
 {
 PressureSensor = new QPressureSensor(this);
-connect(PressureSensor, SIGNAL(readingChanged()), this, SLOT(updatePressureSens()));
-connect(PressureSensor, SIGNAL(sensorError(int)), this, SLOT(error(int)));
+connect(PressureSensor, &QPressureSensor::readingChanged, this, &Sensors::updatePressureSens);
+connect(PressureSensor, &QPressureSensor::sensorError, this, &Sensors::error);
 PressureSensor->setDataRate(1);
 PressureSensor->start();
 }

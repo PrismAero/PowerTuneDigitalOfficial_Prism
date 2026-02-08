@@ -1,0 +1,85 @@
+# .clangd configuration for PowerTune Qt project
+# This file configures clangd LSP server for proper Qt support
+
+CompileFlags:
+  Add:
+    # * C++ Standard
+    - "-std=c++17"
+    
+    # * Qt 6 Include Paths (Homebrew installation)
+    - "-I/opt/homebrew/include"
+    - "-I/opt/homebrew/include/QtCore"
+    - "-I/opt/homebrew/include/QtGui"
+    - "-I/opt/homebrew/include/QtQml"
+    - "-I/opt/homebrew/include/QtQuick"
+    - "-I/opt/homebrew/include/QtNetwork"
+    - "-I/opt/homebrew/include/QtSerialPort"
+    - "-I/opt/homebrew/include/QtSerialBus"
+    - "-I/opt/homebrew/include/QtCharts"
+    - "-I/opt/homebrew/include/QtLocation"
+    - "-I/opt/homebrew/include/QtPositioning"
+    - "-I/opt/homebrew/include/QtSensors"
+    - "-I/opt/homebrew/include/QtMultimedia"
+    - "-I/opt/homebrew/include/QtWidgets"
+    - "-I/opt/homebrew/include/QtOpenGL"
+    
+    # * Project Include Paths
+    - "-I."
+    - "-ICore"
+    - "-ICore/Models"
+    - "-IECU"
+    - "-IHardware"
+    - "-IUtils"
+    
+    # * macOS Framework paths
+    - "-F/opt/homebrew/lib"
+    - "-F/System/Library/Frameworks"
+    
+    # * Qt MOC/Meta-object definitions
+    - "-DQT_CORE_LIB"
+    - "-DQT_GUI_LIB"
+    - "-DQT_QML_LIB"
+    - "-DQT_QUICK_LIB"
+    - "-DQT_NETWORK_LIB"
+    - "-DQT_SERIALPORT_LIB"
+    - "-DQT_CHARTS_LIB"
+    - "-DQT_LOCATION_LIB"
+    - "-DQT_POSITIONING_LIB"
+    - "-DQT_SENSORS_LIB"
+    - "-DQT_MULTIMEDIA_LIB"
+    - "-DQT_WIDGETS_LIB"
+    
+    # * Suppress common Qt macro warnings
+    - "-Wno-unknown-pragmas"
+    
+  Remove:
+    # * Remove flags that cause issues with clangd
+    - "-W*"
+
+Diagnostics:
+  # * Suppress noisy diagnostics
+  Suppress:
+    - "pp_file_not_found"  # Suppress missing Qt header warnings during partial analysis
+    
+  ClangTidy:
+    Add:
+      - "modernize-*"
+      - "readability-*"
+      - "performance-*"
+      - "bugprone-*"
+    Remove:
+      - "modernize-use-trailing-return-type"
+      - "readability-magic-numbers"
+      - "readability-identifier-length"
+
+InlayHints:
+  Enabled: true
+  ParameterNames: true
+  DeducedTypes: true
+  Designators: true
+
+Hover:
+  ShowAKA: true
+
+Completion:
+  AllScopes: true

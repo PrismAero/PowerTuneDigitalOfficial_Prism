@@ -62,7 +62,7 @@ static QString mapFD3S[] ={"InjDuty", "IGL","IGT","Rpm","Speed","Boost","Knock",
 */
 Apexi::Apexi(QObject *parent)
     : QObject(parent)
-    , m_dashboard(Q_NULLPTR)
+    , m_dashboard(nullptr)
 {
 }
 
@@ -86,9 +86,8 @@ void Apexi::initSerialPort()
     }
   */
     m_serialport = new SerialPort(this);
-    connect(this->m_serialport,SIGNAL(readyRead()),this,SLOT(readyToRead()));
-    connect(m_serialport, static_cast<void (QSerialPort::*)(QSerialPort::SerialPortError)>(&QSerialPort::error),
-            this, &Apexi::handleError);
+    connect(m_serialport, &QSerialPort::readyRead, this, &Apexi::readyToRead);
+    connect(m_serialport, &QSerialPort::errorOccurred, this, &Apexi::handleError);
     connect(m_serialport, &QSerialPort::bytesWritten, this, &Apexi::handleBytesWritten);
     connect(&m_timer, &QTimer::timeout, this, &Apexi::handleTimeout);
     m_readData.clear();
@@ -131,9 +130,8 @@ void Apexi::openConnection(const QString &portName)
 }
 void Apexi::closeConnection()
 {
-    disconnect(this->m_serialport,SIGNAL(readyRead()),this,SLOT(readyToRead()));
-    disconnect(m_serialport, static_cast<void (QSerialPort::*)(QSerialPort::SerialPortError)>(&QSerialPort::error),
-               this, &Apexi::handleError);
+    disconnect(m_serialport, &QSerialPort::readyRead, this, &Apexi::readyToRead);
+    disconnect(m_serialport, &QSerialPort::errorOccurred, this, &Apexi::handleError);
     disconnect(m_serialport, &QSerialPort::bytesWritten, this, &Apexi::handleBytesWritten);
     disconnect(&m_timer, &QTimer::timeout, this, &Apexi::handleTimeout);
     m_serialport->close();
@@ -170,7 +168,7 @@ void Apexi::handleError(QSerialPort::SerialPortError serialPortError)
         if(!mFile.open(QFile::Append | QFile::Text)){
         }
         QTextStream out(&mFile);
-        out << "Serial Error " << (m_serialport->errorString()) <<endl;
+        out << "Serial Error " << (m_serialport->errorString()) << Qt::endl;
         mFile.close();
         m_dashboard->setSerialStat(m_serialport->errorString());
         
@@ -189,7 +187,7 @@ void Apexi::readyToRead()
     if(!mFile.open(QFile::Append | QFile::Text)){
     }
     QTextStream out(&mFile);
-    out << m_readData.toHex() <<endl;
+    out << m_readData.toHex() << Qt::endl;
     mFile.close();
     // Test End
   */
@@ -291,7 +289,7 @@ void Apexi::readData(QByteArray rawmessagedata)
                reconnect = 1;
                requestIndex = 0;
                Apexi::closeConnection();
-               QTimer::singleShot(2000, this, SLOT(retryconnect()));
+               QTimer::singleShot(2000, this, &Apexi::retryconnect);
 
 
             }
@@ -583,9 +581,9 @@ void Apexi::decodeAdv(QByteArray rawmessagedata)
     //Toyota
     if (Model == 3)
     {
-        fc_adv_info_t3* info=reinterpret_cast<fc_adv_info_t3*>(rawmessagedata.data());
+        auto* info=reinterpret_cast<fc_adv_info_t3*>(rawmessagedata.data());
         int checkboost = (unsigned char)rawmessagedata[17];
-        packageADV3[0] = mul[0] * info->RPM3 + add[0];
+        packageADV3[0] = (mul[0] * info->RPM3) + add[0];
         //previousRev_rpm[buf_currentIndex] = packageADV[0];
         packageADV3[1] = info->Intakepress3;
         packageADV3[2] = info->PressureV3 * 0.001;
@@ -770,7 +768,7 @@ void Apexi::decodeBasic(QByteArray rawmessagedata)
     if(!mFile.open(QFile::Append | QFile::Text)){
     }
     QTextStream out(&mFile);
-    out << rawmessagedata.toHex() <<endl;
+    out << rawmessagedata.toHex() << Qt::endl;
     mFile.close();
 */    
 }
@@ -870,12 +868,12 @@ void Apexi::writeDashfile(const QString &gauge1,const QString &gauge2,const QStr
 
     {
         QTextStream stream( &file );
-        stream << gauge1 << endl;
-        stream << gauge2 << endl;
-        stream << gauge3 << endl;
-        stream << gauge4 << endl;
-        stream << gauge5 << endl;
-        stream << gauge6 << endl;
+        stream << gauge1 << Qt::endl;
+        stream << gauge2 << Qt::endl;
+        stream << gauge3 << Qt::endl;
+        stream << gauge4 << Qt::endl;
+        stream << gauge5 << Qt::endl;
+        stream << gauge6 << Qt::endl;
     }
 
     QString filename2="/home/pi/UserDashboards/UserDashApexi.txt";
@@ -884,12 +882,12 @@ void Apexi::writeDashfile(const QString &gauge1,const QString &gauge2,const QStr
 
     {
         QTextStream stream( &file2 );
-        stream << gauge1 << endl;
-        stream << gauge2 << endl;
-        stream << gauge3 << endl;
-        stream << gauge4 << endl;
-        stream << gauge5 << endl;
-        stream << gauge6 << endl;
+        stream << gauge1 << Qt::endl;
+        stream << gauge2 << Qt::endl;
+        stream << gauge3 << Qt::endl;
+        stream << gauge4 << Qt::endl;
+        stream << gauge5 << Qt::endl;
+        stream << gauge6 << Qt::endl;
     }
 
 

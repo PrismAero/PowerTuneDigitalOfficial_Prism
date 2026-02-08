@@ -6,7 +6,7 @@
 
 AppSettings::AppSettings(QObject *parent)
     : QObject(parent)
-    , m_dashboard(Q_NULLPTR)
+    , m_dashboard(nullptr)
 
 
 {

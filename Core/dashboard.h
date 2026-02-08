@@ -4,9 +4,33 @@
 #include <QStringList>
 #include <QObject>
 
+// * Forward declarations for sub-model classes (TODO-001: DashBoard God Object refactoring)
+class EngineData;
+class VehicleData;
+class GPSData;
+class AnalogInputs;
+class DigitalInputs;
+class ExpanderBoardData;
+class ElectricMotorData;
+class FlagsData;
+class TimingData;
+
 class DashBoard : public QObject
 {
     Q_OBJECT
+
+    // * Sub-model accessors for QML (TODO-001: DashBoard God Object refactoring)
+    // ! These expose domain-specific data models for cleaner QML bindings
+    // ! Example: Dashboard.engine.rpm instead of Dashboard.rpm
+    Q_PROPERTY(EngineData* engine READ engine CONSTANT)
+    Q_PROPERTY(VehicleData* vehicle READ vehicle CONSTANT)
+    Q_PROPERTY(GPSData* gps READ gps CONSTANT)
+    Q_PROPERTY(AnalogInputs* analog READ analog CONSTANT)
+    Q_PROPERTY(DigitalInputs* digital READ digital CONSTANT)
+    Q_PROPERTY(ExpanderBoardData* expander READ expander CONSTANT)
+    Q_PROPERTY(ElectricMotorData* emotor READ emotor CONSTANT)
+    Q_PROPERTY(FlagsData* flags READ flags CONSTANT)
+    Q_PROPERTY(TimingData* timing READ timing CONSTANT)
 
     // Odometer
     Q_PROPERTY(qreal Odo READ Odo WRITE setOdo NOTIFY odoChanged)
@@ -641,6 +665,18 @@ class DashBoard : public QObject
 
     public:
     DashBoard(QObject *parent = 0);
+
+    // * Sub-model accessors (TODO-001: DashBoard God Object refactoring)
+    EngineData* engine() const { return m_engine; }
+    VehicleData* vehicle() const { return m_vehicle; }
+    GPSData* gps() const { return m_gps; }
+    AnalogInputs* analog() const { return m_analog; }
+    DigitalInputs* digital() const { return m_digital; }
+    ExpanderBoardData* expander() const { return m_expander; }
+    ElectricMotorData* emotor() const { return m_emotor; }
+    FlagsData* flags() const { return m_flags; }
+    TimingData* timing() const { return m_timing; }
+
     //Steinhart Hart
     long R01 = 2000;
     long R02 = 4000;
@@ -3199,6 +3235,18 @@ private:
     qreal m_Knock_cyl2;
     qreal m_Knock_cyl3;
     qreal m_Knock_cyl4;
+
+    // * Sub-model instances (TODO-001: DashBoard God Object refactoring)
+    // ! These will hold domain-specific data, eventually replacing flat properties above
+    EngineData* m_engine;
+    VehicleData* m_vehicle;
+    GPSData* m_gps;
+    AnalogInputs* m_analog;
+    DigitalInputs* m_digital;
+    ExpanderBoardData* m_expander;
+    ElectricMotorData* m_emotor;
+    FlagsData* m_flags;
+    TimingData* m_timing;
 };
 
 #endif // DASHBOARD_H

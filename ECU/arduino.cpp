@@ -6,7 +6,7 @@
 
 Arduino::Arduino(QObject *parent)
     : QObject(parent)
-    , m_dashboard(Q_NULLPTR)
+    , m_dashboard(nullptr)
 {
 }
 
@@ -19,9 +19,8 @@ Arduino::Arduino(DashBoard *dashboard, QObject *parent)
 void Arduino::initSerialPort()
 {
     m_serialport = new SerialPort(this);
-    connect(this->m_serialport,SIGNAL(readyRead()),this,SLOT(readyToRead()));
-    connect(m_serialport, static_cast<void (QSerialPort::*)(QSerialPort::SerialPortError)>(&QSerialPort::error),
-            this, &Arduino::handleError);
+    connect(m_serialport, &QSerialPort::readyRead, this, &Arduino::readyToRead);
+    connect(m_serialport, &QSerialPort::errorOccurred, this, &Arduino::handleError);
     m_readData.clear();
    // qDebug("Serial port set for arduino");
 }
@@ -60,9 +59,8 @@ void Arduino::openConnection(const QString &portName)
 }
 void Arduino::closeConnection()
 {
-    disconnect(this->m_serialport,SIGNAL(readyRead()),this,SLOT(readyToRead()));
-    disconnect(m_serialport, static_cast<void (QSerialPort::*)(QSerialPort::SerialPortError)>(&QSerialPort::error),
-               this, &Arduino::handleError);
+    disconnect(m_serialport, &QSerialPort::readyRead, this, &Arduino::readyToRead);
+    disconnect(m_serialport, &QSerialPort::errorOccurred, this, &Arduino::handleError);
     m_serialport->close();
     m_dashboard->setSerialSpeed(0);
     m_dashboard->setSerialSpeed(0);
@@ -86,7 +84,7 @@ void Arduino::handleError(QSerialPort::SerialPortError serialPortError)
         if(!mFile.open(QFile::Append | QFile::Text)){
         }
         QTextStream out(&mFile);
-        out << "Serial Error " << (m_serialport->errorString()) <<endl;
+        out << "Serial Error " << (m_serialport->errorString()) << Qt::endl;
         mFile.close();
         m_dashboard->setSerialStat(m_serialport->errorString());
 
@@ -106,7 +104,7 @@ void Arduino::readyToRead()
     if(!mFile.open(QFile::Append | QFile::Text)){
     }
     QTextStream out(&mFile);
-    out  << (test.toHex()) <<endl;
+    out  << (test.toHex()) << Qt::endl;
     mFile.close();*/
     m_dashboard->setSerialStat(test.toHex());
     //qDebug()<< "Arduino"+m_readData;

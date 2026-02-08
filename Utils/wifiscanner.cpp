@@ -1,13 +1,14 @@
 #include "wifiscanner.h"
 #include "../Core/dashboard.h"
 #include "../Core/connect.h"
+
 #include <QFile>
 #include <QFileInfo>
 #include <QTextStream>
 #include <QProcess>
-#include <QByteArrayMatcher>
 #include <QByteArray>
 #include <QNetworkInterface>
+#include <QRegularExpression>
 
 
 QString outputline;
@@ -17,7 +18,7 @@ QString wlanip;
 
 WifiScanner::WifiScanner(QObject *parent)
     : QObject(parent)
-    , m_dashboard(Q_NULLPTR)
+    , m_dashboard(nullptr)
 {
 }
 
@@ -42,7 +43,7 @@ void WifiScanner::initializeWifiscanner()
         proc2.start("sh", QStringList()<<"-c"<<"iw wlan0 scan |grep SSID");
         proc2.waitForFinished();
         QString output2 = proc2.readAllStandardOutput();
-        QStringList fields = output2.split(QRegExp("[\n]"));
+        QStringList fields = output2.split(QRegularExpression("[\n]"));
         foreach (const QString &str, fields) {
                 raw = str;
                 raw.replace("SSID: ","");
@@ -144,7 +145,7 @@ void WifiScanner::setwifi(const QString &country,const QString &ssid1,const QStr
                        // << "ssid="<< "\"" << ssid2 << "\"" << "\r\n"
                        // << "psk=" << "\"" << psk2 << "\"" << "\r\n"
                        // << "}" << "\r\n"
-                    << endl;
+                    << Qt::endl;
             file.close();
         }
         else
@@ -163,7 +164,7 @@ void WifiScanner::setwifi(const QString &country,const QString &ssid1,const QStr
                    // << "ssid="<< "\"" << ssid2 << "\"" << "\r\n"
                    // << "psk=" << "\"" << psk2 << "\"" << "\r\n"
                    // << "}" << "\r\n"
-                << endl;
+                << Qt::endl;
         file.close();
         }
     }

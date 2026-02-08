@@ -7,7 +7,7 @@
 
 udpreceiver::udpreceiver(QObject *parent)
     : QObject(parent)
-    , m_dashboard(Q_NULLPTR)
+    , m_dashboard(nullptr)
 
 {
 
@@ -24,8 +24,7 @@ void udpreceiver::startreceiver()
 {
     udpSocket = new QUdpSocket(this);
     udpSocket->bind(45454, QUdpSocket::ShareAddress);
-    connect(udpSocket, SIGNAL(readyRead()),
-            this, SLOT(processPendingDatagrams()));
+    connect(udpSocket, &QUdpSocket::readyRead, this, &udpreceiver::processPendingDatagrams);
 
 }
 

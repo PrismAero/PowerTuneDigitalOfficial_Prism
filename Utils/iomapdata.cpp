@@ -1,5 +1,6 @@
 #include "iomapdata.h"
 #include <QtGlobal>
+#include <QRegularExpression>
 
 
 ioMapData::ioMapData(QObject *parent):
@@ -33,9 +34,9 @@ QGeoPath ioMapData::loadMapData(QString country, QString trackName) {
             // qDebug() << line ;
             if (line.contains("KML", Qt::CaseInsensitive))
             {
-                spl = line.split(QRegExp("[:]"));
+                spl = line.split(QRegularExpression("[:]"));
                 spl.removeFirst();
-                list = spl[0].split(QRegExp("[,]"));
+                list = spl[0].split(QRegularExpression("[,]"));
                 return parseKML(list);
             }
         }
@@ -220,9 +221,9 @@ QList<QString> ioMapData::getCenter(QString country, QString trackName)
             //qDebug() << line ;
             if(line.contains("MAPCENTER", Qt::CaseInsensitive))
             {
-                spl = line.split(QRegExp ("[:]"));
+                spl = line.split(QRegularExpression ("[:]"));
                 spl.removeFirst();
-                list = spl[0].split(QRegExp ("[,]"));
+                list = spl[0].split(QRegularExpression ("[,]"));
 
                 returnList.append(list[0]);
                 returnList.append(list[1]);
@@ -263,9 +264,9 @@ QList<QString> ioMapData::getStartFinishLine(QString country, QString trackName)
            // qDebug() << line ;
             if(line.contains("STARTFINISH1", Qt::CaseInsensitive))
             {
-                spl = line.split(QRegExp ("[:]"));
+                spl = line.split(QRegularExpression ("[:]"));
                 spl.removeFirst();
-                list = spl[0].split(QRegExp ("[,]"));
+                list = spl[0].split(QRegularExpression ("[,]"));
 
                 floatList.append(list[0]);
                 floatList.append(list[1]);
@@ -305,9 +306,9 @@ QList<QString> ioMapData::getSecondFinishLine(QString country, QString trackName
             //qDebug() << line ;
             if(line.contains("STARTFINISH2", Qt::CaseInsensitive))
             {
-                spl = line.split(QRegExp ("[:]"));
+                spl = line.split(QRegularExpression ("[:]"));
                 spl.removeFirst();
-                list = spl[0].split(QRegExp ("[,]"));
+                list = spl[0].split(QRegularExpression ("[,]"));
 
                 floatList.append(list[0]);
                 floatList.append(list[1]);
@@ -346,7 +347,7 @@ qreal ioMapData::getZOOMLEVEL(QString country, QString trackName)
             //qDebug() << line ;
             if(line.contains("ZOOMLEVEL", Qt::CaseInsensitive))
             {
-                spl = line.split(QRegExp ("[:]"));
+                spl = line.split(QRegularExpression ("[:]"));
                 spl.removeFirst();
 
             }

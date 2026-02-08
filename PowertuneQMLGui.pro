@@ -17,6 +17,7 @@ static {
 # * Include paths for organized directory structure
 INCLUDEPATH += \
     Core \
+    Core/Models \
     ECU \
     Hardware \
     Utils
@@ -26,6 +27,15 @@ SOURCES += main.cpp \
     Core/dashboard.cpp \
     Core/serialport.cpp \
     Core/appsettings.cpp \
+    Core/Models/EngineData.cpp \
+    Core/Models/VehicleData.cpp \
+    Core/Models/GPSData.cpp \
+    Core/Models/AnalogInputs.cpp \
+    Core/Models/DigitalInputs.cpp \
+    Core/Models/ExpanderBoardData.cpp \
+    Core/Models/ElectricMotorData.cpp \
+    Core/Models/FlagsData.cpp \
+    Core/Models/TimingData.cpp \
     ECU/Apexi.cpp \
     ECU/AdaptronicSelect.cpp \
     ECU/arduino.cpp \
@@ -58,6 +68,16 @@ HEADERS += \
     Core/dashboard.h \
     Core/serialport.h \
     Core/appsettings.h \
+    Core/Models/DataModels.h \
+    Core/Models/EngineData.h \
+    Core/Models/VehicleData.h \
+    Core/Models/GPSData.h \
+    Core/Models/AnalogInputs.h \
+    Core/Models/DigitalInputs.h \
+    Core/Models/ExpanderBoardData.h \
+    Core/Models/ElectricMotorData.h \
+    Core/Models/FlagsData.h \
+    Core/Models/TimingData.h \
     ECU/Apexi.h \
     ECU/AdaptronicSelect.h \
     ECU/arduino.h \

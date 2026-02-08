@@ -54,7 +54,7 @@ qint64 prev_timestamp = QDateTime::currentMSecsSinceEpoch();
 
 calculations::calculations(QObject *parent)
     : QObject(parent)
-    , m_dashboard(Q_NULLPTR)
+    , m_dashboard(nullptr)
 
 {
 

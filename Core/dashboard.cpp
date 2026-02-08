@@ -5,6 +5,17 @@
 #include "math.h"
 #include <QDateTime>
 
+// * Sub-model includes (TODO-001: DashBoard God Object refactoring)
+#include "Models/EngineData.h"
+#include "Models/VehicleData.h"
+#include "Models/GPSData.h"
+#include "Models/AnalogInputs.h"
+#include "Models/DigitalInputs.h"
+#include "Models/ExpanderBoardData.h"
+#include "Models/ElectricMotorData.h"
+#include "Models/FlagsData.h"
+#include "Models/TimingData.h"
+
 
 
 
@@ -637,8 +648,28 @@ DashBoard::DashBoard(QObject *parent)
     ,m_Knock_cyl3()
     ,m_Knock_cyl4()
 
-{
+    // * Sub-model initialization (TODO-001: DashBoard God Object refactoring)
+    , m_engine(nullptr)
+    , m_vehicle(nullptr)
+    , m_gps(nullptr)
+    , m_analog(nullptr)
+    , m_digital(nullptr)
+    , m_expander(nullptr)
+    , m_emotor(nullptr)
+    , m_flags(nullptr)
+    , m_timing(nullptr)
 
+{
+    // * Instantiate sub-models (TODO-001: DashBoard God Object refactoring)
+    m_engine = new EngineData(this);
+    m_vehicle = new VehicleData(this);
+    m_gps = new GPSData(this);
+    m_analog = new AnalogInputs(this);
+    m_digital = new DigitalInputs(this);
+    m_expander = new ExpanderBoardData(this);
+    m_emotor = new ElectricMotorData(this);
+    m_flags = new FlagsData(this);
+    m_timing = new TimingData(this);
 }
 
 
@@ -3637,7 +3668,7 @@ void DashBoard::setCalibrationSelect(const int &CalibrationSelect)
 
 void DashBoard::setError(const QString &Error)
 {
-    if (m_ecu == Error)
+    if (m_Error == Error)
         return;
     m_Error = Error;
     emit ErrorChanged(Error);

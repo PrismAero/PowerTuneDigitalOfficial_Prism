@@ -1,0 +1,138 @@
+# .clang-tidy configuration for PowerTune Qt project
+# Static analysis checks for code quality and best practices
+
+---
+# * Enabled check categories
+Checks: >
+  -*,
+  bugprone-*,
+  cppcoreguidelines-*,
+  clang-analyzer-*,
+  modernize-*,
+  performance-*,
+  readability-*,
+  portability-*,
+  -bugprone-easily-swappable-parameters,
+  -bugprone-narrowing-conversions,
+  -cppcoreguidelines-avoid-c-arrays,
+  -cppcoreguidelines-avoid-magic-numbers,
+  -cppcoreguidelines-non-private-member-variables-in-classes,
+  -cppcoreguidelines-owning-memory,
+  -cppcoreguidelines-pro-bounds-array-to-pointer-decay,
+  -cppcoreguidelines-pro-bounds-constant-array-index,
+  -cppcoreguidelines-pro-bounds-pointer-arithmetic,
+  -cppcoreguidelines-pro-type-reinterpret-cast,
+  -cppcoreguidelines-pro-type-union-access,
+  -cppcoreguidelines-special-member-functions,
+  -modernize-avoid-c-arrays,
+  -modernize-use-nodiscard,
+  -modernize-use-trailing-return-type,
+  -readability-braces-around-statements,
+  -readability-convert-member-functions-to-static,
+  -readability-else-after-return,
+  -readability-function-cognitive-complexity,
+  -readability-identifier-length,
+  -readability-implicit-bool-conversion,
+  -readability-magic-numbers,
+  -readability-named-parameter,
+  -readability-qualified-auto,
+  -readability-redundant-access-specifiers,
+  -readability-uppercase-literal-suffix,
+
+# * Warning configuration
+WarningsAsErrors: ''
+
+# * Header filter - only analyze project headers
+HeaderFilterRegex: '.*/(Core|ECU|Hardware|Utils)/.*\.h$'
+
+# * Format style for fix-its
+FormatStyle: file
+
+# * Check-specific options
+CheckOptions:
+  # * Naming conventions (Qt-style)
+  - key: readability-identifier-naming.ClassCase
+    value: CamelCase
+  - key: readability-identifier-naming.StructCase
+    value: CamelCase
+  - key: readability-identifier-naming.EnumCase
+    value: CamelCase
+  - key: readability-identifier-naming.EnumConstantCase
+    value: CamelCase
+  - key: readability-identifier-naming.FunctionCase
+    value: camelBack
+  - key: readability-identifier-naming.MethodCase
+    value: camelBack
+  - key: readability-identifier-naming.VariableCase
+    value: camelBack
+  - key: readability-identifier-naming.ParameterCase
+    value: camelBack
+  - key: readability-identifier-naming.MemberCase
+    value: camelBack
+  - key: readability-identifier-naming.PrivateMemberPrefix
+    value: 'm_'
+  - key: readability-identifier-naming.ConstantCase
+    value: CamelCase
+  - key: readability-identifier-naming.GlobalConstantCase
+    value: CamelCase
+  - key: readability-identifier-naming.MacroDefinitionCase
+    value: UPPER_CASE
+  - key: readability-identifier-naming.NamespaceCase
+    value: lower_case
+  
+  # * Performance settings
+  - key: performance-for-range-copy.WarnOnAllAutoCopies
+    value: true
+  - key: performance-inefficient-string-concatenation.StrictMode
+    value: true
+  - key: performance-move-const-arg.CheckTriviallyCopyableMove
+    value: true
+  - key: performance-unnecessary-value-param.AllowedTypes
+    value: 'QString;QStringList;QByteArray;QVariant'
+  
+  # * Modernize settings
+  - key: modernize-loop-convert.MinConfidence
+    value: reasonable
+  - key: modernize-pass-by-value.IncludeStyle
+    value: llvm
+  - key: modernize-replace-auto-ptr.IncludeStyle
+    value: llvm
+  - key: modernize-use-nullptr.NullMacros
+    value: 'NULL;Q_NULLPTR'
+  - key: modernize-use-override.AllowOverrideAndFinal
+    value: false
+  - key: modernize-use-override.FinalSpelling
+    value: final
+  - key: modernize-use-override.OverrideSpelling
+    value: override
+  
+  # * Readability settings
+  - key: readability-function-size.LineThreshold
+    value: 200
+  - key: readability-function-size.StatementThreshold
+    value: 100
+  - key: readability-function-size.BranchThreshold
+    value: 50
+  - key: readability-function-size.ParameterThreshold
+    value: 10
+  
+  # * Bug-prone checks
+  - key: bugprone-argument-comment.StrictMode
+    value: false
+  - key: bugprone-assert-side-effect.AssertMacros
+    value: 'assert;Q_ASSERT;Q_ASSERT_X'
+  - key: bugprone-sizeof-expression.WarnOnSizeOfIntegerExpression
+    value: true
+  - key: bugprone-string-constructor.WarnOnLargeLength
+    value: true
+  - key: bugprone-string-constructor.LargeLengthThreshold
+    value: 8388608
+
+# * System header handling
+SystemHeaders: false
+
+# * User mapping for Qt macros that clang-tidy might not understand
+ExtraArgs:
+  - '-Wno-unknown-pragmas'
+  - '-Wno-unused-macros'
+...

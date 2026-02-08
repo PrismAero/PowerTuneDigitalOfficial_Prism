@@ -73,11 +73,16 @@ Desktop.ini
 *.user
 *.local
 
-# CMake (if used)
+# CMake
 CMakeCache.txt
 CMakeFiles/
 cmake_install.cmake
 CMakeLists.txt.user
+compile_commands.json
+
+# clangd cache
+.cache/
+.clangd/
 
 # ccache
 .ccache/
@@ -85,3 +90,4 @@ CMakeLists.txt.user
 # Compiled Python (if any scripts)
 __pycache__/
 *.py[cod]
+.cursor/plans/split_dashboard_god_object_b63a27ab.plan.md
