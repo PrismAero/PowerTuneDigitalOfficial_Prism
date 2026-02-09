@@ -1,99 +1,6 @@
 <RCC>
     <qresource prefix="/">
-        <!-- QML Files -->
-        <file>QML/main.qml</file>
-        <file>QML/SerialSettings.qml</file>
-        <file>QML/Intro.qml</file>
-        <file>QML/AnalogInputs.qml</file>
-        <file>QML/BrightnessPopUp.qml</file>
-        <file>QML/ConsultRegs.qml</file>
-        <file>QML/ExBoardAnalog.qml</file>
-        <file>QML/Laptimecontainer.qml</file>
-        <file>QML/OBDPIDS.qml</file>
-        <file>QML/Translator.js</file>
-
-        <!-- Settings -->
-        <file>Settings/main.qml</file>
-        <file>Settings/DashSelector.qml</file>
-        <file>Settings/sensehat.qml</file>
-        <file>Settings/warn_gear.qml</file>
-        <file>Settings/speed.qml</file>
-        <file>Settings/analog.qml</file>
-        <file>Settings/rpm.qml</file>
-        <file>Settings/startup.qml</file>
-        <file>Settings/network.qml</file>
-        <file>Settings/WifiCountryList.qml</file>
-        <file>Settings/DashSelectorWidget.qml</file>
-        <file>Settings/CanMonitor.qml</file>
-
-        <!-- Settings/components -->
-        <file>Settings/components/SettingsPage.qml</file>
-        <file>Settings/components/SettingsSection.qml</file>
-        <file>Settings/components/SettingsRow.qml</file>
-        <file>Settings/components/StyledComboBox.qml</file>
-        <file>Settings/components/StyledTextField.qml</file>
-        <file>Settings/components/StyledButton.qml</file>
-        <file>Settings/components/StyledSwitch.qml</file>
-        <file>Settings/components/ConnectionStatusIndicator.qml</file>
-        <file>Settings/components/qmldir</file>
-
-        <!-- Gauges -->
-        <file>Gauges/DashboardGaugeStyle.qml</file>
-        <file>Gauges/TachometerStyle.qml</file>
-        <file>Gauges/PFCSensors.qml</file>
-        <file>Gauges/BarGauge.qml</file>
-        <file>Gauges/GPS.qml</file>
-        <file>Gauges/GaugeNeedle_minus90to180.qml</file>
-        <file>Gauges/GaugeNeedle_minus180to90.qml</file>
-        <file>Gauges/Charts.qml</file>
-        <file>Gauges/ForceMeter.qml</file>
-        <file>Gauges/SensorTest.qml</file>
-        <file>Gauges/createverticalbargauge.js</file>
-        <file>Gauges/Dyno.qml</file>
-        <file>Gauges/Camera.qml</file>
-        <file>Gauges/Cluster.qml</file>
-        <file>Gauges/SquareGauge.qml</file>
-        <file>Gauges/Mediaplayer.qml</file>
-        <file>Gauges/Screentoggle.qml</file>
-        <file>Gauges/ConsultTest.qml</file>
-        <file>Gauges/HaltechFlags.qml</file>
-        <file>Gauges/RPMBar.qml</file>
-        <file>Gauges/ShiftLights.qml</file>
-        <file>Gauges/Warning.qml</file>
-        <file>Gauges/WarningLoader.qml</file>
-        <file>Gauges/RPMBarStyle1.qml</file>
-        <file>Gauges/RPMBarStyle2.qml</file>
-        <file>Gauges/RPMBarStyle3.qml</file>
-        <file>Gauges/Userdash1.qml</file>
-        <file>Gauges/Userdash2.qml</file>
-        <file>Gauges/Userdash3.qml</file>
-        <file>Gauges/createsquaregaugeUserDash.js</file>
-        <file>Gauges/DatasourcesList.qml</file>
-        <file>Gauges/ColorList.qml</file>
-        <file>Gauges/ColorpickerCombobox.qml</file>
-        <file>Gauges/RoundGauge.qml</file>
-        <file>Gauges/VerticalBarGauge.qml</file>
-        <file>Gauges/createRoundGauge.js</file>
-        <file>Gauges/MyTextLabel.qml</file>
-        <file>Gauges/createText.js</file>
-        <file>Gauges/createPicture.js</file>
-        <file>Gauges/Picture.qml</file>
-        <file>Gauges/StatePicture.qml</file>
-        <file>Gauges/createStatePicture.js</file>
-        <file>Gauges/SpeedMeasurements.qml</file>
-        <file>Gauges/StateGIF.qml</file>
-        <file>Gauges/createStateGIF.js</file>
-        <file>Gauges/TyreMonitor.qml</file>
-        <file>Gauges/Keypad.qml</file>
-
-        <!-- Gauges/Qt6Compat -->
-        <file>Gauges/Qt6Compat/CircularGauge.qml</file>
-        <file>Gauges/Qt6Compat/Gauge.qml</file>
-        <file>Gauges/Qt6Compat/CircularGaugeStyle.qml</file>
-        <file>Gauges/Qt6Compat/GaugeStyle.qml</file>
-        <file>Gauges/Qt6Compat/qmldir</file>
-
-        <!-- GPS Tracks -->
+        <!-- GPS Tracks (not part of PowerTune modules) -->
         <file>GPSTracks/Laptimer.qml</file>
 
         <!-- Resources/Graphics -->
@@ -141,6 +48,9 @@
 
         <!-- Resources/Sounds -->
         <file>Resources/Sounds/alarm.wav</file>
+
+        <!-- Resources/Fonts -->
+        <file>Resources/fonts/MaterialSymbolsOutlined.ttf</file>
 
         <!-- Resources/KTracks -->
         <file>Resources/KTracks/Countries.txt</file>

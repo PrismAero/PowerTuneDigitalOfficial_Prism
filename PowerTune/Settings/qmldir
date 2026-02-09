@@ -1,0 +1,22 @@
+module PowerTune.Settings
+MainSettings 1.0 MainSettings.qml
+DashSelector 1.0 DashSelector.qml
+DashSelectorWidget 1.0 DashSelectorWidget.qml
+SenseHatSettings 1.0 SenseHatSettings.qml
+WarnGearSettings 1.0 WarnGearSettings.qml
+SpeedSettings 1.0 SpeedSettings.qml
+AnalogSettings 1.0 AnalogSettings.qml
+RPMSettings 1.0 RPMSettings.qml
+StartupSettings 1.0 StartupSettings.qml
+NetworkSettings 1.0 NetworkSettings.qml
+CanMonitor 1.0 CanMonitor.qml
+HelpPage 1.0 HelpPage.qml
+WifiCountryList 1.0 WifiCountryList.qml
+SettingsPage 1.0 components/SettingsPage.qml
+SettingsSection 1.0 components/SettingsSection.qml
+SettingsRow 1.0 components/SettingsRow.qml
+StyledButton 1.0 components/StyledButton.qml
+StyledComboBox 1.0 components/StyledComboBox.qml
+StyledSwitch 1.0 components/StyledSwitch.qml
+StyledTextField 1.0 components/StyledTextField.qml
+ConnectionStatusIndicator 1.0 components/ConnectionStatusIndicator.qml

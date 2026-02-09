@@ -9,6 +9,7 @@
 #include <QFileSystemModel>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
+#include <QQuickStyle>
 #include <QtQml>
 
 #include <cstdio>
@@ -17,14 +18,17 @@ ioMapData mpd;
 int main(int argc, char *argv[])
 {
     qputenv("QT_IM_MODULE", QByteArray("qtvirtualkeyboard"));
+    // * Set Qt Quick Controls style to Basic for cross-platform consistency
+    // * This suppresses native style customization warnings on macOS
+    QQuickStyle::setStyle("Basic");
     QApplication app(argc, argv);
     app.setOrganizationName("Power-Tune");
     app.setOrganizationDomain("power-tune.org");
     app.setApplicationName("PowerTune");
     QQmlApplicationEngine engine;
     
-    // * Add PowerTune QML module path for import PowerTune 1.0
-    engine.addImportPath("qrc:/");
+    // * Add QML module import paths for PowerTune modules
+    engine.addImportPath("qrc:/qt/qml");
     
     qmlRegisterType<ioMapData>("IMD", 1, 0, "IMD");
     qmlRegisterType<DownloadManager>("DLM", 1, 0, "DLM");
@@ -38,6 +42,8 @@ int main(int argc, char *argv[])
 #else
     engine.rootContext()->setContextProperty("HAVE_DDCUTIL", false);
 #endif
-    engine.load(QUrl(QStringLiteral("qrc:/QML/main.qml")));
+    // * Load main QML from PowerTune.Core module
+    // ! Resource path includes both prefix and source path due to qt_add_qml_module behavior
+    engine.load(QUrl(QStringLiteral("qrc:/qt/qml/PowerTune/Core/PowerTune/Core/Main.qml")));
     return app.exec();
 }

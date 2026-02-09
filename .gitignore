@@ -76,6 +76,7 @@ Desktop.ini
 *.user
 *.local
 PowerTuneDigitalOfficial-main/
+.cursor/
 
 # CMake
 CMakeCache.txt

@@ -1,0 +1,868 @@
+import QtQuick 2.15
+import QtQuick.Controls 2.15
+import QtQuick.Layouts 1.15
+import QtMultimedia
+import Qt.labs.settings 1.0
+import PowerTune.Settings 1.0
+import PowerTune.Utils 1.0
+
+Rectangle {
+    id: root
+    anchors.fill: parent
+    color: "#121212"
+
+    property int connected: 0
+    property int hexstring: 0
+    property int hexstring2: 0
+    property int currentLanguage: Dashboard.language
+
+    // * Settings persistence
+    Item {
+        id: powerTuneSettings
+        Settings {
+            property alias connectECUAtStartup: connectButton.enabled
+            property alias connectGPSAtStartup: connectButtonGPS.enabled
+            property alias serialPortName: serialName.currentText
+            property alias gpsPortName: serialNameGPS.currentText
+            property alias gpsPortNameindex: serialNameGPS.currentIndex
+            property alias ecuType: ecuSelect.currentText
+            property alias auxunit1: unitaux1.text
+            property alias aux1: an1V0.text
+            property alias aux2: an2V5.text
+            property alias auxunit2: unitaux2.text
+            property alias aux3: an3V0.text
+            property alias aux4: an4V5.text
+            property alias goProVariant: goProSelect.currentIndex
+            property alias password: goPropass.text
+            property alias vehicleweight: weight.text
+            property alias unitSelector1: unitSelect1.currentIndex
+            property alias unitSelector: unitSelect.currentIndex
+            property alias unitSelector2: unitSelect2.currentIndex
+            property alias odometervalue: odometer.text
+            property alias tripmetervalue: tripmeter.text
+            property alias smoothingrpm: smoothrpm.currentIndex
+            property alias smoothingspeed: smoothspeed.currentIndex
+            property alias extendercanbase: baseadresstext.text
+            property alias shiftlightcanbase: shiftlightbaseadresstext.text
+            property alias languagecombobox: languageselect.currentIndex
+        }
+
+        SoundEffect {
+            id: warnsound
+            source: "qrc:/Resources/Sounds/alarm.wav"
+        }
+
+        Connections {
+            target: Dashboard
+            onOdoChanged: odometer.text = Dashboard.Odo.toFixed(3)
+            onTripChanged: tripmeter.text = Dashboard.Trip.toFixed(3)
+            onWatertempChanged: { if (Dashboard.Watertemp > Dashboard.waterwarn) playwarning.start() }
+            onRpmChanged: { if (Dashboard.rpm > Dashboard.rpmwarn) playwarning.start() }
+            onKnockChanged: { if (Dashboard.Knock > Dashboard.knockwarn) playwarning.start() }
+            onBoostPresChanged: { if (Dashboard.BoostPres > Dashboard.boostwarn) playwarning.start() }
+        }
+    }
+
+    ScrollView {
+        anchors.fill: parent
+        anchors.margins: 16
+        clip: true
+        ScrollBar.vertical.policy: ScrollBar.AsNeeded
+        ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
+
+        RowLayout {
+            width: root.width - 32
+            spacing: 20
+
+            // * LEFT COLUMN
+            ColumnLayout {
+                Layout.preferredWidth: 520
+                Layout.alignment: Qt.AlignTop
+                spacing: 20
+
+                // * Connection Section
+                SettingsSection {
+                    title: Translator.translate("Connection", Dashboard.language)
+                    Layout.fillWidth: true
+
+                    RowLayout {
+                        spacing: 12
+                        StyledButton {
+                            id: connectButton
+                            text: Translator.translate("Connect", Dashboard.language)
+                            width: 180
+                            onClicked: {
+                                functconnect.connectfunc()
+                                connectButton.enabled = false
+                                ecuSelect.enabled = false
+                                disconnectButton.enabled = true
+                            }
+                        }
+                        StyledButton {
+                            id: disconnectButton
+                            text: Translator.translate("Disconnect", Dashboard.language)
+                            width: 180
+                            primary: false
+                            enabled: false
+                            onClicked: {
+                                connectButton.enabled = true
+                                disconnectButton.enabled = false
+                                ecuSelect.enabled = true
+                                functdisconnect.disconnectfunc()
+                            }
+                        }
+                    }
+
+                    RowLayout {
+                        spacing: 12
+                        StyledButton {
+                            id: connectButtonGPS
+                            text: Translator.translate("GPS Connect", Dashboard.language)
+                            width: 180
+                            Component.onCompleted: autoconnectGPS.auto()
+                            onClicked: {
+                                connectButtonGPS.enabled = false
+                                disconnectButtonGPS.enabled = true
+                                autoconnectGPS.auto()
+                            }
+                        }
+                        StyledButton {
+                            id: disconnectButtonGPS
+                            text: Translator.translate("GPS Disconnect", Dashboard.language)
+                            width: 180
+                            primary: false
+                            enabled: false
+                            onClicked: {
+                                connectButtonGPS.enabled = true
+                                disconnectButtonGPS.enabled = false
+                                Gps.closeConnection()
+                            }
+                        }
+                    }
+
+                    // * ECU Serial Port (visible for PowerFC)
+                    RowLayout {
+                        visible: ecuSelect.currentIndex === 1
+                        spacing: 20
+                        Text {
+                            text: Translator.translate("ECU Serial Port", Dashboard.language)
+                            font.pixelSize: 20
+                            font.family: "Lato"
+                            color: "#FFFFFF"
+                            Layout.preferredWidth: 180
+                        }
+                        StyledComboBox {
+                            id: serialName
+                            width: 240
+                            model: Connect.portsNames
+                            property bool initialized: false
+                            onCurrentIndexChanged: {
+                                if (initialized) AppSettings.setBaudRate(currentIndex)
+                            }
+                            Component.onCompleted: {
+                                currentIndex = AppSettings.getBaudRate()
+                                initialized = true
+                                autoconnect.auto()
+                            }
+                        }
+                    }
+
+                    RowLayout {
+                        spacing: 20
+                        Text {
+                            text: Translator.translate("GPS Port", Dashboard.language)
+                            font.pixelSize: 20
+                            font.family: "Lato"
+                            color: "#FFFFFF"
+                            Layout.preferredWidth: 180
+                        }
+                        StyledComboBox {
+                            id: serialNameGPS
+                            width: 240
+                            model: Connect.portsNames
+                        }
+                    }
+
+                    RowLayout {
+                        spacing: 20
+                        Text {
+                            text: Translator.translate("Serial Status", Dashboard.language)
+                            font.pixelSize: 20
+                            font.family: "Lato"
+                            color: "#FFFFFF"
+                            Layout.preferredWidth: 180
+                        }
+                        ConnectionStatusIndicator {
+                            statusText: Dashboard.SerialStat
+                            status: Dashboard.SerialStat === "Connected" ? "connected" : "disconnected"
+                            width: 240
+                        }
+                    }
+                }
+
+                // * ECU Configuration Section
+                SettingsSection {
+                    title: Translator.translate("ECU Configuration", Dashboard.language)
+                    Layout.fillWidth: true
+
+                    RowLayout {
+                        spacing: 20
+                        Text {
+                            text: Translator.translate("ECU Selection", Dashboard.language)
+                            font.pixelSize: 20
+                            font.family: "Lato"
+                            color: "#FFFFFF"
+                            Layout.preferredWidth: 180
+                        }
+                        StyledComboBox {
+                            id: ecuSelect
+                            width: 240
+                            model: ["CAN", "PowerFC", "Consult", "OBD2", "Generic CAN"]
+                            property bool initialized: false
+                            onCurrentIndexChanged: {
+                                if (initialized) {
+                                    AppSettings.setECU(currentIndex)
+                                    Dashboard.setecu(ecuSelect.currentIndex)
+                                }
+                            }
+                            Component.onCompleted: {
+                                currentIndex = AppSettings.getECU()
+                                Dashboard.setecu(ecuSelect.currentIndex)
+                                initialized = true
+                            }
+                        }
+                    }
+
+                    // * Smoothing options (visible for Consult)
+                    RowLayout {
+                        visible: Dashboard.ecu === "2"
+                        spacing: 20
+                        Text {
+                            text: Translator.translate("RPM Smoothing", Dashboard.language)
+                            font.pixelSize: 20
+                            font.family: "Lato"
+                            color: "#FFFFFF"
+                            Layout.preferredWidth: 180
+                        }
+                        StyledComboBox {
+                            id: smoothrpm
+                            width: 240
+                            model: [Translator.translate("OFF", Dashboard.language), "2", "3", "4", "5", "6", "7", "8", "9", "10"]
+                            onCurrentIndexChanged: Dashboard.setsmoothrpm(smoothrpm.currentIndex)
+                            Component.onCompleted: Dashboard.setsmoothrpm(smoothrpm.currentIndex)
+                        }
+                    }
+
+                    RowLayout {
+                        visible: Dashboard.ecu === "2"
+                        spacing: 20
+                        Text {
+                            text: Translator.translate("Speed Smoothing", Dashboard.language)
+                            font.pixelSize: 20
+                            font.family: "Lato"
+                            color: "#FFFFFF"
+                            Layout.preferredWidth: 180
+                        }
+                        StyledComboBox {
+                            id: smoothspeed
+                            width: 240
+                            model: [Translator.translate("OFF", Dashboard.language), "2", "3", "4", "5", "6", "7", "8", "9", "10"]
+                            onCurrentIndexChanged: Dashboard.setsmoothspeed(smoothspeed.currentIndex)
+                            Component.onCompleted: Dashboard.setsmoothspeed(smoothspeed.currentIndex)
+                        }
+                    }
+                }
+
+                // * Units Section
+                SettingsSection {
+                    title: Translator.translate("Units", Dashboard.language)
+                    Layout.fillWidth: true
+
+                    RowLayout {
+                        spacing: 20
+                        Text {
+                            text: Translator.translate("Speed units", Dashboard.language)
+                            font.pixelSize: 20
+                            font.family: "Lato"
+                            color: "#FFFFFF"
+                            Layout.preferredWidth: 180
+                        }
+                        StyledComboBox {
+                            id: unitSelect1
+                            width: 240
+                            model: [Translator.translate("Metric", Dashboard.language), Translator.translate("Imperial", Dashboard.language)]
+                            Component.onCompleted: {
+                                Connect.setSpeedUnits(currentIndex)
+                                changeweighttext.changetext()
+                            }
+                            onCurrentIndexChanged: {
+                                Connect.setSpeedUnits(currentIndex)
+                                changeweighttext.changetext()
+                            }
+                        }
+                    }
+
+                    RowLayout {
+                        spacing: 20
+                        Text {
+                            text: Translator.translate("Temp units", Dashboard.language)
+                            font.pixelSize: 20
+                            font.family: "Lato"
+                            color: "#FFFFFF"
+                            Layout.preferredWidth: 180
+                        }
+                        StyledComboBox {
+                            id: unitSelect
+                            width: 240
+                            model: [Translator.translate("°C", Dashboard.language), Translator.translate("°F", Dashboard.language)]
+                            Component.onCompleted: {
+                                Connect.setUnits(currentIndex)
+                                changeweighttext.changetext()
+                            }
+                            onCurrentIndexChanged: {
+                                Connect.setUnits(currentIndex)
+                                changeweighttext.changetext()
+                            }
+                        }
+                    }
+
+                    RowLayout {
+                        spacing: 20
+                        Text {
+                            text: Translator.translate("Pressure units", Dashboard.language)
+                            font.pixelSize: 20
+                            font.family: "Lato"
+                            color: "#FFFFFF"
+                            Layout.preferredWidth: 180
+                        }
+                        StyledComboBox {
+                            id: unitSelect2
+                            width: 240
+                            model: ["kPa", "PSI"]
+                            Component.onCompleted: Connect.setPressUnits(currentIndex)
+                            onCurrentIndexChanged: Connect.setPressUnits(currentIndex)
+                        }
+                    }
+                }
+            }
+
+            // * MIDDLE COLUMN
+            ColumnLayout {
+                Layout.preferredWidth: 520
+                Layout.alignment: Qt.AlignTop
+                spacing: 20
+
+                // * Vehicle Section
+                SettingsSection {
+                    title: Translator.translate("Vehicle", Dashboard.language)
+                    Layout.fillWidth: true
+
+                    RowLayout {
+                        spacing: 20
+                        Text {
+                            id: weighttext
+                            text: Translator.translate("Weight", Dashboard.language) + " kg"
+                            font.pixelSize: 20
+                            font.family: "Lato"
+                            color: "#FFFFFF"
+                            Layout.preferredWidth: 180
+                        }
+                        StyledTextField {
+                            id: weight
+                            width: 240
+                            inputMethodHints: Qt.ImhFormattedNumbersOnly
+                        }
+                    }
+
+                    RowLayout {
+                        spacing: 20
+                        Text {
+                            text: Translator.translate("Odo", Dashboard.language)
+                            font.pixelSize: 20
+                            font.family: "Lato"
+                            color: "#FFFFFF"
+                            Layout.preferredWidth: 180
+                        }
+                        StyledTextField {
+                            id: odometer
+                            width: 240
+                            text: "0"
+                            inputMethodHints: Qt.ImhFormattedNumbersOnly
+                        }
+                    }
+
+                    RowLayout {
+                        spacing: 20
+                        Text {
+                            text: Translator.translate("Trip", Dashboard.language)
+                            font.pixelSize: 20
+                            font.family: "Lato"
+                            color: "#FFFFFF"
+                            Layout.preferredWidth: 180
+                        }
+                        StyledTextField {
+                            id: tripmeter
+                            width: 180
+                            text: "0"
+                            readOnly: true
+                            Component.onCompleted: Dashboard.setTrip(tripmeter.text)
+                        }
+                        StyledButton {
+                            text: Translator.translate("Trip Reset", Dashboard.language)
+                            width: 120
+                            primary: false
+                            onClicked: Calculations.resettrip()
+                        }
+                    }
+                }
+
+                // * Data Logging Section
+                SettingsSection {
+                    title: Translator.translate("Data Logging", Dashboard.language)
+                    Layout.fillWidth: true
+
+                    RowLayout {
+                        spacing: 20
+                        Text {
+                            text: Translator.translate("Logfile name", Dashboard.language)
+                            font.pixelSize: 20
+                            font.family: "Lato"
+                            color: "#FFFFFF"
+                            Layout.preferredWidth: 180
+                        }
+                        StyledTextField {
+                            id: logfilenameSelect
+                            width: 240
+                            text: "DataLog"
+                            inputMethodHints: Qt.ImhNoAutoUppercase | Qt.ImhPreferLowercase | Qt.ImhSensitiveData | Qt.ImhNoPredictiveText
+                        }
+                    }
+
+                    StyledSwitch {
+                        id: loggerswitch
+                        label: Translator.translate("Data Logger", Dashboard.language)
+                        Component.onCompleted: logger.datalogger()
+                        onClicked: logger.datalogger()
+                    }
+
+                    StyledSwitch {
+                        id: nmeaLog
+                        label: Translator.translate("NMEA Logger", Dashboard.language)
+                        onClicked: Dashboard.setNMEAlog(nmeaLog.checked)
+                        Component.onCompleted: tabView.currentIndex = 1
+                    }
+                }
+
+                // * GoPro Section
+                SettingsSection {
+                    title: "GoPro"
+                    Layout.fillWidth: true
+
+                    RowLayout {
+                        spacing: 20
+                        Text {
+                            text: Translator.translate("GoPro Variant", Dashboard.language)
+                            font.pixelSize: 20
+                            font.family: "Lato"
+                            color: "#FFFFFF"
+                            Layout.preferredWidth: 180
+                        }
+                        StyledComboBox {
+                            id: goProSelect
+                            width: 240
+                            model: ["Hero", "Hero2", "Hero3"]
+                        }
+                    }
+
+                    RowLayout {
+                        spacing: 20
+                        Text {
+                            text: Translator.translate("GoPro Pasword", Dashboard.language)
+                            font.pixelSize: 20
+                            font.family: "Lato"
+                            color: "#FFFFFF"
+                            Layout.preferredWidth: 180
+                        }
+                        StyledTextField {
+                            id: goPropass
+                            width: 240
+                            placeholderText: Translator.translate("GoPro Pasword", Dashboard.language)
+                            inputMethodHints: Qt.ImhNoAutoUppercase | Qt.ImhPreferLowercase | Qt.ImhSensitiveData | Qt.ImhNoPredictiveText
+                            Component.onCompleted: transferSettings.sendSettings()
+                        }
+                    }
+
+                    StyledSwitch {
+                        id: record
+                        label: Translator.translate("GoPro rec", Dashboard.language)
+                        onClicked: { transferSettings.sendSettings(); goproRec.rec() }
+                    }
+                }
+
+                // * Analog Inputs Section (PowerFC only)
+                SettingsSection {
+                    title: "Analog Inputs"
+                    visible: ecuSelect.currentIndex === 1
+                    Layout.fillWidth: true
+
+                    GridLayout {
+                        columns: 4
+                        rowSpacing: 8
+                        columnSpacing: 12
+
+                        Text { text: ""; font.pixelSize: 18; color: "#B0B0B0" }
+                        Text { text: "0V"; font.pixelSize: 18; color: "#B0B0B0" }
+                        Text { text: "5V"; font.pixelSize: 18; color: "#B0B0B0" }
+                        Text { text: "Name"; font.pixelSize: 18; color: "#B0B0B0" }
+
+                        Text { text: "AN1-2"; font.pixelSize: 18; color: "#FFFFFF" }
+                        StyledTextField { id: an1V0; width: 100; placeholderText: "9"; inputMethodHints: Qt.ImhFormattedNumbersOnly }
+                        StyledTextField { id: an2V5; width: 100; placeholderText: "16"; inputMethodHints: Qt.ImhFormattedNumbersOnly }
+                        StyledTextField { id: unitaux1; width: 100; placeholderText: "AFR" }
+
+                        Text { text: "AN3-4"; font.pixelSize: 18; color: "#FFFFFF" }
+                        StyledTextField { id: an3V0; width: 100; placeholderText: "0"; inputMethodHints: Qt.ImhFormattedNumbersOnly }
+                        StyledTextField { id: an4V5; width: 100; placeholderText: "5"; inputMethodHints: Qt.ImhFormattedNumbersOnly }
+                        StyledTextField { id: unitaux2; width: 100; placeholderText: "AFR" }
+                    }
+                }
+            }
+
+            // * RIGHT COLUMN
+            ColumnLayout {
+                Layout.preferredWidth: 480
+                Layout.alignment: Qt.AlignTop
+                spacing: 20
+
+                // * CAN Configuration Section
+                SettingsSection {
+                    title: "CAN Configuration"
+                    Layout.fillWidth: true
+
+                    // CAN Extender
+                    Text {
+                        text: "CAN Extender"
+                        font.pixelSize: 22
+                        font.weight: Font.DemiBold
+                        font.family: "Lato"
+                        color: "#009688"
+                    }
+
+                    RowLayout {
+                        spacing: 20
+                        Text {
+                            text: Translator.translate("base adress", Dashboard.language) + " " + Translator.translate("(decimal)", Dashboard.language)
+                            font.pixelSize: 18
+                            font.family: "Lato"
+                            color: "#FFFFFF"
+                            Layout.preferredWidth: 180
+                        }
+                        StyledTextField {
+                            id: baseadresstext
+                            width: 140
+                            enabled: connectButton.enabled
+                            placeholderText: "1024"
+                            inputMethodHints: Qt.ImhFormattedNumbersOnly
+                            validator: IntValidator { bottom: 0; top: 4000 }
+                            onTextChanged: hexstring = parseInt(baseadresstext.text) || 0
+                        }
+                        Text {
+                            text: "HEX: 0x" + (hexstring + 0x1000).toString(16).substr(-3).toUpperCase()
+                            font.pixelSize: 18
+                            font.family: "Lato"
+                            color: "#009688"
+                        }
+                    }
+
+                    // Shiftlight CAN
+                    Text {
+                        text: "Shiftlight CAN"
+                        font.pixelSize: 22
+                        font.weight: Font.DemiBold
+                        font.family: "Lato"
+                        color: "#009688"
+                    }
+
+                    RowLayout {
+                        spacing: 20
+                        Text {
+                            text: Translator.translate("base adress", Dashboard.language) + " " + Translator.translate("(decimal)", Dashboard.language)
+                            font.pixelSize: 18
+                            font.family: "Lato"
+                            color: "#FFFFFF"
+                            Layout.preferredWidth: 180
+                        }
+                        StyledTextField {
+                            id: shiftlightbaseadresstext
+                            width: 140
+                            enabled: connectButton.enabled
+                            placeholderText: "1024"
+                            inputMethodHints: Qt.ImhFormattedNumbersOnly
+                            validator: IntValidator { bottom: 0; top: 4000 }
+                            onTextChanged: hexstring2 = parseInt(shiftlightbaseadresstext.text) || 0
+                        }
+                        Text {
+                            text: "HEX: 0x" + (hexstring2 + 0x1000).toString(16).substr(-3).toUpperCase()
+                            font.pixelSize: 18
+                            font.family: "Lato"
+                            color: "#009688"
+                        }
+                    }
+                }
+
+                // * Language Section
+                SettingsSection {
+                    title: Translator.translate("Language", Dashboard.language)
+                    Layout.fillWidth: true
+
+                    ComboBox {
+                        id: languageselect
+                        width: 280
+                        height: 44
+                        font.pixelSize: 20
+                        font.family: "Lato"
+
+                        model: [
+                            {name: "English", flag: "qrc:/Resources/graphics/Flags/us.png"},
+                            {name: "Deutsch", flag: "qrc:/Resources/graphics/Flags/de.png"},
+                            {name: "日本語", flag: "qrc:/Resources/graphics/Flags/jp.png"},
+                            {name: "Español", flag: "qrc:/Resources/graphics/Flags/es.png"}
+                        ]
+
+                        onCurrentIndexChanged: {
+                            functLanguageselect.languageselectfunct()
+                            changeweighttext.changetext()
+                        }
+
+                        delegate: Item {
+                            width: languageselect.width
+                            height: 44
+                            Row {
+                                anchors.verticalCenter: parent.verticalCenter
+                                leftPadding: 12
+                                spacing: 12
+                                Image {
+                                    source: modelData.flag
+                                    width: 24
+                                    height: 24
+                                    anchors.verticalCenter: parent.verticalCenter
+                                }
+                                Text {
+                                    text: modelData.name
+                                    font.weight: languageselect.currentIndex === index ? Font.DemiBold : Font.Normal
+                                    font.pixelSize: 20
+                                    font.family: "Lato"
+                                    color: "#FFFFFF"
+                                    anchors.verticalCenter: parent.verticalCenter
+                                }
+                            }
+                            Rectangle {
+                                anchors.fill: parent
+                                color: languageselect.highlightedIndex === index ? "#009688" : "transparent"
+                                z: -1
+                            }
+                            MouseArea {
+                                anchors.fill: parent
+                                onClicked: languageselect.currentIndex = index
+                            }
+                        }
+
+                        contentItem: Row {
+                            leftPadding: 12
+                            spacing: 12
+                            Image {
+                                source: languageselect.model[languageselect.currentIndex].flag
+                                width: 24
+                                height: 24
+                                anchors.verticalCenter: parent.verticalCenter
+                            }
+                            Text {
+                                text: languageselect.model[languageselect.currentIndex].name
+                                font.pixelSize: 20
+                                font.family: "Lato"
+                                color: "#FFFFFF"
+                                verticalAlignment: Text.AlignVCenter
+                                anchors.verticalCenter: parent.verticalCenter
+                            }
+                        }
+
+                        background: Rectangle {
+                            color: languageselect.pressed ? "#3D3D3D" : "#2D2D2D"
+                            radius: 8
+                            border.color: languageselect.activeFocus ? "#009688" : "#3D3D3D"
+                            border.width: 1
+                        }
+
+                        popup: Popup {
+                            y: languageselect.height + 4
+                            width: languageselect.width
+                            implicitHeight: contentItem.implicitHeight + 8
+                            padding: 4
+
+                            contentItem: ListView {
+                                clip: true
+                                implicitHeight: contentHeight
+                                model: languageselect.popup.visible ? languageselect.delegateModel : null
+                            }
+
+                            background: Rectangle {
+                                color: "#1E1E1E"
+                                radius: 8
+                                border.color: "#3D3D3D"
+                                border.width: 1
+                            }
+                        }
+                    }
+                }
+
+                // * System Section
+                SettingsSection {
+                    title: Translator.translate("System", Dashboard.language)
+                    Layout.fillWidth: true
+
+                    Text {
+                        text: "V 1.99F " + Dashboard.Platform
+                        font.pixelSize: 18
+                        font.family: "Lato"
+                        color: "#B0B0B0"
+                    }
+
+                    RowLayout {
+                        spacing: 12
+
+                        StyledButton {
+                            text: Translator.translate("Quit", Dashboard.language)
+                            width: 140
+                            primary: false
+                            onClicked: Qt.quit()
+                        }
+
+                        StyledButton {
+                            text: Translator.translate("Reboot", Dashboard.language)
+                            width: 140
+                            primary: false
+                            onClicked: Connect.reboot()
+                        }
+
+                        StyledButton {
+                            text: Translator.translate("Shutdown", Dashboard.language)
+                            width: 140
+                            danger: true
+                            onClicked: Connect.shutdown()
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // * Helper Functions
+    Item {
+        id: autoconnect
+        function auto() {
+            if (connectButton.enabled === false) {
+                functconnect.connectfunc()
+                ecuSelect.enabled = false
+                disconnectButton.enabled = true
+            }
+        }
+    }
+
+    Item {
+        id: autoconnectGPS
+        function auto() {
+            if (connectButtonGPS.enabled === false) {
+                Gps.openConnection(serialNameGPS.currentText, "9600")
+                disconnectButtonGPS.enabled = true
+            }
+        }
+    }
+
+    Item {
+        id: changeweighttext
+        function changetext() {
+            if (unitSelect.currentIndex === 0)
+                weighttext.text = Translator.translate("Weight", Dashboard.language) + " kg"
+            if (unitSelect.currentIndex === 1)
+                weighttext.text = Translator.translate("Weight", Dashboard.language) + " lbs"
+        }
+    }
+
+    Item {
+        id: goproRec
+        property int recording: 0
+        function rec() {
+            if (record.checked) {
+                goproRec.recording = 1
+                GoPro.goprorec(recording)
+            } else {
+                goproRec.recording = 0
+                GoPro.goprorec(recording)
+            }
+        }
+    }
+
+    Item {
+        id: logger
+        property int loggeron: 0
+        function datalogger() {
+            if (loggerswitch.checked) {
+                logger.loggeron = 1
+                Logger.startLog(logfilenameSelect.text)
+            } else {
+                logger.loggeron = 0
+                Logger.stopLog()
+            }
+        }
+    }
+
+    Item {
+        id: transferSettings
+        function sendSettings() {
+            GoPro.goProSettings(goProSelect.currentIndex, goPropass.text)
+        }
+    }
+
+    Item {
+        id: functconnect
+        function connectfunc() {
+            Connect.setOdometer(odometer.text)
+            Connect.setWeight(weight.text)
+            Connect.openConnection(serialName.currentText, ecuSelect.currentIndex, baseadresstext.text, shiftlightbaseadresstext.text)
+            Apexi.calculatorAux(an1V0.text, an2V5.text, an3V0.text, an4V5.text, unitaux1.text, unitaux2.text)
+            connected = 1
+        }
+    }
+
+    Item {
+        id: functdisconnect
+        function disconnectfunc() {
+            Connect.closeConnection()
+            connected = 0
+        }
+    }
+
+    Item {
+        id: playwarning
+        function start() {
+            if (!warnsound.playing) warnsound.play()
+        }
+    }
+
+    Item {
+        id: functLanguageselect
+        function languageselectfunct() {
+            AppSettings.writeLanguage(languageselect.currentIndex)
+        }
+    }
+
+    Item {
+        id: autoconnectArd
+        Component.onCompleted: autoconnectArd.auto()
+        function auto() {
+            if (Dashboard.externalspeedconnectionrequest === 1) {
+                Arduino.openConnection(Dashboard.externalspeedport, "9600")
+            }
+        }
+    }
+}

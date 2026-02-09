@@ -1,0 +1,73 @@
+module PowerTune.Gauges
+
+# Qt6 gauge replacements
+CircularGauge 1.0 CircularGauge.qml
+CircularGaugeStyle 1.0 CircularGaugeStyle.qml
+Gauge 1.0 Gauge.qml
+GaugeStyle 1.0 GaugeStyle.qml
+
+# Gauge styles
+DashboardGaugeStyle 1.0 DashboardGaugeStyle.qml
+TachometerStyle 1.0 TachometerStyle.qml
+NormalGaugeStyle 1.0 NormalGaugeStyle.qml
+RPMBarStyle1 1.0 RPMBarStyle1.qml
+RPMBarStyle2 1.0 RPMBarStyle2.qml
+RPMBarStyle3 1.0 RPMBarStyle3.qml
+
+# Gauge components
+RoundGauge 1.0 RoundGauge.qml
+BarGauge 1.0 BarGauge.qml
+VerticalBarGauge 1.0 VerticalBarGauge.qml
+SquareGauge 1.0 SquareGauge.qml
+SquareGaugeMain 1.0 SquareGaugeMain.qml
+SquareGaugeRaceDash 1.0 SquareGaugeRaceDash.qml
+RPMBar 1.0 RPMBar.qml
+GaugeNeedle_minus90to180 1.0 GaugeNeedle_minus90to180.qml
+GaugeNeedle_minus180to90 1.0 GaugeNeedle_minus180to90.qml
+
+# Dashboard views
+Cluster 1.0 Cluster.qml
+Dashboard 1.0 Dashboard.qml
+SportDash 1.0 SportDash.qml
+Advanced 1.0 Advanced.qml
+
+# Specialty gauges
+GPS 1.0 GPS.qml
+ForceMeter 1.0 ForceMeter.qml
+Charts 1.0 Charts.qml
+Dyno 1.0 Dyno.qml
+VirtualDyno 1.0 VirtualDyno.qml
+SpeedMeasurements 1.0 SpeedMeasurements.qml
+TyreMonitor 1.0 TyreMonitor.qml
+ShiftLights 1.0 ShiftLights.qml
+
+# Sensor displays
+PFCSensors 1.0 PFCSensors.qml
+HaltechFlags 1.0 HaltechFlags.qml
+SensorTest 1.0 SensorTest.qml
+ConsultTest 1.0 ConsultTest.qml
+
+# User dashboards
+Userdash1 1.0 Userdash1.qml
+Userdash2 1.0 Userdash2.qml
+Userdash3 1.0 Userdash3.qml
+
+# Media/utility
+Camera 1.0 Camera.qml
+Mediaplayer 1.0 Mediaplayer.qml
+Screentoggle 1.0 Screentoggle.qml
+Keypad 1.0 Keypad.qml
+
+# UI helpers
+Picture 1.0 Picture.qml
+StatePicture 1.0 StatePicture.qml
+StateGIF 1.0 StateGIF.qml
+MyTextLabel 1.0 MyTextLabel.qml
+ColorList 1.0 ColorList.qml
+ColorpickerCombobox 1.0 ColorpickerCombobox.qml
+DatasourcesList 1.0 DatasourcesList.qml
+Datasources 1.0 Datasources.qml
+
+# Warning system
+Warning 1.0 Warning.qml
+WarningLoader 1.0 WarningLoader.qml

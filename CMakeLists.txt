@@ -26,6 +26,7 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS
     Gui
     Qml
     Quick
+    QuickControls2
     Network
     SerialPort
     SerialBus
@@ -182,6 +183,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     Qt${QT_VERSION_MAJOR}::Gui
     Qt${QT_VERSION_MAJOR}::Qml
     Qt${QT_VERSION_MAJOR}::Quick
+    Qt${QT_VERSION_MAJOR}::QuickControls2
     Qt${QT_VERSION_MAJOR}::Network
     Qt${QT_VERSION_MAJOR}::SerialPort
     Qt${QT_VERSION_MAJOR}::SerialBus
@@ -206,39 +208,181 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6 AND Qt6Qt5Compat_FOUND)
     )
 endif()
 
-# * PowerTune QML Module (Qt6 only)
-# * This provides a single import for all PowerTune components: import PowerTune 1.0
+# * PowerTune QML Sub-Modules (Qt6 only)
+# * Provides organized imports: PowerTune.Core, PowerTune.Settings, PowerTune.Gauges, PowerTune.Utils
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     # * Suppress Qt policy warning about qmldir files
     qt_policy(SET QTP0004 OLD)
     
-    # * Define singleton files separately for proper Qt6 singleton registration
-    set_source_files_properties(PowerTune/Translator.qml PROPERTIES
+    # * Define singleton for Translator
+    set_source_files_properties(PowerTune/Utils/Translator.qml PROPERTIES
         QT_QML_SINGLETON_TYPE TRUE
     )
     
-    qt_add_qml_module(${PROJECT_NAME}
-        URI PowerTune
+    # * Create backing library targets for QML modules
+    qt_add_library(PowerTuneUtilsLib STATIC)
+    qt_add_library(PowerTuneCoreLib STATIC)
+    qt_add_library(PowerTuneSettingsLib STATIC)
+    qt_add_library(PowerTuneGaugesLib STATIC)
+    
+    # * PowerTune.Utils module - Translator singleton and icon utilities
+    qt_add_qml_module(PowerTuneUtilsLib
+        URI PowerTune.Utils
         VERSION 1.0
         QML_FILES
-            PowerTune/CircularGauge.qml
-            PowerTune/CircularGaugeStyle.qml
-            PowerTune/Gauge.qml
-            PowerTune/GaugeStyle.qml
-            PowerTune/Translator.qml
+            PowerTune/Utils/Translator.qml
+            PowerTune/Utils/MaterialIcon.qml
         RESOURCES
-            PowerTune/Translator.js
-        NO_RESOURCE_TARGET_PATH
+            PowerTune/Utils/Translator.js
+        RESOURCE_PREFIX /qt/qml
+        OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/qt/qml/PowerTune/Utils
+    )
+    
+    # * PowerTune.Core module - Main application pages
+    qt_add_qml_module(PowerTuneCoreLib
+        URI PowerTune.Core
+        VERSION 1.0
+        QML_FILES
+            PowerTune/Core/Main.qml
+            PowerTune/Core/Intro.qml
+            PowerTune/Core/SerialSettings.qml
+            PowerTune/Core/ExBoardAnalog.qml
+            PowerTune/Core/AnalogInputs.qml
+            PowerTune/Core/ConsultRegs.qml
+            PowerTune/Core/OBDPIDS.qml
+            PowerTune/Core/BrightnessPopUp.qml
+            PowerTune/Core/Laptimecontainer.qml
+        RESOURCE_PREFIX /qt/qml
+        OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/qt/qml/PowerTune/Core
+    )
+    
+    # * PowerTune.Settings module - Settings pages
+    qt_add_qml_module(PowerTuneSettingsLib
+        URI PowerTune.Settings
+        VERSION 1.0
+        QML_FILES
+            PowerTune/Settings/MainSettings.qml
+            PowerTune/Settings/DashSelector.qml
+            PowerTune/Settings/DashSelectorWidget.qml
+            PowerTune/Settings/SenseHatSettings.qml
+            PowerTune/Settings/WarnGearSettings.qml
+            PowerTune/Settings/SpeedSettings.qml
+            PowerTune/Settings/AnalogSettings.qml
+            PowerTune/Settings/RPMSettings.qml
+            PowerTune/Settings/StartupSettings.qml
+            PowerTune/Settings/NetworkSettings.qml
+            PowerTune/Settings/CanMonitor.qml
+            PowerTune/Settings/HelpPage.qml
+            PowerTune/Settings/WifiCountryList.qml
+            PowerTune/Settings/components/SettingsPage.qml
+            PowerTune/Settings/components/SettingsSection.qml
+            PowerTune/Settings/components/SettingsRow.qml
+            PowerTune/Settings/components/StyledButton.qml
+            PowerTune/Settings/components/StyledComboBox.qml
+            PowerTune/Settings/components/StyledSwitch.qml
+            PowerTune/Settings/components/StyledTextField.qml
+            PowerTune/Settings/components/ConnectionStatusIndicator.qml
+        RESOURCE_PREFIX /qt/qml
+        OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/qt/qml/PowerTune/Settings
+    )
+    
+    # * PowerTune.Gauges module - All gauge components
+    qt_add_qml_module(PowerTuneGaugesLib
+        URI PowerTune.Gauges
+        VERSION 1.0
+        QML_FILES
+            # Qt6 gauge replacements
+            PowerTune/Gauges/CircularGauge.qml
+            PowerTune/Gauges/CircularGaugeStyle.qml
+            PowerTune/Gauges/Gauge.qml
+            PowerTune/Gauges/GaugeStyle.qml
+            # Gauge styles
+            PowerTune/Gauges/DashboardGaugeStyle.qml
+            PowerTune/Gauges/TachometerStyle.qml
+            PowerTune/Gauges/NormalGaugeStyle.qml
+            PowerTune/Gauges/RPMBarStyle1.qml
+            PowerTune/Gauges/RPMBarStyle2.qml
+            PowerTune/Gauges/RPMBarStyle3.qml
+            # Gauge components
+            PowerTune/Gauges/RoundGauge.qml
+            PowerTune/Gauges/BarGauge.qml
+            PowerTune/Gauges/VerticalBarGauge.qml
+            PowerTune/Gauges/SquareGauge.qml
+            PowerTune/Gauges/SquareGaugeMain.qml
+            PowerTune/Gauges/SquareGaugeRaceDash.qml
+            PowerTune/Gauges/RPMBar.qml
+            PowerTune/Gauges/GaugeNeedle_minus90to180.qml
+            PowerTune/Gauges/GaugeNeedle_minus180to90.qml
+            # Dashboard views
+            PowerTune/Gauges/Cluster.qml
+            PowerTune/Gauges/Dashboard.qml
+            PowerTune/Gauges/SportDash.qml
+            PowerTune/Gauges/Advanced.qml
+            # Specialty gauges
+            PowerTune/Gauges/GPS.qml
+            PowerTune/Gauges/ForceMeter.qml
+            PowerTune/Gauges/Charts.qml
+            PowerTune/Gauges/Dyno.qml
+            PowerTune/Gauges/VirtualDyno.qml
+            PowerTune/Gauges/SpeedMeasurements.qml
+            PowerTune/Gauges/TyreMonitor.qml
+            PowerTune/Gauges/ShiftLights.qml
+            # Sensor displays
+            PowerTune/Gauges/PFCSensors.qml
+            PowerTune/Gauges/HaltechFlags.qml
+            PowerTune/Gauges/SensorTest.qml
+            PowerTune/Gauges/ConsultTest.qml
+            # User dashboards
+            PowerTune/Gauges/Userdash1.qml
+            PowerTune/Gauges/Userdash2.qml
+            PowerTune/Gauges/Userdash3.qml
+            # Media/utility
+            PowerTune/Gauges/Camera.qml
+            PowerTune/Gauges/Mediaplayer.qml
+            PowerTune/Gauges/Screentoggle.qml
+            PowerTune/Gauges/Keypad.qml
+            # UI helpers
+            PowerTune/Gauges/Picture.qml
+            PowerTune/Gauges/StatePicture.qml
+            PowerTune/Gauges/StateGIF.qml
+            PowerTune/Gauges/MyTextLabel.qml
+            PowerTune/Gauges/ColorList.qml
+            PowerTune/Gauges/ColorpickerCombobox.qml
+            PowerTune/Gauges/DatasourcesList.qml
+            PowerTune/Gauges/Datasources.qml
+            # Warning system
+            PowerTune/Gauges/Warning.qml
+            PowerTune/Gauges/WarningLoader.qml
+        RESOURCES
+            PowerTune/Gauges/createMaindash.js
+            PowerTune/Gauges/createPicture.js
+            PowerTune/Gauges/createRoundGauge.js
+            PowerTune/Gauges/createsquaregaugeUserDash.js
+            PowerTune/Gauges/createStateGIF.js
+            PowerTune/Gauges/createStatePicture.js
+            PowerTune/Gauges/createText.js
+            PowerTune/Gauges/createverticalbargauge.js
+        RESOURCE_PREFIX /qt/qml
+        OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/qt/qml/PowerTune/Gauges
+    )
+    
+    # * Link all QML modules to main executable
+    target_link_libraries(${PROJECT_NAME} PRIVATE
+        PowerTuneUtilsLibplugin
+        PowerTuneCoreLibplugin
+        PowerTuneSettingsLibplugin
+        PowerTuneGaugesLibplugin
     )
 endif()
 
 # * QML Import paths for Qt Creator and Qt Design Studio
 set(QML_IMPORT_PATH
-    "${CMAKE_CURRENT_SOURCE_DIR}/QML"
-    "${CMAKE_CURRENT_SOURCE_DIR}/Gauges"
-    "${CMAKE_CURRENT_SOURCE_DIR}/Settings"
-    "${CMAKE_CURRENT_SOURCE_DIR}/GPSTracks"
     "${CMAKE_CURRENT_SOURCE_DIR}/PowerTune"
+    "${CMAKE_CURRENT_SOURCE_DIR}/PowerTune/Core"
+    "${CMAKE_CURRENT_SOURCE_DIR}/PowerTune/Settings"
+    "${CMAKE_CURRENT_SOURCE_DIR}/PowerTune/Gauges"
+    "${CMAKE_CURRENT_SOURCE_DIR}/PowerTune/Utils"
+    "${CMAKE_CURRENT_SOURCE_DIR}/GPSTracks"
     CACHE STRING "Qt Creator/Design Studio QML import paths"
     FORCE
 )

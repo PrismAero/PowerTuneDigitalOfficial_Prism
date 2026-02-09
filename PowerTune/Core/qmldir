@@ -1,0 +1,10 @@
+module PowerTune.Core
+Main 1.0 Main.qml
+Intro 1.0 Intro.qml
+SerialSettings 1.0 SerialSettings.qml
+ExBoardAnalog 1.0 ExBoardAnalog.qml
+AnalogInputs 1.0 AnalogInputs.qml
+ConsultRegs 1.0 ConsultRegs.qml
+OBDPIDS 1.0 OBDPIDS.qml
+BrightnessPopUp 1.0 BrightnessPopUp.qml
+Laptimecontainer 1.0 Laptimecontainer.qml

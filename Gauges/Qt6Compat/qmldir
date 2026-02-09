@@ -1,9 +1,0 @@
-module Gauges.Qt6Compat
-
-# * Gauge components (replacements for QtQuick.Extras 1.4)
-CircularGauge 1.0 CircularGauge.qml
-Gauge 1.0 Gauge.qml
-
-# * Style components (replacements for QtQuick.Controls.Styles 1.4)
-CircularGaugeStyle 1.0 CircularGaugeStyle.qml
-GaugeStyle 1.0 GaugeStyle.qml

@@ -1,0 +1,3 @@
+module PowerTune.Utils
+singleton Translator 1.0 Translator.qml
+MaterialIcon 1.0 MaterialIcon.qml
