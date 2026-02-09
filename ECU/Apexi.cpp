@@ -1,7 +1,11 @@
 #include "Apexi.h"
 
 #include "../Core/connect.h"
-#include "../Core/dashboard.h"
+#include "../Core/Models/EngineData.h"
+#include "../Core/Models/VehicleData.h"
+#include "../Core/Models/FlagsData.h"
+#include "../Core/Models/SensorData.h"
+#include "../Core/Models/ConnectionData.h"
 
 #include <QBitArray>
 #include <QByteArrayMatcher>
@@ -69,9 +73,26 @@ static QString mapFD3S[] = {
                         "Basic_Injduty", "Basic_IGL", "Basic_IGT", "Basic_RPM", "Basic_KPH", "Basic_Boost",
    "Basic_Knock", "Basic_Watert", "Basic_Airt", "Basic_BattV",};
 */
-Apexi::Apexi(QObject *parent) : QObject(parent), m_dashboard(nullptr) {}
+Apexi::Apexi(QObject *parent)
+    : QObject(parent)
+    , m_engineData(nullptr)
+    , m_vehicleData(nullptr)
+    , m_flagsData(nullptr)
+    , m_sensorData(nullptr)
+    , m_connectionData(nullptr)
+{
+}
 
-Apexi::Apexi(DashBoard *dashboard, QObject *parent) : QObject(parent), m_dashboard(dashboard) {}
+Apexi::Apexi(EngineData *engineData, VehicleData *vehicleData, FlagsData *flagsData, SensorData *sensorData,
+             ConnectionData *connectionData, QObject *parent)
+    : QObject(parent)
+    , m_engineData(engineData)
+    , m_vehicleData(vehicleData)
+    , m_flagsData(flagsData)
+    , m_sensorData(sensorData)
+    , m_connectionData(connectionData)
+{
+}
 
 void Apexi::SetProtocol(const int &protocolselect)
 {
@@ -117,10 +138,14 @@ void Apexi::openConnection(const QString &portName)
     ;
 
     if (m_serialport->open(QIODevice::ReadWrite) == false) {
-        m_dashboard->setSerialStat(m_serialport->errorString());
+        if (m_connectionData) {
+            m_connectionData->setSerialStat(m_serialport->errorString());
+        }
         Apexi::closeConnection();
     } else {
-        m_dashboard->setSerialStat(QString("Connected to Serialport"));
+        if (m_connectionData) {
+            m_connectionData->setSerialStat(QString("Connected to Serialport"));
+        }
         requestIndex = 0;
         Apexi::sendRequest(requestIndex);
     }
@@ -139,13 +164,19 @@ void Apexi::retryconnect()
 }
 void Apexi::handleTimeout()
 {
-    m_dashboard->setTimeoutStat(QString("Is Timeout : Y"));
+    if (m_connectionData) {
+        m_connectionData->setTimeoutStat(QString("Is Timeout : Y"));
+    }
     m_timer.stop();
     m_serialport->close();
     if (m_serialport->open(QIODevice::ReadWrite) == false) {
-        m_dashboard->setSerialStat(m_serialport->errorString());
+        if (m_connectionData) {
+            m_connectionData->setSerialStat(m_serialport->errorString());
+        }
     } else {
-        m_dashboard->setSerialStat(QString("Connected to Serialport"));
+        if (m_connectionData) {
+            m_connectionData->setSerialStat(QString("Connected to Serialport"));
+        }
     }
 
     requestIndex = 2;
@@ -163,7 +194,9 @@ void Apexi::handleError(QSerialPort::SerialPortError serialPortError)
         QTextStream out(&mFile);
         out << "Serial Error " << (m_serialport->errorString()) << Qt::endl;
         mFile.close();
-        m_dashboard->setSerialStat(m_serialport->errorString());
+        if (m_connectionData) {
+            m_connectionData->setSerialStat(m_serialport->errorString());
+        }
     }
 }
 
@@ -182,7 +215,9 @@ void Apexi::readyToRead()
       mFile.close();
       // Test End
     */
-    m_dashboard->setRecvData(QString("Receive Data : " + m_readData.toHex()));
+    if (m_connectionData) {
+        m_connectionData->setRecvData(QString("Receive Data : " + m_readData.toHex()));
+    }
     Apexi::apexiECU(m_readData);
 }
 
@@ -195,7 +230,9 @@ void Apexi::apexiECU(const QByteArray &buffer)
 
     int pos = 0;
     while ((pos = startmatcher.indexIn(m_buffer, pos)) != -1) {
-        m_dashboard->setRunStat(m_buffer.toHex());
+        if (m_connectionData) {
+            m_connectionData->setRunStat(m_buffer.toHex());
+        }
         if (pos != 0) {
             m_buffer.remove(0, pos);
             if (m_buffer.length() > expectedbytes) {
@@ -209,7 +246,9 @@ void Apexi::apexiECU(const QByteArray &buffer)
     }
 
     if (m_buffer.length() == expectedbytes) {
-        m_dashboard->setTimeoutStat(QString("Is Timeout : N"));
+        if (m_connectionData) {
+            m_connectionData->setTimeoutStat(QString("Is Timeout : N"));
+        }
 
         m_apexiMsg = m_buffer;
         m_buffer.clear();
@@ -301,9 +340,13 @@ void Apexi::writeRequestPFC(QByteArray p_request)
     // m_dashboard->setSerialStat(QString("Sending Request " + p_request.toHex()));
 
     if (bytesWritten == -1) {
-        m_dashboard->setSerialStat(m_serialport->errorString());
+        if (m_connectionData) {
+            m_connectionData->setSerialStat(m_serialport->errorString());
+        }
     } else if (bytesWritten != m_writeData.size()) {
-        m_dashboard->setSerialStat(m_serialport->errorString());
+        if (m_connectionData) {
+            m_connectionData->setSerialStat(m_serialport->errorString());
+        }
     }
 }
 
@@ -448,28 +491,32 @@ void Apexi::decodeAdv(QByteArray rawmessagedata)
         packageADV[20] = info->Secinjpulse * 0.001;
         packageADV[21] = info->na2;
 
-        m_dashboard->setrpm(packageADV[0]);
-        m_dashboard->setIntakepress(packageADV[1]);
-        m_dashboard->setPressureV(packageADV[2]);
-        m_dashboard->setThrottleV(packageADV[3]);
-        m_dashboard->setPrimaryinp(packageADV[4]);
-        m_dashboard->setFuelc(packageADV[5]);
-        m_dashboard->setLeadingign(packageADV[6]);
-        m_dashboard->setTrailingign(packageADV[7]);
-        m_dashboard->setFueltemp(packageADV[8]);
-        m_dashboard->setMoilp(packageADV[9]);
-        m_dashboard->setBoosttp(packageADV[10]);
-        m_dashboard->setBoostwg(packageADV[11]);
-        m_dashboard->setWatertemp(packageADV[12]);
-        m_dashboard->setIntaketemp(packageADV[13]);
-        m_dashboard->setKnock(packageADV[14]);
-        m_dashboard->setBatteryV(packageADV[15]);
-        m_dashboard->setSpeed(packageADV[16]);
-        m_dashboard->setIscvduty(packageADV[17]);
-        m_dashboard->setO2volt(packageADV[18]);
-        m_dashboard->setna1(packageADV[19]);
-        m_dashboard->setSecinjpulse(packageADV[20]);
-        m_dashboard->setna2(packageADV[21]);
+        if (m_engineData) {
+            m_engineData->setrpm(packageADV[0]);
+            m_engineData->setIntakepress(packageADV[1]);
+            m_engineData->setPressureV(packageADV[2]);
+            m_engineData->setThrottleV(packageADV[3]);
+            m_engineData->setPrimaryinp(packageADV[4]);
+            m_engineData->setFuelc(packageADV[5]);
+            m_engineData->setLeadingign(packageADV[6]);
+            m_engineData->setTrailingign(packageADV[7]);
+            m_engineData->setFueltemp(packageADV[8]);
+            m_engineData->setMoilp(packageADV[9]);
+            m_engineData->setBoosttp(packageADV[10]);
+            m_engineData->setBoostwg(packageADV[11]);
+            m_engineData->setWatertemp(packageADV[12]);
+            m_engineData->setIntaketemp(packageADV[13]);
+            m_engineData->setKnock(packageADV[14]);
+            m_engineData->setBatteryV(packageADV[15]);
+            m_engineData->setIscvduty(packageADV[17]);
+            m_engineData->setO2volt(packageADV[18]);
+            m_engineData->setna1(packageADV[19]);
+            m_engineData->setSecinjpulse(packageADV[20]);
+            m_engineData->setna2(packageADV[21]);
+        }
+        if (m_vehicleData) {
+            m_vehicleData->setSpeed(packageADV[16]);
+        }
 
 
         //    //qDebug() << "Time passed since last call"<< startTime.msecsTo(QTime::currentTime());
@@ -507,27 +554,28 @@ void Apexi::decodeAdv(QByteArray rawmessagedata)
         packageADV2[17] = info->O2volt_2 * 0.005;
         packageADV2[18] = info->ThrottleV * 0.001;
 
-        m_dashboard->setrpm(packageADV2[0]);
-        m_dashboard->setEngLoad(packageADV2[1]);
-        m_dashboard->setMAF1V(packageADV2[2]);
-        m_dashboard->setMAF2V(packageADV2[3]);
-        m_dashboard->setinjms(packageADV2[4]);
-        // m_dashboard->setFue(packageADV2[5]);
-        m_dashboard->setIgn(packageADV2[6]);
-        m_dashboard->setDwell(packageADV2[7]);
-        // m_dashboard->setMAP(packageADV2[8]);
-        // m_dashboard->setBoostPreskpa(kpaboost);
-        m_dashboard->setBoostDuty(packageADV2[9]);
-        m_dashboard->setWatertemp(packageADV2[10]);
-        m_dashboard->setIntaketemp(packageADV2[11]);
-        m_dashboard->setKnock(packageADV2[12]);
-        m_dashboard->setBatteryV(packageADV2[13]);
-        m_dashboard->setSpeed(packageADV2[14]);
-        m_dashboard->setMAFactivity(packageADV2[15]);
-        m_dashboard->setO2volt(packageADV2[16]);
-        m_dashboard->setO2volt_2(packageADV2[17]);
-        m_dashboard->setThrottleV((packageADV2[18] * 100));
-        m_dashboard->setTPS((packageADV2[18] * 100) / 4.38);
+        if (m_engineData) {
+            m_engineData->setrpm(packageADV2[0]);
+            m_engineData->setEngLoad(packageADV2[1]);
+            m_engineData->setMAF1V(packageADV2[2]);
+            m_engineData->setMAF2V(packageADV2[3]);
+            m_engineData->setinjms(packageADV2[4]);
+            m_engineData->setIgn(packageADV2[6]);
+            m_engineData->setDwell(packageADV2[7]);
+            m_engineData->setBoostDuty(packageADV2[9]);
+            m_engineData->setWatertemp(packageADV2[10]);
+            m_engineData->setIntaketemp(packageADV2[11]);
+            m_engineData->setKnock(packageADV2[12]);
+            m_engineData->setBatteryV(packageADV2[13]);
+            m_engineData->setMAFactivity(packageADV2[15]);
+            m_engineData->setO2volt(packageADV2[16]);
+            m_engineData->setO2volt_2(packageADV2[17]);
+            m_engineData->setThrottleV((packageADV2[18] * 100));
+            m_engineData->setTPS((packageADV2[18] * 100) / 4.38);
+        }
+        if (m_vehicleData) {
+            m_vehicleData->setSpeed(packageADV2[14]);
+        }
     }
     // Toyota
     if (Model == 3) {
@@ -567,20 +615,24 @@ void Apexi::decodeAdv(QByteArray rawmessagedata)
         packageADV3[21] = 0;
 
 
-        m_dashboard->setrpm(packageADV3[0]);
-        m_dashboard->setIntakepress(packageADV3[1]);
-        m_dashboard->setPressureV(packageADV3[2]);
-        m_dashboard->setThrottleV(packageADV3[3]);
-        m_dashboard->setPrimaryinp(packageADV3[4]);
-        m_dashboard->setFuelc(packageADV3[5]);
-        m_dashboard->setLeadingign(packageADV3[6]);
-        m_dashboard->setTrailingign(packageADV3[7]);
-        m_dashboard->setpim(advboost);
-        m_dashboard->setWatertemp(packageADV3[10]);
-        m_dashboard->setIntaketemp(packageADV3[11]);
-        m_dashboard->setKnock(packageADV3[12]);
-        m_dashboard->setBatteryV(packageADV3[13]);
-        m_dashboard->setSpeed(packageADV3[14]);
+        if (m_engineData) {
+            m_engineData->setrpm(packageADV3[0]);
+            m_engineData->setIntakepress(packageADV3[1]);
+            m_engineData->setPressureV(packageADV3[2]);
+            m_engineData->setThrottleV(packageADV3[3]);
+            m_engineData->setPrimaryinp(packageADV3[4]);
+            m_engineData->setFuelc(packageADV3[5]);
+            m_engineData->setLeadingign(packageADV3[6]);
+            m_engineData->setTrailingign(packageADV3[7]);
+            m_engineData->setpim(advboost);
+            m_engineData->setWatertemp(packageADV3[10]);
+            m_engineData->setIntaketemp(packageADV3[11]);
+            m_engineData->setKnock(packageADV3[12]);
+            m_engineData->setBatteryV(packageADV3[13]);
+        }
+        if (m_vehicleData) {
+            m_vehicleData->setSpeed(packageADV3[14]);
+        }
     }
 }
 
@@ -603,32 +655,36 @@ void Apexi::decodeSensor(QByteArray rawmessagedata)
         flagArray.setBit(i, info->flags >> i & 1);
 
 
-    m_dashboard->setsens1(packageSens[0]);
-    m_dashboard->setsens2(packageSens[1]);
-    m_dashboard->setsens3(packageSens[2]);
-    m_dashboard->setsens4(packageSens[3]);
-    m_dashboard->setsens5(packageSens[4]);
-    m_dashboard->setsens6(packageSens[5]);
-    m_dashboard->setsens7(packageSens[6]);
-    m_dashboard->setsens8(packageSens[7]);
+    if (m_sensorData) {
+        m_sensorData->setsens1(packageSens[0]);
+        m_sensorData->setsens2(packageSens[1]);
+        m_sensorData->setsens3(packageSens[2]);
+        m_sensorData->setsens4(packageSens[3]);
+        m_sensorData->setsens5(packageSens[4]);
+        m_sensorData->setsens6(packageSens[5]);
+        m_sensorData->setsens7(packageSens[6]);
+        m_sensorData->setsens8(packageSens[7]);
+    }
 
     // Bit Flags for Sensors
-    m_dashboard->setFlag1(flagArray[0]);
-    m_dashboard->setFlag2(flagArray[1]);
-    m_dashboard->setFlag3(flagArray[2]);
-    m_dashboard->setFlag4(flagArray[3]);
-    m_dashboard->setFlag5(flagArray[4]);
-    m_dashboard->setFlag6(flagArray[5]);
-    m_dashboard->setFlag7(flagArray[6]);
-    m_dashboard->setFlag8(flagArray[7]);
-    m_dashboard->setFlag9(flagArray[8]);
-    m_dashboard->setFlag10(flagArray[9]);
-    m_dashboard->setFlag11(flagArray[10]);
-    m_dashboard->setFlag12(flagArray[11]);
-    m_dashboard->setFlag13(flagArray[12]);
-    m_dashboard->setFlag14(flagArray[13]);
-    m_dashboard->setFlag15(flagArray[14]);
-    m_dashboard->setFlag16(flagArray[15]);
+    if (m_flagsData) {
+        m_flagsData->setFlag1(flagArray[0]);
+        m_flagsData->setFlag2(flagArray[1]);
+        m_flagsData->setFlag3(flagArray[2]);
+        m_flagsData->setFlag4(flagArray[3]);
+        m_flagsData->setFlag5(flagArray[4]);
+        m_flagsData->setFlag6(flagArray[5]);
+        m_flagsData->setFlag7(flagArray[6]);
+        m_flagsData->setFlag8(flagArray[7]);
+        m_flagsData->setFlag9(flagArray[8]);
+        m_flagsData->setFlag10(flagArray[9]);
+        m_flagsData->setFlag11(flagArray[10]);
+        m_flagsData->setFlag12(flagArray[11]);
+        m_flagsData->setFlag13(flagArray[12]);
+        m_flagsData->setFlag14(flagArray[13]);
+        m_flagsData->setFlag15(flagArray[14]);
+        m_flagsData->setFlag16(flagArray[15]);
+    }
 }
 
 void Apexi::decodeAux(QByteArray rawmessagedata)
@@ -648,8 +704,10 @@ void Apexi::decodeAux(QByteArray rawmessagedata)
     // Analog1
     AN1AN2calc = (((((auxval2 - auxval1) * 0.2) * (packageAux[0] - packageAux[1]))) + auxval1);
     AN3AN4calc = ((((auxval4 - auxval3) * 0.2) * (packageAux[2] - packageAux[3])) + auxval3);
-    m_dashboard->setauxcalc1(AN1AN2calc);
-    m_dashboard->setauxcalc2(AN3AN4calc);
+    if (m_sensorData) {
+        m_sensorData->setauxcalc1(AN1AN2calc);
+        m_sensorData->setauxcalc2(AN3AN4calc);
+    }
     // qDebug()<< "AN1-AN2" << AN1AN2calc ;
     // qDebug()<< "AN1-AN2" << AN3AN4calc ;
 }
@@ -689,17 +747,20 @@ void Apexi::decodeBasic(QByteArray rawmessagedata)
     }
 
 
-    // m_dashboard->setInjDuty(packageBasic[0]);
-    m_dashboard->setLeadingign(packageBasic[1]);
-    m_dashboard->setTrailingign(packageBasic[2]);
-    m_dashboard->setrpm(packageBasic[3]);
-    m_dashboard->setSpeed(packageBasic[4]);
-    m_dashboard->setBoostPres(Boost);
-    m_dashboard->setBoostPreskpa(kpaboost);
-    m_dashboard->setKnock(packageBasic[6]);
-    m_dashboard->setWatertemp(packageBasic[7]);
-    m_dashboard->setIntaketemp(packageBasic[8]);
-    m_dashboard->setBatteryV(packageBasic[9]);
+    if (m_engineData) {
+        m_engineData->setLeadingign(packageBasic[1]);
+        m_engineData->setTrailingign(packageBasic[2]);
+        m_engineData->setrpm(packageBasic[3]);
+        m_engineData->setBoostPres(Boost);
+        m_engineData->setBoostPreskpa(kpaboost);
+        m_engineData->setKnock(packageBasic[6]);
+        m_engineData->setWatertemp(packageBasic[7]);
+        m_engineData->setIntaketemp(packageBasic[8]);
+        m_engineData->setBatteryV(packageBasic[9]);
+    }
+    if (m_vehicleData) {
+        m_vehicleData->setSpeed(packageBasic[4]);
+    }
     /*
         QString fileName = "Basic.txt";
         QFile mFile(fileName);
@@ -777,37 +838,42 @@ void Apexi::decodeInit(QByteArray rawmessagedata)
         Modelname == "4G63-D7 ") {
         Model = 3;
     }
-    m_dashboard->setPlatform(QString(rawmessagedata).mid(2, 8) + QString::number(Model));
+    if (m_connectionData) {
+        m_connectionData->setPlatform(QString(rawmessagedata).mid(2, 8) + QString::number(Model));
+    }
 }
 
 void Apexi::decodeSensorStrings(QByteArray rawmessagedata)
 {
-    m_dashboard->setSensorString1(QString(rawmessagedata).mid(2, 4));
-    m_dashboard->setSensorString2(QString(rawmessagedata).mid(6, 4));
-    m_dashboard->setSensorString3(QString(rawmessagedata).mid(10, 4));
-    m_dashboard->setSensorString4(QString(rawmessagedata).mid(14, 4));
-    m_dashboard->setSensorString5(QString(rawmessagedata).mid(18, 4));
-    m_dashboard->setSensorString6(QString(rawmessagedata).mid(22, 4));
-    m_dashboard->setSensorString7(QString(rawmessagedata).mid(26, 4));
-    m_dashboard->setSensorString8(QString(rawmessagedata).mid(30, 4));
+    if (m_sensorData) {
+        m_sensorData->setSensorString1(QString(rawmessagedata).mid(2, 4));
+        m_sensorData->setSensorString2(QString(rawmessagedata).mid(6, 4));
+        m_sensorData->setSensorString3(QString(rawmessagedata).mid(10, 4));
+        m_sensorData->setSensorString4(QString(rawmessagedata).mid(14, 4));
+        m_sensorData->setSensorString5(QString(rawmessagedata).mid(18, 4));
+        m_sensorData->setSensorString6(QString(rawmessagedata).mid(22, 4));
+        m_sensorData->setSensorString7(QString(rawmessagedata).mid(26, 4));
+        m_sensorData->setSensorString8(QString(rawmessagedata).mid(30, 4));
+    }
 
-
-    m_dashboard->setFlagString1(QString(rawmessagedata).mid(34, 3));
-    m_dashboard->setFlagString2(QString(rawmessagedata).mid(37, 3));
-    m_dashboard->setFlagString3(QString(rawmessagedata).mid(40, 3));
-    m_dashboard->setFlagString4(QString(rawmessagedata).mid(43, 3));
-    m_dashboard->setFlagString5(QString(rawmessagedata).mid(46, 3));
-    m_dashboard->setFlagString6(QString(rawmessagedata).mid(49, 3));
-    m_dashboard->setFlagString7(QString(rawmessagedata).mid(52, 3));
-    m_dashboard->setFlagString8(QString(rawmessagedata).mid(55, 3));
-    m_dashboard->setFlagString9(QString(rawmessagedata).mid(58, 3));
-    m_dashboard->setFlagString10(QString(rawmessagedata).mid(61, 3));
-    m_dashboard->setFlagString11(QString(rawmessagedata).mid(64, 3));
-    m_dashboard->setFlagString12(QString(rawmessagedata).mid(67, 3));
-    m_dashboard->setFlagString13(QString(rawmessagedata).mid(70, 3));
-    m_dashboard->setFlagString14(QString(rawmessagedata).mid(73, 3));
-    m_dashboard->setFlagString15(QString(rawmessagedata).mid(76, 3));
-    m_dashboard->setFlagString16(QString(rawmessagedata).mid(79, 3));
+    if (m_flagsData) {
+        m_flagsData->setFlagString1(QString(rawmessagedata).mid(34, 3));
+        m_flagsData->setFlagString2(QString(rawmessagedata).mid(37, 3));
+        m_flagsData->setFlagString3(QString(rawmessagedata).mid(40, 3));
+        m_flagsData->setFlagString4(QString(rawmessagedata).mid(43, 3));
+        m_flagsData->setFlagString5(QString(rawmessagedata).mid(46, 3));
+        m_flagsData->setFlagString6(QString(rawmessagedata).mid(49, 3));
+        m_flagsData->setFlagString7(QString(rawmessagedata).mid(52, 3));
+        m_flagsData->setFlagString8(QString(rawmessagedata).mid(55, 3));
+        m_flagsData->setFlagString9(QString(rawmessagedata).mid(58, 3));
+        m_flagsData->setFlagString10(QString(rawmessagedata).mid(61, 3));
+        m_flagsData->setFlagString11(QString(rawmessagedata).mid(64, 3));
+        m_flagsData->setFlagString12(QString(rawmessagedata).mid(67, 3));
+        m_flagsData->setFlagString13(QString(rawmessagedata).mid(70, 3));
+        m_flagsData->setFlagString14(QString(rawmessagedata).mid(73, 3));
+        m_flagsData->setFlagString15(QString(rawmessagedata).mid(76, 3));
+        m_flagsData->setFlagString16(QString(rawmessagedata).mid(79, 3));
+    }
 }
 
 void Apexi::calculatorAux(float aux1min, float aux2max, float aux3min, float aux4max, QString Auxunit1,

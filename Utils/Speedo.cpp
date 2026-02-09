@@ -1,14 +1,14 @@
 #include "Speedo.h"
 
 #include "../Core/connect.h"
-#include "../Core/dashboard.h"
+#include "../Core/Models/VehicleData.h"
 
 #include <QDebug>
 
 
-Speedo::Speedo(QObject *parent) : QObject(parent), m_dashboard(nullptr) {}
+Speedo::Speedo(QObject *parent) : QObject(parent), m_vehicleData(nullptr) {}
 
-Speedo::Speedo(DashBoard *dashboard, QObject *parent) : QObject(parent), m_dashboard(dashboard) {}
+Speedo::Speedo(VehicleData *vehicleData, QObject *parent) : QObject(parent), m_vehicleData(vehicleData) {}
 void Speedo::initSerialPort()
 {
     m_serialport = new SerialPort(this);
@@ -37,5 +37,5 @@ void Speedo::readyToRead()
     qDebug() << "data available";
     m_readData = m_serialport->readLine();
     qDebug() << "test" << m_readData.toInt();
-    m_dashboard->setSpeed(m_readData.toInt());
+    m_vehicleData->setSpeed(m_readData.toInt());
 }

@@ -4,6 +4,7 @@
 
 class DashBoard;
 class Serialport;
+class ConnectionData;
 
 class Arduino : public QObject
 {
@@ -11,10 +12,10 @@ class Arduino : public QObject
 
 public:
     explicit Arduino(QObject *parent = nullptr);
-    explicit Arduino(DashBoard *dashboard, QObject *parent = nullptr);
+    explicit Arduino(ConnectionData *connectionData, QObject *parent = nullptr);
 
 private:
-    DashBoard *m_dashboard;
+    ConnectionData *m_connectionData;
     SerialPort *m_serialport;
     QByteArray m_readData;
     QByteArray m_buffer;

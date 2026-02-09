@@ -1,7 +1,7 @@
 #include "wifiscanner.h"
 
 #include "../Core/connect.h"
-#include "../Core/dashboard.h"
+#include "../Core/Models/ConnectionData.h"
 
 #include <QByteArray>
 #include <QFile>
@@ -17,10 +17,10 @@ QStringList result;
 QString eth0ip;
 QString wlanip;
 
-WifiScanner::WifiScanner(QObject *parent) : QObject(parent), m_dashboard(nullptr) {}
+WifiScanner::WifiScanner(QObject *parent) : QObject(parent), m_connectionData(nullptr) {}
 
 
-WifiScanner::WifiScanner(DashBoard *dashboard, QObject *parent) : QObject(parent), m_dashboard(dashboard) {}
+WifiScanner::WifiScanner(ConnectionData *connectionData, QObject *parent) : QObject(parent), m_connectionData(connectionData) {}
 
 
 void WifiScanner::initializeWifiscanner()
@@ -44,7 +44,7 @@ void WifiScanner::initializeWifiscanner()
         raw.remove(0, 1);  // Remove the white space before the SSID
         result += raw;
     }
-    m_dashboard->setwifi(result);  // Pass on wifi name list to QML Combobox
+    m_connectionData->setwifi(result);  // Pass on wifi name list to QML Combobox
 }
 
 
@@ -62,12 +62,12 @@ void WifiScanner::getconnectionStatus()
         wlanip.replace("QHostAddress(", "");
         wlanip.remove(QChar(')'));
         wlanip.remove(QChar('"'));
-        if (m_dashboard->WifiStat() != wlanip) {
-            m_dashboard->setWifiStat(wlanip);
+        if (m_connectionData->WifiStat() != wlanip) {
+            m_connectionData->setWifiStat(wlanip);
         }
     } else {
-        if (m_dashboard->WifiStat() != "NOT CONNECTED") {
-            m_dashboard->setWifiStat("NOT CONNECTED");
+        if (m_connectionData->WifiStat() != "NOT CONNECTED") {
+            m_connectionData->setWifiStat("NOT CONNECTED");
         }
     }
 
@@ -79,12 +79,12 @@ void WifiScanner::getconnectionStatus()
         eth0ip.replace("QHostAddress(", "");
         eth0ip.remove(QChar(')'));
         eth0ip.remove(QChar('"'));
-        if (m_dashboard->EthernetStat() != eth0ip) {
-            m_dashboard->setEthernetStat(eth0ip);
+        if (m_connectionData->EthernetStat() != eth0ip) {
+            m_connectionData->setEthernetStat(eth0ip);
         }
     } else {
-        if (m_dashboard->EthernetStat() != "NOT CONNECTED") {
-            m_dashboard->setEthernetStat("NOT CONNECTED");
+        if (m_connectionData->EthernetStat() != "NOT CONNECTED") {
+            m_connectionData->setEthernetStat("NOT CONNECTED");
         }
     }
 }

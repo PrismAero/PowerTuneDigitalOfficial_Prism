@@ -2,8 +2,10 @@
 
 #include "../Core/appsettings.h"
 #include "../Core/connect.h"
-#include "../Core/dashboard.h"
 #include "../Core/serialport.h"
+#include "../Core/Models/EngineData.h"
+#include "../Core/Models/VehicleData.h"
+#include "../Core/Models/SensorData.h"
 
 #include <QDebug>
 #include <QThread>
@@ -13,7 +15,8 @@
 
 
 AdaptronicSelect::AdaptronicSelect(QObject *parent)
-    : QObject(parent), m_dashboard(nullptr), lastRequest(nullptr), modbusDevice(nullptr)
+    : QObject(parent), m_engineData(nullptr), m_vehicleData(nullptr), m_sensorData(nullptr),
+      lastRequest(nullptr), modbusDevice(nullptr)
 {}
 
 AdaptronicSelect::~AdaptronicSelect()
@@ -23,9 +26,10 @@ AdaptronicSelect::~AdaptronicSelect()
     delete modbusDevice;
 }
 
-AdaptronicSelect::AdaptronicSelect(DashBoard *dashboard, QObject *parent)
-    : QObject(parent), m_dashboard(dashboard), lastRequest(nullptr), modbusDevice(nullptr)
-
+AdaptronicSelect::AdaptronicSelect(EngineData *engineData, VehicleData *vehicleData, SensorData *sensorData,
+                                   QObject *parent)
+    : QObject(parent), m_engineData(engineData), m_vehicleData(vehicleData),
+      m_sensorData(sensorData), lastRequest(nullptr), modbusDevice(nullptr)
 {}
 
 
@@ -100,43 +104,49 @@ void AdaptronicSelect::decodeAdaptronic(QModbusDataUnit unit)
     int Boostconv;
 
     // qDebug()<<"Watertemp: " <<unit.value(3);
-    m_dashboard->setSpeed(unit.value(10));  // <-This is for the "main" speedo KMH
-    m_dashboard->setrpm(unit.value(0));
-    m_dashboard->setMAP(unit.value(1));
-    m_dashboard->setIntaketemp(unit.value(2));
-    m_dashboard->setWatertemp(unit.value(3));
-    m_dashboard->setAUXT(unit.value(4));
-    m_dashboard->setauxcalc1(unit.value(5) / 2570.00);
-    m_dashboard->setKnock(unit.value(6) / 256);
-    m_dashboard->setTPS(unit.value(7));
-    m_dashboard->setIdleValue(unit.value(8));
-    m_dashboard->setBatteryV(unit.value(9) / 10);
-    m_dashboard->setMVSS(unit.value(10));
-    m_dashboard->setSVSS(unit.value(11));
-    m_dashboard->setInj1((unit.value(12) / 3) * 2);
-    m_dashboard->setInj2((unit.value(13) / 3) * 2);
-    m_dashboard->setInj3((unit.value(14) / 3) * 2);
-    m_dashboard->setInj4((unit.value(15) / 3) * 2);
-    m_dashboard->setIgn1((unit.value(16) / 5));
-    m_dashboard->setIgn2((unit.value(17) / 5));
-    m_dashboard->setIgn3((unit.value(18) / 5));
-    m_dashboard->setIgn4((unit.value(19) / 5));
-    m_dashboard->setTRIM((unit.value(20)));
-
-
-    // Convert absolute pressure in KPA to relative pressure mmhg/Kg/cm2
-
-    if ((unit.value(1)) > 103)  // while boost pressure is positive multiply by 0.01 to show kg/cm2
-    {
-        Boostconv = ((unit.value(1)) - 103);
-        realBoost = Boostconv * 0.01;
-        // qDebug() << realBoost;
-    } else if ((unit.value(1)) < 103)  // while boost pressure is negative  multiply by 0.01 to show kg/cm2
-    {
-        Boostconv = ((unit.value(1)) - 103) * 7.50061561303;
-        realBoost = Boostconv;
+    // Use domain models
+    if (m_vehicleData) {
+        m_vehicleData->setSpeed(unit.value(10));  // <-This is for the "main" speedo KMH
+        m_vehicleData->setMVSS(unit.value(10));
+        m_vehicleData->setSVSS(unit.value(11));
     }
+    if (m_engineData) {
+        m_engineData->setrpm(unit.value(0));
+        m_engineData->setMAP(unit.value(1));
+        m_engineData->setIntaketemp(unit.value(2));
+        m_engineData->setWatertemp(unit.value(3));
+        m_engineData->setAUXT(unit.value(4));
+        m_engineData->setKnock(unit.value(6) / 256);
+        m_engineData->setTPS(unit.value(7));
+        m_engineData->setIdleValue(unit.value(8));
+        m_engineData->setBatteryV(unit.value(9) / 10);
+        m_engineData->setInj1((unit.value(12) / 3) * 2);
+        m_engineData->setInj2((unit.value(13) / 3) * 2);
+        m_engineData->setInj3((unit.value(14) / 3) * 2);
+        m_engineData->setInj4((unit.value(15) / 3) * 2);
+        m_engineData->setIgn1((unit.value(16) / 5));
+        m_engineData->setIgn2((unit.value(17) / 5));
+        m_engineData->setIgn3((unit.value(18) / 5));
+        m_engineData->setIgn4((unit.value(19) / 5));
+        m_engineData->setTRIM((unit.value(20)));
 
-    m_dashboard->setpim(realBoost);
+        // Convert absolute pressure in KPA to relative pressure mmhg/Kg/cm2
+
+        if ((unit.value(1)) > 103)  // while boost pressure is positive multiply by 0.01 to show kg/cm2
+        {
+            Boostconv = ((unit.value(1)) - 103);
+            realBoost = Boostconv * 0.01;
+            // qDebug() << realBoost;
+        } else if ((unit.value(1)) < 103)  // while boost pressure is negative  multiply by 0.01 to show kg/cm2
+        {
+            Boostconv = ((unit.value(1)) - 103) * 7.50061561303;
+            realBoost = Boostconv;
+        }
+
+        m_engineData->setpim(realBoost);
+    }
+    if (m_sensorData) {
+        m_sensorData->setauxcalc1(unit.value(5) / 2570.00);
+    }
     emit sig_adaptronicReadFinished();
 }

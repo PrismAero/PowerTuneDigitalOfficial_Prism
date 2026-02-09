@@ -8,7 +8,7 @@
 #include <QTimer>
 
 // * Forward declarations
-class DashBoard;
+class ConnectionData;
 class QStandardItemModel;
 
 /**
@@ -23,7 +23,7 @@ class WifiScanner : public QObject
 
 public:
     explicit WifiScanner(QObject *parent = nullptr);
-    explicit WifiScanner(DashBoard *dashboard, QObject *parent = nullptr);
+    explicit WifiScanner(ConnectionData *connectionData, QObject *parent = nullptr);
 
     int foundCount = 0;
     QStringList wifilist;
@@ -38,7 +38,7 @@ public slots:
 
 private:
     QStandardItemModel *listModel = nullptr;
-    DashBoard *m_dashboard = nullptr;
+    ConnectionData *m_connectionData = nullptr;
     QProcess *process = nullptr;
 };
 

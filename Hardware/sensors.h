@@ -9,7 +9,7 @@
 #include <QPressureSensor>
 
 class Sensors;
-class DashBoard;
+class VehicleData;
 
 class Sensors : public QObject
 {
@@ -17,7 +17,7 @@ class Sensors : public QObject
 
 public:
     explicit Sensors(QObject *parent = nullptr);
-    explicit Sensors(DashBoard *dashboard, QObject *parent = nullptr);
+    explicit Sensors(VehicleData *vehicleData, QObject *parent = nullptr);
     Q_INVOKABLE void Comp();
     Q_INVOKABLE void Accel();
     Q_INVOKABLE void Gyro();
@@ -34,7 +34,7 @@ public slots:
     void error(int);
 
 private:
-    DashBoard *m_dashboard;
+    VehicleData *m_vehicleData;
 
     QCompass *Compass;
     QAccelerometer *Accelerometer;

@@ -7,7 +7,7 @@
 #include <QByteArray>
 #include <QObject>
 
-class DashBoard;
+class VehicleData;
 
 class Speedo : public QObject
 {
@@ -15,7 +15,7 @@ class Speedo : public QObject
 
 public:
     explicit Speedo(QObject *parent = nullptr);
-    explicit Speedo(DashBoard *dashboard, QObject *parent = nullptr);
+    explicit Speedo(VehicleData *vehicleData, QObject *parent = nullptr);
 
     void initSerialPort();
     void openConnection(const QString &portName);
@@ -25,7 +25,7 @@ private slots:
 
 private:
     SerialPort *m_serialport = nullptr;
-    DashBoard *m_dashboard = nullptr;
+    VehicleData *m_vehicleData = nullptr;
     QByteArray m_readData;
 };
 

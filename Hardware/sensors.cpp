@@ -11,7 +11,7 @@
 
 #include "sensors.h"
 
-#include "../Core/dashboard.h"
+#include "../Core/Models/VehicleData.h"
 
 #include <QAccelerometer>
 #include <QAccelerometerReading>
@@ -24,10 +24,10 @@
 #include <QGyroscopeReading>
 #include <QPressureSensor>
 
-Sensors::Sensors(QObject *parent) : QObject(parent), m_dashboard(nullptr) {}
-Sensors::Sensors(DashBoard *dashboard, QObject *parent)
+Sensors::Sensors(QObject *parent) : QObject(parent), m_vehicleData(nullptr) {}
+Sensors::Sensors(VehicleData *vehicleData, QObject *parent)
     : QObject(parent),
-      m_dashboard(dashboard),
+      m_vehicleData(vehicleData),
       Compass(nullptr),
       Accelerometer(nullptr),
       Gyroscope(nullptr),
@@ -90,7 +90,7 @@ void Sensors::updateCompass()
     QString text_compass;
     compass_reading = Compass->reading();
     if (compass_reading != nullptr) {
-        m_dashboard->setcompass(compass_reading->azimuth());
+        m_vehicleData->setcompass(compass_reading->azimuth());
         /*
          text_compass = " Compass:  azimuth = " + QString::number(compass_reading->azimuth())
                 + " Calibration level = " + QString::number(compass_reading->calibrationLevel());
@@ -108,9 +108,9 @@ void Sensors::updateAccel()
     accel_reading = Accelerometer->reading();
     ;
     if (accel_reading != nullptr) {
-        m_dashboard->setaccelx(accel_reading->x() * 0.10197162129779);
-        m_dashboard->setaccely(accel_reading->y() * 0.10197162129779);
-        m_dashboard->setaccelz(accel_reading->z() * 0.10197162129779);
+        m_vehicleData->setaccelx(accel_reading->x() * 0.10197162129779);
+        m_vehicleData->setaccely(accel_reading->y() * 0.10197162129779);
+        m_vehicleData->setaccelz(accel_reading->z() * 0.10197162129779);
         /*text_accel = QDateTime::currentDateTime().toString() +
                 + "Acceleration  x = " + QString::number(accel_reading->x())+ "y ="
                 + QString::number(accel_reading->y())+ "z ="+ QString::number(accel_reading->z());
@@ -123,24 +123,24 @@ void Sensors::updateAccel()
 void Sensors::updateGyro()
 {
     gyro_reading = Gyroscope->reading();
-    if (accel_reading != nullptr) {
-        m_dashboard->setgyrox(gyro_reading->x());
-        m_dashboard->setgyroy(gyro_reading->y());
-        m_dashboard->setgyroz(gyro_reading->z());
+    if (gyro_reading != nullptr) {
+        m_vehicleData->setgyrox(gyro_reading->x());
+        m_vehicleData->setgyroy(gyro_reading->y());
+        m_vehicleData->setgyroz(gyro_reading->z());
     }
 }
 void Sensors::updateAmbientSens()
 {
     temp_reading = AmbientTemperatureSensor->reading();
     if (temp_reading != nullptr) {
-        m_dashboard->setambitemp(temp_reading->temperature());
+        m_vehicleData->setambitemp(temp_reading->temperature());
     }
 }
 void Sensors::updatePressureSens()
 {
     press_reading = PressureSensor->reading();
     if (press_reading != nullptr) {
-        m_dashboard->setambipress(press_reading->pressure());
+        m_vehicleData->setambipress(press_reading->pressure());
     }
 }
 void Sensors::error(int) {}

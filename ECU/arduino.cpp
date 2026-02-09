@@ -1,14 +1,14 @@
 #include "arduino.h"
 
 #include "../Core/connect.h"
-#include "../Core/dashboard.h"
+#include "../Core/Models/ConnectionData.h"
 
 #include <QByteArrayMatcher>
 #include <QDebug>
 
-Arduino::Arduino(QObject *parent) : QObject(parent), m_dashboard(nullptr) {}
+Arduino::Arduino(QObject *parent) : QObject(parent), m_connectionData(nullptr) {}
 
-Arduino::Arduino(DashBoard *dashboard, QObject *parent) : QObject(parent), m_dashboard(dashboard) {}
+Arduino::Arduino(ConnectionData *connectionData, QObject *parent) : QObject(parent), m_connectionData(connectionData) {}
 
 void Arduino::initSerialPort()
 {
@@ -52,15 +52,9 @@ void Arduino::closeConnection()
     disconnect(m_serialport, &QSerialPort::readyRead, this, &Arduino::readyToRead);
     disconnect(m_serialport, &QSerialPort::errorOccurred, this, &Arduino::handleError);
     m_serialport->close();
-    m_dashboard->setSerialSpeed(0);
-    m_dashboard->setSerialSpeed(0);
-    m_dashboard->setSerialSpeed(0);
-    m_dashboard->setSerialSpeed(0);
-    m_dashboard->setSerialSpeed(0);
-    m_dashboard->setSerialSpeed(0);
-    m_dashboard->setSerialSpeed(0);
-    m_dashboard->setSerialSpeed(0);
-    m_dashboard->setSerialSpeed(0);
+    if (m_connectionData) {
+        m_connectionData->setSerialSpeed(0);
+    }
 }
 
 
@@ -73,7 +67,9 @@ void Arduino::handleError(QSerialPort::SerialPortError serialPortError)
         QTextStream out(&mFile);
         out << "Serial Error " << (m_serialport->errorString()) << Qt::endl;
         mFile.close();
-        m_dashboard->setSerialStat(m_serialport->errorString());
+        if (m_connectionData) {
+            m_connectionData->setSerialStat(m_serialport->errorString());
+        }
     }
 }
 
@@ -90,7 +86,9 @@ void Arduino::readyToRead()
     QTextStream out(&mFile);
     out  << (test.toHex()) << Qt::endl;
     mFile.close();*/
-    m_dashboard->setSerialStat(test.toHex());
+    if (m_connectionData) {
+        m_connectionData->setSerialStat(test.toHex());
+    }
     // qDebug()<< "Arduino"+m_readData;
     Arduino::assemblemessage(m_readData);
 }
@@ -113,7 +111,9 @@ void Arduino::assemblemessage(const QByteArray &buffer)
         }
 
         else {
-            m_dashboard->setSerialSpeed(value);
+            if (m_connectionData) {
+                m_connectionData->setSerialSpeed(value);
+            }
         }
     }
 }

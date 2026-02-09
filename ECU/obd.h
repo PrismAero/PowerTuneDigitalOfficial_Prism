@@ -44,6 +44,7 @@ enum ENUM {
 
 class SerialPort;
 class DashBoard;
+class ConnectionData;
 
 
 class OBD : public QObject
@@ -51,7 +52,7 @@ class OBD : public QObject
     Q_OBJECT
 public:
     explicit OBD(QObject *parent = nullptr);
-    explicit OBD(DashBoard *dashboard, QObject *parent = nullptr);
+    explicit OBD(ConnectionData *connectionData, QObject *parent = nullptr);
 
     Q_INVOKABLE void clear() const;
     Q_INVOKABLE void initSerialPort();
@@ -65,7 +66,7 @@ public:
     void writeRequest(QByteArray);
 
 private:
-    DashBoard *m_dashboard;
+    ConnectionData *m_connectionData;
     SerialPort *m_serial;
     QStringList *m_ecuList;
     qint64 m_bytesWritten;

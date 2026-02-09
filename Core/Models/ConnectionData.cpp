@@ -19,6 +19,14 @@ void ConnectionData::setSerialStat(const QString &SerialStat)
     emit serialStatChanged(m_SerialStat);
 }
 
+void ConnectionData::setSerialSpeed(const qreal &SerialSpeed)
+{
+    if (m_SerialSpeed == SerialSpeed)
+        return;
+    m_SerialSpeed = SerialSpeed;
+    emit serialSpeedChanged(m_SerialSpeed);
+}
+
 void ConnectionData::setRecvData(const QString &RecvData)
 {
     if (m_RecvData == RecvData)

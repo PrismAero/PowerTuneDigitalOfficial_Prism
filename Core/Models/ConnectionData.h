@@ -26,6 +26,7 @@ class ConnectionData : public QObject
 
     // * Serial communication status
     Q_PROPERTY(QString SerialStat READ SerialStat WRITE setSerialStat NOTIFY serialStatChanged)
+    Q_PROPERTY(qreal SerialSpeed READ SerialSpeed WRITE setSerialSpeed NOTIFY serialSpeedChanged)
     Q_PROPERTY(QString RecvData READ RecvData WRITE setRecvData NOTIFY recvDataChanged)
     Q_PROPERTY(QString TimeoutStat READ TimeoutStat WRITE setTimeoutStat NOTIFY timeoutStatChanged)
     Q_PROPERTY(QString RunStat READ RunStat WRITE setRunStat NOTIFY runStatChanged)
@@ -60,6 +61,7 @@ public:
 
     // * Getters - Serial status
     QString SerialStat() const { return m_SerialStat; }
+    qreal SerialSpeed() const { return m_SerialSpeed; }
     QString RecvData() const { return m_RecvData; }
     QString TimeoutStat() const { return m_TimeoutStat; }
     QString RunStat() const { return m_RunStat; }
@@ -92,6 +94,7 @@ public:
 public slots:
     // * Setters - Serial status
     void setSerialStat(const QString &SerialStat);
+    void setSerialSpeed(const qreal &SerialSpeed);
     void setRecvData(const QString &RecvData);
     void setTimeoutStat(const QString &TimeoutStat);
     void setRunStat(const QString &RunStat);
@@ -124,6 +127,7 @@ public slots:
 signals:
     // * Signals - Serial status
     void serialStatChanged(const QString &SerialStat);
+    void serialSpeedChanged(const qreal &SerialSpeed);
     void recvDataChanged(const QString &RecvData);
     void timeoutStatChanged(const QString &TimeoutStat);
     void runStatChanged(const QString &RunStat);
@@ -156,6 +160,7 @@ signals:
 private:
     // * Serial status
     QString m_SerialStat;
+    qreal m_SerialSpeed = 0;
     QString m_RecvData;
     QString m_TimeoutStat;
     QString m_RunStat;

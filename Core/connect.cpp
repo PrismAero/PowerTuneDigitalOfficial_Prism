@@ -115,7 +115,18 @@ Connect::Connect(QObject *parent)
     m_sensorData = new SensorData(this);
     m_connectionData = new ConnectionData(this);
     m_settingsData = new SettingsData(this);
-    m_appSettings = new AppSettings(m_dashBoard, this);
+    // * Phase 4: AppSettings now writes directly to domain models (with Dashboard fallback for unmigrated properties)
+    m_appSettings = new AppSettings(
+        m_dashBoard,
+        m_settingsData,
+        m_uiState,
+        m_vehicleData,
+        m_analogInputs,
+        m_expanderBoardData,
+        m_engineData,
+        m_connectionData,
+        this
+    );
     // * Phase 3: Create PropertyRouter for dynamic QML property access
     m_propertyRouter = new PropertyRouter(
         m_engineData,
@@ -134,8 +145,10 @@ Connect::Connect(QObject *parent)
         this
     );
     m_gopro = new GoPro(this);
-    m_gps = new GPS(m_dashBoard, this);
-    m_adaptronicselect = new AdaptronicSelect(m_dashBoard, this);
+    // * Phase 4: GPS now writes directly to domain models
+    m_gps = new GPS(m_gpsData, m_timingData, this);
+    // * Phase 4: AdaptronicSelect now writes directly to domain models
+    m_adaptronicselect = new AdaptronicSelect(m_engineData, m_vehicleData, m_sensorData, this);
     // * Phase 1: UDPReceiver now writes directly to domain models
     m_udpreceiver = new udpreceiver(
         m_engineData,
@@ -151,13 +164,18 @@ Connect::Connect(QObject *parent)
         m_settingsData,
         this
     );
-    m_apexi = new Apexi(m_dashBoard, this);
-    m_sensors = new Sensors(m_dashBoard, this);
+    // * Phase 4: Apexi now writes directly to domain models
+    m_apexi = new Apexi(m_engineData, m_vehicleData, m_flagsData, m_sensorData, m_connectionData, this);
+    // * Phase 4: Sensors now writes directly to domain models
+    m_sensors = new Sensors(m_vehicleData, this);
     m_datalogger = new datalogger(m_dashBoard, this);
-    m_calculations = new calculations(m_dashBoard, this);
-    m_arduino = new Arduino(m_dashBoard, this);
-    m_wifiscanner = new WifiScanner(m_dashBoard, this);
-    m_extender = new Extender(m_dashBoard, this);
+    // * Phase 4: Calculations now writes directly to domain models
+    m_calculations = new calculations(m_dashBoard, m_vehicleData, m_engineData, m_timingData, this);
+    // * Phase 4: Arduino now writes directly to domain models
+    m_arduino = new Arduino(m_connectionData, this);
+    m_wifiscanner = new WifiScanner(m_connectionData, this);
+    // * Phase 4: Extender now writes directly to domain models
+    m_extender = new Extender(m_digitalInputs, m_expanderBoardData, m_engineData, m_settingsData, m_vehicleData, m_connectionData, this);
     // m_wifiscanner = new WifScanner(this);
     QString mPath = "/";
     // DIRECTORIES

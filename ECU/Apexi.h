@@ -28,6 +28,11 @@ enum ENUM {
 
 class DashBoard;
 class Serialport;
+class EngineData;
+class VehicleData;
+class FlagsData;
+class SensorData;
+class ConnectionData;
 
 class Apexi : public QObject
 {
@@ -363,7 +368,8 @@ private:
 
 public:
     explicit Apexi(QObject *parent = nullptr);
-    explicit Apexi(DashBoard *dashboard, QObject *parent = nullptr);
+    explicit Apexi(EngineData *engineData, VehicleData *vehicleData, FlagsData *flagsData,
+                   SensorData *sensorData, ConnectionData *connectionData, QObject *parent = nullptr);
     Q_INVOKABLE void SetProtocol(const int &protocolselect);
     Q_INVOKABLE void Auxcalc(const QString &unitaux1, const qreal &an1V0, const qreal &an2V5, const QString &unitaux2,
                              const qreal &an3V0, const qreal &an4V5);
@@ -372,7 +378,11 @@ public:
 
 
 private:
-    DashBoard *m_dashboard;
+    EngineData *m_engineData;
+    VehicleData *m_vehicleData;
+    FlagsData *m_flagsData;
+    SensorData *m_sensorData;
+    ConnectionData *m_connectionData;
     SerialPort *m_serialport;
     qint64 m_bytesWritten;
     QByteArray m_readData;

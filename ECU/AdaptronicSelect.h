@@ -7,10 +7,12 @@
 #include <QtSerialPort/QSerialPort>
 
 
-class DashBoard;
 class Serialport;
 class QModbusClient;
 class QModbusReply;
+class EngineData;
+class VehicleData;
+class SensorData;
 
 class AdaptronicSelect : public QObject
 {
@@ -18,10 +20,10 @@ class AdaptronicSelect : public QObject
 
 public:
     explicit AdaptronicSelect(QObject *parent = nullptr);
-    explicit AdaptronicSelect(DashBoard *dashboard, QObject *parent = nullptr);
+    explicit AdaptronicSelect(EngineData *engineData, VehicleData *vehicleData, SensorData *sensorData,
+                             QObject *parent = nullptr);
     ~AdaptronicSelect() override;
 
-private:
 public slots:
     void openConnection(const QString &portName);
     void closeConnection();
@@ -30,7 +32,9 @@ public slots:
     void decodeAdaptronic(QModbusDataUnit serialdata);
 
 private:
-    DashBoard *m_dashboard;
+    EngineData *m_engineData;
+    VehicleData *m_vehicleData;
+    SensorData *m_sensorData;
     QModbusReply *lastRequest;
     QModbusClient *modbusDevice;
     QModbusDataUnit readRequest() const;

@@ -5,7 +5,8 @@
 #include <QElapsedTimer>
 #include <QTimer>
 
-class DashBoard;
+class GPSData;
+class TimingData;
 class Serialport;
 
 class GPS : public QObject
@@ -14,13 +15,14 @@ class GPS : public QObject
 
 public:
     explicit GPS(QObject *parent = nullptr);
-    explicit GPS(DashBoard *dashboard, QObject *parent = nullptr);
+    explicit GPS(GPSData *gpsData, TimingData *timingData, QObject *parent = nullptr);
     Q_INVOKABLE void defineFinishLine(const qreal &Y1, const qreal &X1, const qreal &Y2, const qreal &X2);
     Q_INVOKABLE void defineFinishLine2(const qreal &Y1, const qreal &X1, const qreal &Y2, const qreal &X2);
     Q_INVOKABLE void resetLaptimer();
 
 private:
-    DashBoard *m_dashboard;
+    GPSData *m_gpsData;
+    TimingData *m_timingData;
     SerialPort *m_serialport;
     QByteArray m_readData;
     QByteArray m_buffer;

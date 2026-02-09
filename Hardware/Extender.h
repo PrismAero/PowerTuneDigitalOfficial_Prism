@@ -23,14 +23,25 @@
 #include <QObject>
 
 
-class DashBoard;
+class DigitalInputs;
+class ExpanderBoardData;
+class EngineData;
+class SettingsData;
+class VehicleData;
+class ConnectionData;
 
 class Extender : public QObject
 {
     Q_OBJECT
 public:
     explicit Extender(QObject *parent = nullptr);
-    explicit Extender(DashBoard *dashboard, QObject *parent = nullptr);
+    explicit Extender(DigitalInputs *digitalInputs,
+                      ExpanderBoardData *expanderBoardData,
+                      EngineData *engineData,
+                      SettingsData *settingsData,
+                      VehicleData *vehicleData,
+                      ConnectionData *connectionData,
+                      QObject *parent = nullptr);
     ~Extender() override;
 
 
@@ -42,7 +53,12 @@ public slots:
 private:
     QCanBusDevice *m_canDevice;
     QString byteArrayToHex(const QByteArray &byteArray);
-    DashBoard *m_dashboard;
+    DigitalInputs *m_digitalInputs;
+    ExpanderBoardData *m_expanderBoardData;
+    EngineData *m_engineData;
+    SettingsData *m_settingsData;
+    VehicleData *m_vehicleData;
+    ConnectionData *m_connectionData;
     double pkgpayload[8];
     struct payload
     {

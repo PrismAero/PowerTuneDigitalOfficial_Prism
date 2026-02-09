@@ -9,6 +9,9 @@
 #include "Calculations.h"
 
 #include "../Core/dashboard.h"
+#include "../Core/Models/VehicleData.h"
+#include "../Core/Models/EngineData.h"
+#include "../Core/Models/TimingData.h"
 
 #include <QDebug>
 
@@ -54,15 +57,15 @@ int GearN;
 double prev_speed = 0;
 qint64 prev_timestamp = QDateTime::currentMSecsSinceEpoch();
 
-calculations::calculations(QObject *parent) : QObject(parent), m_dashboard(nullptr) {}
-calculations::calculations(DashBoard *dashboard, QObject *parent) : QObject(parent), m_dashboard(dashboard) {}
+calculations::calculations(QObject *parent) : QObject(parent), m_dashboard(nullptr), m_vehicleData(nullptr), m_engineData(nullptr), m_timingData(nullptr) {}
+calculations::calculations(DashBoard *dashboard, VehicleData *vehicleData, EngineData *engineData, TimingData *timingData, QObject *parent) : QObject(parent), m_dashboard(dashboard), m_vehicleData(vehicleData), m_engineData(engineData), m_timingData(timingData) {}
 
 void calculations::start()
 {
     connect(&m_updatetimer, &QTimer::timeout, this, &calculations::calculate);
     connect(&m_updateodotimer, &QTimer::timeout, this, &calculations::saveodoandtriptofile);
-    odometer = m_dashboard->Odo();
-    tripmeter = m_dashboard->Trip();
+    odometer = m_vehicleData->Odo();
+    tripmeter = m_vehicleData->Trip();
     m_updatetimer.setInterval(25);
     // m_updateodotimer.start(10000);
     m_updatetimer.start();
@@ -74,7 +77,7 @@ void calculations::stop()
 void calculations::resettrip()
 {
     tripmeter = 0;
-    m_dashboard->setTrip(0);
+    m_vehicleData->setTrip(0);
 }
 void calculations::startdragtimer()
 {
@@ -115,14 +118,14 @@ void calculations::stopreactiontimer()
     m_reactiontimer.stop();
     startTime = QTime::currentTime();
     reactiontime = (reactiontimerdiff.msecsTo(QTime::currentTime()));  // reactiontime
-    m_dashboard->setreactiontime(reactiontime / 1000);
+    m_timingData->setreactiontime(reactiontime / 1000);
 }
 
 
 /*
 void calculations::calculatereactiontime()
 {
-    m_dashboard->setreactiontime((reactiontime / 1000) - qmlgreentime) ;
+    m_timingData->setreactiontime((reactiontime / 1000) - qmlgreentime) ;
 }
 */
 void calculations::readodoandtrip()
@@ -149,93 +152,93 @@ void calculations::calculate()
     // Dragracing Calculations
     if (m_dashboard->speedunits() == "metric" && startdragcalculation == 1) {
         timesincelastupdate = (startTime.msecsTo(QTime::currentTime())) - totaldragtime;
-        dragdistance = (timesincelastupdate * ((m_dashboard->speed()) / 3600000));  // Odometer
+        dragdistance = (timesincelastupdate * ((m_vehicleData->speed()) / 3600000));  // Odometer
         totaldragtime = (startTime.msecsTo(QTime::currentTime()));
         dragdistancetotal += dragdistance;
         if (dragdistancetotal >= 0.01828762 && sixtyfootset == 0) {
-            m_dashboard->setsixtyfoottime(totaldragtime / 1000);
-            m_dashboard->setsixtyfootspeed(m_dashboard->speed());
+            m_timingData->setsixtyfoottime(totaldragtime / 1000);
+            m_timingData->setsixtyfootspeed(m_vehicleData->speed());
             sixtyfootset = 1;
         }
         if (dragdistancetotal >= 0.10058191 && threhundredthirtyfootset == 0) {
-            m_dashboard->setthreehundredthirtyfoottime(totaldragtime / 1000);
-            m_dashboard->setthreehundredthirtyfootspeed(m_dashboard->speed());
+            m_timingData->setthreehundredthirtyfoottime(totaldragtime / 1000);
+            m_timingData->setthreehundredthirtyfootspeed(m_vehicleData->speed());
             threhundredthirtyfootset = 1;
         }
         if (dragdistancetotal >= 0.201168 && eightmileset == 0) {
-            m_dashboard->seteightmiletime(totaldragtime / 1000);
-            m_dashboard->seteightmilespeed(m_dashboard->speed());
+            m_timingData->seteightmiletime(totaldragtime / 1000);
+            m_timingData->seteightmilespeed(m_vehicleData->speed());
             eightmileset = 1;
         }
         if (dragdistancetotal >= 0.402336 && quartermileset == 0) {
-            m_dashboard->setquartermiletime(totaldragtime / 1000);
-            m_dashboard->setquartermilespeed(m_dashboard->speed());
+            m_timingData->setquartermiletime(totaldragtime / 1000);
+            m_timingData->setquartermilespeed(m_vehicleData->speed());
             quartermileset = 1;
         }
         if (dragdistancetotal >= 0.3048 && thousandfootset == 0) {
-            m_dashboard->setthousandfoottime(totaldragtime / 1000);
-            m_dashboard->setthousandfootspeed(m_dashboard->speed());
+            m_timingData->setthousandfoottime(totaldragtime / 1000);
+            m_timingData->setthousandfootspeed(m_vehicleData->speed());
             thousandfootset = 1;
         }
-        if (m_dashboard->speed() >= 100 && zerotohundredset == 0) {
+        if (m_vehicleData->speed() >= 100 && zerotohundredset == 0) {
             zerotohundredtime = totaldragtime;
-            m_dashboard->setzerotohundredt(totaldragtime / 1000);
+            m_timingData->setzerotohundredt(totaldragtime / 1000);
             zerotohundredset = 1;
         }
-        if (m_dashboard->speed() >= 200 && hundredtotwohundredset == 0) {
+        if (m_vehicleData->speed() >= 200 && hundredtotwohundredset == 0) {
             twohundredtime = totaldragtime - zerotohundredtime;
-            m_dashboard->sethundredtotwohundredtime(twohundredtime / 1000);
+            m_timingData->sethundredtotwohundredtime(twohundredtime / 1000);
             hundredtotwohundredset = 1;
         }
-        if (m_dashboard->speed() >= 300 && twohundredtothreehundredset == 0) {
+        if (m_vehicleData->speed() >= 300 && twohundredtothreehundredset == 0) {
             threehundredtime = totaldragtime - zerotohundredtime - twohundredtime;
-            m_dashboard->settwohundredtothreehundredtime(threehundredtime / 1000);
+            m_timingData->settwohundredtothreehundredtime(threehundredtime / 1000);
             twohundredtothreehundredset = 1;
         }
     }
     if (m_dashboard->speedunits() == "imperial" && startdragcalculation == 1) {
         timesincelastupdate = (startTime.msecsTo(QTime::currentTime())) - totaldragtime;
-        dragdistance = (timesincelastupdate * ((m_dashboard->speed()) / 3600000));  // Odometer
+        dragdistance = (timesincelastupdate * ((m_vehicleData->speed()) / 3600000));  // Odometer
         totaldragtime = (startTime.msecsTo(QTime::currentTime()));
         dragdistancetotal += dragdistance;
         if (dragdistancetotal >= 0.01136364 && sixtyfootset == 0) {
-            m_dashboard->setsixtyfoottime(totaldragtime / 1000);
-            m_dashboard->setsixtyfootspeed(m_dashboard->speed());
+            m_timingData->setsixtyfoottime(totaldragtime / 1000);
+            m_timingData->setsixtyfootspeed(m_vehicleData->speed());
             sixtyfootset = 1;
         }
         if (dragdistancetotal >= 0.0625 && threhundredthirtyfootset == 0) {
-            m_dashboard->setthreehundredthirtyfoottime(totaldragtime / 1000);
-            m_dashboard->setthreehundredthirtyfootspeed(m_dashboard->speed());
+            m_timingData->setthreehundredthirtyfoottime(totaldragtime / 1000);
+            m_timingData->setthreehundredthirtyfootspeed(m_vehicleData->speed());
             threhundredthirtyfootset = 1;
         }
         if (dragdistancetotal >= 0.125 && eightmileset == 0) {
-            m_dashboard->seteightmiletime(totaldragtime / 1000);
-            m_dashboard->seteightmilespeed(m_dashboard->speed());
+            m_timingData->seteightmiletime(totaldragtime / 1000);
+            m_timingData->seteightmilespeed(m_vehicleData->speed());
             eightmileset = 1;
         }
         if (dragdistancetotal >= 0.25 && quartermileset == 0) {
-            m_dashboard->setquartermiletime(totaldragtime / 1000);
-            m_dashboard->setquartermilespeed(m_dashboard->speed());
+            m_timingData->setquartermiletime(totaldragtime / 1000);
+            m_timingData->setquartermilespeed(m_vehicleData->speed());
             quartermileset = 1;
         }
         if (dragdistancetotal >= 0.18939394 && thousandfootset == 0) {
-            m_dashboard->setthousandfoottime(totaldragtime / 1000);
-            m_dashboard->setthousandfootspeed(m_dashboard->speed());
+            m_timingData->setthousandfoottime(totaldragtime / 1000);
+            m_timingData->setthousandfootspeed(m_vehicleData->speed());
             thousandfootset = 1;
         }
-        if (m_dashboard->speed() >= 60 && zerotohundredset == 0) {
+        if (m_vehicleData->speed() >= 60 && zerotohundredset == 0) {
             zerotohundredtime = totaldragtime;
-            m_dashboard->setzerotohundredt(totaldragtime / 1000);
+            m_timingData->setzerotohundredt(totaldragtime / 1000);
             zerotohundredset = 1;
         }
-        if (m_dashboard->speed() >= 120 && hundredtotwohundredset == 0) {
+        if (m_vehicleData->speed() >= 120 && hundredtotwohundredset == 0) {
             twohundredtime = totaldragtime - zerotohundredtime;
-            m_dashboard->sethundredtotwohundredtime(twohundredtime / 1000);
+            m_timingData->sethundredtotwohundredtime(twohundredtime / 1000);
             hundredtotwohundredset = 1;
         }
-        if (m_dashboard->speed() >= 180 && twohundredtothreehundredset == 0) {
+        if (m_vehicleData->speed() >= 180 && twohundredtothreehundredset == 0) {
             threehundredtime = totaldragtime - zerotohundredtime - twohundredtime;
-            m_dashboard->settwohundredtothreehundredtime(threehundredtime / 1000);
+            m_timingData->settwohundredtothreehundredtime(threehundredtime / 1000);
             twohundredtothreehundredset = 1;
         }
     }
@@ -243,7 +246,7 @@ void calculations::calculate()
     // Dragracing Calculations END
     if (m_dashboard->gearcalcactivation() == 1) {
         // Gear Calculation borrowed from Raspexi big thanks to Jacob Donley
-        int N = m_dashboard->rpm() / (m_dashboard->speed() == 0.0 ? 0.01 : m_dashboard->speed());
+        int N = m_dashboard->rpm() / (m_vehicleData->speed() == 0.0 ? 0.01 : m_vehicleData->speed());
         int CurrentGear =
             (N > (m_dashboard->gearcalc1() * 1.5)
                  ? 0.0
@@ -264,9 +267,9 @@ void calculations::calculate()
                                                                   : (N > (m_dashboard->gearcalc6() / 2.0)
                                                                          ? 6.0
                                                                          : 0.0)))))))));
-        m_dashboard->setGear(CurrentGear);
-        m_dashboard->setGearCalculation(CurrentGear);
-        // qDebug()<<"Gear"<< m_dashboard->Gear();
+        m_vehicleData->setGear(CurrentGear);
+        m_vehicleData->setGearCalculation(CurrentGear);
+        // qDebug()<<"Gear"<< m_vehicleData->Gear();
     }
     /*
 
@@ -280,7 +283,7 @@ void calculations::calculate()
 
 
     // Odometer
-    if (m_dashboard->speed() > 0)  // ensure that odo and trip meter only gets updated if the speed is greater  km/h
+    if (m_vehicleData->speed() > 0)  // ensure that odo and trip meter only gets updated if the speed is greater  km/h
     {
         // Get the current timestamp
         qint64 current_timestamp = QDateTime::currentMSecsSinceEpoch();
@@ -289,7 +292,7 @@ void calculations::calculate()
         double time_interval = (current_timestamp - prev_timestamp) / 1000.0;
 
         // Get the current speed value in kilometers per hour
-        double current_speed_kph = m_dashboard->speed();
+        double current_speed_kph = m_vehicleData->speed();
 
         // Convert the current speed from kilometers per hour to meters per second
         double current_speed_mps = current_speed_kph / 3.6;
@@ -306,8 +309,8 @@ void calculations::calculate()
         // Sanity check to see if distance traveled is actually feasibe
         if (distance_traveled < 0.005) {
             // Update the odometer value with the new distance value
-            m_dashboard->setOdo(m_dashboard->Odo() + distance_traveled);
-            m_dashboard->setTrip(m_dashboard->Trip() + distance_traveled);
+            m_vehicleData->setOdo(m_vehicleData->Odo() + distance_traveled);
+            m_vehicleData->setTrip(m_vehicleData->Trip() + distance_traveled);
         }
 
         // Update the previous speed value with the current speed value for the next iteration
@@ -324,26 +327,26 @@ void calculations::calculate()
     if (m_dashboard->units() == "metric") {
         // To calculate kW when set to Metric
         // Weight (kg) * LongAcc (g) * Speed channel (km/h) * 0.0031107
-        Power = ((weight * m_dashboard->accely()) * m_dashboard->speed()) * 0.0031107;
+        Power = ((weight * m_dashboard->accely()) * m_vehicleData->speed()) * 0.0031107;
         // To calculate Torque in Nm when set to Metric
         // Power (kW) * 9549 / rotational speed (rpm)
         Torque = (Power * 9549) / m_dashboard->rpm();
         // qDebug() << "metric Power" <<Power;
         if (Power >= 1) {
-            m_dashboard->setPower(Power);
-            m_dashboard->setTorque(Torque);
+            m_engineData->setPower(Power);
+            m_engineData->setTorque(Torque);
         }
     }
     if (m_dashboard->units() == "imperial") {
         // Horsepower when set to Imperial
         // Weight (lbs) * LongAcc (g) * Speed channel (mph) * 0.003054
-        Power = weight * m_dashboard->accely() * m_dashboard->speed() * 0.003054;
+        Power = weight * m_dashboard->accely() * m_vehicleData->speed() * 0.003054;
         // To calculate Torque in ft-lb when set to Imperial
         //  Power (hp) * 5252 / rotational speed (rpm)
         Torque = (Power * 5252) / m_dashboard->rpm();
         if (Power >= 1) {
-            m_dashboard->setPower(Power);
-            m_dashboard->setTorque(Torque);
+            m_engineData->setPower(Power);
+            m_engineData->setTorque(Torque);
         }
     }
 
@@ -352,23 +355,23 @@ void calculations::calculate()
         //Metric Calculation
         if (m_dashboard->units()  == "metric")
         {
-        if (m_dashboard->speed() > PreviousSpeed)
+        if (m_vehicleData->speed() > PreviousSpeed)
         {
-        m_dashboard->setaccely((((m_dashboard->speed() - PreviousSpeed) *0.277778) / (25 * 0.001))*0.10197162129779);
+        m_vehicleData->setaccely((((m_vehicleData->speed() - PreviousSpeed) *0.277778) / (25 * 0.001))*0.10197162129779);
        // qDebug() << "G force "<< m_dashboard->accely();
         }
         }
         if (m_dashboard->units()  == "imperial")
         {
-        if (m_dashboard->speed() > PreviousSpeed)
+        if (m_vehicleData->speed() > PreviousSpeed)
         {
-        m_dashboard->setaccely(((((m_dashboard->speed() - PreviousSpeed)* 1.60934) *0.277778) / (25 *
+        m_vehicleData->setaccely(((((m_vehicleData->speed() - PreviousSpeed)* 1.60934) *0.277778) / (25 *
        0.001))*0.10197162129779);
         //qDebug() << "G force "<< m_dashboard->accely();
         }
         }
 
-        PreviousSpeed = m_dashboard->speed();
+        PreviousSpeed = m_vehicleData->speed();
     */
 
     // Voltage

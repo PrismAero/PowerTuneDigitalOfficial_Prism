@@ -9,17 +9,17 @@
 
 #include "obd.h"
 
-#include "../Core/dashboard.h"
+#include "../Core/Models/ConnectionData.h"
 #include "../Core/serialport.h"
 
 #include <QDebug>
 
 OBD::OBD(QObject *parent)
-    : QObject(parent), m_dashboard(nullptr), m_serial(nullptr), m_ecuList(nullptr), m_bytesWritten(0), m_units(0)
+    : QObject(parent), m_connectionData(nullptr), m_serial(nullptr), m_ecuList(nullptr), m_bytesWritten(0), m_units(0)
 {}
 
-OBD::OBD(DashBoard *dashboard, QObject *parent)
-    : QObject(parent), m_dashboard(dashboard), m_serial(nullptr), m_ecuList(nullptr), m_bytesWritten(0), m_units(0)
+OBD::OBD(ConnectionData *connectionData, QObject *parent)
+    : QObject(parent), m_connectionData(connectionData), m_serial(nullptr), m_ecuList(nullptr), m_bytesWritten(0), m_units(0)
 {}
 
 void OBD::clear() const
@@ -51,13 +51,13 @@ void OBD::openConnection(const QString &portName)
 
     if (!m_serial->open(QIODevice::ReadWrite)) {
         qDebug() << "OBD: Failed to open serial port" << portName;
-        if (m_dashboard) {
-            m_dashboard->setSerialStat("OBD: Connection failed");
+        if (m_connectionData) {
+            m_connectionData->setSerialStat("OBD: Connection failed");
         }
     } else {
         qDebug() << "OBD: Connected to" << portName;
-        if (m_dashboard) {
-            m_dashboard->setSerialStat("OBD: Connected");
+        if (m_connectionData) {
+            m_connectionData->setSerialStat("OBD: Connected");
         }
     }
 }
@@ -101,8 +101,8 @@ void OBD::handleError(QSerialPort::SerialPortError error)
 {
     if (error == QSerialPort::ReadError) {
         qDebug() << "OBD: Serial read error:" << m_serial->errorString();
-        if (m_dashboard) {
-            m_dashboard->setSerialStat(m_serial->errorString());
+        if (m_connectionData) {
+            m_connectionData->setSerialStat(m_serial->errorString());
         }
     }
 }
