@@ -1,12 +1,10 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
-import QtQuick.Controls.Styles 1.4
 import QtQuick.Window 2.15
 import QtQuick.VirtualKeyboard 2.1
 import Qt.labs.settings 1.0
 import com.powertune 1.0
-
-import "qrc:/QML/Translator.js" as Translator
+import PowerTune 1.0
 
 
 
@@ -94,8 +92,8 @@ ApplicationWindow {
 
     Connections{
             target: Dashboard
-            onBrigtnessChanged: {
-            brightness.value = Dashboard.Brightness
+            function onBrigtnessChanged() {
+                brightness.value = Dashboard.Brightness
             }
     }
 

@@ -1,10 +1,10 @@
 import QtQuick 2.15
-import QtLocation 5.9
-import QtPositioning 5.9
+import QtLocation
+import QtPositioning
 import QtQuick.Controls 2.15
-import QtQuick.Controls.Styles 1.4
 import QtQuick.Layouts 1.15
-import QtQuick.XmlListModel 2.0
+import QtCore
+import "qrc:/Gauges/Qt6Compat"
 import IMD 1.0
 
 
@@ -53,9 +53,13 @@ Rectangle {
 
     Connections{
         target: Dashboard
-        onGpsLatitudeChanged : {pos.poschanged()}
-        onGpsLongitudeChanged : {pos.poschanged()}
-        onCurrentLapChanged :{
+        function onGpsLatitudeChanged() {
+            pos.poschanged()
+        }
+        function onGpsLongitudeChanged() {
+            pos.poschanged()
+        }
+        function onCurrentLapChanged() {
             if (Dashboard.currentLap > 1)
             {
                 laptimeModel.append({"lap":Dashboard.currentLap-1, "time":Dashboard.laptime})

@@ -1,5 +1,5 @@
 import QtQuick 2.15
-import QtQuick.Controls 1.4
+import QtQuick.Controls 2.15
 
 Rectangle {
     width: 400
@@ -8,7 +8,7 @@ Rectangle {
 
     Connections{
         target: Dashboard
-        onCurrentLapChanged :{
+        function onCurrentLapChanged() {
             if (Dashboard.currentLap > 1)
             {
                 laptimeModel.append({"lap":Dashboard.currentLap-1, "time":Dashboard.laptime})

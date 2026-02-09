@@ -1,12 +1,9 @@
 import QtQuick 2.15
-import QtQuick.Extras 1.4
-import QtQuick.Dialogs 1.0
-import QtQuick.Controls.Styles 1.4
 import QtQuick.Controls 2.15
 import QtQuick.Controls.Material 2.0
 import QtQml.Models 2.3
 import Qt.labs.settings 1.0
-import QtQuick.Controls 1.4 as Quick1
+import QtQuick.Dialogs
 import "../Gauges"
 import "qrc:/Gauges/createRoundGauge.js" as CreateRoundgaugeScript
 import "qrc:/Gauges/createsquaregaugeUserDash.js" as CreateSquareGaugeScript
@@ -102,8 +99,8 @@ Item {
     Connections{
         target: Dashboard
 
-        onBackroundpicturesChanged: updatppiclist();
-        onDashsetup3Changed:
+        function onBackroundpicturesChanged() { updatppiclist(); }
+        function onDashsetup3Changed()
         {
             if (dashvalue.textAt(1) !== "") {
 

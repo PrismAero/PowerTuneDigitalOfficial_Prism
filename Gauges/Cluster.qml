@@ -1,12 +1,10 @@
 import QtQuick 2.15
-import QtQuick.Extras 1.4
-import QtQuick.Dialogs 1.0
-import QtQuick.Controls.Styles 1.4
+import QtQuick.Dialogs
 import QtQuick.Controls 2.15
 import QtQuick.Controls.Material 2.0
 import QtQml.Models 2.3
 import Qt.labs.settings 1.0
-import QtQuick.Controls 1.4 as Quick1
+import "qrc:/Gauges/Qt6Compat"
 import "../Gauges"
 import "qrc:/Gauges/createsquaregaugeUserDash.js" as CreateSquareGaugeScript
 import "qrc:/Translator.js" as Translator
@@ -79,7 +77,7 @@ Item {
 
     Connections{
         target: Dashboard
-        onMaindashsetupChanged: {
+        function onMaindashsetupChanged() {
             if (dashvalue.textAt(8) === "true") {val1 = true};
             if (dashvalue.textAt(8) === "false") {val1 = false};
             if (dashvalue.textAt(9) === "true") {val2 = true};

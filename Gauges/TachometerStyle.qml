@@ -49,8 +49,7 @@
 ****************************************************************************/
 
 import QtQuick 2.15
-import QtQuick.Controls.Styles 1.4
-import QtQuick.Extras 1.4
+import "qrc:/Gauges/Qt6Compat"
 
 DashboardGaugeStyle {
     id: tachometerStyle

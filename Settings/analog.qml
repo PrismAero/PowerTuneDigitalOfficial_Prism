@@ -33,9 +33,8 @@ Rectangle {
 
     Connections {
         target: Dashboard
-        onEcuChanged: {
+        function onEcuChanged() {
             loadersource()
-
         }
     }
 }

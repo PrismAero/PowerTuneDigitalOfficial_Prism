@@ -49,7 +49,7 @@
 ****************************************************************************/
 
 import QtQuick 2.15
-import QtQuick.Controls.Styles 1.4
+import "qrc:/Gauges/Qt6Compat"
 
 CircularGaugeStyle {
     tickmarkInset: toPixels(0.04)

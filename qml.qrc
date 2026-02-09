@@ -25,7 +25,17 @@
         <file>Settings/WifiCountryList.qml</file>
         <file>Settings/DashSelectorWidget.qml</file>
         <file>Settings/CanMonitor.qml</file>
-        <file>Settings/help.qml</file>
+
+        <!-- Settings/components -->
+        <file>Settings/components/SettingsPage.qml</file>
+        <file>Settings/components/SettingsSection.qml</file>
+        <file>Settings/components/SettingsRow.qml</file>
+        <file>Settings/components/StyledComboBox.qml</file>
+        <file>Settings/components/StyledTextField.qml</file>
+        <file>Settings/components/StyledButton.qml</file>
+        <file>Settings/components/StyledSwitch.qml</file>
+        <file>Settings/components/ConnectionStatusIndicator.qml</file>
+        <file>Settings/components/qmldir</file>
 
         <!-- Gauges -->
         <file>Gauges/DashboardGaugeStyle.qml</file>
@@ -75,6 +85,13 @@
         <file>Gauges/createStateGIF.js</file>
         <file>Gauges/TyreMonitor.qml</file>
         <file>Gauges/Keypad.qml</file>
+
+        <!-- Gauges/Qt6Compat -->
+        <file>Gauges/Qt6Compat/CircularGauge.qml</file>
+        <file>Gauges/Qt6Compat/Gauge.qml</file>
+        <file>Gauges/Qt6Compat/CircularGaugeStyle.qml</file>
+        <file>Gauges/Qt6Compat/GaugeStyle.qml</file>
+        <file>Gauges/Qt6Compat/qmldir</file>
 
         <!-- GPS Tracks -->
         <file>GPSTracks/Laptimer.qml</file>

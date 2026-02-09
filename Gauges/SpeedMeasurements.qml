@@ -1,7 +1,7 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
-import QtQuick.Controls.Styles 1.4
 import QtQuick.Layouts 1.15
+import "qrc:/Gauges/Qt6Compat"
 
 
 Rectangle {
@@ -19,16 +19,16 @@ Rectangle {
     //STAGING Lights
     Connections{
         target: Dashboard
-        onSpeedChanged :{speedchange.start()}
+        function onSpeedChanged() { speedchange.start() }
     }
     Connections{
         target: Dashboard
-        onSpeedunitsChanged :{units.start()}
+        function onSpeedunitsChanged() { units.start() }
     }
 
     Connections{
         target: Dashboard
-        onReactiontimeChanged :{reactiontimecheck.start()}
+        function onReactiontimeChanged() { reactiontimecheck.start() }
     }
 
 

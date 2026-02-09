@@ -39,8 +39,11 @@ debug/
 *.swp
 *.swo
 *~
-.vscode/
 *.code-workspace
+
+# Keep .vscode for shared tasks/launch configs but ignore user settings
+.vscode/settings.json
+.vscode/extensions.json
 
 # macOS
 .DS_Store
@@ -72,6 +75,7 @@ Desktop.ini
 # User-specific files
 *.user
 *.local
+PowerTuneDigitalOfficial-main/
 
 # CMake
 CMakeCache.txt

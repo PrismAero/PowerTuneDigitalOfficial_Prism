@@ -1,8 +1,7 @@
 import QtQuick 2.15
-import QtQuick.Extras 1.4
 import QtQuick.Controls 2.15
-import QtQuick.Controls.Styles 1.4
 import Qt.labs.settings 1.0
+import "qrc:/Gauges/Qt6Compat"
 import "qrc:/QML/Translator.js" as Translator
 
 Rectangle {

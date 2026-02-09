@@ -1,10 +1,9 @@
 import QtQuick 2.15
-import QtQuick.Controls 1.4
 import QtQuick.Controls 2.15
 import Qt.labs.folderlistmodel 2.1
-import QtQuick.Extras 1.4
-import QtMultimedia 5.8
-import QtQuick.Window 2.15 //compatibility with QT 5.10
+import "qrc:/Gauges/Qt6Compat"
+import QtMultimedia
+import QtQuick.Window 2.15
 
 Rectangle {
     //width: 800
@@ -14,7 +13,7 @@ Rectangle {
     property bool playing: false
     Connections{
         target: Dashboard
-        onMusicpathChanged : folderModel.folder = Dashboard.musicpath
+        function onMusicpathChanged() { folderModel.folder = Dashboard.musicpath }
     }
     TreeView {
         id:mp3selector

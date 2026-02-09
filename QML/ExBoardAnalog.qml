@@ -1,9 +1,7 @@
 import QtQuick 2.15
-import QtQuick.Extras 1.4
 import QtQuick.Controls 2.15
-import QtQuick.Controls.Styles 1.4
 import Qt.labs.settings 1.0
-import QtQuick.Controls.Styles 1.4
+import "qrc:/Gauges/Qt6Compat"
 import "qrc:/Translator.js" as Translator
 
 Rectangle {
@@ -345,8 +343,8 @@ Rectangle {
             font.pixelSize: mainWindow.width / 55
             text: "0"
             inputMethodHints: Qt.ImhFormattedNumbersOnly
-            validator: RegExpValidator {
-                regExp: /^(?:[1-9]\d{0,2}|1000)$/
+            validator: RegularExpressionValidator {
+                regularExpression: /^(?:[1-9]\d{0,2}|1000)$/
             }
             onEditingFinished: inputs.setInputs()
         }

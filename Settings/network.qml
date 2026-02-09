@@ -1,22 +1,23 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
+import QtQuick.Layouts 1.15
 import Qt.labs.settings 1.0
-import QtQuick.Controls 1.4 as Quick1
-import QtQuick.Controls.Styles 1.4
 import "qrc:/Translator.js" as Translator
+import "components"
 
 Rectangle {
-    id: extrarect
+    id: root
     anchors.fill: parent
-    color: "grey"
+    color: "#121212"
+
     Connections {
         target: Dashboard
         onSerialStatChanged: {
             consoleText.append(Dashboard.SerialStat)
-            ////console.log(Dashboard.SerialStat);
-            scrollBar.increase()
+            consoleFlickable.contentY = consoleFlickable.contentHeight - consoleFlickable.height
         }
     }
+
     WifiCountryList {
         id: wificountrynames
     }
@@ -25,324 +26,336 @@ Rectangle {
         property alias wificountryindex: wificountrycbx.currentIndex
     }
 
-    Flickable {
-        id: flickable
-        width: 450
-        height: 400
+    RowLayout {
+        anchors.fill: parent
+        anchors.margins: 16
+        spacing: 24
 
-        TextArea.flickable: TextArea {
-            id: consoleText
-            wrapMode: TextArea.Wrap
-            readOnly: true
-            color: "green"
-            font.pixelSize: 15
-            background: Rectangle {
-                height: flickable.height
-                width: flickable.width
-                color: "black"
-            }
-        }
+        // * Console Output Section
+        Rectangle {
+            Layout.preferredWidth: 500
+            Layout.fillHeight: true
+            color: "#0A0A0A"
+            radius: 8
+            border.color: "#3D3D3D"
+            border.width: 1
 
-        ScrollBar.vertical: ScrollBar {
-            id: scrollBar
-            policy: ScrollBar.AlwaysOn
-        }
-    }
+            ColumnLayout {
+                anchors.fill: parent
+                anchors.margins: 12
+                spacing: 8
 
-    Grid {
-        id: extragrid
-        anchors.top: parent.top
-        anchors.topMargin: parent.height / 20
-        anchors.right: parent.right
-        rows: 12
-        columns: 2
-        spacing: parent.width / 150
-
-        Text {
-            text: " "
-            font.pixelSize: extrarect.width / 55
-        }
-        Button {
-            id: btnScanNetwork
-            // visible: false
-            text: Translator.translate("Scan WIFI", Dashboard.language)
-            width: extrarect.width / 5
-            height: extrarect.height / 15
-            font.pixelSize: extrarect.width / 55
-            onClicked: {
-                consoleText.clear()
-                Wifiscanner.initializeWifiscanner()
-                //btnScanNetwork.enabled =false;
-            }
-        }
-        Component.onCompleted: Wifiscanner.initializeWifiscanner() // Workarround to show initial values
-        Text {
-            text: Translator.translate("WIFI Country", Dashboard.language)
-            font.pixelSize: extrarect.width / 55
-        }
-        ComboBox {
-            id: wificountrycbx
-            //visible: false
-            width: extrarect.width / 5
-            height: extrarect.height / 15
-            font.pixelSize: extrarect.width / 55
-            model: wificountrynames
-            textRole: "name"
-            property bool initialized: true
-        }
-        Text {
-            text: Translator.translate("WIFI 1", Dashboard.language)
-            font.pixelSize: extrarect.width / 55
-        }
-        ComboBox {
-            id: wifilistbox
-            //visible: false
-            width: extrarect.width / 5
-            height: extrarect.height / 15
-            font.pixelSize: extrarect.width / 55
-            model: Dashboard.wifi
-            onCountChanged: btnScanNetwork.enabled = true
-            property bool initialized: false
-            delegate: ItemDelegate {
-                width: wifilistbox.width
-                text: wifilistbox.textRole ? (Array.isArray(
-                                                  control.model) ? modelData[control.textRole] : model[control.textRole]) : modelData
-                font.weight: wifilistbox.currentIndex == index ? Font.DemiBold : Font.Normal
-                font.family: wifilistbox.font.family
-                font.pixelSize: wifilistbox.font.pixelSize
-                highlighted: wifilistbox.highlightedIndex == index
-                hoverEnabled: wifilistbox.hoverEnabled
-            }
-        }
-        Text {
-
-            text: Translator.translate("Password 1", Dashboard.language)
-            font.pixelSize: extrarect.width / 55
-        }
-        TextField {
-            id: pw1
-            placeholderText: qsTr("Passphrase")
-            width: extrarect.width / 5
-            font.pixelSize: extrarect.width / 55
-        }
-
-
-        /*
-        Text { text: "Wifi 2 :"
-            //visible: false
-            font.pixelSize: extrarect.width / 55 }
-        ComboBox {
-            id: wifilistbox2
-            //visible: false
-            width: extrarect.width / 5
-            height: extrarect.height /15
-            font.pixelSize: extrarect.width / 55
-            model: Dashboard.wifi
-            onCountChanged: btnScanNetwork.enabled =true;
-            property bool initialized: false
-            delegate: ItemDelegate {
-                width: wifilistbox2.width
-                text: wifilistbox2.textRole ? (Array.isArray(control.model) ? modelData[control.textRole] : model[control.textRole]) : modelData
-                font.weight: wifilistbox2.currentIndex == index ? Font.DemiBold : Font.Normal
-                font.family: wifilistbox2.font.family
-                font.pixelSize: wifilistbox2.font.pixelSize
-                highlighted: wifilistbox2.highlightedIndex == index
-                hoverEnabled: wifilistbox2.hoverEnabled
-            }
-        }
-        Text {
-            text: "Password :"
-            font.pixelSize: extrarect.width / 55 }
-        TextField {
-            id: pw2
-            placeholderText: qsTr("Passphrase")
-            width: extrarect.width / 5
-            font.pixelSize: extrarect.width / 55 }*/
-        Text {
-            text: " "
-            font.pixelSize: extrarect.width / 55
-        }
-
-        Button {
-            id: applyWifiSettings
-            text: Translator.translate("Connect WIFI", Dashboard.language)
-            width: extrarect.width / 5
-            height: extrarect.height / 15
-            font.pixelSize: extrarect.width / 55
-            Component.onCompleted: {
-
-                //Wifiscanner.findActiveWirelesses();
-                // Wifiscanner.initializeWifiscanner()
-            }
-            onClicked: {
-                //Wifiscanner.setwifi(wificountrynames.get(wificountrycbx.currentIndex).countryname,wifilistbox.textAt(wifilistbox.currentIndex),pw1.text,wifilistbox2.textAt(wifilistbox2.currentIndex),pw2.text );
-                Wifiscanner.setwifi(
-                            wificountrynames.get(
-                                wificountrycbx.currentIndex).countryname,
-                            wifilistbox.textAt(wifilistbox.currentIndex),
-                            pw1.text, "placeholder", "placeholder")
-                Connect.reboot()
-            }
-        }
-
-        Text {
-            text: " "
-            font.pixelSize: extrarect.width / 55
-        }
-        Button {
-            id: updateBtn
-            text: Translator.translate("Update", Dashboard.language)
-            width: extrarect.width / 5
-            height: extrarect.height / 15
-            font.pixelSize: extrarect.width / 55
-            onClicked: {
-                Connect.update()
-                updateBtn.enabled = false
-            }
-        }
-
-        Text {
-            text: " "
-            font.pixelSize: extrarect.width / 55
-        }
-
-        Button {
-            id: develtest
-            text: Translator.translate("Restart daemon", Dashboard.language)
-            width: extrarect.width / 5
-            height: extrarect.height / 15
-            font.pixelSize: extrarect.width / 55
-
-            onClicked: {
-
-                //Arduino.openConnection("COM11");
-                Connect.restartDaemon()
-                //develtest.enabled = false;
-            }
-        }
-        Text {
-            text: " "
-            font.pixelSize: extrarect.width / 55
-        }
-        Button {
-            id: trackUpdate
-            text: Translator.translate("Update Tracks", Dashboard.language)
-            width: extrarect.width / 5
-            height: extrarect.height / 15
-            font.pixelSize: extrarect.width / 55
-            onClicked: {
-                downloadManager.append("") // needed as a workarround
-                downloadManager.append(
-                            "https://gitlab.com/PowerTuneDigital/PowertuneTracks/-/raw/main/repo.txt")
-                downloadManager.append("") // needed as a workarround
-                consoleText.append("Downloading Tracks for Laptimer :")
-                trackUpdate.enabled = false
-                downloadprogress.indeterminate = true
-            }
-        }
-        Text {
-            text: " "
-            font.pixelSize: extrarect.width / 55
-        }
-        Quick1.ProgressBar {
-            id: downloadprogress
-            width: extrarect.width / 5
-            height: extrarect.height / 15
-        }
-        Text {
-            id: ethernetip
-            text: Translator.translate("Ethernet IP adress", Dashboard.language)
-            font.pixelSize: extrarect.width / 55
-            visible: true
-        }
-
-        Quick1.Button {
-            id: ethernetstatus
-            text: Dashboard.EthernetStat
-            width: extrarect.width / 5
-            height: extrarect.height / 15
-            style: ButtonStyle {
-                label: Label {
-                    text: ethernetstatus.text
-                    color: "black"
-                    font.pixelSize: extrarect.width / 55
-                    horizontalAlignment: Text.AlignHCenter
-                    verticalAlignment: Text.AlignVCenter
+                Text {
+                    text: "Console Output"
+                    font.pixelSize: 18
+                    font.weight: Font.DemiBold
+                    font.family: "Lato"
+                    color: "#B0B0B0"
                 }
-                background: Rectangle {
-                    color: {
-                        (ethernetstatus.text == "NOT CONNECTED") ? "red" : "green"
+
+                Rectangle {
+                    Layout.fillWidth: true
+                    height: 1
+                    color: "#3D3D3D"
+                }
+
+                Flickable {
+                    id: consoleFlickable
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    clip: true
+                    contentHeight: consoleText.contentHeight
+
+                    TextArea {
+                        id: consoleText
+                        width: parent.width
+                        wrapMode: TextArea.Wrap
+                        readOnly: true
+                        color: "#4CAF50"
+                        font.pixelSize: 14
+                        font.family: "Courier New"
+                        background: Rectangle { color: "transparent" }
                     }
-                    border.width: control.activeFocus ? 2 : 1
-                    border.color: "#888"
-                }
-            }
-        }
 
-        Text {
-            id: wlanip
-            text: Translator.translate("WLAN IP adress", Dashboard.language)
-            font.pixelSize: extrarect.width / 55
-            visible: true
-        }
-        Quick1.Button {
-            id: wifistatus
-            text: Dashboard.WifiStat
-            width: extrarect.width / 5
-            height: extrarect.height / 15
-            style: ButtonStyle {
-                label: Label {
-                    text: wifistatus.text
-                    color: "black"
-                    font.pixelSize: extrarect.width / 55
-                    horizontalAlignment: Text.AlignHCenter
-                    verticalAlignment: Text.AlignVCenter
-                }
-                background: Rectangle {
-                    color: {
-                        (wifistatus.text == "NOT CONNECTED") ? "red" : "green"
+                    ScrollBar.vertical: ScrollBar {
+                        policy: ScrollBar.AsNeeded
                     }
-                    border.width: control.activeFocus ? 2 : 1
-                    border.color: "#888"
                 }
             }
         }
-        Text {
-            text: " "
-            font.pixelSize: extrarect.width / 55
-        }
-        Text {
-            id: downloadspeedtext
-            text: downloadManager.downloadStatus
-            font.pixelSize: extrarect.width / 55
-            onTextChanged: {
-                if (downloadspeedtext.text == "Finished") {
-                    //trackUpdate.enabled = true;
-                    downloadprogress.indeterminate = false
-                    downloadspeedtext.text = " "
-                    Connect.changefolderpermission()
+
+        // * Settings Column
+        ScrollView {
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            clip: true
+            ScrollBar.vertical.policy: ScrollBar.AsNeeded
+            ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
+
+            ColumnLayout {
+                width: parent.width - 20
+                spacing: 20
+
+                // * WiFi Configuration Section
+                SettingsSection {
+                    title: Translator.translate("WIFI Configuration", Dashboard.language)
+                    Layout.fillWidth: true
+
+                    RowLayout {
+                        spacing: 20
+                        Layout.fillWidth: true
+
+                        Text {
+                            text: Translator.translate("WIFI Country", Dashboard.language)
+                            font.pixelSize: 20
+                            font.family: "Lato"
+                            color: "#FFFFFF"
+                            Layout.preferredWidth: 180
+                        }
+
+                        StyledComboBox {
+                            id: wificountrycbx
+                            width: 280
+                            model: wificountrynames
+                            textRole: "name"
+                        }
+                    }
+
+                    RowLayout {
+                        spacing: 20
+                        Layout.fillWidth: true
+
+                        Text {
+                            text: Translator.translate("WIFI 1", Dashboard.language)
+                            font.pixelSize: 20
+                            font.family: "Lato"
+                            color: "#FFFFFF"
+                            Layout.preferredWidth: 180
+                        }
+
+                        StyledComboBox {
+                            id: wifilistbox
+                            width: 280
+                            model: Dashboard.wifi
+                            onCountChanged: btnScanNetwork.enabled = true
+                        }
+                    }
+
+                    RowLayout {
+                        spacing: 20
+                        Layout.fillWidth: true
+
+                        Text {
+                            text: Translator.translate("Password 1", Dashboard.language)
+                            font.pixelSize: 20
+                            font.family: "Lato"
+                            color: "#FFFFFF"
+                            Layout.preferredWidth: 180
+                        }
+
+                        StyledTextField {
+                            id: pw1
+                            width: 280
+                            placeholderText: qsTr("Passphrase")
+                            echoMode: TextInput.Password
+                        }
+                    }
+
+                    RowLayout {
+                        spacing: 12
+
+                        StyledButton {
+                            id: btnScanNetwork
+                            text: Translator.translate("Scan WIFI", Dashboard.language)
+                            width: 180
+                            onClicked: {
+                                consoleText.clear()
+                                Wifiscanner.initializeWifiscanner()
+                            }
+                        }
+
+                        StyledButton {
+                            id: applyWifiSettings
+                            text: Translator.translate("Connect WIFI", Dashboard.language)
+                            width: 180
+                            onClicked: {
+                                Wifiscanner.setwifi(
+                                    wificountrynames.get(wificountrycbx.currentIndex).countryname,
+                                    wifilistbox.textAt(wifilistbox.currentIndex),
+                                    pw1.text, "placeholder", "placeholder")
+                                Connect.reboot()
+                            }
+                        }
+                    }
+
+                    Component.onCompleted: Wifiscanner.initializeWifiscanner()
+                }
+
+                // * Network Status Section
+                SettingsSection {
+                    title: Translator.translate("Network Status", Dashboard.language)
+                    Layout.fillWidth: true
+
+                    RowLayout {
+                        spacing: 20
+                        Layout.fillWidth: true
+
+                        Text {
+                            text: Translator.translate("Ethernet IP adress", Dashboard.language)
+                            font.pixelSize: 20
+                            font.family: "Lato"
+                            color: "#FFFFFF"
+                            Layout.preferredWidth: 180
+                        }
+
+                        ConnectionStatusIndicator {
+                            id: ethernetstatus
+                            statusText: Dashboard.EthernetStat
+                            status: Dashboard.EthernetStat === "NOT CONNECTED" ? "disconnected" : "connected"
+                            width: 280
+                        }
+                    }
+
+                    RowLayout {
+                        spacing: 20
+                        Layout.fillWidth: true
+
+                        Text {
+                            text: Translator.translate("WLAN IP adress", Dashboard.language)
+                            font.pixelSize: 20
+                            font.family: "Lato"
+                            color: "#FFFFFF"
+                            Layout.preferredWidth: 180
+                        }
+
+                        ConnectionStatusIndicator {
+                            id: wifistatus
+                            statusText: Dashboard.WifiStat
+                            status: Dashboard.WifiStat === "NOT CONNECTED" ? "disconnected" : "connected"
+                            width: 280
+                        }
+                    }
+                }
+
+                // * System Actions Section
+                SettingsSection {
+                    title: Translator.translate("System Actions", Dashboard.language)
+                    Layout.fillWidth: true
+
+                    RowLayout {
+                        spacing: 12
+
+                        StyledButton {
+                            id: updateBtn
+                            text: Translator.translate("Update", Dashboard.language)
+                            width: 180
+                            onClicked: {
+                                Connect.update()
+                                updateBtn.enabled = false
+                            }
+                        }
+
+                        StyledButton {
+                            id: develtest
+                            text: Translator.translate("Restart daemon", Dashboard.language)
+                            width: 180
+                            primary: false
+                            onClicked: Connect.restartDaemon()
+                        }
+                    }
+                }
+
+                // * Track Downloads Section
+                SettingsSection {
+                    title: Translator.translate("Track Downloads", Dashboard.language)
+                    Layout.fillWidth: true
+
+                    StyledButton {
+                        id: trackUpdate
+                        text: Translator.translate("Update Tracks", Dashboard.language)
+                        width: 280
+                        onClicked: {
+                            downloadManager.append("")
+                            downloadManager.append("https://gitlab.com/PowerTuneDigital/PowertuneTracks/-/raw/main/repo.txt")
+                            downloadManager.append("")
+                            consoleText.append("Downloading Tracks for Laptimer:")
+                            trackUpdate.enabled = false
+                            downloadprogress.indeterminate = true
+                        }
+                    }
+
+                    RowLayout {
+                        spacing: 12
+                        Layout.fillWidth: true
+
+                        ProgressBar {
+                            id: downloadprogress
+                            Layout.preferredWidth: 300
+                            height: 8
+
+                            background: Rectangle {
+                                implicitWidth: 300
+                                implicitHeight: 8
+                                color: "#2D2D2D"
+                                radius: 4
+                            }
+
+                            contentItem: Item {
+                                implicitWidth: 300
+                                implicitHeight: 8
+
+                                Rectangle {
+                                    width: downloadprogress.visualPosition * parent.width
+                                    height: parent.height
+                                    radius: 4
+                                    color: "#009688"
+                                    visible: !downloadprogress.indeterminate
+                                }
+
+                                Rectangle {
+                                    id: indeterminateBar
+                                    width: parent.width * 0.3
+                                    height: parent.height
+                                    radius: 4
+                                    color: "#009688"
+                                    visible: downloadprogress.indeterminate
+
+                                    SequentialAnimation on x {
+                                        running: downloadprogress.indeterminate
+                                        loops: Animation.Infinite
+                                        NumberAnimation { from: -indeterminateBar.width; to: downloadprogress.width; duration: 1500; easing.type: Easing.InOutQuad }
+                                    }
+                                }
+                            }
+                        }
+
+                        Text {
+                            id: downloadspeedtext
+                            text: downloadManager.downloadStatus
+                            font.pixelSize: 16
+                            font.family: "Lato"
+                            color: "#B0B0B0"
+                            onTextChanged: {
+                                if (downloadspeedtext.text === "Finished") {
+                                    downloadprogress.indeterminate = false
+                                    downloadspeedtext.text = " "
+                                    Connect.changefolderpermission()
+                                }
+                            }
+                        }
+                    }
+
+                    Text {
+                        id: downloadfilenametext
+                        text: downloadManager.downloadFilename
+                        font.pixelSize: 14
+                        font.family: "Lato"
+                        color: "#B0B0B0"
+                        visible: false
+                        onTextChanged: consoleText.append(downloadManager.downloadFilename)
+                    }
                 }
             }
         }
-        Text {
-            id: downloadfilenametext
-            text: downloadManager.downloadFilename
-            font.pixelSize: extrarect.width / 55
-            visible: false
-            onTextChanged: consoleText.append(downloadManager.downloadFilename)
-        }
-
-
-        /*
-
-        Button {
-            id: develtest1
-            text: "Development dont click"
-            width: extrarect.width / 5
-            height: extrarect.height /15
-            font.pixelSize: extrarect.width / 55
-            onClicked: Connect.canbitratesetup(0)
-
-        }*/
     }
 }

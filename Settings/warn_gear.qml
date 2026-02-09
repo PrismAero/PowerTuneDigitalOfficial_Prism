@@ -1,14 +1,17 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
+import QtQuick.Layouts 1.15
 import Qt.labs.settings 1.0
 import "qrc:/Translator.js" as Translator
+import "components"
 
 Rectangle {
-
-    id: warningsettings
+    id: root
     anchors.fill: parent
-    color: "grey"
-    property int gercalactive
+    color: "#121212"
+
+    property int gercalactive: 0
+
     Item {
         id: warnettings
         Settings {
@@ -24,226 +27,255 @@ Rectangle {
             property alias gearval4: valgear4.text
             property alias gearval5: valgear5.text
             property alias gearval6: valgear6.text
-
         }
+    }
 
-        Grid {
-            id: speedcorrgrid
-            rows: 3
-            columns: 5
-            spacing: warningsettings.height / 150
-            Text {
-                text: Translator.translate("WaterTemp", Dashboard.language)
-                font.pixelSize: warningsettings.width / 55
-                color: "white"
-            }
-            Text {
-                text: Translator.translate("Boost", Dashboard.language)
-                font.pixelSize: warningsettings.width / 55
-                color: "white"
-            }
-            Text {
-                text: Translator.translate("Revs", Dashboard.language)
-                font.pixelSize: warningsettings.width / 55
-                color: "white"
-            }
-            Text {
-                text: Translator.translate("Knock", Dashboard.language)
-                font.pixelSize: warningsettings.width / 55
-                color: "white"
-            }
-            Text {
-                text: Translator.translate("Lamdamultiply", Dashboard.language)
-                font.pixelSize: warningsettings.width / 55
-                color: "white"
-            }
-            TextField {
-                id: watertempwarn
-                width: warningsettings.width / 10
-                height: warningsettings.height / 15
-                font.pixelSize: warningsettings.width / 55
-                text: "110"
-                inputMethodHints: Qt.ImhFormattedNumbersOnly // this ensures valid inputs are number only
-                onEditingFinished: applysettings.start()
-            }
-            TextField {
-                id: boostwarn
-                width: warningsettings.width / 10
-                height: warningsettings.height / 15
-                font.pixelSize: warningsettings.width / 55
-                inputMethodHints: Qt.ImhFormattedNumbersOnly
-                text: "0.9"
-                onEditingFinished: applysettings.start()
-            }
-            TextField {
-                id: rpmwarn
-                width: warningsettings.width / 10
-                height: warningsettings.height / 15
-                font.pixelSize: warningsettings.width / 55
-                inputMethodHints: Qt.ImhFormattedNumbersOnly
-                text: "10000"
-                onEditingFinished: applysettings.start()
-            }
-            TextField {
-                id: knockwarn
-                width: warningsettings.width / 10
-                height: warningsettings.height / 15
-                font.pixelSize: warningsettings.width / 55
-                inputMethodHints: Qt.ImhFormattedNumbersOnly
-                text: "80"
-                onEditingFinished: applysettings.start()
-            }
-            TextField {
-                id: lambdamultiply
-                width: warningsettings.width / 7
-                height: warningsettings.height / 15
-                font.pixelSize: warningsettings.width / 55
-                inputMethodHints: Qt.ImhFormattedNumbersOnly
-                text: "14.7"
-                onEditingFinished: applysettings.start()
+    ScrollView {
+        anchors.fill: parent
+        anchors.margins: 16
+        clip: true
+        ScrollBar.vertical.policy: ScrollBar.AsNeeded
+        ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
 
+        ColumnLayout {
+            width: root.width - 32
+            spacing: 20
+
+            // * Warning Thresholds Section
+            SettingsSection {
+                title: Translator.translate("Warning Thresholds", Dashboard.language)
+                Layout.fillWidth: true
+
+                GridLayout {
+                    columns: 5
+                    rowSpacing: 12
+                    columnSpacing: 20
+
+                    // Labels row
+                    Text {
+                        text: Translator.translate("WaterTemp", Dashboard.language)
+                        font.pixelSize: 18
+                        font.weight: Font.DemiBold
+                        font.family: "Lato"
+                        color: "#B0B0B0"
+                    }
+                    Text {
+                        text: Translator.translate("Boost", Dashboard.language)
+                        font.pixelSize: 18
+                        font.weight: Font.DemiBold
+                        font.family: "Lato"
+                        color: "#B0B0B0"
+                    }
+                    Text {
+                        text: Translator.translate("Revs", Dashboard.language)
+                        font.pixelSize: 18
+                        font.weight: Font.DemiBold
+                        font.family: "Lato"
+                        color: "#B0B0B0"
+                    }
+                    Text {
+                        text: Translator.translate("Knock", Dashboard.language)
+                        font.pixelSize: 18
+                        font.weight: Font.DemiBold
+                        font.family: "Lato"
+                        color: "#B0B0B0"
+                    }
+                    Text {
+                        text: Translator.translate("Lamdamultiply", Dashboard.language)
+                        font.pixelSize: 18
+                        font.weight: Font.DemiBold
+                        font.family: "Lato"
+                        color: "#B0B0B0"
+                    }
+
+                    // Input fields row
+                    StyledTextField {
+                        id: watertempwarn
+                        width: 140
+                        text: "110"
+                        inputMethodHints: Qt.ImhFormattedNumbersOnly
+                        onEditingFinished: applysettings.start()
+                    }
+                    StyledTextField {
+                        id: boostwarn
+                        width: 140
+                        text: "0.9"
+                        inputMethodHints: Qt.ImhFormattedNumbersOnly
+                        onEditingFinished: applysettings.start()
+                    }
+                    StyledTextField {
+                        id: rpmwarn
+                        width: 140
+                        text: "10000"
+                        inputMethodHints: Qt.ImhFormattedNumbersOnly
+                        onEditingFinished: applysettings.start()
+                    }
+                    StyledTextField {
+                        id: knockwarn
+                        width: 140
+                        text: "80"
+                        inputMethodHints: Qt.ImhFormattedNumbersOnly
+                        onEditingFinished: applysettings.start()
+                    }
+                    StyledTextField {
+                        id: lambdamultiply
+                        width: 140
+                        text: "14.7"
+                        inputMethodHints: Qt.ImhFormattedNumbersOnly
+                        onEditingFinished: applysettings.start()
+                    }
+                }
+            }
+
+            // * Gear Calculation Section
+            SettingsSection {
+                title: Translator.translate("GearCalculation", Dashboard.language)
+                Layout.fillWidth: true
+
+                StyledSwitch {
+                    id: gearcalcselect
+                    label: gearcalcselect.checked
+                        ? Translator.translate("GearCalculation", Dashboard.language) + " " + Translator.translate("ON", Dashboard.language)
+                        : Translator.translate("GearCalculation", Dashboard.language) + " " + Translator.translate("OFF", Dashboard.language)
+
+                    Component.onCompleted: {
+                        gercalactive = gearcalcselect.checked ? 1 : 0
+                        applysettings.start()
+                    }
+
+                    onCheckedChanged: {
+                        gercalactive = gearcalcselect.checked ? 1 : 0
+                        applysettings.start()
+                    }
+                }
+
+                GridLayout {
+                    columns: 6
+                    rowSpacing: 12
+                    columnSpacing: 16
+
+                    // Labels row
+                    Text {
+                        text: Translator.translate("Gear", Dashboard.language) + " 1"
+                        font.pixelSize: 18
+                        font.weight: Font.DemiBold
+                        font.family: "Lato"
+                        color: "#B0B0B0"
+                        Layout.preferredWidth: 100
+                        horizontalAlignment: Text.AlignHCenter
+                    }
+                    Text {
+                        text: Translator.translate("Gear", Dashboard.language) + " 2"
+                        font.pixelSize: 18
+                        font.weight: Font.DemiBold
+                        font.family: "Lato"
+                        color: "#B0B0B0"
+                        Layout.preferredWidth: 100
+                        horizontalAlignment: Text.AlignHCenter
+                    }
+                    Text {
+                        text: Translator.translate("Gear", Dashboard.language) + " 3"
+                        font.pixelSize: 18
+                        font.weight: Font.DemiBold
+                        font.family: "Lato"
+                        color: "#B0B0B0"
+                        Layout.preferredWidth: 100
+                        horizontalAlignment: Text.AlignHCenter
+                    }
+                    Text {
+                        text: Translator.translate("Gear", Dashboard.language) + " 4"
+                        font.pixelSize: 18
+                        font.weight: Font.DemiBold
+                        font.family: "Lato"
+                        color: "#B0B0B0"
+                        Layout.preferredWidth: 100
+                        horizontalAlignment: Text.AlignHCenter
+                    }
+                    Text {
+                        text: Translator.translate("Gear", Dashboard.language) + " 5"
+                        font.pixelSize: 18
+                        font.weight: Font.DemiBold
+                        font.family: "Lato"
+                        color: "#B0B0B0"
+                        Layout.preferredWidth: 100
+                        horizontalAlignment: Text.AlignHCenter
+                    }
+                    Text {
+                        text: Translator.translate("Gear", Dashboard.language) + " 6"
+                        font.pixelSize: 18
+                        font.weight: Font.DemiBold
+                        font.family: "Lato"
+                        color: "#B0B0B0"
+                        Layout.preferredWidth: 100
+                        horizontalAlignment: Text.AlignHCenter
+                    }
+
+                    // Input fields row
+                    StyledTextField {
+                        id: valgear1
+                        width: 100
+                        text: "120"
+                        inputMethodHints: Qt.ImhFormattedNumbersOnly
+                        onEditingFinished: applysettings.start()
+                    }
+                    StyledTextField {
+                        id: valgear2
+                        width: 100
+                        text: "74"
+                        inputMethodHints: Qt.ImhFormattedNumbersOnly
+                        onEditingFinished: applysettings.start()
+                    }
+                    StyledTextField {
+                        id: valgear3
+                        width: 100
+                        text: "54"
+                        inputMethodHints: Qt.ImhFormattedNumbersOnly
+                        onEditingFinished: applysettings.start()
+                    }
+                    StyledTextField {
+                        id: valgear4
+                        width: 100
+                        text: "37"
+                        inputMethodHints: Qt.ImhFormattedNumbersOnly
+                        onEditingFinished: applysettings.start()
+                    }
+                    StyledTextField {
+                        id: valgear5
+                        width: 100
+                        text: "28"
+                        inputMethodHints: Qt.ImhFormattedNumbersOnly
+                        onEditingFinished: applysettings.start()
+                    }
+                    StyledTextField {
+                        id: valgear6
+                        width: 100
+                        text: ""
+                        inputMethodHints: Qt.ImhFormattedNumbersOnly
+                        onEditingFinished: applysettings.start()
+                        Component.onCompleted: applysettings.start()
+                    }
+                }
+
+                Text {
+                    text: "Enter RPM/Speed ratio values for each gear"
+                    font.pixelSize: 16
+                    font.family: "Lato"
+                    color: "#707070"
+                    font.italic: true
                 }
             }
         }
-
-    Rectangle {
-        id: gearsettings
-        width: parent.width
-        height: parent.height / 2
-        y: parent.height / 5
-        color: "transparent"
-        Grid {
-            id: geargrid
-            rows: 3
-            columns: 7
-            spacing: warningsettings.height / 150
-
-            Text {
-                id: switchtext
-                text: Translator.translate("GearCalculation", Dashboard.language)
-                font.pixelSize: warningsettings.width / 55
-                color: "white"
-            }
-            Text {
-                text: Translator.translate("Gear", Dashboard.language)+" 1"
-                font.pixelSize: warningsettings.width / 55
-                color: "white"
-            }
-            Text {
-                text: Translator.translate("Gear", Dashboard.language)+" 2"
-                font.pixelSize: warningsettings.width / 55
-                color: "white"
-            }
-            Text {
-                text: Translator.translate("Gear", Dashboard.language)+" 3"
-                font.pixelSize: warningsettings.width / 55
-                color: "white"
-            }
-            Text {
-                text: Translator.translate("Gear", Dashboard.language)+" 4"
-                font.pixelSize: warningsettings.width / 55
-                color: "white"
-            }
-            Text {
-                text: Translator.translate("Gear", Dashboard.language)+" 5"
-                font.pixelSize: warningsettings.width / 55
-                color: "white"
-            }
-            Text {
-                text: Translator.translate("Gear", Dashboard.language)+" 6"
-                font.pixelSize: warningsettings.width / 55
-                color: "white"
-            }
-
-            Switch {
-                id: gearcalcselect
-                width: warningsettings.width / 5
-                height: warningsettings.height / 15
-                font.pixelSize: warningsettings.width / 55
-                Component.onCompleted: if (gearcalcselect.checked == true) {
-                                           gercalactive = 1
-                                           applysettings.start()
-                                           switchtext.text = Translator.translate("GearCalculation", Dashboard.language) +" " +Translator.translate("ON", Dashboard.language)
-                                       } else {
-                                           gercalactive = 0
-                                           applysettings.start()
-                                           switchtext.text = Translator.translate("GearCalculation", Dashboard.language) + " " +Translator.translate("OFF", Dashboard.language)
-                                       }
-
-                onCheckedChanged: if (gearcalcselect.checked == true) {
-                                      gercalactive = 1
-                                      applysettings.start()
-                                      switchtext.text = Translator.translate("GearCalculation", Dashboard.language) +" " +Translator.translate("ON", Dashboard.language)
-                                  } else {
-                                      gercalactive = 0
-                                      applysettings.start()
-                                      switchtext.text = Translator.translate("GearCalculation", Dashboard.language) + " " +Translator.translate("OFF", Dashboard.language)
-                                  }
-            }
-
-            TextField {
-                id: valgear1
-                width: warningsettings.width / 10
-                height: warningsettings.height / 15
-                font.pixelSize: warningsettings.width / 55
-                inputMethodHints: Qt.ImhFormattedNumbersOnly
-                text: "120"
-                onEditingFinished: applysettings.start()
-            }
-            TextField {
-                id: valgear2
-                width: warningsettings.width / 10
-                height: warningsettings.height / 15
-                font.pixelSize: warningsettings.width / 55
-                inputMethodHints: Qt.ImhFormattedNumbersOnly
-                text: "74"
-                onEditingFinished: applysettings.start()
-            }
-            TextField {
-                id: valgear3
-                width: warningsettings.width / 10
-                height: warningsettings.height / 15
-                font.pixelSize: warningsettings.width / 55
-                inputMethodHints: Qt.ImhFormattedNumbersOnly
-                text: "54"
-                onEditingFinished: applysettings.start()
-            }
-            TextField {
-                id: valgear4
-                width: warningsettings.width / 10
-                height: warningsettings.height / 15
-                font.pixelSize: warningsettings.width / 55
-                inputMethodHints: Qt.ImhFormattedNumbersOnly
-                text: "37"
-                onEditingFinished: applysettings.start()
-            }
-            TextField {
-                id: valgear5
-                width: warningsettings.width / 10
-                height: warningsettings.height / 15
-                font.pixelSize: warningsettings.width / 55
-                inputMethodHints: Qt.ImhFormattedNumbersOnly
-                text: "28"
-                onEditingFinished: applysettings.start()
-
-            }
-            TextField {
-                id: valgear6
-                width: warningsettings.width / 10
-                height: warningsettings.height / 15
-                font.pixelSize: warningsettings.width / 55
-                inputMethodHints: Qt.ImhFormattedNumbersOnly
-                text: ""
-                onEditingFinished: applysettings.start()
-                Component.onCompleted: applysettings.start()
-            }
-        }
-
     }
+
     Item {
         id: applysettings
         function start() {
-            AppSettings.writeWarnGearSettings(watertempwarn.text,boostwarn.text,rpmwarn.text,knockwarn.text,gercalactive,lambdamultiply.text,valgear1.text,valgear2.text,valgear3.text,valgear4.text,valgear5.text,valgear6.text)
+            AppSettings.writeWarnGearSettings(
+                watertempwarn.text, boostwarn.text, rpmwarn.text, knockwarn.text,
+                gercalactive, lambdamultiply.text,
+                valgear1.text, valgear2.text, valgear3.text,
+                valgear4.text, valgear5.text, valgear6.text
+            )
         }
     }
 }

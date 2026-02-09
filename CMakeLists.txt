@@ -39,6 +39,20 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS
 # * Optional: Location module (may not be available on all platforms)
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Location QUIET)
 
+# * Qt6-specific: Qt5Compat for GraphicalEffects and other Qt5 modules
+if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
+    find_package(Qt6 COMPONENTS Core5Compat QUIET)
+    if(Qt6Core5Compat_FOUND)
+        set(Qt6Qt5Compat_FOUND TRUE)
+        message(STATUS "Qt5Compat (Core5Compat) found - GraphicalEffects available")
+    else()
+        message(WARNING "Qt5Compat not found - some graphical effects may not work")
+    endif()
+    
+    # * ShaderTools for Qt6 effects
+    find_package(Qt6 COMPONENTS ShaderTools QUIET)
+endif()
+
 # * Optional: ddcutil support (Linux display brightness control)
 if(EXISTS "/usr/lib/libddcutil.so.4")
     add_compile_definitions(HAVE_DDCUTIL)
@@ -57,32 +71,6 @@ set(CORE_HEADERS
     Core/dashboard.h
     Core/serialport.h
     Core/appsettings.h
-)
-
-# * Source files - Core/Models (Domain data models)
-set(MODELS_SOURCES
-    Core/Models/EngineData.cpp
-    Core/Models/VehicleData.cpp
-    Core/Models/GPSData.cpp
-    Core/Models/AnalogInputs.cpp
-    Core/Models/DigitalInputs.cpp
-    Core/Models/ExpanderBoardData.cpp
-    Core/Models/ElectricMotorData.cpp
-    Core/Models/FlagsData.cpp
-    Core/Models/TimingData.cpp
-)
-
-set(MODELS_HEADERS
-    Core/Models/DataModels.h
-    Core/Models/EngineData.h
-    Core/Models/VehicleData.h
-    Core/Models/GPSData.h
-    Core/Models/AnalogInputs.h
-    Core/Models/DigitalInputs.h
-    Core/Models/ExpanderBoardData.h
-    Core/Models/ElectricMotorData.h
-    Core/Models/FlagsData.h
-    Core/Models/TimingData.h
 )
 
 # * Source files - ECU protocols
@@ -146,7 +134,6 @@ set(UTILS_HEADERS
 set(PROJECT_SOURCES
     main.cpp
     ${CORE_SOURCES}
-    ${MODELS_SOURCES}
     ${ECU_SOURCES}
     ${HARDWARE_SOURCES}
     ${UTILS_SOURCES}
@@ -154,7 +141,6 @@ set(PROJECT_SOURCES
 
 set(PROJECT_HEADERS
     ${CORE_HEADERS}
-    ${MODELS_HEADERS}
     ${ECU_HEADERS}
     ${HARDWARE_HEADERS}
     ${UTILS_HEADERS}
@@ -185,7 +171,6 @@ endif()
 target_include_directories(${PROJECT_NAME} PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/Core
-    ${CMAKE_CURRENT_SOURCE_DIR}/Core/Models
     ${CMAKE_CURRENT_SOURCE_DIR}/ECU
     ${CMAKE_CURRENT_SOURCE_DIR}/Hardware
     ${CMAKE_CURRENT_SOURCE_DIR}/Utils
@@ -214,12 +199,41 @@ if(Qt${QT_VERSION_MAJOR}Location_FOUND)
     )
 endif()
 
+# * Link Qt5Compat for GraphicalEffects (Qt6 only)
+if(${QT_VERSION_MAJOR} GREATER_EQUAL 6 AND Qt6Qt5Compat_FOUND)
+    target_link_libraries(${PROJECT_NAME} PRIVATE
+        Qt6::Core5Compat
+    )
+endif()
+
+# * PowerTune QML Module (Qt6 only)
+# * This provides a single import for all PowerTune components: import PowerTune 1.0
+if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
+    # * Suppress Qt policy warning about qmldir files
+    qt_policy(SET QTP0004 OLD)
+    
+    qt_add_qml_module(${PROJECT_NAME}
+        URI PowerTune
+        VERSION 1.0
+        QML_FILES
+            PowerTune/CircularGauge.qml
+            PowerTune/CircularGaugeStyle.qml
+            PowerTune/Gauge.qml
+            PowerTune/GaugeStyle.qml
+            PowerTune/Translator.qml
+        RESOURCES
+            PowerTune/Translator.js
+        NO_RESOURCE_TARGET_PATH
+    )
+endif()
+
 # * QML Import paths for Qt Creator and Qt Design Studio
 set(QML_IMPORT_PATH
     "${CMAKE_CURRENT_SOURCE_DIR}/QML"
     "${CMAKE_CURRENT_SOURCE_DIR}/Gauges"
     "${CMAKE_CURRENT_SOURCE_DIR}/Settings"
     "${CMAKE_CURRENT_SOURCE_DIR}/GPSTracks"
+    "${CMAKE_CURRENT_SOURCE_DIR}/PowerTune"
     CACHE STRING "Qt Creator/Design Studio QML import paths"
     FORCE
 )

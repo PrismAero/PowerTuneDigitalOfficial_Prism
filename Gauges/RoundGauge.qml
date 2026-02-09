@@ -1,9 +1,7 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
-import QtQuick.Controls.Styles 1.4
-import QtQuick.Extras 1.4
-import QtQuick.Extras.Private 1.0
-import QtGraphicalEffects 1.0
+import Qt5Compat.GraphicalEffects
+import "qrc:/Gauges/Qt6Compat"
 import "qrc:/Translator.js" as Translator
 
 Rectangle{
@@ -121,7 +119,7 @@ Rectangle{
     }
     Connections{
         target: Dashboard
-        onDraggableChanged:togglemousearea()
+        function onDraggableChanged() { togglemousearea(); }
     }
 
 
@@ -217,9 +215,9 @@ Rectangle{
 
                     Connections {
                         target: roundGauge
-                        onNeedlecolorChanged: needlecanvas.requestPaint()
-                        onNeedlecolor2Changed: needlecanvas.requestPaint()
-                        onNeedleTipWidthChanged: needlecanvas.requestPaint()
+                        function onNeedlecolorChanged() { needlecanvas.requestPaint(); }
+                        function onNeedlecolor2Changed() { needlecanvas.requestPaint(); }
+                        function onNeedleTipWidthChanged() { needlecanvas.requestPaint(); }
                     }
 
 
@@ -293,8 +291,8 @@ Rectangle{
 
                     Connections{
                         target: roundGauge
-                        onRedareainsetChanged : redcanvas.requestPaint()
-                        onRedareawidthChanged : redcanvas.requestPaint()
+                        function onRedareainsetChanged() { redcanvas.requestPaint(); }
+                        function onRedareawidthChanged() { redcanvas.requestPaint(); }
                     }
 
                     onPaint: {
