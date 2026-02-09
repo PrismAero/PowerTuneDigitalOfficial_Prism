@@ -225,3 +225,46 @@ void SettingsData::setlanguage(int language)
     m_language = language;
     emit languageChanged(m_language);
 }
+
+// * Setters - Country/Track settings
+void SettingsData::setCBXCountrysave(const QString &CBXCountrysave)
+{
+    if (m_CBXCountrysave == CBXCountrysave)
+        return;
+    m_CBXCountrysave = CBXCountrysave;
+    emit CBXCountrysaveChanged(m_CBXCountrysave);
+}
+
+void SettingsData::setCBXTracksave(const QString &CBXTracksave)
+{
+    if (m_CBXTracksave == CBXTracksave)
+        return;
+    m_CBXTracksave = CBXTracksave;
+    emit CBXTracksaveChanged(m_CBXTracksave);
+}
+
+// * Setters - License/Product settings
+void SettingsData::setdaemonlicense(const QString &daemonlicense)
+{
+    if (m_daemonlicense == daemonlicense)
+        return;
+    m_daemonlicense = daemonlicense;
+    emit daemonlicenseChanged(m_daemonlicense);
+}
+
+void SettingsData::setholleyproductid(const QString &holleyproductid)
+{
+    if (m_holleyproductid == holleyproductid)
+        return;
+    m_holleyproductid = holleyproductid;
+    emit holleyproductidChanged(m_holleyproductid);
+}
+
+// * Setters - Additional smoothing
+void SettingsData::setsmootexAnalogInput7(int smootexAnalogInput7)
+{
+    if (m_smootexAnalogInput7 == smootexAnalogInput7)
+        return;
+    m_smootexAnalogInput7 = smootexAnalogInput7;
+    emit smootexAnalogInput7Changed(m_smootexAnalogInput7);
+}

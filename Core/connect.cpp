@@ -115,7 +115,7 @@ Connect::Connect(QObject *parent)
     m_sensorData = new SensorData(this);
     m_connectionData = new ConnectionData(this);
     m_settingsData = new SettingsData(this);
-    // * Phase 4: AppSettings now writes directly to domain models (with Dashboard fallback for unmigrated properties)
+    // * Phase 5: AppSettings now writes directly to domain models (no Dashboard fallback)
     m_appSettings = new AppSettings(
         m_dashBoard,
         m_settingsData,
@@ -125,6 +125,7 @@ Connect::Connect(QObject *parent)
         m_expanderBoardData,
         m_engineData,
         m_connectionData,
+        m_digitalInputs,
         this
     );
     // * Phase 3: Create PropertyRouter for dynamic QML property access
@@ -270,9 +271,9 @@ void Connect::setfilename3(const QString &file3)
 }
 void Connect::setrpm(const int &dash1, const int &dash2, const int &dash3)
 {
-    m_dashBoard->setrpmstyle1(dash1);
-    m_dashBoard->setrpmstyle2(dash2);
-    m_dashBoard->setrpmstyle3(dash3);
+    m_uiState->setrpmstyle1(dash1);
+    m_uiState->setrpmstyle2(dash2);
+    m_uiState->setrpmstyle3(dash3);
 }
 void Connect::checkifraspberrypi()
 {
@@ -285,16 +286,16 @@ void Connect::checkifraspberrypi()
         bool ok;
         int val = line.toInt(&ok);
         // qDebug() <<"Bright " << val ;
-        m_dashBoard->setBrightness(val);
+        m_uiState->setBrightness(val);
         inputFile.close();
     }
     if (QFileInfo::exists(path)) {
-        m_dashBoard->setscreen(true);
+        m_uiState->setscreen(true);
     } else {
-        m_dashBoard->setscreen(false);
+        m_uiState->setscreen(false);
     }
 #ifdef HAVE_DDCUTIL
-    m_dashBoard->setscreen(true);
+    m_uiState->setscreen(true);
 #endif
 }
 void Connect::readavailabledashfiles()
@@ -302,7 +303,7 @@ void Connect::readavailabledashfiles()
     // QDir directory(""); //for Windows
     QDir directory("/home/pi/UserDashboards");
     QStringList dashfiles = directory.entryList(QStringList() << "*.txt", QDir::Files);
-    m_dashBoard->setdashfiles(dashfiles);
+    m_uiState->setdashfiles(dashfiles);
     // qDebug() <<"files" << dashfiles ;
 }
 
@@ -330,7 +331,7 @@ void Connect::readavailablebackrounds()
 #endif
     
     dashfiles.prepend("None");
-    m_dashBoard->setbackroundpictures(dashfiles);
+    m_uiState->setbackroundpictures(dashfiles);
 }
 
 void Connect::readMaindashsetup()
@@ -343,7 +344,7 @@ void Connect::readMaindashsetup()
         while (!in.atEnd()) {
             QString line = in.readLine();
             QStringList list = line.split(QRegularExpression("\\,"));
-            m_dashBoard->setmaindashsetup(list);
+            m_uiState->setmaindashsetup(list);
         }
         inputFile.close();
     }
@@ -369,7 +370,7 @@ void Connect::readdashsetup3()
              list = line.split(QRegularExpression("\\,"));
             }*/
             list.removeAll(QString(""));
-            m_dashBoard->setdashsetup3(list);
+            m_uiState->setdashsetup3(list);
         }
         inputFile.close();
     }
@@ -395,7 +396,7 @@ void Connect::readdashsetup2()
              list = line.split(QRegularExpression("\\,"));
             }*/
             list.removeAll(QString(""));
-            m_dashBoard->setdashsetup2(list);
+            m_uiState->setdashsetup2(list);
         }
         inputFile.close();
     }
@@ -421,7 +422,7 @@ void Connect::readdashsetup1()
              list = line.split(QRegularExpression("\\,"));
             }*/
             list.removeAll(QString(""));
-            m_dashBoard->setdashsetup1(list);
+            m_uiState->setdashsetup1(list);
         }
         inputFile.close();
     }
@@ -449,10 +450,10 @@ void Connect::setSpeedUnits(const int &units1)
 {
     switch (units1) {
     case 0:
-        m_dashBoard->setspeedunits("metric");
+        m_settingsData->setspeedunits("metric");
         break;
     case 1:
-        m_dashBoard->setspeedunits("imperial");
+        m_settingsData->setspeedunits("imperial");
         break;
 
     default:
@@ -463,10 +464,10 @@ void Connect::setUnits(const int &units)
 {
     switch (units) {
     case 0:
-        m_dashBoard->setunits("metric");
+        m_settingsData->setunits("metric");
         break;
     case 1:
-        m_dashBoard->setunits("imperial");
+        m_settingsData->setunits("imperial");
         break;
 
     default:
@@ -477,10 +478,10 @@ void Connect::setPressUnits(const int &units2)
 {
     switch (units2) {
     case 0:
-        m_dashBoard->setpressureunits("metric");
+        m_settingsData->setpressureunits("metric");
         break;
     case 1:
-        m_dashBoard->setpressureunits("imperial");
+        m_settingsData->setpressureunits("imperial");
         break;
 
     default:
@@ -490,12 +491,12 @@ void Connect::setPressUnits(const int &units2)
 
 void Connect::setWeight(const int &weight)
 {
-    m_dashBoard->setWeight(weight);
+    m_vehicleData->setWeight(weight);
 }
 
 void Connect::setOdometer(const qreal &Odometer)
 {
-    m_dashBoard->setOdo(Odometer);
+    m_vehicleData->setOdo(Odometer);
     m_calculations->start();
 }
 void Connect::qmlTreeviewclicked(const QModelIndex &index)
@@ -503,7 +504,7 @@ void Connect::qmlTreeviewclicked(const QModelIndex &index)
     QString mPath = dirModel->fileInfo(index).absoluteFilePath();
     // mPath.remove(0, 2); //this is needed for windows
     QString mPathnew = "file://" + mPath;
-    m_dashBoard->setmusicpath(mPathnew);
+    m_connectionData->setmusicpath(mPathnew);
 }
 
 void Connect::getPorts()
@@ -542,7 +543,7 @@ void Connect::checkOBDReg()
     while (i < list.length()) {
         // qDebug()<< "Enter Loop" <<i;
         int pidread = (list[i].toInt(&ok, 16));
-        m_dashBoard->setsupportedReg(pidread);
+        m_connectionData->setsupportedReg(pidread);
         // qDebug()<< "Reading" << list[i];
         i++;
     }
@@ -568,215 +569,215 @@ void Connect::checkReg()
         // qDebug()<< "Read supported Consult Reg" <<list[i];
         switch (list[i].toInt(&ok, 16)) {
         case 0x00:
-            m_dashBoard->setsupportedReg(0);
+            m_connectionData->setsupportedReg(0);
             i++;
             break;
         case 0x01:
-            m_dashBoard->setsupportedReg(1);
+            m_connectionData->setsupportedReg(1);
             i++;
             break;
         case 0x02:
-            m_dashBoard->setsupportedReg(2);
+            m_connectionData->setsupportedReg(2);
             i++;
             break;
         case 0x03:
-            m_dashBoard->setsupportedReg(3);
+            m_connectionData->setsupportedReg(3);
             i++;
             break;
         case 0x04:
-            m_dashBoard->setsupportedReg(4);
+            m_connectionData->setsupportedReg(4);
             i++;
             break;
         case 0x05:
-            m_dashBoard->setsupportedReg(5);
+            m_connectionData->setsupportedReg(5);
             i++;
             break;
         case 0x06:
-            m_dashBoard->setsupportedReg(6);
+            m_connectionData->setsupportedReg(6);
             i++;
             break;
         case 0x07:
-            m_dashBoard->setsupportedReg(7);
+            m_connectionData->setsupportedReg(7);
             i++;
             break;
         case 0x08:
-            m_dashBoard->setsupportedReg(8);
+            m_connectionData->setsupportedReg(8);
             i++;
             break;
         case 0x09:
-            m_dashBoard->setsupportedReg(9);
+            m_connectionData->setsupportedReg(9);
             i++;
             break;
         case 0x0a:
-            m_dashBoard->setsupportedReg(10);
+            m_connectionData->setsupportedReg(10);
             i++;
             break;
         case 0x0b:
-            m_dashBoard->setsupportedReg(11);
+            m_connectionData->setsupportedReg(11);
             i++;
             break;
         case 0x0c:
-            m_dashBoard->setsupportedReg(12);
+            m_connectionData->setsupportedReg(12);
             i++;
             break;
         case 0x0d:
-            m_dashBoard->setsupportedReg(13);
+            m_connectionData->setsupportedReg(13);
             i++;
             break;
         case 0x0f:
-            m_dashBoard->setsupportedReg(14);
+            m_connectionData->setsupportedReg(14);
             i++;
             break;
         case 0x11:
-            m_dashBoard->setsupportedReg(15);
+            m_connectionData->setsupportedReg(15);
             i++;
             break;
         case 0x12:
-            m_dashBoard->setsupportedReg(16);
+            m_connectionData->setsupportedReg(16);
             i++;
             break;
         case 0x13:
-            m_dashBoard->setsupportedReg(17);
+            m_connectionData->setsupportedReg(17);
             i++;
             break;
         case 0x14:
-            m_dashBoard->setsupportedReg(18);
+            m_connectionData->setsupportedReg(18);
             i++;
             break;
         case 0x15:
-            m_dashBoard->setsupportedReg(19);
+            m_connectionData->setsupportedReg(19);
             i++;
             break;
         case 0x16:
-            m_dashBoard->setsupportedReg(20);
+            m_connectionData->setsupportedReg(20);
             i++;
             break;
         case 0x17:
-            m_dashBoard->setsupportedReg(21);
+            m_connectionData->setsupportedReg(21);
             i++;
             break;
         case 0x1a:
-            m_dashBoard->setsupportedReg(22);
+            m_connectionData->setsupportedReg(22);
             i++;
             break;
         case 0x1b:
-            m_dashBoard->setsupportedReg(23);
+            m_connectionData->setsupportedReg(23);
             i++;
             break;
         case 0x1c:
-            m_dashBoard->setsupportedReg(24);
+            m_connectionData->setsupportedReg(24);
             i++;
             break;
         case 0x1d:
-            m_dashBoard->setsupportedReg(25);
+            m_connectionData->setsupportedReg(25);
             i++;
             break;
         case 0x1e:
-            m_dashBoard->setsupportedReg(26);
+            m_connectionData->setsupportedReg(26);
             i++;
             break;
         case 0x1f:
-            m_dashBoard->setsupportedReg(27);
+            m_connectionData->setsupportedReg(27);
             i++;
             break;
         case 0x21:
-            m_dashBoard->setsupportedReg(28);
+            m_connectionData->setsupportedReg(28);
             i++;
             break;
         case 0x22:
-            m_dashBoard->setsupportedReg(29);
+            m_connectionData->setsupportedReg(29);
             i++;
             break;
         case 0x23:
-            m_dashBoard->setsupportedReg(30);
+            m_connectionData->setsupportedReg(30);
             i++;
             break;
         case 0x28:
-            m_dashBoard->setsupportedReg(31);
+            m_connectionData->setsupportedReg(31);
             i++;
             break;
         case 0x29:  // corrct
-            m_dashBoard->setsupportedReg(32);
+            m_connectionData->setsupportedReg(32);
             i++;
             break;
         case 0x2a:  // corrct
-            m_dashBoard->setsupportedReg(33);
+            m_connectionData->setsupportedReg(33);
             i++;
             break;
         case 0x2e:  // corrct
-            m_dashBoard->setsupportedReg(34);
+            m_connectionData->setsupportedReg(34);
             i++;
             break;
         case 0x25:  // corrct
-            m_dashBoard->setsupportedReg(35);
+            m_connectionData->setsupportedReg(35);
             i++;
             break;
         case 0x26:  // corrct
-            m_dashBoard->setsupportedReg(36);
+            m_connectionData->setsupportedReg(36);
             i++;
             break;
         case 0x27:  // corrct
-            m_dashBoard->setsupportedReg(37);
+            m_connectionData->setsupportedReg(37);
             i++;
             break;
         case 0x2f:
-            m_dashBoard->setsupportedReg(38);
+            m_connectionData->setsupportedReg(38);
             i++;
             break;
         case 0x30:
-            m_dashBoard->setsupportedReg(39);
+            m_connectionData->setsupportedReg(39);
             i++;
             break;
         case 0x31:
-            m_dashBoard->setsupportedReg(40);
+            m_connectionData->setsupportedReg(40);
             i++;
             break;
         case 0x32:
-            m_dashBoard->setsupportedReg(41);
+            m_connectionData->setsupportedReg(41);
             i++;
             break;
         case 0x33:
-            m_dashBoard->setsupportedReg(42);
+            m_connectionData->setsupportedReg(42);
             i++;
             break;
         case 0x34:
-            m_dashBoard->setsupportedReg(43);
+            m_connectionData->setsupportedReg(43);
             i++;
             break;
         case 0x35:
-            m_dashBoard->setsupportedReg(44);
+            m_connectionData->setsupportedReg(44);
             i++;
             break;
         case 0x36:
-            m_dashBoard->setsupportedReg(45);
+            m_connectionData->setsupportedReg(45);
             i++;
             break;
         case 0x37:
-            m_dashBoard->setsupportedReg(46);
+            m_connectionData->setsupportedReg(46);
             i++;
             break;
         case 0x38:
-            m_dashBoard->setsupportedReg(47);
+            m_connectionData->setsupportedReg(47);
             i++;
             break;
         case 0x39:
-            m_dashBoard->setsupportedReg(48);
+            m_connectionData->setsupportedReg(48);
             i++;
             break;
         case 0x3a:
-            m_dashBoard->setsupportedReg(49);
+            m_connectionData->setsupportedReg(49);
             i++;
             break;
         case 0x4a:
-            m_dashBoard->setsupportedReg(50);
+            m_connectionData->setsupportedReg(50);
             i++;
             break;
         case 0x52:
-            m_dashBoard->setsupportedReg(51);
+            m_connectionData->setsupportedReg(51);
             i++;
             break;
         case 0x53:
-            m_dashBoard->setsupportedReg(52);
+            m_connectionData->setsupportedReg(52);
             i++;
             break;
         case 0xFE:
@@ -1430,7 +1431,7 @@ void Connect::changefolderpermission()
 
 void Connect::shutdown()
 {
-    m_dashBoard->setSerialStat("Shutting Down");
+    m_connectionData->setSerialStat("Shutting Down");
     QProcess *process = new QProcess(this);
     QString program = "sudo";
     QStringList arguments;
@@ -1442,7 +1443,7 @@ void Connect::shutdown()
 
 void Connect::reboot()
 {
-    m_dashBoard->setSerialStat("Rebooting");
+    m_connectionData->setSerialStat("Rebooting");
     QProcess *process = new QProcess(this);
     QString program = "sudo";
     QStringList arguments;
@@ -1454,7 +1455,7 @@ void Connect::reboot()
 
 void Connect::turnscreen()
 {
-    m_dashBoard->setSerialStat("Turning Screen");
+    m_connectionData->setSerialStat("Turning Screen");
     QProcess *process = new QProcess(this);
     QString program = "sudo";
     QStringList arguments;
@@ -1504,7 +1505,7 @@ void Connect::processOutput()
     //  if (p)
     QString output = p->readAllStandardOutput();
     //       qDebug() << "redirecting" << output;
-    m_dashBoard->setSerialStat(output);
+    m_connectionData->setSerialStat(output);
 }
 
 void Connect::updatefinished(int exitCode, QProcess::ExitStatus exitStatus)
@@ -1514,10 +1515,10 @@ void Connect::updatefinished(int exitCode, QProcess::ExitStatus exitStatus)
     QString fileName = "/home/pi/build/PowertuneQMLGui";
     QFile file(fileName);
     if (QFileInfo::exists(fileName)) {
-        m_dashBoard->setSerialStat("Update Successful");
+        m_connectionData->setSerialStat("Update Successful");
         file.close();
     } else {
-        m_dashBoard->setSerialStat("Update Unsuccessful");
+        m_connectionData->setSerialStat("Update Unsuccessful");
     }
 }
 
@@ -1536,7 +1537,7 @@ void Connect::RequestLicence()
         QTextStream in(&inputFile);
         while (!in.atEnd()) {
             QString line = in.readLine();
-            m_dashBoard->setSerialStat(line);
+            m_connectionData->setSerialStat(line);
         }
         inputFile.close();
     }

@@ -67,6 +67,17 @@ class SettingsData : public QObject
     // * Language
     Q_PROPERTY(int language READ language WRITE setlanguage NOTIFY languageChanged)
 
+    // * Country/Track settings
+    Q_PROPERTY(QString CBXCountrysave READ CBXCountrysave WRITE setCBXCountrysave NOTIFY CBXCountrysaveChanged)
+    Q_PROPERTY(QString CBXTracksave READ CBXTracksave WRITE setCBXTracksave NOTIFY CBXTracksaveChanged)
+
+    // * License/Product settings
+    Q_PROPERTY(QString daemonlicense READ daemonlicense WRITE setdaemonlicense NOTIFY daemonlicenseChanged)
+    Q_PROPERTY(QString holleyproductid READ holleyproductid WRITE setholleyproductid NOTIFY holleyproductidChanged)
+
+    // * Additional smoothing
+    Q_PROPERTY(int smootexAnalogInput7 READ smootexAnalogInput7 WRITE setsmootexAnalogInput7 NOTIFY smootexAnalogInput7Changed)
+
 public:
     explicit SettingsData(QObject *parent = nullptr);
 
@@ -112,6 +123,17 @@ public:
     // * Getters - Language
     int language() const { return m_language; }
 
+    // * Getters - Country/Track settings
+    QString CBXCountrysave() const { return m_CBXCountrysave; }
+    QString CBXTracksave() const { return m_CBXTracksave; }
+
+    // * Getters - License/Product settings
+    QString daemonlicense() const { return m_daemonlicense; }
+    QString holleyproductid() const { return m_holleyproductid; }
+
+    // * Getters - Additional smoothing
+    int smootexAnalogInput7() const { return m_smootexAnalogInput7; }
+
 public slots:
     // * Setters - Units
     void setunits(const QString &units);
@@ -154,6 +176,17 @@ public slots:
 
     // * Setters - Language
     void setlanguage(int language);
+
+    // * Setters - Country/Track settings
+    void setCBXCountrysave(const QString &CBXCountrysave);
+    void setCBXTracksave(const QString &CBXTracksave);
+
+    // * Setters - License/Product settings
+    void setdaemonlicense(const QString &daemonlicense);
+    void setholleyproductid(const QString &holleyproductid);
+
+    // * Setters - Additional smoothing
+    void setsmootexAnalogInput7(int smootexAnalogInput7);
 
 signals:
     // * Signals - Units
@@ -198,6 +231,17 @@ signals:
     // * Signals - Language
     void languageChanged(int language);
 
+    // * Signals - Country/Track settings
+    void CBXCountrysaveChanged(const QString &CBXCountrysave);
+    void CBXTracksaveChanged(const QString &CBXTracksave);
+
+    // * Signals - License/Product settings
+    void daemonlicenseChanged(const QString &daemonlicense);
+    void holleyproductidChanged(const QString &holleyproductid);
+
+    // * Signals - Additional smoothing
+    void smootexAnalogInput7Changed(int smootexAnalogInput7);
+
 private:
     // * Units
     QString m_units;
@@ -240,6 +284,17 @@ private:
 
     // * Language
     int m_language = 0;
+
+    // * Country/Track settings
+    QString m_CBXCountrysave;
+    QString m_CBXTracksave;
+
+    // * License/Product settings
+    QString m_daemonlicense;
+    QString m_holleyproductid;
+
+    // * Additional smoothing
+    int m_smootexAnalogInput7 = 0;
 };
 
 #endif  // SETTINGSDATA_H

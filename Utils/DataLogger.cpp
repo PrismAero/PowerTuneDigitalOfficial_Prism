@@ -77,7 +77,7 @@ void datalogger::updateLog()
             if (!mFile.open(QFile::Append | QFile::Text)) {}
             QTextStream out(&mFile);
 
-            int ecuValue = m_connectionData ? m_connectionData->ecu() : (m_dashboard ? m_dashboard->ecu() : 0);
+            int ecuValue = m_connectionData ? m_connectionData->ecu() : 0;
             switch (ecuValue) {
             case 0:  ////Apexi ECU
                 out << (loggerStartT.msecsTo(QTime::currentTime())) << "," << (m_engineData ? m_engineData->rpm() : 0) << ","
@@ -258,7 +258,7 @@ void datalogger::updateLog()
 
 void datalogger::createHeader()
 {
-    int ecuValue = m_connectionData ? m_connectionData->ecu() : (m_dashboard ? m_dashboard->ecu() : 0);
+    int ecuValue = m_connectionData ? m_connectionData->ecu() : 0;
     qDebug() << "ECU" << ecuValue;
     QString filename = Log + ".csv";
     QFile file(filename);

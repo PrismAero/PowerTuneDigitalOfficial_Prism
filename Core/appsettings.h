@@ -11,6 +11,7 @@ class AnalogInputs;
 class ExpanderBoardData;
 class EngineData;
 class ConnectionData;
+class DigitalInputs;
 
 class AppSettings : public QObject
 {
@@ -22,7 +23,8 @@ public:
     explicit AppSettings(DashBoard *dashboard, QObject *parent = nullptr);
     explicit AppSettings(DashBoard *dashboard, SettingsData *settingsData, UIState *uiState, VehicleData *vehicleData,
                          AnalogInputs *analogInputs, ExpanderBoardData *expanderBoardData,
-                         EngineData *engineData, ConnectionData *connectionData, QObject *parent = nullptr);
+                         EngineData *engineData, ConnectionData *connectionData,
+                         DigitalInputs *digitalInputs, QObject *parent = nullptr);
 
 
     Q_INVOKABLE int getBaudRate();
@@ -102,6 +104,7 @@ private:
     ExpanderBoardData *m_expanderBoardData;
     EngineData *m_engineData;
     ConnectionData *m_connectionData;
+    DigitalInputs *m_digitalInputs;
 };
 
 #endif  // APPSETTINGS_H
