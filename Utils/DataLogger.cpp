@@ -1,6 +1,16 @@
 #include "DataLogger.h"
 
 #include "../Core/dashboard.h"
+#include "../Core/Models/EngineData.h"
+#include "../Core/Models/VehicleData.h"
+#include "../Core/Models/GPSData.h"
+#include "../Core/Models/SensorData.h"
+#include "../Core/Models/FlagsData.h"
+#include "../Core/Models/AnalogInputs.h"
+#include "../Core/Models/ExpanderBoardData.h"
+#include "../Core/Models/DigitalInputs.h"
+#include "../Core/Models/ConnectionData.h"
+#include "../Core/Models/TimingData.h"
 
 #include <QDebug>
 #include <QFile>
@@ -14,6 +24,30 @@ QString Log;
 
 datalogger::datalogger(QObject *parent) : QObject(parent), m_dashboard(nullptr) {}
 datalogger::datalogger(DashBoard *dashboard, QObject *parent) : QObject(parent), m_dashboard(dashboard) {}
+datalogger::datalogger(
+    EngineData *engineData,
+    VehicleData *vehicleData,
+    GPSData *gpsData,
+    SensorData *sensorData,
+    FlagsData *flagsData,
+    AnalogInputs *analogInputs,
+    ExpanderBoardData *expanderBoardData,
+    DigitalInputs *digitalInputs,
+    ConnectionData *connectionData,
+    TimingData *timingData,
+    QObject *parent
+) : QObject(parent),
+    m_engineData(engineData),
+    m_vehicleData(vehicleData),
+    m_gpsData(gpsData),
+    m_sensorData(sensorData),
+    m_flagsData(flagsData),
+    m_analogInputs(analogInputs),
+    m_expanderBoardData(expanderBoardData),
+    m_digitalInputs(digitalInputs),
+    m_connectionData(connectionData),
+    m_timingData(timingData)
+{}
 
 void datalogger::startLog(QString Logfilename)
 {
@@ -43,176 +77,177 @@ void datalogger::updateLog()
             if (!mFile.open(QFile::Append | QFile::Text)) {}
             QTextStream out(&mFile);
 
-            switch (m_dashboard->ecu()) {
+            int ecuValue = m_connectionData ? m_connectionData->ecu() : (m_dashboard ? m_dashboard->ecu() : 0);
+            switch (ecuValue) {
             case 0:  ////Apexi ECU
-                out << (loggerStartT.msecsTo(QTime::currentTime())) << "," << m_dashboard->rpm() << ","
-                    << m_dashboard->Intakepress() << "," << m_dashboard->PressureV() << "," << m_dashboard->ThrottleV()
-                    << "," << m_dashboard->Primaryinp() << "," << m_dashboard->Fuelc() << ","
-                    << m_dashboard->Leadingign() << "," << m_dashboard->Trailingign() << "," << m_dashboard->Fueltemp()
-                    << "," << m_dashboard->Moilp() << "," << m_dashboard->Boosttp() << "," << m_dashboard->Boostwg()
-                    << "," << m_dashboard->Watertemp() << "," << m_dashboard->Intaketemp() << ","
-                    << m_dashboard->Knock() << "," << m_dashboard->BatteryV() << "," << m_dashboard->speed() << ","
-                    << m_dashboard->Iscvduty() << "," << m_dashboard->O2volt() << "," << m_dashboard->na1() << ","
-                    << m_dashboard->Secinjpulse() << "," << m_dashboard->na2() << "," << m_dashboard->InjDuty() << ","
-                    << m_dashboard->EngLoad() << "," << m_dashboard->MAF1V() << "," << m_dashboard->MAF2V() << ","
-                    << m_dashboard->injms() << "," << m_dashboard->Inj() << "," << m_dashboard->Ign() << ","
-                    << m_dashboard->Dwell() << "," << m_dashboard->BoostPres() << "," << m_dashboard->BoostDuty() << ","
-                    << m_dashboard->MAFactivity() << "," << m_dashboard->O2volt_2() << "," << m_dashboard->pim() << ","
-                    << m_dashboard->auxcalc1() << "," << m_dashboard->auxcalc2() << "," << m_dashboard->sens1() << ","
-                    << m_dashboard->sens2() << "," << m_dashboard->sens3() << "," << m_dashboard->sens4() << ","
-                    << m_dashboard->sens5() << "," << m_dashboard->sens6() << "," << m_dashboard->sens7() << ","
-                    << m_dashboard->sens8() << "," << m_dashboard->Flag1() << "," << m_dashboard->Flag2() << ","
-                    << m_dashboard->Flag3() << "," << m_dashboard->Flag4() << "," << m_dashboard->Flag5() << ","
-                    << m_dashboard->Flag6() << "," << m_dashboard->Flag7() << "," << m_dashboard->Flag8() << ","
-                    << m_dashboard->Flag9() << "," << m_dashboard->Flag10() << "," << m_dashboard->Flag11() << ","
-                    << m_dashboard->Flag12() << "," << m_dashboard->Flag13() << "," << m_dashboard->Flag14() << ","
-                    << m_dashboard->Flag15() << "," << m_dashboard->Flag16() << "," << m_dashboard->MAP() << ","
-                    << m_dashboard->AUXT() << "," << m_dashboard->AFR() << "," << m_dashboard->TPS() << ","
-                    << m_dashboard->IdleValue() << "," << m_dashboard->MVSS() << "," << m_dashboard->SVSS() << ","
-                    << m_dashboard->Inj1() << "," << m_dashboard->Inj2() << "," << m_dashboard->Inj3() << ","
-                    << m_dashboard->Inj4() << "," << m_dashboard->Ign1() << "," << m_dashboard->Ign2() << ","
-                    << m_dashboard->Ign3() << "," << m_dashboard->Ign4() << "," << m_dashboard->TRIM() << ","
-                    << m_dashboard->gpsTime() << "," << m_dashboard->gpsAltitude() << ","
-                    << QString("%1").arg(m_dashboard->gpsLatitude(), 0, 'f', 6) << ","
-                    << QString("%1").arg(m_dashboard->gpsLongitude(), 0, 'f', 6)
+                out << (loggerStartT.msecsTo(QTime::currentTime())) << "," << (m_engineData ? m_engineData->rpm() : 0) << ","
+                    << (m_engineData ? m_engineData->Intakepress() : 0) << "," << (m_engineData ? m_engineData->PressureV() : 0) << "," << (m_engineData ? m_engineData->ThrottleV() : 0)
+                    << "," << (m_engineData ? m_engineData->Primaryinp() : 0) << "," << (m_engineData ? m_engineData->Fuelc() : 0) << ","
+                    << (m_engineData ? m_engineData->Leadingign() : 0) << "," << (m_engineData ? m_engineData->Trailingign() : 0) << "," << (m_engineData ? m_engineData->Fueltemp() : 0)
+                    << "," << (m_engineData ? m_engineData->Moilp() : 0) << "," << (m_engineData ? m_engineData->Boosttp() : 0) << "," << (m_engineData ? m_engineData->Boostwg() : 0)
+                    << "," << (m_engineData ? m_engineData->Watertemp() : 0) << "," << (m_engineData ? m_engineData->Intaketemp() : 0) << ","
+                    << (m_engineData ? m_engineData->Knock() : 0) << "," << (m_engineData ? m_engineData->BatteryV() : 0) << "," << (m_vehicleData ? m_vehicleData->speed() : 0) << ","
+                    << (m_engineData ? m_engineData->Iscvduty() : 0) << "," << (m_engineData ? m_engineData->O2volt() : 0) << "," << (m_engineData ? m_engineData->na1() : 0) << ","
+                    << (m_engineData ? m_engineData->Secinjpulse() : 0) << "," << (m_engineData ? m_engineData->na2() : 0) << "," << (m_engineData ? m_engineData->InjDuty() : 0) << ","
+                    << (m_engineData ? m_engineData->EngLoad() : 0) << "," << (m_engineData ? m_engineData->MAF1V() : 0) << "," << (m_engineData ? m_engineData->MAF2V() : 0) << ","
+                    << (m_engineData ? m_engineData->injms() : 0) << "," << (m_engineData ? m_engineData->Inj() : 0) << "," << (m_engineData ? m_engineData->Ign() : 0) << ","
+                    << (m_engineData ? m_engineData->Dwell() : 0) << "," << (m_engineData ? m_engineData->BoostPres() : 0) << "," << (m_engineData ? m_engineData->BoostDuty() : 0) << ","
+                    << (m_engineData ? m_engineData->MAFactivity() : 0) << "," << (m_engineData ? m_engineData->O2volt_2() : 0) << "," << (m_engineData ? m_engineData->pim() : 0) << ","
+                    << (m_sensorData ? m_sensorData->auxcalc1() : 0) << "," << (m_sensorData ? m_sensorData->auxcalc2() : 0) << "," << (m_sensorData ? m_sensorData->sens1() : 0) << ","
+                    << (m_sensorData ? m_sensorData->sens2() : 0) << "," << (m_sensorData ? m_sensorData->sens3() : 0) << "," << (m_sensorData ? m_sensorData->sens4() : 0) << ","
+                    << (m_sensorData ? m_sensorData->sens5() : 0) << "," << (m_sensorData ? m_sensorData->sens6() : 0) << "," << (m_sensorData ? m_sensorData->sens7() : 0) << ","
+                    << (m_sensorData ? m_sensorData->sens8() : 0) << "," << (m_flagsData ? m_flagsData->Flag1() : 0) << "," << (m_flagsData ? m_flagsData->Flag2() : 0) << ","
+                    << (m_flagsData ? m_flagsData->Flag3() : 0) << "," << (m_flagsData ? m_flagsData->Flag4() : 0) << "," << (m_flagsData ? m_flagsData->Flag5() : 0) << ","
+                    << (m_flagsData ? m_flagsData->Flag6() : 0) << "," << (m_flagsData ? m_flagsData->Flag7() : 0) << "," << (m_flagsData ? m_flagsData->Flag8() : 0) << ","
+                    << (m_flagsData ? m_flagsData->Flag9() : 0) << "," << (m_flagsData ? m_flagsData->Flag10() : 0) << "," << (m_flagsData ? m_flagsData->Flag11() : 0) << ","
+                    << (m_flagsData ? m_flagsData->Flag12() : 0) << "," << (m_flagsData ? m_flagsData->Flag13() : 0) << "," << (m_flagsData ? m_flagsData->Flag14() : 0) << ","
+                    << (m_flagsData ? m_flagsData->Flag15() : 0) << "," << (m_flagsData ? m_flagsData->Flag16() : 0) << "," << (m_engineData ? m_engineData->MAP() : 0) << ","
+                    << (m_engineData ? m_engineData->AUXT() : 0) << "," << (m_engineData ? m_engineData->AFR() : 0) << "," << (m_engineData ? m_engineData->TPS() : 0) << ","
+                    << (m_engineData ? m_engineData->IdleValue() : 0) << "," << (m_vehicleData ? m_vehicleData->MVSS() : 0) << "," << (m_vehicleData ? m_vehicleData->SVSS() : 0) << ","
+                    << (m_engineData ? m_engineData->Inj1() : 0) << "," << (m_engineData ? m_engineData->Inj2() : 0) << "," << (m_engineData ? m_engineData->Inj3() : 0) << ","
+                    << (m_engineData ? m_engineData->Inj4() : 0) << "," << (m_engineData ? m_engineData->Ign1() : 0) << "," << (m_engineData ? m_engineData->Ign2() : 0) << ","
+                    << (m_engineData ? m_engineData->Ign3() : 0) << "," << (m_engineData ? m_engineData->Ign4() : 0) << "," << (m_engineData ? m_engineData->TRIM() : 0) << ","
+                    << (m_gpsData ? m_gpsData->gpsTime() : QString()) << "," << (m_gpsData ? m_gpsData->gpsAltitude() : 0) << ","
+                    << QString("%1").arg(m_gpsData ? m_gpsData->gpsLatitude() : 0, 0, 'f', 6) << ","
+                    << QString("%1").arg(m_gpsData ? m_gpsData->gpsLongitude() : 0, 0, 'f', 6)
                     << ","
-                    //<< m_dashboard->gpsLatitude()  << "," << << QString("%1").arg(x, 0, 'f', 6)
-                    // << m_dashboard->gpsLongitude()   << ","
-                    << m_dashboard->gpsSpeed() << "," << m_dashboard->gpsVisibleSatelites() << ","
-                    << m_dashboard->accelx() << "," << m_dashboard->accely() << "," << m_dashboard->accelz() << ","
-                    << m_dashboard->gyrox() << "," << m_dashboard->gyroy() << "," << m_dashboard->gyroz() << ","
-                    << m_dashboard->compass() << "," << m_dashboard->ambitemp() << "," << m_dashboard->ambipress()
-                    << "," << m_dashboard->currentLap() << "," << m_dashboard->laptime() << ","
-                    << m_dashboard->EXAnalogInput0() << "," << m_dashboard->EXAnalogInput1() << ","
-                    << m_dashboard->EXAnalogInput2() << "," << m_dashboard->EXAnalogInput3() << ","
-                    << m_dashboard->EXAnalogInput4() << "," << m_dashboard->EXAnalogInput5() << ","
-                    << m_dashboard->EXAnalogInput6() << "," << m_dashboard->EXAnalogInput7() << ","
-                    << m_dashboard->EXAnalogCalc0() << "," << m_dashboard->EXAnalogCalc1() << ","
-                    << m_dashboard->EXAnalogCalc2() << "," << m_dashboard->EXAnalogCalc3() << ","
-                    << m_dashboard->EXAnalogCalc4() << "," << m_dashboard->EXAnalogCalc5() << ","
-                    << m_dashboard->EXAnalogCalc6() << "," << m_dashboard->EXAnalogCalc7() << ","
-                    << m_dashboard->EXDigitalInput1() << "," << m_dashboard->EXDigitalInput2() << ","
-                    << m_dashboard->EXDigitalInput3() << "," << m_dashboard->EXDigitalInput4() << ","
-                    << m_dashboard->EXDigitalInput5() << "," << m_dashboard->EXDigitalInput6() << ","
-                    << m_dashboard->EXDigitalInput7() << "," << m_dashboard->EXDigitalInput8() << "," << Qt::endl;
+                    //<< m_gpsData->gpsLatitude()  << "," << << QString("%1").arg(x, 0, 'f', 6)
+                    // << m_gpsData->gpsLongitude()   << ","
+                    << (m_gpsData ? m_gpsData->gpsSpeed() : 0) << "," << (m_gpsData ? m_gpsData->gpsVisibleSatelites() : 0) << ","
+                    << (m_vehicleData ? m_vehicleData->accelx() : 0) << "," << (m_vehicleData ? m_vehicleData->accely() : 0) << "," << (m_vehicleData ? m_vehicleData->accelz() : 0) << ","
+                    << (m_vehicleData ? m_vehicleData->gyrox() : 0) << "," << (m_vehicleData ? m_vehicleData->gyroy() : 0) << "," << (m_vehicleData ? m_vehicleData->gyroz() : 0) << ","
+                    << (m_vehicleData ? m_vehicleData->compass() : 0) << "," << (m_vehicleData ? m_vehicleData->ambitemp() : 0) << "," << (m_vehicleData ? m_vehicleData->ambipress() : 0)
+                    << "," << (m_timingData ? m_timingData->currentLap() : 0) << "," << (m_timingData ? m_timingData->laptime() : QString()) << ","
+                    << (m_expanderBoardData ? m_expanderBoardData->EXAnalogInput0() : 0) << "," << (m_expanderBoardData ? m_expanderBoardData->EXAnalogInput1() : 0) << ","
+                    << (m_expanderBoardData ? m_expanderBoardData->EXAnalogInput2() : 0) << "," << (m_expanderBoardData ? m_expanderBoardData->EXAnalogInput3() : 0) << ","
+                    << (m_expanderBoardData ? m_expanderBoardData->EXAnalogInput4() : 0) << "," << (m_expanderBoardData ? m_expanderBoardData->EXAnalogInput5() : 0) << ","
+                    << (m_expanderBoardData ? m_expanderBoardData->EXAnalogInput6() : 0) << "," << (m_expanderBoardData ? m_expanderBoardData->EXAnalogInput7() : 0) << ","
+                    << (m_expanderBoardData ? m_expanderBoardData->EXAnalogCalc0() : 0) << "," << (m_expanderBoardData ? m_expanderBoardData->EXAnalogCalc1() : 0) << ","
+                    << (m_expanderBoardData ? m_expanderBoardData->EXAnalogCalc2() : 0) << "," << (m_expanderBoardData ? m_expanderBoardData->EXAnalogCalc3() : 0) << ","
+                    << (m_expanderBoardData ? m_expanderBoardData->EXAnalogCalc4() : 0) << "," << (m_expanderBoardData ? m_expanderBoardData->EXAnalogCalc5() : 0) << ","
+                    << (m_expanderBoardData ? m_expanderBoardData->EXAnalogCalc6() : 0) << "," << (m_expanderBoardData ? m_expanderBoardData->EXAnalogCalc7() : 0) << ","
+                    << (m_digitalInputs ? m_digitalInputs->EXDigitalInput1() : 0) << "," << (m_digitalInputs ? m_digitalInputs->EXDigitalInput2() : 0) << ","
+                    << (m_digitalInputs ? m_digitalInputs->EXDigitalInput3() : 0) << "," << (m_digitalInputs ? m_digitalInputs->EXDigitalInput4() : 0) << ","
+                    << (m_digitalInputs ? m_digitalInputs->EXDigitalInput5() : 0) << "," << (m_digitalInputs ? m_digitalInputs->EXDigitalInput6() : 0) << ","
+                    << (m_digitalInputs ? m_digitalInputs->EXDigitalInput7() : 0) << "," << (m_digitalInputs ? m_digitalInputs->EXDigitalInput8() : 0) << "," << Qt::endl;
                 mFile.close();
                 break;
             case 1:  ////Link ECU Generic CAN
-                out << (loggerStartT.msecsTo(QTime::currentTime())) << "," << m_dashboard->rpm() << ","
-                    << m_dashboard->MAP() << ","
-                    << "MGP" << "," << m_dashboard->ambipress() << "," << m_dashboard->TPS() << ","
-                    << m_dashboard->InjDuty() << "," << m_dashboard->InjDuty2() << "," << m_dashboard->injms() << ","
-                    << m_dashboard->Watertemp() << "," << m_dashboard->Intaketemp() << "," << m_dashboard->BatteryV()
-                    << "," << m_dashboard->MAFactivity() << "," << m_dashboard->Gear() << "," << m_dashboard->InjAngle()
-                    << "," << m_dashboard->Ign() << "," << m_dashboard->incamangle1() << ","
-                    << m_dashboard->incamangle2() << "," << m_dashboard->excamangle1() << ","
-                    << m_dashboard->excamangle2() << "," << m_dashboard->LAMBDA() << "," << m_dashboard->lambda2()
+                out << (loggerStartT.msecsTo(QTime::currentTime())) << "," << (m_engineData ? m_engineData->rpm() : 0) << ","
+                    << (m_engineData ? m_engineData->MAP() : 0) << ","
+                    << "MGP" << "," << (m_vehicleData ? m_vehicleData->ambipress() : 0) << "," << (m_engineData ? m_engineData->TPS() : 0) << ","
+                    << (m_engineData ? m_engineData->InjDuty() : 0) << "," << (m_engineData ? m_engineData->InjDuty2() : 0) << "," << (m_engineData ? m_engineData->injms() : 0) << ","
+                    << (m_engineData ? m_engineData->Watertemp() : 0) << "," << (m_engineData ? m_engineData->Intaketemp() : 0) << "," << (m_engineData ? m_engineData->BatteryV() : 0)
+                    << "," << (m_engineData ? m_engineData->MAFactivity() : 0) << "," << (m_vehicleData ? m_vehicleData->Gear() : 0) << "," << (m_engineData ? m_engineData->InjAngle() : 0)
+                    << "," << (m_engineData ? m_engineData->Ign() : 0) << "," << (m_engineData ? m_engineData->incamangle1() : 0) << ","
+                    << (m_engineData ? m_engineData->incamangle2() : 0) << "," << (m_engineData ? m_engineData->excamangle1() : 0) << ","
+                    << (m_engineData ? m_engineData->excamangle2() : 0) << "," << (m_engineData ? m_engineData->LAMBDA() : 0) << "," << (m_engineData ? m_engineData->lambda2() : 0)
                     << ","
-                    << "Trig 1 Error Counter" << "," << m_dashboard->Error() << "," << m_dashboard->FuelPress() << ","
-                    << m_dashboard->oiltemp() << "," << m_dashboard->oilpres() << "," << m_dashboard->wheelspdftleft()
-                    << "," << m_dashboard->wheelspdrearleft() << "," << m_dashboard->wheelspdftright() << ","
-                    << m_dashboard->wheelspdrearright() << "," << m_dashboard->Knock() << ","
+                    << "Trig 1 Error Counter" << "," << (m_connectionData ? m_connectionData->Error() : QString()) << "," << (m_engineData ? m_engineData->FuelPress() : 0) << ","
+                    << (m_engineData ? m_engineData->oiltemp() : 0) << "," << (m_engineData ? m_engineData->oilpres() : 0) << "," << (m_vehicleData ? m_vehicleData->wheelspdftleft() : 0)
+                    << "," << (m_vehicleData ? m_vehicleData->wheelspdrearleft() : 0) << "," << (m_vehicleData ? m_vehicleData->wheelspdftright() : 0) << ","
+                    << (m_vehicleData ? m_vehicleData->wheelspdrearright() : 0) << "," << (m_engineData ? m_engineData->Knock() : 0) << ","
                     << "Knock Level 2" << ","
                     << "Knock Level 3" << ","
                     << "Knock Level 4" << ","
                     << "Knock Level 5" << ","
                     << "Knock Level 6" << ","
                     << "Knock Level 7" << ","
-                    << "Knock Level 8" << "," << m_dashboard->currentLap() << "," << m_dashboard->laptime() << ","
-                    << m_dashboard->EXAnalogInput0() << "," << m_dashboard->EXAnalogInput1() << ","
-                    << m_dashboard->EXAnalogInput2() << "," << m_dashboard->EXAnalogInput3() << ","
-                    << m_dashboard->EXAnalogInput4() << "," << m_dashboard->EXAnalogInput5() << ","
-                    << m_dashboard->EXAnalogInput6() << "," << m_dashboard->EXAnalogInput7() << ","
-                    << m_dashboard->EXAnalogCalc0() << "," << m_dashboard->EXAnalogCalc1() << ","
-                    << m_dashboard->EXAnalogCalc2() << "," << m_dashboard->EXAnalogCalc3() << ","
-                    << m_dashboard->EXAnalogCalc4() << "," << m_dashboard->EXAnalogCalc5() << ","
-                    << m_dashboard->EXAnalogCalc6() << "," << m_dashboard->EXAnalogCalc7() << ","
-                    << m_dashboard->EXDigitalInput1() << "," << m_dashboard->EXDigitalInput2() << ","
-                    << m_dashboard->EXDigitalInput3() << "," << m_dashboard->EXDigitalInput4() << ","
-                    << m_dashboard->EXDigitalInput5() << "," << m_dashboard->EXDigitalInput6() << ","
-                    << m_dashboard->EXDigitalInput7() << "," << m_dashboard->EXDigitalInput8() << "," << Qt::endl;
+                    << "Knock Level 8" << "," << (m_timingData ? m_timingData->currentLap() : 0) << "," << (m_timingData ? m_timingData->laptime() : QString()) << ","
+                    << (m_expanderBoardData ? m_expanderBoardData->EXAnalogInput0() : 0) << "," << (m_expanderBoardData ? m_expanderBoardData->EXAnalogInput1() : 0) << ","
+                    << (m_expanderBoardData ? m_expanderBoardData->EXAnalogInput2() : 0) << "," << (m_expanderBoardData ? m_expanderBoardData->EXAnalogInput3() : 0) << ","
+                    << (m_expanderBoardData ? m_expanderBoardData->EXAnalogInput4() : 0) << "," << (m_expanderBoardData ? m_expanderBoardData->EXAnalogInput5() : 0) << ","
+                    << (m_expanderBoardData ? m_expanderBoardData->EXAnalogInput6() : 0) << "," << (m_expanderBoardData ? m_expanderBoardData->EXAnalogInput7() : 0) << ","
+                    << (m_expanderBoardData ? m_expanderBoardData->EXAnalogCalc0() : 0) << "," << (m_expanderBoardData ? m_expanderBoardData->EXAnalogCalc1() : 0) << ","
+                    << (m_expanderBoardData ? m_expanderBoardData->EXAnalogCalc2() : 0) << "," << (m_expanderBoardData ? m_expanderBoardData->EXAnalogCalc3() : 0) << ","
+                    << (m_expanderBoardData ? m_expanderBoardData->EXAnalogCalc4() : 0) << "," << (m_expanderBoardData ? m_expanderBoardData->EXAnalogCalc5() : 0) << ","
+                    << (m_expanderBoardData ? m_expanderBoardData->EXAnalogCalc6() : 0) << "," << (m_expanderBoardData ? m_expanderBoardData->EXAnalogCalc7() : 0) << ","
+                    << (m_digitalInputs ? m_digitalInputs->EXDigitalInput1() : 0) << "," << (m_digitalInputs ? m_digitalInputs->EXDigitalInput2() : 0) << ","
+                    << (m_digitalInputs ? m_digitalInputs->EXDigitalInput3() : 0) << "," << (m_digitalInputs ? m_digitalInputs->EXDigitalInput4() : 0) << ","
+                    << (m_digitalInputs ? m_digitalInputs->EXDigitalInput5() : 0) << "," << (m_digitalInputs ? m_digitalInputs->EXDigitalInput6() : 0) << ","
+                    << (m_digitalInputs ? m_digitalInputs->EXDigitalInput7() : 0) << "," << (m_digitalInputs ? m_digitalInputs->EXDigitalInput8() : 0) << "," << Qt::endl;
                 mFile.close();
                 break;
             case 2:  ////Toyota86 BRZ FRS
-                out << (loggerStartT.msecsTo(QTime::currentTime())) << "," << m_dashboard->rpm() << ","
-                    << m_dashboard->Watertemp() << "," << m_dashboard->oiltemp() << "," << m_dashboard->wheelspdftleft()
-                    << "," << m_dashboard->wheelspdrearleft() << "," << m_dashboard->wheelspdftright() << ","
-                    << m_dashboard->wheelspdrearright() << "," << m_dashboard->SteeringWheelAngle() << ","
-                    << m_dashboard->brakepress() << "," << m_dashboard->gpsTime() << "," << m_dashboard->gpsAltitude()
-                    << "," << QString("%1").arg(m_dashboard->gpsLatitude(), 0, 'f', 6) << ","
-                    << QString("%1").arg(m_dashboard->gpsLongitude(), 0, 'f', 6) << "," << m_dashboard->gpsSpeed()
-                    << "," << m_dashboard->currentLap() << "," << m_dashboard->laptime() << ","
-                    << m_dashboard->EXAnalogInput0() << "," << m_dashboard->EXAnalogInput1() << ","
-                    << m_dashboard->EXAnalogInput2() << "," << m_dashboard->EXAnalogInput3() << ","
-                    << m_dashboard->EXAnalogInput4() << "," << m_dashboard->EXAnalogInput5() << ","
-                    << m_dashboard->EXAnalogInput6() << "," << m_dashboard->EXAnalogInput7() << ","
-                    << m_dashboard->EXAnalogCalc0() << "," << m_dashboard->EXAnalogCalc1() << ","
-                    << m_dashboard->EXAnalogCalc2() << "," << m_dashboard->EXAnalogCalc3() << ","
-                    << m_dashboard->EXAnalogCalc4() << "," << m_dashboard->EXAnalogCalc5() << ","
-                    << m_dashboard->EXAnalogCalc6() << "," << m_dashboard->EXAnalogCalc7() << ","
-                    << m_dashboard->EXDigitalInput1() << "," << m_dashboard->EXDigitalInput2() << ","
-                    << m_dashboard->EXDigitalInput3() << "," << m_dashboard->EXDigitalInput4() << ","
-                    << m_dashboard->EXDigitalInput5() << "," << m_dashboard->EXDigitalInput6() << ","
-                    << m_dashboard->EXDigitalInput7() << "," << m_dashboard->EXDigitalInput8() << "," << Qt::endl;
+                out << (loggerStartT.msecsTo(QTime::currentTime())) << "," << (m_engineData ? m_engineData->rpm() : 0) << ","
+                    << (m_engineData ? m_engineData->Watertemp() : 0) << "," << (m_engineData ? m_engineData->oiltemp() : 0) << "," << (m_vehicleData ? m_vehicleData->wheelspdftleft() : 0)
+                    << "," << (m_vehicleData ? m_vehicleData->wheelspdrearleft() : 0) << "," << (m_vehicleData ? m_vehicleData->wheelspdftright() : 0) << ","
+                    << (m_vehicleData ? m_vehicleData->wheelspdrearright() : 0) << "," << (m_vehicleData ? m_vehicleData->SteeringWheelAngle() : 0) << ","
+                    << (m_engineData ? m_engineData->brakepress() : 0) << "," << (m_gpsData ? m_gpsData->gpsTime() : QString()) << "," << (m_gpsData ? m_gpsData->gpsAltitude() : 0)
+                    << "," << QString("%1").arg(m_gpsData ? m_gpsData->gpsLatitude() : 0, 0, 'f', 6) << ","
+                    << QString("%1").arg(m_gpsData ? m_gpsData->gpsLongitude() : 0, 0, 'f', 6) << "," << (m_gpsData ? m_gpsData->gpsSpeed() : 0)
+                    << "," << (m_timingData ? m_timingData->currentLap() : 0) << "," << (m_timingData ? m_timingData->laptime() : QString()) << ","
+                    << (m_expanderBoardData ? m_expanderBoardData->EXAnalogInput0() : 0) << "," << (m_expanderBoardData ? m_expanderBoardData->EXAnalogInput1() : 0) << ","
+                    << (m_expanderBoardData ? m_expanderBoardData->EXAnalogInput2() : 0) << "," << (m_expanderBoardData ? m_expanderBoardData->EXAnalogInput3() : 0) << ","
+                    << (m_expanderBoardData ? m_expanderBoardData->EXAnalogInput4() : 0) << "," << (m_expanderBoardData ? m_expanderBoardData->EXAnalogInput5() : 0) << ","
+                    << (m_expanderBoardData ? m_expanderBoardData->EXAnalogInput6() : 0) << "," << (m_expanderBoardData ? m_expanderBoardData->EXAnalogInput7() : 0) << ","
+                    << (m_expanderBoardData ? m_expanderBoardData->EXAnalogCalc0() : 0) << "," << (m_expanderBoardData ? m_expanderBoardData->EXAnalogCalc1() : 0) << ","
+                    << (m_expanderBoardData ? m_expanderBoardData->EXAnalogCalc2() : 0) << "," << (m_expanderBoardData ? m_expanderBoardData->EXAnalogCalc3() : 0) << ","
+                    << (m_expanderBoardData ? m_expanderBoardData->EXAnalogCalc4() : 0) << "," << (m_expanderBoardData ? m_expanderBoardData->EXAnalogCalc5() : 0) << ","
+                    << (m_expanderBoardData ? m_expanderBoardData->EXAnalogCalc6() : 0) << "," << (m_expanderBoardData ? m_expanderBoardData->EXAnalogCalc7() : 0) << ","
+                    << (m_digitalInputs ? m_digitalInputs->EXDigitalInput1() : 0) << "," << (m_digitalInputs ? m_digitalInputs->EXDigitalInput2() : 0) << ","
+                    << (m_digitalInputs ? m_digitalInputs->EXDigitalInput3() : 0) << "," << (m_digitalInputs ? m_digitalInputs->EXDigitalInput4() : 0) << ","
+                    << (m_digitalInputs ? m_digitalInputs->EXDigitalInput5() : 0) << "," << (m_digitalInputs ? m_digitalInputs->EXDigitalInput6() : 0) << ","
+                    << (m_digitalInputs ? m_digitalInputs->EXDigitalInput7() : 0) << "," << (m_digitalInputs ? m_digitalInputs->EXDigitalInput8() : 0) << "," << Qt::endl;
                 mFile.close();
                 break;
             case 5:  ////ECU MASTERS EMU CAN
                 out << (loggerStartT.msecsTo(QTime::currentTime())) << ","
 
-                    << m_dashboard->rpm() << "," << m_dashboard->TPS() << "," << m_dashboard->injms() << ","
-                    << m_dashboard->speed() << "," << m_dashboard->ambipress() << "," << m_dashboard->oiltemp() << ","
-                    << m_dashboard->oilpres() << "," << m_dashboard->FuelPress() << "," << m_dashboard->Watertemp()
-                    << "," << m_dashboard->Ign() << "," << m_dashboard->Dwell() << "," << m_dashboard->LAMBDA() << ","
-                    << m_dashboard->LAMBDA() << "," << m_dashboard->egt1() << "," << m_dashboard->egt2() << ","
-                    << m_dashboard->Gear() << "," << m_dashboard->BatteryV() << "," << m_dashboard->fuelcomposition()
-                    << "," << m_dashboard->Analog1() << "," << m_dashboard->Analog2() << "," << m_dashboard->Analog3()
-                    << "," << m_dashboard->Analog4() << "," << m_dashboard->Analog5() << "," << m_dashboard->Analog6()
-                    << "," << m_dashboard->gpsTime() << "," << m_dashboard->gpsAltitude() << ","
-                    << QString("%1").arg(m_dashboard->gpsLatitude(), 0, 'f', 6) << ","
-                    << QString("%1").arg(m_dashboard->gpsLongitude(), 0, 'f', 6) << "," << m_dashboard->gpsSpeed()
-                    << "," << m_dashboard->currentLap() << "," << m_dashboard->laptime() << ","
-                    << m_dashboard->EXAnalogInput0() << "," << m_dashboard->EXAnalogInput1() << ","
-                    << m_dashboard->EXAnalogInput2() << "," << m_dashboard->EXAnalogInput3() << ","
-                    << m_dashboard->EXAnalogInput4() << "," << m_dashboard->EXAnalogInput5() << ","
-                    << m_dashboard->EXAnalogInput6() << "," << m_dashboard->EXAnalogInput7() << ","
-                    << m_dashboard->EXAnalogCalc0() << "," << m_dashboard->EXAnalogCalc1() << ","
-                    << m_dashboard->EXAnalogCalc2() << "," << m_dashboard->EXAnalogCalc3() << ","
-                    << m_dashboard->EXAnalogCalc4() << "," << m_dashboard->EXAnalogCalc5() << ","
-                    << m_dashboard->EXAnalogCalc6() << "," << m_dashboard->EXAnalogCalc7() << ","
-                    << m_dashboard->EXDigitalInput1() << "," << m_dashboard->EXDigitalInput2() << ","
-                    << m_dashboard->EXDigitalInput3() << "," << m_dashboard->EXDigitalInput4() << ","
-                    << m_dashboard->EXDigitalInput5() << "," << m_dashboard->EXDigitalInput6() << ","
-                    << m_dashboard->EXDigitalInput7() << "," << m_dashboard->EXDigitalInput8() << "," << Qt::endl;
+                    << (m_engineData ? m_engineData->rpm() : 0) << "," << (m_engineData ? m_engineData->TPS() : 0) << "," << (m_engineData ? m_engineData->injms() : 0) << ","
+                    << (m_vehicleData ? m_vehicleData->speed() : 0) << "," << (m_vehicleData ? m_vehicleData->ambipress() : 0) << "," << (m_engineData ? m_engineData->oiltemp() : 0) << ","
+                    << (m_engineData ? m_engineData->oilpres() : 0) << "," << (m_engineData ? m_engineData->FuelPress() : 0) << "," << (m_engineData ? m_engineData->Watertemp() : 0)
+                    << "," << (m_engineData ? m_engineData->Ign() : 0) << "," << (m_engineData ? m_engineData->Dwell() : 0) << "," << (m_engineData ? m_engineData->LAMBDA() : 0) << ","
+                    << (m_engineData ? m_engineData->LAMBDA() : 0) << "," << (m_engineData ? m_engineData->egt1() : 0) << "," << (m_engineData ? m_engineData->egt2() : 0) << ","
+                    << (m_vehicleData ? m_vehicleData->Gear() : 0) << "," << (m_engineData ? m_engineData->BatteryV() : 0) << "," << (m_engineData ? m_engineData->fuelcomposition() : 0)
+                    << "," << (m_analogInputs ? m_analogInputs->Analog1() : 0) << "," << (m_analogInputs ? m_analogInputs->Analog2() : 0) << "," << (m_analogInputs ? m_analogInputs->Analog3() : 0)
+                    << "," << (m_analogInputs ? m_analogInputs->Analog4() : 0) << "," << (m_analogInputs ? m_analogInputs->Analog5() : 0) << "," << (m_analogInputs ? m_analogInputs->Analog6() : 0)
+                    << "," << (m_gpsData ? m_gpsData->gpsTime() : QString()) << "," << (m_gpsData ? m_gpsData->gpsAltitude() : 0) << ","
+                    << QString("%1").arg(m_gpsData ? m_gpsData->gpsLatitude() : 0, 0, 'f', 6) << ","
+                    << QString("%1").arg(m_gpsData ? m_gpsData->gpsLongitude() : 0, 0, 'f', 6) << "," << (m_gpsData ? m_gpsData->gpsSpeed() : 0)
+                    << "," << (m_timingData ? m_timingData->currentLap() : 0) << "," << (m_timingData ? m_timingData->laptime() : QString()) << ","
+                    << (m_expanderBoardData ? m_expanderBoardData->EXAnalogInput0() : 0) << "," << (m_expanderBoardData ? m_expanderBoardData->EXAnalogInput1() : 0) << ","
+                    << (m_expanderBoardData ? m_expanderBoardData->EXAnalogInput2() : 0) << "," << (m_expanderBoardData ? m_expanderBoardData->EXAnalogInput3() : 0) << ","
+                    << (m_expanderBoardData ? m_expanderBoardData->EXAnalogInput4() : 0) << "," << (m_expanderBoardData ? m_expanderBoardData->EXAnalogInput5() : 0) << ","
+                    << (m_expanderBoardData ? m_expanderBoardData->EXAnalogInput6() : 0) << "," << (m_expanderBoardData ? m_expanderBoardData->EXAnalogInput7() : 0) << ","
+                    << (m_expanderBoardData ? m_expanderBoardData->EXAnalogCalc0() : 0) << "," << (m_expanderBoardData ? m_expanderBoardData->EXAnalogCalc1() : 0) << ","
+                    << (m_expanderBoardData ? m_expanderBoardData->EXAnalogCalc2() : 0) << "," << (m_expanderBoardData ? m_expanderBoardData->EXAnalogCalc3() : 0) << ","
+                    << (m_expanderBoardData ? m_expanderBoardData->EXAnalogCalc4() : 0) << "," << (m_expanderBoardData ? m_expanderBoardData->EXAnalogCalc5() : 0) << ","
+                    << (m_expanderBoardData ? m_expanderBoardData->EXAnalogCalc6() : 0) << "," << (m_expanderBoardData ? m_expanderBoardData->EXAnalogCalc7() : 0) << ","
+                    << (m_digitalInputs ? m_digitalInputs->EXDigitalInput1() : 0) << "," << (m_digitalInputs ? m_digitalInputs->EXDigitalInput2() : 0) << ","
+                    << (m_digitalInputs ? m_digitalInputs->EXDigitalInput3() : 0) << "," << (m_digitalInputs ? m_digitalInputs->EXDigitalInput4() : 0) << ","
+                    << (m_digitalInputs ? m_digitalInputs->EXDigitalInput5() : 0) << "," << (m_digitalInputs ? m_digitalInputs->EXDigitalInput6() : 0) << ","
+                    << (m_digitalInputs ? m_digitalInputs->EXDigitalInput7() : 0) << "," << (m_digitalInputs ? m_digitalInputs->EXDigitalInput8() : 0) << "," << Qt::endl;
                 mFile.close();
                 break;
             case 6:  ////GR YARIS
                 out << (loggerStartT.msecsTo(QTime::currentTime())) << ","
 
-                    << m_dashboard->rpm() << "," << m_dashboard->wheelspdftleft() << ","
-                    << m_dashboard->wheelspdftright() << "," << m_dashboard->wheelspdrearleft() << ","
-                    << m_dashboard->wheelspdrearright() << "," << m_dashboard->SteeringWheelAngle() << ","
-                    << m_dashboard->Flag1() << ","       // Brake Switch
-                    << m_dashboard->brakepress() << ","  // Brake Pressure
-                    << m_dashboard->IdleValue() << ","   //  Idle Switch
-                    << m_dashboard->TPS() << ","         // Throttle Position A
-                    << m_dashboard->ThrottleV() << ","   // Throttle Position B
-                    << m_dashboard->Torque() << ","      // Steering Torque
-                    << m_dashboard->clutchswitchstate() << "," << m_dashboard->gpsTime() << ","
-                    << m_dashboard->gpsAltitude() << "," << QString("%1").arg(m_dashboard->gpsLatitude(), 0, 'f', 6)
-                    << "," << QString("%1").arg(m_dashboard->gpsLongitude(), 0, 'f', 6) << ","
-                    << m_dashboard->gpsSpeed() << "," << m_dashboard->currentLap() << "," << m_dashboard->laptime()
-                    << "," << m_dashboard->EXAnalogInput0() << "," << m_dashboard->EXAnalogInput1() << ","
-                    << m_dashboard->EXAnalogInput2() << "," << m_dashboard->EXAnalogInput3() << ","
-                    << m_dashboard->EXAnalogInput4() << "," << m_dashboard->EXAnalogInput5() << ","
-                    << m_dashboard->EXAnalogInput6() << "," << m_dashboard->EXAnalogInput7() << ","
-                    << m_dashboard->EXAnalogCalc0() << "," << m_dashboard->EXAnalogCalc1() << ","
-                    << m_dashboard->EXAnalogCalc2() << "," << m_dashboard->EXAnalogCalc3() << ","
-                    << m_dashboard->EXAnalogCalc4() << "," << m_dashboard->EXAnalogCalc5() << ","
-                    << m_dashboard->EXAnalogCalc6() << "," << m_dashboard->EXAnalogCalc7() << ","
-                    << m_dashboard->EXDigitalInput1() << "," << m_dashboard->EXDigitalInput2() << ","
-                    << m_dashboard->EXDigitalInput3() << "," << m_dashboard->EXDigitalInput4() << ","
-                    << m_dashboard->EXDigitalInput5() << "," << m_dashboard->EXDigitalInput6() << ","
-                    << m_dashboard->EXDigitalInput7() << "," << m_dashboard->EXDigitalInput8() << "," << Qt::endl;
+                    << (m_engineData ? m_engineData->rpm() : 0) << "," << (m_vehicleData ? m_vehicleData->wheelspdftleft() : 0) << ","
+                    << (m_vehicleData ? m_vehicleData->wheelspdftright() : 0) << "," << (m_vehicleData ? m_vehicleData->wheelspdrearleft() : 0) << ","
+                    << (m_vehicleData ? m_vehicleData->wheelspdrearright() : 0) << "," << (m_vehicleData ? m_vehicleData->SteeringWheelAngle() : 0) << ","
+                    << (m_flagsData ? m_flagsData->Flag1() : 0) << ","       // Brake Switch
+                    << (m_engineData ? m_engineData->brakepress() : 0) << ","  // Brake Pressure
+                    << (m_engineData ? m_engineData->IdleValue() : 0) << ","   //  Idle Switch
+                    << (m_engineData ? m_engineData->TPS() : 0) << ","         // Throttle Position A
+                    << (m_engineData ? m_engineData->ThrottleV() : 0) << ","   // Throttle Position B
+                    << (m_engineData ? m_engineData->Torque() : 0) << ","      // Steering Torque
+                    << (m_vehicleData ? m_vehicleData->clutchswitchstate() : 0) << "," << (m_gpsData ? m_gpsData->gpsTime() : QString()) << ","
+                    << (m_gpsData ? m_gpsData->gpsAltitude() : 0) << "," << QString("%1").arg(m_gpsData ? m_gpsData->gpsLatitude() : 0, 0, 'f', 6)
+                    << "," << QString("%1").arg(m_gpsData ? m_gpsData->gpsLongitude() : 0, 0, 'f', 6) << ","
+                    << (m_gpsData ? m_gpsData->gpsSpeed() : 0) << "," << (m_timingData ? m_timingData->currentLap() : 0) << "," << (m_timingData ? m_timingData->laptime() : QString())
+                    << "," << (m_expanderBoardData ? m_expanderBoardData->EXAnalogInput0() : 0) << "," << (m_expanderBoardData ? m_expanderBoardData->EXAnalogInput1() : 0) << ","
+                    << (m_expanderBoardData ? m_expanderBoardData->EXAnalogInput2() : 0) << "," << (m_expanderBoardData ? m_expanderBoardData->EXAnalogInput3() : 0) << ","
+                    << (m_expanderBoardData ? m_expanderBoardData->EXAnalogInput4() : 0) << "," << (m_expanderBoardData ? m_expanderBoardData->EXAnalogInput5() : 0) << ","
+                    << (m_expanderBoardData ? m_expanderBoardData->EXAnalogInput6() : 0) << "," << (m_expanderBoardData ? m_expanderBoardData->EXAnalogInput7() : 0) << ","
+                    << (m_expanderBoardData ? m_expanderBoardData->EXAnalogCalc0() : 0) << "," << (m_expanderBoardData ? m_expanderBoardData->EXAnalogCalc1() : 0) << ","
+                    << (m_expanderBoardData ? m_expanderBoardData->EXAnalogCalc2() : 0) << "," << (m_expanderBoardData ? m_expanderBoardData->EXAnalogCalc3() : 0) << ","
+                    << (m_expanderBoardData ? m_expanderBoardData->EXAnalogCalc4() : 0) << "," << (m_expanderBoardData ? m_expanderBoardData->EXAnalogCalc5() : 0) << ","
+                    << (m_expanderBoardData ? m_expanderBoardData->EXAnalogCalc6() : 0) << "," << (m_expanderBoardData ? m_expanderBoardData->EXAnalogCalc7() : 0) << ","
+                    << (m_digitalInputs ? m_digitalInputs->EXDigitalInput1() : 0) << "," << (m_digitalInputs ? m_digitalInputs->EXDigitalInput2() : 0) << ","
+                    << (m_digitalInputs ? m_digitalInputs->EXDigitalInput3() : 0) << "," << (m_digitalInputs ? m_digitalInputs->EXDigitalInput4() : 0) << ","
+                    << (m_digitalInputs ? m_digitalInputs->EXDigitalInput5() : 0) << "," << (m_digitalInputs ? m_digitalInputs->EXDigitalInput6() : 0) << ","
+                    << (m_digitalInputs ? m_digitalInputs->EXDigitalInput7() : 0) << "," << (m_digitalInputs ? m_digitalInputs->EXDigitalInput8() : 0) << "," << Qt::endl;
                 mFile.close();
                 break;
             }
@@ -223,7 +258,8 @@ void datalogger::updateLog()
 
 void datalogger::createHeader()
 {
-    qDebug() << "ECU" << m_dashboard->ecu();
+    int ecuValue = m_connectionData ? m_connectionData->ecu() : (m_dashboard ? m_dashboard->ecu() : 0);
+    qDebug() << "ECU" << ecuValue;
     QString filename = Log + ".csv";
     QFile file(filename);
     // qDebug() << "update Log";
@@ -234,7 +270,7 @@ void datalogger::createHeader()
             if (!mFile.open(QFile::Append | QFile::Text)) {}
 
             QTextStream out(&mFile);
-            switch (m_dashboard->ecu()) {
+            switch (ecuValue) {
             case 0:  ////Apexi
 
                 out << "Time ms" << ","
@@ -274,18 +310,18 @@ void datalogger::createHeader()
                     << "O2volt_2" << ","
                     << "pim" << ","
                     << "auxcalc1" << ","
-                    << "auxcalc2" << "," << m_dashboard->SensorString1() << "," << m_dashboard->SensorString2() << ","
-                    << m_dashboard->SensorString3() << "," << m_dashboard->SensorString4() << ","
-                    << m_dashboard->SensorString5() << "," << m_dashboard->SensorString6() << ","
-                    << m_dashboard->SensorString7() << "," << m_dashboard->SensorString8() << ","
-                    << m_dashboard->FlagString1() << "," << m_dashboard->FlagString2() << ","
-                    << m_dashboard->FlagString3() << "," << m_dashboard->FlagString4() << ","
-                    << m_dashboard->FlagString5() << "," << m_dashboard->FlagString6() << ","
-                    << m_dashboard->FlagString7() << "," << m_dashboard->FlagString8() << ","
-                    << m_dashboard->FlagString9() << "," << m_dashboard->FlagString10() << ","
-                    << m_dashboard->FlagString11() << "," << m_dashboard->FlagString12() << ","
-                    << m_dashboard->FlagString13() << "," << m_dashboard->FlagString14() << ","
-                    << m_dashboard->FlagString15() << "," << m_dashboard->FlagString16() << ","
+                    << "auxcalc2" << "," << (m_flagsData ? m_flagsData->SensorString1() : QString()) << "," << (m_flagsData ? m_flagsData->SensorString2() : QString()) << ","
+                    << (m_flagsData ? m_flagsData->SensorString3() : QString()) << "," << (m_flagsData ? m_flagsData->SensorString4() : QString()) << ","
+                    << (m_flagsData ? m_flagsData->SensorString5() : QString()) << "," << (m_flagsData ? m_flagsData->SensorString6() : QString()) << ","
+                    << (m_flagsData ? m_flagsData->SensorString7() : QString()) << "," << (m_flagsData ? m_flagsData->SensorString8() : QString()) << ","
+                    << (m_flagsData ? m_flagsData->FlagString1() : QString()) << "," << (m_flagsData ? m_flagsData->FlagString2() : QString()) << ","
+                    << (m_flagsData ? m_flagsData->FlagString3() : QString()) << "," << (m_flagsData ? m_flagsData->FlagString4() : QString()) << ","
+                    << (m_flagsData ? m_flagsData->FlagString5() : QString()) << "," << (m_flagsData ? m_flagsData->FlagString6() : QString()) << ","
+                    << (m_flagsData ? m_flagsData->FlagString7() : QString()) << "," << (m_flagsData ? m_flagsData->FlagString8() : QString()) << ","
+                    << (m_flagsData ? m_flagsData->FlagString9() : QString()) << "," << (m_flagsData ? m_flagsData->FlagString10() : QString()) << ","
+                    << (m_flagsData ? m_flagsData->FlagString11() : QString()) << "," << (m_flagsData ? m_flagsData->FlagString12() : QString()) << ","
+                    << (m_flagsData ? m_flagsData->FlagString13() : QString()) << "," << (m_flagsData ? m_flagsData->FlagString14() : QString()) << ","
+                    << (m_flagsData ? m_flagsData->FlagString15() : QString()) << "," << (m_flagsData ? m_flagsData->FlagString16() : QString()) << ","
                     << "MAP" << ","
                     << "AUXT" << ","
                     << "AFR" << ","

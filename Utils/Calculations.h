@@ -9,6 +9,7 @@ class DashBoard;
 class VehicleData;
 class EngineData;
 class TimingData;
+class SettingsData;
 
 class calculations : public QObject
 {
@@ -17,7 +18,7 @@ class calculations : public QObject
 
 public:
     explicit calculations(QObject *parent = nullptr);
-    explicit calculations(DashBoard *dashboard, VehicleData *vehicleData, EngineData *engineData, TimingData *timingData, QObject *parent = nullptr);
+    explicit calculations(DashBoard *dashboard, VehicleData *vehicleData, EngineData *engineData, TimingData *timingData, SettingsData *settingsData, QObject *parent = nullptr);
 
 public slots:
     Q_INVOKABLE void startdragtimer();
@@ -38,6 +39,7 @@ private:
     VehicleData *m_vehicleData;
     EngineData *m_engineData;
     TimingData *m_timingData;
+    SettingsData *m_settingsData;
     QTimer m_updatetimer;
     QTimer m_updateodotimer;
     QTimer m_reactiontimer;

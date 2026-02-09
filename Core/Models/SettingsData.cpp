@@ -127,6 +127,14 @@ void SettingsData::setsmoothspeed(int smoothspeed)
 }
 
 // * Setters - Gear calculation parameters
+void SettingsData::setgearcalcactivation(int gearcalcactivation)
+{
+    if (m_gearcalcactivation == gearcalcactivation)
+        return;
+    m_gearcalcactivation = gearcalcactivation;
+    emit gearcalcactivationChanged(m_gearcalcactivation);
+}
+
 void SettingsData::setgearcalc1(int gearcalc1)
 {
     if (m_gearcalc1 == gearcalc1)

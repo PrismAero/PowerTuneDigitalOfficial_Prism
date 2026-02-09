@@ -12,6 +12,7 @@
 #include "../Core/Models/VehicleData.h"
 #include "../Core/Models/EngineData.h"
 #include "../Core/Models/TimingData.h"
+#include "../Core/Models/SettingsData.h"
 
 #include <QDebug>
 
@@ -57,8 +58,8 @@ int GearN;
 double prev_speed = 0;
 qint64 prev_timestamp = QDateTime::currentMSecsSinceEpoch();
 
-calculations::calculations(QObject *parent) : QObject(parent), m_dashboard(nullptr), m_vehicleData(nullptr), m_engineData(nullptr), m_timingData(nullptr) {}
-calculations::calculations(DashBoard *dashboard, VehicleData *vehicleData, EngineData *engineData, TimingData *timingData, QObject *parent) : QObject(parent), m_dashboard(dashboard), m_vehicleData(vehicleData), m_engineData(engineData), m_timingData(timingData) {}
+calculations::calculations(QObject *parent) : QObject(parent), m_dashboard(nullptr), m_vehicleData(nullptr), m_engineData(nullptr), m_timingData(nullptr), m_settingsData(nullptr) {}
+calculations::calculations(DashBoard *dashboard, VehicleData *vehicleData, EngineData *engineData, TimingData *timingData, SettingsData *settingsData, QObject *parent) : QObject(parent), m_dashboard(dashboard), m_vehicleData(vehicleData), m_engineData(engineData), m_timingData(timingData), m_settingsData(settingsData) {}
 
 void calculations::start()
 {
@@ -143,14 +144,14 @@ void calculations::saveodoandtriptofile()
 // 330 Feet  = 0,0624987 miles = 0,10058191 km
 void calculations::calculate()
 {
-    weight = m_dashboard->Weight();
+    weight = m_vehicleData->Weight();
     // qDebug() << "Weight" << weight;
 
     // starting the timer again with 25 ms
     m_updatetimer.start(25);
 
     // Dragracing Calculations
-    if (m_dashboard->speedunits() == "metric" && startdragcalculation == 1) {
+    if (m_settingsData->speedunits() == "metric" && startdragcalculation == 1) {
         timesincelastupdate = (startTime.msecsTo(QTime::currentTime())) - totaldragtime;
         dragdistance = (timesincelastupdate * ((m_vehicleData->speed()) / 3600000));  // Odometer
         totaldragtime = (startTime.msecsTo(QTime::currentTime()));
@@ -196,7 +197,7 @@ void calculations::calculate()
             twohundredtothreehundredset = 1;
         }
     }
-    if (m_dashboard->speedunits() == "imperial" && startdragcalculation == 1) {
+    if (m_settingsData->speedunits() == "imperial" && startdragcalculation == 1) {
         timesincelastupdate = (startTime.msecsTo(QTime::currentTime())) - totaldragtime;
         dragdistance = (timesincelastupdate * ((m_vehicleData->speed()) / 3600000));  // Odometer
         totaldragtime = (startTime.msecsTo(QTime::currentTime()));
@@ -244,41 +245,41 @@ void calculations::calculate()
     }
 
     // Dragracing Calculations END
-    if (m_dashboard->gearcalcactivation() == 1) {
+    if (m_settingsData->gearcalcactivation() == 1) {
         // Gear Calculation borrowed from Raspexi big thanks to Jacob Donley
-        int N = m_dashboard->rpm() / (m_vehicleData->speed() == 0.0 ? 0.01 : m_vehicleData->speed());
+        int N = m_engineData->rpm() / (m_vehicleData->speed() == 0.0 ? 0.01 : m_vehicleData->speed());
         int CurrentGear =
-            (N > (m_dashboard->gearcalc1() * 1.5)
+            (N > (m_settingsData->gearcalc1() * 1.5)
                  ? 0.0
-                 : (N > ((m_dashboard->gearcalc1() + m_dashboard->gearcalc2()) / 2.0)
+                 : (N > ((m_settingsData->gearcalc1() + m_settingsData->gearcalc2()) / 2.0)
                         ? 1.0
-                        : (N > ((m_dashboard->gearcalc2() + m_dashboard->gearcalc3()) / 2.0)
+                        : (N > ((m_settingsData->gearcalc2() + m_settingsData->gearcalc3()) / 2.0)
                                ? 2.0
-                               : (N > ((m_dashboard->gearcalc3() + m_dashboard->gearcalc4()) / 2.0)
+                               : (N > ((m_settingsData->gearcalc3() + m_settingsData->gearcalc4()) / 2.0)
                                       ? 3.0
-                                      : (N > ((m_dashboard->gearcalc4() + m_dashboard->gearcalc5()) / 2.0)
+                                      : (N > ((m_settingsData->gearcalc4() + m_settingsData->gearcalc5()) / 2.0)
                                              ? 4.0
-                                             : (m_dashboard->gearcalc5() == 0
+                                             : (m_settingsData->gearcalc5() == 0
                                                     ? 0.0
-                                                    : (N > ((m_dashboard->gearcalc5() + m_dashboard->gearcalc6()) / 2.0)
+                                                    : (N > ((m_settingsData->gearcalc5() + m_settingsData->gearcalc6()) / 2.0)
                                                            ? 5.0
-                                                           : (m_dashboard->gearcalc6() == 0
+                                                           : (m_settingsData->gearcalc6() == 0
                                                                   ? 0.0
-                                                                  : (N > (m_dashboard->gearcalc6() / 2.0)
+                                                                  : (N > (m_settingsData->gearcalc6() / 2.0)
                                                                          ? 6.0
-                                                                         : 0.0)))))))));
+                                                                         : 0.0))))))))); 
         m_vehicleData->setGear(CurrentGear);
         m_vehicleData->setGearCalculation(CurrentGear);
         // qDebug()<<"Gear"<< m_vehicleData->Gear();
     }
     /*
 
-         qDebug()<<"Gear1"<< m_dashboard->gearcalc1();
-         qDebug()<<"Gear2"<< m_dashboard->gearcalc2();
-         qDebug()<<"Gear3"<< m_dashboard->gearcalc3();
-         qDebug()<<"Gear4"<< m_dashboard->gearcalc4();
-         qDebug()<<"Gear5"<< m_dashboard->gearcalc5();
-         qDebug()<<"Gear6"<< m_dashboard->gearcalc6();
+         qDebug()<<"Gear1"<< m_settingsData->gearcalc1();
+         qDebug()<<"Gear2"<< m_settingsData->gearcalc2();
+         qDebug()<<"Gear3"<< m_settingsData->gearcalc3();
+         qDebug()<<"Gear4"<< m_settingsData->gearcalc4();
+         qDebug()<<"Gear5"<< m_settingsData->gearcalc5();
+         qDebug()<<"Gear6"<< m_settingsData->gearcalc6();
     */
 
 
@@ -324,26 +325,26 @@ void calculations::calculate()
     // Virtual Dyno to calculate Wheel Power and Wheel Torque
 
 
-    if (m_dashboard->units() == "metric") {
+    if (m_settingsData->units() == "metric") {
         // To calculate kW when set to Metric
         // Weight (kg) * LongAcc (g) * Speed channel (km/h) * 0.0031107
-        Power = ((weight * m_dashboard->accely()) * m_vehicleData->speed()) * 0.0031107;
+        Power = ((weight * m_vehicleData->accely()) * m_vehicleData->speed()) * 0.0031107;
         // To calculate Torque in Nm when set to Metric
         // Power (kW) * 9549 / rotational speed (rpm)
-        Torque = (Power * 9549) / m_dashboard->rpm();
+        Torque = (Power * 9549) / m_engineData->rpm();
         // qDebug() << "metric Power" <<Power;
         if (Power >= 1) {
             m_engineData->setPower(Power);
             m_engineData->setTorque(Torque);
         }
     }
-    if (m_dashboard->units() == "imperial") {
+    if (m_settingsData->units() == "imperial") {
         // Horsepower when set to Imperial
         // Weight (lbs) * LongAcc (g) * Speed channel (mph) * 0.003054
-        Power = weight * m_dashboard->accely() * m_vehicleData->speed() * 0.003054;
+        Power = weight * m_vehicleData->accely() * m_vehicleData->speed() * 0.003054;
         // To calculate Torque in ft-lb when set to Imperial
         //  Power (hp) * 5252 / rotational speed (rpm)
-        Torque = (Power * 5252) / m_dashboard->rpm();
+        Torque = (Power * 5252) / m_engineData->rpm();
         if (Power >= 1) {
             m_engineData->setPower(Power);
             m_engineData->setTorque(Torque);
@@ -353,21 +354,21 @@ void calculations::calculate()
     /*
         //calculate acceleration in G without speedo
         //Metric Calculation
-        if (m_dashboard->units()  == "metric")
+        if (m_settingsData->units()  == "metric")
         {
         if (m_vehicleData->speed() > PreviousSpeed)
         {
         m_vehicleData->setaccely((((m_vehicleData->speed() - PreviousSpeed) *0.277778) / (25 * 0.001))*0.10197162129779);
-       // qDebug() << "G force "<< m_dashboard->accely();
+       // qDebug() << "G force "<< m_vehicleData->accely();
         }
         }
-        if (m_dashboard->units()  == "imperial")
+        if (m_settingsData->units()  == "imperial")
         {
         if (m_vehicleData->speed() > PreviousSpeed)
         {
         m_vehicleData->setaccely(((((m_vehicleData->speed() - PreviousSpeed)* 1.60934) *0.277778) / (25 *
        0.001))*0.10197162129779);
-        //qDebug() << "G force "<< m_dashboard->accely();
+        //qDebug() << "G force "<< m_vehicleData->accely();
         }
         }
 

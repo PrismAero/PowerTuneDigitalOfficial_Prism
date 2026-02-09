@@ -168,9 +168,22 @@ Connect::Connect(QObject *parent)
     m_apexi = new Apexi(m_engineData, m_vehicleData, m_flagsData, m_sensorData, m_connectionData, this);
     // * Phase 4: Sensors now writes directly to domain models
     m_sensors = new Sensors(m_vehicleData, this);
-    m_datalogger = new datalogger(m_dashBoard, this);
+    // * Phase 5: DataLogger now reads from domain models
+    m_datalogger = new datalogger(
+        m_engineData,
+        m_vehicleData,
+        m_gpsData,
+        m_sensorData,
+        m_flagsData,
+        m_analogInputs,
+        m_expanderBoardData,
+        m_digitalInputs,
+        m_connectionData,
+        m_timingData,
+        this
+    );
     // * Phase 4: Calculations now writes directly to domain models
-    m_calculations = new calculations(m_dashBoard, m_vehicleData, m_engineData, m_timingData, this);
+    m_calculations = new calculations(m_dashBoard, m_vehicleData, m_engineData, m_timingData, m_settingsData, this);
     // * Phase 4: Arduino now writes directly to domain models
     m_arduino = new Arduino(m_connectionData, this);
     m_wifiscanner = new WifiScanner(m_connectionData, this);

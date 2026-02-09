@@ -48,6 +48,7 @@ class SettingsData : public QObject
     Q_PROPERTY(int smoothspeed READ smoothspeed WRITE setsmoothspeed NOTIFY smoothspeedChanged)
 
     // * Gear calculation parameters
+    Q_PROPERTY(int gearcalcactivation READ gearcalcactivation WRITE setgearcalcactivation NOTIFY gearcalcactivationChanged)
     Q_PROPERTY(int gearcalc1 READ gearcalc1 WRITE setgearcalc1 NOTIFY gearcalc1Changed)
     Q_PROPERTY(int gearcalc2 READ gearcalc2 WRITE setgearcalc2 NOTIFY gearcalc2Changed)
     Q_PROPERTY(int gearcalc3 READ gearcalc3 WRITE setgearcalc3 NOTIFY gearcalc3Changed)
@@ -92,6 +93,7 @@ public:
     int smoothspeed() const { return m_smoothspeed; }
 
     // * Getters - Gear calculation parameters
+    int gearcalcactivation() const { return m_gearcalcactivation; }
     int gearcalc1() const { return m_gearcalc1; }
     int gearcalc2() const { return m_gearcalc2; }
     int gearcalc3() const { return m_gearcalc3; }
@@ -134,6 +136,7 @@ public slots:
     void setsmoothspeed(int smoothspeed);
 
     // * Setters - Gear calculation parameters
+    void setgearcalcactivation(int gearcalcactivation);
     void setgearcalc1(int gearcalc1);
     void setgearcalc2(int gearcalc2);
     void setgearcalc3(int gearcalc3);
@@ -176,6 +179,7 @@ signals:
     void smoothspeedChanged(int smoothspeed);
 
     // * Signals - Gear calculation parameters
+    void gearcalcactivationChanged(int gearcalcactivation);
     void gearcalc1Changed(int gearcalc1);
     void gearcalc2Changed(int gearcalc2);
     void gearcalc3Changed(int gearcalc3);
@@ -218,6 +222,7 @@ private:
     int m_smoothspeed = 0;
 
     // * Gear calculation parameters
+    int m_gearcalcactivation = 0;
     int m_gearcalc1 = 0;
     int m_gearcalc2 = 0;
     int m_gearcalc3 = 0;
