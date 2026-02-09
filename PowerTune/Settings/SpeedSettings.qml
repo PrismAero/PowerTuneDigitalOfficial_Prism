@@ -34,7 +34,7 @@ Rectangle {
 
             // * Speed Correction Section
             SettingsSection {
-                title: Translator.translate("SpeedCorrection", Dashboard.language)
+                title: Translator.translate("SpeedCorrection", Settings.language)
                 Layout.fillWidth: true
 
                 RowLayout {
@@ -42,7 +42,7 @@ Rectangle {
                     Layout.fillWidth: true
 
                     Text {
-                        text: Translator.translate("SpeedCorrection", Dashboard.language) + " %"
+                        text: Translator.translate("SpeedCorrection", Settings.language) + " %"
                         font.pixelSize: 20
                         font.family: "Lato"
                         color: "#FFFFFF"
@@ -72,15 +72,15 @@ Rectangle {
 
             // * External Speed Sensor Section
             SettingsSection {
-                title: Translator.translate("USB VR Speed Sensor", Dashboard.language)
+                title: Translator.translate("USB VR Speed Sensor", Settings.language)
                 Layout.fillWidth: true
 
                 StyledSwitch {
                     id: usbvrcheckbox
-                    label: Translator.translate("USB VR Speed Sensor", Dashboard.language)
+                    label: Translator.translate("USB VR Speed Sensor", Settings.language)
                     onCheckedChanged: {
                         if (!checked) {
-                            if (Dashboard.externalspeedconnectionrequest === 1) {
+                            if (Connection.externalspeedconnectionrequest === 1) {
                                 Arduino.closeConnection()
                             }
                             AppSettings.externalspeedconnectionstatus(0)
@@ -101,7 +101,7 @@ Rectangle {
                         Layout.fillWidth: true
 
                         Text {
-                            text: Translator.translate("Pulses per mile", Dashboard.language)
+                            text: Translator.translate("Pulses per mile", Settings.language)
                             font.pixelSize: 20
                             font.family: "Lato"
                             color: "#FFFFFF"
@@ -125,7 +125,7 @@ Rectangle {
                         Layout.fillWidth: true
 
                         Text {
-                            text: Translator.translate("External Speed port", Dashboard.language)
+                            text: Translator.translate("External Speed port", Settings.language)
                             font.pixelSize: 20
                             font.family: "Lato"
                             color: "#FFFFFF"
@@ -145,12 +145,12 @@ Rectangle {
 
                         StyledButton {
                             id: connectButtonArd
-                            text: Translator.translate("Connect", Dashboard.language)
+                            text: Translator.translate("Connect", Settings.language)
                             width: 180
                             onClicked: {
                                 AppSettings.externalspeedconnectionstatus(1)
                                 AppSettings.externalspeedport(serialNameArd.textAt(serialNameArd.currentIndex))
-                                Arduino.openConnection(Dashboard.externalspeedport, "9600")
+                                Arduino.openConnection(Connection.externalspeedport, "9600")
                                 connectButtonArd.enabled = false
                                 disconnectButtonArd.enabled = true
                             }
@@ -158,7 +158,7 @@ Rectangle {
 
                         StyledButton {
                             id: disconnectButtonArd
-                            text: Translator.translate("Disconnect", Dashboard.language)
+                            text: Translator.translate("Disconnect", Settings.language)
                             width: 180
                             primary: false
                             enabled: false

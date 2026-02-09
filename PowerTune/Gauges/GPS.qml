@@ -10,7 +10,7 @@ Rectangle {
     property int count: 0
 
     Connections {
-        target: Dashboard
+        target: GPS
         function onGpsLatitudeChanged() {
             pos.poschanged()
         }
@@ -53,7 +53,7 @@ Rectangle {
             copyrightsVisible: false
             gesture.enabled: false
             tilt: 0
-            bearing: Dashboard.gpsbearing
+            bearing: GPS.gpsbearing
             color: "black"
 
             // Draw a small red circle for current Vehicle Location
@@ -62,8 +62,8 @@ Rectangle {
                 anchorPoint.x: 10
                 anchorPoint.y: 10
                 width: 15
-                coordinate: QtPositioning.coordinate(Dashboard.gpsLatitude,
-                                                     Dashboard.gpsLongitude)
+                coordinate: QtPositioning.coordinate(GPS.gpsLatitude,
+                                                     GPS.gpsLongitude)
                 sourceItem: Rectangle {
                     id: image
                     width: 20
@@ -129,7 +129,7 @@ Rectangle {
             }
             Text {
                 id:dateTime
-                text: Dashboard.gpsTime
+                text: GPS.gpsTime
                 font.pixelSize: mapItem.width * 0.025
                 font.bold: true
                 font.family: "Eurostile"
@@ -144,7 +144,7 @@ Rectangle {
                 font.family: "Eurostile"
             }
             Text {
-                text: Dashboard.gpsSpeed
+                text: GPS.gpsSpeed
                 font.pixelSize: mapItem.width * 0.025
                 font.bold: true
                 font.family: "Eurostile"
@@ -156,7 +156,7 @@ Rectangle {
                 font.family: "Eurostile"
             }
             Text {
-                text: Dashboard.gpsAltitude
+                text: GPS.gpsAltitude
                 font.pixelSize: mapItem.width * 0.025
                 font.bold: true
                 font.family: "Eurostile"
@@ -168,7 +168,7 @@ Rectangle {
                 font.family: "Eurostile"
             }
             Text {
-                text: Dashboard.gpsLatitude.toFixed(6)
+                text: GPS.gpsLatitude.toFixed(6)
                 font.pixelSize: mapItem.width * 0.025
                 font.bold: true
                 font.family: "Eurostile"
@@ -180,7 +180,7 @@ Rectangle {
                 font.family: "Eurostile"
             }
             Text {
-                text: Dashboard.gpsLongitude.toFixed(6)
+                text: GPS.gpsLongitude.toFixed(6)
                 font.pixelSize: mapItem.width * 0.025
                 font.bold: true
                 font.family: "Eurostile"
@@ -192,7 +192,7 @@ Rectangle {
                 font.family: "Eurostile"
             }
             Text {
-                text: Dashboard.gpsVisibleSatelites
+                text: GPS.gpsVisibleSatelites
                 font.pixelSize: mapItem.width * 0.025
                 font.bold: true
                 font.family: "Eurostile"
@@ -204,7 +204,7 @@ Rectangle {
                 font.family: "Eurostile"
             }
             Text {
-                text: Dashboard.gpsbearing
+                text: GPS.gpsbearing
                 font.pixelSize: mapItem.width * 0.025
                 font.bold: true
                 font.family: "Eurostile"
@@ -216,7 +216,7 @@ Rectangle {
                 font.family: "Eurostile"
             }
             Text {
-                text: (Dashboard.gpsHDOP).toFixed(2)
+                text: (GPS.gpsHDOP).toFixed(2)
                 font.pixelSize: mapItem.width * 0.025
                 font.bold: true
                 font.family: "Eurostile"
@@ -228,7 +228,7 @@ Rectangle {
                 font.family: "Eurostile"
             }
             Text {
-                text: Dashboard.gpsFIXtype
+                text: GPS.gpsFIXtype
                 font.pixelSize: mapItem.width * 0.025
                 font.bold: true
                 font.family: "Eurostile"
@@ -246,7 +246,7 @@ Rectangle {
                                 -25.804219, 28.300091)
                 }
                 ;
-                //if (countryselect.textAt(countryselect.currentIndex) == "Current Position"){trackselect.model = ["Tilt 0", "Tilt 45"],map.center= QtPositioning.coordinate(Dashboard.gpsLatitude,Dashboard.gpsLongitude)};
+                //if (countryselect.textAt(countryselect.currentIndex) == "Current Position"){trackselect.model = ["Tilt 0", "Tilt 45"],map.center= QtPositioning.coordinate(GPS.gpsLatitude,GPS.gpsLongitude)};
                 if (countryselect.textAt(
                             countryselect.currentIndex) == "Australia") {
                     trackselect.model = ["Carrnell Raceway", "Wakefield Park"]
@@ -387,7 +387,7 @@ Rectangle {
                 if (countryselect.textAt(
                             countryselect.currentIndex) == "Current Position") {
                     map.center = QtPositioning.coordinate(
-                                Dashboard.gpsLatitude, Dashboard.gpsLongitude)
+                                GPS.gpsLatitude, GPS.gpsLongitude)
                 }
                 ;
             }

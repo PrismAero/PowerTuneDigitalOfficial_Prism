@@ -33,6 +33,9 @@
 #include "appsettings.h"
 #include "dashboard.h"
 #include "serialport.h"
+#include "PropertyRouter.h"
+#include "Models/UIState.h"
+#include "Models/DataModels.h"
 
 #include <QByteArrayMatcher>
 #include <QDebug>
@@ -74,16 +77,80 @@ Connect::Connect(QObject *parent)
       m_calculations(nullptr),
       m_arduino(nullptr),
       m_wifiscanner(nullptr),
-      m_extender(nullptr)
+      m_extender(nullptr),
+      m_uiState(nullptr),
+      m_engineData(nullptr),
+      m_vehicleData(nullptr),
+      m_gpsData(nullptr),
+      m_analogInputs(nullptr),
+      m_digitalInputs(nullptr),
+      m_expanderBoardData(nullptr),
+      m_electricMotorData(nullptr),
+      m_flagsData(nullptr),
+      m_timingData(nullptr),
+      m_sensorData(nullptr),
+      m_connectionData(nullptr),
+      m_settingsData(nullptr),
+      m_propertyRouter(nullptr)
 
 {
     getPorts();
     m_dashBoard = new DashBoard(this);
+    // * Phase 2: Create domain data models
+    m_uiState = new UIState(this);
+
+    // * Phase 4: Connect DashBoard to UIState for facade forwarding
+    m_dashBoard->setUIState(m_uiState);
+
+    m_engineData = new EngineData(this);
+    m_vehicleData = new VehicleData(this);
+    m_gpsData = new GPSData(this);
+    m_analogInputs = new AnalogInputs(this);
+    m_digitalInputs = new DigitalInputs(this);
+    m_expanderBoardData = new ExpanderBoardData(this);
+    m_electricMotorData = new ElectricMotorData(this);
+    m_flagsData = new FlagsData(this);
+    m_timingData = new TimingData(this);
+    // * Phase 3: Create remaining data models
+    m_sensorData = new SensorData(this);
+    m_connectionData = new ConnectionData(this);
+    m_settingsData = new SettingsData(this);
     m_appSettings = new AppSettings(m_dashBoard, this);
+    // * Phase 3: Create PropertyRouter for dynamic QML property access
+    m_propertyRouter = new PropertyRouter(
+        m_engineData,
+        m_vehicleData,
+        m_gpsData,
+        m_analogInputs,
+        m_digitalInputs,
+        m_expanderBoardData,
+        m_electricMotorData,
+        m_flagsData,
+        m_sensorData,
+        m_connectionData,
+        m_settingsData,
+        m_timingData,
+        m_uiState,
+        this
+    );
     m_gopro = new GoPro(this);
     m_gps = new GPS(m_dashBoard, this);
     m_adaptronicselect = new AdaptronicSelect(m_dashBoard, this);
-    m_udpreceiver = new udpreceiver(m_dashBoard, this);
+    // * Phase 1: UDPReceiver now writes directly to domain models
+    m_udpreceiver = new udpreceiver(
+        m_engineData,
+        m_vehicleData,
+        m_gpsData,
+        m_analogInputs,
+        m_digitalInputs,
+        m_expanderBoardData,
+        m_electricMotorData,
+        m_flagsData,
+        m_sensorData,
+        m_connectionData,
+        m_settingsData,
+        this
+    );
     m_apexi = new Apexi(m_dashBoard, this);
     m_sensors = new Sensors(m_dashBoard, this);
     m_datalogger = new datalogger(m_dashBoard, this);
@@ -109,6 +176,23 @@ Connect::Connect(QObject *parent)
     if (engine == nullptr)
         return;
     engine->rootContext()->setContextProperty("Dashboard", m_dashBoard);
+    // * Phase 2: Expose domain data models to QML
+    engine->rootContext()->setContextProperty("UI", m_uiState);
+    engine->rootContext()->setContextProperty("Engine", m_engineData);
+    engine->rootContext()->setContextProperty("Vehicle", m_vehicleData);
+    engine->rootContext()->setContextProperty("GPS", m_gpsData);
+    engine->rootContext()->setContextProperty("Analog", m_analogInputs);
+    engine->rootContext()->setContextProperty("Digital", m_digitalInputs);
+    engine->rootContext()->setContextProperty("Expander", m_expanderBoardData);
+    engine->rootContext()->setContextProperty("Motor", m_electricMotorData);
+    engine->rootContext()->setContextProperty("Flags", m_flagsData);
+    engine->rootContext()->setContextProperty("Timing", m_timingData);
+    // * Phase 3: Expose remaining data models to QML
+    engine->rootContext()->setContextProperty("Sensor", m_sensorData);
+    engine->rootContext()->setContextProperty("Connection", m_connectionData);
+    engine->rootContext()->setContextProperty("Settings", m_settingsData);
+    // * Phase 3: Expose PropertyRouter for dynamic property access (replaces Dashboard[propName])
+    engine->rootContext()->setContextProperty("PropertyRouter", m_propertyRouter);
     engine->rootContext()->setContextProperty("Extender2", m_extender);
     engine->rootContext()->setContextProperty("AppSettings", m_appSettings);
     engine->rootContext()->setContextProperty("GoPro", m_gopro);
@@ -193,9 +277,27 @@ void Connect::readavailabledashfiles()
 
 void Connect::readavailablebackrounds()
 {
-    // QDir directory(""); //for Windows
+    QStringList dashfiles;
+    
+#ifdef Q_OS_LINUX
+    // * Linux (Raspberry Pi) - use /home/pi/Logo directory
     QDir directory("/home/pi/Logo");
-    QStringList dashfiles = directory.entryList(QStringList() << "*.png" << "*.gif", QDir::Files);
+    dashfiles = directory.entryList(QStringList() << "*.png" << "*.gif", QDir::Files);
+#elif defined(Q_OS_MACOS)
+    // * macOS - list bundled graphics resources for development testing
+    // * The files are in the qrc, so we provide a static list of available images
+    dashfiles << "Logo.png" << "MainDash.png" << "MainDashBlue.png" << "MainDashnew.png" 
+              << "Racedash.png" << "Racedash800x480.png" << "RPM_BG.png" << "rotary.gif"
+              << "test.png" << "StateGIF.gif";
+#elif defined(Q_OS_WIN)
+    // * Windows - use C:/Logo directory
+    QDir directory("C:/Logo");
+    dashfiles = directory.entryList(QStringList() << "*.png" << "*.gif", QDir::Files);
+#else
+    QDir directory("./Logo");
+    dashfiles = directory.entryList(QStringList() << "*.png" << "*.gif", QDir::Files);
+#endif
+    
     dashfiles.prepend("None");
     m_dashBoard->setbackroundpictures(dashfiles);
 }

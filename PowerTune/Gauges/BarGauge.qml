@@ -44,7 +44,7 @@ Rectangle {
                       minimumValue: 0
                       maximumValue: 300
 
-                      //value: Dashboard.MAP
+                      //value: Engine.MAP
                       Behavior on value {
                           NumberAnimation {
                               duration: 5

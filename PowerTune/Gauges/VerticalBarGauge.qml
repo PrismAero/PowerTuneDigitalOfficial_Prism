@@ -17,6 +17,10 @@ Rectangle {
     property string information: "Bar gauge"
     property string gaugename
     property string mainvaluename
+    
+    // * Double-tap detection properties
+    property int touchCounter: 0
+    property real lastTouchTime: 0
     property alias gaugetext: gaugetextfield.text
     property alias gaugevalue: gauge1.value
     property double minvalue: gauge1.minimumValue
@@ -39,7 +43,7 @@ Rectangle {
     }
 
     Connections{
-        target: Dashboard
+        target: UI
         function onDraggableChanged() { togglemousearea() }
     }
     //When the Gauge Value Changes do the maths with the scale and offset applied to display the new value
@@ -75,8 +79,8 @@ Rectangle {
         anchors.fill: parent
         drag.target: parent
         enabled: false
-        onPressed:
-        {
+        z: 100  // * Higher z-order to receive events over dashboard background
+        onPressed: function(mouse) {
             touchCounter++;
             if (touchCounter == 1) {
                 lastTouchTime = Date.now();
@@ -84,12 +88,16 @@ Rectangle {
             } else if (touchCounter == 2) {
                 var currentTime = Date.now();
                 if (currentTime - lastTouchTime <= 500) { // Double-tap detected within 500 ms
-                    console.log("Double-tap detected at", mouse.x, mouse.y);
+                    console.log("Gauge double-tap detected at", mouse.x, mouse.y);
                 }
                 touchCounter = 0;
                 timerDoubleClick.stop();
                 popupmenu.popup(touchArea.mouseX, touchArea.mouseY);
             }
+        }
+        Component.onCompleted: {
+            // * Check initial draggable state since gauge may be created after edit mode is enabled
+            togglemousearea();
         }
     }
 
@@ -145,7 +153,7 @@ Rectangle {
         Menu {
             id: popupmenu
             MenuItem {
-                text: Translator.translate("max value", Dashboard.language)
+                text: Translator.translate("max value", Settings.language)
                 font.pixelSize: 15
                 onClicked: {
                     bargaugeMax.visible = true;
@@ -153,7 +161,7 @@ Rectangle {
                 }
             }
             MenuItem {
-                text: Translator.translate("min value", Dashboard.language)
+                text: Translator.translate("min value", Settings.language)
                 font.pixelSize: 15
                 onClicked:    {
                     txtBarMinValue.visible = true;
@@ -161,7 +169,7 @@ Rectangle {
                 }
             }
             MenuItem {
-                text: Translator.translate("Set decimal", Dashboard.language)
+                text: Translator.translate("Set decimal", Settings.language)
                 font.pixelSize: 15
                 onClicked:    {
                     cbx_decimalplaces.visible = true;
@@ -187,7 +195,7 @@ Rectangle {
             }
             */
             MenuItem {
-                text: Translator.translate("Change title", Dashboard.language)
+                text: Translator.translate("Change title", Settings.language)
                 font.pixelSize: 15
                 onClicked:    {
                     txtgaugenamechange.visible = true;
@@ -210,7 +218,7 @@ Rectangle {
             //     }
             // }
             MenuItem {
-                text: Translator.translate("remove gauge", Dashboard.language)
+                text: Translator.translate("remove gauge", Settings.language)
                 font.pixelSize: 15
                 onClicked: gauge.destroy()
             }
@@ -234,7 +242,7 @@ Rectangle {
         Button {
             id: btnMaxValue
             x: 119
-            text: Translator.translate("OK", Dashboard.language)
+            text: Translator.translate("OK", Settings.language)
             anchors.top: parent.top
             anchors.topMargin: 0
             anchors.right: parent.right
@@ -261,7 +269,7 @@ Rectangle {
         Button {
             id: btnBarMinValue
             x: 119
-            text: Translator.translate("OK", Dashboard.language)
+            text: Translator.translate("OK", Settings.language)
             anchors.top: parent.top
             anchors.topMargin: 0
             anchors.right: parent.right
@@ -284,7 +292,7 @@ Rectangle {
         Button {
             id: btndecimalplaces
             x: 119
-            text: Translator.translate("OK", Dashboard.language)
+            text: Translator.translate("OK", Settings.language)
             anchors.top: parent.top
             anchors.topMargin: 0
             anchors.right: parent.right
@@ -312,7 +320,7 @@ Rectangle {
         Button {
             id: btnminValue
             x: 119
-            text: Translator.translate("OK", Dashboard.language)
+            text: Translator.translate("OK", Settings.language)
             anchors.top: parent.top
             anchors.topMargin: 0
             anchors.right: parent.right
@@ -340,7 +348,7 @@ Rectangle {
         Button {
             id: btnmaxValue
             x: 119
-            text: Translator.translate("OK", Dashboard.language)
+            text: Translator.translate("OK", Settings.language)
             anchors.top: parent.top
             anchors.topMargin: 0
             anchors.right: parent.right
@@ -368,7 +376,7 @@ Rectangle {
         Button {
             id: btngaugenamechange
             x: 119
-            text: Translator.translate("OK", Dashboard.language)
+            text: Translator.translate("OK", Settings.language)
             anchors.top: parent.top
             anchors.topMargin: 0
             anchors.right: parent.right
@@ -475,7 +483,7 @@ Rectangle {
     //Functions
     function togglemousearea()
     {
-        if (Dashboard.draggable === 1)
+        if (UI.draggable === 1)
         {
             touchArea.enabled = true;
         }

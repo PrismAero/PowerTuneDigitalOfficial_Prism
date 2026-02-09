@@ -18,7 +18,7 @@ Rectangle {
 
     function loadersource() {
         // * Load appropriate ECU-specific component
-        switch (Dashboard.ecu) {
+        switch (Connection.ecu) {
             case "0":
             case "1":
                 pageLoader.sourceComponent = analogInputsComponent
@@ -52,7 +52,7 @@ Rectangle {
     }
 
     Connections {
-        target: Dashboard
+        target: Connection
         function onEcuChanged() {
             loadersource()
         }

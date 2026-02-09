@@ -96,3 +96,5 @@ compile_commands.json
 __pycache__/
 *.py[cod]
 .cursor/plans/split_dashboard_god_object_b63a27ab.plan.md
+.memory/memory.db-shm
+.memory/memory.db-wal

@@ -12,11 +12,16 @@ Item {
     property int pictureheight
     //property int picturewidth
     property string increasedecreaseident
+    
+    // * Double-tap detection properties
+    property int touchCounter: 0
+    property real lastTouchTime: 0
+    
     Drag.active: true
     Component.onCompleted: togglemousearea();
 
     Connections{
-        target: Dashboard
+        target: UI
         function onDraggableChanged() { togglemousearea(); }
     }
 
@@ -42,8 +47,8 @@ Item {
         anchors.fill: parent
         drag.target: parent
         enabled: false
-        onPressed:
-        {
+        z: 100  // * Higher z-order to receive events over dashboard background
+        onPressed: function(mouse) {
             touchCounter++;
             if (touchCounter == 1) {
                 lastTouchTime = Date.now();
@@ -51,7 +56,7 @@ Item {
             } else if (touchCounter == 2) {
                 var currentTime = Date.now();
                 if (currentTime - lastTouchTime <= 500) { // Double-tap detected within 500 ms
-                    console.log("Double-tap detected at", mouse.x, mouse.y);
+                    console.log("Picture double-tap detected at", mouse.x, mouse.y);
                 }
                 touchCounter = 0;
                 timerDoubleClick.stop();
@@ -59,8 +64,11 @@ Item {
                 Connect.readavailablebackrounds();
             }
         }
-        Component.onCompleted: {toggledecimal();
+        Component.onCompleted: {
+            toggledecimal();
             toggledecimal2();
+            // * Check initial draggable state since gauge may be created after edit mode is enabled
+            togglemousearea();
         }
     }
     Timer {
@@ -129,13 +137,22 @@ Item {
                 width: 200
                 height: 40
                 font.pixelSize: 15
-                model: Dashboard.backroundpictures
+                model: UI.backroundpictures
                 currentIndex: 0
                 onCurrentIndexChanged: {
-                    picturesource = "file:///home/pi/Logo/" + pictureSelector.textAt(pictureSelector.currentIndex);
-                    //picturesource = "file:" + pictureSelector.textAt(pictureSelector.currentIndex); // windows
+                    // * Use platform-aware path for images
+                    var selectedFile = pictureSelector.textAt(pictureSelector.currentIndex);
+                    if (Qt.platform.os === "linux") {
+                        picturesource = "file:///home/pi/Logo/" + selectedFile;
+                    } else if (Qt.platform.os === "osx") {
+                        picturesource = "qrc:/Resources/graphics/" + selectedFile;
+                    } else if (Qt.platform.os === "windows") {
+                        picturesource = "file:///c:/Logo/" + selectedFile;
+                    } else {
+                        picturesource = "file:" + selectedFile;
+                    }
                     mypicture.source = picturesource;
-                                       }
+                }
                 delegate: ItemDelegate {
                     width: pictureSelector.width
                     text: pictureSelector.textRole ? (Array.isArray(pictureSelector.model) ? modelData[pictureSelector.textRole] : model[pictureSelector.textRole]) : modelData
@@ -148,13 +165,13 @@ Item {
             }
             RoundButton{
                 width: parent.width
-                text: Translator.translate("Delete image", Dashboard.language)
+                text: Translator.translate("Delete image", Settings.language)
                 font.pixelSize: 15
                 onClicked: picture.destroy();
             }
             RoundButton{
                 width: parent.width
-                text: Translator.translate("Close", Dashboard.language)
+                text: Translator.translate("Close", Settings.language)
                 onClicked: changesize.visible = false;
             }
         }
@@ -171,13 +188,22 @@ Item {
     }
     function togglemousearea()
     {
-    //    console.log("toggle" + Dashboard.draggable);
-        if (Dashboard.draggable === 1)
+    //    console.log("toggle" + UI.draggable);
+        if (UI.draggable === 1)
         {
             touchArea.enabled = true;
         }
         else
             touchArea.enabled = false;
+    }
+    
+    // * Placeholder functions for decimal formatting (not used by Picture)
+    function toggledecimal() {
+        // ! Picture doesn't have decimal display fields, this is a no-op
+    }
+    
+    function toggledecimal2() {
+        // ! Picture doesn't have decimal display fields, this is a no-op
     }
     function increaseDecrease()
     {

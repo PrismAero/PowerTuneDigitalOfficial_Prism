@@ -138,18 +138,18 @@ Grid{
     height:mainwindow.height * (100 / mainwindow.height) //100
     width:mainwindow.width * (20 / mainwindow.width) //20
     color: {
-             if (Dashboard.LR_Tyre_Temp_01  < greencolor)
+             if (Vehicle.LR_Tyre_Temp_01  < greencolor)
                  return "blue"
-             else if (Dashboard.LR_Tyre_Temp_01 >= greencolor && Dashboard.LR_Tyre_Temp_01 < yellowcolor)
+             else if (Vehicle.LR_Tyre_Temp_01 >= greencolor && Vehicle.LR_Tyre_Temp_01 < yellowcolor)
                  return "green"
-             else if (Dashboard.LR_Tyre_Temp_01 >= yellowcolor && Dashboard.LR_Tyre_Temp_01 < redcolor)
+             else if (Vehicle.LR_Tyre_Temp_01 >= yellowcolor && Vehicle.LR_Tyre_Temp_01 < redcolor)
                 return "yellow"
-             else if (Dashboard.LR_Tyre_Temp_01 >= redcolor )
+             else if (Vehicle.LR_Tyre_Temp_01 >= redcolor )
                 return "red"
          }
     Text{
     anchors.fill: parent
-    text: (Dashboard.LR_Tyre_Temp_01).toFixed(0)
+    text: (Vehicle.LR_Tyre_Temp_01).toFixed(0)
     wrapMode: Text.WrapAnywhere
     font.pixelSize: mainwindow.width * (20 / mainwindow.width) //20
     }
@@ -159,18 +159,18 @@ Grid{
     height:mainwindow.height * (75 / mainwindow.height) //75
     width:mainwindow.width * (20 / mainwindow.width) //20
     color: {
-             if (Dashboard.LR_Tyre_Temp_02  < greencolor)
+             if (Vehicle.LR_Tyre_Temp_02  < greencolor)
                  return "blue"
-             else if (Dashboard.LR_Tyre_Temp_02 >= greencolor && Dashboard.LR_Tyre_Temp_02 < yellowcolor)
+             else if (Vehicle.LR_Tyre_Temp_02 >= greencolor && Vehicle.LR_Tyre_Temp_02 < yellowcolor)
                  return "green"
-             else if (Dashboard.LR_Tyre_Temp_02 >= yellowcolor && Dashboard.LR_Tyre_Temp_02 < redcolor)
+             else if (Vehicle.LR_Tyre_Temp_02 >= yellowcolor && Vehicle.LR_Tyre_Temp_02 < redcolor)
                 return "yellow"
-             else if (Dashboard.LR_Tyre_Temp_02 >= redcolor )
+             else if (Vehicle.LR_Tyre_Temp_02 >= redcolor )
                 return "red"
          }
     Text{
     anchors.fill: parent
-    text: (Dashboard.LR_Tyre_Temp_02).toFixed(0)
+    text: (Vehicle.LR_Tyre_Temp_02).toFixed(0)
     wrapMode: Text.WrapAnywhere
     font.pixelSize: mainwindow.width * (20 / mainwindow.width) //20
     }
@@ -180,18 +180,18 @@ Grid{
     height:mainwindow.height * (75 / mainwindow.height) //75
     width:mainwindow.width * (20 / mainwindow.width) //20
     color: {
-             if (Dashboard.LR_Tyre_Temp_03  < greencolor)
+             if (Vehicle.LR_Tyre_Temp_03  < greencolor)
                  return "blue"
-             else if (Dashboard.LR_Tyre_Temp_03 >= greencolor && Dashboard.LR_Tyre_Temp_03 < yellowcolor)
+             else if (Vehicle.LR_Tyre_Temp_03 >= greencolor && Vehicle.LR_Tyre_Temp_03 < yellowcolor)
                  return "green"
-             else if (Dashboard.LR_Tyre_Temp_03 >= yellowcolor && Dashboard.LR_Tyre_Temp_03 < redcolor)
+             else if (Vehicle.LR_Tyre_Temp_03 >= yellowcolor && Vehicle.LR_Tyre_Temp_03 < redcolor)
                 return "yellow"
-             else if (Dashboard.LR_Tyre_Temp_03 >= redcolor )
+             else if (Vehicle.LR_Tyre_Temp_03 >= redcolor )
                 return "red"
          }
     Text{
     anchors.fill: parent
-    text: (Dashboard.LR_Tyre_Temp_03).toFixed(0)
+    text: (Vehicle.LR_Tyre_Temp_03).toFixed(0)
     wrapMode: Text.WrapAnywhere
     font.pixelSize: mainwindow.width * (20 / mainwindow.width) //20
     }
@@ -201,18 +201,18 @@ Grid{
     height:mainwindow.height * (75 / mainwindow.height) //75
     width:mainwindow.width * (20 / mainwindow.width) //20
     color: {
-             if (Dashboard.LR_Tyre_Temp_04  < greencolor)
+             if (Vehicle.LR_Tyre_Temp_04  < greencolor)
                  return "blue"
-             else if (Dashboard.LR_Tyre_Temp_04 >= greencolor && Dashboard.LR_Tyre_Temp_04 < yellowcolor)
+             else if (Vehicle.LR_Tyre_Temp_04 >= greencolor && Vehicle.LR_Tyre_Temp_04 < yellowcolor)
                  return "green"
-             else if (Dashboard.LR_Tyre_Temp_04 >= yellowcolor && Dashboard.LR_Tyre_Temp_04 < redcolor)
+             else if (Vehicle.LR_Tyre_Temp_04 >= yellowcolor && Vehicle.LR_Tyre_Temp_04 < redcolor)
                 return "yellow"
-             else if (Dashboard.LR_Tyre_Temp_04 >= redcolor )
+             else if (Vehicle.LR_Tyre_Temp_04 >= redcolor )
                 return "red"
          }
     Text{
     anchors.fill: parent
-    text: (Dashboard.LR_Tyre_Temp_04).toFixed(0)
+    text: (Vehicle.LR_Tyre_Temp_04).toFixed(0)
     wrapMode: Text.WrapAnywhere
     font.pixelSize: mainwindow.width * (20 / mainwindow.width) //20
     }
@@ -222,18 +222,18 @@ Grid{
     height:mainwindow.height * (75 / mainwindow.height) //75
     width:mainwindow.width * (20 / mainwindow.width) //20
     color: {
-             if (Dashboard.LR_Tyre_Temp_05  < greencolor)
+             if (Vehicle.LR_Tyre_Temp_05  < greencolor)
                  return "blue"
-             else if (Dashboard.LR_Tyre_Temp_05 >= greencolor && Dashboard.LR_Tyre_Temp_05 < yellowcolor)
+             else if (Vehicle.LR_Tyre_Temp_05 >= greencolor && Vehicle.LR_Tyre_Temp_05 < yellowcolor)
                  return "green"
-             else if (Dashboard.LR_Tyre_Temp_05 >= yellowcolor && Dashboard.LR_Tyre_Temp_05 < redcolor)
+             else if (Vehicle.LR_Tyre_Temp_05 >= yellowcolor && Vehicle.LR_Tyre_Temp_05 < redcolor)
                 return "yellow"
-             else if (Dashboard.LR_Tyre_Temp_05 >= redcolor )
+             else if (Vehicle.LR_Tyre_Temp_05 >= redcolor )
                 return "red"
          }
     Text{
     anchors.fill: parent
-    text: (Dashboard.LR_Tyre_Temp_05).toFixed(0)
+    text: (Vehicle.LR_Tyre_Temp_05).toFixed(0)
     wrapMode: Text.WrapAnywhere
     font.pixelSize: mainwindow.width * (20 / mainwindow.width) //20
     }
@@ -243,18 +243,18 @@ Grid{
     height:mainwindow.height * (75 / mainwindow.height) //75
     width:mainwindow.width * (20 / mainwindow.width) //20
     color: {
-             if (Dashboard.LR_Tyre_Temp_06  < greencolor)
+             if (Vehicle.LR_Tyre_Temp_06  < greencolor)
                  return "blue"
-             else if (Dashboard.LR_Tyre_Temp_06 >= greencolor && Dashboard.LR_Tyre_Temp_06 < yellowcolor)
+             else if (Vehicle.LR_Tyre_Temp_06 >= greencolor && Vehicle.LR_Tyre_Temp_06 < yellowcolor)
                  return "green"
-             else if (Dashboard.LR_Tyre_Temp_06 >= yellowcolor && Dashboard.LR_Tyre_Temp_06 < redcolor)
+             else if (Vehicle.LR_Tyre_Temp_06 >= yellowcolor && Vehicle.LR_Tyre_Temp_06 < redcolor)
                 return "yellow"
-             else if (Dashboard.LR_Tyre_Temp_06 >= redcolor )
+             else if (Vehicle.LR_Tyre_Temp_06 >= redcolor )
                 return "red"
          }
     Text{
     anchors.fill: parent
-    text: (Dashboard.LR_Tyre_Temp_03).toFixed(0)
+    text: (Vehicle.LR_Tyre_Temp_06).toFixed(0)
     wrapMode: Text.WrapAnywhere
     font.pixelSize: mainwindow.width * (20 / mainwindow.width) //20
     }
@@ -264,18 +264,18 @@ Grid{
     height:mainwindow.height * (75 / mainwindow.height) //75
     width:mainwindow.width * (20 / mainwindow.width) //20
     color: {
-             if (Dashboard.LR_Tyre_Temp_07  < greencolor)
+             if (Vehicle.LR_Tyre_Temp_07  < greencolor)
                  return "blue"
-             else if (Dashboard.LR_Tyre_Temp_07 >= greencolor && Dashboard.LR_Tyre_Temp_07 < yellowcolor)
+             else if (Vehicle.LR_Tyre_Temp_07 >= greencolor && Vehicle.LR_Tyre_Temp_07 < yellowcolor)
                  return "green"
-             else if (Dashboard.LR_Tyre_Temp_07 >= yellowcolor && Dashboard.LR_Tyre_Temp_07 < redcolor)
+             else if (Vehicle.LR_Tyre_Temp_07 >= yellowcolor && Vehicle.LR_Tyre_Temp_07 < redcolor)
                 return "yellow"
-             else if (Dashboard.LR_Tyre_Temp_07 >= redcolor )
+             else if (Vehicle.LR_Tyre_Temp_07 >= redcolor )
                 return "red"
          }
     Text{
     anchors.fill: parent
-    text: (Dashboard.LR_Tyre_Temp_07).toFixed(0)
+    text: (Vehicle.LR_Tyre_Temp_07).toFixed(0)
     wrapMode: Text.WrapAnywhere
     font.pixelSize: mainwindow.width * (20 / mainwindow.width) //20
     }
@@ -285,18 +285,18 @@ Grid{
     height:mainwindow.height * (75 / mainwindow.height) //75
     width:mainwindow.width * (20 / mainwindow.width) //20
     color: {
-             if (Dashboard.LR_Tyre_Temp_08  < greencolor)
+             if (Vehicle.LR_Tyre_Temp_08  < greencolor)
                  return "blue"
-             else if (Dashboard.LR_Tyre_Temp_08 >= greencolor && Dashboard.LR_Tyre_Temp_08 < yellowcolor)
+             else if (Vehicle.LR_Tyre_Temp_08 >= greencolor && Vehicle.LR_Tyre_Temp_08 < yellowcolor)
                  return "green"
-             else if (Dashboard.LR_Tyre_Temp_08 >= yellowcolor && Dashboard.LR_Tyre_Temp_08 < redcolor)
+             else if (Vehicle.LR_Tyre_Temp_08 >= yellowcolor && Vehicle.LR_Tyre_Temp_08 < redcolor)
                 return "yellow"
-             else if (Dashboard.LR_Tyre_Temp_08 >= redcolor )
+             else if (Vehicle.LR_Tyre_Temp_08 >= redcolor )
                 return "red"
          }
     Text{
     anchors.fill: parent
-    text: (Dashboard.LR_Tyre_Temp_08).toFixed(0)
+    text: (Vehicle.LR_Tyre_Temp_08).toFixed(0)
     wrapMode: Text.WrapAnywhere
     font.pixelSize: mainwindow.width * (20 / mainwindow.width) //20
     }

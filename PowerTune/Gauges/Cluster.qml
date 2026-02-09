@@ -62,7 +62,7 @@ Item {
     ComboBox{
         id: dashvalue
         width: parent.width * (200 / parent.width)
-        model: Dashboard.maindashsetup
+        model: UI.maindashsetup
         visible:false
         font.pixelSize: 15
         delegate: ItemDelegate {
@@ -106,7 +106,7 @@ Item {
 
     //adjusts the Gauges to metric or imperial
 
-    property  var unit : Dashboard.speedunits;
+    property  var unit : Settings.speedunits;
 
     //fade in effect for the Gauges (Welcome animation)
 
@@ -183,7 +183,7 @@ Item {
             }
             Text {
                 id: trip
-                text:(Dashboard.Trip).toFixed(1)
+                text:(Vehicle.Trip).toFixed(1)
                 font.pixelSize: scalerect.width / 45
                 anchors.right: tripunits.left
                 anchors.bottom: odotrip.bottom
@@ -215,7 +215,7 @@ Item {
             }
             Text {
                 id: odo
-                text: (Dashboard.Odo).toFixed(0)
+                text: (Vehicle.Odo).toFixed(0)
                 font.pixelSize: scalerect.width / 45
                 anchors.left: odoname.right
                 anchors.bottom: odotrip.bottom
@@ -255,7 +255,7 @@ Item {
                 height: parent.height
                 width: height
 
-                value: (Dashboard.speed).toFixed(0);
+                value: (Vehicle.speed).toFixed(0);
                 anchors.verticalCenter: parent.verticalCenter
                 maximumValue: 320
 
@@ -281,7 +281,7 @@ Item {
                 id: speedoNeedlekph
                 anchors.verticalCenterOffset: 0
                 anchors.centerIn: parent
-                value: Dashboard.speed / 4.155844155844156
+                value: Vehicle.speed / 4.155844155844156
 
             }
             GaugeNeedle_minus180to90  {
@@ -289,7 +289,7 @@ Item {
                 id: speedoNeedlemph
                 anchors.verticalCenterOffset: 0
                 anchors.centerIn: parent
-                value: Dashboard.speed / 2.597402597402597
+                value: Vehicle.speed / 2.597402597402597
 
 
             }
@@ -304,7 +304,7 @@ Item {
             }
             Text {
                 id: speedinnertext
-                text: (Dashboard.speed).toFixed(0);
+                text: (Vehicle.speed).toFixed(0);
                 font.pixelSize: scalerect.width / 20
                 anchors.centerIn: parent
                 font.family: "Eurostile"
@@ -328,7 +328,7 @@ Item {
                 id: revcounterticks
                 height: parent.height
                 width: height
-                value: Dashboard.rpm
+                value: Engine.rpm
                 anchors.verticalCenter: parent.verticalCenter
                 maximumValue: 10
 
@@ -341,10 +341,10 @@ Item {
                     needleTipWidth: 0
                     needleBaseWidth: 0
                     tickmarkLabel:  Text {
-                        font.pixelSize: styleData.value >= Dashboard.rpm/1000+0.5 || styleData.value <= Dashboard.rpm/1000-0.5  ? revcounterticks.height /22 : (revcounterticks.value-Dashboard.rpm/1000)+speedo.height /11
+                        font.pixelSize: styleData.value >= Engine.rpm/1000+0.5 || styleData.value <= Engine.rpm/1000-0.5  ? revcounterticks.height /22 : (revcounterticks.value-Engine.rpm/1000)+speedo.height /11
                         text: styleData.value
-                        font.bold : styleData.value >= Dashboard.rpm/1000+0.5 || styleData.value <= Dashboard.rpm/1000-0.5  ? false : true
-                        color: styleData.value <= Dashboard.rpm/1000 ? "white" : "grey"
+                        font.bold : styleData.value >= Engine.rpm/1000+0.5 || styleData.value <= Engine.rpm/1000-0.5  ? false : true
+                        color: styleData.value <= Engine.rpm/1000 ? "white" : "grey"
                         antialiasing: true
                     }
                 }
@@ -357,7 +357,7 @@ Item {
                 id: revneedele
                 anchors.verticalCenterOffset: 0
                 anchors.centerIn: parent
-                value: Dashboard.rpm *0.0077
+                value: Engine.rpm *0.0077
 
             }
             Image {
@@ -370,7 +370,7 @@ Item {
             }
             Text {
                 id: revinnertesxt
-                text: Dashboard.rpm
+                text: Engine.rpm
                 font.pixelSize: scalerect.width / 20
                 anchors.centerIn: parent
                 font.family: "Eurostile"
@@ -433,7 +433,7 @@ Item {
                 btnclear.visible = true;
                 loadfromfile.visible = true;
                 squaregaugemenu.visible = true;
-                Dashboard.setdraggable(1);
+                UI.draggable = 1;
                 //pimenu.popup(touchArea.mouseX,touchArea.mouseY)
             }
         }
@@ -487,7 +487,7 @@ Item {
             id: loadfileselect
             x:0
             y:0
-            model: Dashboard.dashfiles
+            model: UI.dashfiles
             width: squaregaugemenu.width
             height: mainwindow.height * 0.08333
             visible: false
@@ -525,7 +525,7 @@ Item {
                     CreateSquareGaugeScript.createSquareGauge(266,119,0,240,248,0,powertunedatasource.get(cbx_sources.currentIndex).defaultsymbol,powertunedatasource.get(cbx_sources.currentIndex).titlename,false,true,false,"Dashboard",powertunedatasource.get(cbx_sources.currentIndex).sourcename,powertunedatasource.get(cbx_sources.currentIndex).sourcename,10000,-20000,"lightsteelblue","black","lightsteelblue","white","white","blue",25,40);
                     squaregaugemenu.visible = false;
                     selectcolor.visible =false;
-                    Dashboard.setdraggable(0);
+                    UI.draggable = 0;
                 }
             }
 
@@ -539,7 +539,7 @@ Item {
                 onClicked: {
                     selectcolor.visible =true;
                     squaregaugemenu.visible = false;
-                    Dashboard.setdraggable(0);
+                    UI.draggable = 0;
                 }
             }
             Button {
@@ -551,7 +551,7 @@ Item {
                 onClicked:  {
                     selectcolor.visible =false;
                     squaregaugemenu.visible = false;
-                    Dashboard.setdraggable(0);
+                    UI.draggable = 0;
                     for (var i=0; i<userDash.children.length; ++i)
                     {
                         userDash.children[i].destroy()
@@ -595,7 +595,7 @@ Item {
                 onClicked:  {
                     squaregaugemenu.visible = false;
                     selectcolor.visible =false;
-                    Dashboard.setdraggable(0);
+                    UI.draggable = 0;
                 }
             }
 
@@ -613,7 +613,7 @@ Item {
                     squaregaugemenu.visible = false;
                     load.visible = false;
                     selectcolor.visible =false;
-                    Dashboard.setdraggable(0);
+                    UI.draggable = 0;
                     Connect.readMaindashsetup();
                 }
             }
@@ -630,7 +630,7 @@ Item {
                     squaregaugemenu.visible = false;
                     load.visible = false;
                     selectcolor.visible =false;
-                    Dashboard.setdraggable(0);
+                    UI.draggable = 0;
                 }
             }
 
@@ -644,7 +644,7 @@ Item {
 
                 onClicked: {
                     squaregaugemenu.visible = false;
-                    Dashboard.setdraggable(0);
+                    UI.draggable = 0;
                     selectcolor.visible =false;
                     saveDashtofile();
                     Connect.saveDashtoFile("MainDashexport",saveDashtofilestring);
@@ -660,7 +660,7 @@ Item {
                 onClicked: {
                     squaregaugemenu.visible = false;
                     selectcolor.visible =false;
-                    Dashboard.setdraggable(0);
+                    UI.draggable = 0;
                     // Clearing the gaugelist
                     gaugelist.clear()
                     for (var i=0; i<userDash.children.length; ++i)
@@ -827,15 +827,15 @@ Item {
             spacing:5
             // FrameColor
             Text {
-                text: Translator.translate("Frame color", Dashboard.language)
+                text: Translator.translate("Frame color", Settings.language)
                 font.pixelSize: mainwindow.width * 0.018//15
             }
             Text {
-                text: Translator.translate("Titlebar color", Dashboard.language)
+                text: Translator.translate("Titlebar color", Settings.language)
                 font.pixelSize: mainwindow.width * 0.018//15
             }
             Text {
-                text: Translator.translate("Background color", Dashboard.language)
+                text: Translator.translate("Background color", Settings.language)
                 font.pixelSize: mainwindow.width * 0.018//15
             }
 
@@ -945,15 +945,15 @@ Item {
                 }
             }
             Text {
-                text: Translator.translate("Bargauge color", Dashboard.language)
+                text: Translator.translate("Bargauge color", Settings.language)
                 font.pixelSize: mainwindow.width * 0.018//15
             }
             Text {
-                text: Translator.translate("Title text color", Dashboard.language)
+                text: Translator.translate("Title text color", Settings.language)
                 font.pixelSize: mainwindow.width * 0.018//15
             }
             Text {
-                text: Translator.translate("Main text color", Dashboard.language)
+                text: Translator.translate("Main text color", Settings.language)
                 font.pixelSize: mainwindow.width * 0.018//15
             }
             // BargaugeColor
@@ -1074,7 +1074,7 @@ Item {
                 id: btnclosecolorselect
                 width: mainwindow.width * 0.1875
                 height: mainwindow.height * 0.083
-                text: Translator.translate("Close menu", Dashboard.language)
+                text: Translator.translate("Close menu", Settings.language)
                 font.pixelSize: mainwindow.width * 0.018//15
                 onClicked: {selectcolor.visible = false;}
                 }

@@ -14,6 +14,11 @@ Item {
     property string increasedecreaseident
     property string mainvaluename
     property double triggervalue : 0
+    
+    // * Double-tap detection properties
+    property int touchCounter: 0
+    property real lastTouchTime: 0
+    
     Drag.active: true
     x: 200
     y: 200
@@ -24,7 +29,7 @@ Item {
 
 
     Connections{
-        target: Dashboard
+        target: UI
         function onDraggableChanged() { togglemousearea(); }
         function onBackroundpicturesChanged() { updatppiclist(); }
     }
@@ -68,8 +73,8 @@ Item {
         anchors.fill: parent
         drag.target: parent
         enabled: false
-        onPressed:
-        {
+        z: 100  // * Higher z-order to receive events over dashboard background
+        onPressed: function(mouse) {
             touchCounter++;
             if (touchCounter == 1) {
                 lastTouchTime = Date.now();
@@ -77,7 +82,7 @@ Item {
             } else if (touchCounter == 2) {
                 var currentTime = Date.now();
                 if (currentTime - lastTouchTime <= 500) { // Double-tap detected within 500 ms
-                    console.log("Double-tap detected at", mouse.x, mouse.y);
+                    console.log("StatePicture double-tap detected at", mouse.x, mouse.y);
                 }
                 touchCounter = 0;
                 timerDoubleClick.stop();
@@ -86,6 +91,10 @@ Item {
                 changesize.x= -statepicture.x;
                 changesize.y= -statepicture.y;
             }
+        }
+        Component.onCompleted: {
+            // * Check initial draggable state since gauge may be created after edit mode is enabled
+            togglemousearea();
         }
     }
 
@@ -156,7 +165,7 @@ Item {
                 columns: 2
                 spacing :5
             Text{
-                text: Translator.translate("Image", Dashboard.language) + " " + Translator.translate("OFF", Dashboard.language)
+                text: Translator.translate("Image", Settings.language) + " " + Translator.translate("OFF", Settings.language)
                 font.pixelSize: 800 * (12 / 800)
 
             }
@@ -166,13 +175,22 @@ Item {
                 width: 800 * 0.175 //140
                 height: 480 * 0.083 //40
                 font.pixelSize: 800 * (12 / 800) //12 being the font size. 800 being 7" screen width
-                model: Dashboard.backroundpictures
+                model: UI.backroundpictures
                 currentIndex: 0
                 onCurrentIndexChanged: {
-                    statepicturesourceoff = "file:///home/pi/Logo/" + pictureSelectoroff.textAt(pictureSelectoroff.currentIndex);
-                    //statepicturesourceoff = "file:" + pictureSelectoroff.textAt(pictureSelectoroff.currentIndex); // windows
+                    // * Use platform-aware path for images
+                    var selectedFile = pictureSelectoroff.textAt(pictureSelectoroff.currentIndex);
+                    if (Qt.platform.os === "linux") {
+                        statepicturesourceoff = "file:///home/pi/Logo/" + selectedFile;
+                    } else if (Qt.platform.os === "osx") {
+                        statepicturesourceoff = "qrc:/Resources/graphics/" + selectedFile;
+                    } else if (Qt.platform.os === "windows") {
+                        statepicturesourceoff = "file:///c:/Logo/" + selectedFile;
+                    } else {
+                        statepicturesourceoff = "file:" + selectedFile;
+                    }
                     statepictureoff.source = statepicturesourceoff;
-                                       }
+                }
                 delegate: ItemDelegate {
                     width: pictureSelectoroff.width
                     text: pictureSelectoroff.textRole ? (Array.isArray(pictureSelectoroff.model) ? modelData[pictureSelectoroff.textRole] : model[pictureSelectoroff.textRole]) : modelData
@@ -184,7 +202,7 @@ Item {
                 }
             }
             Text{
-                text: Translator.translate("Image", Dashboard.language) + " " + Translator.translate("ON", Dashboard.language)
+                text: Translator.translate("Image", Settings.language) + " " + Translator.translate("ON", Settings.language)
                 font.pixelSize: 800 * (12 / 800)
             }
             ComboBox {
@@ -192,11 +210,20 @@ Item {
                 width: 800 * 0.175 //140
                 height: 480 * 0.083 //40
                 font.pixelSize: 800 * (12 / 800)
-                model: Dashboard.backroundpictures
+                model: UI.backroundpictures
                 currentIndex: 0
                 onCurrentIndexChanged: {
-                    statepicturesourceon = "file:///home/pi/Logo/" + pictureSelectoron.textAt(pictureSelectoron.currentIndex);
-                    //statepicturesourceon = "file:" + pictureSelectoron.textAt(pictureSelectoron.currentIndex); // windows
+                    // * Use platform-aware path for images
+                    var selectedFile = pictureSelectoron.textAt(pictureSelectoron.currentIndex);
+                    if (Qt.platform.os === "linux") {
+                        statepicturesourceon = "file:///home/pi/Logo/" + selectedFile;
+                    } else if (Qt.platform.os === "osx") {
+                        statepicturesourceon = "qrc:/Resources/graphics/" + selectedFile;
+                    } else if (Qt.platform.os === "windows") {
+                        statepicturesourceon = "file:///c:/Logo/" + selectedFile;
+                    } else {
+                        statepicturesourceon = "file:" + selectedFile;
+                    }
                     statepictureon.source = statepicturesourceon;
                 }
 
@@ -213,7 +240,7 @@ Item {
                 }
             }
             Text{
-                text: Translator.translate("Source", Dashboard.language)
+                text: Translator.translate("Source", Settings.language)
                 font.pixelSize: 800 * (12 / 800)
             }
             ComboBox {
@@ -236,7 +263,7 @@ Item {
                 }
             }
             Text{
-                text: Translator.translate("Trigger", Dashboard.language)
+                text: Translator.translate("Trigger", Settings.language)
                 font.pixelSize: 800 * (12 / 800)
             }
             TextField {
@@ -250,13 +277,13 @@ Item {
             }
             RoundButton{
                 width: parent.width
-                text: Translator.translate("Delete image", Dashboard.language)
+                text: Translator.translate("Delete image", Settings.language)
                 font.pixelSize: 800 * (15 / 800)
                 onClicked: statepicture.destroy();
             }
             RoundButton{
                 width: parent.width
-                text: Translator.translate("Close", Dashboard.language)
+                text: Translator.translate("Close", Settings.language)
                 font.pixelSize: 800 * (15 / 800)
                 onClicked: {
                     triggervalue = triggeronvalue.text;
@@ -290,8 +317,8 @@ Item {
     }
     function togglemousearea()
     {
-    //    //console.log("toggle" + Dashboard.draggable);
-        if (Dashboard.draggable === 1)
+    //    //console.log("toggle" + UI.draggable);
+        if (UI.draggable === 1)
         {
             touchArea.enabled = true;
         }
@@ -318,7 +345,7 @@ Item {
     }
     function bind()
     {
-        mainvaluetextfield.text = Qt.binding(function(){return Dashboard[mainvaluename]});
+        mainvaluetextfield.text = Qt.binding(function(){return PropertyRouter.getValue(mainvaluename)});
     }
 
     // These functions update the Picture sources in the ComboBoxes

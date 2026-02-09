@@ -6,11 +6,11 @@ Rectangle {
     id: widget
     width: 250
     height: 120
-    color: visible && Dashboard.Visibledashes >= index ? "#1E1E1E" : "transparent"
+    color: visible && UI.Visibledashes >= index ? "#1E1E1E" : "transparent"
     radius: 8
-    border.color: visible && Dashboard.Visibledashes >= index ? "#3D3D3D" : "transparent"
+    border.color: visible && UI.Visibledashes >= index ? "#3D3D3D" : "transparent"
     border.width: 1
-    visible: Dashboard.Visibledashes >= index
+    visible: UI.Visibledashes >= index
     opacity: visible ? 1 : 0
 
     Behavior on opacity { NumberAnimation { duration: 200 } }
@@ -23,7 +23,7 @@ Rectangle {
         anchors.fill: parent
         anchors.margins: 12
         spacing: 8
-        visible: Dashboard.Visibledashes >= index
+        visible: UI.Visibledashes >= index
 
         Text {
             text: "Dash " + index

@@ -1,4 +1,5 @@
 #include "dashboard.h"
+#include "Models/UIState.h"
 
 #include "math.h"
 
@@ -651,8 +652,44 @@ DashBoard::DashBoard(QObject *parent)
       m_Knock_cyl1(),
       m_Knock_cyl2(),
       m_Knock_cyl3(),
-      m_Knock_cyl4()
+      m_Knock_cyl4(),
+      m_uiState(nullptr)
 {
+}
+
+/**
+ * @brief Connects DashBoard to UIState for facade forwarding
+ *
+ * This method establishes bidirectional signal forwarding between DashBoard
+ * and UIState, enabling backward compatibility for QML code that uses
+ * Dashboard.draggable while new code can use UI.draggable directly.
+ */
+void DashBoard::setUIState(UIState *uiState)
+{
+    if (m_uiState == uiState)
+        return;
+
+    m_uiState = uiState;
+
+    if (m_uiState) {
+        // * Forward UIState changes to DashBoard signals for backward compatibility
+        connect(m_uiState, &UIState::draggableChanged, this, &DashBoard::draggableChanged);
+        connect(m_uiState, &UIState::BrightnessChanged, this, &DashBoard::BrightnessChanged);
+        connect(m_uiState, &UIState::VisibledashesChanged, this, &DashBoard::VisibledashesChanged);
+        connect(m_uiState, &UIState::screenChanged, this, &DashBoard::screenChanged);
+        connect(m_uiState, &UIState::rpmstyle1Changed, this, &DashBoard::rpmstyle1Changed);
+        connect(m_uiState, &UIState::rpmstyle2Changed, this, &DashBoard::rpmstyle2Changed);
+        connect(m_uiState, &UIState::rpmstyle3Changed, this, &DashBoard::rpmstyle3Changed);
+
+        // * Sync initial values from DashBoard to UIState
+        m_uiState->setdraggable(m_draggable);
+        m_uiState->setBrightness(m_Brightness);
+        m_uiState->setVisibledashes(m_Visibledashes);
+        m_uiState->setscreen(m_screen);
+        m_uiState->setrpmstyle1(m_rpmstyle1);
+        m_uiState->setrpmstyle2(m_rpmstyle2);
+        m_uiState->setrpmstyle3(m_rpmstyle3);
+    }
 }
 
 
@@ -2653,7 +2690,13 @@ void DashBoard::setscreen(const bool &screen)
     if (m_screen == screen)
         return;
     m_screen = screen;
-    emit screenChanged(screen);
+
+    // * Phase 4: Forward to UIState if available
+    if (m_uiState) {
+        m_uiState->setscreen(screen);
+    } else {
+        emit screenChanged(screen);
+    }
 }
 
 void DashBoard::setmaindashsetup(const QStringList &maindashsetup)
@@ -3676,21 +3719,39 @@ void DashBoard::setrpmstyle1(const int &rpmstyle1)
     if (m_rpmstyle1 == rpmstyle1)
         return;
     m_rpmstyle1 = rpmstyle1;
-    emit rpmstyle1Changed(rpmstyle1);
+
+    // * Phase 4: Forward to UIState if available
+    if (m_uiState) {
+        m_uiState->setrpmstyle1(rpmstyle1);
+    } else {
+        emit rpmstyle1Changed(rpmstyle1);
+    }
 }
 void DashBoard::setrpmstyle2(const int &rpmstyle2)
 {
     if (m_rpmstyle2 == rpmstyle2)
         return;
     m_rpmstyle2 = rpmstyle2;
-    emit rpmstyle2Changed(rpmstyle2);
+
+    // * Phase 4: Forward to UIState if available
+    if (m_uiState) {
+        m_uiState->setrpmstyle2(rpmstyle2);
+    } else {
+        emit rpmstyle2Changed(rpmstyle2);
+    }
 }
 void DashBoard::setrpmstyle3(const int &rpmstyle3)
 {
     if (m_rpmstyle3 == rpmstyle3)
         return;
     m_rpmstyle3 = rpmstyle3;
-    emit rpmstyle3Changed(rpmstyle3);
+
+    // * Phase 4: Forward to UIState if available
+    if (m_uiState) {
+        m_uiState->setrpmstyle3(rpmstyle3);
+    } else {
+        emit rpmstyle3Changed(rpmstyle3);
+    }
 }
 
 void DashBoard::setRotaryTrimpot1(const int &RotaryTrimpot1)
@@ -3797,7 +3858,13 @@ void DashBoard::setdraggable(const int &draggable)
     if (m_draggable == draggable)
         return;
     m_draggable = draggable;
-    emit draggableChanged(draggable);
+
+    // * Phase 4: Forward to UIState if available
+    if (m_uiState) {
+        m_uiState->setdraggable(draggable);
+    } else {
+        emit draggableChanged(draggable);
+    }
 }
 void DashBoard::setwifi(const QStringList &wifi)
 {
@@ -4348,14 +4415,26 @@ void DashBoard::setBrightness(const int &Brightness)
     if (m_Brightness == Brightness)
         return;
     m_Brightness = Brightness;
-    emit BrightnessChanged(Brightness);
+
+    // * Phase 4: Forward to UIState if available
+    if (m_uiState) {
+        m_uiState->setBrightness(Brightness);
+    } else {
+        emit BrightnessChanged(Brightness);
+    }
 }
 void DashBoard::setVisibledashes(const int &Visibledashes)
 {
     if (m_Visibledashes == Visibledashes)
         return;
     m_Visibledashes = Visibledashes;
-    emit VisibledashesChanged(Visibledashes);
+
+    // * Phase 4: Forward to UIState if available
+    if (m_uiState) {
+        m_uiState->setVisibledashes(Visibledashes);
+    } else {
+        emit VisibledashesChanged(Visibledashes);
+    }
 }
 
 void DashBoard::setoilpressurelamp(const int &oilpressurelamp)
@@ -6464,6 +6543,10 @@ qreal DashBoard::Weight() const
 // Official Pi screen present screen
 bool DashBoard::screen() const
 {
+    // * Phase 4: Forward to UIState if available
+    if (m_uiState) {
+        return m_uiState->screen();
+    }
     return m_screen;
 }
 
@@ -6941,14 +7024,26 @@ int DashBoard::ecu() const
 }
 int DashBoard::rpmstyle1() const
 {
+    // * Phase 4: Forward to UIState if available
+    if (m_uiState) {
+        return m_uiState->rpmstyle1();
+    }
     return m_rpmstyle1;
 }
 int DashBoard::rpmstyle2() const
 {
+    // * Phase 4: Forward to UIState if available
+    if (m_uiState) {
+        return m_uiState->rpmstyle2();
+    }
     return m_rpmstyle2;
 }
 int DashBoard::rpmstyle3() const
 {
+    // * Phase 4: Forward to UIState if available
+    if (m_uiState) {
+        return m_uiState->rpmstyle3();
+    }
     return m_rpmstyle3;
 }
 int DashBoard::RotaryTrimpot1() const
@@ -7010,6 +7105,10 @@ QString DashBoard::bestlaptime() const
 }
 int DashBoard::draggable() const
 {
+    // * Phase 4: Forward to UIState if available
+    if (m_uiState) {
+        return m_uiState->draggable();
+    }
     return m_draggable;
 }
 
@@ -7208,10 +7307,18 @@ qreal DashBoard::SteeringWheelAngle() const
 }
 int DashBoard::Brightness() const
 {
+    // * Phase 4: Forward to UIState if available
+    if (m_uiState) {
+        return m_uiState->Brightness();
+    }
     return m_Brightness;
 }
 int DashBoard::Visibledashes() const
 {
+    // * Phase 4: Forward to UIState if available
+    if (m_uiState) {
+        return m_uiState->Visibledashes();
+    }
     return m_Visibledashes;
 }
 int DashBoard::oilpressurelamp() const

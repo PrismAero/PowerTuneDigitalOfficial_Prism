@@ -65,6 +65,20 @@ set(CORE_SOURCES
     Core/dashboard.cpp
     Core/serialport.cpp
     Core/appsettings.cpp
+    Core/PropertyRouter.cpp
+    Core/Models/UIState.cpp
+    Core/Models/EngineData.cpp
+    Core/Models/VehicleData.cpp
+    Core/Models/GPSData.cpp
+    Core/Models/AnalogInputs.cpp
+    Core/Models/DigitalInputs.cpp
+    Core/Models/ExpanderBoardData.cpp
+    Core/Models/ElectricMotorData.cpp
+    Core/Models/FlagsData.cpp
+    Core/Models/TimingData.cpp
+    Core/Models/SensorData.cpp
+    Core/Models/ConnectionData.cpp
+    Core/Models/SettingsData.cpp
 )
 
 set(CORE_HEADERS
@@ -72,6 +86,21 @@ set(CORE_HEADERS
     Core/dashboard.h
     Core/serialport.h
     Core/appsettings.h
+    Core/PropertyRouter.h
+    Core/Models/UIState.h
+    Core/Models/DataModels.h
+    Core/Models/EngineData.h
+    Core/Models/VehicleData.h
+    Core/Models/GPSData.h
+    Core/Models/AnalogInputs.h
+    Core/Models/DigitalInputs.h
+    Core/Models/ExpanderBoardData.h
+    Core/Models/ElectricMotorData.h
+    Core/Models/FlagsData.h
+    Core/Models/TimingData.h
+    Core/Models/SensorData.h
+    Core/Models/ConnectionData.h
+    Core/Models/SettingsData.h
 )
 
 # * Source files - ECU protocols
@@ -108,6 +137,8 @@ set(HARDWARE_HEADERS
 set(UTILS_SOURCES
     Utils/DataLogger.cpp
     Utils/Calculations.cpp
+    Utils/SteinhartCalculator.cpp
+    Utils/SignalSmoother.cpp
     Utils/downloadmanager.cpp
     Utils/iomapdata.cpp
     Utils/ParseGithubData.cpp
@@ -121,6 +152,8 @@ set(UTILS_SOURCES
 set(UTILS_HEADERS
     Utils/DataLogger.h
     Utils/Calculations.h
+    Utils/SteinhartCalculator.h
+    Utils/SignalSmoother.h
     Utils/downloadmanager.h
     Utils/iomapdata.h
     Utils/ParseGithubData.h

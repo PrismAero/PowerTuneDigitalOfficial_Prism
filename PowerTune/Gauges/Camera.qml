@@ -82,7 +82,7 @@ Item {
                 source: "qrc:/Resources/graphics/Tacho_Mitte.png"
                 CircularGauge {
                     id: speedometer
-                    value: Dashboard.speed
+                    value: Vehicle.speed
                     //anchors.verticalCenter: parent.verticalCenter
                     //anchors.right: parent.horizontalCenter
                     width: height
@@ -167,7 +167,7 @@ Item {
                 source: "qrc:/Resources/graphics/Tacho_Mitte.png"
                 CircularGauge {
                     id: revcounter
-                    value: Dashboard.revs /1000
+                    value: Engine.rpm /1000
                     anchors.centerIn: backroundrev
                     width: height
                     height: parent.height /1.13

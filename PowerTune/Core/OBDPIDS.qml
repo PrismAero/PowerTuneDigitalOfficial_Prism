@@ -1057,7 +1057,7 @@ Item {
         }
     }
     Connections {
-        target: Dashboard
+        target: Connection
         function onSupportedRegChanged() {
             functsupportedRegs.supportedRegs();
         }
@@ -1066,8 +1066,8 @@ Item {
     Item {   //Function for Consult to show only supported Regs
         id: functsupportedRegs
         function supportedRegs() {
-            var Test = "obd" + Dashboard.supportedReg + ".visible";
-            switch (Dashboard.supportedReg) {
+            var Test = "obd" + Connection.supportedReg + ".visible";
+            switch (Connection.supportedReg) {
             case 4:
                 {
                     obd4.visible = true;

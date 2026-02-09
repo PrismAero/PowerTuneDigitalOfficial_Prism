@@ -88,6 +88,10 @@ Rectangle{
     property string peakneedletipwidth
     property string peakneedleoffset
     property string peakneedlevisible
+    
+    // * Double-tap detection properties
+    property int touchCounter: 0
+    property real lastTouchTime: 0
 
     Drag.active: true
     DatasourcesList{id: powertunedatasource}
@@ -97,7 +101,7 @@ Rectangle{
         running: true
        onRunningChanged:{
             if (intro.running == false )
-                gauge.value  = Qt.binding(function(){return Dashboard[mainvaluename]});
+                gauge.value  = Qt.binding(function(){return PropertyRouter.getValue(mainvaluename)});
        }
         NumberAnimation {
             id :animation
@@ -120,7 +124,7 @@ Rectangle{
         }
     }
     Connections{
-        target: Dashboard
+        target: UI
         function onDraggableChanged() { togglemousearea(); }
     }
 
@@ -140,8 +144,8 @@ Rectangle{
         anchors.fill: parent
         drag.target: parent
         enabled: false
-        onPressed:
-        {
+        z: 100  // * Higher z-order to receive events over dashboard background
+        onPressed: function(mouse) {
             touchCounter++;
             if (touchCounter == 1) {
                 lastTouchTime = Date.now();
@@ -149,15 +153,18 @@ Rectangle{
             } else if (touchCounter == 2) {
                 var currentTime = Date.now();
                 if (currentTime - lastTouchTime <= 500) { // Double-tap detected within 500 ms
-                    console.log("Double-tap detected at", mouse.x, mouse.y);
+                    console.log("Gauge double-tap detected at", mouse.x, mouse.y);
                 }
                 touchCounter = 0;
                 timerDoubleClick.stop();
                 popupmenu.popup(touchArea.mouseX, touchArea.mouseY);
             }
         }
-        Component.onCompleted: {toggledecimal();
+        Component.onCompleted: {
+            toggledecimal();
             toggledecimal2();
+            // * Check initial draggable state since gauge may be created after edit mode is enabled
+            togglemousearea();
         }
     }
 
@@ -169,6 +176,22 @@ Rectangle{
         onTriggered: {
             touchCounter = 0; // Reset counter if time interval exceeds 500 ms
         }
+    }
+
+    // * Helper properties for style components - these provide access to gauge geometry
+    readonly property real outerRadius: gauge.width / 2
+    
+    // * Helper function for converting percentages to pixels based on gauge radius
+    function toPixels(percentage) {
+        return percentage * outerRadius;
+    }
+    
+    // * Helper function for converting values to angles
+    function valueToAngle(value) {
+        var range = maxvalue - minvalue;
+        if (range === 0) return startangle;
+        var normalized = (value - minvalue) / range;
+        return startangle + normalized * (endangle - startangle);
     }
 
     CircularGauge {
@@ -186,25 +209,22 @@ Rectangle{
 
         style: CircularGaugeStyle {
             labelStepSize: setlabelsteps
-            labelInset: toPixels(setlabelinset*0.01)
+            labelInset: roundGauge.toPixels(setlabelinset*0.01)
             tickmarkStepSize :tickmarksteps
             minorTickmarkCount: minortickmarksteps
             tickmarkInset: setmajortickmarkinset
             minorTickmarkInset: setminortickmarkinset
             minimumValueAngle: startangle
             maximumValueAngle: endangle
-            function toPixels(percentage) {
-                return percentage * outerRadius;
-            }
 
 
 
             needle: Rectangle {
                 id:gaugeneedle
                 visible: needlevisible
-                y: outerRadius * (needleinset * 0.01)
-                implicitWidth: outerRadius * (needleBaseWidth *0.01)
-                implicitHeight: outerRadius *(needleLength *0.01)
+                y: roundGauge.outerRadius * (needleinset * 0.01)
+                implicitWidth: roundGauge.outerRadius * (needleBaseWidth *0.01)
+                implicitHeight: roundGauge.outerRadius *(needleLength *0.01)
                 antialiasing: true
                 color: "transparent"
                 Canvas {
@@ -252,7 +272,7 @@ Rectangle{
                 id:centerbutton
                 visible: needlecentervisisble
                 Rectangle {
-                    width: outerRadius * 0.2
+                    width: roundGauge.outerRadius * 0.2
                     height: width
                     radius: width / 2
                     color: "black"
@@ -287,9 +307,6 @@ Rectangle{
                     function degreesToRadians(degrees) {
                         return degrees * (Math.PI / 180);
                     }
-                    function toPixels(percentage) {
-                        return percentage * outerRadius;
-                    }
 
                     Connections{
                         target: roundGauge
@@ -299,22 +316,17 @@ Rectangle{
 
                     onPaint: {
                         var ctx = getContext("2d");
-                       // var gradient =ctx.createLinearGradient(xStart, yStart, xEnd, yEnd);
-                        //var gradient =ctx.createLinearGradient(xStart, yStart, xEnd, yEnd);
-                        //var gradient = ctx.createRadialGradient((parent.width / 2),(parent.height / 2), 0, (parent.width / 2),(parent.height / 2),parent.height );
-                        //gradient = ctx.createLinearGradient(redareastart, yStart, xEnd, yEnd);
-                        //gradient.addColorStop(0.0,"yellow");
-                        //gradient.addColorStop(1.0,"red");
+                        var _outerRadius = roundGauge.outerRadius;
 
                         ctx.reset();
                         ctx.beginPath();
                         ctx.strokeStyle = "red"
-                        ctx.lineWidth = toPixels(redareawidth * 0.01)
-                        ctx.arc(outerRadius,
-                                outerRadius,
-                                outerRadius - toPixels(redareainset*0.01) - ctx.lineWidth / 2,
-                                degreesToRadians(valueToAngle(redareastart) - 90),
-                                degreesToRadians(valueToAngle(gauge.maximumValue) - 90));
+                        ctx.lineWidth = roundGauge.toPixels(redareawidth * 0.01)
+                        ctx.arc(_outerRadius,
+                                _outerRadius,
+                                _outerRadius - roundGauge.toPixels(redareainset*0.01) - ctx.lineWidth / 2,
+                                degreesToRadians(roundGauge.valueToAngle(redareastart) - 90),
+                                degreesToRadians(roundGauge.valueToAngle(gauge.maximumValue) - 90));
                         ctx.stroke();
                     }
                 }
@@ -333,6 +345,7 @@ Rectangle{
 
                     onPaint: {
                         var ctx = getContext("2d");
+                        var _outerRadius = roundGauge.outerRadius;
                         var gradient2;
                         gradient2 = ctx.createRadialGradient((parent.width / 2),(parent.height / 2), 0, (parent.width / 2),(parent.height / 2),parent.height );
                         gradient2.addColorStop(trailhighboarder, outerneedlecolortrail);   //outer needle ring color
@@ -344,12 +357,12 @@ Rectangle{
                         ctx.reset();
                         ctx.beginPath();
                         ctx.strokeStyle = gradient2
-                        ctx.lineWidth = outerRadius
-                        ctx.arc(outerRadius,
-                                outerRadius,
-                                outerRadius - ctx.lineWidth / 2,
-                                degreesToRadians(valueToAngle(gauge.minimumValue) - 90),
-                                degreesToRadians(valueToAngle(gauge.value) - 90));
+                        ctx.lineWidth = _outerRadius
+                        ctx.arc(_outerRadius,
+                                _outerRadius,
+                                _outerRadius - ctx.lineWidth / 2,
+                                degreesToRadians(roundGauge.valueToAngle(gauge.minimumValue) - 90),
+                                degreesToRadians(roundGauge.valueToAngle(gauge.value) - 90));
                         ctx.stroke();
                     }
                 }
@@ -357,7 +370,7 @@ Rectangle{
 
             tickmarkLabel:  Text {
                 id:labeltext
-                font.pixelSize: toPixels(labelfontsize*0.01) //Math.max(6, outerRadius * 0.05)
+                font.pixelSize: roundGauge.toPixels(labelfontsize*0.01) //Math.max(6, outerRadius * 0.05)
                 text: styleData.value / divider
                 font.bold: true
                 font.family: labelfont
@@ -366,8 +379,8 @@ Rectangle{
             }
 
             minorTickmark: Rectangle {
-                implicitWidth: toPixels(minortickmarkwidth *0.01)
-                implicitHeight: toPixels(minortickmarkheight *0.01)
+                implicitWidth: roundGauge.toPixels(minortickmarkwidth *0.01)
+                implicitHeight: roundGauge.toPixels(minortickmarkheight *0.01)
                 antialiasing: true
                 smooth: true
                 color: styleData.value <= gauge.value ? minortickmarkcoloractive : minortickmarkcolorinactive
@@ -375,8 +388,8 @@ Rectangle{
             }
 
             tickmark:  Rectangle {
-                implicitWidth: toPixels(tickmarkwidth *0.01)
-                implicitHeight: toPixels(tickmarkheight *0.01)
+                implicitWidth: roundGauge.toPixels(tickmarkwidth *0.01)
+                implicitHeight: roundGauge.toPixels(tickmarkheight *0.01)
                 antialiasing: true
                 smooth: true
                 color: styleData.value <= gauge.value ? majortickmarkcoloractive : majortickmarkcolorinactive
@@ -397,32 +410,32 @@ Rectangle{
             font.pixelSize: 15
             z:1000
             MenuItem {
-                text: Translator.translate("Test sweep", Dashboard.language)
+                text: Translator.translate("Test sweep", Settings.language)
                 font.pixelSize: 15
                 onClicked: intro.running = true;
             }
 
 
             MenuItem {
-                text: Translator.translate("Datasource", Dashboard.language)
+                text: Translator.translate("Datasource", Settings.language)
                 font.pixelSize: 15
                 onClicked: {datasourcemenue.popup(touchArea.mouseX, touchArea.mouseY);//gaugesizesmenue.visible= true;
                 }
             }
             MenuItem {
-                text: Translator.translate("Size and ring", Dashboard.language)
+                text: Translator.translate("Size and ring", Settings.language)
                 font.pixelSize: 15
                 onClicked: {gaugesizesmenue.popup(touchArea.mouseX, touchArea.mouseY);//gaugesizesmenue.visible= true;
                          for(var i = 0; i < backroundcolorselect.model.count; ++i) if (backroundcolorselect.textAt(i) === backroundcolor)backroundcolorselect.currentIndex = i ;
                 }
             }
             MenuItem {
-                text: Translator.translate("Start Stop values", Dashboard.language)
+                text: Translator.translate("Start Stop values", Settings.language)
                 font.pixelSize: 15
                 onClicked: startstopmenu.popup(touchArea.mouseX, touchArea.mouseY);
             }
             MenuItem {
-                text: Translator.translate("Needle", Dashboard.language)
+                text: Translator.translate("Needle", Settings.language)
                 font.pixelSize: 15
                 onClicked: {needlemenu.popup(touchArea.mouseX, touchArea.mouseY);
                     for(var i = 0; i < needlecolor2select.model.count; ++i) if (needlecolor2select.textAt(i) === needlecolor2)needlecolor2select.currentIndex = i;
@@ -431,7 +444,7 @@ Rectangle{
                 }
             }
             MenuItem {
-                text: Translator.translate("Needle trail", Dashboard.language)
+                text: Translator.translate("Needle trail", Settings.language)
                 font.pixelSize: 15
                 onClicked: {needletrailmenu.popup(touchArea.mouseX, touchArea.mouseY);
                 for(var a = 0; a < lowerneedlecolortrailselect.model.count; ++a) if (lowerneedlecolortrailselect.textAt(a) === lowerneedlecolortrailsave)lowerneedlecolortrailselect.currentIndex = a ;
@@ -441,7 +454,7 @@ Rectangle{
 
             }
             MenuItem {
-                text: Translator.translate("Minor ticks", Dashboard.language)
+                text: Translator.translate("Minor ticks", Settings.language)
                 font.pixelSize: 15
                 onClicked: {minortickmarkmenu.popup(touchArea.mouseX, touchArea.mouseY);
                     for(var a = 0; a < minortickmarkcolorainctiveselect.model.count; ++a) if (minortickmarkcolorainctiveselect.textAt(a) === minortickmarkcolorinactive)minortickmarkcolorainctiveselect.currentIndex = a;
@@ -450,7 +463,7 @@ Rectangle{
 
             }
             MenuItem {
-                text: Translator.translate("Major ticks", Dashboard.language)
+                text: Translator.translate("Major ticks", Settings.language)
                 font.pixelSize: 15
                 onClicked: {majortickmarkmenu.popup(touchArea.mouseX, touchArea.mouseY);//gaugesizesmenue.visible= true;
                     for(var i = 0; i < tickmarkcolorinactiveselect.model.count; ++i) if (tickmarkcolorinactiveselect.textAt(i) === majortickmarkcolorinactive)tickmarkcolorinactiveselect.currentIndex = i;
@@ -459,7 +472,7 @@ Rectangle{
 
             }
             MenuItem {
-                text: Translator.translate("Labels", Dashboard.language)
+                text: Translator.translate("Labels", Settings.language)
                 font.pixelSize: 15
                 onClicked: {labelsandticks.popup(touchArea.mouseX, touchArea.mouseY);
                     for(var a = 0; a < labelfontselect.model.count; ++a) if (labelfontselect.textAt(a) === labelfont)labelfontselect.currentIndex = a ;
@@ -469,12 +482,12 @@ Rectangle{
                 }
             }
             MenuItem {
-                text: Translator.translate("Warnings", Dashboard.language)
+                text: Translator.translate("Warnings", Settings.language)
                 font.pixelSize: 15
                 onClicked: warningmenu.popup(touchArea.mouseX, touchArea.mouseY);
             }
             MenuItem {
-                text: Translator.translate("Description text", Dashboard.language)
+                text: Translator.translate("Description text", Settings.language)
                 font.pixelSize: 15
                 onClicked: {descriptionmenu.popup(touchArea.mouseX, touchArea.mouseY);
                     for(var i = 0; i < desclabelfontselect.model.count; ++i) if (desclabelfontselect.textAt(i) === desclabelfont)desclabelfontselect.currentIndex = i ;
@@ -482,7 +495,7 @@ Rectangle{
                 }
             }
             MenuItem {
-                text: Translator.translate("Delete gauge", Dashboard.language)
+                text: Translator.translate("Delete gauge", Settings.language)
                 font.pixelSize: 15
                 onClicked: roundGauge.destroy();
             }
@@ -536,7 +549,7 @@ Rectangle{
 
         }
         RoundButton{
-            text: Translator.translate("Close menu", Dashboard.language)
+            text: Translator.translate("Close menu", Settings.language)
             font.bold: true
             font.pixelSize : 15
             width: parent.width /1.07
@@ -564,7 +577,7 @@ Rectangle{
             rowSpacing :5
             leftPadding: 5
             Text {
-                text: Translator.translate("Gauge size", Dashboard.language)
+                text: Translator.translate("Gauge size", Settings.language)
                 font.bold: true
                 font.pixelSize: 15
                 horizontalAlignment: Text.AlignHCenter
@@ -600,7 +613,7 @@ Rectangle{
             }
 
             Text {
-                text: Translator.translate("Background color", Dashboard.language)
+                text: Translator.translate("Background color", Settings.language)
                 font.bold: true
                 font.pixelSize: 15}
 
@@ -635,28 +648,28 @@ Rectangle{
             }
 
             RoundButton{
-                text: Translator.translate("Needle visible", Dashboard.language)
+                text: Translator.translate("Needle visible", Settings.language)
                 font.bold: true
                 font.pixelSize : 15
                 width: parent.width /1.07
                 onClicked: toggleneedle()
             }
             RoundButton{
-                text: Translator.translate("Needle button visible", Dashboard.language)
+                text: Translator.translate("Needle button visible", Settings.language)
                 font.bold: true
                 font.pixelSize : 15
                 width: parent.width /1.07
                 onClicked: toggleneedlecenter()
             }
             RoundButton{
-                text: Translator.translate("Outer ring visible", Dashboard.language)
+                text: Translator.translate("Outer ring visible", Settings.language)
                 font.bold: true
                 font.pixelSize : 15
                 width: parent.width /1.07
                 onClicked: togglering()
             }
             RoundButton{
-                text: Translator.translate("Close menu", Dashboard.language)
+                text: Translator.translate("Close menu", Settings.language)
                 font.bold: true
                 font.pixelSize : 15
                 width: parent.width /1.07
@@ -680,7 +693,7 @@ Rectangle{
             spacing: 10
             leftPadding: 5
             Text {
-                text: Translator.translate("Start value", Dashboard.language)
+                text: Translator.translate("Start value", Settings.language)
                 font.bold: true
                 font.pixelSize: 15}
             Grid {
@@ -713,7 +726,7 @@ Rectangle{
             }
 
             Text {
-                text: Translator.translate("End value", Dashboard.language)
+                text: Translator.translate("End value", Settings.language)
                 font.bold: true
                 font.pixelSize: 15}
             Grid {
@@ -746,7 +759,7 @@ Rectangle{
                 }
             }
             Text {
-                text: Translator.translate("Start angle", Dashboard.language)
+                text: Translator.translate("Start angle", Settings.language)
                 font.pixelSize: 15
                 font.bold : true
             }
@@ -776,7 +789,7 @@ Rectangle{
             }
 
             Text {
-                text: Translator.translate("End angle", Dashboard.language)
+                text: Translator.translate("End angle", Settings.language)
                 font.pixelSize: 15
                 font.bold :true
             }
@@ -804,7 +817,7 @@ Rectangle{
                 }
             }
             RoundButton{
-                text: Translator.translate("Close menu", Dashboard.language)
+                text: Translator.translate("Close menu", Settings.language)
                 font.bold: true
                 font.pixelSize : 15
                 width: parent.width /1.07
@@ -830,7 +843,7 @@ Rectangle{
             rowSpacing :5
 
             Text {
-                text: Translator.translate("Needle color", Dashboard.language)
+                text: Translator.translate("Needle color", Settings.language)
                 font.bold: true
                 font.pixelSize: 15}
             ComboBox {
@@ -893,7 +906,7 @@ Rectangle{
             }
 
             Text {
-                text: Translator.translate("Needle lenght", Dashboard.language)
+                text: Translator.translate("Needle lenght", Settings.language)
                 font.bold: true
                 font.pixelSize: 15}
             Grid {
@@ -920,7 +933,7 @@ Rectangle{
                 }
             }
             Text {
-                text: Translator.translate("Needle base width", Dashboard.language)
+                text: Translator.translate("Needle base width", Settings.language)
                 font.bold: true
                 font.pixelSize: 15}
             Grid {
@@ -948,7 +961,7 @@ Rectangle{
                 }
             }
             Text {
-                text: Translator.translate("Needle tip width", Dashboard.language)
+                text: Translator.translate("Needle tip width", Settings.language)
                 font.bold: true
                 font.pixelSize: 15}
             Grid {
@@ -977,7 +990,7 @@ Rectangle{
             }
 
             Text {
-                text: Translator.translate("Needle offset", Dashboard.language)
+                text: Translator.translate("Needle offset", Settings.language)
                 font.bold: true
                 font.pixelSize: 15}
             Grid {
@@ -1005,7 +1018,7 @@ Rectangle{
                 }
             }
             RoundButton{
-                text: Translator.translate("Close menu", Dashboard.language)
+                text: Translator.translate("Close menu", Settings.language)
                 font.bold: true
                 font.pixelSize : 15
                 width: parent.width /1.07
@@ -1029,7 +1042,7 @@ Rectangle{
             leftPadding: 5
             rowSpacing :5
             Text {
-                text: Translator.translate("Outer needle trail", Dashboard.language)
+                text: Translator.translate("Outer needle trail", Settings.language)
                 font.bold: true
                 font.pixelSize: 15
             }
@@ -1068,7 +1081,7 @@ Rectangle{
             }
 
             Text {
-                text: Translator.translate("Middle needle trail", Dashboard.language)
+                text: Translator.translate("Middle needle trail", Settings.language)
                 font.bold: true
                 font.pixelSize: 15
 
@@ -1104,7 +1117,7 @@ Rectangle{
                 }
             }
             Text {
-                text: Translator.translate("Lower needle trail", Dashboard.language)
+                text: Translator.translate("Lower needle trail", Settings.language)
                 font.bold: true
                 font.pixelSize: 15
                 horizontalAlignment: Text.AlignHCenter
@@ -1140,7 +1153,7 @@ Rectangle{
                 }
             }
             RoundButton{
-                text: Translator.translate("Close menu", Dashboard.language)
+                text: Translator.translate("Close menu", Settings.language)
                 font.bold: true
                 font.pixelSize : 15
                 width: parent.width /1.07
@@ -1163,7 +1176,7 @@ Rectangle{
             rowSpacing :5
             leftPadding: 5
             Text {
-                text: Translator.translate("Minor tickmark height", Dashboard.language)
+                text: Translator.translate("Minor tickmark height", Settings.language)
                 font.bold: true
                 font.pixelSize: 15}
             Grid {
@@ -1191,7 +1204,7 @@ Rectangle{
                 }
             }
             Text {
-                text: Translator.translate("Minor tickmark width", Dashboard.language)
+                text: Translator.translate("Minor tickmark width", Settings.language)
                 font.bold: true
                 font.pixelSize: 15}
             Grid {
@@ -1218,7 +1231,7 @@ Rectangle{
                 }
             }
             Text {
-                text: Translator.translate("Minor tickmark steps", Dashboard.language)
+                text: Translator.translate("Minor tickmark steps", Settings.language)
                 font.bold: true
                 font.pixelSize: 15}
             Grid {
@@ -1247,7 +1260,7 @@ Rectangle{
             }
 
             Text {
-                text: Translator.translate("Minor tickmark inset", Dashboard.language)
+                text: Translator.translate("Minor tickmark inset", Settings.language)
                 font.bold: true
                 font.pixelSize: 15}
             Grid {
@@ -1273,7 +1286,7 @@ Rectangle{
                 }
             }
             Text {
-                text:Translator.translate("Minor tick active color", Dashboard.language)
+                text:Translator.translate("Minor tick active color", Settings.language)
                 font.pixelSize: 15
                 font.bold: true
             }
@@ -1307,7 +1320,7 @@ Rectangle{
                 }
             }
             Text {
-                text: Translator.translate("Minor tick inactive color", Dashboard.language)
+                text: Translator.translate("Minor tick inactive color", Settings.language)
                 font.pixelSize: 15
                 font.bold: true
             }
@@ -1341,7 +1354,7 @@ Rectangle{
                 }
             }
             RoundButton{
-                text: Translator.translate("Close menu", Dashboard.language)
+                text: Translator.translate("Close menu", Settings.language)
                 font.bold: true
                 font.pixelSize : 15
                 width: popupmenu.width /1.07
@@ -1369,7 +1382,7 @@ Rectangle{
                 rowSpacing :5
 
                 Text {
-                    text: Translator.translate("Major tick steps", Dashboard.language)
+                    text: Translator.translate("Major tick steps", Settings.language)
                     font.bold: true
                     font.pixelSize: 15
                 }
@@ -1408,7 +1421,7 @@ Rectangle{
                     }
 
                     Text {
-                        text: Translator.translate("Major tickmark height", Dashboard.language)
+                        text: Translator.translate("Major tickmark height", Settings.language)
                         font.bold: true
                         font.pixelSize: 15}
                     Grid {
@@ -1438,7 +1451,7 @@ Rectangle{
                         }
                     }
                     Text {
-                        text: Translator.translate("Major tickmark width", Dashboard.language)
+                        text: Translator.translate("Major tickmark width", Settings.language)
                         font.bold: true
                         font.pixelSize: 15
                     }
@@ -1469,7 +1482,7 @@ Rectangle{
                         }
                     }
                     Text {
-                        text: Translator.translate("Major tickmark inset", Dashboard.language)
+                        text: Translator.translate("Major tickmark inset", Settings.language)
                         font.bold: true
                         font.pixelSize: 15
                     }
@@ -1501,7 +1514,7 @@ Rectangle{
                     }
 
                     Text {
-                        text: Translator.translate("Tickmark active color", Dashboard.language)
+                        text: Translator.translate("Tickmark active color", Settings.language)
                         font.pixelSize: 15
                         font.bold: true
                     }
@@ -1535,7 +1548,7 @@ Rectangle{
                         }
                     }
                     Text {
-                        text: Translator.translate("Tickmark inactive color", Dashboard.language)
+                        text: Translator.translate("Tickmark inactive color", Settings.language)
                         font.pixelSize: 15
                         font.bold: true
                     }
@@ -1569,7 +1582,7 @@ Rectangle{
                         }
                     }
                     RoundButton{
-                        text: Translator.translate("Close menu", Dashboard.language)
+                        text: Translator.translate("Close menu", Settings.language)
                         font.bold: true
                         font.pixelSize : 15
                         width: parent.width /1.07
@@ -1594,7 +1607,7 @@ Rectangle{
             rows: 20
             rowSpacing :5
             Text {
-                text: Translator.translate("Major label steps", Dashboard.language)
+                text: Translator.translate("Major label steps", Settings.language)
                 font.bold: true
                 font.pixelSize: 15
             }
@@ -1628,7 +1641,7 @@ Rectangle{
                 }
             }
             Text {
-                text: Translator.translate("Label size", Dashboard.language)
+                text: Translator.translate("Label size", Settings.language)
                 font.bold: true
                 font.pixelSize: 15}
             Grid {
@@ -1659,7 +1672,7 @@ Rectangle{
                 }
             }
             Text {
-                text: Translator.translate("Label inset", Dashboard.language)
+                text: Translator.translate("Label inset", Settings.language)
                 font.pixelSize: 15
                 font.bold: true
             }
@@ -1688,7 +1701,7 @@ Rectangle{
             }
             ////Qt.fontFamilies()
             Text {
-                text: Translator.translate("Label Font", Dashboard.language)
+                text: Translator.translate("Label Font", Settings.language)
                 font.pixelSize: 15
                 font.bold: true
             }
@@ -1711,7 +1724,7 @@ Rectangle{
             }
 
             Text {
-                text: Translator.translate("Label active color", Dashboard.language)
+                text: Translator.translate("Label active color", Settings.language)
                 font.pixelSize: 15
                 font.bold: true
             }
@@ -1745,7 +1758,7 @@ Rectangle{
                 }
             }
             Text {
-                text: Translator.translate("Label inactive color", Dashboard.language)
+                text: Translator.translate("Label inactive color", Settings.language)
                 font.pixelSize: 15
                 font.bold: true
             }
@@ -1779,7 +1792,7 @@ Rectangle{
                 }
             }
             RoundButton{
-                text: Translator.translate("Close menu", Dashboard.language)
+                text: Translator.translate("Close menu", Settings.language)
                 font.bold: true
                 font.pixelSize: 15
                 width: parent.width /1.07
@@ -1805,7 +1818,7 @@ Menu{
             rowSpacing :5
             leftPadding: 5
             Text {
-                text: Translator.translate("Low warning trigger", Dashboard.language)
+                text: Translator.translate("Low warning trigger", Settings.language)
                 font.pixelSize: 15
                 font.bold: true
             }
@@ -1833,7 +1846,7 @@ Menu{
                 }
             }
             Text {
-                text: Translator.translate("High warning trigger", Dashboard.language)
+                text: Translator.translate("High warning trigger", Settings.language)
                 font.pixelSize: 15
                 font.bold: true
             }
@@ -1863,7 +1876,7 @@ Menu{
                 }
             }
             Text {
-                text: Translator.translate("Red area inset", Dashboard.language)
+                text: Translator.translate("Red area inset", Settings.language)
                 font.pixelSize: 15
                 font.bold: true
             }
@@ -1894,7 +1907,7 @@ Menu{
                 }
             }
             Text {
-                text: Translator.translate("Red start", Dashboard.language)
+                text: Translator.translate("Red start", Settings.language)
                 font.pixelSize: 15
                 font.bold: true
             }
@@ -1925,7 +1938,7 @@ Menu{
             }
 
             Text {
-                text: Translator.translate("Red area width", Dashboard.language)
+                text: Translator.translate("Red area width", Settings.language)
                 font.pixelSize: 15
                 font.bold: true
             }
@@ -1956,7 +1969,7 @@ Menu{
             }
 
             RoundButton{
-                text: Translator.translate("Close menu", Dashboard.language)
+                text: Translator.translate("Close menu", Settings.language)
                 font.bold: true
                 font.pixelSize: 15
                 width: parent.width /1.07
@@ -1980,7 +1993,7 @@ Menu{
             rowSpacing :5
             leftPadding: 5
             Text {
-                text: Translator.translate("Horizontal position", Dashboard.language)
+                text: Translator.translate("Horizontal position", Settings.language)
                 font.pixelSize: 15
                 font.bold: true
             }
@@ -2011,7 +2024,7 @@ Menu{
             }
 
             Text {
-                text: Translator.translate("Vertical position", Dashboard.language)
+                text: Translator.translate("Vertical position", Settings.language)
                 font.pixelSize: 15
                 font.bold: true
             }
@@ -2043,7 +2056,7 @@ Menu{
             }
             //////////////
             Text {
-                text: Translator.translate("Fontsize", Dashboard.language)
+                text: Translator.translate("Fontsize", Settings.language)
                 font.pixelSize: 15
                 font.bold: true
             }
@@ -2074,7 +2087,7 @@ Menu{
             }
 
             Text {
-                text: Translator.translate("Font", Dashboard.language)
+                text: Translator.translate("Font", Settings.language)
                 font.pixelSize: 15
                 font.bold: true
             }
@@ -2095,7 +2108,7 @@ Menu{
                 }
             }
             Text {
-                text: Translator.translate("Font color", Dashboard.language)
+                text: Translator.translate("Font color", Settings.language)
                 font.pixelSize: 15
                 font.bold: true
             }
@@ -2129,7 +2142,7 @@ Menu{
                 }
             }
             Text {
-                text: Translator.translate("Display Text", Dashboard.language)
+                text: Translator.translate("Display Text", Settings.language)
                 font.pixelSize: 15
                 font.bold: true
             }
@@ -2143,7 +2156,7 @@ Menu{
 
 
             RoundButton{
-                text: Translator.translate("Close menu", Dashboard.language)
+                text: Translator.translate("Close menu", Settings.language)
                 font.bold: true
                 font.pixelSize: 15
                 width: parent.width /1.07
@@ -2174,7 +2187,7 @@ Menu{
 
     function togglemousearea()
     {
-        if (Dashboard.draggable === 1)
+        if (UI.draggable === 1)
         {
             touchArea.enabled = true;
         }
@@ -2411,6 +2424,15 @@ Menu{
             roundGauge.innerneedlecolortrail = innerneedlecolortrailsave;
             warningactive = 0;
         }
+    }
+    
+    // * Placeholder functions for decimal formatting (used by Component.onCompleted)
+    function toggledecimal() {
+        // ! RoundGauge doesn't have decimal display fields, this is a no-op
+    }
+    
+    function toggledecimal2() {
+        // ! RoundGauge doesn't have decimal display fields, this is a no-op
     }
 }
 

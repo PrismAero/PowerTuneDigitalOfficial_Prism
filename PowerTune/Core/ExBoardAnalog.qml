@@ -363,7 +363,7 @@ Rectangle {
         }
         Text {
 
-            text: Translator.translate("Damping", Dashboard.language)
+            text: Translator.translate("Damping", Settings.language)
             font.pixelSize: mainWindow.width / 60
             color: "white"
         }
@@ -522,7 +522,7 @@ Rectangle {
         }
 
         Text {
-            text: "RPMCAN " + Translator.translate("Version", Dashboard.language)
+            text: "RPMCAN " + Translator.translate("Version", Settings.language)
             font.pixelSize: mainWindow.width / 60
             visible: {
                 (rpmcheckbox.checked == true) ? true : false;
@@ -550,7 +550,7 @@ Rectangle {
             }
         }
         Text {
-            text: Translator.translate("Cylinders", Dashboard.language)
+            text: Translator.translate("Cylinders", Settings.language)
             font.pixelSize: mainWindow.width / 60
             visible: {
                 (rpmcheckbox.checked == true) ? true : false;
@@ -603,7 +603,7 @@ Rectangle {
         anchors.leftMargin: 10
         anchors.top: parent.top
         anchors.right: parent.right
-        text: Translator.translate("Voltage divider jumpers", Dashboard.language)
+        text: Translator.translate("Voltage divider jumpers", Settings.language)
         font.pixelSize: mainWindow.width / 60
         color: "white"
     }
@@ -617,7 +617,7 @@ Rectangle {
         columns: 9
         spacing: 3
         Text {
-            text: Translator.translate("Temp In.", Dashboard.language)
+            text: Translator.translate("Temp In.", Settings.language)
             font.pixelSize: mainWindow.width / 60
             color: "white"
             rightPadding: mainWindow.width * 0.01675

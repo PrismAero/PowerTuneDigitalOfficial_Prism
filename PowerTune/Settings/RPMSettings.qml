@@ -60,7 +60,7 @@ Rectangle {
 
             // * Shift Light Section
             SettingsSection {
-                title: Translator.translate("Shift Light", Dashboard.language)
+                title: Translator.translate("Shift Light", Settings.language)
                 Layout.fillWidth: true
 
                 Text {
@@ -90,7 +90,7 @@ Rectangle {
                             spacing: 8
 
                             Text {
-                                text: Translator.translate("Stage", Dashboard.language) + " 1"
+                                text: Translator.translate("Stage", Settings.language) + " 1"
                                 font.pixelSize: 18
                                 font.weight: Font.DemiBold
                                 font.family: "Lato"
@@ -132,7 +132,7 @@ Rectangle {
                             spacing: 8
 
                             Text {
-                                text: Translator.translate("Stage", Dashboard.language) + " 2"
+                                text: Translator.translate("Stage", Settings.language) + " 2"
                                 font.pixelSize: 18
                                 font.weight: Font.DemiBold
                                 font.family: "Lato"
@@ -174,7 +174,7 @@ Rectangle {
                             spacing: 8
 
                             Text {
-                                text: Translator.translate("Stage", Dashboard.language) + " 3"
+                                text: Translator.translate("Stage", Settings.language) + " 3"
                                 font.pixelSize: 18
                                 font.weight: Font.DemiBold
                                 font.family: "Lato"
@@ -216,7 +216,7 @@ Rectangle {
                             spacing: 8
 
                             Text {
-                                text: Translator.translate("Stage", Dashboard.language) + " 4"
+                                text: Translator.translate("Stage", Settings.language) + " 4"
                                 font.pixelSize: 18
                                 font.weight: Font.DemiBold
                                 font.family: "Lato"

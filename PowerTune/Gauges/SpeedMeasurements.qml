@@ -19,16 +19,16 @@ Rectangle {
 
     //STAGING Lights
     Connections{
-        target: Dashboard
+        target: Vehicle
         function onSpeedChanged() { speedchange.start() }
     }
     Connections{
-        target: Dashboard
+        target: Settings
         function onSpeedunitsChanged() { units.start() }
     }
 
     Connections{
-        target: Dashboard
+        target: Timing
         function onReactiontimeChanged() { reactiontimecheck.start() }
     }
 
@@ -41,7 +41,7 @@ Rectangle {
         id: speedchange
         function start()
         {
-        if (Dashboard.speed > 0 && startmeasurement === 1 &&measurementstarted === 0)
+        if (Vehicle.speed > 0 && startmeasurement === 1 &&measurementstarted === 0)
        {
         measurementstarted = 1;
         Calculations.stopreactiontimer();
@@ -54,7 +54,7 @@ Rectangle {
         id: reactiontimecheck
         function start()
         {
-        if (Dashboard.reactiontime < 0 )
+        if (Timing.reactiontime < 0 )
        {
             //reactiotimertimetext.color = "red"
             //reactiotimertext.color = "red"
@@ -67,7 +67,7 @@ Rectangle {
         id: units
         function start()
         {
-        if (Dashboard.speedunits === "metric")
+        if (Settings.speedunits === "metric")
         {
             hundred.text = "0-100 km/h TIME: "
             twohundred.text = "100-200 km/h TIME: "
@@ -208,7 +208,7 @@ Row{
 
         Text {
             id:reactiotimertimetext
-            text: (Dashboard.reactiontime).toFixed(3)
+            text: (Timing.reactiontime).toFixed(3)
             font.pixelSize: measurements.width / 40
             color: sliptextcolor
             Component.onCompleted: {
@@ -230,7 +230,7 @@ Row{
         }
         Text {
             id: sixtyTime
-            text: (Dashboard.sixtyfoottime)
+            text: (Timing.sixtyfoottime)
             font.pixelSize: measurements.width / 40
             color: sliptextcolor
             Component.onCompleted: {
@@ -252,7 +252,7 @@ Row{
         }
         Text {
             id: threeTime
-            text:  (Dashboard.threehundredthirtyfoottime)
+            text:  (Timing.threehundredthirtyfoottime)
             font.pixelSize: measurements.width / 40
             color: sliptextcolor
             Component.onCompleted: {
@@ -276,7 +276,7 @@ Row{
         }
         Text {
             id: eigthMileTime
-            text: (Dashboard.eightmiletime)
+            text: (Timing.eightmiletime)
             font.pixelSize: measurements.width / 40
             color: sliptextcolor
             Component.onCompleted: {
@@ -299,7 +299,7 @@ Row{
 
         Text {
             id: thousandTime
-            text:  (Dashboard.thousandfoottime)
+            text:  (Timing.thousandfoottime)
             font.pixelSize: measurements.width / 40
             color: sliptextcolor
             Component.onCompleted: {
@@ -321,7 +321,7 @@ Row{
         }
         Text {
             id: quarterTime
-            text:  (Dashboard.quartermiletime)
+            text:  (Timing.quartermiletime)
             font.pixelSize: measurements.width / 40
             color: sliptextcolor
             Component.onCompleted: {
@@ -343,7 +343,7 @@ Row{
         }
         Text {
             id: hundredTime
-            text:  (Dashboard.zerotohundredt)
+            text:  (Timing.zerotohundredt)
             font.pixelSize: measurements.width / 40
             color: sliptextcolor
             Component.onCompleted: {
@@ -365,7 +365,7 @@ Row{
         }
         Text {
             id: twoHundredTime
-            text:  (Dashboard.hundredtotwohundredtime)
+            text:  (Timing.hundredtotwohundredtime)
             font.pixelSize: measurements.width / 40
             color: sliptextcolor
             Component.onCompleted: {
@@ -387,7 +387,7 @@ Row{
         }
         Text {
             id: threeHundredTime
-            text:  (Dashboard.twohundredtothreehundredtime)
+            text:  (Timing.twohundredtothreehundredtime)
             font.pixelSize: measurements.width / 40
             color: sliptextcolor
             Component.onCompleted: {
@@ -429,7 +429,7 @@ Row{
         }
         Text {
             id: sixtyTopSpeed
-            text: (Dashboard.sixtyfootspeed)
+            text: (Timing.sixtyfootspeed)
             font.pixelSize: measurements.width / 40
             color: sliptextcolor
             Component.onCompleted: {
@@ -451,7 +451,7 @@ Row{
         }
         Text {
             id: threeThirtySpeed
-            text: (Dashboard.threehundredthirtyfootspeed)
+            text: (Timing.threehundredthirtyfootspeed)
             font.pixelSize: measurements.width / 40
             color: sliptextcolor
             Component.onCompleted: {
@@ -473,7 +473,7 @@ Row{
         }
         Text {
             id: eightMileTop
-            text:  (Dashboard.eightmilespeed)
+            text:  (Timing.eightmilespeed)
             font.pixelSize: measurements.width / 40
             color: sliptextcolor
             Component.onCompleted: {
@@ -495,7 +495,7 @@ Row{
     }
     Text {
         id: thousandTopSpeed
-        text:  (Dashboard.thousandfootspeed)
+        text:  (Timing.thousandfootspeed)
         font.pixelSize: measurements.width / 40
         color: sliptextcolor
         Component.onCompleted: {
@@ -517,7 +517,7 @@ Row{
     }
     Text {
         id: quarterTopSpeed
-        text:  (Dashboard.quartermilespeed)
+        text:  (Timing.quartermilespeed)
         font.pixelSize: measurements.width / 40
         color: sliptextcolor
         Component.onCompleted: {
@@ -622,23 +622,23 @@ Row{
         height: measurements.height /10
         font.pixelSize: measurements.width / 55
         onClicked: {
-            Dashboard.reactiontime = 0;
-            Dashboard.sixtyfoottime = 0;
-            Dashboard.sixtyfootspeed = 0;
-            Dashboard.threehundredthirtyfoottime = 0;
-            Dashboard.threehundredthirtyfootspeed = 0;
-            Dashboard.eightmiletime = 0;
-            Dashboard.eightmilespeed = 0;
-            Dashboard.quartermiletime = 0;
-            Dashboard.quartermilespeed = 0;
-            Dashboard.eightmiletime = 0;
-            Dashboard.eightmilespeed = 0;
-            Dashboard.thousandfoottime = 0;
-            Dashboard.thousandfootspeed = 0;
-            Dashboard.zerotohundredt = 0;
-            Dashboard.hundredtotwohundredtime = 0;
-            Dashboard.twohundredtothreehundredtime = 0;
-            Dashboard.reactiontime = 0;
+            Timing.reactiontime = 0;
+            Timing.sixtyfoottime = 0;
+            Timing.sixtyfootspeed = 0;
+            Timing.threehundredthirtyfoottime = 0;
+            Timing.threehundredthirtyfootspeed = 0;
+            Timing.eightmiletime = 0;
+            Timing.eightmilespeed = 0;
+            Timing.quartermiletime = 0;
+            Timing.quartermilespeed = 0;
+            Timing.eightmiletime = 0;
+            Timing.eightmilespeed = 0;
+            Timing.thousandfoottime = 0;
+            Timing.thousandfootspeed = 0;
+            Timing.zerotohundredt = 0;
+            Timing.hundredtotwohundredtime = 0;
+            Timing.twohundredtothreehundredtime = 0;
+            Timing.reactiontime = 0;
         startmeasurement = 0;
         measurementstarted = 0;
         greenled.source = "qrc:/Resources/graphics/ledoff.png"
@@ -650,7 +650,7 @@ Row{
         measurements.color = "orange"
         sliptextcolor = "transparent"
         startmeasurement = 1;
-        if (Dashboard.speed > 0)
+        if (Vehicle.speed > 0)
         {
         stagelight.running = false;
         startmeasurement = 0;

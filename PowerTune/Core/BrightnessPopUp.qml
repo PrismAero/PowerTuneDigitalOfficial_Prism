@@ -25,7 +25,7 @@ Rectangle{
             //anchors.right: parent.right
             layoutDirection: "RightToLeft"
             spacing: popUp1.width / 12
-            visible: true //Dashboard.screen
+            visible: true //UI.screen
 
             Button {
 

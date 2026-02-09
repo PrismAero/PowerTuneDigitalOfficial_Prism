@@ -7,14 +7,14 @@ Rectangle {
     color: "black"
 
     Connections{
-        target: Dashboard
+        target: Timing
         function onCurrentLapChanged() {
-            if (Dashboard.currentLap > 1)
+            if (Timing.currentLap > 1)
             {
-                laptimeModel.append({"lap":Dashboard.currentLap-1, "time":Dashboard.laptime})
+                laptimeModel.append({"lap":Timing.currentLap-1, "time":Timing.laptime})
                 laptimelistview.incrementCurrentIndex()
             }
-            if (Dashboard.currentLap == 0){
+            if (Timing.currentLap == 0){
                 laptimeModel.clear()
                 laptimelistview.currentIndex = 0
             }

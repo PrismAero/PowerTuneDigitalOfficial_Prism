@@ -14,106 +14,106 @@ Rectangle {
         anchors.left: parent.left
         Text {
             color: "yellow"
-            text: "PIM kgcm2 " + Dashboard.Intakepress
+            text: "PIM kgcm2 " + Engine.Intakepress
         }
         Text {
             color: "yellow"
-            text: "PIM V " + Dashboard.PressureV
+            text: "PIM V " + Engine.PressureV
         }
         Text {
             color: "yellow"
-            text: "Thro V " + Dashboard.ThrottleV
+            text: "Thro V " + Engine.ThrottleV
 
         }
         Text {
             color: "yellow"
-            text: "Pri Inj "+ Dashboard.Primaryinp
+            text: "Pri Inj "+ Engine.Primaryinp
 
         }
         Text {
             color: "yellow"
-            text: "Fuelc " + Dashboard.Fuelc
+            text: "Fuelc " + Engine.Fuelc
 
         }
         Text {
             color: "yellow"
-            text: "Lead Ign " + Dashboard.Leadingign
+            text: "Lead Ign " + Engine.Leadingign
 
         }
         Text {
             color: "yellow"
-            text: "Trailingign " + Dashboard.Trailingign
+            text: "Trailingign " + Engine.Trailingign
 
         }
         Text {
             color: "yellow"
-            text: "Fueltemp " + Dashboard.Fueltemp
+            text: "Fueltemp " + Engine.Fueltemp
 
         }
         Text {
             color: "yellow"
-            text: "Moilp " + Dashboard.Moilp
+            text: "Moilp " + Engine.Moilp
 
         }
         Text {
             color: "yellow"
-            text: "Boosttp %" + Dashboard.Boosttp
+            text: "Boosttp %" + Engine.Boosttp
 
         }
         Text {
             color: "yellow"
-            text: "Boostwg %" +Dashboard.Boostwg
+            text: "Boostwg %" +Engine.Boostwg
 
         }
         Text {
             color: "yellow"
-            text:"Watertemp " + Dashboard.Watertemp
-
-        }
-
-        Text {
-            color: "yellow"
-            text: "Intaketemp " + Dashboard.Intaketemp
+            text:"Watertemp " + Engine.Watertemp
 
         }
 
         Text {
             color: "yellow"
-            text: "Knock " + Dashboard.Knock
+            text: "Intaketemp " + Engine.Intaketemp
 
         }
 
         Text {
             color: "yellow"
-            text: "Batt V " + Dashboard.BatteryV
-
-        }
-        Text {
-            color: "yellow"
-            text: "Iscvduty " + Dashboard.Iscvduty
+            text: "Knock " + Engine.Knock
 
         }
 
         Text {
             color: "yellow"
-            text: "O2volt " + Dashboard.O2volt
+            text: "Batt V " + Engine.BatteryV
+
+        }
+        Text {
+            color: "yellow"
+            text: "Iscvduty " + Engine.Iscvduty
 
         }
 
         Text {
             color: "yellow"
-            text: "na1 " + Dashboard.na1
+            text: "O2volt " + Engine.O2volt
 
         }
 
         Text {
             color: "yellow"
-            text: "Secinjpulse " + Dashboard.Secinjpulse
+            text: "na1 " + PropertyRouter.getValue("na1")
+
+        }
+
+        Text {
+            color: "yellow"
+            text: "Secinjpulse " + Engine.Secinjpulse
 
         }
         Text {
             color: "yellow"
-            text: "na2 " + Dashboard.na2
+            text: "na2 " + PropertyRouter.getValue("na2")
 
         }
 }
@@ -125,40 +125,40 @@ Rectangle {
         anchors.centerIn: parent
         Text {
             color: "yellow"
-            text: "Boost " + Dashboard.pim
+            text: "Boost " + Engine.pim
              }
         Text {
             color: "yellow"
-            text: "VTA1 V " + Dashboard.vta1
+            text: "VTA1 V " + PropertyRouter.getValue("vta1")
         }
         Text {
             color: "yellow"
-            text: "VTA2 V " + Dashboard.vta2
+            text: "VTA2 V " + PropertyRouter.getValue("vta2")
 
         }
         Text {
             color: "yellow"
-            text: "Oil pump V "+ Dashboard.vmop
+            text: "Oil pump V "+ PropertyRouter.getValue("vmop")
 
         }
         Text {
             color: "yellow"
-            text: "Water Temp. " + Dashboard.wtrt
+            text: "Water Temp. " + Engine.Watertemp
 
         }
         Text {
             color: "yellow"
-            text: "Air Temp. " + Dashboard.airt
+            text: "Air Temp. " + Engine.Intaketemp
 
         }
         Text {
             color: "yellow"
-            text: "Fuel Temp. " + Dashboard.fuelt
+            text: "Fuel Temp. " + Engine.Fueltemp
 
         }
         Text {
             color: "yellow"
-            text: "O2S " + Dashboard.O2S
+            text: "O2S " + Engine.O2volt
 
         }
 }
@@ -169,94 +169,94 @@ Rectangle {
 
         Text {
             color: "yellow"
-            text: Dashboard.Flag1 +" "+ Dashboard.FlagString1
+            text: Flags.Flag1 +" "+ Flags.FlagString1
 
         }
         Text {
             color: "yellow"
-            text: Dashboard.Flag2 +" "+ Dashboard.FlagString2
+            text: Flags.Flag2 +" "+ Flags.FlagString2
 
         }
         Text {
             color: "yellow"
-            text: Dashboard.Flag3 +" "+ Dashboard.FlagString3
+            text: Flags.Flag3 +" "+ Flags.FlagString3
 
         }
         Text {
             color: "yellow"
-            text: Dashboard.Flag4 +" "+ Dashboard.FlagString4
-
-        }
-
-        Text {
-            color: "yellow"
-            text: Dashboard.Flag5 +" "+ Dashboard.FlagString5
+            text: Flags.Flag4 +" "+ Flags.FlagString4
 
         }
 
         Text {
             color: "yellow"
-            text: Dashboard.Flag6 +" "+ Dashboard.FlagString6
+            text: Flags.Flag5 +" "+ Flags.FlagString5
 
         }
 
         Text {
             color: "yellow"
-            text: Dashboard.Flag7 +" "+ Dashboard.FlagString7
+            text: Flags.Flag6 +" "+ Flags.FlagString6
 
         }
 
         Text {
             color: "yellow"
-            text: Dashboard.Flag8 +" "+ Dashboard.FlagString8
+            text: Flags.Flag7 +" "+ Flags.FlagString7
 
         }
 
         Text {
             color: "yellow"
-            text: Dashboard.Flag9 +" "+ Dashboard.FlagString9
+            text: Flags.Flag8 +" "+ Flags.FlagString8
 
         }
 
         Text {
             color: "yellow"
-            text: Dashboard.Flag10 +" "+ Dashboard.FlagString10
+            text: Flags.Flag9 +" "+ Flags.FlagString9
 
         }
 
         Text {
             color: "yellow"
-            text: Dashboard.Flag11 +" "+ Dashboard.FlagString11
+            text: Flags.Flag10 +" "+ Flags.FlagString10
 
         }
 
         Text {
             color: "yellow"
-            text: Dashboard.Flag12 +" "+ Dashboard.FlagString12
+            text: Flags.Flag11 +" "+ Flags.FlagString11
 
         }
 
         Text {
             color: "yellow"
-            text: Dashboard.Flag13 +" "+ Dashboard.FlagString13
+            text: Flags.Flag12 +" "+ Flags.FlagString12
 
         }
 
         Text {
             color: "yellow"
-            text: Dashboard.Flag14 +" "+ Dashboard.FlagString14
+            text: Flags.Flag13 +" "+ Flags.FlagString13
 
         }
 
         Text {
             color: "yellow"
-            text: Dashboard.Flag15 +" "+ Dashboard.FlagString15
+            text: Flags.Flag14 +" "+ Flags.FlagString14
 
         }
 
         Text {
             color: "yellow"
-            text: Dashboard.Flag16 +" "+ Dashboard.FlagString16
+            text: Flags.Flag15 +" "+ Flags.FlagString15
+
+        }
+
+        Text {
+            color: "yellow"
+            text: Flags.Flag16 +" "+ Flags.FlagString16
 
         }
 

@@ -11,7 +11,7 @@ Item {
     property double previousrpm
     property var powertext
     property var torquetext
-    property var unit : Dashboard.units;
+    property var unit : Settings.units;
     Component.onCompleted: {units.unitadjust()} // adjusts the Gauges to metric or imperial
 
     ChartView {
@@ -34,7 +34,7 @@ Item {
                 id: startButton
                 text: "Start"
                 onClicked: {
-                    if (refreshTimer.running == false) refreshTimer.running = true ,series2.clear(),series1.clear(), previousrpm = Dashboard.rpm, finalPower =0, finalTorque =0, finalTorqueRPM = 0, finalPowerRPM =0,startButton.enabled =false;
+                    if (refreshTimer.running == false) refreshTimer.running = true ,series2.clear(),series1.clear(), previousrpm = Engine.rpm, finalPower =0, finalTorque =0, finalTorqueRPM = 0, finalPowerRPM =0,startButton.enabled =false;
 
 
                 }
@@ -98,19 +98,19 @@ Item {
         repeat: true
         onTriggered: {
 
-            if (previousrpm <= Dashboard.rpm)
+            if (previousrpm <= Engine.rpm)
             {
 
-            previousrpm = Dashboard.rpm
+            previousrpm = Engine.rpm
 
-            if (finalPower < Dashboard.Power)
-            {finalPower = (Dashboard.Power).toFixed(1),finalPowerRPM = Dashboard.rpm}
-            if (finalTorque < Dashboard.Torque)
-            {finalTorque = (Dashboard.Torque).toFixed(1) ,finalTorqueRPM = Dashboard.rpm}
-            series1.append(Dashboard.rpm, Dashboard.Power);
-            series2.append(Dashboard.rpm, Dashboard.Torque);
+            if (finalPower < Engine.Power)
+            {finalPower = (Engine.Power).toFixed(1),finalPowerRPM = Engine.rpm}
+            if (finalTorque < Engine.Torque)
+            {finalTorque = (Engine.Torque).toFixed(1) ,finalTorqueRPM = Engine.rpm}
+            series1.append(Engine.rpm, Engine.Power);
+            series2.append(Engine.rpm, Engine.Torque);
             }
-            if (previousrpm > Dashboard.rpm) {refreshTimer.running = false,startButton.enabled =true}
+            if (previousrpm > Engine.rpm) {refreshTimer.running = false,startButton.enabled =true}
 
         }
     }

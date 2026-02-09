@@ -10,7 +10,7 @@ Rectangle {
   visible: true
   color:"transparent"
   anchors.fill:parent
-  property  var unit : Dashboard.units;
+  property  var unit : Settings.units;
   property int rpmFillStart: 61
 
   Component.onCompleted: {units.unitadjust();
@@ -44,7 +44,7 @@ Rectangle {
       }
       Text {
           id:rpmNumbers
-          text: (Dashboard.rpm)
+          text: (Engine.rpm)
           topPadding: 30
           font.pixelSize: 100
           font.italic: true
@@ -86,7 +86,7 @@ Rectangle {
       }
       Text {
           id: speedNumbers
-          text: (Dashboard.speed).toFixed(0);
+          text: (Vehicle.speed).toFixed(0);
           topPadding: 30
           font.pixelSize: 100
           font.italic: true
@@ -126,7 +126,7 @@ Rectangle {
       Item{
             id: displayWindow1
             height: parent.height
-            width: (groove1.width*0.81375*(Dashboard.rpm)/Dashboard.maxRPM)+rpmFillStart //+61 is the pixel where the RPM bar starts and from there is 651 pixels wide, Needs to be scaled dynamically
+            width: (groove1.width*0.81375*(Engine.rpm)/Settings.maxRPM)+rpmFillStart //+61 is the pixel where the RPM bar starts and from there is 651 pixels wide, Needs to be scaled dynamically
             clip: true
 
               anchors.bottom: parent.bottom
@@ -177,7 +177,7 @@ Rectangle {
       //PathArc { x: 176; y: 11; radiusX: 90; radiusY: 90 }
       //PathLine { x: 800; y: 11 }
     }
-   progress: Dashboard.rpm / Dashboard.maxRPM //slider.value/8000 // replace this with Dashboard.rpm
+   progress: Engine.rpm / Settings.maxRPM //slider.value/8000 // replace this with Engine.rpm
         }
     }
     ShiftLights{

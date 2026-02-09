@@ -87,7 +87,7 @@ Rectangle {
                                 spacing: 4
 
                                 Text {
-                                    text: Translator.translate("Accelerometer", Dashboard.language)
+                                    text: Translator.translate("Accelerometer", Settings.language)
                                     font.pixelSize: 20
                                     font.weight: Font.DemiBold
                                     font.family: "Lato"
@@ -144,7 +144,7 @@ Rectangle {
                                 spacing: 4
 
                                 Text {
-                                    text: Translator.translate("Gyro Sensor", Dashboard.language)
+                                    text: Translator.translate("Gyro Sensor", Settings.language)
                                     font.pixelSize: 20
                                     font.weight: Font.DemiBold
                                     font.family: "Lato"
@@ -201,7 +201,7 @@ Rectangle {
                                 spacing: 4
 
                                 Text {
-                                    text: Translator.translate("Compass", Dashboard.language)
+                                    text: Translator.translate("Compass", Settings.language)
                                     font.pixelSize: 20
                                     font.weight: Font.DemiBold
                                     font.family: "Lato"
@@ -258,7 +258,7 @@ Rectangle {
                                 spacing: 4
 
                                 Text {
-                                    text: Translator.translate("Pressure Sensor", Dashboard.language)
+                                    text: Translator.translate("Pressure Sensor", Settings.language)
                                     font.pixelSize: 20
                                     font.weight: Font.DemiBold
                                     font.family: "Lato"
@@ -315,7 +315,7 @@ Rectangle {
                                 spacing: 4
 
                                 Text {
-                                    text: Translator.translate("Temperature Sensor", Dashboard.language)
+                                    text: Translator.translate("Temperature Sensor", Settings.language)
                                     font.pixelSize: 20
                                     font.weight: Font.DemiBold
                                     font.family: "Lato"

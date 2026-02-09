@@ -7,7 +7,7 @@ Item {
     anchors.fill : parent
 
     Connections{
-        target: Dashboard
+        target: Connection
         function onSupportedRegChanged() { functsupportedRegs.supportedRegs(); }
     }
     Grid {
@@ -310,7 +310,7 @@ Item {
                 id: functsupportedRegs
                 function supportedRegs()
                 {
-                    switch (Dashboard.supportedReg) {
+                    switch (Connection.supportedReg) {
                     case 1: {
                         consRPM.visible = true;
                         break;

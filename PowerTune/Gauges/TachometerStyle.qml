@@ -84,18 +84,23 @@ DashboardGaugeStyle {
             var ctx = getContext("2d");
             ctx.reset();
             //paintBackground(ctx);
+            
+            // * Access style properties via tachometerStyle reference
+            var _outerRadius = tachometerStyle.outerRadius;
+            var _tickmarkInset = tachometerStyle.tickmarkInset;
+            var _angleRange = tachometerStyle.maximumValueAngle - tachometerStyle.minimumValueAngle;
 
             ctx.beginPath();
             ctx.lineWidth = tachometerStyle.toPixels(0.08);
             ctx.strokeStyle = Qt.rgba(0.5, 0, 0, 1);
-            var warningCircumference = maximumValueAngle - minimumValueAngle * 0.1;
-            var startAngle = maximumValueAngle - 85;
+            var warningCircumference = tachometerStyle.maximumValueAngle - tachometerStyle.minimumValueAngle * 0.1;
+            var startAngle = tachometerStyle.maximumValueAngle - 85;
 
-            ctx.arc(outerRadius, outerRadius,
+            ctx.arc(_outerRadius, _outerRadius,
                 // Start the line in from the decorations, and account for the width of the line itself.
-                outerRadius - tickmarkInset - ctx.lineWidth / 2,
-                degToRad(startAngle - angleRange / 4 + angleRange * 0.015),
-                degToRad(startAngle - angleRange * 0.015), false);
+                _outerRadius - _tickmarkInset - ctx.lineWidth / 2,
+                tachometerStyle.degToRad(startAngle - _angleRange / 4 + _angleRange * 0.015),
+                tachometerStyle.degToRad(startAngle - _angleRange * 0.015), false);
             ctx.stroke();
         }
 

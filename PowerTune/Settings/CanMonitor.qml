@@ -166,10 +166,10 @@ Rectangle {
     }
 
     Connections {
-        target: Dashboard
+        target: Connection
         function onCanChanged() {
-            var canId = Dashboard.can[0]
-            var payload = Dashboard.can[1]
+            var canId = Connection.can[0]
+            var payload = Connection.can[1]
             var itemFound = false
 
             for (var i = 0; i < listView.model.count; ++i) {

@@ -15,7 +15,7 @@ Item {
 
         Text {
         id: lattxt
-        text:  "Lateral    G:          " +(Dashboard.accely).toFixed(2)
+        text:  "Lateral    G:          " +(Vehicle.accely).toFixed(2)
         color: "white"
         anchors.bottom: longtxt.top
         anchors.horizontalCenter: forcecircle.horizontalCenter
@@ -25,7 +25,7 @@ Item {
         }
         Text {
         id: longtxt
-        text: "Longitudinal G:    " + (Dashboard.accelx).toFixed(2)
+        text: "Longitudinal G:    " + (Vehicle.accelx).toFixed(2)
         color: "white"
         anchors.bottom: forcecircle.top
         anchors.bottomMargin: forcecircle.width /50
@@ -104,8 +104,8 @@ Item {
             height: parent.height / 20
             width: height
             radius: width*0.5
-            x:((forcecircle.height / 2) - (ball.height /2)) + ((forcecircle.height / 4) * Dashboard.accelx)
-            y: ((forcecircle.height / 2) - (ball.height /2)) + ((forcecircle.height / 4) * Dashboard.accely)
+            x:((forcecircle.height / 2) - (ball.height /2)) + ((forcecircle.height / 4) * Vehicle.accelx)
+            y: ((forcecircle.height / 2) - (ball.height /2)) + ((forcecircle.height / 4) * Vehicle.accely)
 
         }
     }

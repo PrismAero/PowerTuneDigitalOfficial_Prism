@@ -44,6 +44,22 @@ class udpreceiver;
 class Arduino;
 class WifiScanner;
 class Extender;
+// * Data Models (Phase 2 & 3 - Modularization)
+class UIState;
+class EngineData;
+class VehicleData;
+class GPSData;
+class AnalogInputs;
+class DigitalInputs;
+class ExpanderBoardData;
+class ElectricMotorData;
+class FlagsData;
+class TimingData;
+class SensorData;
+class ConnectionData;
+class SettingsData;
+// * PropertyRouter for dynamic QML property access
+class PropertyRouter;
 
 class Connect : public QObject
 {
@@ -126,6 +142,22 @@ private:
     Arduino *m_arduino;
     WifiScanner *m_wifiscanner;
     Extender *m_extender;
+    // * Data Models (Phase 2 & 3 - Modularization)
+    UIState *m_uiState;
+    EngineData *m_engineData;
+    VehicleData *m_vehicleData;
+    GPSData *m_gpsData;
+    AnalogInputs *m_analogInputs;
+    DigitalInputs *m_digitalInputs;
+    ExpanderBoardData *m_expanderBoardData;
+    ElectricMotorData *m_electricMotorData;
+    FlagsData *m_flagsData;
+    TimingData *m_timingData;
+    SensorData *m_sensorData;
+    ConnectionData *m_connectionData;
+    SettingsData *m_settingsData;
+    // * PropertyRouter for dynamic QML property access
+    PropertyRouter *m_propertyRouter;
 
 
 signals:

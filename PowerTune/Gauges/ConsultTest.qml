@@ -10,124 +10,124 @@ Rectangle {
         columns: 4
         spacing: view.width/ 30
     Text {
-        text: Dashboard.Flag1 + " AC SW   "
+        text: Flags.Flag1 + " AC SW   "
         font.pixelSize: view.width/ 55
     }
     Text {
-        text: Dashboard.Flag2 + " PS SW   "
+        text: Flags.Flag2 + " PS SW   "
         font.pixelSize: view.width/ 55
     }
     Text {
-        text: Dashboard.Flag3 + " N  SW   "
+        text: Flags.Flag3 + " N  SW   "
         font.pixelSize: view.width/ 55
     }
     Text {
-        text: Dashboard.Flag4 + " Cranking"
+        text: Flags.Flag4 + " Cranking"
         font.pixelSize: view.width/ 55
     }
     Text {
-        text: Dashboard.Flag5 + " CLSD/THL"
+        text: Flags.Flag5 + " CLSD/THL"
         font.pixelSize: view.width/ 55
     }
     Text {
-        text: Dashboard.Flag6 + " AC Relay"
+        text: Flags.Flag6 + " AC Relay"
         font.pixelSize: view.width/ 55
     }
     Text {
-        text: Dashboard.Flag7 + " Fuel Rel"
+        text: Flags.Flag7 + " Fuel Rel"
         font.pixelSize: view.width/ 55
     }
     Text {
-        text: Dashboard.Flag8 + " VTC SOL "
+        text: Flags.Flag8 + " VTC SOL "
         font.pixelSize: view.width/ 55
     }
     Text {
-        text: Dashboard.Flag9 + " FAN Hi  "
+        text: Flags.Flag9 + " FAN Hi  "
         font.pixelSize: view.width/ 55
     }
     Text {
-        text: Dashboard.Flag10 + " FAN Low "
+        text: Flags.Flag10 + " FAN Low "
         font.pixelSize: view.width/ 55
     }
     Text {
-        text: Dashboard.Flag11 + " P/Reg Va"
+        text: Flags.Flag11 + " P/Reg Va"
         font.pixelSize: view.width/ 55
     }
     Text {
-        text: Dashboard.Flag12 + " WG Sol  "
+        text: Flags.Flag12 + " WG Sol  "
         font.pixelSize: view.width/ 55
     }
     Text {
-        text: Dashboard.Flag13 + " IAC Sol "
+        text: Flags.Flag13 + " IAC Sol "
         font.pixelSize: view.width/ 55
     }
     Text {
-        text: Dashboard.Flag14 + " EGR Sol "
+        text: Flags.Flag14 + " EGR Sol "
         font.pixelSize: view.width/ 55
     }
     Text {
-        text: Dashboard.Flag15 + " LH Bank "
+        text: Flags.Flag15 + " LH Bank "
         font.pixelSize: view.width/ 55
     }
     Text {
-        text: Dashboard.Flag16 + " RH Bank "
+        text: Flags.Flag16 + " RH Bank "
         font.pixelSize: view.width/ 55
     }
     Text {
-        text: "RPM     " + Dashboard.rpm
+        text: "RPM     " + Engine.rpm
         font.pixelSize: view.width/ 55
     }
     Text {
-        text:"RPM Ref " //+ Dashboard.
+        text:"RPM Ref " //+ Engine.
         font.pixelSize: view.width/ 55
     }
     Text {
-        text: "MAF V.  " + Dashboard.MAF1V
+        text: "MAF V.  " + Engine.MAF1V
         font.pixelSize: view.width/ 55
     }
     Text {
-        text: "RH MAFV " + Dashboard.MAF2V
+        text: "RH MAFV " + Engine.MAF2V
         font.pixelSize: view.width/ 55
     }
     Text {
-        text: "Water T " + Dashboard.Watertemp
+        text: "Water T " + Engine.Watertemp
         font.pixelSize: view.width/ 55
     }
     Text {
-        text: "LH 02 V " + Dashboard.O2volt
+        text: "LH 02 V " + Engine.O2volt
         font.pixelSize: view.width/ 55
     }
     Text {
-        text: "RH 02 V " + Dashboard.O2volt_2
+        text: "RH 02 V " + Engine.O2volt_2
         font.pixelSize: view.width/ 55
     }
     Text {
-        text: "Speed   " + Dashboard.speed
+        text: "Speed   " + Vehicle.speed
         font.pixelSize: view.width/ 55
     }
     Text {
-        text: "Batt V  " + Dashboard.BatteryV
+        text: "Batt V  " + Engine.BatteryV
         font.pixelSize: view.width/ 55
     }
     Text {
-        text: "TPS  V  " + Dashboard.TPS
+        text: "TPS  V  " + Engine.TPS
         font.pixelSize: view.width/ 55
     }
     Text {
-        text: "Fuel T  " + Dashboard.Fueltemp
+        text: "Fuel T  " + Engine.Fueltemp
         font.pixelSize: view.width/ 55
     }
 
     Text {
-        text: "IAT     " + Dashboard.Intaketemp
+        text: "IAT     " + Engine.Intaketemp
         font.pixelSize: view.width/ 55
     }
     Text {
-        text: "EGT V   " //+ Dashboard.
+        text: "EGT V   " //+ Engine.
         font.pixelSize: view.width/ 55
     }
     Text {
-        text: "Inj T L " + Dashboard.Inj
+        text: "Inj T L " + Engine.Inj
         font.pixelSize: view.width/ 55
     }
     Text {

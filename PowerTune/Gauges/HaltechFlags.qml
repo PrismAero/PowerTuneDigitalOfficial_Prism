@@ -29,7 +29,7 @@ Rectangle {
                 width: height
                 color: "green"
                 active: {
-                    (Dashboard.Flag1 == "1") ? true : false;
+                    (Flags.Flag1 == "1") ? true : false;
                 }
             }
 
@@ -43,7 +43,7 @@ Rectangle {
                 width: height
                 color: "green"
                 active: {
-                    (Dashboard.Flag2 == "1") ? true : false;
+                    (Flags.Flag2 == "1") ? true : false;
                 }
             }
 
@@ -59,7 +59,7 @@ Rectangle {
                 width: height
                 color: "green"
                 active: {
-                    (Dashboard.Flag3 == "1") ? true : false;
+                    (Flags.Flag3 == "1") ? true : false;
                 }
             }
 
@@ -73,7 +73,7 @@ Rectangle {
                 width: height
                 color: "green"
                 active: {
-                    (Dashboard.Flag4 == "1") ? true : false;
+                    (Flags.Flag4 == "1") ? true : false;
                 }
             }
             // ROW 3
@@ -88,7 +88,7 @@ Rectangle {
                 width: height
                 color: "green"
                 active: {
-                    (Dashboard.Flag5 == "1") ? true : false;
+                    (Flags.Flag5 == "1") ? true : false;
                 }
             }
 
@@ -102,7 +102,7 @@ Rectangle {
                 width: height
                 color: "green"
                 active: {
-                    (Dashboard.Flag6 == "1") ? true : false;
+                    (Flags.Flag6 == "1") ? true : false;
                 }
             }
 
@@ -118,7 +118,7 @@ Rectangle {
                 width: height
                 color: "green"
                 active: {
-                    (Dashboard.Flag7 == "1") ? true : false;
+                    (Flags.Flag7 == "1") ? true : false;
                 }
             }
 
@@ -132,7 +132,7 @@ Rectangle {
                 width: height
                 color: "green"
                 active: {
-                    (Dashboard.Flag8 == "1") ? true : false;
+                    (Flags.Flag8 == "1") ? true : false;
                 }
             }
 
@@ -146,7 +146,7 @@ Rectangle {
                 width: height
                 color: "green"
                 active: {
-                    (Dashboard.Flag9 == "1") ? true : false;
+                    (Flags.Flag9 == "1") ? true : false;
                 }
             }
 
@@ -160,7 +160,7 @@ Rectangle {
                 width: height
                 color: "green"
                 active: {
-                    (Dashboard.Flag10 == "1") ? true : false;
+                    (Flags.Flag10 == "1") ? true : false;
                 }
             }
 
@@ -174,7 +174,7 @@ Rectangle {
                 width: height
                 color: "green"
                 active: {
-                    (Dashboard.Flag11 == "1") ? true : false;
+                    (Flags.Flag11 == "1") ? true : false;
                 }
             }
 
@@ -188,7 +188,7 @@ Rectangle {
                 width: height
                 color: "green"
                 active: {
-                    (Dashboard.Flag12 == "1") ? true : false;
+                    (Flags.Flag12 == "1") ? true : false;
                 }
             }
 
@@ -204,7 +204,7 @@ Rectangle {
                 width: height
                 color: "green"
                 active: {
-                    (Dashboard.Flag13 == "1") ? true : false;
+                    (Flags.Flag13 == "1") ? true : false;
                 }
             }
 
@@ -218,7 +218,7 @@ Rectangle {
                 width: height
                 color: "green"
                 active: {
-                    (Dashboard.Flag14 == "1") ? true : false;
+                    (Flags.Flag14 == "1") ? true : false;
                 }
             }
 
@@ -232,7 +232,7 @@ Rectangle {
                 width: height
                 color: "green"
                 active: {
-                    (Dashboard.Flag15 == "1") ? true : false;
+                    (Flags.Flag15 == "1") ? true : false;
                 }
             }
 
@@ -246,7 +246,7 @@ Rectangle {
                 width: height
                 color: "green"
                 active: {
-                    (Dashboard.Flag16 == "1") ? true : false;
+                    (Flags.Flag16 == "1") ? true : false;
                 }
             }
             //
@@ -260,7 +260,7 @@ Rectangle {
                 width: height
                 color: "green"
                 active: {
-                    (Dashboard.Flag17 == "1") ? true : false;
+                    (Flags.Flag17 == "1") ? true : false;
                 }
             }
             Text {
@@ -273,7 +273,7 @@ Rectangle {
                 width: height
                 color: "green"
                 active: {
-                    (Dashboard.Flag18 == "1") ? true : false;
+                    (Flags.Flag18 == "1") ? true : false;
                 }
             }
             Text {
@@ -286,7 +286,7 @@ Rectangle {
                 width: height
                 color: "green"
                 active: {
-                    (Dashboard.Flag19 == "1") ? true : false;
+                    (Flags.Flag19 == "1") ? true : false;
                 }
             }
             Text {
@@ -299,7 +299,7 @@ Rectangle {
                 width: height
                 color: "green"
                 active: {
-                    (Dashboard.Flag20 == "1") ? true : false;
+                    (Flags.Flag20 == "1") ? true : false;
                 }
             }
             Text {
@@ -312,7 +312,7 @@ Rectangle {
                 width: height
                 color: "green"
                 active: {
-                    (Dashboard.Flag21 == "1") ? true : false;
+                    (Flags.Flag21 == "1") ? true : false;
                 }
             }
             Text {
@@ -325,7 +325,7 @@ Rectangle {
                 width: height
                 color: "green"
                 active: {
-                    (Dashboard.Flag22 == "1") ? true : false;
+                    (Flags.Flag22 == "1") ? true : false;
                 }
             }
             Text {
@@ -338,7 +338,7 @@ Rectangle {
                 width: height
                 color: "green"
                 active: {
-                    (Dashboard.Flag23 == "1") ? true : false;
+                    (Flags.Flag23 == "1") ? true : false;
                 }
             }
             Text {
@@ -351,7 +351,7 @@ Rectangle {
                 width: height
                 color: "green"
                 active: {
-                    (Dashboard.Flag24 == "1") ? true : false;
+                    (Flags.Flag24 == "1") ? true : false;
                 }
             }
         }

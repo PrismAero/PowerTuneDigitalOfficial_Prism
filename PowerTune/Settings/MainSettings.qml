@@ -14,7 +14,7 @@ Rectangle {
     property int connected: 0
     property int hexstring: 0
     property int hexstring2: 0
-    property int currentLanguage: Dashboard.language
+    property int currentLanguage: Settings.language
 
     // * Settings persistence
     Item {
@@ -53,13 +53,28 @@ Rectangle {
         }
 
         Connections {
-            target: Dashboard
-            onOdoChanged: odometer.text = Dashboard.Odo.toFixed(3)
-            onTripChanged: tripmeter.text = Dashboard.Trip.toFixed(3)
-            onWatertempChanged: { if (Dashboard.Watertemp > Dashboard.waterwarn) playwarning.start() }
-            onRpmChanged: { if (Dashboard.rpm > Dashboard.rpmwarn) playwarning.start() }
-            onKnockChanged: { if (Dashboard.Knock > Dashboard.knockwarn) playwarning.start() }
-            onBoostPresChanged: { if (Dashboard.BoostPres > Dashboard.boostwarn) playwarning.start() }
+            target: Vehicle
+            onOdoChanged: odometer.text = Vehicle.Odo.toFixed(3)
+        }
+        Connections {
+            target: Vehicle
+            onTripChanged: tripmeter.text = Vehicle.Trip.toFixed(3)
+        }
+        Connections {
+            target: Engine
+            onWatertempChanged: { if (Engine.Watertemp > Settings.waterwarn) playwarning.start() }
+        }
+        Connections {
+            target: Engine
+            onRpmChanged: { if (Engine.rpm > Settings.rpmwarn) playwarning.start() }
+        }
+        Connections {
+            target: Engine
+            onKnockChanged: { if (Engine.Knock > Settings.knockwarn) playwarning.start() }
+        }
+        Connections {
+            target: Engine
+            onBoostPresChanged: { if (Engine.BoostPres > Settings.boostwarn) playwarning.start() }
         }
     }
 
@@ -82,14 +97,14 @@ Rectangle {
 
                 // * Connection Section
                 SettingsSection {
-                    title: Translator.translate("Connection", Dashboard.language)
+                    title: Translator.translate("Connection", Settings.language)
                     Layout.fillWidth: true
 
                     RowLayout {
                         spacing: 12
                         StyledButton {
                             id: connectButton
-                            text: Translator.translate("Connect", Dashboard.language)
+                            text: Translator.translate("Connect", Settings.language)
                             width: 180
                             onClicked: {
                                 functconnect.connectfunc()
@@ -100,7 +115,7 @@ Rectangle {
                         }
                         StyledButton {
                             id: disconnectButton
-                            text: Translator.translate("Disconnect", Dashboard.language)
+                            text: Translator.translate("Disconnect", Settings.language)
                             width: 180
                             primary: false
                             enabled: false
@@ -117,7 +132,7 @@ Rectangle {
                         spacing: 12
                         StyledButton {
                             id: connectButtonGPS
-                            text: Translator.translate("GPS Connect", Dashboard.language)
+                            text: Translator.translate("GPS Connect", Settings.language)
                             width: 180
                             Component.onCompleted: autoconnectGPS.auto()
                             onClicked: {
@@ -128,7 +143,7 @@ Rectangle {
                         }
                         StyledButton {
                             id: disconnectButtonGPS
-                            text: Translator.translate("GPS Disconnect", Dashboard.language)
+                            text: Translator.translate("GPS Disconnect", Settings.language)
                             width: 180
                             primary: false
                             enabled: false
@@ -145,7 +160,7 @@ Rectangle {
                         visible: ecuSelect.currentIndex === 1
                         spacing: 20
                         Text {
-                            text: Translator.translate("ECU Serial Port", Dashboard.language)
+                            text: Translator.translate("ECU Serial Port", Settings.language)
                             font.pixelSize: 20
                             font.family: "Lato"
                             color: "#FFFFFF"
@@ -170,7 +185,7 @@ Rectangle {
                     RowLayout {
                         spacing: 20
                         Text {
-                            text: Translator.translate("GPS Port", Dashboard.language)
+                            text: Translator.translate("GPS Port", Settings.language)
                             font.pixelSize: 20
                             font.family: "Lato"
                             color: "#FFFFFF"
@@ -186,15 +201,15 @@ Rectangle {
                     RowLayout {
                         spacing: 20
                         Text {
-                            text: Translator.translate("Serial Status", Dashboard.language)
+                            text: Translator.translate("Serial Status", Settings.language)
                             font.pixelSize: 20
                             font.family: "Lato"
                             color: "#FFFFFF"
                             Layout.preferredWidth: 180
                         }
                         ConnectionStatusIndicator {
-                            statusText: Dashboard.SerialStat
-                            status: Dashboard.SerialStat === "Connected" ? "connected" : "disconnected"
+                            statusText: Connection.SerialStat
+                            status: Connection.SerialStat === "Connected" ? "connected" : "disconnected"
                             width: 240
                         }
                     }
@@ -202,13 +217,13 @@ Rectangle {
 
                 // * ECU Configuration Section
                 SettingsSection {
-                    title: Translator.translate("ECU Configuration", Dashboard.language)
+                    title: Translator.translate("ECU Configuration", Settings.language)
                     Layout.fillWidth: true
 
                     RowLayout {
                         spacing: 20
                         Text {
-                            text: Translator.translate("ECU Selection", Dashboard.language)
+                            text: Translator.translate("ECU Selection", Settings.language)
                             font.pixelSize: 20
                             font.family: "Lato"
                             color: "#FFFFFF"
@@ -222,12 +237,12 @@ Rectangle {
                             onCurrentIndexChanged: {
                                 if (initialized) {
                                     AppSettings.setECU(currentIndex)
-                                    Dashboard.setecu(ecuSelect.currentIndex)
+                                    Connection.setecu(ecuSelect.currentIndex)
                                 }
                             }
                             Component.onCompleted: {
                                 currentIndex = AppSettings.getECU()
-                                Dashboard.setecu(ecuSelect.currentIndex)
+                                Connection.setecu(ecuSelect.currentIndex)
                                 initialized = true
                             }
                         }
@@ -235,10 +250,10 @@ Rectangle {
 
                     // * Smoothing options (visible for Consult)
                     RowLayout {
-                        visible: Dashboard.ecu === "2"
+                        visible: Connection.ecu === 2
                         spacing: 20
                         Text {
-                            text: Translator.translate("RPM Smoothing", Dashboard.language)
+                            text: Translator.translate("RPM Smoothing", Settings.language)
                             font.pixelSize: 20
                             font.family: "Lato"
                             color: "#FFFFFF"
@@ -247,17 +262,17 @@ Rectangle {
                         StyledComboBox {
                             id: smoothrpm
                             width: 240
-                            model: [Translator.translate("OFF", Dashboard.language), "2", "3", "4", "5", "6", "7", "8", "9", "10"]
-                            onCurrentIndexChanged: Dashboard.setsmoothrpm(smoothrpm.currentIndex)
-                            Component.onCompleted: Dashboard.setsmoothrpm(smoothrpm.currentIndex)
+                            model: [Translator.translate("OFF", Settings.language), "2", "3", "4", "5", "6", "7", "8", "9", "10"]
+                            onCurrentIndexChanged: Settings.setsmoothrpm(smoothrpm.currentIndex)
+                            Component.onCompleted: Settings.setsmoothrpm(smoothrpm.currentIndex)
                         }
                     }
 
                     RowLayout {
-                        visible: Dashboard.ecu === "2"
+                        visible: Connection.ecu === 2
                         spacing: 20
                         Text {
-                            text: Translator.translate("Speed Smoothing", Dashboard.language)
+                            text: Translator.translate("Speed Smoothing", Settings.language)
                             font.pixelSize: 20
                             font.family: "Lato"
                             color: "#FFFFFF"
@@ -266,22 +281,22 @@ Rectangle {
                         StyledComboBox {
                             id: smoothspeed
                             width: 240
-                            model: [Translator.translate("OFF", Dashboard.language), "2", "3", "4", "5", "6", "7", "8", "9", "10"]
-                            onCurrentIndexChanged: Dashboard.setsmoothspeed(smoothspeed.currentIndex)
-                            Component.onCompleted: Dashboard.setsmoothspeed(smoothspeed.currentIndex)
+                            model: [Translator.translate("OFF", Settings.language), "2", "3", "4", "5", "6", "7", "8", "9", "10"]
+                            onCurrentIndexChanged: Settings.setsmoothspeed(smoothspeed.currentIndex)
+                            Component.onCompleted: Settings.setsmoothspeed(smoothspeed.currentIndex)
                         }
                     }
                 }
 
                 // * Units Section
                 SettingsSection {
-                    title: Translator.translate("Units", Dashboard.language)
+                    title: Translator.translate("Units", Settings.language)
                     Layout.fillWidth: true
 
                     RowLayout {
                         spacing: 20
                         Text {
-                            text: Translator.translate("Speed units", Dashboard.language)
+                            text: Translator.translate("Speed units", Settings.language)
                             font.pixelSize: 20
                             font.family: "Lato"
                             color: "#FFFFFF"
@@ -290,7 +305,7 @@ Rectangle {
                         StyledComboBox {
                             id: unitSelect1
                             width: 240
-                            model: [Translator.translate("Metric", Dashboard.language), Translator.translate("Imperial", Dashboard.language)]
+                            model: [Translator.translate("Metric", Settings.language), Translator.translate("Imperial", Settings.language)]
                             Component.onCompleted: {
                                 Connect.setSpeedUnits(currentIndex)
                                 changeweighttext.changetext()
@@ -305,7 +320,7 @@ Rectangle {
                     RowLayout {
                         spacing: 20
                         Text {
-                            text: Translator.translate("Temp units", Dashboard.language)
+                            text: Translator.translate("Temp units", Settings.language)
                             font.pixelSize: 20
                             font.family: "Lato"
                             color: "#FFFFFF"
@@ -314,7 +329,7 @@ Rectangle {
                         StyledComboBox {
                             id: unitSelect
                             width: 240
-                            model: [Translator.translate("°C", Dashboard.language), Translator.translate("°F", Dashboard.language)]
+                            model: [Translator.translate("°C", Settings.language), Translator.translate("°F", Settings.language)]
                             Component.onCompleted: {
                                 Connect.setUnits(currentIndex)
                                 changeweighttext.changetext()
@@ -329,7 +344,7 @@ Rectangle {
                     RowLayout {
                         spacing: 20
                         Text {
-                            text: Translator.translate("Pressure units", Dashboard.language)
+                            text: Translator.translate("Pressure units", Settings.language)
                             font.pixelSize: 20
                             font.family: "Lato"
                             color: "#FFFFFF"
@@ -354,14 +369,14 @@ Rectangle {
 
                 // * Vehicle Section
                 SettingsSection {
-                    title: Translator.translate("Vehicle", Dashboard.language)
+                    title: Translator.translate("Vehicle", Settings.language)
                     Layout.fillWidth: true
 
                     RowLayout {
                         spacing: 20
                         Text {
                             id: weighttext
-                            text: Translator.translate("Weight", Dashboard.language) + " kg"
+                            text: Translator.translate("Weight", Settings.language) + " kg"
                             font.pixelSize: 20
                             font.family: "Lato"
                             color: "#FFFFFF"
@@ -377,7 +392,7 @@ Rectangle {
                     RowLayout {
                         spacing: 20
                         Text {
-                            text: Translator.translate("Odo", Dashboard.language)
+                            text: Translator.translate("Odo", Settings.language)
                             font.pixelSize: 20
                             font.family: "Lato"
                             color: "#FFFFFF"
@@ -394,7 +409,7 @@ Rectangle {
                     RowLayout {
                         spacing: 20
                         Text {
-                            text: Translator.translate("Trip", Dashboard.language)
+                            text: Translator.translate("Trip", Settings.language)
                             font.pixelSize: 20
                             font.family: "Lato"
                             color: "#FFFFFF"
@@ -405,10 +420,10 @@ Rectangle {
                             width: 180
                             text: "0"
                             readOnly: true
-                            Component.onCompleted: Dashboard.setTrip(tripmeter.text)
+                            Component.onCompleted: Vehicle.setTrip(tripmeter.text)
                         }
                         StyledButton {
-                            text: Translator.translate("Trip Reset", Dashboard.language)
+                            text: Translator.translate("Trip Reset", Settings.language)
                             width: 120
                             primary: false
                             onClicked: Calculations.resettrip()
@@ -418,13 +433,13 @@ Rectangle {
 
                 // * Data Logging Section
                 SettingsSection {
-                    title: Translator.translate("Data Logging", Dashboard.language)
+                    title: Translator.translate("Data Logging", Settings.language)
                     Layout.fillWidth: true
 
                     RowLayout {
                         spacing: 20
                         Text {
-                            text: Translator.translate("Logfile name", Dashboard.language)
+                            text: Translator.translate("Logfile name", Settings.language)
                             font.pixelSize: 20
                             font.family: "Lato"
                             color: "#FFFFFF"
@@ -440,15 +455,15 @@ Rectangle {
 
                     StyledSwitch {
                         id: loggerswitch
-                        label: Translator.translate("Data Logger", Dashboard.language)
+                        label: Translator.translate("Data Logger", Settings.language)
                         Component.onCompleted: logger.datalogger()
                         onClicked: logger.datalogger()
                     }
 
                     StyledSwitch {
                         id: nmeaLog
-                        label: Translator.translate("NMEA Logger", Dashboard.language)
-                        onClicked: Dashboard.setNMEAlog(nmeaLog.checked)
+                        label: Translator.translate("NMEA Logger", Settings.language)
+                        onClicked: GPS.setNMEAlog(nmeaLog.checked ? 1 : 0)
                         Component.onCompleted: tabView.currentIndex = 1
                     }
                 }
@@ -461,7 +476,7 @@ Rectangle {
                     RowLayout {
                         spacing: 20
                         Text {
-                            text: Translator.translate("GoPro Variant", Dashboard.language)
+                            text: Translator.translate("GoPro Variant", Settings.language)
                             font.pixelSize: 20
                             font.family: "Lato"
                             color: "#FFFFFF"
@@ -477,7 +492,7 @@ Rectangle {
                     RowLayout {
                         spacing: 20
                         Text {
-                            text: Translator.translate("GoPro Pasword", Dashboard.language)
+                            text: Translator.translate("GoPro Pasword", Settings.language)
                             font.pixelSize: 20
                             font.family: "Lato"
                             color: "#FFFFFF"
@@ -486,7 +501,7 @@ Rectangle {
                         StyledTextField {
                             id: goPropass
                             width: 240
-                            placeholderText: Translator.translate("GoPro Pasword", Dashboard.language)
+                            placeholderText: Translator.translate("GoPro Pasword", Settings.language)
                             inputMethodHints: Qt.ImhNoAutoUppercase | Qt.ImhPreferLowercase | Qt.ImhSensitiveData | Qt.ImhNoPredictiveText
                             Component.onCompleted: transferSettings.sendSettings()
                         }
@@ -494,7 +509,7 @@ Rectangle {
 
                     StyledSwitch {
                         id: record
-                        label: Translator.translate("GoPro rec", Dashboard.language)
+                        label: Translator.translate("GoPro rec", Settings.language)
                         onClicked: { transferSettings.sendSettings(); goproRec.rec() }
                     }
                 }
@@ -551,7 +566,7 @@ Rectangle {
                     RowLayout {
                         spacing: 20
                         Text {
-                            text: Translator.translate("base adress", Dashboard.language) + " " + Translator.translate("(decimal)", Dashboard.language)
+                            text: Translator.translate("base adress", Settings.language) + " " + Translator.translate("(decimal)", Settings.language)
                             font.pixelSize: 18
                             font.family: "Lato"
                             color: "#FFFFFF"
@@ -586,7 +601,7 @@ Rectangle {
                     RowLayout {
                         spacing: 20
                         Text {
-                            text: Translator.translate("base adress", Dashboard.language) + " " + Translator.translate("(decimal)", Dashboard.language)
+                            text: Translator.translate("base adress", Settings.language) + " " + Translator.translate("(decimal)", Settings.language)
                             font.pixelSize: 18
                             font.family: "Lato"
                             color: "#FFFFFF"
@@ -612,7 +627,7 @@ Rectangle {
 
                 // * Language Section
                 SettingsSection {
-                    title: Translator.translate("Language", Dashboard.language)
+                    title: Translator.translate("Language", Settings.language)
                     Layout.fillWidth: true
 
                     ComboBox {
@@ -717,11 +732,11 @@ Rectangle {
 
                 // * System Section
                 SettingsSection {
-                    title: Translator.translate("System", Dashboard.language)
+                    title: Translator.translate("System", Settings.language)
                     Layout.fillWidth: true
 
                     Text {
-                        text: "V 1.99F " + Dashboard.Platform
+                        text: "V 1.99F " + Connection.Platform
                         font.pixelSize: 18
                         font.family: "Lato"
                         color: "#B0B0B0"
@@ -731,21 +746,21 @@ Rectangle {
                         spacing: 12
 
                         StyledButton {
-                            text: Translator.translate("Quit", Dashboard.language)
+                            text: Translator.translate("Quit", Settings.language)
                             width: 140
                             primary: false
                             onClicked: Qt.quit()
                         }
 
                         StyledButton {
-                            text: Translator.translate("Reboot", Dashboard.language)
+                            text: Translator.translate("Reboot", Settings.language)
                             width: 140
                             primary: false
                             onClicked: Connect.reboot()
                         }
 
                         StyledButton {
-                            text: Translator.translate("Shutdown", Dashboard.language)
+                            text: Translator.translate("Shutdown", Settings.language)
                             width: 140
                             danger: true
                             onClicked: Connect.shutdown()
@@ -782,9 +797,9 @@ Rectangle {
         id: changeweighttext
         function changetext() {
             if (unitSelect.currentIndex === 0)
-                weighttext.text = Translator.translate("Weight", Dashboard.language) + " kg"
+                weighttext.text = Translator.translate("Weight", Settings.language) + " kg"
             if (unitSelect.currentIndex === 1)
-                weighttext.text = Translator.translate("Weight", Dashboard.language) + " lbs"
+                weighttext.text = Translator.translate("Weight", Settings.language) + " lbs"
         }
     }
 
@@ -860,8 +875,8 @@ Rectangle {
         id: autoconnectArd
         Component.onCompleted: autoconnectArd.auto()
         function auto() {
-            if (Dashboard.externalspeedconnectionrequest === 1) {
-                Arduino.openConnection(Dashboard.externalspeedport, "9600")
+            if (Connection.externalspeedconnectionrequest === 1) {
+                Arduino.openConnection(Connection.externalspeedport, "9600")
             }
         }
     }

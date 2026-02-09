@@ -18,7 +18,7 @@ Item {
             id: revcounter
             height: parent.height
             width: height
-            value: Dashboard.rpm/1000
+            value: Engine.rpm/1000
             anchors.verticalCenter: parent.verticalCenter
             maximumValue: 10
 
@@ -27,12 +27,12 @@ Item {
                 labelInset: toPixels(0.21)
                 minimumValueAngle: -180
                 maximumValueAngle: 90
-                innertext :Dashboard.speed
+                innertext :Vehicle.speed
                 tickmarkLabel:  Text {
-                    font.pixelSize: styleData.value >= Dashboard.rpm/1000+0.5 || styleData.value <= Dashboard.rpm/1000-0.5  ?  revcounter.height /11 : (styleData.value-Dashboard.rpm/1000)+revcounter.height /7
+                    font.pixelSize: styleData.value >= Engine.rpm/1000+0.5 || styleData.value <= Engine.rpm/1000-0.5  ?  revcounter.height /11 : (styleData.value-Engine.rpm/1000)+revcounter.height /7
                     text: styleData.value
-                    font.bold : styleData.value >= Dashboard.rpm/1000+0.5 || styleData.value <= Dashboard.rpm/1000-0.5  ? false : true
-                    color: styleData.value <= Dashboard.rpm/1000 ? "white" : "grey"
+                    font.bold : styleData.value >= Engine.rpm/1000+0.5 || styleData.value <= Engine.rpm/1000-0.5  ? false : true
+                    color: styleData.value <= Engine.rpm/1000 ? "white" : "grey"
                     antialiasing: true
                 }
                 Canvas {

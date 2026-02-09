@@ -33,7 +33,7 @@ Rectangle {
 
             // * Daemon Selection Section
             SettingsSection {
-                title: Translator.translate("Startup daemon", Dashboard.language)
+                title: Translator.translate("Startup daemon", Settings.language)
                 Layout.fillWidth: true
 
                 RowLayout {
@@ -41,7 +41,7 @@ Rectangle {
                     Layout.fillWidth: true
 
                     Text {
-                        text: Translator.translate("Startup daemon", Dashboard.language)
+                        text: Translator.translate("Startup daemon", Settings.language)
                         font.pixelSize: 20
                         font.family: "Lato"
                         color: "#FFFFFF"
@@ -57,7 +57,7 @@ Rectangle {
                 }
 
                 StyledButton {
-                    text: Translator.translate("Apply", Dashboard.language)
+                    text: Translator.translate("Apply", Settings.language)
                     width: 200
                     onClicked: {
                         Connect.daemonstartup(daemonselect.currentIndex)
@@ -68,7 +68,7 @@ Rectangle {
 
             // * CAN Configuration Section
             SettingsSection {
-                title: Translator.translate("Can Bitrate", Dashboard.language)
+                title: Translator.translate("Can Bitrate", Settings.language)
                 Layout.fillWidth: true
 
                 RowLayout {
@@ -76,7 +76,7 @@ Rectangle {
                     Layout.fillWidth: true
 
                     Text {
-                        text: Translator.translate("Can Bitrate", Dashboard.language)
+                        text: Translator.translate("Can Bitrate", Settings.language)
                         font.pixelSize: 20
                         font.family: "Lato"
                         color: "#FFFFFF"
@@ -93,7 +93,7 @@ Rectangle {
 
             // * Speed Source Section
             SettingsSection {
-                title: Translator.translate("Main Speed Source", Dashboard.language)
+                title: Translator.translate("Main Speed Source", Settings.language)
                 Layout.fillWidth: true
 
                 RowLayout {
@@ -101,7 +101,7 @@ Rectangle {
                     Layout.fillWidth: true
 
                     Text {
-                        text: Translator.translate("Main Speed Source", Dashboard.language)
+                        text: Translator.translate("Main Speed Source", Settings.language)
                         font.pixelSize: 20
                         font.family: "Lato"
                         color: "#FFFFFF"
@@ -119,7 +119,7 @@ Rectangle {
 
             // * Holley ECU Section (conditional)
             SettingsSection {
-                title: Translator.translate("Holley ECU", Dashboard.language)
+                title: Translator.translate("Holley ECU", Settings.language)
                 visible: daemonselect.textAt(daemonselect.currentIndex) === "Holley (Standard)"
                 Layout.fillWidth: true
 
@@ -128,7 +128,7 @@ Rectangle {
                     Layout.fillWidth: true
 
                     Text {
-                        text: Translator.translate("Holley ECU", Dashboard.language)
+                        text: Translator.translate("Holley ECU", Settings.language)
                         font.pixelSize: 20
                         font.family: "Lato"
                         color: "#FFFFFF"
@@ -165,7 +165,7 @@ Rectangle {
 
                 Text {
                     id: warningtext
-                    text: Translator.translate("Warningtext", Dashboard.language)
+                    text: Translator.translate("Warningtext", Settings.language)
                     font.pixelSize: 20
                     font.bold: true
                     font.family: "Lato"

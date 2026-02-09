@@ -11,9 +11,9 @@ Rectangle {
     color: "#121212"
 
     Connections {
-        target: Dashboard
+        target: Connection
         onSerialStatChanged: {
-            consoleText.append(Dashboard.SerialStat)
+            consoleText.append(Connection.SerialStat)
             consoleFlickable.contentY = consoleFlickable.contentHeight - consoleFlickable.height
         }
     }
@@ -98,7 +98,7 @@ Rectangle {
 
                 // * WiFi Configuration Section
                 SettingsSection {
-                    title: Translator.translate("WIFI Configuration", Dashboard.language)
+                    title: Translator.translate("WIFI Configuration", Settings.language)
                     Layout.fillWidth: true
 
                     RowLayout {
@@ -106,7 +106,7 @@ Rectangle {
                         Layout.fillWidth: true
 
                         Text {
-                            text: Translator.translate("WIFI Country", Dashboard.language)
+                            text: Translator.translate("WIFI Country", Settings.language)
                             font.pixelSize: 20
                             font.family: "Lato"
                             color: "#FFFFFF"
@@ -126,7 +126,7 @@ Rectangle {
                         Layout.fillWidth: true
 
                         Text {
-                            text: Translator.translate("WIFI 1", Dashboard.language)
+                            text: Translator.translate("WIFI 1", Settings.language)
                             font.pixelSize: 20
                             font.family: "Lato"
                             color: "#FFFFFF"
@@ -136,7 +136,7 @@ Rectangle {
                         StyledComboBox {
                             id: wifilistbox
                             width: 280
-                            model: Dashboard.wifi
+                            model: Connection.wifi
                             onCountChanged: btnScanNetwork.enabled = true
                         }
                     }
@@ -146,7 +146,7 @@ Rectangle {
                         Layout.fillWidth: true
 
                         Text {
-                            text: Translator.translate("Password 1", Dashboard.language)
+                            text: Translator.translate("Password 1", Settings.language)
                             font.pixelSize: 20
                             font.family: "Lato"
                             color: "#FFFFFF"
@@ -166,7 +166,7 @@ Rectangle {
 
                         StyledButton {
                             id: btnScanNetwork
-                            text: Translator.translate("Scan WIFI", Dashboard.language)
+                            text: Translator.translate("Scan WIFI", Settings.language)
                             width: 180
                             onClicked: {
                                 consoleText.clear()
@@ -176,7 +176,7 @@ Rectangle {
 
                         StyledButton {
                             id: applyWifiSettings
-                            text: Translator.translate("Connect WIFI", Dashboard.language)
+                            text: Translator.translate("Connect WIFI", Settings.language)
                             width: 180
                             onClicked: {
                                 Wifiscanner.setwifi(
@@ -193,7 +193,7 @@ Rectangle {
 
                 // * Network Status Section
                 SettingsSection {
-                    title: Translator.translate("Network Status", Dashboard.language)
+                    title: Translator.translate("Network Status", Settings.language)
                     Layout.fillWidth: true
 
                     RowLayout {
@@ -201,7 +201,7 @@ Rectangle {
                         Layout.fillWidth: true
 
                         Text {
-                            text: Translator.translate("Ethernet IP adress", Dashboard.language)
+                            text: Translator.translate("Ethernet IP adress", Settings.language)
                             font.pixelSize: 20
                             font.family: "Lato"
                             color: "#FFFFFF"
@@ -210,8 +210,8 @@ Rectangle {
 
                         ConnectionStatusIndicator {
                             id: ethernetstatus
-                            statusText: Dashboard.EthernetStat
-                            status: Dashboard.EthernetStat === "NOT CONNECTED" ? "disconnected" : "connected"
+                            statusText: Connection.EthernetStat
+                            status: Connection.EthernetStat === "NOT CONNECTED" ? "disconnected" : "connected"
                             width: 280
                         }
                     }
@@ -221,7 +221,7 @@ Rectangle {
                         Layout.fillWidth: true
 
                         Text {
-                            text: Translator.translate("WLAN IP adress", Dashboard.language)
+                            text: Translator.translate("WLAN IP adress", Settings.language)
                             font.pixelSize: 20
                             font.family: "Lato"
                             color: "#FFFFFF"
@@ -230,8 +230,8 @@ Rectangle {
 
                         ConnectionStatusIndicator {
                             id: wifistatus
-                            statusText: Dashboard.WifiStat
-                            status: Dashboard.WifiStat === "NOT CONNECTED" ? "disconnected" : "connected"
+                            statusText: Connection.WifiStat
+                            status: Connection.WifiStat === "NOT CONNECTED" ? "disconnected" : "connected"
                             width: 280
                         }
                     }
@@ -239,7 +239,7 @@ Rectangle {
 
                 // * System Actions Section
                 SettingsSection {
-                    title: Translator.translate("System Actions", Dashboard.language)
+                    title: Translator.translate("System Actions", Settings.language)
                     Layout.fillWidth: true
 
                     RowLayout {
@@ -247,7 +247,7 @@ Rectangle {
 
                         StyledButton {
                             id: updateBtn
-                            text: Translator.translate("Update", Dashboard.language)
+                            text: Translator.translate("Update", Settings.language)
                             width: 180
                             onClicked: {
                                 Connect.update()
@@ -257,7 +257,7 @@ Rectangle {
 
                         StyledButton {
                             id: develtest
-                            text: Translator.translate("Restart daemon", Dashboard.language)
+                            text: Translator.translate("Restart daemon", Settings.language)
                             width: 180
                             primary: false
                             onClicked: Connect.restartDaemon()
@@ -267,12 +267,12 @@ Rectangle {
 
                 // * Track Downloads Section
                 SettingsSection {
-                    title: Translator.translate("Track Downloads", Dashboard.language)
+                    title: Translator.translate("Track Downloads", Settings.language)
                     Layout.fillWidth: true
 
                     StyledButton {
                         id: trackUpdate
-                        text: Translator.translate("Update Tracks", Dashboard.language)
+                        text: Translator.translate("Update Tracks", Settings.language)
                         width: 280
                         onClicked: {
                             downloadManager.append("")

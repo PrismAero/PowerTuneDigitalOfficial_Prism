@@ -27,38 +27,38 @@ Rectangle {
             Text {
                 font.pixelSize: sensorwindow.width * 0.045
                 color:"white"
-                text: qsTr(Dashboard.SensorString1)
+                text: qsTr(Sensor.SensorString1)
 
             }
             Text {
                 font.pixelSize: sensorwindow.width * 0.045
-                color:{ (Dashboard.sens1 > "5") ? "red": "green"; }
-                text: (Dashboard.sens1).toFixed(2) + " V   "
+                color:{ (Sensor.sens1 > "5") ? "red": "green"; }
+                text: (Sensor.sens1).toFixed(2) + " V   "
             }
 
             Text {
                 font.pixelSize: sensorwindow.width * 0.045
                 color:"white"
-                text: qsTr(Dashboard.FlagString1)
+                text: qsTr(Flags.FlagString1)
             }
 
             StatusIndicator {
                 height: sensorwindow.width * 0.045
                 width: height
                 color: "green"
-                active: { (Dashboard.Flag1 == "1") ? true: false; }
+                active: { (Flags.Flag1 == "1") ? true: false; }
             }
 
             Text {
                 font.pixelSize: sensorwindow.width * 0.045
                 color:"white"
-                text: qsTr(Dashboard.FlagString2)
+                text: qsTr(Flags.FlagString2)
             }
             StatusIndicator {
                 height: sensorwindow.width * 0.045
                 width: height
                 color: "green"
-                active: { (Dashboard.Flag2 == "1") ? true: false; }
+                active: { (Flags.Flag2 == "1") ? true: false; }
             }
 
             // ROW 2
@@ -66,72 +66,72 @@ Rectangle {
             Text {
                 font.pixelSize: sensorwindow.width * 0.045
                 color:"white"
-                text: qsTr(Dashboard.SensorString2)
+                text: qsTr(Sensor.SensorString2)
             }
             Text {
                 font.pixelSize: sensorwindow.width * 0.045
-                color:{ (Dashboard.sens2 > "5") ? "red": "green"; }
-                text: (Dashboard.sens2).toFixed(2) + " V   "
+                color:{ (Sensor.sens2 > "5") ? "red": "green"; }
+                text: (Sensor.sens2).toFixed(2) + " V   "
             }
 
             Text {
                 font.pixelSize: sensorwindow.width * 0.045
                 color:"white"
-                text: qsTr(Dashboard.FlagString3)
+                text: qsTr(Flags.FlagString3)
             }
             StatusIndicator {
                 height: sensorwindow.width * 0.045
                 width: height
                 color: "green"
-                active: { (Dashboard.Flag3 == "1") ? true: false; }
+                active: { (Flags.Flag3 == "1") ? true: false; }
 
             }
 
             Text {
                 font.pixelSize: sensorwindow.width * 0.045
                 color:"white"
-                text: qsTr(Dashboard.FlagString4)
+                text: qsTr(Flags.FlagString4)
             }
             StatusIndicator {
                 height: sensorwindow.width * 0.045
                 width: height
                 color: "green"
-                active: { (Dashboard.Flag4 == "1") ? true: false; }
+                active: { (Flags.Flag4 == "1") ? true: false; }
             }
             // ROW 3
 
             Text {
                 font.pixelSize: sensorwindow.width * 0.045
                 color:"white"
-                text: qsTr(Dashboard.SensorString3)
+                text: qsTr(Sensor.SensorString3)
             }
             Text {
                 font.pixelSize: sensorwindow.width * 0.045
-                color:{ (Dashboard.sens3 > "5") ? "red": "green"; }
-                text: (Dashboard.sens3).toFixed(2) + " V   "
+                color:{ (Sensor.sens3 > "5") ? "red": "green"; }
+                text: (Sensor.sens3).toFixed(2) + " V   "
             }
             Text {
                 font.pixelSize: sensorwindow.width * 0.045
                 color:"white"
-                text: qsTr(Dashboard.FlagString5)
+                text: qsTr(Flags.FlagString5)
             }
             StatusIndicator {
                 height: sensorwindow.width * 0.045
                 width: height
                 color: "green"
-                active: { (Dashboard.Flag5 == "1") ? true: false; }
+                active: { (Flags.Flag5 == "1") ? true: false; }
             }
 
             Text {
                 font.pixelSize: sensorwindow.width * 0.045
                 color:"white"
-                text: qsTr(Dashboard.FlagString6)
+                text: qsTr(Flags.FlagString6)
             }
             StatusIndicator {
                 height: sensorwindow.width * 0.045
                 width: height
                 color: "green"
-                active: { (Dashboard.Flag6 == "1") ? true: false; }
+                active: { (Flags.Flag6 == "1") ? true: false; }
 
             }
 
@@ -140,73 +140,73 @@ Rectangle {
             Text {
                 font.pixelSize: sensorwindow.width * 0.045
                 color:"white"
-                text: qsTr(Dashboard.SensorString4)
+                text: qsTr(Sensor.SensorString4)
             }
             Text {
                 font.pixelSize: sensorwindow.width * 0.045
-                color:{ (Dashboard.sens4 > "5") ? "red": "green"; }
-                text: (Dashboard.sens4).toFixed(2) + " V   "
+                color:{ (Sensor.sens4 > "5") ? "red": "green"; }
+                text: (Sensor.sens4).toFixed(2) + " V   "
             }
 
             Text {
                 font.pixelSize: sensorwindow.width * 0.045
                 color:"white"
-                text: qsTr(Dashboard.FlagString7)
+                text: qsTr(Flags.FlagString7)
             }
             StatusIndicator {
                 height: sensorwindow.width * 0.045
                 width: height
                 color: "green"
-                active: { (Dashboard.Flag7 == "1") ? true: false; }
+                active: { (Flags.Flag7 == "1") ? true: false; }
             }
 
             Text {
                 font.pixelSize: sensorwindow.width * 0.045
                 color:"white"
-                text: qsTr(Dashboard.FlagString8)
+                text: qsTr(Flags.FlagString8)
             }
             StatusIndicator {
                 height: sensorwindow.width * 0.045
                 width: height
                 color: "green"
-                active: { (Dashboard.Flag8 == "1") ? true: false; }
+                active: { (Flags.Flag8 == "1") ? true: false; }
             }
             // ROW 5
 
             Text {
                 font.pixelSize: sensorwindow.width * 0.045
                 color:"white"
-                text: qsTr(Dashboard.SensorString5)
+                text: qsTr(Sensor.SensorString5)
             }
             Text {
                 font.pixelSize: sensorwindow.width * 0.045
-                color:{ (Dashboard.sens5 > "5") ? "red": "green"; }
-                text: (Dashboard.sens5).toFixed(2) + " V   "
+                color:{ (Sensor.sens5 > "5") ? "red": "green"; }
+                text: (Sensor.sens5).toFixed(2) + " V   "
             }
 
             Text {
                 font.pixelSize: sensorwindow.width * 0.045
                 color:"white"
-                text: qsTr(Dashboard.FlagString9)
+                text: qsTr(Flags.FlagString9)
             }
             StatusIndicator {
                 height: sensorwindow.width * 0.045
                 width: height
                 color: "green"
-                active: { (Dashboard.Flag9 == "1") ? true: false; }
+                active: { (Flags.Flag9 == "1") ? true: false; }
             }
 
 
             Text {
                 font.pixelSize: sensorwindow.width * 0.045
                 color:"white"
-                text: qsTr(Dashboard.FlagString10)
+                text: qsTr(Flags.FlagString10)
             }
             StatusIndicator {
                 height: sensorwindow.width * 0.045
                 width: height
                 color: "green"
-                active: { (Dashboard.Flag10 == "1") ? true: false; }
+                active: { (Flags.Flag10 == "1") ? true: false; }
             }
 
             // ROW 6
@@ -215,37 +215,37 @@ Rectangle {
             Text {
                 font.pixelSize: sensorwindow.width * 0.045
                 color:"white"
-                text: qsTr(Dashboard.SensorString6)
+                text: qsTr(Sensor.SensorString6)
             }
             Text {
                 font.pixelSize: sensorwindow.width * 0.045
-                color:{ (Dashboard.sens6 > "5") ? "red": "green"; }
-                text: (Dashboard.sens6).toFixed(2) + " V   "
+                color:{ (Sensor.sens6 > "5") ? "red": "green"; }
+                text: (Sensor.sens6).toFixed(2) + " V   "
             }
 
             Text {
                 font.pixelSize: sensorwindow.width * 0.045
                 color:"white"
-                text: qsTr(Dashboard.FlagString11)
+                text: qsTr(Flags.FlagString11)
             }
             StatusIndicator {
                 height: sensorwindow.width * 0.045
                 width: height
                 color: "green"
-                active: { (Dashboard.Flag11 == "1") ? true: false; }
+                active: { (Flags.Flag11 == "1") ? true: false; }
             }
 
 
             Text {
                 font.pixelSize: sensorwindow.width * 0.045
                 color:"white"
-                text: qsTr(Dashboard.FlagString12)
+                text: qsTr(Flags.FlagString12)
             }
             StatusIndicator {
                 height: sensorwindow.width * 0.045
                 width: height
                 color: "green"
-                active: { (Dashboard.Flag12 == "1") ? true: false; }
+                active: { (Flags.Flag12 == "1") ? true: false; }
             }
 
             // ROW 7
@@ -254,24 +254,24 @@ Rectangle {
             Text {
                 font.pixelSize: sensorwindow.width * 0.045
                 color:"white"
-                text: qsTr(Dashboard.SensorString7)
+                text: qsTr(Sensor.SensorString7)
             }
             Text {
                 font.pixelSize: sensorwindow.width * 0.045
-                color:{ (Dashboard.sens7 > "5") ? "red": "green"; }
-                text: (Dashboard.sens7).toFixed(2) + " V   "
+                color:{ (Sensor.sens7 > "5") ? "red": "green"; }
+                text: (Sensor.sens7).toFixed(2) + " V   "
             }
 
             Text {
                 font.pixelSize: sensorwindow.width * 0.045
                 color:"white"
-                text: qsTr(Dashboard.FlagString13)
+                text: qsTr(Flags.FlagString13)
             }
             StatusIndicator {
                 height: sensorwindow.width * 0.045
                 width: height
                 color: "green"
-                active: { (Dashboard.Flag13 == "1") ? true: false; }
+                active: { (Flags.Flag13 == "1") ? true: false; }
             }
 
 
@@ -279,13 +279,13 @@ Rectangle {
             Text {
                 font.pixelSize: sensorwindow.width * 0.045
                 color:"white"
-                text: qsTr(Dashboard.FlagString14)
+                text: qsTr(Flags.FlagString14)
             }
             StatusIndicator {
                 height: sensorwindow.width * 0.045
                 width: height
                 color: "green"
-                active: { (Dashboard.Flag14 == "1") ? true: false; }
+                active: { (Flags.Flag14 == "1") ? true: false; }
             }
 
 
@@ -294,39 +294,39 @@ Rectangle {
             Text {
                 font.pixelSize: sensorwindow.width * 0.045
                 color:"white"
-                text: qsTr(Dashboard.SensorString8)
+                text: qsTr(Sensor.SensorString8)
             }
             Text {
                 font.pixelSize: sensorwindow.width * 0.045
-                color:{ (Dashboard.sens8 > "5") ? "red": "green"; }
-                text: (Dashboard.sens8).toFixed(2) + " V   "
+                color:{ (Sensor.sens8 > "5") ? "red": "green"; }
+                text: (Sensor.sens8).toFixed(2) + " V   "
             }
-
-
-            Text {
-                font.pixelSize: sensorwindow.width * 0.045
-                color:"white"
-                text: qsTr(Dashboard.FlagString15)
-            }
-            StatusIndicator {
-                height: sensorwindow.width * 0.045
-                width: height
-                color: "green"
-                active: { (Dashboard.Flag15 == "1") ? true: false; }
-            }
-
 
 
             Text {
                 font.pixelSize: sensorwindow.width * 0.045
                 color:"white"
-                text: qsTr(Dashboard.FlagString16)
+                text: qsTr(Flags.FlagString15)
             }
             StatusIndicator {
                 height: sensorwindow.width * 0.045
                 width: height
                 color: "green"
-                active: { (Dashboard.Flag16 == "1") ? true: false; }
+                active: { (Flags.Flag15 == "1") ? true: false; }
+            }
+
+
+
+            Text {
+                font.pixelSize: sensorwindow.width * 0.045
+                color:"white"
+                text: qsTr(Flags.FlagString16)
+            }
+            StatusIndicator {
+                height: sensorwindow.width * 0.045
+                width: height
+                color: "green"
+                active: { (Flags.Flag16 == "1") ? true: false; }
 
             }
 

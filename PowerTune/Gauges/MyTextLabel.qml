@@ -19,6 +19,11 @@ Item {
     property double warnvaluehigh: 20000
     property double warnvaluelow : -20000
     property string resettextcolor
+    
+    // * Double-tap detection properties
+    property int touchCounter: 0
+    property real lastTouchTime: 0
+    
     Drag.active: true
 
     Component.onCompleted: {
@@ -50,8 +55,8 @@ Item {
         anchors.fill: parent
         drag.target: parent
         enabled: false
-        onPressed:
-        {
+        z: 100  // * Higher z-order to receive events over dashboard background
+        onPressed: function(mouse) {
             touchCounter++;
             if (touchCounter == 1) {
                 lastTouchTime = Date.now();
@@ -59,7 +64,7 @@ Item {
             } else if (touchCounter == 2) {
                 var currentTime = Date.now();
                 if (currentTime - lastTouchTime <= 500) { // Double-tap detected within 500 ms
-                    console.log("Double-tap detected at", mouse.x, mouse.y);
+                    console.log("TextLabel double-tap detected at", mouse.x, mouse.y);
                 }
                 touchCounter = 0;
                 timerDoubleClick.stop();
@@ -244,7 +249,7 @@ Item {
                 }
             }
         Text{
-            text: Translator.translate("Warn value high", Dashboard.language)
+            text: Translator.translate("Warn value high", Settings.language)
             font.pixelSize: 15
             }
             ////
@@ -277,7 +282,7 @@ Item {
                 }
             }
             Text{
-                text: Translator.translate("Warn value low", Dashboard.language)
+                text: Translator.translate("Warn value low", Settings.language)
                 font.pixelSize: 15 //800 * (7 / 800)
                 }
             Grid {
@@ -309,7 +314,7 @@ Item {
                 }
             }
             RoundButton{
-                text: Translator.translate("Use Datasource", Dashboard.language)
+                text: Translator.translate("Use Datasource", Settings.language)
                 width: parent.width
                 font.pixelSize: 15
                 onClicked: {
@@ -319,13 +324,13 @@ Item {
                 }
             }
             RoundButton {
-                text: Translator.translate("Delete", Dashboard.language)
+                text: Translator.translate("Delete", Settings.language)
                 font.pixelSize: 15
                 width: parent.width
                 onClicked: mytextlabel.destroy();
             }
             RoundButton{
-                text: Translator.translate("Close", Dashboard.language)
+                text: Translator.translate("Close", Settings.language)
                 width: parent.width
                 font.pixelSize: 15
                 onClicked: changesize.visible = false;
@@ -347,10 +352,10 @@ Item {
         if (datasourcename != ""){
             if (decimalpoints < 4)
             {
-                changetext.text  = Qt.binding(function(){return Dashboard[datasourcename].toFixed(decimalpoints)});
+                changetext.text  = Qt.binding(function(){return PropertyRouter.getValue(datasourcename).toFixed(decimalpoints)});
             }
             else
-                changetext.text  = Qt.binding(function(){return Dashboard[datasourcename]});
+                changetext.text  = Qt.binding(function(){return PropertyRouter.getValue(datasourcename)});
         }
     }
     Item {
@@ -368,7 +373,7 @@ Item {
     function togglemousearea()
     {
 
-        if (Dashboard.draggable === 1)
+        if (UI.draggable === 1)
         {
             touchArea.enabled = true;
         }

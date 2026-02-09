@@ -11,7 +11,7 @@ Item {
     anchors.fill: parent
     Component.onCompleted: {units.unitadjust()} // adjusts the Gauges to metric or imperial
 
-    property  var unit : Dashboard.units;
+    property  var unit : Settings.units;
 
     //fade in effect for the Gauges (Welcome animation)
     OpacityAnimator {
@@ -134,7 +134,7 @@ Item {
             }
             Text {
                 id: value1
-                text: (Dashboard.auxcalc1).toFixed(1)
+                text: (Analog.auxcalc1).toFixed(1)
                 font.pixelSize: scalerect.width / 55
                 anchors.right: parent.right
                 anchors.rightMargin: scalerect.width / 26
@@ -158,7 +158,7 @@ Item {
             }
             Text {
                 id: value2
-                text:(Dashboard.pim).toFixed(2)
+                text:(Engine.pim).toFixed(2)
                 font.pixelSize: scalerect.width / 55
                 anchors.right: parent.right
                 anchors.rightMargin: scalerect.width / 26
@@ -186,7 +186,7 @@ Item {
                 id: leftgaugeticks
                 height: parent.height
                 width: height
-                value: Dashboard.Watertemp
+                value: Engine.Watertemp
                 anchors.verticalCenter: parent.verticalCenter
                 minimumValue: 30
                 maximumValue: 110
@@ -233,7 +233,7 @@ Item {
                 id: rightgaugeticks
                 height: parent.height
                 width: height
-                value: Dashboard.Intaketemp
+                value: Engine.Intaketemp
                 anchors.verticalCenter: parent.verticalCenter
                 minimumValue: 20
                 maximumValue: 80
@@ -297,7 +297,7 @@ Item {
                 height: parent.height
                 width: height
 
-                value: Dashboard.speed
+                value: Vehicle.speed
                 anchors.verticalCenter: parent.verticalCenter
                 maximumValue: 320
 
@@ -315,7 +315,7 @@ Item {
                 id: speedoNeedlekph
                 anchors.verticalCenterOffset: 0
                 anchors.centerIn: parent
-                value: Dashboard.speed / 4.155844155844156
+                value: Vehicle.speed / 4.155844155844156
 
             }
             GaugeNeedle_minus180to90  {
@@ -323,7 +323,7 @@ Item {
                 id: speedoNeedlemph
                 anchors.verticalCenterOffset: 0
                 anchors.centerIn: parent
-                value: Dashboard.speed / 2.597402597402597
+                value: Vehicle.speed / 2.597402597402597
 
 
             }
@@ -344,7 +344,7 @@ Item {
                 id: revcounterticks
                 height: parent.height
                 width: height
-                value: Dashboard.revs
+                value: Engine.rpm
                 anchors.verticalCenter: parent.verticalCenter
                 maximumValue: 10
 
@@ -365,7 +365,7 @@ Item {
                 id: revneedele
                 anchors.verticalCenterOffset: 0
                 anchors.centerIn: parent
-                value: Dashboard.revs *0.0077
+                value: Engine.rpm *0.0077
 
             }
         }

@@ -14,7 +14,7 @@ Rectangle {
     property bool playing: false
     Connections{
         target: Dashboard
-        function onMusicpathChanged() { folderModel.folder = Dashboard.musicpath }
+        function onMusicpathChanged() { folderModel.folder = Connection.musicpath }
     }
     TreeView {
         id:mp3selector
@@ -29,7 +29,7 @@ Rectangle {
             width: parent.wdith * (300 / parent.width)
         }
         model: Dirmodel
-        onActivated: Connect.qmlTreeviewclicked(mp3selector.currentIndex),folderModel.folder = Dashboard.musicpath;
+        onActivated: Connect.qmlTreeviewclicked(mp3selector.currentIndex),folderModel.folder = Connection.musicpath;
     }
     ListView {
         id: list

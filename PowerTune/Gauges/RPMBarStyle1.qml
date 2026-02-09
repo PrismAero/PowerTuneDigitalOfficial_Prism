@@ -9,7 +9,7 @@ import com.powertune 1.0
 Item {
   id: speedUnits
   anchors.fill:parent
-  property  var unit : Dashboard.speedunits;
+  property  var unit : Settings.speedunits;
   Component.onCompleted: {units.unitadjust();}
 
 
@@ -26,12 +26,12 @@ color: "darkgrey"
       width: parent.width /1.024
       y:0
       minorTickmarkCount: 0
-      tickmarkStepSize : Dashboard.maxRPM
+      tickmarkStepSize : Settings.maxRPM
       orientation : Qt.Horizontal
       minimumValue: 0
-      maximumValue: Dashboard.maxRPM
+      maximumValue: Settings.maxRPM
 
-      value: Dashboard.rpm
+      value: Engine.rpm
       Behavior on value {
           NumberAnimation {
               duration: 5
@@ -99,7 +99,7 @@ Row{
     }
     Text {
         id: rpmNumber
-        text: (Dashboard.rpm)
+        text: (Engine.rpm)
         font.pixelSize: 100
         font.italic: true
         font.bold: true
@@ -138,7 +138,7 @@ Row{
     }
     Text {
         id: speedNumbers
-        text: (Dashboard.speed).toFixed(0);
+        text: (Vehicle.speed).toFixed(0);
         font.pixelSize: 100
         font.italic: true
         font.bold: true

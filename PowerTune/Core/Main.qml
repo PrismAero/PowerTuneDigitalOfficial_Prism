@@ -18,20 +18,20 @@ ApplicationWindow {
     height: 720
     minimumWidth: 1600
     minimumHeight: 720
-    title: qsTr("PowerTune ") + Dashboard.Platform
+    title: qsTr("PowerTune ") + Connection.Platform
     color: "black"
 
     property int brightnessIncrease: 175
     property int ddcUtilBrightnessIncrease: 50
 
-    property int digitalInput1: Dashboard.EXDigitalInput1
-    property int digitalInput2: Dashboard.EXDigitalInput2
-    property int digitalInput3: Dashboard.EXDigitalInput3
-    property int digitalInput4: Dashboard.EXDigitalInput4
-    property int digitalInput5: Dashboard.EXDigitalInput5
-    property int digitalInput6: Dashboard.EXDigitalInput6
-    property int digitalInput7: Dashboard.EXDigitalInput7
-    property int digitalInput8: Dashboard.EXDigitalInput8
+    property int digitalInput1: Expander.EXDigitalInput1
+    property int digitalInput2: Expander.EXDigitalInput2
+    property int digitalInput3: Expander.EXDigitalInput3
+    property int digitalInput4: Expander.EXDigitalInput4
+    property int digitalInput5: Expander.EXDigitalInput5
+    property int digitalInput6: Expander.EXDigitalInput6
+    property int digitalInput7: Expander.EXDigitalInput7
+    property int digitalInput8: Expander.EXDigitalInput8
 
     // ! Screen Keyboard - Behaviour between QT5.10 and QT5.15 is different
     Settings{
@@ -93,9 +93,9 @@ ApplicationWindow {
     }
 
     Connections{
-            target: Dashboard
+            target: UI
             function onBrightnessChanged() {
-                brightness.value = Dashboard.Brightness
+                brightness.value = UI.Brightness
             }
     }
 
@@ -109,6 +109,8 @@ ApplicationWindow {
         id: dashView
 
         currentIndex: 0
+        // * Disable swiping when in edit mode (UI.draggable === 1)
+        interactive: UI.draggable === 0
 
         onCurrentIndexChanged: {
             if (dashView.currentIndex != 0){
@@ -127,19 +129,19 @@ ApplicationWindow {
 
         Loader {
             id: secondPageLoader
-            active: Dashboard.Visibledashes > 1
+            active: UI.Visibledashes > 1
             source: ""
 
         }
         Loader {
             id: thirdPageLoader
-            active: Dashboard.Visibledashes > 2;
+            active: UI.Visibledashes > 2;
             source: ""
         }
         
         Loader {
             id: fourthPageLoader
-            active: Dashboard.Visibledashes > 3;
+            active: UI.Visibledashes > 3;
             source: ""
         }
 
@@ -287,7 +289,7 @@ ApplicationWindow {
              anchors.top: row3.bottom
              anchors.topMargin: drawerpopup.height/30
              anchors.horizontalCenter: parent.horizontalCenter
-             visible: Dashboard.screen
+             visible: UI.screen
              Image {
                  height: window.height /15
                  width:height
@@ -302,7 +304,7 @@ ApplicationWindow {
              topPadding: 10
              from: 20
              to: 255
-             value: Dashboard.Brightness
+             value: UI.Brightness
 
              onValueChanged: {
                       Connect.setSreenbrightness(brightness.value);

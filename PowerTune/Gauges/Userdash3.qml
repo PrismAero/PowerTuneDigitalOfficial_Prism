@@ -62,7 +62,7 @@ Item {
     ComboBox{
         id: dashvalue
         width: mainwindow.width * 0.25//200
-        model: Dashboard.dashsetup3
+        model: UI.dashsetup3
         visible:false
         font.pixelSize: mainwindow.width * 0.018//15
         delegate: ItemDelegate {
@@ -223,8 +223,10 @@ Item {
     MouseArea {
         id: touchArea
         anchors.fill: parent
-        onPressed:
-        {
+        z: -1  // * Lower z-order so gauges receive events first when in edit mode
+        // * Only active when NOT in edit mode - when draggable=1, gauges handle their own events
+        enabled: UI.draggable === 0
+        onPressed: function(mouse) {
             touchCounter++;
             if (touchCounter == 1) {
                 lastTouchTime = Date.now();
@@ -232,7 +234,7 @@ Item {
             } else if (touchCounter == 2) {
                 var currentTime = Date.now();
                 if (currentTime - lastTouchTime <= 500) { // Double-tap detected within 500 ms
-                    console.log("Double-tap detected at", mouse.x, mouse.y);
+                    console.log("Dashboard double-tap detected at", mouse.x, mouse.y);
                 }
                 touchCounter = 0;
                 timerDoubleClick.stop();
@@ -253,7 +255,7 @@ Item {
                 btnaddStatePicture.visible = true;
                 btnaddStateGIF.visible = true;
                 btnaddBar.visible = true;
-                Dashboard.setdraggable(1);
+                UI.draggable = 1;
             }
         }
     }
@@ -289,7 +291,7 @@ Item {
             rowSpacing :5
 
             Text {
-                text: Translator.translate("RPM2", Dashboard.language)+ " " +Translator.translate("Style", Dashboard.language)
+                text: Translator.translate("RPM2", Settings.language)+ " " +Translator.translate("Style", Settings.language)
                 font.pixelSize: mainwindow.width * 0.025 //20
                 font.bold: true
             }
@@ -298,7 +300,7 @@ Item {
                 width: mainwindow.width * 0.25 //200
                 height: mainwindow.height * 0.083 //40
                 font.pixelSize: mainwindow.width * 0.018 //15
-                model: [Translator.translate("None", Dashboard.language), Translator.translate("Style", Dashboard.language) + " 1",Translator.translate("Style", Dashboard.language) + " 2", Translator.translate("Style", Dashboard.language) + " 3", Translator.translate("Style", Dashboard.language) + " 4"]
+                model: [Translator.translate("None", Settings.language), Translator.translate("Style", Settings.language) + " 1",Translator.translate("Style", Settings.language) + " 2", Translator.translate("Style", Settings.language) + " 3", Translator.translate("Style", Settings.language) + " 4"]
                 onCurrentIndexChanged: rpmgauge.selector();
                 delegate: ItemDelegate {
                     width: rpmstyleselector.width
@@ -311,7 +313,7 @@ Item {
                 }
             }
             Text {
-                text: Translator.translate("Background", Dashboard.language) + " " + Translator.translate("Image", Dashboard.language)
+                text: Translator.translate("Background", Settings.language) + " " + Translator.translate("Image", Settings.language)
                 font.pixelSize: mainwindow.width * 0.025 //20
                 font.bold: true
             }
@@ -320,13 +322,20 @@ Item {
                 width: mainwindow.width * 0.25 //200
                 height: mainwindow.height * 0.083 //40
                 font.pixelSize: mainwindow.width * 0.015
-                model: Dashboard.backroundpictures
+                model: UI.backroundpictures
                 currentIndex: 0
                 onCurrentIndexChanged: {
-
-                    backroundpicturesource3 = "file:///home/pi/Logo/" + backroundSelector.textAt(backroundSelector.currentIndex);
-                    //backroundpicturesource3 = "file:///c:/Logo/" + backroundSelector.textAt(backroundSelector.currentIndex);
-                    //backroundpicturesource3 = "file:" + backroundSelector.textAt(backroundSelector.currentIndex);
+                    // * Use platform-aware path for background images
+                    var selectedFile = backroundSelector.textAt(backroundSelector.currentIndex);
+                    if (Qt.platform.os === "linux") {
+                        backroundpicturesource3 = "file:///home/pi/Logo/" + selectedFile;
+                    } else if (Qt.platform.os === "osx") {
+                        backroundpicturesource3 = "qrc:/Resources/graphics/" + selectedFile;
+                    } else if (Qt.platform.os === "windows") {
+                        backroundpicturesource3 = "file:///c:/Logo/" + selectedFile;
+                    } else {
+                        backroundpicturesource3 = "file:" + selectedFile;
+                    }
                     backroundpicture3.source = backroundpicturesource3;
                 }
                 delegate: ItemDelegate {
@@ -340,7 +349,7 @@ Item {
                 }
             }
             Text {
-                text: Translator.translate("Background", Dashboard.language) + " " + Translator.translate("Color", Dashboard.language)
+                text: Translator.translate("Background", Settings.language) + " " + Translator.translate("Color", Settings.language)
                 font.pixelSize: mainwindow.width * 0.025
                 font.bold: true
             }
@@ -383,7 +392,7 @@ Item {
 
             }
             Text {
-                text: "Extra "//Translator.translate("Extra: ", Dashboard.language)
+                text: "Extra "//Translator.translate("Extra: ", Settings.language)
                 font.pixelSize: mainwindow.width * 0.018
                 font.bold: true
             }
@@ -392,7 +401,7 @@ Item {
                 width: mainwindow.width * 0.25 //200
                 height: mainwindow.height * 0.083 //40
                 font.pixelSize: mainwindow.width * 0.018//15
-                model: [Translator.translate(Translator.translate("None", Dashboard.language), Dashboard.language), "PFC Sensors"]
+                model: [Translator.translate(Translator.translate("None", Settings.language), Settings.language), "PFC Sensors"]
                 onCurrentIndexChanged: setextra();
                 delegate: ItemDelegate {
                     width: extraSelector.width
@@ -406,7 +415,7 @@ Item {
             }
             Button {
                 id: btncloserpm
-                text: Translator.translate("Close", Dashboard.language)
+                text: Translator.translate("Close", Settings.language)
                 font.pixelSize: mainwindow.width * 0.018//15
                 width: mainwindow.width * 0.25 //200
                 height: mainwindow.height * 0.083 //40
@@ -512,7 +521,7 @@ Item {
         ComboBox {
             id: loadfileselect
             font.pixelSize: mainwindow.width * 0.018//15
-            model: Dashboard.dashfiles
+            model: UI.dashfiles
             width: parent.width
             height: parent.height * 0.083
             visible: false
@@ -544,94 +553,94 @@ Item {
                 id: btnaddSquare
                 width: mainwindow.width * 0.118
                 height: mainwindow.height * 0.083
-                text:  Translator.translate("Square", Dashboard.language)
+                text:  Translator.translate("Square", Settings.language)
                 font.pixelSize: mainwindow.width * 0.015
                 onClicked: {
                     console.log(powertunedatasource.get(cbx_sources.currentIndex).decimalpoints);
                     CreateSquareGaugeScript.createSquareGauge(266,119,0,240,248,powertunedatasource.get(cbx_sources.currentIndex).decimalpoints,powertunedatasource.get(cbx_sources.currentIndex).defaultsymbol,powertunedatasource.get(cbx_sources.currentIndex).titlename,false,true,false,"Dashboard",powertunedatasource.get(cbx_sources.currentIndex).sourcename,powertunedatasource.get(cbx_sources.currentIndex).sourcename,10000,-20000,"lightsteelblue","black","lightsteelblue","white","white","blue",25,40,powertunedatasource.get(cbx_sources.currentIndex).decimalpoints2,"Lato","Lato");
                     squaregaugemenu.visible = false;
                     selectcolor.visible =false;
-                    Dashboard.setdraggable(0);
+                    UI.draggable = 0;
                 }
             }
             Button {
                 id: btnaddBar
                 width: mainwindow.width * 0.118
                 height: mainwindow.height * 0.083
-                text: Translator.translate("Bar", Dashboard.language)
+                text: Translator.translate("Bar", Settings.language)
                 font.pixelSize: mainwindow.width * 0.015
                 onClicked: {
                     CreateBargaugeScript.createVerticalGauge(320,80,10,0,0,8000,powertunedatasource.get(cbx_sources.currentIndex).decimalpoints,powertunedatasource.get(cbx_sources.currentIndex).titlename,powertunedatasource.get(cbx_sources.currentIndex).sourcename,1000,0);
                     squaregaugemenu.visible = false;
                     selectcolor.visible =false;
-                    Dashboard.setdraggable(0);
+                    UI.draggable = 0;
                 }
             }
             Button {
                 id: btnaddRound
                 width: mainwindow.width * 0.118
                 height: mainwindow.height * 0.083
-                text: Translator.translate("Round", Dashboard.language)
+                text: Translator.translate("Round", Settings.language)
                 font.pixelSize: mainwindow.width * 0.015
                 onClicked: {
                     CreateRoundgaugeScript.createRoundGauge(400,20,20,powertunedatasource.get(cbx_sources.currentIndex).sourcename,powertunedatasource.get(cbx_sources.currentIndex).maxvalue,0,powertunedatasource.get(cbx_sources.currentIndex).maxvalue,-1000,-145,90,powertunedatasource.get(cbx_sources.currentIndex).maxvalue,powertunedatasource.get(cbx_sources.currentIndex).divisor,powertunedatasource.get(cbx_sources.currentIndex).stepsize,1,powertunedatasource.get(cbx_sources.currentIndex).stepsize,powertunedatasource.get(cbx_sources.currentIndex).decimalpoints,2,38,3,3,8,3,15,5,0.50,0.40,0.33,0.25,20,5,93,8,0,0,"red","darkred","aliceblue","red","grey","darkgrey","darkgrey","black","grey","black","dodgerblue","deepskyblue","lightskyblue","transparent",true,true,true,"Lato",30,50,10,false,"Lato",powertunedatasource.get(cbx_sources.currentIndex).titlename,"red",0,0,0,0,0,0,"false");
                     squaregaugemenu.visible = false;
                     selectcolor.visible =false;
-                    Dashboard.setdraggable(0);
+                    UI.draggable = 0;
                 }
             }
             Button {
                 id: btnaddText
                 width: mainwindow.width * 0.118
                 height: mainwindow.height * 0.083
-                text: Translator.translate("Text", Dashboard.language)
+                text: Translator.translate("Text", Settings.language)
                 font.pixelSize: mainwindow.width * 0.015
                 onClicked: {
                     CreateTextScript.createText(100,50,"Textelement","Lato",15,"red","",true,0,20000,-20000)
                     squaregaugemenu.visible = false;
                     selectcolor.visible =false;
-                    Dashboard.setdraggable(0);
+                    UI.draggable = 0;
                 }
             }
             Button {
                 id: btnaddPicture
                 width: mainwindow.width * 0.118
                 height: mainwindow.height * 0.083
-                text: Translator.translate("Image", Dashboard.language)
+                text: Translator.translate("Image", Settings.language)
                 font.pixelSize: mainwindow.width * 0.015
                 onClicked: {
                     CreatePictureScript.createPicture(10,10,100,"qrc:/Resources/graphics/slectImage.png")
                     squaregaugemenu.visible = false;
                     selectcolor.visible =false;
-                    Dashboard.setdraggable(0);
+                    UI.draggable = 0;
                 }
             }
             Button {
                 id: btnaddStatePicture
                 width: mainwindow.width * 0.118
                 height: mainwindow.height * 0.083
-                text: Translator.translate("State", Dashboard.language) + " " + Translator.translate("Image", Dashboard.language)
+                text: Translator.translate("State", Settings.language) + " " + Translator.translate("Image", Settings.language)
                 font.pixelSize: mainwindow.width * 0.015
                 onClicked: {
                    // console.log("create State gauge ");
                     CreateStatePictureScript.createPicture(10,10,100,"speed",1,"qrc:/Resources/graphics/selectStateImage.png","qrc:/Resources/graphics/selectStateImage.png");
                     squaregaugemenu.visible = false;
                     selectcolor.visible =false;
-                    Dashboard.setdraggable(0);
+                    UI.draggable = 0;
                 }
             }
             Button {
                 id: btnaddStateGIF
                 width: mainwindow.width * 0.118
                 height: mainwindow.height * 0.083
-                text: Translator.translate("State", Dashboard.language) + " " + Translator.translate("GIF", Dashboard.language)
+                text: Translator.translate("State", Settings.language) + " " + Translator.translate("GIF", Settings.language)
                 font.pixelSize: mainwindow.width * 0.015
                 onClicked: {
                    // console.log("create State gauge ");
                     CreateStateGIFScript.createPicture(10,10,100,"speed",1,"qrc:/Resources/graphics/StateGIF.gif","qrc:/Resources/graphics/StateGIF.gif,0");
                     squaregaugemenu.visible = false;
                     selectcolor.visible =false;
-                    Dashboard.setdraggable(0);
+                    UI.draggable = 0;
                 }
             }
 
@@ -640,25 +649,25 @@ Item {
                 id: btnopencolorselect
                 width: mainwindow.width * 0.118
                 height: mainwindow.height * 0.083
-                text: Translator.translate("Colors", Dashboard.language)
+                text: Translator.translate("Colors", Settings.language)
                 font.pixelSize: mainwindow.width * 0.015
                 onClicked: {
                     selectcolor.visible =true;
                     squaregaugemenu.visible = false;
-                    Dashboard.setdraggable(0);
+                    UI.draggable = 0;
                 }
             }
             Button {
                 id: btnclear
                 width: mainwindow.width * 0.118
                 height: mainwindow.height * 0.083
-                text: Translator.translate("Clear", Dashboard.language)
+                text: Translator.translate("Clear", Settings.language)
                 font.pixelSize: mainwindow.width * 0.015
                 onClicked:  {
 
                     selectcolor.visible =false;
                     squaregaugemenu.visible = false;
-                    Dashboard.setdraggable(0);
+                    UI.draggable = 0;
                     for (var i=0; i<userDash.children.length; ++i)
                     {
                         userDash.children[i].destroy()
@@ -670,7 +679,7 @@ Item {
                 id: loadfromfile
                 width: mainwindow.width * 0.118
                 height: mainwindow.height * 0.083
-                text: Translator.translate("Import", Dashboard.language)
+                text: Translator.translate("Import", Settings.language)
                 font.pixelSize: mainwindow.width * 0.015
 
                 onClicked: {
@@ -703,12 +712,12 @@ Item {
                 id: savetofile
                 width: mainwindow.width * 0.118
                 height: mainwindow.height * 0.083
-                text: Translator.translate("Export", Dashboard.language)
+                text: Translator.translate("Export", Settings.language)
                 font.pixelSize: mainwindow.width * 0.015
 
                 onClicked: {
                     squaregaugemenu.visible = false;
-                    Dashboard.setdraggable(0);
+                    UI.draggable = 0;
                     btnaddRound.visible = false;
                     btnaddText.visible = false;
                     btnaddPicture.visible = false;
@@ -724,7 +733,7 @@ Item {
                 id: btncancelload
                 width: mainwindow.width * 0.118
                 height: mainwindow.height * 0.083
-                text: Translator.translate("Cancel", Dashboard.language)
+                text: Translator.translate("Cancel", Settings.language)
                 font.pixelSize: mainwindow.width * 0.015
                 visible: false
                 onClicked: {
@@ -733,7 +742,7 @@ Item {
                     squaregaugemenu.visible = false;
                     load.visible = false;
                     selectcolor.visible =false;
-                    Dashboard.setdraggable(0);
+                    UI.draggable = 0;
 
                 }
             }
@@ -741,7 +750,7 @@ Item {
                 id: load
                 width: mainwindow.width * 0.118
                 height: mainwindow.height * 0.083
-                text: Translator.translate("Load", Dashboard.language)
+                text: Translator.translate("Load", Settings.language)
                 font.pixelSize: mainwindow.width * 0.015
                 visible: false
                 onClicked: {
@@ -751,7 +760,7 @@ Item {
                     squaregaugemenu.visible = false;
                     load.visible = false;
                     selectcolor.visible =false;
-                    Dashboard.setdraggable(0);
+                    UI.draggable = 0;
                     Connect.readdashsetup3();
                 }
             }
@@ -759,13 +768,13 @@ Item {
                 id: btnbackround
                 width: mainwindow.width * 0.118
                 height: mainwindow.height * 0.083
-                text: Translator.translate("Background", Dashboard.language)
+                text: Translator.translate("Background", Settings.language)
                 font.pixelSize: mainwindow.width * 0.015
                 onClicked: {
                     rpmbackroundselector.visible =true;
                     squaregaugemenu.visible = false;
                     btnbackround.visible =false;
-                    Dashboard.setdraggable(0);
+                    UI.draggable = 0;
                     Connect.readavailablebackrounds();
                 }
             }
@@ -774,13 +783,13 @@ Item {
                 id: btnsave
                 width: mainwindow.width * 0.118
                 height: mainwindow.height * 0.083
-                text: Translator.translate("Save", Dashboard.language)
+                text: Translator.translate("Save", Settings.language)
                 font.pixelSize: mainwindow.width * 0.015
                 highlighted: true
                 onClicked: {
                     squaregaugemenu.visible = false;
                     selectcolor.visible =false;
-                    Dashboard.setdraggable(0);
+                    UI.draggable = 0;
                     savedash();
                 }
             }
@@ -789,13 +798,13 @@ Item {
                 id: btncancel
                 width: mainwindow.width * 0.118
                 height: mainwindow.height * 0.083
-                text: Translator.translate("Close", Dashboard.language)
+                text: Translator.translate("Close", Settings.language)
                 font.pixelSize: mainwindow.width * 0.015
                 highlighted: true
                 onClicked:  {
                     squaregaugemenu.visible = false;
                     selectcolor.visible =false;
-                    Dashboard.setdraggable(0);
+                    UI.draggable = 0;
                 }
             }
         }
@@ -1257,15 +1266,15 @@ Item {
             spacing:5
             // FrameColor
             Text {
-                text: Translator.translate("Frame color", Dashboard.language)
+                text: Translator.translate("Frame color", Settings.language)
                 font.pixelSize: mainwindow.width * 0.018//15
             }
             Text {
-                text: Translator.translate("Titlebar color", Dashboard.language)
+                text: Translator.translate("Titlebar color", Settings.language)
                 font.pixelSize: mainwindow.width * 0.018//15
             }
             Text {
-                text: Translator.translate("Background color", Dashboard.language)
+                text: Translator.translate("Background color", Settings.language)
                 font.pixelSize: mainwindow.width * 0.018//15
             }
 
@@ -1375,15 +1384,15 @@ Item {
                 }
             }
             Text {
-                text: Translator.translate("Bargauge color", Dashboard.language)
+                text: Translator.translate("Bargauge color", Settings.language)
                 font.pixelSize: mainwindow.width * 0.018//15
             }
             Text {
-                text: Translator.translate("Title text color", Dashboard.language)
+                text: Translator.translate("Title text color", Settings.language)
                 font.pixelSize: mainwindow.width * 0.018//15
             }
             Text {
-                text: Translator.translate("Main text color", Dashboard.language)
+                text: Translator.translate("Main text color", Settings.language)
                 font.pixelSize: mainwindow.width * 0.018//15
             }
             // BargaugeColor
@@ -1505,7 +1514,7 @@ Item {
                 id: btnclosecolorselect
                 width: mainwindow.width * 0.1875
                 height: mainwindow.height * 0.083
-                text: Translator.translate("Close menu", Dashboard.language)
+                text: Translator.translate("Close menu", Settings.language)
                 font.pixelSize: mainwindow.width * 0.018//15
                 onClicked: {selectcolor.visible = false;}
 

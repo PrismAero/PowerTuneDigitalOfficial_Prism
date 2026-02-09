@@ -40,7 +40,7 @@ Rectangle {
     }
 
     function adremove() {
-        Dashboard.Visibledashes = numberofdashes.currentIndex + 1
+        UI.Visibledashes = numberofdashes.currentIndex + 1
 
         while (dashView.count > numberofdashes.currentIndex + 2) {
             dashView.takeItem(dashView.count - 2)
@@ -68,14 +68,14 @@ Rectangle {
 
             // * Active Dashboards Section
             SettingsSection {
-                title: Translator.translate("ActiveDashboards", Dashboard.language)
+                title: Translator.translate("ActiveDashboards", Settings.language)
                 Layout.fillWidth: true
 
                 RowLayout {
                     spacing: 20
 
                     Text {
-                        text: Translator.translate("ActiveDashboards", Dashboard.language)
+                        text: Translator.translate("ActiveDashboards", Settings.language)
                         font.pixelSize: 20
                         font.family: "Lato"
                         color: "#FFFFFF"

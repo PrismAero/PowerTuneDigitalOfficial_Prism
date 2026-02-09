@@ -58,7 +58,7 @@ Item {
 
                 onClicked: {
 
-                    if (refreshTimer.running == false) refreshTimer.running = true, previousrpm = Dashboard.revs, finalkw =0, finalnm =0;
+                    if (refreshTimer.running == false) refreshTimer.running = true, previousrpm = Engine.rpm, finalkw =0, finalnm =0;
 
 
 
@@ -168,19 +168,19 @@ Item {
 
 
 
-            if (previousrpm <= Dashboard.revs)
+            if (previousrpm <= Engine.rpm)
 
             {
 
             speed ++
 
-            previousrpm = Dashboard.revs
+            previousrpm = Engine.rpm
 
 
 
-            kw = ((((1300)*(Dashboard.speed / 3.6) * ((Dashboard.speed / 3.6)))) /1000)
+            kw = ((((1300)*(Vehicle.speed / 3.6) * ((Vehicle.speed / 3.6)))) /1000)
 
-            nm = ((9.5488 * kw *1000) / Dashboard.revs)
+            nm = ((9.5488 * kw *1000) / Engine.rpm)
 
 
 
@@ -196,13 +196,13 @@ Item {
 
             finalnm
 
-            series1.append(Dashboard.revs, kw);
+            series1.append(Engine.rpm, kw);
 
-            series2.append(Dashboard.revs, nm);
+            series2.append(Engine.rpm, nm);
 
             }
 
-            if (previousrpm > Dashboard.revs) {refreshTimer.running = false}
+            if (previousrpm > Engine.rpm) {refreshTimer.running = false}
 
 
 

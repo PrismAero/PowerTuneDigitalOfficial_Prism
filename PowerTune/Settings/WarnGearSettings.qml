@@ -43,7 +43,7 @@ Rectangle {
 
             // * Warning Thresholds Section
             SettingsSection {
-                title: Translator.translate("Warning Thresholds", Dashboard.language)
+                title: Translator.translate("Warning Thresholds", Settings.language)
                 Layout.fillWidth: true
 
                 GridLayout {
@@ -53,35 +53,35 @@ Rectangle {
 
                     // Labels row
                     Text {
-                        text: Translator.translate("WaterTemp", Dashboard.language)
+                        text: Translator.translate("WaterTemp", Settings.language)
                         font.pixelSize: 18
                         font.weight: Font.DemiBold
                         font.family: "Lato"
                         color: "#B0B0B0"
                     }
                     Text {
-                        text: Translator.translate("Boost", Dashboard.language)
+                        text: Translator.translate("Boost", Settings.language)
                         font.pixelSize: 18
                         font.weight: Font.DemiBold
                         font.family: "Lato"
                         color: "#B0B0B0"
                     }
                     Text {
-                        text: Translator.translate("Revs", Dashboard.language)
+                        text: Translator.translate("Revs", Settings.language)
                         font.pixelSize: 18
                         font.weight: Font.DemiBold
                         font.family: "Lato"
                         color: "#B0B0B0"
                     }
                     Text {
-                        text: Translator.translate("Knock", Dashboard.language)
+                        text: Translator.translate("Knock", Settings.language)
                         font.pixelSize: 18
                         font.weight: Font.DemiBold
                         font.family: "Lato"
                         color: "#B0B0B0"
                     }
                     Text {
-                        text: Translator.translate("Lamdamultiply", Dashboard.language)
+                        text: Translator.translate("Lamdamultiply", Settings.language)
                         font.pixelSize: 18
                         font.weight: Font.DemiBold
                         font.family: "Lato"
@@ -129,14 +129,14 @@ Rectangle {
 
             // * Gear Calculation Section
             SettingsSection {
-                title: Translator.translate("GearCalculation", Dashboard.language)
+                title: Translator.translate("GearCalculation", Settings.language)
                 Layout.fillWidth: true
 
                 StyledSwitch {
                     id: gearcalcselect
                     label: gearcalcselect.checked
-                        ? Translator.translate("GearCalculation", Dashboard.language) + " " + Translator.translate("ON", Dashboard.language)
-                        : Translator.translate("GearCalculation", Dashboard.language) + " " + Translator.translate("OFF", Dashboard.language)
+                        ? Translator.translate("GearCalculation", Settings.language) + " " + Translator.translate("ON", Settings.language)
+                        : Translator.translate("GearCalculation", Settings.language) + " " + Translator.translate("OFF", Settings.language)
 
                     Component.onCompleted: {
                         gercalactive = gearcalcselect.checked ? 1 : 0
@@ -156,7 +156,7 @@ Rectangle {
 
                     // Labels row
                     Text {
-                        text: Translator.translate("Gear", Dashboard.language) + " 1"
+                        text: Translator.translate("Gear", Settings.language) + " 1"
                         font.pixelSize: 18
                         font.weight: Font.DemiBold
                         font.family: "Lato"
@@ -165,7 +165,7 @@ Rectangle {
                         horizontalAlignment: Text.AlignHCenter
                     }
                     Text {
-                        text: Translator.translate("Gear", Dashboard.language) + " 2"
+                        text: Translator.translate("Gear", Settings.language) + " 2"
                         font.pixelSize: 18
                         font.weight: Font.DemiBold
                         font.family: "Lato"
@@ -174,7 +174,7 @@ Rectangle {
                         horizontalAlignment: Text.AlignHCenter
                     }
                     Text {
-                        text: Translator.translate("Gear", Dashboard.language) + " 3"
+                        text: Translator.translate("Gear", Settings.language) + " 3"
                         font.pixelSize: 18
                         font.weight: Font.DemiBold
                         font.family: "Lato"
@@ -183,7 +183,7 @@ Rectangle {
                         horizontalAlignment: Text.AlignHCenter
                     }
                     Text {
-                        text: Translator.translate("Gear", Dashboard.language) + " 4"
+                        text: Translator.translate("Gear", Settings.language) + " 4"
                         font.pixelSize: 18
                         font.weight: Font.DemiBold
                         font.family: "Lato"
@@ -192,7 +192,7 @@ Rectangle {
                         horizontalAlignment: Text.AlignHCenter
                     }
                     Text {
-                        text: Translator.translate("Gear", Dashboard.language) + " 5"
+                        text: Translator.translate("Gear", Settings.language) + " 5"
                         font.pixelSize: 18
                         font.weight: Font.DemiBold
                         font.family: "Lato"
@@ -201,7 +201,7 @@ Rectangle {
                         horizontalAlignment: Text.AlignHCenter
                     }
                     Text {
-                        text: Translator.translate("Gear", Dashboard.language) + " 6"
+                        text: Translator.translate("Gear", Settings.language) + " 6"
                         font.pixelSize: 18
                         font.weight: Font.DemiBold
                         font.family: "Lato"

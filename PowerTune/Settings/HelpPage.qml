@@ -13,7 +13,7 @@ Rectangle {
                 Text {
                     id: supportText
                     bottomPadding: helpBackground.height * 0.5
-                    text: Translator.translate("Support", Dashboard.language)
+                    text: Translator.translate("Support", Settings.language)
                     font.bold: true
                     font.pixelSize: helpBackground.width * 0.02
                     horizontalAlignment: Text.AlignHCenter

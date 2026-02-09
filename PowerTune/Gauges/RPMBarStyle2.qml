@@ -10,7 +10,7 @@ Rectangle {
   visible: true
   color:"transparent"
   anchors.fill:parent
-  property  var unit : Dashboard.speedunits;
+  property  var unit : Settings.speedunits;
 
   property int pathStartX: 47
   property int pathLineX: 137
@@ -73,7 +73,7 @@ Rectangle {
   }
   Text {
       id: rpmNumbers
-      text: (Dashboard.rpm)
+      text: (Engine.rpm)
       font.pixelSize: 100
   font.italic: true
       font.bold: true
@@ -112,7 +112,7 @@ Rectangle {
       }
       Text {
           id: speedNumber
-          text: (Dashboard.speed).toFixed(0);
+          text: (Vehicle.speed).toFixed(0);
           font.pixelSize: 100
           font.italic: true
           font.bold: true
@@ -154,19 +154,19 @@ Rectangle {
       Item{
             id: displayWindow1
             height: parent.height
-            width: (groove1.width*0.85*(Dashboard.rpm)/Dashboard.maxRPM)+rpmFillStart //+70 is the pixel where the RPM bar starts and from there is 678 pixels wide
+            width: (groove1.width*0.85*(Engine.rpm)/Settings.maxRPM)+rpmFillStart //+70 is the pixel where the RPM bar starts and from there is 678 pixels wide
             clip: true
 
               anchors.bottom: parent.bottom
               anchors.left: parent.left
                anchors.rightMargin:{switch(true)
               {
-                 case Dashboard.rpm>=0 && Dashboard.rpm < 500:return 10;
-                 case Dashboard.rpm>=500 && Dashboard.rpm < 700:return 9.7;
-                 case Dashboard.rpm>=700 && Dashboard.rpm < 900:return 8.4;
-                 case Dashboard.rpm>=900 && Dashboard.rpm < 1000:return 8;
-                 case Dashboard.rpm>=1100 && Dashboard.rpm <= 1200:return 7.15;
-                 case Dashboard.rpm>=1200 && Dashboard.rpm <= 1300:return 6;
+                 case Engine.rpm>=0 && Engine.rpm < 500:return 10;
+                 case Engine.rpm>=500 && Engine.rpm < 700:return 9.7;
+                 case Engine.rpm>=700 && Engine.rpm < 900:return 8.4;
+                 case Engine.rpm>=900 && Engine.rpm < 1000:return 8;
+                 case Engine.rpm>=1100 && Engine.rpm <= 1200:return 7.15;
+                 case Engine.rpm>=1200 && Engine.rpm <= 1300:return 6;
 
                  }
                }
@@ -204,7 +204,7 @@ Rectangle {
              console.log(pathStartX + " " + pathStartY + " 800 width")
          }
        }
-      progress: Dashboard.rpm / Dashboard.maxRPM
+      progress: Engine.rpm / Settings.maxRPM
     }
     }
 

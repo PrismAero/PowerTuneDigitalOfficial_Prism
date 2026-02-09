@@ -31,8 +31,11 @@ Rectangle {
     }
 
     Connections {
-        target: Dashboard
+        target: Connection
         function onEcuChanged() { setregtabtitle() }
+    }
+    Connections {
+        target: Settings
         function onLanguageChanged() { setregtabtitle() }
     }
 
@@ -78,7 +81,7 @@ Rectangle {
                             text: {
                                 // * Translate tab titles
                                 if (index === 5) return regtabTitle
-                                return Translator.translate(model.title, Dashboard.language)
+                                return Translator.translate(model.title, Settings.language)
                             }
                             width: 145
                             height: 56
@@ -147,13 +150,13 @@ Rectangle {
     }
 
     // * Dynamic tab title for ECU-specific tab
-    property string regtabTitle: Translator.translate("Analog", Dashboard.language)
+    property string regtabTitle: Translator.translate("Analog", Settings.language)
 
     function setregtabtitle() {
-        switch (Dashboard.ecu) {
+        switch (Connection.ecu) {
             case "0":
             case "1":
-                regtabTitle = Translator.translate("Analog", Dashboard.language)
+                regtabTitle = Translator.translate("Analog", Settings.language)
                 break
             case "2":
                 regtabTitle = "Consult"
@@ -165,7 +168,7 @@ Rectangle {
                 regtabTitle = "Generic CAN"
                 break
             default:
-                regtabTitle = Translator.translate("Analog", Dashboard.language)
+                regtabTitle = Translator.translate("Analog", Settings.language)
         }
     }
 

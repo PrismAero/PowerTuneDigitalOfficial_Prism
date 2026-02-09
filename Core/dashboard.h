@@ -4,6 +4,11 @@
 #include <QObject>
 #include <QStringList>
 
+// * Forward declarations for Phase 4/5 modularization
+class UIState;
+class SteinhartCalculator;
+class SignalSmoother;
+
 class DashBoard : public QObject
 {
     Q_OBJECT
@@ -678,6 +683,17 @@ class DashBoard : public QObject
 
 public:
     DashBoard(QObject *parent = nullptr);
+
+    /**
+     * @brief Set UIState model for facade forwarding (Phase 4)
+     * @param uiState Pointer to UIState model instance
+     *
+     * This enables backward compatibility by forwarding UI-related properties
+     * (draggable, Brightness, Visibledashes, screen, rpmstyle1-3) to the
+     * dedicated UIState model. QML code using Dashboard.draggable will
+     * continue to work while new code can use UI.draggable directly.
+     */
+    void setUIState(UIState *uiState);
 
     // Steinhart Hart
     long R01 = 2000;
@@ -3246,6 +3262,18 @@ private:
     qreal m_Knock_cyl2;
     qreal m_Knock_cyl3;
     qreal m_Knock_cyl4;
+
+    // * Phase 4: UIState model pointer for facade forwarding
+    UIState *m_uiState = nullptr;
+
+    // * Phase 5: Business logic service classes
+    SteinhartCalculator *m_steinhartCalc = nullptr;
+    SignalSmoother *m_rpmSmoother = nullptr;
+    SignalSmoother *m_speedSmoother = nullptr;
+
+    // * Phase 5: Analog input calibration values (moved from global variables)
+    qreal m_AN_calibration[22] = {0};   // AN00 through AN105
+    qreal m_EXAN_calibration[16] = {0}; // EXAN00 through EXAN75
 };
 
 #endif  // DASHBOARD_H

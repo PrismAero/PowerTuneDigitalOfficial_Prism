@@ -40,7 +40,7 @@ Rectangle {
             font.bold: true
             font.family: "Eurostile"
         }
-        Text { text: Dashboard.accelx
+        Text { text: Vehicle.accelx
             font.pixelSize: sensorwindow.width /20
             font.bold: true
             font.family: "Eurostile"
@@ -49,7 +49,7 @@ Rectangle {
             font.pixelSize: sensorwindow.width /20
             font.bold: true
             font.family: "Eurostile"}
-        Text { text: Dashboard.accely
+        Text { text: Vehicle.accely
             font.pixelSize: sensorwindow.width /20
             font.bold: true
             font.family: "Eurostile"}
@@ -57,7 +57,7 @@ Rectangle {
             font.pixelSize: sensorwindow.width /20
             font.bold: true
             font.family: "Eurostile"}
-        Text { text: Dashboard.accelz
+        Text { text: Vehicle.accelz
             font.pixelSize: sensorwindow.width /20
             font.bold: true
             font.family: "Eurostile"}
@@ -65,7 +65,7 @@ Rectangle {
             font.pixelSize: sensorwindow.width /20
             font.bold: true
             font.family: "Eurostile"}
-        Text { text: Dashboard.ambitemp
+        Text { text: Vehicle.ambitemp
             font.pixelSize: sensorwindow.width /20
             font.bold: true
             font.family: "Eurostile"}
@@ -73,7 +73,7 @@ Rectangle {
             font.pixelSize: sensorwindow.width /20
             font.bold: true
             font.family: "Eurostile"}
-        Text { text: Dashboard.ambipress
+        Text { text: Vehicle.ambipress
             font.pixelSize: sensorwindow.width /20
             font.bold: true
             font.family: "Eurostile"}
@@ -81,7 +81,7 @@ Rectangle {
             font.pixelSize: sensorwindow.width /20
             font.bold: true
             font.family: "Eurostile"}
-        Text { text: Dashboard.compass
+        Text { text: Vehicle.compass
             font.pixelSize: sensorwindow.width /20
             font.bold: true
             font.family: "Eurostile"}
@@ -90,7 +90,7 @@ Rectangle {
             font.bold: true
             font.family: "Eurostile"
         }
-        Text { text: Dashboard.gyrox
+        Text { text: Vehicle.gyrox
             font.pixelSize: sensorwindow.width /20
             font.bold: true
             font.family: "Eurostile"
@@ -100,7 +100,7 @@ Rectangle {
             font.bold: true
             font.family: "Eurostile"
         }
-        Text { text: Dashboard.gyroy
+        Text { text: Vehicle.gyroy
             font.pixelSize: sensorwindow.width /20
             font.bold: true
             font.family: "Eurostile"
@@ -110,7 +110,7 @@ Rectangle {
             font.bold: true
             font.family: "Eurostile"
         }
-        Text { text: Dashboard.gyroz
+        Text { text: Vehicle.gyroz
             font.pixelSize: sensorwindow.width /20
             font.bold: true
             font.family: "Eurostile"

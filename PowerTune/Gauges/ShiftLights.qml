@@ -8,25 +8,28 @@ Item {
     height:parent.height * 0.75
     //Setting Position to align with the RPM 1 Bar
     x: parent.width * 0.33
-    property  int rpmwarn1: Dashboard.rpmStage1
-    property  int rpmwarn2: Dashboard.rpmStage2
-    property  int rpmwarn3: Dashboard.rpmStage3
-    property  int rpmwarn4: Dashboard.rpmStage4
+    property  int rpmwarn1: Settings.rpmStage1
+    property  int rpmwarn2: Settings.rpmStage2
+    property  int rpmwarn3: Settings.rpmStage3
+    property  int rpmwarn4: Settings.rpmStage4
     Connections{
-        target: Dashboard
-        function onRpmStage1Changed() { rpmwarn1 = Dashboard.rpmStage1 }
-        function onRpmStage2Changed() { rpmwarn2 = Dashboard.rpmStage2 }
-        function onRpmStage3Changed() { rpmwarn3 = Dashboard.rpmStage3 }
-        function onRpmStage4Changed() { rpmwarn4 = Dashboard.rpmStage4 }
+        target: Settings
+        function onRpmStage1Changed() { rpmwarn1 = Settings.rpmStage1 }
+        function onRpmStage2Changed() { rpmwarn2 = Settings.rpmStage2 }
+        function onRpmStage3Changed() { rpmwarn3 = Settings.rpmStage3 }
+        function onRpmStage4Changed() { rpmwarn4 = Settings.rpmStage4 }
+    }
+    Connections{
+        target: Engine
         function onRpmChanged() {
-            if (Dashboard.rpm > rpmwarn1) {led1.source = "qrc:/Resources/graphics/ledgreen.png",led8.source = "qrc:/Resources/graphics/ledgreen.png"};
-            if (Dashboard.rpm > rpmwarn2) {led2.source = "qrc:/Resources/graphics/ledgreen.png",led7.source = "qrc:/Resources/graphics/ledgreen.png"};
-            if (Dashboard.rpm > rpmwarn3) {led3.source = "qrc:/Resources/graphics/ledyellow.png",led6.source = "qrc:/Resources/graphics/ledyellow.png"};
-            if (Dashboard.rpm > rpmwarn4) {led4.source = "qrc:/Resources/graphics/ledred.png",led5.source = "qrc:/Resources/graphics/ledred.png"};
-            if (Dashboard.rpm < rpmwarn1) {led1.source = "qrc:/Resources/graphics/ledoff.png",led8.source = "qrc:/Resources/graphics/ledoff.png"};
-            if (Dashboard.rpm < rpmwarn2) {led2.source = "qrc:/Resources/graphics/ledoff.png",led7.source = "qrc:/Resources/graphics/ledoff.png"};
-            if (Dashboard.rpm < rpmwarn3) {led3.source = "qrc:/Resources/graphics/ledoff.png",led6.source = "qrc:/Resources/graphics/ledoff.png"};
-            if (Dashboard.rpm < rpmwarn4) {led4.source = "qrc:/Resources/graphics/ledoff.png",led5.source = "qrc:/Resources/graphics/ledoff.png"};
+            if (Engine.rpm > rpmwarn1) {led1.source = "qrc:/Resources/graphics/ledgreen.png",led8.source = "qrc:/Resources/graphics/ledgreen.png"};
+            if (Engine.rpm > rpmwarn2) {led2.source = "qrc:/Resources/graphics/ledgreen.png",led7.source = "qrc:/Resources/graphics/ledgreen.png"};
+            if (Engine.rpm > rpmwarn3) {led3.source = "qrc:/Resources/graphics/ledyellow.png",led6.source = "qrc:/Resources/graphics/ledyellow.png"};
+            if (Engine.rpm > rpmwarn4) {led4.source = "qrc:/Resources/graphics/ledred.png",led5.source = "qrc:/Resources/graphics/ledred.png"};
+            if (Engine.rpm < rpmwarn1) {led1.source = "qrc:/Resources/graphics/ledoff.png",led8.source = "qrc:/Resources/graphics/ledoff.png"};
+            if (Engine.rpm < rpmwarn2) {led2.source = "qrc:/Resources/graphics/ledoff.png",led7.source = "qrc:/Resources/graphics/ledoff.png"};
+            if (Engine.rpm < rpmwarn3) {led3.source = "qrc:/Resources/graphics/ledoff.png",led6.source = "qrc:/Resources/graphics/ledoff.png"};
+            if (Engine.rpm < rpmwarn4) {led4.source = "qrc:/Resources/graphics/ledoff.png",led5.source = "qrc:/Resources/graphics/ledoff.png"};
         }
 
     }

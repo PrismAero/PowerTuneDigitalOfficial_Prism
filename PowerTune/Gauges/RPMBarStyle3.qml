@@ -21,7 +21,7 @@ Item {
         Item{
               id: displayWindow1
               height: parent.height
-              width: (userDash.width*(Dashboard.rpm)/Dashboard.maxRPM)  //(parent.width*(Dashboard.rpm)/Dashboard.maxRPM)
+              width: (userDash.width*(Engine.rpm)/Settings.maxRPM)  //(parent.width*(Engine.rpm)/Settings.maxRPM)
               clip: true
 
                 anchors.bottom: parent.bottom
@@ -48,7 +48,7 @@ Item {
            startX: 0; startY: parent.width /4.2
            PathLine { x: parent.width; y: parent.height }
          }
-        progress: Dashboard.rpm / Dashboard.maxRPM
+        progress: Engine.rpm / Settings.maxRPM
       }
 }
 //
@@ -62,7 +62,7 @@ Item {
             font.pixelSize:  70
             font.bold: true
             color: "white"
-            text: Dashboard.rpm
+            text: Engine.rpm
             horizontalAlignment: Text.AlignLeft
             font.letterSpacing: 3
             font.wordSpacing: 0
