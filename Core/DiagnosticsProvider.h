@@ -219,22 +219,44 @@ public:
     Q_INVOKABLE QVariantList getLiveSensorData() const;
 
     /**
-     * @brief Get analog input diagnostics (raw ADC values).
-     * @return List of maps: {channel, rawVoltage, calibratedValue, presetName, unit, configured}
+     * @brief Returns diagnostic information for ECU-reported analog input channels.
+     *
+     * Provides raw ADC voltage and calibration data for Analog0 through Analog10
+     * (0-indexed, 11 channels total) received via daemon UDP.
+     *
+     * @return QVariantList containing diagnostic entries for each analog input channel.
      */
     Q_INVOKABLE QVariantList getAnalogInputDiagnostics() const;
 
     /**
-     * @brief Get digital input states.
-     * @return List of maps: {channel, state, configured, label}
+     * @brief Returns diagnostic information for daemon-reported digital inputs.
+     *
+     * Provides state and configuration data for DigitalInput1 through
+     * DigitalInput7 (7 channels total) received via daemon UDP.
+     *
+     * @return QVariantList containing diagnostic entries for each digital input channel.
      */
     Q_INVOKABLE QVariantList getDigitalInputDiagnostics() const;
 
     /**
-     * @brief Get expander board diagnostics.
-     * @return List of maps: {channel, rawVoltage, calibratedValue, presetName, unit, configured}
+     * @brief Returns diagnostic information for extender board analog inputs.
+     *
+     * Provides raw ADC voltage and calibration data for EXAnalogInput0 through
+     * EXAnalogInput7 (0-indexed, 8 channels total) from the extender board CAN interface.
+     *
+     * @return QVariantList containing diagnostic entries for each extender analog input channel.
      */
     Q_INVOKABLE QVariantList getExpanderBoardDiagnostics() const;
+
+    /**
+     * @brief Returns diagnostic information for extender board digital inputs.
+     *
+     * Provides state and configuration data for EXDigitalInput1 through
+     * EXDigitalInput8 from the extender board CAN interface.
+     *
+     * @return QVariantList containing diagnostic entries for each extender digital input channel.
+     */
+    Q_INVOKABLE QVariantList getExtenderDigitalDiagnostics() const;
 
     /**
      * @brief Add a log message to the buffer.

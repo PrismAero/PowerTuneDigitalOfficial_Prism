@@ -5,11 +5,11 @@
  * @brief Runtime registry tracking which sensors are actually available.
  *
  * Sensors can be registered from multiple sources:
- * - CAN bus data (auto-detected when UDPReceiver receives data)
- * - Configured analog inputs
- * - Configured digital inputs
- * - Configured expander board channels
+ * - ECU data via daemon UDP (engine data, analog channels, digital inputs)
+ * - Extender board analog inputs via CAN
+ * - Extender board digital inputs via CAN
  * - Built-in hardware (GPS, SenseHat)
+ * - Computed values derived from other sensors
  *
  * The registry provides a filtered list to the dashboard creator
  * so only available sensors are shown.
@@ -48,13 +48,15 @@ public:
      * @brief Identifies where a sensor's data originates.
      */
     enum class SensorSource {
-        CAN,            ///< CAN bus / daemon UDP data
-        AnalogInput,    ///< Analog input channel (AN1-AN11)
-        DigitalInput,   ///< Digital input channel (DI1-DI4)
-        ExpanderBoard,  ///< Expander board analog/digital (EX_AN1-EX_AN8)
-        GPS,            ///< GPS hardware
-        SenseHat,       ///< SenseHat accelerometer / gyroscope
-        Computed        ///< Values derived from other sensors
+        DaemonUDP,          ///< ECU data via daemon UDP (port 45454) - includes engine data,
+                            ///< ECU-reported analog channels (Analog0-10), and
+                            ///< ECU-reported digital inputs (DigitalInput1-7)
+        ExtenderAnalog,     ///< Extender board analog inputs via CAN (EXAnalogInput0-7)
+        ExtenderDigital,    ///< Extender board digital inputs via CAN (EXDigitalInput1-8)
+        GPS,                ///< GPS hardware (serial NMEA)
+        SenseHat,           ///< SenseHat sensors (accelerometer, gyroscope, compass,
+                            ///< ambient temperature, ambient pressure)
+        Computed            ///< Values derived from other sensors
     };
     Q_ENUM(SensorSource)
 
@@ -62,7 +64,7 @@ public:
 
     /**
      * @brief Register a sensor as available.
-     * @param key Unique property key (e.g., "rpm", "boost", "an1")
+     * @param key Unique property key (e.g., "rpm", "boost", "Analog0")
      * @param displayName Human-readable name (e.g., "RPM", "Boost Pressure")
      * @param category Category for grouping (e.g., "Engine", "Analog Inputs")
      * @param unit Unit string (e.g., "rpm", "psi", "V")
@@ -122,21 +124,48 @@ public:
     Q_INVOKABLE QString getUnit(const QString &key) const;
 
     /**
-     * @brief Register analog input channels based on current configuration.
+     * @brief Register ECU-reported analog voltage channels via daemon UDP.
+     *
+     * Registers Analog0 through Analog10 and their corresponding AnalogCalc0
+     * through AnalogCalc10 calibrated channels. These are ECU-reported analog
+     * voltage channels received via daemon UDP (port 45454), not physical
+     * Raspberry Pi analog inputs.
+     *
      * Call this when analog input settings change.
      */
-    Q_INVOKABLE void refreshAnalogInputs();
+    Q_INVOKABLE void refreshEcuAnalogChannels();
 
     /**
-     * @brief Register expander board channels based on current configuration.
-     * Call this when expander board settings change.
+     * @brief Register extender board analog input channels via CAN.
+     *
+     * Registers EXAnalogInput0 through EXAnalogInput7 and their corresponding
+     * EXAnalogCalc0 through EXAnalogCalc7 calibrated channels. These are
+     * analog inputs from the extender board received via CAN bus.
+     *
+     * Call this when extender board settings change.
      */
-    Q_INVOKABLE void refreshExpanderBoard();
+    Q_INVOKABLE void refreshExtenderAnalogInputs();
 
     /**
-     * @brief Register digital input channels based on current configuration.
+     * @brief Register ECU-reported digital input channels via daemon UDP.
+     *
+     * Registers DigitalInput1 through DigitalInput7. These are ECU-reported
+     * digital input states received via daemon UDP (port 45454), not physical
+     * Raspberry Pi GPIO inputs.
+     *
+     * Call this when digital input settings change.
      */
-    Q_INVOKABLE void refreshDigitalInputs();
+    Q_INVOKABLE void refreshEcuDigitalInputs();
+
+    /**
+     * @brief Register extender board digital input channels via CAN.
+     *
+     * Registers EXDigitalInput1 through EXDigitalInput8. These are digital
+     * inputs from the extender board received via CAN bus.
+     *
+     * Call this when extender board settings change.
+     */
+    Q_INVOKABLE void refreshExtenderDigitalInputs();
 
     // -- Property accessors --
 
@@ -186,12 +215,12 @@ private:
         QString category;
         QString unit;
         SensorSource source;
-        bool active = true;         ///< For CAN sensors: true if data received recently
+        bool active = true;         ///< For DaemonUDP sensors: true if data received recently
         qint64 lastActiveTimestamp = 0; ///< msecsSinceEpoch of last markCanSensorActive call
     };
 
     QMap<QString, SensorEntry> m_sensors;
-    QTimer m_canTimeoutTimer; ///< Periodically check for stale CAN sensors
+    QTimer m_canTimeoutTimer; ///< Periodically check for stale DaemonUDP sensors
 
     /**
      * @brief Register built-in sensors that are always available (GPS, SenseHat).
@@ -212,7 +241,7 @@ private:
     QVariantMap entryToVariantMap(const SensorEntry &entry) const;
 
     /**
-     * @brief Timer callback to mark CAN sensors as inactive if no data received in 10 seconds.
+     * @brief Timer callback to mark DaemonUDP sensors as inactive if no data received in 10 seconds.
      */
     void checkCanTimeouts();
 };

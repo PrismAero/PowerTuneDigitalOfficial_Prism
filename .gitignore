@@ -99,3 +99,16 @@ __pycache__/
 .cursor/plans/split_dashboard_god_object_b63a27ab.plan.md
 .memory/memory.db-shm
 .memory/memory.db-wal
+
+.generated_files/
+dist/
+nbproject/
+Makefile*
+Package-*
+private/
+_build/
+!cmake/**/user.cmake
+cmake/**/.generated/*
+cmake/**/CMake*
+out/
+reference_sourcecode/

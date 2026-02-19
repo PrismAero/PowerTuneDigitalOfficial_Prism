@@ -10,18 +10,17 @@
 #include <QDateTime>
 #include <QDebug>
 #include <QMetaEnum>
-#include <algorithm>
 
-/// CAN sensor timeout threshold in milliseconds (10 seconds)
+/// DaemonUDP sensor timeout threshold in milliseconds (10 seconds)
 static constexpr qint64 kCanTimeoutMs = 10000;
 
-/// CAN timeout check interval in milliseconds (5 seconds)
+/// DaemonUDP timeout check interval in milliseconds (5 seconds)
 static constexpr int kCanCheckIntervalMs = 5000;
 
 /**
- * @brief Construct a SensorRegistry and populate it with built-in and common CAN sensors.
+ * @brief Construct a SensorRegistry and populate it with built-in and common DaemonUDP sensors.
  *
- * Sets up the CAN timeout timer to periodically check for stale CAN sensors.
+ * Sets up the DaemonUDP timeout timer to periodically check for stale sensors.
  *
  * @param parent QObject parent
  */
@@ -31,7 +30,7 @@ SensorRegistry::SensorRegistry(QObject *parent)
     registerBuiltinSensors();
     registerCommonCanSensors();
 
-    // Set up the CAN timeout timer to mark stale CAN sensors as inactive
+    // Set up the DaemonUDP timeout timer to mark stale sensors as inactive
     m_canTimeoutTimer.setInterval(kCanCheckIntervalMs);
     connect(&m_canTimeoutTimer, &QTimer::timeout, this, &SensorRegistry::checkCanTimeouts);
     m_canTimeoutTimer.start();
@@ -42,7 +41,7 @@ SensorRegistry::SensorRegistry(QObject *parent)
  *
  * If a sensor with the same key already exists, it is updated in place.
  *
- * @param key Unique property key (e.g., "rpm", "boost", "an1")
+ * @param key Unique property key (e.g., "rpm", "boost", "Analog0")
  * @param displayName Human-readable name (e.g., "RPM", "Boost Pressure")
  * @param category Category for grouping (e.g., "Engine", "Analog Inputs")
  * @param unit Unit string (e.g., "rpm", "psi", "V")
@@ -60,7 +59,7 @@ void SensorRegistry::registerSensor(const QString &key, const QString &displayNa
     entry.category = category;
     entry.unit = unit;
     entry.source = source;
-    entry.active = (source != SensorSource::CAN); // CAN sensors start inactive
+    entry.active = (source != SensorSource::DaemonUDP); // DaemonUDP sensors start inactive
     entry.lastActiveTimestamp = 0;
 
     m_sensors.insert(key, entry);
@@ -172,17 +171,23 @@ QString SensorRegistry::getUnit(const QString &key) const
 }
 
 /**
- * @brief Register analog input channels AN1 through AN11.
+ * @brief Register ECU-reported analog voltage channels Analog0 through Analog10.
  *
- * Removes any previously registered analog input sensors and re-registers
- * them based on current configuration. Call this when analog input settings change.
+ * Removes any previously registered DaemonUDP analog input sensors and re-registers
+ * them based on current configuration. Also registers AnalogCalc0 through AnalogCalc10
+ * calibrated/calculated analog channels.
+ *
+ * These are ECU-reported analog voltage channels received via daemon UDP (port 45454),
+ * not physical Raspberry Pi analog inputs.
+ *
+ * Call this when analog input settings change.
  */
-void SensorRegistry::refreshAnalogInputs()
+void SensorRegistry::refreshEcuAnalogChannels()
 {
-    // Remove existing analog input entries
+    // Remove existing DaemonUDP analog input entries (keys starting with "Analog")
     QStringList toRemove;
     for (auto it = m_sensors.constBegin(); it != m_sensors.constEnd(); ++it) {
-        if (it->source == SensorSource::AnalogInput) {
+        if (it->source == SensorSource::DaemonUDP && it.key().startsWith(QStringLiteral("Analog"))) {
             toRemove.append(it.key());
         }
     }
@@ -190,9 +195,9 @@ void SensorRegistry::refreshAnalogInputs()
         m_sensors.remove(key);
     }
 
-    // Register AN1 through AN11
-    for (int i = 1; i <= 11; ++i) {
-        const QString key = QStringLiteral("an%1").arg(i);
+    // Register Analog0 through Analog10
+    for (int i = 0; i <= 10; ++i) {
+        const QString key = QStringLiteral("Analog%1").arg(i);
         const QString displayName = QStringLiteral("Analog Input %1").arg(i);
 
         SensorEntry entry;
@@ -200,45 +205,23 @@ void SensorRegistry::refreshAnalogInputs()
         entry.displayName = displayName;
         entry.category = QStringLiteral("Analog Inputs");
         entry.unit = QStringLiteral("V");
-        entry.source = SensorSource::AnalogInput;
+        entry.source = SensorSource::DaemonUDP;
         entry.active = true;
         entry.lastActiveTimestamp = 0;
         m_sensors.insert(key, entry);
     }
 
-    emit sensorsChanged();
-}
-
-/**
- * @brief Register expander board analog channels EX_AN1 through EX_AN8.
- *
- * Removes any previously registered expander board sensors and re-registers
- * them. Call this when expander board settings change.
- */
-void SensorRegistry::refreshExpanderBoard()
-{
-    // Remove existing expander board entries
-    QStringList toRemove;
-    for (auto it = m_sensors.constBegin(); it != m_sensors.constEnd(); ++it) {
-        if (it->source == SensorSource::ExpanderBoard) {
-            toRemove.append(it.key());
-        }
-    }
-    for (const QString &key : toRemove) {
-        m_sensors.remove(key);
-    }
-
-    // Register EX_AN1 through EX_AN8
-    for (int i = 1; i <= 8; ++i) {
-        const QString key = QStringLiteral("ex_an%1").arg(i);
-        const QString displayName = QStringLiteral("Expander Analog %1").arg(i);
+    // Register calibrated/calculated analog channels
+    for (int i = 0; i <= 10; ++i) {
+        const QString key = QStringLiteral("AnalogCalc%1").arg(i);
+        const QString displayName = QStringLiteral("Analog Calc %1").arg(i);
 
         SensorEntry entry;
         entry.key = key;
         entry.displayName = displayName;
-        entry.category = QStringLiteral("Expander Board");
-        entry.unit = QStringLiteral("V");
-        entry.source = SensorSource::ExpanderBoard;
+        entry.category = QStringLiteral("Analog Inputs");
+        entry.unit = QString();
+        entry.source = SensorSource::DaemonUDP;
         entry.active = true;
         entry.lastActiveTimestamp = 0;
         m_sensors.insert(key, entry);
@@ -248,17 +231,20 @@ void SensorRegistry::refreshExpanderBoard()
 }
 
 /**
- * @brief Register digital input channels DI1 through DI4.
+ * @brief Register extender board analog input channels EXAnalogInput0 through EXAnalogInput7.
  *
- * Removes any previously registered digital input sensors and re-registers
- * them. Call this when digital input settings change.
+ * Removes any previously registered ExtenderAnalog sensors and re-registers
+ * them. Also registers EXAnalogCalc0 through EXAnalogCalc7 calibrated channels.
+ * These are analog inputs from the extender board received via CAN bus.
+ *
+ * Call this when extender board settings change.
  */
-void SensorRegistry::refreshDigitalInputs()
+void SensorRegistry::refreshExtenderAnalogInputs()
 {
-    // Remove existing digital input entries
+    // Remove existing ExtenderAnalog entries
     QStringList toRemove;
     for (auto it = m_sensors.constBegin(); it != m_sensors.constEnd(); ++it) {
-        if (it->source == SensorSource::DigitalInput) {
+        if (it->source == SensorSource::ExtenderAnalog) {
             toRemove.append(it.key());
         }
     }
@@ -266,9 +252,66 @@ void SensorRegistry::refreshDigitalInputs()
         m_sensors.remove(key);
     }
 
-    // Register DI1 through DI4
-    for (int i = 1; i <= 4; ++i) {
-        const QString key = QStringLiteral("di%1").arg(i);
+    // Register EXAnalogInput0 through EXAnalogInput7
+    for (int i = 0; i <= 7; ++i) {
+        const QString key = QStringLiteral("EXAnalogInput%1").arg(i);
+        const QString displayName = QStringLiteral("Extender Analog Input %1").arg(i);
+
+        SensorEntry entry;
+        entry.key = key;
+        entry.displayName = displayName;
+        entry.category = QStringLiteral("Extender Board");
+        entry.unit = QStringLiteral("V");
+        entry.source = SensorSource::ExtenderAnalog;
+        entry.active = true;
+        entry.lastActiveTimestamp = 0;
+        m_sensors.insert(key, entry);
+    }
+
+    // Register calibrated/calculated extender analog channels
+    for (int i = 0; i <= 7; ++i) {
+        const QString key = QStringLiteral("EXAnalogCalc%1").arg(i);
+        const QString displayName = QStringLiteral("Extender Analog Calc %1").arg(i);
+
+        SensorEntry entry;
+        entry.key = key;
+        entry.displayName = displayName;
+        entry.category = QStringLiteral("Extender Board");
+        entry.unit = QString();
+        entry.source = SensorSource::ExtenderAnalog;
+        entry.active = true;
+        entry.lastActiveTimestamp = 0;
+        m_sensors.insert(key, entry);
+    }
+
+    emit sensorsChanged();
+}
+
+/**
+ * @brief Register ECU-reported digital input channels DigitalInput1 through DigitalInput7.
+ *
+ * Removes any previously registered DaemonUDP digital input sensors and re-registers
+ * them. These are ECU-reported digital input states received via daemon UDP (port 45454),
+ * not physical Raspberry Pi GPIO inputs.
+ *
+ * Call this when digital input settings change.
+ */
+void SensorRegistry::refreshEcuDigitalInputs()
+{
+    // Remove existing DaemonUDP digital input entries (keys starting with "DigitalInput")
+    QStringList toRemove;
+    for (auto it = m_sensors.constBegin(); it != m_sensors.constEnd(); ++it) {
+        if (it->source == SensorSource::DaemonUDP && it.key().startsWith(QStringLiteral("DigitalInput"))) {
+            toRemove.append(it.key());
+        }
+    }
+    for (const QString &key : toRemove) {
+        m_sensors.remove(key);
+    }
+
+    // Register DigitalInput1 through DigitalInput7
+    for (int i = 1; i <= 7; ++i) {
+        const QString key = QStringLiteral("DigitalInput%1").arg(i);
         const QString displayName = QStringLiteral("Digital Input %1").arg(i);
 
         SensorEntry entry;
@@ -276,7 +319,45 @@ void SensorRegistry::refreshDigitalInputs()
         entry.displayName = displayName;
         entry.category = QStringLiteral("Digital Inputs");
         entry.unit = QString();
-        entry.source = SensorSource::DigitalInput;
+        entry.source = SensorSource::DaemonUDP;
+        entry.active = true;
+        entry.lastActiveTimestamp = 0;
+        m_sensors.insert(key, entry);
+    }
+
+    emit sensorsChanged();
+}
+
+/**
+ * @brief Refreshes extender board digital input sensors in the registry.
+ *
+ * Registers EXDigitalInput1 through EXDigitalInput8 (1-indexed per reference).
+ * These are digital inputs from the extender board received via CAN bus.
+ */
+void SensorRegistry::refreshExtenderDigitalInputs()
+{
+    // Remove existing ExtenderDigital entries
+    QStringList toRemove;
+    for (auto it = m_sensors.constBegin(); it != m_sensors.constEnd(); ++it) {
+        if (it->source == SensorSource::ExtenderDigital) {
+            toRemove.append(it.key());
+        }
+    }
+    for (const QString &key : toRemove) {
+        m_sensors.remove(key);
+    }
+
+    // Register EXDigitalInput1 through EXDigitalInput8 (1-indexed per reference)
+    for (int i = 1; i <= 8; ++i) {
+        const QString key = QStringLiteral("EXDigitalInput%1").arg(i);
+        const QString displayName = QStringLiteral("Extender Digital Input %1").arg(i);
+
+        SensorEntry entry;
+        entry.key = key;
+        entry.displayName = displayName;
+        entry.category = QStringLiteral("Extender Board");
+        entry.unit = QString();
+        entry.source = SensorSource::ExtenderDigital;
         entry.active = true;
         entry.lastActiveTimestamp = 0;
         m_sensors.insert(key, entry);
@@ -321,8 +402,9 @@ QStringList SensorRegistry::availableCategories() const
 /**
  * @brief Register built-in sensors that are always available.
  *
- * Registers GPS position/speed/heading/altitude/satellites sensors and
- * SenseHat accelerometer axes (X, Y, Z).
+ * Registers GPS position/speed/heading/altitude/satellites sensors,
+ * SenseHat accelerometer axes (X, Y, Z), gyroscope axes (X, Y, Z),
+ * compass heading, ambient temperature, and ambient pressure.
  */
 void SensorRegistry::registerBuiltinSensors()
 {
@@ -347,27 +429,53 @@ void SensorRegistry::registerBuiltinSensors()
                    QString(), SensorSource::GPS);
 
     // SenseHat accelerometer sensors
-    registerSensor(QStringLiteral("accelX"),
+    registerSensor(QStringLiteral("accelx"),
                    QStringLiteral("Accelerometer X"), QStringLiteral("Accelerometer"),
                    QStringLiteral("g"), SensorSource::SenseHat);
-    registerSensor(QStringLiteral("accelY"),
+    registerSensor(QStringLiteral("accely"),
                    QStringLiteral("Accelerometer Y"), QStringLiteral("Accelerometer"),
                    QStringLiteral("g"), SensorSource::SenseHat);
-    registerSensor(QStringLiteral("accelZ"),
+    registerSensor(QStringLiteral("accelz"),
                    QStringLiteral("Accelerometer Z"), QStringLiteral("Accelerometer"),
                    QStringLiteral("g"), SensorSource::SenseHat);
+
+    // SenseHat gyroscope sensors
+    registerSensor(QStringLiteral("gyrox"),
+                   QStringLiteral("Gyroscope X"), QStringLiteral("Gyroscope"),
+                   QStringLiteral("deg/s"), SensorSource::SenseHat);
+    registerSensor(QStringLiteral("gyroy"),
+                   QStringLiteral("Gyroscope Y"), QStringLiteral("Gyroscope"),
+                   QStringLiteral("deg/s"), SensorSource::SenseHat);
+    registerSensor(QStringLiteral("gyroz"),
+                   QStringLiteral("Gyroscope Z"), QStringLiteral("Gyroscope"),
+                   QStringLiteral("deg/s"), SensorSource::SenseHat);
+
+    // SenseHat compass
+    registerSensor(QStringLiteral("compass"),
+                   QStringLiteral("Compass Heading"), QStringLiteral("Compass"),
+                   QStringLiteral("deg"), SensorSource::SenseHat);
+
+    // SenseHat ambient temperature
+    registerSensor(QStringLiteral("ambitemp"),
+                   QStringLiteral("Ambient Temperature"), QStringLiteral("Environment"),
+                   QStringLiteral("C"), SensorSource::SenseHat);
+
+    // SenseHat ambient pressure
+    registerSensor(QStringLiteral("ambipress"),
+                   QStringLiteral("Ambient Pressure"), QStringLiteral("Environment"),
+                   QStringLiteral("Pa"), SensorSource::SenseHat);
 }
 
 /**
  * @brief Register common CAN/daemon sensors that most ECUs provide.
  *
- * All CAN sensors are registered with active=false. They become active
+ * All DaemonUDP sensors are registered with active=false. They become active
  * when markCanSensorActive() is called (i.e., when UDPReceiver receives data).
  * The property keys match the Q_PROPERTY names in the domain data models.
  */
 void SensorRegistry::registerCommonCanSensors()
 {
-    // Helper lambda to reduce boilerplate for CAN sensor registration
+    // Helper lambda to reduce boilerplate for DaemonUDP sensor registration
     auto reg = [this](const QString &key, const QString &name,
                       const QString &category, const QString &unit) {
         SensorEntry entry;
@@ -375,7 +483,7 @@ void SensorRegistry::registerCommonCanSensors()
         entry.displayName = name;
         entry.category = category;
         entry.unit = unit;
-        entry.source = SensorSource::CAN;
+        entry.source = SensorSource::DaemonUDP;
         entry.active = false;
         entry.lastActiveTimestamp = 0;
         m_sensors.insert(key, entry);
@@ -457,9 +565,9 @@ QVariantMap SensorRegistry::entryToVariantMap(const SensorEntry &entry) const
 }
 
 /**
- * @brief Timer callback to mark CAN sensors as inactive if no data received recently.
+ * @brief Timer callback to mark DaemonUDP sensors as inactive if no data received recently.
  *
- * Iterates all CAN-sourced sensors and sets active=false for any that have not
+ * Iterates all DaemonUDP-sourced sensors and sets active=false for any that have not
  * received data within the last 10 seconds. Emits sensorsChanged if any state changed.
  */
 void SensorRegistry::checkCanTimeouts()
@@ -468,7 +576,7 @@ void SensorRegistry::checkCanTimeouts()
     bool changed = false;
 
     for (auto it = m_sensors.begin(); it != m_sensors.end(); ++it) {
-        if (it->source == SensorSource::CAN && it->active) {
+        if (it->source == SensorSource::DaemonUDP && it->active) {
             if (it->lastActiveTimestamp > 0 && (now - it->lastActiveTimestamp) > kCanTimeoutMs) {
                 it->active = false;
                 changed = true;

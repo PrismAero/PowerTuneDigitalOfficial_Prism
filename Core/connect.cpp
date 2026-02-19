@@ -262,9 +262,10 @@ Connect::Connect(QObject *parent)
     engine->rootContext()->setContextProperty("Diagnostics", m_diagnosticsProvider);
     m_appSettings->readandApplySettings();
     // * Phase 7: Populate SensorRegistry with configured input channels
-    m_sensorRegistry->refreshAnalogInputs();
-    m_sensorRegistry->refreshExpanderBoard();
-    m_sensorRegistry->refreshDigitalInputs();
+    m_sensorRegistry->refreshEcuAnalogChannels();
+    m_sensorRegistry->refreshExtenderAnalogInputs();
+    m_sensorRegistry->refreshExtenderDigitalInputs();
+    m_sensorRegistry->refreshEcuDigitalInputs();
 }
 
 

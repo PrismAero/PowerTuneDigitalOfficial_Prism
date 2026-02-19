@@ -310,21 +310,21 @@ QVariantList DiagnosticsProvider::getLiveSensorData() const
 }
 
 /**
- * @brief Get analog input diagnostics (raw ADC values).
+ * @brief Returns diagnostic information for ECU-reported analog input channels.
  *
- * Returns 11 entries (AN1-AN11) with channel metadata.
- * Actual raw voltage values will be wired to AnalogInputs model later.
+ * Provides raw ADC voltage and calibration data for Analog0 through Analog10
+ * (0-indexed, 11 channels total) received via daemon UDP.
  *
- * @return List of maps: {channel, rawVoltage, calibratedValue, presetName, unit, configured}
+ * @return QVariantList containing diagnostic entries for each analog input channel.
  */
 QVariantList DiagnosticsProvider::getAnalogInputDiagnostics() const
 {
     QVariantList result;
 
-    for (int i = 1; i <= 11; ++i) {
+    for (int i = 0; i <= 10; ++i) {
         QVariantMap entry;
         entry[QStringLiteral("channel")] = i;
-        entry[QStringLiteral("label")] = QStringLiteral("AN%1").arg(i);
+        entry[QStringLiteral("label")] = QStringLiteral("Analog%1").arg(i);
         // TODO: Wire rawVoltage from AnalogInputs model when integration is complete
         entry[QStringLiteral("rawVoltage")] = 0.0;
         entry[QStringLiteral("calibratedValue")] = 0.0;
@@ -338,21 +338,21 @@ QVariantList DiagnosticsProvider::getAnalogInputDiagnostics() const
 }
 
 /**
- * @brief Get digital input states.
+ * @brief Returns diagnostic information for daemon-reported digital inputs.
  *
- * Returns 4 entries (DI1-DI4) with channel metadata.
- * Actual state values will be wired to DigitalInputs model later.
+ * Provides state and configuration data for DigitalInput1 through
+ * DigitalInput7 (7 channels total) received via daemon UDP.
  *
- * @return List of maps: {channel, state, configured, label}
+ * @return QVariantList containing diagnostic entries for each digital input channel.
  */
 QVariantList DiagnosticsProvider::getDigitalInputDiagnostics() const
 {
     QVariantList result;
 
-    for (int i = 1; i <= 4; ++i) {
+    for (int i = 1; i <= 7; ++i) {
         QVariantMap entry;
         entry[QStringLiteral("channel")] = i;
-        entry[QStringLiteral("label")] = QStringLiteral("DI%1").arg(i);
+        entry[QStringLiteral("label")] = QStringLiteral("DigitalInput%1").arg(i);
         // TODO: Wire state from DigitalInputs model when integration is complete
         entry[QStringLiteral("state")] = false;
         entry[QStringLiteral("configured")] = false;
@@ -363,26 +363,51 @@ QVariantList DiagnosticsProvider::getDigitalInputDiagnostics() const
 }
 
 /**
- * @brief Get expander board diagnostics.
+ * @brief Returns diagnostic information for extender board analog inputs.
  *
- * Returns 8 entries (EX_AN1-EX_AN8) with channel metadata.
- * Actual values will be wired to ExpanderBoardData model later.
+ * Provides raw ADC voltage and calibration data for EXAnalogInput0 through
+ * EXAnalogInput7 (0-indexed, 8 channels total) from the extender board CAN interface.
  *
- * @return List of maps: {channel, rawVoltage, calibratedValue, presetName, unit, configured}
+ * @return QVariantList containing diagnostic entries for each extender analog input channel.
  */
 QVariantList DiagnosticsProvider::getExpanderBoardDiagnostics() const
+{
+    QVariantList result;
+
+    for (int i = 0; i <= 7; ++i) {
+        QVariantMap entry;
+        entry[QStringLiteral("channel")] = i;
+        entry[QStringLiteral("label")] = QStringLiteral("EXAnalogInput%1").arg(i);
+        // TODO: Wire rawVoltage from ExpanderBoardData model when integration is complete
+        entry[QStringLiteral("rawVoltage")] = 0.0;
+        entry[QStringLiteral("calibratedValue")] = 0.0;
+        entry[QStringLiteral("presetName")] = QString();
+        entry[QStringLiteral("unit")] = QStringLiteral("V");
+        entry[QStringLiteral("configured")] = false;
+        result.append(entry);
+    }
+
+    return result;
+}
+
+/**
+ * @brief Returns diagnostic information for extender board digital inputs.
+ *
+ * Provides state and configuration data for EXDigitalInput1 through
+ * EXDigitalInput8 from the extender board CAN interface.
+ *
+ * @return QVariantList containing diagnostic entries for each extender digital input channel.
+ */
+QVariantList DiagnosticsProvider::getExtenderDigitalDiagnostics() const
 {
     QVariantList result;
 
     for (int i = 1; i <= 8; ++i) {
         QVariantMap entry;
         entry[QStringLiteral("channel")] = i;
-        entry[QStringLiteral("label")] = QStringLiteral("EX_AN%1").arg(i);
-        // TODO: Wire rawVoltage from ExpanderBoardData model when integration is complete
-        entry[QStringLiteral("rawVoltage")] = 0.0;
-        entry[QStringLiteral("calibratedValue")] = 0.0;
-        entry[QStringLiteral("presetName")] = QString();
-        entry[QStringLiteral("unit")] = QStringLiteral("V");
+        entry[QStringLiteral("label")] = QStringLiteral("EXDigitalInput%1").arg(i);
+        // TODO: Wire state from ExpanderBoardData model when integration is complete
+        entry[QStringLiteral("state")] = false;
         entry[QStringLiteral("configured")] = false;
         result.append(entry);
     }
