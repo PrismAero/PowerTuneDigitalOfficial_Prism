@@ -66,6 +66,8 @@ class SteinhartCalculator;
 class CalibrationHelper;
 // * Phase 7: Sensor registry
 class SensorRegistry;
+// * Phase 8: Diagnostics provider
+class DiagnosticsProvider;
 
 class Connect : public QObject
 {
@@ -169,6 +171,8 @@ private:
     CalibrationHelper *m_calibrationHelper;
     // * Phase 7: Sensor registry
     SensorRegistry *m_sensorRegistry;
+    // * Phase 8: Diagnostics provider
+    DiagnosticsProvider *m_diagnosticsProvider;
 
 
 signals:

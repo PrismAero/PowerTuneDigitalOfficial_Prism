@@ -38,6 +38,7 @@
 #include "serialport.h"
 #include "PropertyRouter.h"
 #include "SensorRegistry.h"
+#include "DiagnosticsProvider.h"
 #include "Models/UIState.h"
 #include "Models/DataModels.h"
 
@@ -98,7 +99,8 @@ Connect::Connect(QObject *parent)
       m_propertyRouter(nullptr),
       m_steinhartCalc(nullptr),
       m_calibrationHelper(nullptr),
-      m_sensorRegistry(nullptr)
+      m_sensorRegistry(nullptr),
+      m_diagnosticsProvider(nullptr)
 
 {
     getPorts();
@@ -202,6 +204,9 @@ Connect::Connect(QObject *parent)
     m_calibrationHelper = new CalibrationHelper(m_steinhartCalc, this);
     // * Phase 7: Create SensorRegistry for runtime sensor tracking
     m_sensorRegistry = new SensorRegistry(this);
+    // * Phase 8: Create DiagnosticsProvider and wire to SensorRegistry
+    m_diagnosticsProvider = new DiagnosticsProvider(this);
+    m_diagnosticsProvider->setSensorRegistry(m_sensorRegistry);
     // m_wifiscanner = new WifScanner(this);
     QString mPath = "/";
     // DIRECTORIES
@@ -253,6 +258,8 @@ Connect::Connect(QObject *parent)
     engine->rootContext()->setContextProperty("Steinhart", m_steinhartCalc);
     // * Phase 7: Expose SensorRegistry to QML
     engine->rootContext()->setContextProperty("SensorRegistry", m_sensorRegistry);
+    // * Phase 8: Expose DiagnosticsProvider to QML
+    engine->rootContext()->setContextProperty("Diagnostics", m_diagnosticsProvider);
     m_appSettings->readandApplySettings();
     // * Phase 7: Populate SensorRegistry with configured input channels
     m_sensorRegistry->refreshAnalogInputs();

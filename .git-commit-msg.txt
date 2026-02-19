@@ -1,32 +1,38 @@
-feat(core): Add SensorRegistry for runtime sensor availability tracking
+feat(diagnostics): Add DiagnosticsProvider C++ backend class
 
-Implement SensorRegistry class that tracks which sensors are actually
-available at runtime, replacing the static list approach in the dashboard
-creator.
+Phase 8: Implement DiagnosticsProvider for the Diagnostics settings page.
 
 New files:
-- Core/SensorRegistry.h: Header with full public API, Q_PROPERTY
-  declarations, Q_INVOKABLE methods, and SensorSource enum
-- Core/SensorRegistry.cpp: Implementation with built-in sensor
-  registration (GPS, SenseHat), common CAN sensor registration,
-  analog/digital/expander board input refresh, and CAN timeout logic
+- Core/DiagnosticsProvider.h - Header with Q_PROPERTY declarations for
+  system info (CPU temp, memory, uptime), CAN bus metrics (message rate,
+  error count, connection status), serial connection info, sensor summary
+  counts, and a circular log buffer. Q_INVOKABLE methods expose live sensor
+  data, analog input diagnostics (AN1-AN11), digital input diagnostics
+  (DI1-DI4), and expander board diagnostics (EX_AN1-EX_AN8).
+
+- Core/DiagnosticsProvider.cpp - Full implementation with:
+  - Platform-specific system info: Linux /sys/class/thermal + /proc/meminfo,
+    macOS Mach host_statistics64 API for memory, sysctl for CPU thermal level
+  - 2-second timer for system info polling
+  - 1-second timer for CAN message rate calculation
+  - SensorRegistry integration for live sensor data and counts
+  - Circular log buffer (max 200 entries, newest first)
+  - CAN tracking methods (recordCanMessage, recordCanError, setCanStatus)
+  - Connection info setter (setConnectionInfo)
+  - Stub analog/digital/expander diagnostics with TODO markers for
+    future model wiring
 
 Modified files:
-- CMakeLists.txt: Added SensorRegistry.h/.cpp to build
-- Core/connect.h: Added SensorRegistry forward declaration and member
-- Core/connect.cpp: Create SensorRegistry instance, expose as QML
-  context property, call refresh methods after settings load
+- CMakeLists.txt - Added DiagnosticsProvider.h/.cpp to CORE_HEADERS/CORE_SOURCES
+- Core/connect.h - Forward declaration and m_diagnosticsProvider member
+- Core/connect.cpp - Include, initialize, create instance, wire to
+  SensorRegistry, expose as "Diagnostics" QML context property
 
-Sensor sources supported:
-- CAN/Daemon (auto-detected, with 10s timeout for inactive marking)
-- Analog Inputs (AN1-AN11)
-- Digital Inputs (DI1-DI4)
-- Expander Board (EX_AN1-EX_AN8)
-- GPS (latitude, longitude, altitude, speed, heading, satellites)
-- SenseHat (accelerometer X/Y/Z)
-- Computed (for derived values)
-
-QML API exposed as "SensorRegistry" context property with:
-- availableCount, availableSensors, availableCategories properties
-- getSensorsByCategory(), isAvailable(), getDisplayName(), getUnit()
-- refreshAnalogInputs(), refreshExpanderBoard(), refreshDigitalInputs()
+QML API surface (context property "Diagnostics"):
+  Properties: cpuTemperature, memoryUsagePercent, uptime, systemTime,
+    canConnected, canMessageRate, canErrorCount, canTotalMessages, daemonName,
+    connectionType, serialConnected, serialPort, serialBaudRate,
+    activeSensorCount, totalSensorCount, logMessages
+  Methods: getLiveSensorData(), getAnalogInputDiagnostics(),
+    getDigitalInputDiagnostics(), getExpanderBoardDiagnostics(),
+    addLogMessage(level, message), clearLog()

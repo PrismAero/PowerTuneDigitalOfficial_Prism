@@ -67,6 +67,7 @@ set(CORE_SOURCES
     Core/appsettings.cpp
     Core/PropertyRouter.cpp
     Core/SensorRegistry.cpp
+    Core/DiagnosticsProvider.cpp
     Core/Models/UIState.cpp
     Core/Models/EngineData.cpp
     Core/Models/VehicleData.cpp
@@ -89,6 +90,7 @@ set(CORE_HEADERS
     Core/appsettings.h
     Core/PropertyRouter.h
     Core/SensorRegistry.h
+    Core/DiagnosticsProvider.h
     Core/Models/UIState.h
     Core/Models/DataModels.h
     Core/Models/EngineData.h
