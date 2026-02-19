@@ -34,7 +34,8 @@ Rectangle {
 
         // * Console Output Section
         Rectangle {
-            Layout.preferredWidth: 420
+            Layout.preferredWidth: 250
+            Layout.maximumWidth: 300
             Layout.fillHeight: true
             color: "#0A0A0A"
             radius: 8
@@ -110,7 +111,7 @@ Rectangle {
 
                     StyledComboBox {
                         id: wificountrycbx
-                        width: 260
+                        Layout.fillWidth: true
                         model: wificountrynames
                         textRole: "name"
                     }
@@ -130,7 +131,7 @@ Rectangle {
 
                     StyledComboBox {
                         id: wifilistbox
-                        width: 260
+                        Layout.fillWidth: true
                         model: Connection.wifi
                         onCountChanged: btnScanNetwork.enabled = true
                     }
@@ -150,7 +151,7 @@ Rectangle {
 
                     StyledTextField {
                         id: pw1
-                        width: 260
+                        Layout.fillWidth: true
                         placeholderText: qsTr("Passphrase")
                         echoMode: TextInput.Password
                     }
@@ -162,7 +163,7 @@ Rectangle {
                     StyledButton {
                         id: btnScanNetwork
                         text: Translator.translate("Scan WIFI", Settings.language)
-                        width: 160
+                        Layout.preferredWidth: 160
                         onClicked: {
                             consoleText.clear()
                             Wifiscanner.initializeWifiscanner()
@@ -172,7 +173,7 @@ Rectangle {
                     StyledButton {
                         id: applyWifiSettings
                         text: Translator.translate("Connect WIFI", Settings.language)
-                        width: 160
+                        Layout.preferredWidth: 160
                         onClicked: {
                             Wifiscanner.setwifi(
                                 wificountrynames.get(wificountrycbx.currentIndex).countryname,
@@ -196,7 +197,7 @@ Rectangle {
                     Layout.fillWidth: true
 
                     Text {
-                        text: Translator.translate("Ethernet IP adress", Settings.language)
+                        text: Translator.translate("Ethernet IP Address", Settings.language)
                         font.pixelSize: 16
                         font.family: "Lato"
                         color: "#FFFFFF"
@@ -207,7 +208,7 @@ Rectangle {
                         id: ethernetstatus
                         statusText: Connection.EthernetStat
                         status: Connection.EthernetStat === "NOT CONNECTED" ? "disconnected" : "connected"
-                        width: 260
+                        Layout.fillWidth: true
                     }
                 }
 
@@ -216,7 +217,7 @@ Rectangle {
                     Layout.fillWidth: true
 
                     Text {
-                        text: Translator.translate("WLAN IP adress", Settings.language)
+                        text: Translator.translate("WLAN IP Address", Settings.language)
                         font.pixelSize: 16
                         font.family: "Lato"
                         color: "#FFFFFF"
@@ -227,7 +228,7 @@ Rectangle {
                         id: wifistatus
                         statusText: Connection.WifiStat
                         status: Connection.WifiStat === "NOT CONNECTED" ? "disconnected" : "connected"
-                        width: 260
+                        Layout.fillWidth: true
                     }
                 }
             }
@@ -240,6 +241,7 @@ Rectangle {
                 SettingsSection {
                     title: Translator.translate("System Actions", Settings.language)
                     Layout.fillWidth: true
+                    Layout.alignment: Qt.AlignTop
 
                     RowLayout {
                         spacing: 12
@@ -247,7 +249,7 @@ Rectangle {
                         StyledButton {
                             id: updateBtn
                             text: Translator.translate("Update", Settings.language)
-                            width: 140
+                            Layout.preferredWidth: 140
                             onClicked: {
                                 Connect.update()
                                 updateBtn.enabled = false
@@ -257,7 +259,7 @@ Rectangle {
                         StyledButton {
                             id: develtest
                             text: Translator.translate("Restart daemon", Settings.language)
-                            width: 160
+                            Layout.preferredWidth: 160
                             primary: false
                             onClicked: Connect.restartDaemon()
                         }
@@ -267,11 +269,12 @@ Rectangle {
                 SettingsSection {
                     title: Translator.translate("Track Downloads", Settings.language)
                     Layout.fillWidth: true
+                    Layout.alignment: Qt.AlignTop
 
                     StyledButton {
                         id: trackUpdate
                         text: Translator.translate("Update Tracks", Settings.language)
-                        width: 200
+                        Layout.preferredWidth: 200
                         onClicked: {
                             downloadManager.append("")
                             downloadManager.append("https://gitlab.com/PowerTuneDigital/PowertuneTracks/-/raw/main/repo.txt")
