@@ -1,17 +1,28 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
+import QtQuick.Layouts 1.15
 import Qt.labs.settings 1.0
 import PowerTune.Utils 1.0
+import PowerTune.Settings 1.0
 
 Rectangle {
     id: mainWindow
     anchors.fill: parent
-    color: "grey"
+    color: "#1a1a2e"
     property double rpmfrequencydivider
 
     property int digiValue
     property string digiStringValue
     property int maxBrightnessOnBoot
+
+    // * Shared sizing constants for grid cells
+    readonly property int fieldWidth: mainWindow.width / 15
+    readonly property int fieldHeight: mainWindow.height / 15
+    readonly property int fieldFontSize: mainWindow.width / 55
+    readonly property int labelFontSize: mainWindow.width / 60
+    readonly property int shFieldWidth: mainWindow.width / 12
+    readonly property int shFieldFontSize: mainWindow.width / 65
+    readonly property int checkWidth: mainWindow.width / 20
 
     ListModel {
         id: comboBoxModel
@@ -132,246 +143,248 @@ Rectangle {
     function getRpmCheckboxSaveValue() {
         return rpmCheckboxSaveValue;
     }
+
+    // * Left section: Analog input values grid (EX AN 0-7)
     Grid {
         id: inputgrid
         rows: 10
         columns: 3
         spacing: 3
         anchors.left: parent.left
-        anchors.leftMargin: 2
+        anchors.leftMargin: 16
         anchors.top: parent.top
         anchors.topMargin: 40
         Text {
             text: " "
-            font.pixelSize: mainWindow.width / 60
-            color: "white"
+            font.pixelSize: labelFontSize
+            color: "#FFFFFF"
         }
         Text {
             text: "Val. @ 0V"
             rightPadding: 3
-            font.pixelSize: mainWindow.width / 60
-            color: "white"
+            font.pixelSize: labelFontSize
+            color: "#FFFFFF"
         }
         Text {
             text: "Val. @ 5V"
             rightPadding: 3
-            font.pixelSize: mainWindow.width / 60
-            color: "white"
+            font.pixelSize: labelFontSize
+            color: "#FFFFFF"
         }
 
         Text {
             text: "EX AN 0"
-            font.pixelSize: mainWindow.width / 60
-            color: "white"
+            font.pixelSize: labelFontSize
+            color: "#FFFFFF"
         }
-        TextField {
+        StyledTextField {
             id: ex00
-            width: mainWindow.width / 15
-            height: mainWindow.height / 15
-            font.pixelSize: mainWindow.width / 55
+            width: fieldWidth
+            height: fieldHeight
+            font.pixelSize: fieldFontSize
             text: "0"
             enabled: checkan0ntc.checked == true ? false : true
-            inputMethodHints: Qt.ImhFormattedNumbersOnly  // this ensures valid inputs are number only
+            inputMethodHints: Qt.ImhFormattedNumbersOnly
             onEditingFinished: inputs.setInputs()
         }
-        TextField {
+        StyledTextField {
             id: ex05
-            width: mainWindow.width / 15
-            height: mainWindow.height / 15
-            font.pixelSize: mainWindow.width / 55
+            width: fieldWidth
+            height: fieldHeight
+            font.pixelSize: fieldFontSize
             text: "5"
             enabled: checkan0ntc.checked == true ? false : true
-            inputMethodHints: Qt.ImhFormattedNumbersOnly  // this ensures valid inputs are number only
+            inputMethodHints: Qt.ImhFormattedNumbersOnly
             onEditingFinished: inputs.setInputs()
         }
 
         Text {
             text: "EX AN 1"
-            font.pixelSize: mainWindow.width / 60
-            color: "white"
+            font.pixelSize: labelFontSize
+            color: "#FFFFFF"
         }
-        TextField {
+        StyledTextField {
             id: ex10
-            width: mainWindow.width / 15
-            height: mainWindow.height / 15
-            font.pixelSize: mainWindow.width / 55
+            width: fieldWidth
+            height: fieldHeight
+            font.pixelSize: fieldFontSize
             text: "0"
             enabled: checkan1ntc.checked == true ? false : true
-            inputMethodHints: Qt.ImhFormattedNumbersOnly  // this ensures valid inputs are number only
+            inputMethodHints: Qt.ImhFormattedNumbersOnly
             onEditingFinished: inputs.setInputs()
         }
-        TextField {
+        StyledTextField {
             id: ex15
-            width: mainWindow.width / 15
-            height: mainWindow.height / 15
-            font.pixelSize: mainWindow.width / 55
+            width: fieldWidth
+            height: fieldHeight
+            font.pixelSize: fieldFontSize
             text: "5"
             enabled: checkan1ntc.checked == true ? false : true
-            inputMethodHints: Qt.ImhFormattedNumbersOnly  // this ensures valid inputs are number only
+            inputMethodHints: Qt.ImhFormattedNumbersOnly
             onEditingFinished: inputs.setInputs()
         }
         Text {
             text: "EX AN 2"
-            font.pixelSize: mainWindow.width / 60
-            color: "white"
+            font.pixelSize: labelFontSize
+            color: "#FFFFFF"
         }
-        TextField {
+        StyledTextField {
             id: ex20
-            width: mainWindow.width / 15
-            height: mainWindow.height / 15
-            font.pixelSize: mainWindow.width / 55
+            width: fieldWidth
+            height: fieldHeight
+            font.pixelSize: fieldFontSize
             text: "0"
             enabled: checkan2ntc.checked == true ? false : true
-            inputMethodHints: Qt.ImhFormattedNumbersOnly  // this ensures valid inputs are number only
+            inputMethodHints: Qt.ImhFormattedNumbersOnly
             onEditingFinished: inputs.setInputs()
         }
-        TextField {
+        StyledTextField {
             id: ex25
-            width: mainWindow.width / 15
-            height: mainWindow.height / 15
-            font.pixelSize: mainWindow.width / 55
+            width: fieldWidth
+            height: fieldHeight
+            font.pixelSize: fieldFontSize
             text: "5"
             enabled: checkan2ntc.checked == true ? false : true
-            inputMethodHints: Qt.ImhFormattedNumbersOnly  // this ensures valid inputs are number only
+            inputMethodHints: Qt.ImhFormattedNumbersOnly
             onEditingFinished: inputs.setInputs()
         }
         Text {
             text: "EX AN 3"
-            font.pixelSize: mainWindow.width / 60
-            color: "white"
+            font.pixelSize: labelFontSize
+            color: "#FFFFFF"
         }
-        TextField {
+        StyledTextField {
             id: ex30
-            width: mainWindow.width / 15
-            height: mainWindow.height / 15
-            font.pixelSize: mainWindow.width / 55
+            width: fieldWidth
+            height: fieldHeight
+            font.pixelSize: fieldFontSize
             text: "0"
             enabled: checkan3ntc.checked == true ? false : true
-            inputMethodHints: Qt.ImhFormattedNumbersOnly  // this ensures valid inputs are number only
+            inputMethodHints: Qt.ImhFormattedNumbersOnly
             onEditingFinished: inputs.setInputs()
         }
-        TextField {
+        StyledTextField {
             id: ex35
-            width: mainWindow.width / 15
-            height: mainWindow.height / 15
-            font.pixelSize: mainWindow.width / 55
+            width: fieldWidth
+            height: fieldHeight
+            font.pixelSize: fieldFontSize
             text: "5"
             enabled: checkan3ntc.checked == true ? false : true
-            inputMethodHints: Qt.ImhFormattedNumbersOnly  // this ensures valid inputs are number only
+            inputMethodHints: Qt.ImhFormattedNumbersOnly
             onEditingFinished: inputs.setInputs()
         }
         Text {
             text: "EX AN 4"
-            font.pixelSize: mainWindow.width / 60
-            color: "white"
+            font.pixelSize: labelFontSize
+            color: "#FFFFFF"
         }
-        TextField {
+        StyledTextField {
             id: ex40
-            width: mainWindow.width / 15
-            height: mainWindow.height / 15
-            font.pixelSize: mainWindow.width / 55
+            width: fieldWidth
+            height: fieldHeight
+            font.pixelSize: fieldFontSize
             text: "0"
             enabled: checkan4ntc.checked == true ? false : true
-            inputMethodHints: Qt.ImhFormattedNumbersOnly  // this ensures valid inputs are number only
+            inputMethodHints: Qt.ImhFormattedNumbersOnly
             onEditingFinished: inputs.setInputs()
         }
-        TextField {
+        StyledTextField {
             id: ex45
-            width: mainWindow.width / 15
-            height: mainWindow.height / 15
-            font.pixelSize: mainWindow.width / 55
+            width: fieldWidth
+            height: fieldHeight
+            font.pixelSize: fieldFontSize
             text: "5"
             enabled: checkan4ntc.checked == true ? false : true
-            inputMethodHints: Qt.ImhFormattedNumbersOnly  // this ensures valid inputs are number only
+            inputMethodHints: Qt.ImhFormattedNumbersOnly
             onEditingFinished: inputs.setInputs()
         }
         Text {
             text: "EX AN 5"
-            font.pixelSize: mainWindow.width / 60
-            color: "white"
+            font.pixelSize: labelFontSize
+            color: "#FFFFFF"
         }
-        TextField {
+        StyledTextField {
             id: ex50
-            width: mainWindow.width / 15
-            height: mainWindow.height / 15
-            font.pixelSize: mainWindow.width / 55
+            width: fieldWidth
+            height: fieldHeight
+            font.pixelSize: fieldFontSize
             text: "0"
             enabled: checkan5ntc.checked == true ? false : true
-            inputMethodHints: Qt.ImhFormattedNumbersOnly  // this ensures valid inputs are number only
+            inputMethodHints: Qt.ImhFormattedNumbersOnly
             onEditingFinished: inputs.setInputs()
         }
-        TextField {
+        StyledTextField {
             id: ex55
-            width: mainWindow.width / 15
-            height: mainWindow.height / 15
-            font.pixelSize: mainWindow.width / 55
+            width: fieldWidth
+            height: fieldHeight
+            font.pixelSize: fieldFontSize
             text: "5"
             enabled: checkan5ntc.checked == true ? false : true
-            inputMethodHints: Qt.ImhFormattedNumbersOnly  // this ensures valid inputs are number only
+            inputMethodHints: Qt.ImhFormattedNumbersOnly
             onEditingFinished: inputs.setInputs()
         }
         Text {
             text: "EX AN 6"
-            font.pixelSize: mainWindow.width / 60
-            color: "white"
+            font.pixelSize: labelFontSize
+            color: "#FFFFFF"
         }
-        TextField {
+        StyledTextField {
             id: ex60
-            width: mainWindow.width / 15
-            height: mainWindow.height / 15
-            font.pixelSize: mainWindow.width / 55
+            width: fieldWidth
+            height: fieldHeight
+            font.pixelSize: fieldFontSize
             text: "0"
-            inputMethodHints: Qt.ImhFormattedNumbersOnly  // this ensures valid inputs are number only
+            inputMethodHints: Qt.ImhFormattedNumbersOnly
             onEditingFinished: inputs.setInputs()
         }
-        TextField {
+        StyledTextField {
             id: ex65
-            width: mainWindow.width / 15
-            height: mainWindow.height / 15
-            font.pixelSize: mainWindow.width / 55
+            width: fieldWidth
+            height: fieldHeight
+            font.pixelSize: fieldFontSize
             text: "5"
-            inputMethodHints: Qt.ImhFormattedNumbersOnly  // this ensures valid inputs are number only
+            inputMethodHints: Qt.ImhFormattedNumbersOnly
             onEditingFinished: inputs.setInputs()
         }
         Text {
             text: "EX AN 7"
-            font.pixelSize: mainWindow.width / 60
-            color: "white"
+            font.pixelSize: labelFontSize
+            color: "#FFFFFF"
         }
-        TextField {
+        StyledTextField {
             id: ex70
-            width: mainWindow.width / 15
-            height: mainWindow.height / 15
-            font.pixelSize: mainWindow.width / 55
+            width: fieldWidth
+            height: fieldHeight
+            font.pixelSize: fieldFontSize
             text: "0"
-            inputMethodHints: Qt.ImhFormattedNumbersOnly  // this ensures valid inputs are number only
+            inputMethodHints: Qt.ImhFormattedNumbersOnly
             onEditingFinished: inputs.setInputs()
         }
-        TextField {
+        StyledTextField {
             id: ex75
-            width: mainWindow.width / 15
-            height: mainWindow.height / 15
-            font.pixelSize: mainWindow.width / 55
+            width: fieldWidth
+            height: fieldHeight
+            font.pixelSize: fieldFontSize
             text: "5"
-            inputMethodHints: Qt.ImhFormattedNumbersOnly  // this ensures valid inputs are number only
+            inputMethodHints: Qt.ImhFormattedNumbersOnly
             onEditingFinished: inputs.setInputs()
         }
         Text {
             text: "Ex AN 7"
-            font.pixelSize: mainWindow.width / 60
-            color: "white"
+            font.pixelSize: labelFontSize
+            color: "#FFFFFF"
         }
         Text {
 
             text: Translator.translate("Damping", Settings.language)
-            font.pixelSize: mainWindow.width / 60
-            color: "white"
+            font.pixelSize: labelFontSize
+            color: "#FFFFFF"
         }
-        TextField {
+        StyledTextField {
             id: an7dampingfactor
-            width: mainWindow.width / 15
-            height: mainWindow.height / 15
-            font.pixelSize: mainWindow.width / 55
+            width: fieldWidth
+            height: fieldHeight
+            font.pixelSize: fieldFontSize
             text: "0"
             inputMethodHints: Qt.ImhFormattedNumbersOnly
             validator: RegularExpressionValidator {
@@ -500,113 +513,91 @@ Rectangle {
             }
         }
     }
+
+    // * RPM CAN settings row
     Grid {
         id: rpmcangrid
         rows: 2
         columns: 6
         spacing: 5
-        anchors.leftMargin: 10
+        anchors.leftMargin: 16
         anchors.left: parent.left
         anchors.top: inputgrid.bottom
         anchors.topMargin: 5
         Text {
             text: "RPM CAN"
-            font.pixelSize: mainWindow.width / 60
-            color: "white"
+            font.pixelSize: labelFontSize
+            color: "#FFFFFF"
         }
-        CheckBox {
+        StyledCheckBox {
             id: rpmcheckbox
             width: mainWindow.width / 14
-            height: mainWindow.height / 15
+            height: fieldHeight
             onCheckStateChanged: inputs.setInputs()
         }
 
         Text {
             text: "RPMCAN " + Translator.translate("Version", Settings.language)
-            font.pixelSize: mainWindow.width / 60
+            font.pixelSize: labelFontSize
             visible: {
                 (rpmcheckbox.checked == true) ? true : false;
             }
-            color: "white"
+            color: "#FFFFFF"
         }
-        ComboBox {
+        StyledComboBox {
             id: rpmcanversionselector
             visible: {
                 (rpmcheckbox.checked == true) ? true : false;
             }
             width: mainWindow.width / 8
-            height: mainWindow.height / 15
+            height: fieldHeight
             font.pixelSize: mainWindow.width / 75
             model: ["V1", "V2"]
             onActivated: inputs.setInputs()
-            delegate: ItemDelegate {
-                width: cylindercombobox.width
-                text: cylindercombobox.textRole ? (Array.isArray(control.model) ? modelData[control.textRole] : model[control.textRole]) : modelData
-                font.weight: cylindercombobox.currentIndex == index ? Font.DemiBold : Font.Normal
-                font.family: cylindercombobox.font.family
-                font.pixelSize: cylindercombobox.font.pixelSize
-                highlighted: cylindercombobox.highlightedIndex == index
-                hoverEnabled: cylindercombobox.hoverEnabled
-            }
         }
         Text {
             text: Translator.translate("Cylinders", Settings.language)
-            font.pixelSize: mainWindow.width / 60
+            font.pixelSize: labelFontSize
             visible: {
                 (rpmcheckbox.checked == true) ? true : false;
             }
-            color: "white"
+            color: "#FFFFFF"
         }
-        ComboBox {
+        StyledComboBox {
             id: cylindercombobox
             visible: {
                 (rpmcanversionselector.currentIndex == 0 && rpmcheckbox.checked == true) ? true : false;
             }
             width: mainWindow.width / 8
-            height: mainWindow.height / 15
+            height: fieldHeight
             font.pixelSize: mainWindow.width / 75
-            //model: ["2","3","4","5","6","8","12"]
             model: ["0.5", "0.6", "0.7", "0.8", "0.9", "1", "1.1", "1.2", "1.3", "1.4", "1.5", "1.6", "1.7", "1.8", "1.9", "2", "2.1", "2.2", "2.3", "2.4", "2.5", "2.6", "2.7", "2.8", "2.9", "3", "3.1", "3.2", "3.3", "3.4", "3.5", "3.6", "3.7", "3.8", "3.9", "4", "4.1", "4.2", "4.3", "4.4", "4.5", "4.6", "4.7", "4.8", "4.9", "5", "5.1", "5.2", "5.3", "5.4", "5.5", "5.6", "5.7", "5.8", "5.9", "6", "6.1", "6.2", "6.3", "6.4", "6.5", "6.6", "6.7", "6.8", "6.9", "7", "7.1", "7.2", "7.3", "7.4", "7.5", "7.6", "7.7", "7.8", "7.9", "8", "8.1", "8.2", "8.3", "8.4", "8.5", "8.6", "8.7", "8.8", "8.9", "9", "9.1", "9.2", "9.3", "9.4", "9.5", "9.6", "9.7", "9.8", "9.9", "10", "10.1", "10.2", "10.3", "10.4", "10.5", "10.6", "10.7", "10.8", "10.9", "11", "11.1", "11.2", "11.3", "11.4", "11.5", "11.6", "11.7", "11.8", "11.9", "12", "12.1", "12.2", "12.3", "12.4", "12.5", "12.6", "12.7", "12.8", "12.9"]
             onActivated: inputs.setInputs()
-            delegate: ItemDelegate {
-                width: cylindercombobox.width
-                text: cylindercombobox.textRole ? (Array.isArray(control.model) ? modelData[control.textRole] : model[control.textRole]) : modelData
-                font.weight: cylindercombobox.currentIndex == index ? Font.DemiBold : Font.Normal
-                font.family: cylindercombobox.font.family
-                font.pixelSize: cylindercombobox.font.pixelSize
-                highlighted: cylindercombobox.highlightedIndex == index
-                hoverEnabled: cylindercombobox.hoverEnabled
-            }
         }
-        ComboBox {
+        StyledComboBox {
             id: cylindercomboboxv2
             visible: {
                 (rpmcanversionselector.currentIndex == 1 && rpmcheckbox.checked == true) ? true : false;
             }
             width: mainWindow.width / 8
-            height: mainWindow.height / 15
+            height: fieldHeight
             font.pixelSize: mainWindow.width / 75
             model: ["1", "2", "3", "4", "5", "6", "8", "12"]
             onActivated: inputs.setInputs()
-            delegate: ItemDelegate {
-                width: cylindercombobox.width
-                text: cylindercombobox.textRole ? (Array.isArray(control.model) ? modelData[control.textRole] : model[control.textRole]) : modelData
-                font.weight: cylindercombobox.currentIndex == index ? Font.DemiBold : Font.Normal
-                font.family: cylindercombobox.font.family
-                font.pixelSize: cylindercombobox.font.pixelSize
-                highlighted: cylindercombobox.highlightedIndex == index
-                hoverEnabled: cylindercombobox.hoverEnabled
-            }
         }
     }
+
+    // * Right section header: Voltage divider jumpers
     Text {
         anchors.leftMargin: 10
         anchors.top: parent.top
         anchors.right: parent.right
         text: Translator.translate("Voltage divider jumpers", Settings.language)
-        font.pixelSize: mainWindow.width / 60
-        color: "white"
+        font.pixelSize: labelFontSize
+        color: "#FFFFFF"
     }
+
+    // * Right section: Steinhart-Hart coefficients + voltage divider jumper checkboxes
     Grid {
         id: inputgrid2
         anchors.right: parent.right
@@ -618,552 +609,510 @@ Rectangle {
         spacing: 3
         Text {
             text: Translator.translate("Temp In.", Settings.language)
-            font.pixelSize: mainWindow.width / 60
-            color: "white"
+            font.pixelSize: labelFontSize
+            color: "#FFFFFF"
             rightPadding: mainWindow.width * 0.01675
         }
         Text {
             id: t1
-            text: "T1 (°C)"
-            font.pixelSize: mainWindow.width / 60
-            color: "white"
+            text: "T1 (C)"
+            font.pixelSize: labelFontSize
+            color: "#FFFFFF"
         }
         Text {
-            text: "R1 (Ω)"
-            font.pixelSize: mainWindow.width / 60
-            color: "white"
+            text: "R1 (Ohm)"
+            font.pixelSize: labelFontSize
+            color: "#FFFFFF"
         }
         Text {
-            text: "T2 (°C)"
-            font.pixelSize: mainWindow.width / 60
-            color: "white"
+            text: "T2 (C)"
+            font.pixelSize: labelFontSize
+            color: "#FFFFFF"
         }
         Text {
-            text: "R2 (Ω)"
-            font.pixelSize: mainWindow.width / 60
-            color: "white"
+            text: "R2 (Ohm)"
+            font.pixelSize: labelFontSize
+            color: "#FFFFFF"
         }
         Text {
-            text: "T3 (°C)"
-            font.pixelSize: mainWindow.width / 60
-            color: "white"
+            text: "T3 (C)"
+            font.pixelSize: labelFontSize
+            color: "#FFFFFF"
         }
         Text {
-            text: "R3 (Ω)"
-            font.pixelSize: mainWindow.width / 60
-            color: "white"
+            text: "R3 (Ohm)"
+            font.pixelSize: labelFontSize
+            color: "#FFFFFF"
         }
         Text {
-            text: "100Ω"
-            font.pixelSize: mainWindow.width / 60
-            color: "white"
+            text: "100 Ohm"
+            font.pixelSize: labelFontSize
+            color: "#FFFFFF"
         }
         Text {
-            text: "1KΩ J."
-            font.pixelSize: mainWindow.width / 60
-            color: "white"
+            text: "1K Ohm J."
+            font.pixelSize: labelFontSize
+            color: "#FFFFFF"
         }
-        CheckBox {
+
+        // * AN 0 Steinhart-Hart row
+        StyledCheckBox {
             id: checkan0ntc
-            width: mainWindow.width / 20
-            height: mainWindow.height / 15
+            width: checkWidth
+            height: fieldHeight
             onCheckStateChanged: inputs.setInputs()
         }
-        TextField {
+        StyledTextField {
             id: t10
-            width: mainWindow.width / 12
-            height: mainWindow.height / 15
-            font.pixelSize: mainWindow.width / 65
-            //text: "-20"
+            width: shFieldWidth
+            height: fieldHeight
+            font.pixelSize: shFieldFontSize
             enabled: checkan0ntc.checked == true ? true : false
-            inputMethodHints: Qt.ImhFormattedNumbersOnly  // this ensures valid inputs are number only
+            inputMethodHints: Qt.ImhFormattedNumbersOnly
             onEditingFinished: inputs.setInputs()
         }
-        TextField {
+        StyledTextField {
             id: r10
-            width: mainWindow.width / 12
-            height: mainWindow.height / 15
-            font.pixelSize: mainWindow.width / 65
-            //text: "15462"
+            width: shFieldWidth
+            height: fieldHeight
+            font.pixelSize: shFieldFontSize
             enabled: checkan0ntc.checked == true ? true : false
-            inputMethodHints: Qt.ImhFormattedNumbersOnly  // this ensures valid inputs are number only
+            inputMethodHints: Qt.ImhFormattedNumbersOnly
             onEditingFinished: inputs.setInputs()
         }
-        TextField {
+        StyledTextField {
             id: t20
-            width: mainWindow.width / 12
-            height: mainWindow.height / 15
-            font.pixelSize: mainWindow.width / 65
-            //text: "20"
+            width: shFieldWidth
+            height: fieldHeight
+            font.pixelSize: shFieldFontSize
             enabled: checkan0ntc.checked == true ? true : false
-            inputMethodHints: Qt.ImhFormattedNumbersOnly  // this ensures valid inputs are number only
+            inputMethodHints: Qt.ImhFormattedNumbersOnly
             onEditingFinished: inputs.setInputs()
         }
-        TextField {
+        StyledTextField {
             id: r20
-            width: mainWindow.width / 12
-            height: mainWindow.height / 15
-            font.pixelSize: mainWindow.width / 65
-            //text: "2500"
+            width: shFieldWidth
+            height: fieldHeight
+            font.pixelSize: shFieldFontSize
             enabled: checkan0ntc.checked == true ? true : false
-            inputMethodHints: Qt.ImhFormattedNumbersOnly  // this ensures valid inputs are number only
+            inputMethodHints: Qt.ImhFormattedNumbersOnly
             onEditingFinished: inputs.setInputs()
         }
-        TextField {
+        StyledTextField {
             id: t30
-            width: mainWindow.width / 12
-            height: mainWindow.height / 15
-            font.pixelSize: mainWindow.width / 65
-            //text: "80"
+            width: shFieldWidth
+            height: fieldHeight
+            font.pixelSize: shFieldFontSize
             enabled: checkan0ntc.checked == true ? true : false
-            inputMethodHints: Qt.ImhFormattedNumbersOnly  // this ensures valid inputs are number only
+            inputMethodHints: Qt.ImhFormattedNumbersOnly
             onEditingFinished: inputs.setInputs()
         }
-        TextField {
+        StyledTextField {
             id: r30
-            width: mainWindow.width / 12
-            height: mainWindow.height / 15
-            font.pixelSize: mainWindow.width / 65
-            //text: "323"
+            width: shFieldWidth
+            height: fieldHeight
+            font.pixelSize: shFieldFontSize
             enabled: checkan0ntc.checked == true ? true : false
-            inputMethodHints: Qt.ImhFormattedNumbersOnly  // this ensures valid inputs are number only
+            inputMethodHints: Qt.ImhFormattedNumbersOnly
             onEditingFinished: inputs.setInputs()
         }
-        CheckBox {
+        StyledCheckBox {
             id: checkan0100
-            width: mainWindow.width / 20
-            height: mainWindow.height / 15
+            width: checkWidth
+            height: fieldHeight
             onCheckStateChanged: inputs.setInputs()
         }
-        CheckBox {
+        StyledCheckBox {
             id: checkan01k
-            width: mainWindow.width / 20
-            height: mainWindow.height / 15
+            width: checkWidth
+            height: fieldHeight
             onCheckStateChanged: inputs.setInputs()
         }
-        CheckBox {
+
+        // * AN 1 Steinhart-Hart row
+        StyledCheckBox {
             id: checkan1ntc
-            width: mainWindow.width / 20
-            height: mainWindow.height / 15
+            width: checkWidth
+            height: fieldHeight
             onCheckStateChanged: inputs.setInputs()
         }
-        TextField {
+        StyledTextField {
             id: t11
-            width: mainWindow.width / 12
-            height: mainWindow.height / 15
-            font.pixelSize: mainWindow.width / 65
-            //text: "-20"
+            width: shFieldWidth
+            height: fieldHeight
+            font.pixelSize: shFieldFontSize
             enabled: checkan1ntc.checked == true ? true : false
-            inputMethodHints: Qt.ImhFormattedNumbersOnly  // this ensures valid inputs are number only
+            inputMethodHints: Qt.ImhFormattedNumbersOnly
             onEditingFinished: inputs.setInputs()
         }
-        TextField {
+        StyledTextField {
             id: r11
-            width: mainWindow.width / 12
-            height: mainWindow.height / 15
-            font.pixelSize: mainWindow.width / 65
-            // text: "14600"
+            width: shFieldWidth
+            height: fieldHeight
+            font.pixelSize: shFieldFontSize
             enabled: checkan1ntc.checked == true ? true : false
-            inputMethodHints: Qt.ImhFormattedNumbersOnly  // this ensures valid inputs are number only
+            inputMethodHints: Qt.ImhFormattedNumbersOnly
             onEditingFinished: inputs.setInputs()
         }
-        TextField {
+        StyledTextField {
             id: t21
-            width: mainWindow.width / 12
-            height: mainWindow.height / 15
-            font.pixelSize: mainWindow.width / 65
-            //text: "20"
+            width: shFieldWidth
+            height: fieldHeight
+            font.pixelSize: shFieldFontSize
             enabled: checkan1ntc.checked == true ? true : false
-            inputMethodHints: Qt.ImhFormattedNumbersOnly  // this ensures valid inputs are number only
+            inputMethodHints: Qt.ImhFormattedNumbersOnly
             onEditingFinished: inputs.setInputs()
         }
-        TextField {
+        StyledTextField {
             id: r21
-            width: mainWindow.width / 12
-            height: mainWindow.height / 15
-            font.pixelSize: mainWindow.width / 65
-            //text: "2200"
+            width: shFieldWidth
+            height: fieldHeight
+            font.pixelSize: shFieldFontSize
             enabled: checkan1ntc.checked == true ? true : false
-            inputMethodHints: Qt.ImhFormattedNumbersOnly  // this ensures valid inputs are number only
+            inputMethodHints: Qt.ImhFormattedNumbersOnly
             onEditingFinished: inputs.setInputs()
         }
-        TextField {
+        StyledTextField {
             id: t31
-            width: mainWindow.width / 12
-            height: mainWindow.height / 15
-            font.pixelSize: mainWindow.width / 65
-            //text: "80"
+            width: shFieldWidth
+            height: fieldHeight
+            font.pixelSize: shFieldFontSize
             enabled: checkan1ntc.checked == true ? true : false
-            inputMethodHints: Qt.ImhFormattedNumbersOnly  // this ensures valid inputs are number only
+            inputMethodHints: Qt.ImhFormattedNumbersOnly
             onEditingFinished: inputs.setInputs()
         }
-        TextField {
+        StyledTextField {
             id: r31
-            width: mainWindow.width / 12
-            height: mainWindow.height / 15
-            font.pixelSize: mainWindow.width / 65
-            //text: "290"
+            width: shFieldWidth
+            height: fieldHeight
+            font.pixelSize: shFieldFontSize
             enabled: checkan1ntc.checked == true ? true : false
-            inputMethodHints: Qt.ImhFormattedNumbersOnly  // this ensures valid inputs are number only
+            inputMethodHints: Qt.ImhFormattedNumbersOnly
             onEditingFinished: inputs.setInputs()
         }
-        CheckBox {
+        StyledCheckBox {
             id: checkan1100
-            width: mainWindow.width / 20
-            height: mainWindow.height / 15
+            width: checkWidth
+            height: fieldHeight
             onCheckStateChanged: inputs.setInputs()
         }
-        CheckBox {
+        StyledCheckBox {
             id: checkan11k
-            width: mainWindow.width / 20
-            height: mainWindow.height / 15
+            width: checkWidth
+            height: fieldHeight
             onCheckStateChanged: inputs.setInputs()
         }
-        CheckBox {
+
+        // * AN 2 Steinhart-Hart row
+        StyledCheckBox {
             id: checkan2ntc
-            width: mainWindow.width / 20
-            height: mainWindow.height / 15
+            width: checkWidth
+            height: fieldHeight
             onCheckStateChanged: inputs.setInputs()
         }
-        TextField {
+        StyledTextField {
             id: t12
-            width: mainWindow.width / 12
-            height: mainWindow.height / 15
-            font.pixelSize: mainWindow.width / 65
-            //text: "-20"
+            width: shFieldWidth
+            height: fieldHeight
+            font.pixelSize: shFieldFontSize
             enabled: checkan2ntc.checked == true ? true : false
-            inputMethodHints: Qt.ImhFormattedNumbersOnly  // this ensures valid inputs are number only
+            inputMethodHints: Qt.ImhFormattedNumbersOnly
             onEditingFinished: inputs.setInputs()
         }
-        TextField {
+        StyledTextField {
             id: r12
-            width: mainWindow.width / 12
-            height: mainWindow.height / 15
-            font.pixelSize: mainWindow.width / 65
-            //text: "14600"
+            width: shFieldWidth
+            height: fieldHeight
+            font.pixelSize: shFieldFontSize
             enabled: checkan2ntc.checked == true ? true : false
-            inputMethodHints: Qt.ImhFormattedNumbersOnly  // this ensures valid inputs are number only
+            inputMethodHints: Qt.ImhFormattedNumbersOnly
             onEditingFinished: inputs.setInputs()
         }
-        TextField {
+        StyledTextField {
             id: t22
-            width: mainWindow.width / 12
-            height: mainWindow.height / 15
-            font.pixelSize: mainWindow.width / 65
-            //text: "20"
+            width: shFieldWidth
+            height: fieldHeight
+            font.pixelSize: shFieldFontSize
             enabled: checkan2ntc.checked == true ? true : false
-            inputMethodHints: Qt.ImhFormattedNumbersOnly  // this ensures valid inputs are number only
+            inputMethodHints: Qt.ImhFormattedNumbersOnly
             onEditingFinished: inputs.setInputs()
         }
-        TextField {
+        StyledTextField {
             id: r22
-            width: mainWindow.width / 12
-            height: mainWindow.height / 15
-            font.pixelSize: mainWindow.width / 65
-            //text: "2200"
+            width: shFieldWidth
+            height: fieldHeight
+            font.pixelSize: shFieldFontSize
             enabled: checkan2ntc.checked == true ? true : false
-            inputMethodHints: Qt.ImhFormattedNumbersOnly  // this ensures valid inputs are number only
+            inputMethodHints: Qt.ImhFormattedNumbersOnly
             onEditingFinished: inputs.setInputs()
         }
-        TextField {
+        StyledTextField {
             id: t32
-            width: mainWindow.width / 12
-            height: mainWindow.height / 15
-            font.pixelSize: mainWindow.width / 65
-            //text: "80"
+            width: shFieldWidth
+            height: fieldHeight
+            font.pixelSize: shFieldFontSize
             enabled: checkan2ntc.checked == true ? true : false
-            inputMethodHints: Qt.ImhFormattedNumbersOnly  // this ensures valid inputs are number only
+            inputMethodHints: Qt.ImhFormattedNumbersOnly
             onEditingFinished: inputs.setInputs()
         }
-        TextField {
+        StyledTextField {
             id: r32
-            width: mainWindow.width / 12
-            height: mainWindow.height / 15
-            font.pixelSize: mainWindow.width / 65
-            //text: "290"
+            width: shFieldWidth
+            height: fieldHeight
+            font.pixelSize: shFieldFontSize
             enabled: checkan2ntc.checked == true ? true : false
-            inputMethodHints: Qt.ImhFormattedNumbersOnly  // this ensures valid inputs are number only
+            inputMethodHints: Qt.ImhFormattedNumbersOnly
             onEditingFinished: inputs.setInputs()
         }
-        CheckBox {
+        StyledCheckBox {
             id: checkan2100
-            width: mainWindow.width / 20
-            height: mainWindow.height / 15
+            width: checkWidth
+            height: fieldHeight
             onCheckStateChanged: inputs.setInputs()
         }
-        CheckBox {
+        StyledCheckBox {
             id: checkan21k
-            width: mainWindow.width / 20
-            height: mainWindow.height / 15
+            width: checkWidth
+            height: fieldHeight
             onCheckStateChanged: inputs.setInputs()
         }
 
-        CheckBox {
+        // * AN 3 Steinhart-Hart row
+        StyledCheckBox {
             id: checkan3ntc
-            width: mainWindow.width / 20
-            height: mainWindow.height / 15
+            width: checkWidth
+            height: fieldHeight
             onCheckStateChanged: inputs.setInputs()
         }
-        TextField {
+        StyledTextField {
             id: t13
-            width: mainWindow.width / 12
-            height: mainWindow.height / 15
-            font.pixelSize: mainWindow.width / 65
-            //text: "-20"
+            width: shFieldWidth
+            height: fieldHeight
+            font.pixelSize: shFieldFontSize
             enabled: checkan3ntc.checked == true ? true : false
-            inputMethodHints: Qt.ImhFormattedNumbersOnly  // this ensures valid inputs are number only
+            inputMethodHints: Qt.ImhFormattedNumbersOnly
             onEditingFinished: inputs.setInputs()
         }
-        TextField {
+        StyledTextField {
             id: r13
-            width: mainWindow.width / 12
-            height: mainWindow.height / 15
-            font.pixelSize: mainWindow.width / 65
-            //text: "14600"
+            width: shFieldWidth
+            height: fieldHeight
+            font.pixelSize: shFieldFontSize
             enabled: checkan3ntc.checked == true ? true : false
-            inputMethodHints: Qt.ImhFormattedNumbersOnly  // this ensures valid inputs are number only
+            inputMethodHints: Qt.ImhFormattedNumbersOnly
             onEditingFinished: inputs.setInputs()
         }
-        TextField {
+        StyledTextField {
             id: t23
-            width: mainWindow.width / 12
-            height: mainWindow.height / 15
-            font.pixelSize: mainWindow.width / 65
-            //text: "20"
+            width: shFieldWidth
+            height: fieldHeight
+            font.pixelSize: shFieldFontSize
             enabled: checkan3ntc.checked == true ? true : false
-            inputMethodHints: Qt.ImhFormattedNumbersOnly  // this ensures valid inputs are number only
+            inputMethodHints: Qt.ImhFormattedNumbersOnly
             onEditingFinished: inputs.setInputs()
         }
-        TextField {
+        StyledTextField {
             id: r23
-            width: mainWindow.width / 12
-            height: mainWindow.height / 15
-            font.pixelSize: mainWindow.width / 65
-            //text: "2200"
+            width: shFieldWidth
+            height: fieldHeight
+            font.pixelSize: shFieldFontSize
             enabled: checkan3ntc.checked == true ? true : false
-            inputMethodHints: Qt.ImhFormattedNumbersOnly  // this ensures valid inputs are number only
+            inputMethodHints: Qt.ImhFormattedNumbersOnly
             onEditingFinished: inputs.setInputs()
         }
-        TextField {
+        StyledTextField {
             id: t33
-            width: mainWindow.width / 12
-            height: mainWindow.height / 15
-            font.pixelSize: mainWindow.width / 65
-            //text: "80"
+            width: shFieldWidth
+            height: fieldHeight
+            font.pixelSize: shFieldFontSize
             enabled: checkan3ntc.checked == true ? true : false
-            inputMethodHints: Qt.ImhFormattedNumbersOnly  // this ensures valid inputs are number only
+            inputMethodHints: Qt.ImhFormattedNumbersOnly
             onEditingFinished: inputs.setInputs()
         }
-        TextField {
+        StyledTextField {
             id: r33
-            width: mainWindow.width / 12
-            height: mainWindow.height / 15
-            font.pixelSize: mainWindow.width / 65
-            //text: "290"
+            width: shFieldWidth
+            height: fieldHeight
+            font.pixelSize: shFieldFontSize
             enabled: checkan3ntc.checked == true ? true : false
-            inputMethodHints: Qt.ImhFormattedNumbersOnly  // this ensures valid inputs are number only
+            inputMethodHints: Qt.ImhFormattedNumbersOnly
             onEditingFinished: inputs.setInputs()
         }
-        CheckBox {
+        StyledCheckBox {
             id: checkan3100
-            width: mainWindow.width / 20
-            height: mainWindow.height / 15
+            width: checkWidth
+            height: fieldHeight
             onCheckStateChanged: inputs.setInputs()
         }
-        CheckBox {
+        StyledCheckBox {
             id: checkan31k
-            width: mainWindow.width / 20
-            height: mainWindow.height / 15
+            width: checkWidth
+            height: fieldHeight
             onCheckStateChanged: inputs.setInputs()
         }
 
-        CheckBox {
+        // * AN 4 Steinhart-Hart row
+        StyledCheckBox {
             id: checkan4ntc
-            width: mainWindow.width / 20
-            height: mainWindow.height / 15
+            width: checkWidth
+            height: fieldHeight
             onCheckStateChanged: inputs.setInputs()
         }
-        TextField {
+        StyledTextField {
             id: t14
-            width: mainWindow.width / 12
-            height: mainWindow.height / 15
-            font.pixelSize: mainWindow.width / 65
-            //text: "-20"
+            width: shFieldWidth
+            height: fieldHeight
+            font.pixelSize: shFieldFontSize
             enabled: checkan4ntc.checked == true ? true : false
-            inputMethodHints: Qt.ImhFormattedNumbersOnly  // this ensures valid inputs are number only
+            inputMethodHints: Qt.ImhFormattedNumbersOnly
             onEditingFinished: inputs.setInputs()
         }
-        TextField {
+        StyledTextField {
             id: r14
-            width: mainWindow.width / 12
-            height: mainWindow.height / 15
-            font.pixelSize: mainWindow.width / 65
-            //text: "14600"
+            width: shFieldWidth
+            height: fieldHeight
+            font.pixelSize: shFieldFontSize
             enabled: checkan4ntc.checked == true ? true : false
-            inputMethodHints: Qt.ImhFormattedNumbersOnly  // this ensures valid inputs are number only
+            inputMethodHints: Qt.ImhFormattedNumbersOnly
             onEditingFinished: inputs.setInputs()
         }
-        TextField {
+        StyledTextField {
             id: t24
-            width: mainWindow.width / 12
-            height: mainWindow.height / 15
-            font.pixelSize: mainWindow.width / 65
-            //text: "20"
+            width: shFieldWidth
+            height: fieldHeight
+            font.pixelSize: shFieldFontSize
             enabled: checkan4ntc.checked == true ? true : false
-            inputMethodHints: Qt.ImhFormattedNumbersOnly  // this ensures valid inputs are number only
+            inputMethodHints: Qt.ImhFormattedNumbersOnly
             onEditingFinished: inputs.setInputs()
         }
-        TextField {
+        StyledTextField {
             id: r24
-            width: mainWindow.width / 12
-            height: mainWindow.height / 15
-            font.pixelSize: mainWindow.width / 65
-            //text: "2200"
+            width: shFieldWidth
+            height: fieldHeight
+            font.pixelSize: shFieldFontSize
             enabled: checkan4ntc.checked == true ? true : false
-            inputMethodHints: Qt.ImhFormattedNumbersOnly  // this ensures valid inputs are number only
+            inputMethodHints: Qt.ImhFormattedNumbersOnly
             onEditingFinished: inputs.setInputs()
         }
-        TextField {
+        StyledTextField {
             id: t34
-            width: mainWindow.width / 12
-            height: mainWindow.height / 15
-            font.pixelSize: mainWindow.width / 65
-            //text: "80"
+            width: shFieldWidth
+            height: fieldHeight
+            font.pixelSize: shFieldFontSize
             enabled: checkan4ntc.checked == true ? true : false
-            inputMethodHints: Qt.ImhFormattedNumbersOnly  // this ensures valid inputs are number only
+            inputMethodHints: Qt.ImhFormattedNumbersOnly
             onEditingFinished: inputs.setInputs()
         }
-        TextField {
+        StyledTextField {
             id: r34
-            width: mainWindow.width / 12
-            height: mainWindow.height / 15
-            font.pixelSize: mainWindow.width / 65
-            //text: "290"
+            width: shFieldWidth
+            height: fieldHeight
+            font.pixelSize: shFieldFontSize
             enabled: checkan4ntc.checked == true ? true : false
-            inputMethodHints: Qt.ImhFormattedNumbersOnly  // this ensures valid inputs are number only
+            inputMethodHints: Qt.ImhFormattedNumbersOnly
             onEditingFinished: inputs.setInputs()
         }
-        CheckBox {
+        StyledCheckBox {
             id: checkan4100
-            width: mainWindow.width / 20
-            height: mainWindow.height / 15
+            width: checkWidth
+            height: fieldHeight
             onCheckStateChanged: inputs.setInputs()
         }
-        CheckBox {
+        StyledCheckBox {
             id: checkan41k
-            width: mainWindow.width / 20
-            height: mainWindow.height / 15
+            width: checkWidth
+            height: fieldHeight
             onCheckStateChanged: inputs.setInputs()
         }
-        //
-        CheckBox {
+
+        // * AN 5 Steinhart-Hart row
+        StyledCheckBox {
             id: checkan5ntc
-            width: mainWindow.width / 20
-            height: mainWindow.height / 15
+            width: checkWidth
+            height: fieldHeight
             onCheckStateChanged: inputs.setInputs()
         }
-        TextField {
+        StyledTextField {
             id: t15
-            width: mainWindow.width / 12
-            height: mainWindow.height / 15
-            font.pixelSize: mainWindow.width / 65
-            //text: "-20"
+            width: shFieldWidth
+            height: fieldHeight
+            font.pixelSize: shFieldFontSize
             enabled: checkan5ntc.checked == true ? true : false
-            inputMethodHints: Qt.ImhFormattedNumbersOnly  // this ensures valid inputs are number only
+            inputMethodHints: Qt.ImhFormattedNumbersOnly
             onEditingFinished: inputs.setInputs()
         }
-        TextField {
+        StyledTextField {
             id: r15
-            width: mainWindow.width / 12
-            height: mainWindow.height / 15
-            font.pixelSize: mainWindow.width / 65
-            //text: "14600"
+            width: shFieldWidth
+            height: fieldHeight
+            font.pixelSize: shFieldFontSize
             enabled: checkan5ntc.checked == true ? true : false
-            inputMethodHints: Qt.ImhFormattedNumbersOnly  // this ensures valid inputs are number only
+            inputMethodHints: Qt.ImhFormattedNumbersOnly
             onEditingFinished: inputs.setInputs()
         }
-        TextField {
+        StyledTextField {
             id: t25
-            width: mainWindow.width / 12
-            height: mainWindow.height / 15
-            font.pixelSize: mainWindow.width / 65
-            //text: "20"
+            width: shFieldWidth
+            height: fieldHeight
+            font.pixelSize: shFieldFontSize
             enabled: checkan5ntc.checked == true ? true : false
-            inputMethodHints: Qt.ImhFormattedNumbersOnly  // this ensures valid inputs are number only
+            inputMethodHints: Qt.ImhFormattedNumbersOnly
             onEditingFinished: inputs.setInputs()
         }
-        TextField {
+        StyledTextField {
             id: r25
-            width: mainWindow.width / 12
-            height: mainWindow.height / 15
-            font.pixelSize: mainWindow.width / 65
-            //text: "2200"
+            width: shFieldWidth
+            height: fieldHeight
+            font.pixelSize: shFieldFontSize
             enabled: checkan5ntc.checked == true ? true : false
-            inputMethodHints: Qt.ImhFormattedNumbersOnly  // this ensures valid inputs are number only
+            inputMethodHints: Qt.ImhFormattedNumbersOnly
             onEditingFinished: inputs.setInputs()
         }
-        TextField {
+        StyledTextField {
             id: t35
-            width: mainWindow.width / 12
-            height: mainWindow.height / 15
-            font.pixelSize: mainWindow.width / 65
-            //text: "80"
+            width: shFieldWidth
+            height: fieldHeight
+            font.pixelSize: shFieldFontSize
             enabled: checkan5ntc.checked == true ? true : false
-            inputMethodHints: Qt.ImhFormattedNumbersOnly  // this ensures valid inputs are number only
+            inputMethodHints: Qt.ImhFormattedNumbersOnly
             onEditingFinished: inputs.setInputs()
         }
-        TextField {
+        StyledTextField {
             id: r35
-            width: mainWindow.width / 12
-            height: mainWindow.height / 15
-            font.pixelSize: mainWindow.width / 65
-            //text: "290"
+            width: shFieldWidth
+            height: fieldHeight
+            font.pixelSize: shFieldFontSize
             enabled: checkan5ntc.checked == true ? true : false
-            inputMethodHints: Qt.ImhFormattedNumbersOnly  // this ensures valid inputs are number only
+            inputMethodHints: Qt.ImhFormattedNumbersOnly
             onEditingFinished: inputs.setInputs()
         }
-        CheckBox {
+        StyledCheckBox {
             id: checkan5100
-            width: mainWindow.width / 20
-            height: mainWindow.height / 15
+            width: checkWidth
+            height: fieldHeight
             onCheckStateChanged: inputs.setInputs()
         }
-        CheckBox {
+        StyledCheckBox {
             id: checkan51k
-            width: mainWindow.width / 20
-            height: mainWindow.height / 15
+            width: checkWidth
+            height: fieldHeight
             onCheckStateChanged: inputs.setInputs()
         }
     }
     Component.onCompleted: {
         inputs.setInputs();
     }
-    /*
-    Text {
-        id: explanationtext
-        anchors.left: inputgrid.right
-        anchors.leftMargin: 20
-        anchors.top: inputgrid2.bottom
-        anchors.topMargin: 20
-        font.pixelSize: parent.width / 55
-        font.bold: true
-        width: parent.width / 1.5
-        horizontalAlignment: Text.AlignHCenter
-        color: "black"
-        wrapMode: Text.WordWrap
-        text: qsTr("Usage : Enter the Value that should be displayed at 0 V in the field Val.@ 0V and the Value that should be displayed at 5 V in the field Val @5V. The calculated values will be available in the corresponding datasource EXAnalogCalcx. Analog 0-3 can also be used for temperature sensors (Connect one side of the Variable resistance Sensor to 5 V and the other side to the AN0/1/2, also enable the 1K pullup resistor ).Set the tick for Temp. in , then  Measure the resistance of the sensor at 3 different temperatures and enter each temperature in degree celsis and enter the Temperature values in T1-T3 and the corresponding resistance in R1-R3. The output will be shown in EXanalogcalc x as temperature. The input will have to be done in degrees celsisus for calibration . The output will show in degrees celsius or fahrenheit, dependending on the Temp units selection in the mainWindow settings. ")
-    }
-    */
 
+    // * Bottom bar: Digital input headlight channel selector
     Row {
         id: row1
         anchors.bottom: mainWindow.bottom
         bottomPadding: 15
-        leftPadding: 5
+        leftPadding: 16
         Text {
             id: digitalSwitchText
             text: "Digital input headlight channel:"
-            color: "white"
+            color: "#FFFFFF"
             topPadding: 7
             rightPadding: 5
 
@@ -1177,21 +1126,12 @@ Rectangle {
             }
         }
 
-        ComboBox {
+        StyledComboBox {
             id: digitalExtender
             model: comboBoxModel
+            textRole: "text"
             width: mainWindow.width * 0.18
             font.pixelSize: 20
-
-            delegate: ItemDelegate {
-                width: digitalExtender.width
-                font.pixelSize: digitalExtender.font.pixelSize
-                text: digitalExtender.textRole ? (Array.isArray(digitalExtender.model) ? modelData[digitalExtender.textRole] : model[digitalExtender.textRole]) : modelData
-                font.weight: digitalExtender.currentIndex === index ? Font.DemiBold : Font.Normal
-                font.family: digitalExtender.font.family
-                highlighted: digitalExtender.highlightedIndex === index
-                hoverEnabled: digitalExtender.hoverEnabled
-            }
 
             Component.onCompleted: {
                 if (mainWindow.width == 800) {
@@ -1201,7 +1141,6 @@ Rectangle {
                 }
             }
             onCurrentIndexChanged: {
-                //see if the index is matching with the text then assign digiValue a pointer for the function digitalLoop()
                 if (digitalExtender.textAt(currentIndex) === "Ex Digital Input 1") {
                     digiValue = 0;
                     digiStringValue = "Ex Digital Input 1";
@@ -1239,6 +1178,7 @@ Rectangle {
         }
     }
 
+    // * Bottom bar: CAN/IO Brightness switch
     Row {
         id: bottomExtenderRow
         anchors.left: row1.right
@@ -1249,7 +1189,7 @@ Rectangle {
         Text {
             id: extenderSwitch
             text: "CAN/IO Brightness Function:"
-            color: "white"
+            color: "#FFFFFF"
             font.family: "Eurostile"
             font.bold: true
             topPadding: 8
@@ -1263,32 +1203,13 @@ Rectangle {
             }
         }
 
-        Switch {
+        StyledSwitch {
             id: maxBrightnessBoot
             text: settings.switchValue ? "On" : "Off"
             checked: settings.value("switchChecked", false)
             width: mainWindow.width / 10
-            contentItem: Text {
-                id: maxBrightnessBootText
-                text: maxBrightnessBoot.text
-                topPadding: 4
-                color: "white" // Set the text color here
-                opacity: enabled ? 1.0 : 0.3
-                horizontalAlignment: Text.AlignHCenter
-                font.family: "Eurostile"
-                font.bold: true
-                Component.onCompleted: {
-                    if (mainWindow.width == 800) {
-                        maxBrightnessBootText.font.pixelSize = 15;
-                        maxBrightnessBootText.leftPadding = 70;
-                    } else {
-                        maxBrightnessBootText.font.pixelSize = 20;
-                        maxBrightnessBootText.topPadding = 2;
-                    }
-                }
-            }
             onClicked: {
-                settings.setValue("switchChecked", checked); // Save the value to settings
+                settings.setValue("switchChecked", checked);
                 maxBrightnessBoot.text = checked ? "On" : "Off";
             }
         }
@@ -1296,7 +1217,6 @@ Rectangle {
 
     function executeOnBootAction() {
         if (settings.switchValue) {
-            // Perform action here that should happen on boot if feature is enabled
             maxBrightnessOnBoot = 1;
         }
     }
