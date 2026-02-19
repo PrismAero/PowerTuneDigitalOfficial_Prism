@@ -311,6 +311,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
             PowerTune/Settings/StartupSettings.qml
             PowerTune/Settings/NetworkSettings.qml
             PowerTune/Settings/CanMonitor.qml
+            PowerTune/Settings/DiagnosticsSettings.qml
             PowerTune/Settings/HelpPage.qml
             PowerTune/Settings/WifiCountryList.qml
             PowerTune/Settings/components/SettingsPage.qml

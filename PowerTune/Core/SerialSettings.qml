@@ -52,6 +52,7 @@ Rectangle {
         ListElement { title: "EX Board" }
         ListElement { title: "Startup" }
         ListElement { title: "Network" }
+        ListElement { title: "Diagnostics" }
     }
 
     ColumnLayout {
@@ -145,6 +146,9 @@ Rectangle {
             }
             NetworkSettings {
                 visible: stackLayout.currentIndex === 9
+            }
+            DiagnosticsSettings {
+                visible: stackLayout.currentIndex === 10
             }
         }
     }

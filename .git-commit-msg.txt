@@ -1,38 +1,27 @@
-feat(diagnostics): Add DiagnosticsProvider C++ backend class
+feat(settings): add Diagnostics settings page and tab
 
-Phase 8: Implement DiagnosticsProvider for the Diagnostics settings page.
+Create a new DiagnosticsSettings.qml page with a 2x2 grid layout
+displaying real-time system diagnostics from DiagnosticsProvider:
 
-New files:
-- Core/DiagnosticsProvider.h - Header with Q_PROPERTY declarations for
-  system info (CPU temp, memory, uptime), CAN bus metrics (message rate,
-  error count, connection status), serial connection info, sensor summary
-  counts, and a circular log buffer. Q_INVOKABLE methods expose live sensor
-  data, analog input diagnostics (AN1-AN11), digital input diagnostics
-  (DI1-DI4), and expander board diagnostics (EX_AN1-EX_AN8).
+- Top-left panel: System info (CPU temp, memory, uptime, system time,
+  active sensor count)
+- Top-right panel: Connection status (CAN bus status with green/red
+  indicators, daemon name, message rate, error count, serial port info,
+  connection type)
+- Bottom-left panel: Active sensors table (name, unit, source) with
+  2-second auto-refresh timer via getLiveSensorData()
+- Bottom-right panel: Log console with dark terminal styling, monospace
+  green text, auto-scroll, and clear button
 
-- Core/DiagnosticsProvider.cpp - Full implementation with:
-  - Platform-specific system info: Linux /sys/class/thermal + /proc/meminfo,
-    macOS Mach host_statistics64 API for memory, sysctl for CPU thermal level
-  - 2-second timer for system info polling
-  - 1-second timer for CAN message rate calculation
-  - SensorRegistry integration for live sensor data and counts
-  - Circular log buffer (max 200 entries, newest first)
-  - CAN tracking methods (recordCanMessage, recordCanError, setCanStatus)
-  - Connection info setter (setConnectionInfo)
-  - Stub analog/digital/expander diagnostics with TODO markers for
-    future model wiring
+Files created:
+- PowerTune/Settings/DiagnosticsSettings.qml
 
-Modified files:
-- CMakeLists.txt - Added DiagnosticsProvider.h/.cpp to CORE_HEADERS/CORE_SOURCES
-- Core/connect.h - Forward declaration and m_diagnosticsProvider member
-- Core/connect.cpp - Include, initialize, create instance, wire to
-  SensorRegistry, expose as "Diagnostics" QML context property
+Files modified:
+- PowerTune/Core/SerialSettings.qml - Added "Diagnostics" as 11th tab
+  (index 10) in tab bar and StackLayout
+- PowerTune/Settings/qmldir - Registered DiagnosticsSettings 1.0
+- CMakeLists.txt - Added DiagnosticsSettings.qml to QML_FILES
 
-QML API surface (context property "Diagnostics"):
-  Properties: cpuTemperature, memoryUsagePercent, uptime, systemTime,
-    canConnected, canMessageRate, canErrorCount, canTotalMessages, daemonName,
-    connectionType, serialConnected, serialPort, serialBaudRate,
-    activeSensorCount, totalSensorCount, logMessages
-  Methods: getLiveSensorData(), getAnalogInputDiagnostics(),
-    getDigitalInputDiagnostics(), getExpanderBoardDiagnostics(),
-    addLogMessage(level, message), clearLog()
+Design: Dark theme (#1a1a2e bg, #1e1e3a panels, #009688 teal accent),
+fits 1600x684px without page-level scrolling. Scrolling only allowed
+within sensor list and log console panels.
