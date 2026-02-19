@@ -5,6 +5,8 @@
  * Provides linear sensor presets, NTC thermistor presets, and voltage divider
  * calculations for the EX Board analog input configuration UI. Delegates
  * Steinhart-Hart math to SteinhartCalculator.
+ *
+ * Copyright (c) 2026 Kai Wyborny. All rights reserved.
  */
 
 #ifndef CALIBRATIONHELPER_H
@@ -63,6 +65,52 @@ public:
      * @return Linearly interpolated sensor value
      */
     Q_INVOKABLE qreal calculateLinearValue(qreal voltage, qreal val0v, qreal val5v) const;
+
+    /**
+     * @brief Calculate a linear sensor value with automatic voltage range scaling
+     *
+     * Looks up the preset by name, normalizes the raw voltage from the sensor's
+     * actual output range to 0-5V, then applies the standard linear interpolation.
+     *
+     * @param presetName The name of the linear preset to use
+     * @param rawVoltage The raw measured voltage from the sensor
+     * @return Scaled sensor value, or 0.0 if the preset is not found
+     */
+    Q_INVOKABLE double calculateLinearValueScaled(const QString &presetName, double rawVoltage);
+
+    /**
+     * @brief Normalize a raw voltage from a sensor's actual range to 0-5V
+     *
+     * Clamps the raw voltage to [sensorMin, sensorMax], then linearly maps it
+     * to the 0-5V range. Returns 0.0 if sensorMax equals sensorMin to avoid
+     * division by zero.
+     *
+     * @param rawVoltage The raw measured voltage
+     * @param sensorMin The sensor's minimum output voltage
+     * @param sensorMax The sensor's maximum output voltage
+     * @return Normalized voltage in the 0-5V range
+     */
+    Q_INVOKABLE double normalizeVoltage(double rawVoltage, double sensorMin, double sensorMax);
+
+    /**
+     * @brief Get the minimum voltage output for a named preset
+     *
+     * Searches both linear and NTC preset tables. Returns 0.0 if not found.
+     *
+     * @param presetName The preset name to look up
+     * @return Minimum voltage of the preset, or 0.0 if not found
+     */
+    Q_INVOKABLE double getPresetMinVoltage(const QString &presetName);
+
+    /**
+     * @brief Get the maximum voltage output for a named preset
+     *
+     * Searches both linear and NTC preset tables. Returns 5.0 if not found.
+     *
+     * @param presetName The preset name to look up
+     * @return Maximum voltage of the preset, or 5.0 if not found
+     */
+    Q_INVOKABLE double getPresetMaxVoltage(const QString &presetName);
 
     // -----------------------------------------------------------------------
     // NTC Temperature Sensor Presets
@@ -173,6 +221,8 @@ private:
         qreal val0v;
         qreal val5v;
         QString unit;
+        double minVoltage = 0.0;  ///< Actual minimum voltage output of sensor
+        double maxVoltage = 5.0;  ///< Actual maximum voltage output of sensor
     };
 
     /**
@@ -186,6 +236,8 @@ private:
         qreal r2;
         qreal t3;
         qreal r3;
+        double minVoltage = 0.0;  ///< Actual minimum voltage output of sensor
+        double maxVoltage = 5.0;  ///< Actual maximum voltage output of sensor
     };
 
     // * Preset data tables (populated in constructor)
