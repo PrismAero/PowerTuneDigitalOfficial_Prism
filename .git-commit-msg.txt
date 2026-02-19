@@ -1,0 +1,23 @@
+feat: Add voltage range display to AnalogInputs/ExBoardAnalog + move JS math to C++
+
+CalibrationHelper C++ additions:
+- getLinearPresetValueAt0V(presetName) - convenience accessor for val0v
+- getLinearPresetValueAt5V(presetName) - convenience accessor for val5v
+- getLinearPresetUnit(presetName) - convenience accessor for unit string
+- expanderChannelMultiplier(channelIndex) - CAN v2 cylinder multiplier (2x/4x)
+- frequencyDividerForCylinders(cylinderIndex) - RPM frequency divider lookup
+
+AnalogInputs.qml:
+- Added Min V / Max V read-only display columns for all 11 analog channels
+- Voltage range auto-populates from Calibration.getPresetMinVoltage/MaxVoltage
+  when a preset is selected (empty when Custom)
+
+ExBoardAnalog.qml:
+- Added MinV / MaxV display columns to all 8 EX AN linear preset rows
+- Replaced 30-line switch/case multiplier logic in setInputs() with single
+  call to Calibration.expanderChannelMultiplier()
+- Replaced 12-line switch/case in cylindercalcrpmdi1() with single call to
+  Calibration.frequencyDividerForCylinders()
+
+All arithmetic/computation moved from QML JavaScript to C++ CalibrationHelper.
+Build verified: zero errors on macos-homebrew preset.

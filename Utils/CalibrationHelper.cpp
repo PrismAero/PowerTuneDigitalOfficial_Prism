@@ -228,6 +228,114 @@ double CalibrationHelper::getPresetMaxVoltage(const QString &presetName)
 }
 
 // ---------------------------------------------------------------------------
+// Convenience Preset Accessors
+// ---------------------------------------------------------------------------
+
+/**
+ * @brief Get the value-at-0V for a named linear preset
+ *
+ * Searches the linear preset table for a matching name and returns
+ * the val0v calibration point.
+ *
+ * @param presetName The preset name to look up (case-sensitive)
+ * @return The sensor value at 0V, or 0.0 if the preset is not found
+ */
+double CalibrationHelper::getLinearPresetValueAt0V(const QString &presetName) const
+{
+    for (const auto &p : m_linearPresets) {
+        if (p.name == presetName) {
+            return p.val0v;
+        }
+    }
+    qWarning() << "CalibrationHelper: Linear preset not found for val0v:" << presetName;
+    return 0.0;
+}
+
+/**
+ * @brief Get the value-at-5V for a named linear preset
+ *
+ * Searches the linear preset table for a matching name and returns
+ * the val5v calibration point.
+ *
+ * @param presetName The preset name to look up (case-sensitive)
+ * @return The sensor value at 5V, or 0.0 if the preset is not found
+ */
+double CalibrationHelper::getLinearPresetValueAt5V(const QString &presetName) const
+{
+    for (const auto &p : m_linearPresets) {
+        if (p.name == presetName) {
+            return p.val5v;
+        }
+    }
+    qWarning() << "CalibrationHelper: Linear preset not found for val5v:" << presetName;
+    return 0.0;
+}
+
+/**
+ * @brief Get the unit string for a named linear preset
+ *
+ * Searches the linear preset table for a matching name and returns
+ * the unit string (e.g. "kPa", "PSI", "Bar").
+ *
+ * @param presetName The preset name to look up (case-sensitive)
+ * @return The unit string, or empty string if the preset is not found
+ */
+QString CalibrationHelper::getLinearPresetUnit(const QString &presetName) const
+{
+    for (const auto &p : m_linearPresets) {
+        if (p.name == presetName) {
+            return p.unit;
+        }
+    }
+    qWarning() << "CalibrationHelper: Linear preset not found for unit:" << presetName;
+    return {};
+}
+
+// ---------------------------------------------------------------------------
+// Expander Board Helpers
+// ---------------------------------------------------------------------------
+
+/**
+ * @brief Get the CAN v2 cylinder multiplier for a given combo box index
+ *
+ * The EX Board CAN v2 protocol requires different multipliers depending
+ * on the cylinder count selection index. Most indices use a 2x multiplier,
+ * except index 5 which uses 4x (typically 12-cylinder engines).
+ *
+ * @param channelIndex The combo box index (0-8)
+ * @return The multiplier (2 or 4), or 1 if the index is out of range
+ */
+int CalibrationHelper::expanderChannelMultiplier(int channelIndex) const
+{
+    if (channelIndex < 0 || channelIndex > 8) {
+        qWarning() << "CalibrationHelper: channelIndex out of range:" << channelIndex;
+        return 1;
+    }
+    // Index 5 (12-cylinder) uses 4x multiplier; all others use 2x
+    return (channelIndex == 5) ? 4 : 2;
+}
+
+/**
+ * @brief Get the RPM frequency divider for a given cylinder count index
+ *
+ * Maps the cylinder count combo box index to the corresponding frequency
+ * divider value used for RPM calculation from a digital input signal.
+ * The divider accounts for the number of ignition events per revolution.
+ *
+ * @param cylinderIndex The combo box index (0-8)
+ * @return The frequency divider value, or 1.0 if the index is out of range
+ */
+double CalibrationHelper::frequencyDividerForCylinders(int cylinderIndex) const
+{
+    static const double dividers[] = {0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 2.0, 2.5, 3.0};
+    if (cylinderIndex < 0 || cylinderIndex > 8) {
+        qWarning() << "CalibrationHelper: cylinderIndex out of range:" << cylinderIndex;
+        return 1.0;
+    }
+    return dividers[cylinderIndex];
+}
+
+// ---------------------------------------------------------------------------
 // NTC Temperature Sensor Presets
 // ---------------------------------------------------------------------------
 

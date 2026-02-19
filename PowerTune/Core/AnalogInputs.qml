@@ -21,6 +21,7 @@ Rectangle {
     readonly property int presetWidth: 200
     readonly property int fieldWidth: 120
     readonly property int unitWidth: 80
+    readonly property int vRangeWidth: 70
     readonly property int fontSize: 13
     readonly property int contentMargin: 16
 
@@ -159,6 +160,22 @@ Rectangle {
                 color: "#B0B0B0"
                 verticalAlignment: Text.AlignVCenter
             }
+            Text {
+                Layout.preferredWidth: vRangeWidth
+                text: "Min V"
+                font.pixelSize: fontSize
+                font.bold: true
+                color: "#B0B0B0"
+                verticalAlignment: Text.AlignVCenter
+            }
+            Text {
+                Layout.preferredWidth: vRangeWidth
+                text: "Max V"
+                font.pixelSize: fontSize
+                font.bold: true
+                color: "#B0B0B0"
+                verticalAlignment: Text.AlignVCenter
+            }
             Item { Layout.fillWidth: true }
         }
 
@@ -220,6 +237,20 @@ Rectangle {
                 color: "#808080"
                 verticalAlignment: Text.AlignVCenter
             }
+            StyledTextField {
+                Layout.preferredWidth: vRangeWidth
+                Layout.preferredHeight: rowHeight
+                font.pixelSize: fontSize
+                text: preset0.currentIndex > 0 ? Calibration.getPresetMinVoltage(preset0.currentText).toFixed(1) : ""
+                readOnly: true; enabled: false
+            }
+            StyledTextField {
+                Layout.preferredWidth: vRangeWidth
+                Layout.preferredHeight: rowHeight
+                font.pixelSize: fontSize
+                text: preset0.currentIndex > 0 ? Calibration.getPresetMaxVoltage(preset0.currentText).toFixed(1) : ""
+                readOnly: true; enabled: false
+            }
             Item { Layout.fillWidth: true }
         }
 
@@ -272,6 +303,20 @@ Rectangle {
                 font.pixelSize: fontSize
                 color: "#808080"
                 verticalAlignment: Text.AlignVCenter
+            }
+            StyledTextField {
+                Layout.preferredWidth: vRangeWidth
+                Layout.preferredHeight: rowHeight
+                font.pixelSize: fontSize
+                text: preset1.currentIndex > 0 ? Calibration.getPresetMinVoltage(preset1.currentText).toFixed(1) : ""
+                readOnly: true; enabled: false
+            }
+            StyledTextField {
+                Layout.preferredWidth: vRangeWidth
+                Layout.preferredHeight: rowHeight
+                font.pixelSize: fontSize
+                text: preset1.currentIndex > 0 ? Calibration.getPresetMaxVoltage(preset1.currentText).toFixed(1) : ""
+                readOnly: true; enabled: false
             }
             Item { Layout.fillWidth: true }
         }
@@ -326,6 +371,20 @@ Rectangle {
                 color: "#808080"
                 verticalAlignment: Text.AlignVCenter
             }
+            StyledTextField {
+                Layout.preferredWidth: vRangeWidth
+                Layout.preferredHeight: rowHeight
+                font.pixelSize: fontSize
+                text: preset2.currentIndex > 0 ? Calibration.getPresetMinVoltage(preset2.currentText).toFixed(1) : ""
+                readOnly: true; enabled: false
+            }
+            StyledTextField {
+                Layout.preferredWidth: vRangeWidth
+                Layout.preferredHeight: rowHeight
+                font.pixelSize: fontSize
+                text: preset2.currentIndex > 0 ? Calibration.getPresetMaxVoltage(preset2.currentText).toFixed(1) : ""
+                readOnly: true; enabled: false
+            }
             Item { Layout.fillWidth: true }
         }
 
@@ -378,6 +437,20 @@ Rectangle {
                 font.pixelSize: fontSize
                 color: "#808080"
                 verticalAlignment: Text.AlignVCenter
+            }
+            StyledTextField {
+                Layout.preferredWidth: vRangeWidth
+                Layout.preferredHeight: rowHeight
+                font.pixelSize: fontSize
+                text: preset3.currentIndex > 0 ? Calibration.getPresetMinVoltage(preset3.currentText).toFixed(1) : ""
+                readOnly: true; enabled: false
+            }
+            StyledTextField {
+                Layout.preferredWidth: vRangeWidth
+                Layout.preferredHeight: rowHeight
+                font.pixelSize: fontSize
+                text: preset3.currentIndex > 0 ? Calibration.getPresetMaxVoltage(preset3.currentText).toFixed(1) : ""
+                readOnly: true; enabled: false
             }
             Item { Layout.fillWidth: true }
         }
@@ -432,6 +505,20 @@ Rectangle {
                 color: "#808080"
                 verticalAlignment: Text.AlignVCenter
             }
+            StyledTextField {
+                Layout.preferredWidth: vRangeWidth
+                Layout.preferredHeight: rowHeight
+                font.pixelSize: fontSize
+                text: preset4.currentIndex > 0 ? Calibration.getPresetMinVoltage(preset4.currentText).toFixed(1) : ""
+                readOnly: true; enabled: false
+            }
+            StyledTextField {
+                Layout.preferredWidth: vRangeWidth
+                Layout.preferredHeight: rowHeight
+                font.pixelSize: fontSize
+                text: preset4.currentIndex > 0 ? Calibration.getPresetMaxVoltage(preset4.currentText).toFixed(1) : ""
+                readOnly: true; enabled: false
+            }
             Item { Layout.fillWidth: true }
         }
 
@@ -484,6 +571,20 @@ Rectangle {
                 font.pixelSize: fontSize
                 color: "#808080"
                 verticalAlignment: Text.AlignVCenter
+            }
+            StyledTextField {
+                Layout.preferredWidth: vRangeWidth
+                Layout.preferredHeight: rowHeight
+                font.pixelSize: fontSize
+                text: preset5.currentIndex > 0 ? Calibration.getPresetMinVoltage(preset5.currentText).toFixed(1) : ""
+                readOnly: true; enabled: false
+            }
+            StyledTextField {
+                Layout.preferredWidth: vRangeWidth
+                Layout.preferredHeight: rowHeight
+                font.pixelSize: fontSize
+                text: preset5.currentIndex > 0 ? Calibration.getPresetMaxVoltage(preset5.currentText).toFixed(1) : ""
+                readOnly: true; enabled: false
             }
             Item { Layout.fillWidth: true }
         }
@@ -538,6 +639,20 @@ Rectangle {
                 color: "#808080"
                 verticalAlignment: Text.AlignVCenter
             }
+            StyledTextField {
+                Layout.preferredWidth: vRangeWidth
+                Layout.preferredHeight: rowHeight
+                font.pixelSize: fontSize
+                text: preset6.currentIndex > 0 ? Calibration.getPresetMinVoltage(preset6.currentText).toFixed(1) : ""
+                readOnly: true; enabled: false
+            }
+            StyledTextField {
+                Layout.preferredWidth: vRangeWidth
+                Layout.preferredHeight: rowHeight
+                font.pixelSize: fontSize
+                text: preset6.currentIndex > 0 ? Calibration.getPresetMaxVoltage(preset6.currentText).toFixed(1) : ""
+                readOnly: true; enabled: false
+            }
             Item { Layout.fillWidth: true }
         }
 
@@ -590,6 +705,20 @@ Rectangle {
                 font.pixelSize: fontSize
                 color: "#808080"
                 verticalAlignment: Text.AlignVCenter
+            }
+            StyledTextField {
+                Layout.preferredWidth: vRangeWidth
+                Layout.preferredHeight: rowHeight
+                font.pixelSize: fontSize
+                text: preset7.currentIndex > 0 ? Calibration.getPresetMinVoltage(preset7.currentText).toFixed(1) : ""
+                readOnly: true; enabled: false
+            }
+            StyledTextField {
+                Layout.preferredWidth: vRangeWidth
+                Layout.preferredHeight: rowHeight
+                font.pixelSize: fontSize
+                text: preset7.currentIndex > 0 ? Calibration.getPresetMaxVoltage(preset7.currentText).toFixed(1) : ""
+                readOnly: true; enabled: false
             }
             Item { Layout.fillWidth: true }
         }
@@ -644,6 +773,20 @@ Rectangle {
                 color: "#808080"
                 verticalAlignment: Text.AlignVCenter
             }
+            StyledTextField {
+                Layout.preferredWidth: vRangeWidth
+                Layout.preferredHeight: rowHeight
+                font.pixelSize: fontSize
+                text: preset8.currentIndex > 0 ? Calibration.getPresetMinVoltage(preset8.currentText).toFixed(1) : ""
+                readOnly: true; enabled: false
+            }
+            StyledTextField {
+                Layout.preferredWidth: vRangeWidth
+                Layout.preferredHeight: rowHeight
+                font.pixelSize: fontSize
+                text: preset8.currentIndex > 0 ? Calibration.getPresetMaxVoltage(preset8.currentText).toFixed(1) : ""
+                readOnly: true; enabled: false
+            }
             Item { Layout.fillWidth: true }
         }
 
@@ -696,6 +839,20 @@ Rectangle {
                 font.pixelSize: fontSize
                 color: "#808080"
                 verticalAlignment: Text.AlignVCenter
+            }
+            StyledTextField {
+                Layout.preferredWidth: vRangeWidth
+                Layout.preferredHeight: rowHeight
+                font.pixelSize: fontSize
+                text: preset9.currentIndex > 0 ? Calibration.getPresetMinVoltage(preset9.currentText).toFixed(1) : ""
+                readOnly: true; enabled: false
+            }
+            StyledTextField {
+                Layout.preferredWidth: vRangeWidth
+                Layout.preferredHeight: rowHeight
+                font.pixelSize: fontSize
+                text: preset9.currentIndex > 0 ? Calibration.getPresetMaxVoltage(preset9.currentText).toFixed(1) : ""
+                readOnly: true; enabled: false
             }
             Item { Layout.fillWidth: true }
         }
@@ -750,6 +907,20 @@ Rectangle {
                 font.pixelSize: fontSize
                 color: "#808080"
                 verticalAlignment: Text.AlignVCenter
+            }
+            StyledTextField {
+                Layout.preferredWidth: vRangeWidth
+                Layout.preferredHeight: rowHeight
+                font.pixelSize: fontSize
+                text: preset10.currentIndex > 0 ? Calibration.getPresetMinVoltage(preset10.currentText).toFixed(1) : ""
+                readOnly: true; enabled: false
+            }
+            StyledTextField {
+                Layout.preferredWidth: vRangeWidth
+                Layout.preferredHeight: rowHeight
+                font.pixelSize: fontSize
+                text: preset10.currentIndex > 0 ? Calibration.getPresetMaxVoltage(preset10.currentText).toFixed(1) : ""
+                readOnly: true; enabled: false
             }
             Item { Layout.fillWidth: true }
         }

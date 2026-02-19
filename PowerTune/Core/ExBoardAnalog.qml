@@ -32,6 +32,7 @@ Rectangle {
     readonly property int val0vColW: 80
     readonly property int val5vColW: 80
     readonly property int unitColW: 50
+    readonly property int vRangeColW: 50
 
     // * Right panel column widths
     readonly property int ntcCheckColW: 40
@@ -220,56 +221,19 @@ Rectangle {
                     AppSettings.writeCylinderSettings(cylindercombobox.textAt(cylindercombobox.currentIndex));
                 }
                 if (rpmcanversionselector.currentIndex == 1) {
-                    switch (cylindercomboboxv2.currentIndex) {
-                    case 0:
-                        AppSettings.writeCylinderSettings(cylindercomboboxv2.textAt(cylindercomboboxv2.currentIndex) * 2);
-                        break;
-                    case 1:
-                        AppSettings.writeCylinderSettings(cylindercomboboxv2.textAt(cylindercomboboxv2.currentIndex) * 2);
-                        break;
-                    case 2:
-                        AppSettings.writeCylinderSettings(cylindercomboboxv2.textAt(cylindercomboboxv2.currentIndex) * 2);
-                        break;
-                    case 3:
-                        AppSettings.writeCylinderSettings(cylindercomboboxv2.textAt(cylindercomboboxv2.currentIndex) * 2);
-                        break;
-                    case 4:
-                        AppSettings.writeCylinderSettings(cylindercomboboxv2.textAt(cylindercomboboxv2.currentIndex) * 2);
-                        break;
-                    case 5:
-                        AppSettings.writeCylinderSettings(cylindercomboboxv2.textAt(cylindercomboboxv2.currentIndex) * 4);
-                        break;
-                    case 6:
-                        AppSettings.writeCylinderSettings(cylindercomboboxv2.textAt(cylindercomboboxv2.currentIndex) * 2);
-                        break;
-                    case 7:
-                        AppSettings.writeCylinderSettings(cylindercomboboxv2.textAt(cylindercomboboxv2.currentIndex) * 2);
-                        break;
-                    case 8:
-                        AppSettings.writeCylinderSettings(cylindercomboboxv2.textAt(cylindercomboboxv2.currentIndex) * 2);
-                        break;
-                    }
+                    var multiplier = Calibration.expanderChannelMultiplier(cylindercomboboxv2.currentIndex);
+                    AppSettings.writeCylinderSettings(cylindercomboboxv2.textAt(cylindercomboboxv2.currentIndex) * multiplier);
                 }
                 AppSettings.writeRPMFrequencySettings(rpmfrequencydivider, 0);
             }
         }
     }
 
-    // * Cylinder RPM frequency divider calculator
+    // * Cylinder RPM frequency divider calculator (delegates to C++)
     Item {
         id: cylindercalcrpmdi1
         function cylindercalcrpmdi1() {
-            switch (cylindercomboboxDi1.currentIndex) {
-            case 0: rpmfrequencydivider = 0.25; break;
-            case 1: rpmfrequencydivider = 0.5; break;
-            case 2: rpmfrequencydivider = 0.75; break;
-            case 3: rpmfrequencydivider = 1; break;
-            case 4: rpmfrequencydivider = 1.25; break;
-            case 5: rpmfrequencydivider = 1.5; break;
-            case 6: rpmfrequencydivider = 2; break;
-            case 7: rpmfrequencydivider = 2.5; break;
-            case 8: rpmfrequencydivider = 3; break;
-            }
+            rpmfrequencydivider = Calibration.frequencyDividerForCylinders(cylindercomboboxDi1.currentIndex);
             inputs.setInputs();
         }
     }
@@ -317,6 +281,8 @@ Rectangle {
                     Text { text: "Val @0V"; font.pixelSize: 11; font.bold: true; color: "#a0a0a0"; Layout.preferredWidth: val0vColW }
                     Text { text: "Val @5V"; font.pixelSize: 11; font.bold: true; color: "#a0a0a0"; Layout.preferredWidth: val5vColW }
                     Text { text: "Unit"; font.pixelSize: 11; font.bold: true; color: "#a0a0a0"; Layout.preferredWidth: unitColW }
+                    Text { text: "MinV"; font.pixelSize: 11; font.bold: true; color: "#a0a0a0"; Layout.preferredWidth: vRangeColW }
+                    Text { text: "MaxV"; font.pixelSize: 11; font.bold: true; color: "#a0a0a0"; Layout.preferredWidth: vRangeColW }
                 }
 
                 // * EX AN 0
@@ -341,6 +307,8 @@ Rectangle {
                         enabled: !checkan0ntc.checked; onEditingFinished: inputs.setInputs()
                     }
                     Text { text: getLinearUnit(linPreset0.currentText); font.pixelSize: 11; color: "#a0a0a0"; Layout.preferredWidth: unitColW; verticalAlignment: Text.AlignVCenter }
+                    Text { text: linPreset0.currentIndex > 0 ? Calibration.getPresetMinVoltage(linPreset0.currentText).toFixed(1) : ""; font.pixelSize: 11; color: "#808080"; Layout.preferredWidth: vRangeColW; verticalAlignment: Text.AlignVCenter }
+                    Text { text: linPreset0.currentIndex > 0 ? Calibration.getPresetMaxVoltage(linPreset0.currentText).toFixed(1) : ""; font.pixelSize: 11; color: "#808080"; Layout.preferredWidth: vRangeColW; verticalAlignment: Text.AlignVCenter }
                 }
 
                 // * EX AN 1
@@ -365,6 +333,8 @@ Rectangle {
                         enabled: !checkan1ntc.checked; onEditingFinished: inputs.setInputs()
                     }
                     Text { text: getLinearUnit(linPreset1.currentText); font.pixelSize: 11; color: "#a0a0a0"; Layout.preferredWidth: unitColW; verticalAlignment: Text.AlignVCenter }
+                    Text { text: linPreset1.currentIndex > 0 ? Calibration.getPresetMinVoltage(linPreset1.currentText).toFixed(1) : ""; font.pixelSize: 11; color: "#808080"; Layout.preferredWidth: vRangeColW; verticalAlignment: Text.AlignVCenter }
+                    Text { text: linPreset1.currentIndex > 0 ? Calibration.getPresetMaxVoltage(linPreset1.currentText).toFixed(1) : ""; font.pixelSize: 11; color: "#808080"; Layout.preferredWidth: vRangeColW; verticalAlignment: Text.AlignVCenter }
                 }
 
                 // * EX AN 2
@@ -389,6 +359,8 @@ Rectangle {
                         enabled: !checkan2ntc.checked; onEditingFinished: inputs.setInputs()
                     }
                     Text { text: getLinearUnit(linPreset2.currentText); font.pixelSize: 11; color: "#a0a0a0"; Layout.preferredWidth: unitColW; verticalAlignment: Text.AlignVCenter }
+                    Text { text: linPreset2.currentIndex > 0 ? Calibration.getPresetMinVoltage(linPreset2.currentText).toFixed(1) : ""; font.pixelSize: 11; color: "#808080"; Layout.preferredWidth: vRangeColW; verticalAlignment: Text.AlignVCenter }
+                    Text { text: linPreset2.currentIndex > 0 ? Calibration.getPresetMaxVoltage(linPreset2.currentText).toFixed(1) : ""; font.pixelSize: 11; color: "#808080"; Layout.preferredWidth: vRangeColW; verticalAlignment: Text.AlignVCenter }
                 }
 
                 // * EX AN 3
@@ -413,6 +385,8 @@ Rectangle {
                         enabled: !checkan3ntc.checked; onEditingFinished: inputs.setInputs()
                     }
                     Text { text: getLinearUnit(linPreset3.currentText); font.pixelSize: 11; color: "#a0a0a0"; Layout.preferredWidth: unitColW; verticalAlignment: Text.AlignVCenter }
+                    Text { text: linPreset3.currentIndex > 0 ? Calibration.getPresetMinVoltage(linPreset3.currentText).toFixed(1) : ""; font.pixelSize: 11; color: "#808080"; Layout.preferredWidth: vRangeColW; verticalAlignment: Text.AlignVCenter }
+                    Text { text: linPreset3.currentIndex > 0 ? Calibration.getPresetMaxVoltage(linPreset3.currentText).toFixed(1) : ""; font.pixelSize: 11; color: "#808080"; Layout.preferredWidth: vRangeColW; verticalAlignment: Text.AlignVCenter }
                 }
 
                 // * EX AN 4
@@ -437,6 +411,8 @@ Rectangle {
                         enabled: !checkan4ntc.checked; onEditingFinished: inputs.setInputs()
                     }
                     Text { text: getLinearUnit(linPreset4.currentText); font.pixelSize: 11; color: "#a0a0a0"; Layout.preferredWidth: unitColW; verticalAlignment: Text.AlignVCenter }
+                    Text { text: linPreset4.currentIndex > 0 ? Calibration.getPresetMinVoltage(linPreset4.currentText).toFixed(1) : ""; font.pixelSize: 11; color: "#808080"; Layout.preferredWidth: vRangeColW; verticalAlignment: Text.AlignVCenter }
+                    Text { text: linPreset4.currentIndex > 0 ? Calibration.getPresetMaxVoltage(linPreset4.currentText).toFixed(1) : ""; font.pixelSize: 11; color: "#808080"; Layout.preferredWidth: vRangeColW; verticalAlignment: Text.AlignVCenter }
                 }
 
                 // * EX AN 5
@@ -461,6 +437,8 @@ Rectangle {
                         enabled: !checkan5ntc.checked; onEditingFinished: inputs.setInputs()
                     }
                     Text { text: getLinearUnit(linPreset5.currentText); font.pixelSize: 11; color: "#a0a0a0"; Layout.preferredWidth: unitColW; verticalAlignment: Text.AlignVCenter }
+                    Text { text: linPreset5.currentIndex > 0 ? Calibration.getPresetMinVoltage(linPreset5.currentText).toFixed(1) : ""; font.pixelSize: 11; color: "#808080"; Layout.preferredWidth: vRangeColW; verticalAlignment: Text.AlignVCenter }
+                    Text { text: linPreset5.currentIndex > 0 ? Calibration.getPresetMaxVoltage(linPreset5.currentText).toFixed(1) : ""; font.pixelSize: 11; color: "#808080"; Layout.preferredWidth: vRangeColW; verticalAlignment: Text.AlignVCenter }
                 }
 
                 // * EX AN 6 (no NTC)
@@ -485,6 +463,8 @@ Rectangle {
                         onEditingFinished: inputs.setInputs()
                     }
                     Text { text: getLinearUnit(linPreset6.currentText); font.pixelSize: 11; color: "#a0a0a0"; Layout.preferredWidth: unitColW; verticalAlignment: Text.AlignVCenter }
+                    Text { text: linPreset6.currentIndex > 0 ? Calibration.getPresetMinVoltage(linPreset6.currentText).toFixed(1) : ""; font.pixelSize: 11; color: "#808080"; Layout.preferredWidth: vRangeColW; verticalAlignment: Text.AlignVCenter }
+                    Text { text: linPreset6.currentIndex > 0 ? Calibration.getPresetMaxVoltage(linPreset6.currentText).toFixed(1) : ""; font.pixelSize: 11; color: "#808080"; Layout.preferredWidth: vRangeColW; verticalAlignment: Text.AlignVCenter }
                 }
 
                 // * EX AN 7 (no NTC)
@@ -509,6 +489,8 @@ Rectangle {
                         onEditingFinished: inputs.setInputs()
                     }
                     Text { text: getLinearUnit(linPreset7.currentText); font.pixelSize: 11; color: "#a0a0a0"; Layout.preferredWidth: unitColW; verticalAlignment: Text.AlignVCenter }
+                    Text { text: linPreset7.currentIndex > 0 ? Calibration.getPresetMinVoltage(linPreset7.currentText).toFixed(1) : ""; font.pixelSize: 11; color: "#808080"; Layout.preferredWidth: vRangeColW; verticalAlignment: Text.AlignVCenter }
+                    Text { text: linPreset7.currentIndex > 0 ? Calibration.getPresetMaxVoltage(linPreset7.currentText).toFixed(1) : ""; font.pixelSize: 11; color: "#808080"; Layout.preferredWidth: vRangeColW; verticalAlignment: Text.AlignVCenter }
                 }
 
                 Item { Layout.fillHeight: true }

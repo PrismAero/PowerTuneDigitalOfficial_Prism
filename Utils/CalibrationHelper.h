@@ -112,6 +112,66 @@ public:
      */
     Q_INVOKABLE double getPresetMaxVoltage(const QString &presetName);
 
+    /**
+     * @brief Get the value-at-0V for a named linear preset
+     *
+     * Convenience method that returns only the val0v field from the preset.
+     *
+     * @param presetName The preset name to look up (case-sensitive)
+     * @return The sensor value at 0V, or 0.0 if not found
+     */
+    Q_INVOKABLE double getLinearPresetValueAt0V(const QString &presetName) const;
+
+    /**
+     * @brief Get the value-at-5V for a named linear preset
+     *
+     * Convenience method that returns only the val5v field from the preset.
+     *
+     * @param presetName The preset name to look up (case-sensitive)
+     * @return The sensor value at 5V, or 0.0 if not found
+     */
+    Q_INVOKABLE double getLinearPresetValueAt5V(const QString &presetName) const;
+
+    /**
+     * @brief Get the unit string for a named linear preset
+     *
+     * Convenience method that returns only the unit field from the preset.
+     *
+     * @param presetName The preset name to look up (case-sensitive)
+     * @return The unit string (e.g. "kPa", "PSI"), or empty string if not found
+     */
+    Q_INVOKABLE QString getLinearPresetUnit(const QString &presetName) const;
+
+    // -----------------------------------------------------------------------
+    // Expander Board Helpers
+    // -----------------------------------------------------------------------
+
+    /**
+     * @brief Get the CAN v2 cylinder multiplier for a given combo box index
+     *
+     * The EX Board CAN v2 protocol requires different multipliers depending
+     * on the cylinder count selection. Most indices use 2x, except index 5
+     * which uses 4x.
+     *
+     * @param channelIndex The combo box index (0-8)
+     * @return The multiplier (2 or 4), or 1 if the index is out of range
+     */
+    Q_INVOKABLE int expanderChannelMultiplier(int channelIndex) const;
+
+    /**
+     * @brief Get the RPM frequency divider for a given cylinder count index
+     *
+     * Maps the cylinder count combo box index to the corresponding frequency
+     * divider value used for RPM calculation from a digital input signal.
+     *
+     * Index mapping: 0->0.25, 1->0.5, 2->0.75, 3->1.0, 4->1.25,
+     *                5->1.5, 6->2.0, 7->2.5, 8->3.0
+     *
+     * @param cylinderIndex The combo box index (0-8)
+     * @return The frequency divider value, or 1.0 if the index is out of range
+     */
+    Q_INVOKABLE double frequencyDividerForCylinders(int cylinderIndex) const;
+
     // -----------------------------------------------------------------------
     // NTC Temperature Sensor Presets
     // -----------------------------------------------------------------------
