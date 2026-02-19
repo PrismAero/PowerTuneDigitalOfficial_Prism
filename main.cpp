@@ -15,9 +15,10 @@
 #include <cstdio>
 ioMapData mpd;
 
+// Modified by Kai Wyborny - 2026
+
 int main(int argc, char *argv[])
 {
-    qputenv("QT_IM_MODULE", QByteArray("qtvirtualkeyboard"));
     // * Set Qt Quick Controls style to Basic for cross-platform consistency
     // * This suppresses native style customization warnings on macOS
     QQuickStyle::setStyle("Basic");

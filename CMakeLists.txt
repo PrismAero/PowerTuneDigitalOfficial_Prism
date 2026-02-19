@@ -263,6 +263,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_library(PowerTuneCoreLib STATIC)
     qt_add_library(PowerTuneSettingsLib STATIC)
     qt_add_library(PowerTuneGaugesLib STATIC)
+    qt_add_library(PrismKeyboardLib STATIC)
     
     # * PowerTune.Utils module - Translator singleton and icon utilities
     qt_add_qml_module(PowerTuneUtilsLib
@@ -407,12 +408,26 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/qt/qml/PowerTune/Gauges
     )
     
+    # * Prism.Keyboard module - Custom virtual keyboard
+    qt_add_qml_module(PrismKeyboardLib
+        URI Prism.Keyboard
+        VERSION 1.0
+        QML_FILES
+            Prism/Keyboard/KeyButton.qml
+            Prism/Keyboard/NumericPad.qml
+            Prism/Keyboard/QwertyLayout.qml
+            Prism/Keyboard/PrismKeyboard.qml
+        RESOURCE_PREFIX /qt/qml
+        OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/qt/qml/Prism/Keyboard
+    )
+    
     # * Link all QML modules to main executable
     target_link_libraries(${PROJECT_NAME} PRIVATE
         PowerTuneUtilsLibplugin
         PowerTuneCoreLibplugin
         PowerTuneSettingsLibplugin
         PowerTuneGaugesLibplugin
+        PrismKeyboardLibplugin
     )
 endif()
 

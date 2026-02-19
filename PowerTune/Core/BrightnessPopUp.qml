@@ -1,7 +1,6 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 import com.powertune 1.0
-import QtQuick.VirtualKeyboard 2.15
 import PowerTune.Utils 1.0
 import QtQuick.Window 2.15
 import Qt.labs.settings 1.0

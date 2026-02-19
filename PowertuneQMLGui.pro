@@ -11,7 +11,6 @@ exists(/usr/lib/libddcutil.so.4) {
 }
 static {
     QT += svg
-    QTPLUGIN += qtvirtualkeyboardplugin
 }
 
 # * Include paths for organized directory structure

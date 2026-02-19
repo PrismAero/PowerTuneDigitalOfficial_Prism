@@ -1,11 +1,11 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Window 2.15
-import QtQuick.VirtualKeyboard 2.1
 import Qt.labs.settings 1.0
 import com.powertune 1.0
 import PowerTune.Core 1.0
 import PowerTune.Utils 1.0
+import Prism.Keyboard 1.0
 
 
 
@@ -33,7 +33,6 @@ ApplicationWindow {
     property int digitalInput7: Expander.EXDigitalInput7
     property int digitalInput8: Expander.EXDigitalInput8
 
-    // ! Screen Keyboard - Behaviour between QT5.10 and QT5.15 is different
     Settings{
         id: appSettings
         property alias sampleActionEnabled: popUpLoader.enabled
@@ -50,47 +49,7 @@ ApplicationWindow {
         }
     }
 
-    Rectangle {
-        id: keyboardcontainer
-        color: "blue"
-        visible: false
 
-        width: Screen.desktopAvailableWidth *0.63
-        height: Screen.desktopAvailableHeight *0.5
-        z: Screen.desktopAvailableHeight *0.5
-
-
-        MouseArea {
-            id: touchAkeyboardcontainer
-            anchors.fill: parent
-            drag.target: keyboardcontainer
-        }
-
-        InputPanel {
-            id: keyboard
-            anchors.fill: keyboardcontainer
-            x:keyboardcontainer.x
-            y:keyboardcontainer.y
-            visible: false
-            states: State {
-                name: "visible"
-                when: keyboard.active
-                PropertyChanges {
-                    target: keyboardcontainer
-                    visible: true
-                }
-                PropertyChanges {
-                    target: keyboard
-                    visible: true
-                }
-                PropertyChanges {
-                    target: drawerpopup
-                    interactive: false
-                }
-            }
-        }
-
-    }
 
     Connections{
             target: UI
@@ -656,6 +615,27 @@ ApplicationWindow {
             Connect.setSreenbrightness(BRIGHTNESS_ON);
             AppSettings.writebrightnessettings(BRIGHTNESS_ON);
             //console.log(`Brightness Set to ${BRIGHTNESS_ON} for Input ${custom.digiValue + 1}`);
+        }
+    }
+
+    // * Custom on-screen keyboard (replaces Qt Virtual Keyboard)
+    PrismKeyboard {
+        id: prismKeyboard
+    }
+
+    // * Auto-show/hide keyboard when text input fields gain/lose focus
+    Connections {
+        target: window
+        function onActiveFocusItemChanged() {
+            var item = window.activeFocusItem
+            // Check if the focused item has text editing capabilities
+            if (item && item.hasOwnProperty("inputMethodHints")) {
+                prismKeyboard.show(item)
+            } else {
+                if (prismKeyboard.visible) {
+                    prismKeyboard.hide()
+                }
+            }
         }
     }
     }
