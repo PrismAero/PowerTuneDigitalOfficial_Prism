@@ -19,10 +19,10 @@ Rectangle {
     height: keyHeight
     radius: 6
     color: pressArea.pressed
-           ? (isAccent ? "#00796b" : isDestructive ? "#4a1a1a" : "#1e3a5f")
+           ? (isAccent ? "#00796b" : isDestructive ? "#4a1a1a" : "#2a4a7e")
            : (isAccent ? "#009688" : isDestructive ? "#5c2a2a" : "#16213e")
     border.width: 1
-    border.color: "#0a0f1e"
+    border.color: "#2a3a5e"
 
     Behavior on color { ColorAnimation { duration: 80 } }
 
@@ -40,6 +40,7 @@ Rectangle {
     MouseArea {
         id: pressArea
         anchors.fill: parent
+        anchors.margins: -1  // 3px effective spacing (1px extra margin on each side)
         onClicked: root.keyPressed(root.keyValue)
         // Long-press repeat for backspace
         onPressAndHold: {

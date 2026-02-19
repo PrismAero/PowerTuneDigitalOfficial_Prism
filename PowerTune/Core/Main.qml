@@ -78,6 +78,7 @@ ApplicationWindow {
         }
 
         anchors.fill: parent
+        anchors.bottomMargin: prismKeyboard.visibleHeight
         //Component.onCompleted: Connect.readavailabledashfiles()
 
         Loader {

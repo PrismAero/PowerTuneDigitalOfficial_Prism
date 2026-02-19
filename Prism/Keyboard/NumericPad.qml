@@ -10,146 +10,168 @@ Item {
     signal enterPressed()
     signal switchLayout()
 
+    // Compact width - do not stretch to full parent width (iOS-style)
+    width: Math.min(parent ? parent.width : 480, 480)
+    anchors.horizontalCenter: parent ? parent.horizontalCenter : undefined
+    anchors.top: parent ? parent.top : undefined
+    anchors.bottom: parent ? parent.bottom : undefined
+
     // Calculate key dimensions based on available width/height
+    // Number columns are wider, action column is slightly narrower
     property real keySpacing: 4
-    property real cellWidth: (width - keySpacing * 3) / 4
+    property real actionColumnRatio: 0.85
+    property real numColumnWidth: (width - keySpacing * 3 - actionColumnWidth) / 3
+    property real actionColumnWidth: (width - keySpacing * 3) / (3 + actionColumnRatio) * actionColumnRatio
     property real cellHeight: (height - keySpacing * 3) / 4
 
-    Grid {
-        id: grid
+    Row {
         anchors.fill: parent
-        columns: 4
-        spacing: keySpacing
+        spacing: 0
 
-        // Row 1: 7 8 9 Backspace
-        KeyButton {
-            text: "7"
-            keyWidth: 1.0
-            width: numericPad.cellWidth
-            height: numericPad.cellHeight
-            onKeyPressed: function(value) { numericPad.keyPressed(value) }
-        }
-        KeyButton {
-            text: "8"
-            keyWidth: 1.0
-            width: numericPad.cellWidth
-            height: numericPad.cellHeight
-            onKeyPressed: function(value) { numericPad.keyPressed(value) }
-        }
-        KeyButton {
-            text: "9"
-            keyWidth: 1.0
-            width: numericPad.cellWidth
-            height: numericPad.cellHeight
-            onKeyPressed: function(value) { numericPad.keyPressed(value) }
-        }
-        KeyButton {
-            text: "<--"
-            keyValue: "backspace"
-            isDestructive: true
-            repeatEnabled: true
-            keyWidth: 1.0
-            width: numericPad.cellWidth
-            height: numericPad.cellHeight
-            onKeyPressed: numericPad.backspacePressed()
-        }
+        // Number keys grid (3 columns)
+        Grid {
+            id: numberGrid
+            width: numericPad.numColumnWidth * 3 + numericPad.keySpacing * 2
+            height: parent.height
+            columns: 3
+            spacing: numericPad.keySpacing
 
-        // Row 2: 4 5 6 Clear
-        KeyButton {
-            text: "4"
-            keyWidth: 1.0
-            width: numericPad.cellWidth
-            height: numericPad.cellHeight
-            onKeyPressed: function(value) { numericPad.keyPressed(value) }
-        }
-        KeyButton {
-            text: "5"
-            keyWidth: 1.0
-            width: numericPad.cellWidth
-            height: numericPad.cellHeight
-            onKeyPressed: function(value) { numericPad.keyPressed(value) }
-        }
-        KeyButton {
-            text: "6"
-            keyWidth: 1.0
-            width: numericPad.cellWidth
-            height: numericPad.cellHeight
-            onKeyPressed: function(value) { numericPad.keyPressed(value) }
-        }
-        KeyButton {
-            text: "Clear"
-            keyValue: "clear"
-            isDestructive: true
-            fontSize: 14
-            keyWidth: 1.0
-            width: numericPad.cellWidth
-            height: numericPad.cellHeight
-            onKeyPressed: numericPad.clearPressed()
-        }
+            // Row 1: 7 8 9
+            KeyButton {
+                text: "7"
+                width: numericPad.numColumnWidth
+                height: numericPad.cellHeight
+                onKeyPressed: function(value) { numericPad.keyPressed(value) }
+            }
+            KeyButton {
+                text: "8"
+                width: numericPad.numColumnWidth
+                height: numericPad.cellHeight
+                onKeyPressed: function(value) { numericPad.keyPressed(value) }
+            }
+            KeyButton {
+                text: "9"
+                width: numericPad.numColumnWidth
+                height: numericPad.cellHeight
+                onKeyPressed: function(value) { numericPad.keyPressed(value) }
+            }
 
-        // Row 3: 1 2 3 ABC
-        KeyButton {
-            text: "1"
-            keyWidth: 1.0
-            width: numericPad.cellWidth
-            height: numericPad.cellHeight
-            onKeyPressed: function(value) { numericPad.keyPressed(value) }
-        }
-        KeyButton {
-            text: "2"
-            keyWidth: 1.0
-            width: numericPad.cellWidth
-            height: numericPad.cellHeight
-            onKeyPressed: function(value) { numericPad.keyPressed(value) }
-        }
-        KeyButton {
-            text: "3"
-            keyWidth: 1.0
-            width: numericPad.cellWidth
-            height: numericPad.cellHeight
-            onKeyPressed: function(value) { numericPad.keyPressed(value) }
-        }
-        KeyButton {
-            text: "ABC"
-            keyValue: "switchLayout"
-            fontSize: 14
-            keyWidth: 1.0
-            width: numericPad.cellWidth
-            height: numericPad.cellHeight
-            onKeyPressed: numericPad.switchLayout()
+            // Row 2: 4 5 6
+            KeyButton {
+                text: "4"
+                width: numericPad.numColumnWidth
+                height: numericPad.cellHeight
+                onKeyPressed: function(value) { numericPad.keyPressed(value) }
+            }
+            KeyButton {
+                text: "5"
+                width: numericPad.numColumnWidth
+                height: numericPad.cellHeight
+                onKeyPressed: function(value) { numericPad.keyPressed(value) }
+            }
+            KeyButton {
+                text: "6"
+                width: numericPad.numColumnWidth
+                height: numericPad.cellHeight
+                onKeyPressed: function(value) { numericPad.keyPressed(value) }
+            }
+
+            // Row 3: 1 2 3
+            KeyButton {
+                text: "1"
+                width: numericPad.numColumnWidth
+                height: numericPad.cellHeight
+                onKeyPressed: function(value) { numericPad.keyPressed(value) }
+            }
+            KeyButton {
+                text: "2"
+                width: numericPad.numColumnWidth
+                height: numericPad.cellHeight
+                onKeyPressed: function(value) { numericPad.keyPressed(value) }
+            }
+            KeyButton {
+                text: "3"
+                width: numericPad.numColumnWidth
+                height: numericPad.cellHeight
+                onKeyPressed: function(value) { numericPad.keyPressed(value) }
+            }
+
+            // Row 4: - 0 .
+            KeyButton {
+                text: "-"
+                width: numericPad.numColumnWidth
+                height: numericPad.cellHeight
+                onKeyPressed: function(value) { numericPad.keyPressed(value) }
+            }
+            KeyButton {
+                text: "0"
+                width: numericPad.numColumnWidth
+                height: numericPad.cellHeight
+                onKeyPressed: function(value) { numericPad.keyPressed(value) }
+            }
+            KeyButton {
+                text: "."
+                width: numericPad.numColumnWidth
+                height: numericPad.cellHeight
+                onKeyPressed: function(value) { numericPad.keyPressed(value) }
+            }
         }
 
-        // Row 4: - 0 . Done
-        KeyButton {
-            text: "-"
-            keyWidth: 1.0
-            width: numericPad.cellWidth
-            height: numericPad.cellHeight
-            onKeyPressed: function(value) { numericPad.keyPressed(value) }
+        // Vertical divider between number keys and action column
+        Rectangle {
+            width: 1
+            height: parent.height
+            color: "#2a3a5e"
+            anchors.verticalCenter: parent.verticalCenter
         }
-        KeyButton {
-            text: "0"
-            keyWidth: 1.0
-            width: numericPad.cellWidth
-            height: numericPad.cellHeight
-            onKeyPressed: function(value) { numericPad.keyPressed(value) }
+
+        // Spacer for the remaining gap
+        Item {
+            width: numericPad.keySpacing - 1
+            height: parent.height
         }
-        KeyButton {
-            text: "."
-            keyWidth: 1.0
-            width: numericPad.cellWidth
-            height: numericPad.cellHeight
-            onKeyPressed: function(value) { numericPad.keyPressed(value) }
-        }
-        KeyButton {
-            text: "Done"
-            keyValue: "enter"
-            isAccent: true
-            fontSize: 14
-            keyWidth: 1.0
-            width: numericPad.cellWidth
-            height: numericPad.cellHeight
-            onKeyPressed: numericPad.enterPressed()
+
+        // Action column (backspace, clear, ABC, done)
+        Column {
+            width: numericPad.actionColumnWidth
+            height: parent.height
+            spacing: numericPad.keySpacing
+
+            KeyButton {
+                text: "<--"
+                keyValue: "backspace"
+                isDestructive: true
+                repeatEnabled: true
+                width: numericPad.actionColumnWidth
+                height: numericPad.cellHeight
+                onKeyPressed: numericPad.backspacePressed()
+            }
+            KeyButton {
+                text: "Clear"
+                keyValue: "clear"
+                isDestructive: true
+                fontSize: 14
+                width: numericPad.actionColumnWidth
+                height: numericPad.cellHeight
+                onKeyPressed: numericPad.clearPressed()
+            }
+            KeyButton {
+                text: "ABC"
+                keyValue: "switchLayout"
+                fontSize: 14
+                width: numericPad.actionColumnWidth
+                height: numericPad.cellHeight
+                onKeyPressed: numericPad.switchLayout()
+            }
+            KeyButton {
+                text: "Done"
+                keyValue: "enter"
+                isAccent: true
+                fontSize: 14
+                width: numericPad.actionColumnWidth
+                height: numericPad.cellHeight
+                onKeyPressed: numericPad.enterPressed()
+            }
         }
     }
 }
