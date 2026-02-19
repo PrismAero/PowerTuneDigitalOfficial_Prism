@@ -53,6 +53,7 @@ var translations = {
            "Network": { en: "Network", de: "Netzwerk",  jp: "ネットワーク", es: "Red", fr: "", ar:"" },
            "Accelerometer": { en: "Accelerometer", de: "Beschleunigungssensor",  jp: "-加速度計", es: "Acelerómetro", fr: "", ar:"" },
            "Compass": { en: "Compass", de: "Compass",  jp: "方位磁針", es: "Brújula", fr: "", ar:"" },
+           "Diagnostics": { en: "Diagnostics", de: "Diagnose", jp: "", es: "", fr: "", ar: "" },
            "Temperature Sensor": { en: "", de: "",  jp: "温度センサー", es: "Sensor de temperatura", fr: "", ar:"" },
            "Gyro Sensor": { en: "Gyro Sensor", de: "Gyroskop Sensor",  jp: "ジャイロセンサー", es: "Sensor giroscópico", fr: "", ar:"" },
            "Pressure Sensor": { en: "Pressure Sensor", de: "Druck Sensor",  jp: "圧力センサー", es: "Sensor de presión", fr: "", ar:"" },
@@ -638,10 +639,11 @@ function translate(text, language) {
             return translatedWord;
         }
     }
- //console.log(translations[text])
+    // If translation key is not found, return the original text as fallback
+    if (!translations[text]) return text;
+
     // If translation is not found or is an empty string, provide the English version
-   // console.warn("Translation not found or empty for:", text, "and language:", language);
-    return translations[text].en || "Translation not found";
+    return translations[text].en || text;
 
 }
 

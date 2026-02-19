@@ -59,7 +59,9 @@ void SensorRegistry::registerSensor(const QString &key, const QString &displayNa
     entry.category = category;
     entry.unit = unit;
     entry.source = source;
-    entry.active = (source != SensorSource::DaemonUDP); // DaemonUDP sensors start inactive
+    entry.active = (source != SensorSource::DaemonUDP
+                 && source != SensorSource::ExtenderAnalog
+                 && source != SensorSource::ExtenderDigital);
     entry.lastActiveTimestamp = 0;
 
     m_sensors.insert(key, entry);
@@ -206,7 +208,7 @@ void SensorRegistry::refreshEcuAnalogChannels()
         entry.category = QStringLiteral("Analog Inputs");
         entry.unit = QStringLiteral("V");
         entry.source = SensorSource::DaemonUDP;
-        entry.active = true;
+        entry.active = false;
         entry.lastActiveTimestamp = 0;
         m_sensors.insert(key, entry);
     }
@@ -222,7 +224,7 @@ void SensorRegistry::refreshEcuAnalogChannels()
         entry.category = QStringLiteral("Analog Inputs");
         entry.unit = QString();
         entry.source = SensorSource::DaemonUDP;
-        entry.active = true;
+        entry.active = false;
         entry.lastActiveTimestamp = 0;
         m_sensors.insert(key, entry);
     }
@@ -263,7 +265,7 @@ void SensorRegistry::refreshExtenderAnalogInputs()
         entry.category = QStringLiteral("Extender Board");
         entry.unit = QStringLiteral("V");
         entry.source = SensorSource::ExtenderAnalog;
-        entry.active = true;
+        entry.active = false;
         entry.lastActiveTimestamp = 0;
         m_sensors.insert(key, entry);
     }
@@ -279,7 +281,7 @@ void SensorRegistry::refreshExtenderAnalogInputs()
         entry.category = QStringLiteral("Extender Board");
         entry.unit = QString();
         entry.source = SensorSource::ExtenderAnalog;
-        entry.active = true;
+        entry.active = false;
         entry.lastActiveTimestamp = 0;
         m_sensors.insert(key, entry);
     }
@@ -320,7 +322,7 @@ void SensorRegistry::refreshEcuDigitalInputs()
         entry.category = QStringLiteral("Digital Inputs");
         entry.unit = QString();
         entry.source = SensorSource::DaemonUDP;
-        entry.active = true;
+        entry.active = false;
         entry.lastActiveTimestamp = 0;
         m_sensors.insert(key, entry);
     }
@@ -358,7 +360,7 @@ void SensorRegistry::refreshExtenderDigitalInputs()
         entry.category = QStringLiteral("Extender Board");
         entry.unit = QString();
         entry.source = SensorSource::ExtenderDigital;
-        entry.active = true;
+        entry.active = false;
         entry.lastActiveTimestamp = 0;
         m_sensors.insert(key, entry);
     }
