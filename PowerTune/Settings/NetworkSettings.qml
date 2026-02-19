@@ -1,3 +1,4 @@
+// Copyright (c) Kai Wyborny. All rights reserved.
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
@@ -8,7 +9,7 @@ import PowerTune.Utils 1.0
 Rectangle {
     id: root
     anchors.fill: parent
-    color: "#121212"
+    color: "#1a1a2e"
 
     Connections {
         target: Connection
@@ -29,11 +30,11 @@ Rectangle {
     RowLayout {
         anchors.fill: parent
         anchors.margins: 16
-        spacing: 24
+        spacing: 16
 
         // * Console Output Section
         Rectangle {
-            Layout.preferredWidth: 500
+            Layout.preferredWidth: 420
             Layout.fillHeight: true
             color: "#0A0A0A"
             radius: 8
@@ -48,9 +49,9 @@ Rectangle {
                 Text {
                     text: "Console Output"
                     font.pixelSize: 18
-                    font.weight: Font.DemiBold
+                    font.weight: Font.Bold
                     font.family: "Lato"
-                    color: "#B0B0B0"
+                    color: "#009688"
                 }
 
                 Rectangle {
@@ -72,7 +73,7 @@ Rectangle {
                         wrapMode: TextArea.Wrap
                         readOnly: true
                         color: "#4CAF50"
-                        font.pixelSize: 14
+                        font.pixelSize: 13
                         font.family: "Courier New"
                         background: Rectangle { color: "transparent" }
                     }
@@ -85,159 +86,157 @@ Rectangle {
         }
 
         // * Settings Column
-        ScrollView {
+        ColumnLayout {
             Layout.fillWidth: true
             Layout.fillHeight: true
-            clip: true
-            ScrollBar.vertical.policy: ScrollBar.AsNeeded
-            ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
+            spacing: 12
 
-            ColumnLayout {
-                width: parent.width - 20
-                spacing: 20
+            // * WiFi Configuration Section
+            SettingsSection {
+                title: Translator.translate("WIFI Configuration", Settings.language)
+                Layout.fillWidth: true
 
-                // * WiFi Configuration Section
-                SettingsSection {
-                    title: Translator.translate("WIFI Configuration", Settings.language)
+                RowLayout {
+                    spacing: 16
                     Layout.fillWidth: true
 
-                    RowLayout {
-                        spacing: 20
-                        Layout.fillWidth: true
-
-                        Text {
-                            text: Translator.translate("WIFI Country", Settings.language)
-                            font.pixelSize: 20
-                            font.family: "Lato"
-                            color: "#FFFFFF"
-                            Layout.preferredWidth: 180
-                        }
-
-                        StyledComboBox {
-                            id: wificountrycbx
-                            width: 280
-                            model: wificountrynames
-                            textRole: "name"
-                        }
+                    Text {
+                        text: Translator.translate("WIFI Country", Settings.language)
+                        font.pixelSize: 16
+                        font.family: "Lato"
+                        color: "#FFFFFF"
+                        Layout.preferredWidth: 160
                     }
 
-                    RowLayout {
-                        spacing: 20
-                        Layout.fillWidth: true
-
-                        Text {
-                            text: Translator.translate("WIFI 1", Settings.language)
-                            font.pixelSize: 20
-                            font.family: "Lato"
-                            color: "#FFFFFF"
-                            Layout.preferredWidth: 180
-                        }
-
-                        StyledComboBox {
-                            id: wifilistbox
-                            width: 280
-                            model: Connection.wifi
-                            onCountChanged: btnScanNetwork.enabled = true
-                        }
+                    StyledComboBox {
+                        id: wificountrycbx
+                        width: 260
+                        model: wificountrynames
+                        textRole: "name"
                     }
-
-                    RowLayout {
-                        spacing: 20
-                        Layout.fillWidth: true
-
-                        Text {
-                            text: Translator.translate("Password 1", Settings.language)
-                            font.pixelSize: 20
-                            font.family: "Lato"
-                            color: "#FFFFFF"
-                            Layout.preferredWidth: 180
-                        }
-
-                        StyledTextField {
-                            id: pw1
-                            width: 280
-                            placeholderText: qsTr("Passphrase")
-                            echoMode: TextInput.Password
-                        }
-                    }
-
-                    RowLayout {
-                        spacing: 12
-
-                        StyledButton {
-                            id: btnScanNetwork
-                            text: Translator.translate("Scan WIFI", Settings.language)
-                            width: 180
-                            onClicked: {
-                                consoleText.clear()
-                                Wifiscanner.initializeWifiscanner()
-                            }
-                        }
-
-                        StyledButton {
-                            id: applyWifiSettings
-                            text: Translator.translate("Connect WIFI", Settings.language)
-                            width: 180
-                            onClicked: {
-                                Wifiscanner.setwifi(
-                                    wificountrynames.get(wificountrycbx.currentIndex).countryname,
-                                    wifilistbox.textAt(wifilistbox.currentIndex),
-                                    pw1.text, "placeholder", "placeholder")
-                                Connect.reboot()
-                            }
-                        }
-                    }
-
-                    Component.onCompleted: Wifiscanner.initializeWifiscanner()
                 }
 
-                // * Network Status Section
-                SettingsSection {
-                    title: Translator.translate("Network Status", Settings.language)
+                RowLayout {
+                    spacing: 16
                     Layout.fillWidth: true
 
-                    RowLayout {
-                        spacing: 20
-                        Layout.fillWidth: true
+                    Text {
+                        text: Translator.translate("WIFI 1", Settings.language)
+                        font.pixelSize: 16
+                        font.family: "Lato"
+                        color: "#FFFFFF"
+                        Layout.preferredWidth: 160
+                    }
 
-                        Text {
-                            text: Translator.translate("Ethernet IP adress", Settings.language)
-                            font.pixelSize: 20
-                            font.family: "Lato"
-                            color: "#FFFFFF"
-                            Layout.preferredWidth: 180
-                        }
+                    StyledComboBox {
+                        id: wifilistbox
+                        width: 260
+                        model: Connection.wifi
+                        onCountChanged: btnScanNetwork.enabled = true
+                    }
+                }
 
-                        ConnectionStatusIndicator {
-                            id: ethernetstatus
-                            statusText: Connection.EthernetStat
-                            status: Connection.EthernetStat === "NOT CONNECTED" ? "disconnected" : "connected"
-                            width: 280
+                RowLayout {
+                    spacing: 16
+                    Layout.fillWidth: true
+
+                    Text {
+                        text: Translator.translate("Password 1", Settings.language)
+                        font.pixelSize: 16
+                        font.family: "Lato"
+                        color: "#FFFFFF"
+                        Layout.preferredWidth: 160
+                    }
+
+                    StyledTextField {
+                        id: pw1
+                        width: 260
+                        placeholderText: qsTr("Passphrase")
+                        echoMode: TextInput.Password
+                    }
+                }
+
+                RowLayout {
+                    spacing: 12
+
+                    StyledButton {
+                        id: btnScanNetwork
+                        text: Translator.translate("Scan WIFI", Settings.language)
+                        width: 160
+                        onClicked: {
+                            consoleText.clear()
+                            Wifiscanner.initializeWifiscanner()
                         }
                     }
 
-                    RowLayout {
-                        spacing: 20
-                        Layout.fillWidth: true
-
-                        Text {
-                            text: Translator.translate("WLAN IP adress", Settings.language)
-                            font.pixelSize: 20
-                            font.family: "Lato"
-                            color: "#FFFFFF"
-                            Layout.preferredWidth: 180
-                        }
-
-                        ConnectionStatusIndicator {
-                            id: wifistatus
-                            statusText: Connection.WifiStat
-                            status: Connection.WifiStat === "NOT CONNECTED" ? "disconnected" : "connected"
-                            width: 280
+                    StyledButton {
+                        id: applyWifiSettings
+                        text: Translator.translate("Connect WIFI", Settings.language)
+                        width: 160
+                        onClicked: {
+                            Wifiscanner.setwifi(
+                                wificountrynames.get(wificountrycbx.currentIndex).countryname,
+                                wifilistbox.textAt(wifilistbox.currentIndex),
+                                pw1.text, "placeholder", "placeholder")
+                            Connect.reboot()
                         }
                     }
                 }
 
-                // * System Actions Section
+                Component.onCompleted: Wifiscanner.initializeWifiscanner()
+            }
+
+            // * Network Status Section
+            SettingsSection {
+                title: Translator.translate("Network Status", Settings.language)
+                Layout.fillWidth: true
+
+                RowLayout {
+                    spacing: 16
+                    Layout.fillWidth: true
+
+                    Text {
+                        text: Translator.translate("Ethernet IP adress", Settings.language)
+                        font.pixelSize: 16
+                        font.family: "Lato"
+                        color: "#FFFFFF"
+                        Layout.preferredWidth: 160
+                    }
+
+                    ConnectionStatusIndicator {
+                        id: ethernetstatus
+                        statusText: Connection.EthernetStat
+                        status: Connection.EthernetStat === "NOT CONNECTED" ? "disconnected" : "connected"
+                        width: 260
+                    }
+                }
+
+                RowLayout {
+                    spacing: 16
+                    Layout.fillWidth: true
+
+                    Text {
+                        text: Translator.translate("WLAN IP adress", Settings.language)
+                        font.pixelSize: 16
+                        font.family: "Lato"
+                        color: "#FFFFFF"
+                        Layout.preferredWidth: 160
+                    }
+
+                    ConnectionStatusIndicator {
+                        id: wifistatus
+                        statusText: Connection.WifiStat
+                        status: Connection.WifiStat === "NOT CONNECTED" ? "disconnected" : "connected"
+                        width: 260
+                    }
+                }
+            }
+
+            // * System Actions and Track Downloads in a row to save vertical space
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: 12
+
                 SettingsSection {
                     title: Translator.translate("System Actions", Settings.language)
                     Layout.fillWidth: true
@@ -248,7 +247,7 @@ Rectangle {
                         StyledButton {
                             id: updateBtn
                             text: Translator.translate("Update", Settings.language)
-                            width: 180
+                            width: 140
                             onClicked: {
                                 Connect.update()
                                 updateBtn.enabled = false
@@ -258,14 +257,13 @@ Rectangle {
                         StyledButton {
                             id: develtest
                             text: Translator.translate("Restart daemon", Settings.language)
-                            width: 180
+                            width: 160
                             primary: false
                             onClicked: Connect.restartDaemon()
                         }
                     }
                 }
 
-                // * Track Downloads Section
                 SettingsSection {
                     title: Translator.translate("Track Downloads", Settings.language)
                     Layout.fillWidth: true
@@ -273,7 +271,7 @@ Rectangle {
                     StyledButton {
                         id: trackUpdate
                         text: Translator.translate("Update Tracks", Settings.language)
-                        width: 280
+                        width: 200
                         onClicked: {
                             downloadManager.append("")
                             downloadManager.append("https://gitlab.com/PowerTuneDigital/PowertuneTracks/-/raw/main/repo.txt")
@@ -290,18 +288,18 @@ Rectangle {
 
                         ProgressBar {
                             id: downloadprogress
-                            Layout.preferredWidth: 300
+                            Layout.preferredWidth: 200
                             height: 8
 
                             background: Rectangle {
-                                implicitWidth: 300
+                                implicitWidth: 200
                                 implicitHeight: 8
                                 color: "#2D2D2D"
                                 radius: 4
                             }
 
                             contentItem: Item {
-                                implicitWidth: 300
+                                implicitWidth: 200
                                 implicitHeight: 8
 
                                 Rectangle {
@@ -332,7 +330,7 @@ Rectangle {
                         Text {
                             id: downloadspeedtext
                             text: downloadManager.downloadStatus
-                            font.pixelSize: 16
+                            font.pixelSize: 14
                             font.family: "Lato"
                             color: "#B0B0B0"
                             onTextChanged: {
@@ -356,6 +354,8 @@ Rectangle {
                     }
                 }
             }
+
+            Item { Layout.fillHeight: true }
         }
     }
 }
