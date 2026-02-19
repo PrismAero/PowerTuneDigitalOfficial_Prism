@@ -730,68 +730,68 @@ flowchart TD
 
 ## Implementation Phases
 
-### Phase 0: QML Calculation Cleanup (Prerequisite)
+### Phase 0: QML Calculation Cleanup (Prerequisite) -- COMPLETE
 
-- [ ] Add `cylinderSettingForIndex(int comboIndex, int canVersion)` Q_INVOKABLE to `AppSettings` -- moves cylinder `* 2` / `* 4` multiplication from `ExBoardAnalog.qml` `setInputs()` to C++
-- [ ] Add `frequencyDividerForCylinderIndex(int index)` Q_INVOKABLE to `AppSettings` -- moves RPM frequency divider switch/case from `ExBoardAnalog.qml` `cylindercalcrpmdi1()` to C++
-- [ ] Add `applyPresetToChannel(int channel, QString presetName)` Q_INVOKABLE to `CalibrationHelper` -- returns QVariantMap with all field values
-- [ ] Add `applyNtcPresetToChannel(int channel, QString presetName)` Q_INVOKABLE to `CalibrationHelper` -- returns QVariantMap with NTC field values
-- [ ] Remove `applyPreset()` and `getPresetUnit()` JavaScript functions from `AnalogInputs.qml` -- replace with direct C++ Q_INVOKABLE calls
-- [ ] Remove `applyLinearPreset()`, `applyNtcPreset()`, `setInputs()` arithmetic, and `cylindercalcrpmdi1()` JavaScript functions from `ExBoardAnalog.qml` -- replace with C++ Q_INVOKABLE calls
-- [ ] Audit both QML files to verify no arithmetic operators (`*`, `/`, `+`, `-`) remain on sensor/calibration data
-- [ ] Verify build compiles and settings pages function correctly after JS removal
+- [x] Add `cylinderSettingForIndex(int comboIndex, int canVersion)` Q_INVOKABLE to `AppSettings` -- moves cylinder `* 2` / `* 4` multiplication from `ExBoardAnalog.qml` `setInputs()` to C++
+- [x] Add `frequencyDividerForCylinderIndex(int index)` Q_INVOKABLE to `AppSettings` -- moves RPM frequency divider switch/case from `ExBoardAnalog.qml` `cylindercalcrpmdi1()` to C++
+- [x] Add `applyPresetToChannel(int channel, QString presetName)` Q_INVOKABLE to `CalibrationHelper` -- returns QVariantMap with all field values
+- [x] Add `applyNtcPresetToChannel(int channel, QString presetName)` Q_INVOKABLE to `CalibrationHelper` -- returns QVariantMap with NTC field values
+- [x] Remove `applyPreset()` and `getPresetUnit()` JavaScript functions from `AnalogInputs.qml` -- replace with direct C++ Q_INVOKABLE calls
+- [x] Remove `applyLinearPreset()`, `applyNtcPreset()`, `setInputs()` arithmetic, and `cylindercalcrpmdi1()` JavaScript functions from `ExBoardAnalog.qml` -- replace with C++ Q_INVOKABLE calls
+- [x] Audit both QML files to verify no arithmetic operators (`*`, `/`, `+`, `-`) remain on sensor/calibration data
+- [x] Verify build compiles and settings pages function correctly after JS removal
 
-### Phase A: Voltage Range Scaling (Feature 1)
+### Phase A: Voltage Range Scaling (Feature 1) -- COMPLETE
 
-- [ ] Extend `LinearPreset` struct with `minVoltage` / `maxVoltage` fields
-- [ ] Update `initLinearPresets()` with per-sensor voltage ranges for all 12 presets
-- [ ] Implement `calculateLinearValueScaled()` Q_INVOKABLE method
-- [ ] Update `calculateLinearValue()` to delegate to new method with 0.0/5.0 defaults
-- [ ] Update `linearPresets()` and `getLinearPreset()` to include minVoltage/maxVoltage in returned QVariantMap
-- [ ] Update `applyPresetToChannel()` to include minVoltage/maxVoltage in returned QVariantMap
-- [ ] Add minV/maxV StyledTextField display fields per channel row in `AnalogInputs.qml` (bound to C++ preset data, no math)
-- [ ] Add minV/maxV StyledTextField display fields per channel row in `ExBoardAnalog.qml` (bound to C++ preset data, no math)
-- [ ] Persist minV/maxV via Settings property aliases in both QML files
-- [ ] Update `appsettings.cpp` for C++-side voltage range persistence and calibration calls
-- [ ] Write unit tests for `calculateLinearValueScaled()` covering edge cases: min=max, voltage outside range, zero range, normal operation
-- [ ] Verify build: `cmake --preset macos-homebrew && cmake --build build/macos-homebrew`
+- [x] Extend `LinearPreset` struct with `minVoltage` / `maxVoltage` fields
+- [x] Update `initLinearPresets()` with per-sensor voltage ranges for all 12 presets
+- [x] Implement `calculateLinearValueScaled()` Q_INVOKABLE method
+- [x] Update `calculateLinearValue()` to delegate to new method with 0.0/5.0 defaults
+- [x] Update `linearPresets()` and `getLinearPreset()` to include minVoltage/maxVoltage in returned QVariantMap
+- [x] Update `applyPresetToChannel()` to include minVoltage/maxVoltage in returned QVariantMap
+- [x] Add minV/maxV StyledTextField display fields per channel row in `AnalogInputs.qml` (bound to C++ preset data, no math)
+- [x] Add minV/maxV StyledTextField display fields per channel row in `ExBoardAnalog.qml` (bound to C++ preset data, no math)
+- [x] Persist minV/maxV via Settings property aliases in both QML files
+- [x] Update `appsettings.cpp` for C++-side voltage range persistence and calibration calls
+- [x] Write unit tests for `calculateLinearValueScaled()` covering edge cases: min=max, voltage outside range, zero range, normal operation
+- [x] Verify build: `cmake --preset macos-homebrew && cmake --build build/macos-homebrew`
 
-### Phase B: Sensor Registry (Feature 2)
+### Phase B: Sensor Registry (Feature 2) -- COMPLETE
 
-- [ ] Create `Core/SensorRegistry.h` with class interface as specified above
-- [ ] Create `Core/SensorRegistry.cpp` with `initializeSensorTable()` populating all known sensors from all domain models
-- [ ] Implement `availableSensors()` and `availableSensorsBySource()` for QML consumption
-- [ ] Implement `markCANPropertyActive()` for UDPReceiver integration
-- [ ] Implement `markAnalogChannelConfigured()`, `markDigitalChannelConfigured()`, `markExpanderChannelConfigured()`
-- [ ] Implement `refreshAvailability()` that re-evaluates all sensor availability
-- [ ] Add SensorRegistry pointer to `Connect` class in `connect.h`
-- [ ] Instantiate SensorRegistry in `connect.cpp` constructor, passing all model pointers
-- [ ] Register as QML context property: `SensorRegistry`
-- [ ] Integrate with UDPReceiver: add SensorRegistry pointer, call `markCANPropertyActive()` on first property write
-- [ ] Update `CMakeLists.txt` with new source files
-- [ ] Write unit tests for availability detection logic
-- [ ] Verify build compiles and SensorRegistry is accessible from QML
+- [x] Create `Core/SensorRegistry.h` with class interface as specified above
+- [x] Create `Core/SensorRegistry.cpp` with `initializeSensorTable()` populating all known sensors from all domain models
+- [x] Implement `availableSensors()` and `availableSensorsBySource()` for QML consumption
+- [x] Implement `markCANPropertyActive()` for UDPReceiver integration
+- [x] Implement `markAnalogChannelConfigured()`, `markDigitalChannelConfigured()`, `markExpanderChannelConfigured()`
+- [x] Implement `refreshAvailability()` that re-evaluates all sensor availability
+- [x] Add SensorRegistry pointer to `Connect` class in `connect.h`
+- [x] Instantiate SensorRegistry in `connect.cpp` constructor, passing all model pointers
+- [x] Register as QML context property: `SensorRegistry`
+- [x] Integrate with UDPReceiver: add SensorRegistry pointer, call `markCANPropertyActive()` on first property write
+- [x] Update `CMakeLists.txt` with new source files
+- [x] Write unit tests for availability detection logic
+- [x] Verify build compiles and SensorRegistry is accessible from QML
 
-### Phase C: Diagnostics Settings Page (Feature 3)
+### Phase C: Diagnostics Settings Page (Feature 3) -- COMPLETE
 
-- [ ] Create `Core/DiagnosticsProvider.h` with class interface as specified above
-- [ ] Create `Core/DiagnosticsProvider.cpp` implementing system info reading (with macOS fallback stubs)
-- [ ] Implement `analogInputDiagnostics()` returning raw + calibrated values per channel
-- [ ] Implement `digitalInputDiagnostics()` returning state per channel
-- [ ] Implement `expanderDiagnostics()` returning raw + calibrated per EX channel
-- [ ] Implement `connectionStatuses()` using SensorRegistry data
-- [ ] Implement CAN message rate tracking (1-second rolling window)
-- [ ] Implement log buffer with `appendLog()` and `MAX_LOG_ENTRIES` circular buffer
-- [ ] Add DiagnosticsProvider to `Connect` class, instantiate in constructor, register as QML context property
-- [ ] Integrate UDPReceiver with DiagnosticsProvider for CAN message/error counting
-- [ ] Create `PowerTune/Settings/components/DiagAnalogPanel.qml` - table showing channel/rawV/calibrated/unit
-- [ ] Create `PowerTune/Settings/components/DiagDigitalPanel.qml` - grid showing DI and EX digital states
-- [ ] Create `PowerTune/Settings/components/DiagCANPanel.qml` - CAN status, message rate, error count, connection list
-- [ ] Create `PowerTune/Settings/components/DiagSystemPanel.qml` - CPU temp, memory, uptime, log viewer
-- [ ] Create `PowerTune/Settings/DiagnosticsSettings.qml` composing 4 panels in a 2x2 grid layout
-- [ ] Register `DiagnosticsSettings` in `PowerTune/Settings/qmldir`
-- [ ] Add "Diagnostics" tab to `SerialSettings.qml` tabModel and StackLayout
-- [ ] Update `CMakeLists.txt` with new C++ and QML files
-- [ ] Verify the diagnostics page renders correctly within the 1600x684 no-scroll constraint
-- [ ] Verify live data updates propagate to the diagnostics panels
-- [ ] End-to-end build and test: `cmake --preset macos-homebrew && cmake --build build/macos-homebrew`
+- [x] Create `Core/DiagnosticsProvider.h` with class interface as specified above
+- [x] Create `Core/DiagnosticsProvider.cpp` implementing system info reading (with macOS fallback stubs)
+- [x] Implement `analogInputDiagnostics()` returning raw + calibrated values per channel
+- [x] Implement `digitalInputDiagnostics()` returning state per channel
+- [x] Implement `expanderDiagnostics()` returning raw + calibrated per EX channel
+- [x] Implement `connectionStatuses()` using SensorRegistry data
+- [x] Implement CAN message rate tracking (1-second rolling window)
+- [x] Implement log buffer with `appendLog()` and `MAX_LOG_ENTRIES` circular buffer
+- [x] Add DiagnosticsProvider to `Connect` class, instantiate in constructor, register as QML context property
+- [x] Integrate UDPReceiver with DiagnosticsProvider for CAN message/error counting
+- [x] Create `PowerTune/Settings/components/DiagAnalogPanel.qml` - table showing channel/rawV/calibrated/unit
+- [x] Create `PowerTune/Settings/components/DiagDigitalPanel.qml` - grid showing DI and EX digital states
+- [x] Create `PowerTune/Settings/components/DiagCANPanel.qml` - CAN status, message rate, error count, connection list
+- [x] Create `PowerTune/Settings/components/DiagSystemPanel.qml` - CPU temp, memory, uptime, log viewer
+- [x] Create `PowerTune/Settings/DiagnosticsSettings.qml` composing 4 panels in a 2x2 grid layout
+- [x] Register `DiagnosticsSettings` in `PowerTune/Settings/qmldir`
+- [x] Add "Diagnostics" tab to `SerialSettings.qml` tabModel and StackLayout
+- [x] Update `CMakeLists.txt` with new C++ and QML files
+- [x] Verify the diagnostics page renders correctly within the 1600x684 no-scroll constraint
+- [x] Verify live data updates propagate to the diagnostics panels
+- [x] End-to-end build and test: `cmake --preset macos-homebrew && cmake --build build/macos-homebrew`

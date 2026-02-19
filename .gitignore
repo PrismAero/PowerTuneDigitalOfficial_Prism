@@ -71,6 +71,7 @@ Desktop.ini
 *.temp
 *.bak
 *.orig
+.git-commit-msg.txt
 
 # User-specific files
 *.user

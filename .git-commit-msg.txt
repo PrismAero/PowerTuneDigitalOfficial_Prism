@@ -1,27 +1,26 @@
-feat(settings): add Diagnostics settings page and tab
+feat: Complete three new features - voltage scaling, sensor registry, diagnostics
 
-Create a new DiagnosticsSettings.qml page with a 2x2 grid layout
-displaying real-time system diagnostics from DiagnosticsProvider:
+Voltage Range Scaling (CalibrationHelper):
+- LinearPreset/NtcPreset structs extended with minVoltage/maxVoltage
+- New methods: calculateLinearValueScaled(), normalizeVoltage(),
+  getPresetMinVoltage(), getPresetMaxVoltage()
+- Real-world voltage ranges for all 12 linear + 6 NTC presets
+- QML: Min V / Max V display columns in AnalogInputs and ExBoardAnalog
+- JS math moved to C++: expanderChannelMultiplier(), frequencyDividerForCylinders()
 
-- Top-left panel: System info (CPU temp, memory, uptime, system time,
-  active sensor count)
-- Top-right panel: Connection status (CAN bus status with green/red
-  indicators, daemon name, message rate, error count, serial port info,
-  connection type)
-- Bottom-left panel: Active sensors table (name, unit, source) with
-  2-second auto-refresh timer via getLiveSensorData()
-- Bottom-right panel: Log console with dark terminal styling, monospace
-  green text, auto-scroll, and clear button
+SensorRegistry (Core/SensorRegistry.h/.cpp):
+- Runtime sensor availability tracking
+- Sources: CAN, AnalogInput, DigitalInput, ExpanderBoard, GPS, SenseHat, Computed
+- ~35 common CAN sensors pre-registered (activate on data receipt)
+- 9 built-in GPS/SenseHat sensors always active
+- Refresh methods for analog/digital/expander configuration changes
+- Exposed to QML as "SensorRegistry" context property
 
-Files created:
-- PowerTune/Settings/DiagnosticsSettings.qml
-
-Files modified:
-- PowerTune/Core/SerialSettings.qml - Added "Diagnostics" as 11th tab
-  (index 10) in tab bar and StackLayout
-- PowerTune/Settings/qmldir - Registered DiagnosticsSettings 1.0
-- CMakeLists.txt - Added DiagnosticsSettings.qml to QML_FILES
-
-Design: Dark theme (#1a1a2e bg, #1e1e3a panels, #009688 teal accent),
-fits 1600x684px without page-level scrolling. Scrolling only allowed
-within sensor list and log console panels.
+DiagnosticsProvider + Diagnostics Page:
+- Core/DiagnosticsProvider.h/.cpp: System info, CAN metrics, connection status, log buffer
+- PowerTune/Settings/DiagnosticsSettings.qml: 2x2 grid layout
+  - System panel: CPU temp, memory, uptime
+  - Connection panel: CAN status, daemon, message rate, errors
+  - Sensor panel: Active sensor table with 2s refresh
+  - Log panel: Dark console with monospace green text
+- New "Diagnostics" tab (11th) in SerialSettings.qml
