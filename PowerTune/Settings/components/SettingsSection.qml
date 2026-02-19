@@ -13,10 +13,10 @@ Rectangle {
     default property alias content: contentColumn.data
 
     Layout.fillWidth: true
-    implicitHeight: collapsed ? headerRow.height + 32 : headerRow.height + contentColumn.height + 48
-    color: "#1E1E1E"
+    implicitHeight: collapsed ? headerRow.height + 24 : headerRow.height + contentColumn.height + 36
+    color: "#1E1E2E"
     radius: 8
-    border.color: "#3D3D3D"
+    border.color: "#2D2D4E"
     border.width: 1
 
     Behavior on implicitHeight {
@@ -25,20 +25,20 @@ Rectangle {
 
     ColumnLayout {
         anchors.fill: parent
-        anchors.margins: 16
-        spacing: 16
+        anchors.margins: 12
+        spacing: 8
 
         RowLayout {
             id: headerRow
             Layout.fillWidth: true
-            spacing: 12
+            spacing: 8
 
             Text {
                 text: root.title
-                font.pixelSize: 28
-                font.weight: Font.DemiBold
+                font.pixelSize: 18
+                font.weight: Font.Bold
                 font.family: "Lato"
-                color: "#FFFFFF"
+                color: "#009688"
                 Layout.fillWidth: true
             }
 
@@ -76,7 +76,7 @@ Rectangle {
         ColumnLayout {
             id: contentColumn
             Layout.fillWidth: true
-            spacing: 12
+            spacing: 8
             visible: !root.collapsed
             opacity: root.collapsed ? 0 : 1
 

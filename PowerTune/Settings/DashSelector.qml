@@ -1,3 +1,4 @@
+// Copyright (c) Kai Wyborny. All rights reserved.
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
@@ -9,7 +10,7 @@ import PowerTune.Utils 1.0
 Rectangle {
     id: dashselector
     anchors.fill: parent
-    color: "#121212"
+    color: "#1a1a2e"
 
     Settings {
         property alias dashselect1: dash1.currentIndex
@@ -55,81 +56,82 @@ Rectangle {
         }
     }
 
-    ScrollView {
+    ColumnLayout {
         anchors.fill: parent
         anchors.margins: 16
-        clip: true
-        ScrollBar.vertical.policy: ScrollBar.AsNeeded
-        ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
+        spacing: 16
 
-        ColumnLayout {
-            width: dashselector.width - 32
-            spacing: 20
+        Item { Layout.fillHeight: true }
 
-            // * Active Dashboards Section
-            SettingsSection {
-                title: Translator.translate("ActiveDashboards", Settings.language)
-                Layout.fillWidth: true
+        // * Active Dashboards Section
+        SettingsSection {
+            title: Translator.translate("ActiveDashboards", Settings.language)
+            Layout.fillWidth: true
+            Layout.maximumWidth: 800
+            Layout.alignment: Qt.AlignHCenter
 
-                RowLayout {
-                    spacing: 20
+            RowLayout {
+                spacing: 16
 
-                    Text {
-                        text: Translator.translate("ActiveDashboards", Settings.language)
-                        font.pixelSize: 20
-                        font.family: "Lato"
-                        color: "#FFFFFF"
-                        Layout.preferredWidth: 200
-                    }
-
-                    StyledComboBox {
-                        id: numberofdashes
-                        width: 150
-                        model: ["1", "2", "3", "4"]
-                        currentIndex: -1
-                        onCurrentIndexChanged: {
-                            adremove()
-                            AppSettings.writeSelectedDashSettings(numberofdashes.currentIndex + 1)
-                        }
-                    }
+                Text {
+                    text: Translator.translate("ActiveDashboards", Settings.language)
+                    font.pixelSize: 16
+                    font.family: "Lato"
+                    color: "#FFFFFF"
+                    Layout.preferredWidth: 200
                 }
-            }
 
-            // * Dashboard Selection Section
-            SettingsSection {
-                title: "Dashboard Selection"
-                Layout.fillWidth: true
-
-                RowLayout {
-                    spacing: 16
-                    Layout.fillWidth: true
-
-                    DashSelectorWidget {
-                        id: dash1
-                        index: 1
-                        linkedLoader: firstPageLoader
-                    }
-
-                    DashSelectorWidget {
-                        id: dash2
-                        index: 2
-                        linkedLoader: secondPageLoader
-                    }
-
-                    DashSelectorWidget {
-                        id: dash3
-                        index: 3
-                        linkedLoader: thirdPageLoader
-                    }
-
-                    DashSelectorWidget {
-                        id: dash4
-                        index: 4
-                        linkedLoader: fourthPageLoader
-                        Component.onCompleted: tabView.currentIndex = 0
+                StyledComboBox {
+                    id: numberofdashes
+                    width: 150
+                    model: ["1", "2", "3", "4"]
+                    currentIndex: -1
+                    onCurrentIndexChanged: {
+                        adremove()
+                        AppSettings.writeSelectedDashSettings(numberofdashes.currentIndex + 1)
                     }
                 }
             }
         }
+
+        // * Dashboard Selection Section
+        SettingsSection {
+            title: "Dashboard Selection"
+            Layout.fillWidth: true
+            Layout.maximumWidth: 800
+            Layout.alignment: Qt.AlignHCenter
+
+            RowLayout {
+                spacing: 16
+                Layout.fillWidth: true
+
+                DashSelectorWidget {
+                    id: dash1
+                    index: 1
+                    linkedLoader: firstPageLoader
+                }
+
+                DashSelectorWidget {
+                    id: dash2
+                    index: 2
+                    linkedLoader: secondPageLoader
+                }
+
+                DashSelectorWidget {
+                    id: dash3
+                    index: 3
+                    linkedLoader: thirdPageLoader
+                }
+
+                DashSelectorWidget {
+                    id: dash4
+                    index: 4
+                    linkedLoader: fourthPageLoader
+                    Component.onCompleted: tabView.currentIndex = 0
+                }
+            }
+        }
+
+        Item { Layout.fillHeight: true }
     }
 }

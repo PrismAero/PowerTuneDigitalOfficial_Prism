@@ -1,3 +1,4 @@
+// Copyright (c) Kai Wyborny. All rights reserved.
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
@@ -8,7 +9,7 @@ import PowerTune.Utils 1.0
 Rectangle {
     id: root
     anchors.fill: parent
-    color: "#121212"
+    color: "#1a1a2e"
 
     property int gercalactive: 0
 
@@ -30,104 +31,121 @@ Rectangle {
         }
     }
 
-    ScrollView {
+    RowLayout {
         anchors.fill: parent
         anchors.margins: 16
-        clip: true
-        ScrollBar.vertical.policy: ScrollBar.AsNeeded
-        ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
+        spacing: 16
 
+        // * LEFT COLUMN - Warning Thresholds
         ColumnLayout {
-            width: root.width - 32
-            spacing: 20
+            Layout.preferredWidth: (root.width - 48) / 2
+            Layout.fillHeight: true
+            Layout.alignment: Qt.AlignTop
+            spacing: 12
 
-            // * Warning Thresholds Section
             SettingsSection {
                 title: Translator.translate("Warning Thresholds", Settings.language)
                 Layout.fillWidth: true
 
-                GridLayout {
-                    columns: 5
-                    rowSpacing: 12
-                    columnSpacing: 20
-
-                    // Labels row
+                RowLayout {
+                    spacing: 12
                     Text {
                         text: Translator.translate("WaterTemp", Settings.language)
-                        font.pixelSize: 18
-                        font.weight: Font.DemiBold
+                        font.pixelSize: 16
                         font.family: "Lato"
-                        color: "#B0B0B0"
+                        color: "#FFFFFF"
+                        Layout.preferredWidth: 160
                     }
-                    Text {
-                        text: Translator.translate("Boost", Settings.language)
-                        font.pixelSize: 18
-                        font.weight: Font.DemiBold
-                        font.family: "Lato"
-                        color: "#B0B0B0"
-                    }
-                    Text {
-                        text: Translator.translate("Revs", Settings.language)
-                        font.pixelSize: 18
-                        font.weight: Font.DemiBold
-                        font.family: "Lato"
-                        color: "#B0B0B0"
-                    }
-                    Text {
-                        text: Translator.translate("Knock", Settings.language)
-                        font.pixelSize: 18
-                        font.weight: Font.DemiBold
-                        font.family: "Lato"
-                        color: "#B0B0B0"
-                    }
-                    Text {
-                        text: Translator.translate("Lamdamultiply", Settings.language)
-                        font.pixelSize: 18
-                        font.weight: Font.DemiBold
-                        font.family: "Lato"
-                        color: "#B0B0B0"
-                    }
-
-                    // Input fields row
                     StyledTextField {
                         id: watertempwarn
-                        width: 140
+                        width: 160
                         text: "110"
                         inputMethodHints: Qt.ImhFormattedNumbersOnly
                         onEditingFinished: applysettings.start()
                     }
+                }
+
+                RowLayout {
+                    spacing: 12
+                    Text {
+                        text: Translator.translate("Boost", Settings.language)
+                        font.pixelSize: 16
+                        font.family: "Lato"
+                        color: "#FFFFFF"
+                        Layout.preferredWidth: 160
+                    }
                     StyledTextField {
                         id: boostwarn
-                        width: 140
+                        width: 160
                         text: "0.9"
                         inputMethodHints: Qt.ImhFormattedNumbersOnly
                         onEditingFinished: applysettings.start()
                     }
+                }
+
+                RowLayout {
+                    spacing: 12
+                    Text {
+                        text: Translator.translate("Revs", Settings.language)
+                        font.pixelSize: 16
+                        font.family: "Lato"
+                        color: "#FFFFFF"
+                        Layout.preferredWidth: 160
+                    }
                     StyledTextField {
                         id: rpmwarn
-                        width: 140
+                        width: 160
                         text: "10000"
                         inputMethodHints: Qt.ImhFormattedNumbersOnly
                         onEditingFinished: applysettings.start()
                     }
+                }
+
+                RowLayout {
+                    spacing: 12
+                    Text {
+                        text: Translator.translate("Knock", Settings.language)
+                        font.pixelSize: 16
+                        font.family: "Lato"
+                        color: "#FFFFFF"
+                        Layout.preferredWidth: 160
+                    }
                     StyledTextField {
                         id: knockwarn
-                        width: 140
+                        width: 160
                         text: "80"
                         inputMethodHints: Qt.ImhFormattedNumbersOnly
                         onEditingFinished: applysettings.start()
                     }
+                }
+
+                RowLayout {
+                    spacing: 12
+                    Text {
+                        text: Translator.translate("Lamdamultiply", Settings.language)
+                        font.pixelSize: 16
+                        font.family: "Lato"
+                        color: "#FFFFFF"
+                        Layout.preferredWidth: 160
+                    }
                     StyledTextField {
                         id: lambdamultiply
-                        width: 140
+                        width: 160
                         text: "14.7"
                         inputMethodHints: Qt.ImhFormattedNumbersOnly
                         onEditingFinished: applysettings.start()
                     }
                 }
             }
+        }
 
-            // * Gear Calculation Section
+        // * RIGHT COLUMN - Gear Ratios
+        ColumnLayout {
+            Layout.preferredWidth: (root.width - 48) / 2
+            Layout.fillHeight: true
+            Layout.alignment: Qt.AlignTop
+            spacing: 12
+
             SettingsSection {
                 title: Translator.translate("GearCalculation", Settings.language)
                 Layout.fillWidth: true
@@ -149,106 +167,108 @@ Rectangle {
                     }
                 }
 
-                GridLayout {
-                    columns: 6
-                    rowSpacing: 12
-                    columnSpacing: 16
-
-                    // Labels row
+                RowLayout {
+                    spacing: 12
                     Text {
                         text: Translator.translate("Gear", Settings.language) + " 1"
-                        font.pixelSize: 18
-                        font.weight: Font.DemiBold
+                        font.pixelSize: 16
                         font.family: "Lato"
-                        color: "#B0B0B0"
-                        Layout.preferredWidth: 100
-                        horizontalAlignment: Text.AlignHCenter
+                        color: "#FFFFFF"
+                        Layout.preferredWidth: 160
                     }
-                    Text {
-                        text: Translator.translate("Gear", Settings.language) + " 2"
-                        font.pixelSize: 18
-                        font.weight: Font.DemiBold
-                        font.family: "Lato"
-                        color: "#B0B0B0"
-                        Layout.preferredWidth: 100
-                        horizontalAlignment: Text.AlignHCenter
-                    }
-                    Text {
-                        text: Translator.translate("Gear", Settings.language) + " 3"
-                        font.pixelSize: 18
-                        font.weight: Font.DemiBold
-                        font.family: "Lato"
-                        color: "#B0B0B0"
-                        Layout.preferredWidth: 100
-                        horizontalAlignment: Text.AlignHCenter
-                    }
-                    Text {
-                        text: Translator.translate("Gear", Settings.language) + " 4"
-                        font.pixelSize: 18
-                        font.weight: Font.DemiBold
-                        font.family: "Lato"
-                        color: "#B0B0B0"
-                        Layout.preferredWidth: 100
-                        horizontalAlignment: Text.AlignHCenter
-                    }
-                    Text {
-                        text: Translator.translate("Gear", Settings.language) + " 5"
-                        font.pixelSize: 18
-                        font.weight: Font.DemiBold
-                        font.family: "Lato"
-                        color: "#B0B0B0"
-                        Layout.preferredWidth: 100
-                        horizontalAlignment: Text.AlignHCenter
-                    }
-                    Text {
-                        text: Translator.translate("Gear", Settings.language) + " 6"
-                        font.pixelSize: 18
-                        font.weight: Font.DemiBold
-                        font.family: "Lato"
-                        color: "#B0B0B0"
-                        Layout.preferredWidth: 100
-                        horizontalAlignment: Text.AlignHCenter
-                    }
-
-                    // Input fields row
                     StyledTextField {
                         id: valgear1
-                        width: 100
+                        width: 160
                         text: "120"
                         inputMethodHints: Qt.ImhFormattedNumbersOnly
                         onEditingFinished: applysettings.start()
                     }
+                }
+
+                RowLayout {
+                    spacing: 12
+                    Text {
+                        text: Translator.translate("Gear", Settings.language) + " 2"
+                        font.pixelSize: 16
+                        font.family: "Lato"
+                        color: "#FFFFFF"
+                        Layout.preferredWidth: 160
+                    }
                     StyledTextField {
                         id: valgear2
-                        width: 100
+                        width: 160
                         text: "74"
                         inputMethodHints: Qt.ImhFormattedNumbersOnly
                         onEditingFinished: applysettings.start()
                     }
+                }
+
+                RowLayout {
+                    spacing: 12
+                    Text {
+                        text: Translator.translate("Gear", Settings.language) + " 3"
+                        font.pixelSize: 16
+                        font.family: "Lato"
+                        color: "#FFFFFF"
+                        Layout.preferredWidth: 160
+                    }
                     StyledTextField {
                         id: valgear3
-                        width: 100
+                        width: 160
                         text: "54"
                         inputMethodHints: Qt.ImhFormattedNumbersOnly
                         onEditingFinished: applysettings.start()
                     }
+                }
+
+                RowLayout {
+                    spacing: 12
+                    Text {
+                        text: Translator.translate("Gear", Settings.language) + " 4"
+                        font.pixelSize: 16
+                        font.family: "Lato"
+                        color: "#FFFFFF"
+                        Layout.preferredWidth: 160
+                    }
                     StyledTextField {
                         id: valgear4
-                        width: 100
+                        width: 160
                         text: "37"
                         inputMethodHints: Qt.ImhFormattedNumbersOnly
                         onEditingFinished: applysettings.start()
                     }
+                }
+
+                RowLayout {
+                    spacing: 12
+                    Text {
+                        text: Translator.translate("Gear", Settings.language) + " 5"
+                        font.pixelSize: 16
+                        font.family: "Lato"
+                        color: "#FFFFFF"
+                        Layout.preferredWidth: 160
+                    }
                     StyledTextField {
                         id: valgear5
-                        width: 100
+                        width: 160
                         text: "28"
                         inputMethodHints: Qt.ImhFormattedNumbersOnly
                         onEditingFinished: applysettings.start()
                     }
+                }
+
+                RowLayout {
+                    spacing: 12
+                    Text {
+                        text: Translator.translate("Gear", Settings.language) + " 6"
+                        font.pixelSize: 16
+                        font.family: "Lato"
+                        color: "#FFFFFF"
+                        Layout.preferredWidth: 160
+                    }
                     StyledTextField {
                         id: valgear6
-                        width: 100
+                        width: 160
                         text: ""
                         inputMethodHints: Qt.ImhFormattedNumbersOnly
                         onEditingFinished: applysettings.start()
@@ -258,7 +278,7 @@ Rectangle {
 
                 Text {
                     text: "Enter RPM/Speed ratio values for each gear"
-                    font.pixelSize: 16
+                    font.pixelSize: 14
                     font.family: "Lato"
                     color: "#707070"
                     font.italic: true
