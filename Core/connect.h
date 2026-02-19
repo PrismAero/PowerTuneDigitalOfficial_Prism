@@ -64,6 +64,8 @@ class PropertyRouter;
 // * Phase 6: Sensor calibration
 class SteinhartCalculator;
 class CalibrationHelper;
+// * Phase 7: Sensor registry
+class SensorRegistry;
 
 class Connect : public QObject
 {
@@ -165,6 +167,8 @@ private:
     // * Phase 6: Sensor calibration helpers
     SteinhartCalculator *m_steinhartCalc;
     CalibrationHelper *m_calibrationHelper;
+    // * Phase 7: Sensor registry
+    SensorRegistry *m_sensorRegistry;
 
 
 signals:

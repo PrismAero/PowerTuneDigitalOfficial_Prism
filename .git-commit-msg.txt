@@ -1,23 +1,32 @@
-feat: Add voltage range display to AnalogInputs/ExBoardAnalog + move JS math to C++
+feat(core): Add SensorRegistry for runtime sensor availability tracking
 
-CalibrationHelper C++ additions:
-- getLinearPresetValueAt0V(presetName) - convenience accessor for val0v
-- getLinearPresetValueAt5V(presetName) - convenience accessor for val5v
-- getLinearPresetUnit(presetName) - convenience accessor for unit string
-- expanderChannelMultiplier(channelIndex) - CAN v2 cylinder multiplier (2x/4x)
-- frequencyDividerForCylinders(cylinderIndex) - RPM frequency divider lookup
+Implement SensorRegistry class that tracks which sensors are actually
+available at runtime, replacing the static list approach in the dashboard
+creator.
 
-AnalogInputs.qml:
-- Added Min V / Max V read-only display columns for all 11 analog channels
-- Voltage range auto-populates from Calibration.getPresetMinVoltage/MaxVoltage
-  when a preset is selected (empty when Custom)
+New files:
+- Core/SensorRegistry.h: Header with full public API, Q_PROPERTY
+  declarations, Q_INVOKABLE methods, and SensorSource enum
+- Core/SensorRegistry.cpp: Implementation with built-in sensor
+  registration (GPS, SenseHat), common CAN sensor registration,
+  analog/digital/expander board input refresh, and CAN timeout logic
 
-ExBoardAnalog.qml:
-- Added MinV / MaxV display columns to all 8 EX AN linear preset rows
-- Replaced 30-line switch/case multiplier logic in setInputs() with single
-  call to Calibration.expanderChannelMultiplier()
-- Replaced 12-line switch/case in cylindercalcrpmdi1() with single call to
-  Calibration.frequencyDividerForCylinders()
+Modified files:
+- CMakeLists.txt: Added SensorRegistry.h/.cpp to build
+- Core/connect.h: Added SensorRegistry forward declaration and member
+- Core/connect.cpp: Create SensorRegistry instance, expose as QML
+  context property, call refresh methods after settings load
 
-All arithmetic/computation moved from QML JavaScript to C++ CalibrationHelper.
-Build verified: zero errors on macos-homebrew preset.
+Sensor sources supported:
+- CAN/Daemon (auto-detected, with 10s timeout for inactive marking)
+- Analog Inputs (AN1-AN11)
+- Digital Inputs (DI1-DI4)
+- Expander Board (EX_AN1-EX_AN8)
+- GPS (latitude, longitude, altitude, speed, heading, satellites)
+- SenseHat (accelerometer X/Y/Z)
+- Computed (for derived values)
+
+QML API exposed as "SensorRegistry" context property with:
+- availableCount, availableSensors, availableCategories properties
+- getSensorsByCategory(), isAvailable(), getDisplayName(), getUnit()
+- refreshAnalogInputs(), refreshExpanderBoard(), refreshDigitalInputs()
