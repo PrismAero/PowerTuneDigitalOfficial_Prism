@@ -314,6 +314,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
             PowerTune/Settings/components/StyledComboBox.qml
             PowerTune/Settings/components/StyledSwitch.qml
             PowerTune/Settings/components/StyledTextField.qml
+            PowerTune/Settings/components/StyledCheckBox.qml
             PowerTune/Settings/components/ConnectionStatusIndicator.qml
         RESOURCE_PREFIX /qt/qml
         OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/qt/qml/PowerTune/Settings

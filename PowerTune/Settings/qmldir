@@ -19,4 +19,5 @@ StyledButton 1.0 components/StyledButton.qml
 StyledComboBox 1.0 components/StyledComboBox.qml
 StyledSwitch 1.0 components/StyledSwitch.qml
 StyledTextField 1.0 components/StyledTextField.qml
+StyledCheckBox 1.0 components/StyledCheckBox.qml
 ConnectionStatusIndicator 1.0 components/ConnectionStatusIndicator.qml

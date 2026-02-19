@@ -46,9 +46,9 @@ Rectangle {
         ListElement { title: "Dash Sel." }
         ListElement { title: "Sensehat" }
         ListElement { title: "Warn / Gear" }
-        ListElement { title: "Speed" }
+        ListElement { title: "Speedtab" }
         ListElement { title: "Analog" }
-        ListElement { title: "RPM" }
+        ListElement { title: "RPM2" }
         ListElement { title: "EX Board" }
         ListElement { title: "Startup" }
         ListElement { title: "Network" }
