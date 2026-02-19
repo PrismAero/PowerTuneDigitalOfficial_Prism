@@ -41,6 +41,7 @@ class VehicleData : public QObject
     Q_PROPERTY(qreal GearCalculation READ GearCalculation WRITE setGearCalculation NOTIFY GearCalculationChanged)
     Q_PROPERTY(qreal gearswitch READ gearswitch WRITE setgearswitch NOTIFY gearswitchChanged)
     Q_PROPERTY(QString autogear READ autogear WRITE setautogear NOTIFY autogearChanged)
+    Q_PROPERTY(qreal Gearoffset READ Gearoffset WRITE setGearoffset NOTIFY GearoffsetChanged)
     Q_PROPERTY(qreal FuelLevel READ FuelLevel WRITE setFuelLevel NOTIFY FuelLevelChanged)
 
     // * Wheel Speeds
@@ -156,6 +157,7 @@ public:
     qreal GearCalculation() const { return m_GearCalculation; }
     qreal gearswitch() const { return m_gearswitch; }
     QString autogear() const { return m_autogear; }
+    qreal Gearoffset() const { return m_Gearoffset; }
     qreal FuelLevel() const { return m_FuelLevel; }
 
     // * Getters - Wheel Speeds
@@ -269,6 +271,7 @@ public slots:
     void setGearCalculation(qreal GearCalculation);
     void setgearswitch(qreal gearswitch);
     void setautogear(const QString &autogear);
+    void setGearoffset(qreal Gearoffset);
     void setFuelLevel(qreal FuelLevel);
 
     // * Setters - Wheel Speeds
@@ -382,6 +385,7 @@ signals:
     void GearCalculationChanged(qreal GearCalculation);
     void gearswitchChanged(qreal gearswitch);
     void autogearChanged(const QString &autogear);
+    void GearoffsetChanged(qreal Gearoffset);
     void FuelLevelChanged(qreal FuelLevel);
 
     // * Signals - Wheel Speeds
@@ -495,6 +499,7 @@ private:
     qreal m_GearCalculation = 0;
     qreal m_gearswitch = 0;
     QString m_autogear;
+    qreal m_Gearoffset = 0;
     qreal m_FuelLevel = 0;
 
     // * Wheel Speeds

@@ -56,6 +56,10 @@ class ConnectionData : public QObject
     // * Media path
     Q_PROPERTY(QString musicpath READ musicpath WRITE setmusicpath NOTIFY musicpathChanged)
 
+    // * Daemon/License
+    Q_PROPERTY(QString daemonlicense READ daemonlicense WRITE setdaemonlicense NOTIFY daemonlicenseChanged)
+    Q_PROPERTY(QString holleyproductid READ holleyproductid WRITE setholleyproductid NOTIFY holleyproductidChanged)
+
 public:
     explicit ConnectionData(QObject *parent = nullptr);
 
@@ -91,6 +95,10 @@ public:
     // * Getters - Media path
     QString musicpath() const { return m_musicpath; }
 
+    // * Getters - Daemon/License
+    QString daemonlicense() const { return m_daemonlicense; }
+    QString holleyproductid() const { return m_holleyproductid; }
+
 public slots:
     // * Setters - Serial status
     void setSerialStat(const QString &SerialStat);
@@ -123,6 +131,10 @@ public slots:
 
     // * Setters - Media path
     void setmusicpath(const QString &musicpath);
+
+    // * Setters - Daemon/License
+    void setdaemonlicense(const QString &daemonlicense);
+    void setholleyproductid(const QString &holleyproductid);
 
 signals:
     // * Signals - Serial status
@@ -157,6 +169,10 @@ signals:
     // * Signals - Media path
     void musicpathChanged(const QString &musicpath);
 
+    // * Signals - Daemon/License
+    void daemonlicenseChanged(const QString &daemonlicense);
+    void holleyproductidChanged(const QString &holleyproductid);
+
 private:
     // * Serial status
     QString m_SerialStat;
@@ -189,6 +205,10 @@ private:
 
     // * Media path
     QString m_musicpath;
+
+    // * Daemon/License
+    QString m_daemonlicense;
+    QString m_holleyproductid;
 };
 
 #endif  // CONNECTIONDATA_H

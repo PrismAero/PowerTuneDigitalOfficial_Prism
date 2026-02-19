@@ -145,3 +145,28 @@ void ConnectionData::setmusicpath(const QString &musicpath)
     m_musicpath = musicpath;
     emit musicpathChanged(m_musicpath);
 }
+
+// * Setters - Daemon/License
+/**
+ * @brief Set the daemon license key for external daemon authentication
+ * @param daemonlicense License key string
+ */
+void ConnectionData::setdaemonlicense(const QString &daemonlicense)
+{
+    if (m_daemonlicense == daemonlicense)
+        return;
+    m_daemonlicense = daemonlicense;
+    emit daemonlicenseChanged(m_daemonlicense);
+}
+
+/**
+ * @brief Set the Holley product ID for Holley EFI daemon connections
+ * @param holleyproductid Product identifier string
+ */
+void ConnectionData::setholleyproductid(const QString &holleyproductid)
+{
+    if (m_holleyproductid == holleyproductid)
+        return;
+    m_holleyproductid = holleyproductid;
+    emit holleyproductidChanged(m_holleyproductid);
+}

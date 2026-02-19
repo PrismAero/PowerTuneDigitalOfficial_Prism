@@ -243,22 +243,7 @@ void SettingsData::setCBXTracksave(const QString &CBXTracksave)
     emit CBXTracksaveChanged(m_CBXTracksave);
 }
 
-// * Setters - License/Product settings
-void SettingsData::setdaemonlicense(const QString &daemonlicense)
-{
-    if (m_daemonlicense == daemonlicense)
-        return;
-    m_daemonlicense = daemonlicense;
-    emit daemonlicenseChanged(m_daemonlicense);
-}
-
-void SettingsData::setholleyproductid(const QString &holleyproductid)
-{
-    if (m_holleyproductid == holleyproductid)
-        return;
-    m_holleyproductid = holleyproductid;
-    emit holleyproductidChanged(m_holleyproductid);
-}
+// * daemonlicense/holleyproductid setters moved to ConnectionData
 
 // * Setters - Additional smoothing
 void SettingsData::setsmootexAnalogInput7(int smootexAnalogInput7)

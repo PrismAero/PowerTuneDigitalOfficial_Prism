@@ -110,6 +110,17 @@ void VehicleData::setautogear(const QString &autogear)
         emit autogearChanged(autogear);
     }
 }
+/**
+ * @brief Set the gear calculation offset value
+ * @param Gearoffset Offset applied to gear ratio calculations
+ */
+void VehicleData::setGearoffset(qreal Gearoffset)
+{
+    if (m_Gearoffset != Gearoffset) {
+        m_Gearoffset = Gearoffset;
+        emit GearoffsetChanged(Gearoffset);
+    }
+}
 void VehicleData::setFuelLevel(qreal FuelLevel)
 {
     if (m_FuelLevel != FuelLevel) {

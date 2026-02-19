@@ -1324,26 +1324,23 @@ void Connect::openConnection(const QString &portName, const int &ecuSelect, cons
     }
     if (ecuSelect == 6)
     {
-        //HaltechV2
-        m_dashBoard->setFlagString1("Clutch");
-        m_dashBoard->setFlagString2("Brake");
-        m_dashBoard->setFlagString3("TransThrottle");
-        m_dashBoard->setFlagString4("Decel Cut");
-        m_dashBoard->setFlagString5("Gear Switch");
-        m_dashBoard->setFlagString6("Torque Red.");
-        m_dashBoard->setFlagString7("Flat Shift");
-        m_dashBoard->setFlagString8("Aux RPM Limit");
-        m_dashBoard->setFlagString9("Antilag");
-        m_dashBoard->setFlagString10("MIL");
-        m_dashBoard->setFlagString11("Batt. Light");
-        m_dashBoard->setFlagString12("Eng. Limiter");
-        m_dashBoard->setFlagString13("Ignition");
-        m_dashBoard->setFlagString14("NOS Stage 1");
-        m_dashBoard->setFlagString15("NOS Stage 2");
-        m_dashBoard->setFlagString16("NOS Stage 3");
-        //m_dashBoard->setFlagString17("NOS Stage 4");
-        //m_dashBoard->setFlagString18("NOS Stage 5");
-        //m_dashBoard->setFlagString19("NOS Stage 6");
+        // HaltechV2 - Flag string labels written to FlagsData model
+        m_flagsData->setFlagString1("Clutch");
+        m_flagsData->setFlagString2("Brake");
+        m_flagsData->setFlagString3("TransThrottle");
+        m_flagsData->setFlagString4("Decel Cut");
+        m_flagsData->setFlagString5("Gear Switch");
+        m_flagsData->setFlagString6("Torque Red.");
+        m_flagsData->setFlagString7("Flat Shift");
+        m_flagsData->setFlagString8("Aux RPM Limit");
+        m_flagsData->setFlagString9("Antilag");
+        m_flagsData->setFlagString10("MIL");
+        m_flagsData->setFlagString11("Batt. Light");
+        m_flagsData->setFlagString12("Eng. Limiter");
+        m_flagsData->setFlagString13("Ignition");
+        m_flagsData->setFlagString14("NOS Stage 1");
+        m_flagsData->setFlagString15("NOS Stage 2");
+        m_flagsData->setFlagString16("NOS Stage 3");
 
         QProcess *process = new QProcess(this);
         process->start("/home/pi/Haltech/HaltechV2");
@@ -1368,11 +1365,11 @@ void Connect::openConnection(const QString &portName, const int &ecuSelect, cons
 
         if(m_Connectport->open(QIODevice::ReadWrite) == false)
         {
-            m_dashBoard->setConnectStat(m_Connectport->errorString());
+            m_connectionData->setSerialStat(m_Connectport->errorString());
         }
         else
         {
-            m_dashBoard->setConnectStat(QString("Connected to Connectport"));
+            m_connectionData->setSerialStat(QString("Connected to Connectport"));
         }
     }*/
 }

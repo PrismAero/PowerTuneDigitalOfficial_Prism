@@ -421,16 +421,16 @@ void AppSettings::writeStartupSettings(const int &ExternalSpeed)
 void AppSettings::writeDaemonLicenseKey(const QString &DaemonLicenseKey)
 {
     setValue("DaemonLicenseKey", DaemonLicenseKey);
-    if (m_settingsData) {
-        m_settingsData->setdaemonlicense(DaemonLicenseKey);
+    if (m_connectionData) {
+        m_connectionData->setdaemonlicense(DaemonLicenseKey);
     }
 }
 
 void AppSettings::writeHolleyProductID(const QString &HolleyProductID)
 {
     setValue("HolleyProductID", HolleyProductID);
-    if (m_settingsData) {
-        m_settingsData->setholleyproductid(HolleyProductID);
+    if (m_connectionData) {
+        m_connectionData->setholleyproductid(HolleyProductID);
     }
 }
 
@@ -573,9 +573,9 @@ void AppSettings::readandApplySettings()
         m_connectionData->setexternalspeedport(getValue("externalspeedport").toString());
     }
 
-    // Daemon and product IDs
-    if (m_settingsData) {
-        m_settingsData->setdaemonlicense(getValue("DaemonLicenseKey").toString());
-        m_settingsData->setholleyproductid(getValue("HolleyProductID").toString());
+    // Daemon and product IDs (moved to ConnectionData)
+    if (m_connectionData) {
+        m_connectionData->setdaemonlicense(getValue("DaemonLicenseKey").toString());
+        m_connectionData->setholleyproductid(getValue("HolleyProductID").toString());
     }
 }
