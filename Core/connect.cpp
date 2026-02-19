@@ -15,6 +15,7 @@
 /*!
   \file Connect.cpp
   \author Bastian Gschrey & Markus Ippy
+  \modifier Kai Wyborny
 */
 
 #include "connect.h"
@@ -27,7 +28,9 @@
 #include "../Hardware/gps.h"
 #include "../Hardware/sensors.h"
 #include "../Utils/Calculations.h"
+#include "../Utils/CalibrationHelper.h"
 #include "../Utils/DataLogger.h"
+#include "../Utils/SteinhartCalculator.h"
 #include "../Utils/UDPReceiver.h"
 #include "../Utils/wifiscanner.h"
 #include "appsettings.h"
@@ -91,7 +94,9 @@ Connect::Connect(QObject *parent)
       m_sensorData(nullptr),
       m_connectionData(nullptr),
       m_settingsData(nullptr),
-      m_propertyRouter(nullptr)
+      m_propertyRouter(nullptr),
+      m_steinhartCalc(nullptr),
+      m_calibrationHelper(nullptr)
 
 {
     getPorts();
@@ -190,6 +195,9 @@ Connect::Connect(QObject *parent)
     m_wifiscanner = new WifiScanner(m_connectionData, this);
     // * Phase 4: Extender now writes directly to domain models
     m_extender = new Extender(m_digitalInputs, m_expanderBoardData, m_engineData, m_settingsData, m_vehicleData, m_connectionData, this);
+    // * Phase 6: Create SteinhartCalculator and CalibrationHelper for sensor calibration
+    m_steinhartCalc = new SteinhartCalculator(this);
+    m_calibrationHelper = new CalibrationHelper(m_steinhartCalc, this);
     // m_wifiscanner = new WifScanner(this);
     QString mPath = "/";
     // DIRECTORIES
@@ -237,6 +245,8 @@ Connect::Connect(QObject *parent)
     engine->rootContext()->setContextProperty("Apexi", m_apexi);
     engine->rootContext()->setContextProperty("Arduino", m_arduino);
     engine->rootContext()->setContextProperty("Wifiscanner", m_wifiscanner);
+    engine->rootContext()->setContextProperty("Calibration", m_calibrationHelper);
+    engine->rootContext()->setContextProperty("Steinhart", m_steinhartCalc);
     m_appSettings->readandApplySettings();
 }
 

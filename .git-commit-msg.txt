@@ -1,0 +1,21 @@
+feat: add CalibrationHelper with sensor presets + fix SteinhartCalculator coefficient bug
+
+Bug Fix - SteinhartCalculator.cpp:
+- Fixed Steinhart-Hart C coefficient calculation: changed (L1 + L2 + L2)
+  to correct formula (L1 + L2 + L3). This typo caused incorrect temperature
+  readings from NTC thermistor calibration across all 6 channels.
+
+New Class - CalibrationHelper (Utils/CalibrationHelper.h/.cpp):
+- QObject-based class exposed to QML as "Calibration" context property
+- Linear sensor presets: 12 built-in presets (PSI, Bar, MAP, O2 sensors)
+  with Q_INVOKABLE linearPresets(), getLinearPreset(), calculateLinearValue()
+- NTC thermistor presets: 6 built-in presets (10K NTC, Bosch, GM, AEM)
+  with Q_INVOKABLE ntcPresets(), getNtcPreset(), calculateTemperature()
+- Voltage divider calculations for EX Board hardware:
+  calculateDividerResistance(), calculateNtcResistance(), voltageDividerInfo()
+- Delegates Steinhart-Hart math to existing SteinhartCalculator instance
+
+Integration:
+- Added SteinhartCalculator and CalibrationHelper members to Connect class
+- Exposed as "Steinhart" and "Calibration" QML context properties
+- Added CalibrationHelper.h/.cpp to CMakeLists.txt UTILS_SOURCES/UTILS_HEADERS

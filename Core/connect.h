@@ -18,6 +18,7 @@
   \file serial.h
   \
   \author Bastian Gschrey & Markus Ippy
+  \modifier Kai Wyborny
  */
 
 #include "../Utils/Calculations.h"
@@ -60,6 +61,9 @@ class ConnectionData;
 class SettingsData;
 // * PropertyRouter for dynamic QML property access
 class PropertyRouter;
+// * Phase 6: Sensor calibration
+class SteinhartCalculator;
+class CalibrationHelper;
 
 class Connect : public QObject
 {
@@ -158,6 +162,9 @@ private:
     SettingsData *m_settingsData;
     // * PropertyRouter for dynamic QML property access
     PropertyRouter *m_propertyRouter;
+    // * Phase 6: Sensor calibration helpers
+    SteinhartCalculator *m_steinhartCalc;
+    CalibrationHelper *m_calibrationHelper;
 
 
 signals:

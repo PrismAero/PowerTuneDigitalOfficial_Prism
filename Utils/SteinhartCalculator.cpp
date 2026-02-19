@@ -3,6 +3,7 @@
  * @brief Implementation of Steinhart-Hart equation calculator
  *
  * Phase 5: Extracted from DashBoard God Object for better separation of concerns.
+ * @modifier Kai Wyborny - Fixed Steinhart-Hart C coefficient calculation bug
  */
 
 #include "SteinhartCalculator.h"
@@ -45,9 +46,7 @@ void SteinhartCalculator::calibrateChannel(int channel, qreal T1, qreal T2, qrea
     long double V3 = (Y3 - Y1) / (L3 - L1);
 
     // * Calculate Steinhart-Hart coefficients A, B, C
-    // ! Note: Original code had (L1 + L2 + L2) which appears to be a typo for (L1 + L2 + L3)
-    // ! Preserving original behavior for backward compatibility
-    long double C = ((V3 - V2) / (L3 - L2)) * std::pow((L1 + L2 + L2), -1);
+    long double C = ((V3 - V2) / (L3 - L2)) * std::pow((L1 + L2 + L3), -1);
     long double B = V3 - C * (std::pow(L1, 2) + L1 * L2 + std::pow(L2, 2));
     long double A = Y1 - (B + std::pow(L1, 2) * C) * L1;
 

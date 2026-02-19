@@ -1,6 +1,10 @@
 # PowerTune
 
+cmake --build build/macos-homebrew 2>&1
+
+
 #### Changelog :
+
 * 1.97u 
 
 RPM CAN V2 implementation 

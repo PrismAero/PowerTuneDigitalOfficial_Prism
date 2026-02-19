@@ -138,6 +138,7 @@ set(UTILS_SOURCES
     Utils/DataLogger.cpp
     Utils/Calculations.cpp
     Utils/SteinhartCalculator.cpp
+    Utils/CalibrationHelper.cpp
     Utils/SignalSmoother.cpp
     Utils/downloadmanager.cpp
     Utils/iomapdata.cpp
@@ -153,6 +154,7 @@ set(UTILS_HEADERS
     Utils/DataLogger.h
     Utils/Calculations.h
     Utils/SteinhartCalculator.h
+    Utils/CalibrationHelper.h
     Utils/SignalSmoother.h
     Utils/downloadmanager.h
     Utils/iomapdata.h
