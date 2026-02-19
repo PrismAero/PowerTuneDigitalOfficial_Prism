@@ -2,13 +2,18 @@ import QtQuick 2.15
 import QtQuick.Controls 2.15
 import Qt.labs.settings 1.0
 import PowerTune.Utils 1.0
+import PowerTune.Settings 1.0
 
 Rectangle {
     anchors.fill: parent
-    color: "grey"
+    color: "#1a1a2e"
     id: main
 
-
+    // * Shared sizing constants for grid cells
+    readonly property int fieldWidth: main.width / 12
+    readonly property int fieldHeight: main.height / 15
+    readonly property int fieldFontSize: main.width / 55
+    readonly property int labelFontSize: main.width / 55
 
     Item {
         id: dashSettings
@@ -47,251 +52,251 @@ Rectangle {
         spacing: 5
         anchors.top: parent.top
         anchors.left: parent.left
-        anchors.topMargin:  20
-        anchors.leftMargin : 40
+        anchors.topMargin: 20
+        anchors.leftMargin: 16
         Text { text: "  "
-            font.pixelSize: main.width / 55;color:"white"}
+            font.pixelSize: labelFontSize; color: "#FFFFFF" }
         Text { text: "Val. @ 0V"
-            font.pixelSize: main.width / 55;color:"white"}
+            font.pixelSize: labelFontSize; color: "#FFFFFF" }
         Text { text: "Val. @ 5V"
-            font.pixelSize: main.width / 55;color:"white"}
+            font.pixelSize: labelFontSize; color: "#FFFFFF" }
         Text { text: Translator.translate("Analog", Settings.language) + " " + "0"
-            font.pixelSize: main.width / 55;color:"white"}
-        TextField {
+            font.pixelSize: labelFontSize; color: "#FFFFFF" }
+        StyledTextField {
             id: an00
-            width: main.width / 12
-            height: main.height /15
-            font.pixelSize: main.width / 55
+            width: fieldWidth
+            height: fieldHeight
+            font.pixelSize: fieldFontSize
             text: "0"
             inputMethodHints: Qt.ImhFormattedNumbersOnly  // this ensures valid inputs are number only
             onEditingFinished: inputs.setInputs()
 
         }
-        TextField {
+        StyledTextField {
             id: an05
-            width: main.width / 12
-            height: main.height /15
-            font.pixelSize: main.width / 55
+            width: fieldWidth
+            height: fieldHeight
+            font.pixelSize: fieldFontSize
             text: "5"
             inputMethodHints: Qt.ImhFormattedNumbersOnly  // this ensures valid inputs are number only
             onEditingFinished: inputs.setInputs()
 
         }
         Text { text: Translator.translate("Analog", Settings.language) + " " + "1"
-            font.pixelSize: main.width / 55;color:"white"}
-        TextField {
+            font.pixelSize: labelFontSize; color: "#FFFFFF" }
+        StyledTextField {
             id: an10
-            width: main.width / 12
-            height: main.height /15
-            font.pixelSize: main.width / 55
+            width: fieldWidth
+            height: fieldHeight
+            font.pixelSize: fieldFontSize
             text: "0"
             inputMethodHints: Qt.ImhFormattedNumbersOnly  // this ensures valid inputs are number only
             onEditingFinished: inputs.setInputs()
 
         }
-        TextField {
+        StyledTextField {
             id: an15
-            width: main.width / 12
-            height: main.height /15
-            font.pixelSize: main.width / 55
+            width: fieldWidth
+            height: fieldHeight
+            font.pixelSize: fieldFontSize
             text: "5"
             inputMethodHints: Qt.ImhFormattedNumbersOnly  // this ensures valid inputs are number only
             onEditingFinished: inputs.setInputs()
 
         }
         Text { text: Translator.translate("Analog", Settings.language) + " " + "2"
-            font.pixelSize: main.width / 55;color:"white"}
-        TextField {
+            font.pixelSize: labelFontSize; color: "#FFFFFF" }
+        StyledTextField {
             id: an20
-            width: main.width / 12
-            height: main.height /15
-            font.pixelSize: main.width / 55
+            width: fieldWidth
+            height: fieldHeight
+            font.pixelSize: fieldFontSize
             text: "0"
             inputMethodHints: Qt.ImhFormattedNumbersOnly  // this ensures valid inputs are number only
             onEditingFinished: inputs.setInputs()
 
         }
-        TextField {
+        StyledTextField {
             id: an25
-            width: main.width / 12
-            height: main.height /15
-            font.pixelSize: main.width / 55
+            width: fieldWidth
+            height: fieldHeight
+            font.pixelSize: fieldFontSize
             text: "5"
             inputMethodHints: Qt.ImhFormattedNumbersOnly  // this ensures valid inputs are number only
             onEditingFinished: inputs.setInputs()
 
         }
         Text { text: Translator.translate("Analog", Settings.language) + " " + "3"
-            font.pixelSize: main.width / 55;color:"white"}
-        TextField {
+            font.pixelSize: labelFontSize; color: "#FFFFFF" }
+        StyledTextField {
             id: an30
-            width: main.width / 12
-            height: main.height /15
-            font.pixelSize: main.width / 55
+            width: fieldWidth
+            height: fieldHeight
+            font.pixelSize: fieldFontSize
             text: "0"
             inputMethodHints: Qt.ImhFormattedNumbersOnly  // this ensures valid inputs are number only
             onEditingFinished: inputs.setInputs()
 
         }
-        TextField {
+        StyledTextField {
             id: an35
-            width: main.width / 12
-            height: main.height /15
-            font.pixelSize: main.width / 55
+            width: fieldWidth
+            height: fieldHeight
+            font.pixelSize: fieldFontSize
             text: "5"
             inputMethodHints: Qt.ImhFormattedNumbersOnly  // this ensures valid inputs are number only
             onEditingFinished: inputs.setInputs()
 
         }
         Text { text: Translator.translate("Analog", Settings.language) + " " + "4"
-            font.pixelSize: main.width / 55;color:"white"}
-        TextField {
+            font.pixelSize: labelFontSize; color: "#FFFFFF" }
+        StyledTextField {
             id: an40
-            width: main.width / 12
-            height: main.height /15
-            font.pixelSize: main.width / 55
+            width: fieldWidth
+            height: fieldHeight
+            font.pixelSize: fieldFontSize
             text: "0"
             inputMethodHints: Qt.ImhFormattedNumbersOnly  // this ensures valid inputs are number only
             onEditingFinished: inputs.setInputs()
 
         }
-        TextField {
+        StyledTextField {
             id: an45
-            width: main.width / 12
-            height: main.height /15
-            font.pixelSize: main.width / 55
+            width: fieldWidth
+            height: fieldHeight
+            font.pixelSize: fieldFontSize
             text: "5"
             inputMethodHints: Qt.ImhFormattedNumbersOnly  // this ensures valid inputs are number only
             onEditingFinished: inputs.setInputs()
 
         }
         Text { text: Translator.translate("Analog", Settings.language) + " " + "5"
-            font.pixelSize: main.width / 55;color:"white"}
-        TextField {
+            font.pixelSize: labelFontSize; color: "#FFFFFF" }
+        StyledTextField {
             id: an50
-            width: main.width / 12
-            height: main.height /15
-            font.pixelSize: main.width / 55
+            width: fieldWidth
+            height: fieldHeight
+            font.pixelSize: fieldFontSize
             text: "0"
             inputMethodHints: Qt.ImhFormattedNumbersOnly  // this ensures valid inputs are number only
             onEditingFinished: inputs.setInputs()
 
         }
-        TextField {
+        StyledTextField {
             id: an55
-            width: main.width / 12
-            height: main.height /15
-            font.pixelSize: main.width / 55
+            width: fieldWidth
+            height: fieldHeight
+            font.pixelSize: fieldFontSize
             text: "5"
             inputMethodHints: Qt.ImhFormattedNumbersOnly  // this ensures valid inputs are number only
             onEditingFinished: inputs.setInputs()
 
         }
         Text { text: Translator.translate("Analog", Settings.language) + " " + "6"
-            font.pixelSize: main.width / 55;color:"white"}
-        TextField {
+            font.pixelSize: labelFontSize; color: "#FFFFFF" }
+        StyledTextField {
             id: an60
-            width: main.width / 12
-            height: main.height /15
-            font.pixelSize: main.width / 55
+            width: fieldWidth
+            height: fieldHeight
+            font.pixelSize: fieldFontSize
             text: "0"
             inputMethodHints: Qt.ImhFormattedNumbersOnly  // this ensures valid inputs are number only
             onEditingFinished: inputs.setInputs()
 
         }
-        TextField {
+        StyledTextField {
             id: an65
-            width: main.width / 12
-            height: main.height /15
-            font.pixelSize: main.width / 55
+            width: fieldWidth
+            height: fieldHeight
+            font.pixelSize: fieldFontSize
             text: "5"
             inputMethodHints: Qt.ImhFormattedNumbersOnly  // this ensures valid inputs are number only
             onEditingFinished: inputs.setInputs()
 
         }
         Text { text: Translator.translate("Analog", Settings.language) + " " + "7"
-            font.pixelSize: main.width / 55;color:"white"}
-        TextField {
+            font.pixelSize: labelFontSize; color: "#FFFFFF" }
+        StyledTextField {
             id: an70
-            width: main.width / 12
-            height: main.height /15
-            font.pixelSize: main.width / 55
+            width: fieldWidth
+            height: fieldHeight
+            font.pixelSize: fieldFontSize
             text: "0"
             inputMethodHints: Qt.ImhFormattedNumbersOnly  // this ensures valid inputs are number only
             onEditingFinished: inputs.setInputs()
 
         }
-        TextField {
+        StyledTextField {
             id: an75
-            width: main.width / 12
-            height: main.height /15
-            font.pixelSize: main.width / 55
+            width: fieldWidth
+            height: fieldHeight
+            font.pixelSize: fieldFontSize
             text: "5"
             inputMethodHints: Qt.ImhFormattedNumbersOnly  // this ensures valid inputs are number only
             onEditingFinished: inputs.setInputs()
 
         }
         Text { text: Translator.translate("Analog", Settings.language) + " " + "8"
-            font.pixelSize: main.width / 55;color:"white"}
-        TextField {
+            font.pixelSize: labelFontSize; color: "#FFFFFF" }
+        StyledTextField {
             id: an80
-            width: main.width / 12
-            height: main.height /15
-            font.pixelSize: main.width / 55
+            width: fieldWidth
+            height: fieldHeight
+            font.pixelSize: fieldFontSize
             text: "0"
             inputMethodHints: Qt.ImhFormattedNumbersOnly  // this ensures valid inputs are number only
             onEditingFinished: inputs.setInputs()
 
         }
-        TextField {
+        StyledTextField {
             id: an85
-            width: main.width / 12
-            height: main.height /15
-            font.pixelSize: main.width / 55
+            width: fieldWidth
+            height: fieldHeight
+            font.pixelSize: fieldFontSize
             text: "5"
             inputMethodHints: Qt.ImhFormattedNumbersOnly  // this ensures valid inputs are number only
             onEditingFinished: inputs.setInputs()
 
         }
         Text { text: Translator.translate("Analog", Settings.language) + " " + "9"
-            font.pixelSize: main.width / 55;color:"white"}
-        TextField {
+            font.pixelSize: labelFontSize; color: "#FFFFFF" }
+        StyledTextField {
             id: an90
-            width: main.width / 12
-            height: main.height /15
-            font.pixelSize: main.width / 55
+            width: fieldWidth
+            height: fieldHeight
+            font.pixelSize: fieldFontSize
             text: "0"
             inputMethodHints: Qt.ImhFormattedNumbersOnly  // this ensures valid inputs are number only
             onEditingFinished: inputs.setInputs()
 
         }
-        TextField {
+        StyledTextField {
             id: an95
-            width: main.width / 12
-            height: main.height /15
-            font.pixelSize: main.width / 55
+            width: fieldWidth
+            height: fieldHeight
+            font.pixelSize: fieldFontSize
             text: "5"
             inputMethodHints: Qt.ImhFormattedNumbersOnly  // this ensures valid inputs are number only
             onEditingFinished: inputs.setInputs()
 
         }
         Text { text: Translator.translate("Analog", Settings.language) + " " + "10"
-            font.pixelSize: main.width / 55;color:"white"}
-        TextField {
+            font.pixelSize: labelFontSize; color: "#FFFFFF" }
+        StyledTextField {
             id: an100
-            width: main.width / 12
-            height: main.height /15
-            font.pixelSize: main.width / 55
+            width: fieldWidth
+            height: fieldHeight
+            font.pixelSize: fieldFontSize
             text: "0"
             inputMethodHints: Qt.ImhFormattedNumbersOnly  // this ensures valid inputs are number only
             onEditingFinished: inputs.setInputs()
 
         }
-        TextField {
+        StyledTextField {
             id: an105
-            width: main.width / 12
-            height: main.height /15
-            font.pixelSize: main.width / 55
+            width: fieldWidth
+            height: fieldHeight
+            font.pixelSize: fieldFontSize
             text: "5"
             inputMethodHints: Qt.ImhFormattedNumbersOnly  // this ensures valid inputs are number only
             onEditingFinished: inputs.setInputs()
@@ -316,7 +321,7 @@ Rectangle {
         font.bold: true
         width: parent.width / 2.5
         horizontalAlignment: Text.AlignHCenter
-        color: "black"
+        color: "#FFFFFF"
         wrapMode: Text.WordWrap
         text: Translator.translate("Analogexplanation", Settings.language)
     }
