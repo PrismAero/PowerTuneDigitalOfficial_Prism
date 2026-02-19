@@ -629,8 +629,13 @@ ApplicationWindow {
         target: window
         function onActiveFocusItemChanged() {
             var item = window.activeFocusItem
-            // Check if the focused item has text editing capabilities
-            if (item && item.hasOwnProperty("inputMethodHints")) {
+            if (item
+                && item.hasOwnProperty("text")
+                && item.hasOwnProperty("cursorPosition")
+                && item.hasOwnProperty("inputMethodHints")
+                && !item.hasOwnProperty("currentIndex")  // Exclude ComboBox
+                && item.hasOwnProperty("readOnly") !== undefined
+                && !item.readOnly) {
                 prismKeyboard.show(item)
             } else {
                 if (prismKeyboard.visible) {
