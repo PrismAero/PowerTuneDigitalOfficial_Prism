@@ -3,7 +3,7 @@
 #include "Utils/downloadmanager.h"
 #include "Utils/iomapdata.h"
 
-#include <QApplication>
+#include <QGuiApplication>
 #include <QDateTime>
 #include <QDebug>
 #include <QFileSystemModel>
@@ -15,14 +15,14 @@
 #include <cstdio>
 ioMapData mpd;
 
-// Modified by Kai Wyborny - 2026
+// Modified by Kai Wyborny - 2026 (QGuiApplication migration, memory optimization)
 
 int main(int argc, char *argv[])
 {
     // * Set Qt Quick Controls style to Basic for cross-platform consistency
     // * This suppresses native style customization warnings on macOS
     QQuickStyle::setStyle("Basic");
-    QApplication app(argc, argv);
+    QGuiApplication app(argc, argv);
     app.setOrganizationName("Power-Tune");
     app.setOrganizationDomain("power-tune.org");
     app.setApplicationName("PowerTune");

@@ -16,6 +16,7 @@
   \file Connect.cpp
   \author Bastian Gschrey & Markus Ippy
   \modifier Kai Wyborny
+  Copyright (C) 2026 Kai Wyborny - Memory optimization changes
 */
 
 #include "connect.h"
@@ -52,6 +53,7 @@
 #include <QRegularExpression>
 #include <QSerialPort>
 #include <QSerialPortInfo>
+#include <QStandardPaths>
 #include <QTextStream>
 #include <QTime>
 #include <QTimer>
@@ -208,7 +210,10 @@ Connect::Connect(QObject *parent)
     m_diagnosticsProvider = new DiagnosticsProvider(this);
     m_diagnosticsProvider->setSensorRegistry(m_sensorRegistry);
     // m_wifiscanner = new WifScanner(this);
-    QString mPath = "/";
+    // Use AppDataLocation instead of "/" to prevent QFileSystemModel from
+    // indexing the entire filesystem (saves 0.5-2GB+ RAM on macOS dev builds)
+    QString mPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+    QDir().mkpath(mPath); // Ensure the directory exists
     // DIRECTORIES
     dirModel = new QFileSystemModel(this);
     // Set filter

@@ -34,7 +34,6 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS
     Positioning
     Sensors
     Multimedia
-    Widgets
 )
 
 # * Optional: Location module (may not be available on all platforms)
@@ -230,7 +229,6 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     Qt${QT_VERSION_MAJOR}::Positioning
     Qt${QT_VERSION_MAJOR}::Sensors
     Qt${QT_VERSION_MAJOR}::Multimedia
-    Qt${QT_VERSION_MAJOR}::Widgets
 )
 
 # * Link Location if available
