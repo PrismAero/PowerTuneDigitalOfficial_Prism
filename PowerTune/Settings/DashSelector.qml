@@ -3,7 +3,6 @@ import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
 import Qt.labs.settings 1.0
-import QtMultimedia
 import PowerTune.Settings 1.0
 import PowerTune.Utils 1.0
 
@@ -53,6 +52,16 @@ Rectangle {
                 case 3: dashView.insertItem(2, thirdPageLoader); break
                 case 4: dashView.insertItem(3, fourthPageLoader); break
             }
+        }
+    }
+
+    Component.onCompleted: {
+        if (numberofdashes.currentIndex >= 0) {
+            adremove()
+            firstPageLoader.source = getDashByIndex(dash1.currentIndex)
+            if (dash2.currentIndex >= 0) secondPageLoader.source = getDashByIndex(dash2.currentIndex)
+            if (dash3.currentIndex >= 0) thirdPageLoader.source = getDashByIndex(dash3.currentIndex)
+            if (dash4.currentIndex >= 0) fourthPageLoader.source = getDashByIndex(dash4.currentIndex)
         }
     }
 

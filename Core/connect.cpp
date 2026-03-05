@@ -21,13 +21,7 @@
 
 #include "connect.h"
 
-#include "../ECU/AdaptronicSelect.h"
-#include "../ECU/Apexi.h"
-#include "../ECU/arduino.h"
 #include "../Hardware/Extender.h"
-#include "../Hardware/gopro.h"
-#include "../Hardware/gps.h"
-#include "../Hardware/sensors.h"
 #include "../Utils/Calculations.h"
 #include "../Utils/CalibrationHelper.h"
 #include "../Utils/DataLogger.h"
@@ -36,7 +30,6 @@
 #include "../Utils/wifiscanner.h"
 #include "appsettings.h"
 #include "dashboard.h"
-#include "serialport.h"
 #include "PropertyRouter.h"
 #include "SensorRegistry.h"
 #include "DiagnosticsProvider.h"
@@ -51,8 +44,6 @@
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include <QRegularExpression>
-#include <QSerialPort>
-#include <QSerialPortInfo>
 #include <QStandardPaths>
 #include <QTextStream>
 #include <QTime>
@@ -72,17 +63,10 @@ QString dashfilename3;
 
 Connect::Connect(QObject *parent)
     : QObject(parent),
-      m_serialport(nullptr),
       m_dashBoard(nullptr),
-      m_gopro(nullptr),
-      m_gps(nullptr),
       m_udpreceiver(nullptr),
-      m_adaptronicselect(nullptr),
-      m_apexi(nullptr),
-      m_sensors(nullptr),
       m_datalogger(nullptr),
       m_calculations(nullptr),
-      m_arduino(nullptr),
       m_wifiscanner(nullptr),
       m_extender(nullptr),
       m_uiState(nullptr),
@@ -105,7 +89,6 @@ Connect::Connect(QObject *parent)
       m_diagnosticsProvider(nullptr)
 
 {
-    getPorts();
     m_dashBoard = new DashBoard(this);
     // * Phase 2: Create domain data models
     m_uiState = new UIState(this);
@@ -156,11 +139,6 @@ Connect::Connect(QObject *parent)
         m_uiState,
         this
     );
-    m_gopro = new GoPro(this);
-    // * Phase 4: GPS now writes directly to domain models
-    m_gps = new GPS(m_gpsData, m_timingData, this);
-    // * Phase 4: AdaptronicSelect now writes directly to domain models
-    m_adaptronicselect = new AdaptronicSelect(m_engineData, m_vehicleData, m_sensorData, this);
     // * Phase 1: UDPReceiver now writes directly to domain models
     m_udpreceiver = new udpreceiver(
         m_engineData,
@@ -176,10 +154,6 @@ Connect::Connect(QObject *parent)
         m_settingsData,
         this
     );
-    // * Phase 4: Apexi now writes directly to domain models
-    m_apexi = new Apexi(m_engineData, m_vehicleData, m_flagsData, m_sensorData, m_connectionData, this);
-    // * Phase 4: Sensors now writes directly to domain models
-    m_sensors = new Sensors(m_vehicleData, this);
     // * Phase 5: DataLogger now reads from domain models
     m_datalogger = new datalogger(
         m_engineData,
@@ -196,8 +170,6 @@ Connect::Connect(QObject *parent)
     );
     // * Phase 4: Calculations now writes directly to domain models
     m_calculations = new calculations(m_dashBoard, m_vehicleData, m_engineData, m_timingData, m_settingsData, this);
-    // * Phase 4: Arduino now writes directly to domain models
-    m_arduino = new Arduino(m_connectionData, this);
     m_wifiscanner = new WifiScanner(m_connectionData, this);
     // * Phase 4: Extender now writes directly to domain models
     m_extender = new Extender(m_digitalInputs, m_expanderBoardData, m_engineData, m_settingsData, m_vehicleData, m_connectionData, this);
@@ -249,15 +221,10 @@ Connect::Connect(QObject *parent)
     engine->rootContext()->setContextProperty("PropertyRouter", m_propertyRouter);
     engine->rootContext()->setContextProperty("Extender2", m_extender);
     engine->rootContext()->setContextProperty("AppSettings", m_appSettings);
-    engine->rootContext()->setContextProperty("GoPro", m_gopro);
-    engine->rootContext()->setContextProperty("Gps", m_gps);
-    engine->rootContext()->setContextProperty("Sens", m_sensors);
     engine->rootContext()->setContextProperty("Logger", m_datalogger);
     engine->rootContext()->setContextProperty("Calculations", m_calculations);
     engine->rootContext()->setContextProperty("Dirmodel", dirModel);
     engine->rootContext()->setContextProperty("Filemodel", fileModel);
-    engine->rootContext()->setContextProperty("Apexi", m_apexi);
-    engine->rootContext()->setContextProperty("Arduino", m_arduino);
     engine->rootContext()->setContextProperty("Wifiscanner", m_wifiscanner);
     engine->rootContext()->setContextProperty("Calibration", m_calibrationHelper);
     engine->rootContext()->setContextProperty("Steinhart", m_steinhartCalc);
@@ -464,10 +431,8 @@ void Connect::readdashsetup1()
 void Connect::setSreenbrightness(const int &brightness)
 {
 #ifdef HAVE_DDCUTIL
-    // Adjust brightness using ddcutil
-    QString brightnessCommand = QString("ddcutil setvcp 10 %1 12 %1 13 %1").arg(brightness);
-    QProcess::execute(brightnessCommand);
-
+    QString val = QString::number(brightness);
+    QProcess::execute("ddcutil", {"setvcp", "10", val, "12", val, "13", val});
 #else
     // Use standard interface
     QFile f("/sys/class/backlight/rpi_backlight/brightness");
@@ -540,16 +505,6 @@ void Connect::qmlTreeviewclicked(const QModelIndex &index)
     m_connectionData->setmusicpath(mPathnew);
 }
 
-void Connect::getPorts()
-{
-    QStringList PortList;
-    foreach (const QSerialPortInfo &info, QSerialPortInfo::availablePorts()) {
-        PortList.append(info.portName());
-    }
-    setPortsNames(PortList);
-    // Check available ports every 1000 ms
-    QTimer::singleShot(1000, this, &Connect::getPorts);
-}
 // function for flushing all Connect buffers
 void Connect::clear() const
 {
@@ -1325,111 +1280,13 @@ void Connect::openConnection(const QString &portName, const int &ecuSelect, cons
     m_extender->openCAN(canbaseadress, rpmcanbaseadress);
 
 
-    if (ecuSelect == 0) {
-        m_udpreceiver->startreceiver();
-    }
-    // Apexi
-    if (ecuSelect == 1) {
-        m_udpreceiver->startreceiver();
-        m_apexi->openConnection(portName);
-    }
-
-    if (ecuSelect == 2) {
-        // NissanConsult
-
-        m_udpreceiver->startreceiver();
-    }
-    if (ecuSelect == 3) {
-        // OBD2
-        m_udpreceiver->startreceiver();
-    }
-    if (ecuSelect == 4) {
-        // OBD2
-        m_udpreceiver->startreceiver();
-    }
-    /*
-    if (ecuSelect == 5)
-    {
-        //HaltechV1
-        QProcess *process = new QProcess(this);
-        process->start("/home/pi/Haltech/HaltechV1");
-        m_udpreceiver->startreceiver();
-    }
-    if (ecuSelect == 6)
-    {
-        // HaltechV2 - Flag string labels written to FlagsData model
-        m_flagsData->setFlagString1("Clutch");
-        m_flagsData->setFlagString2("Brake");
-        m_flagsData->setFlagString3("TransThrottle");
-        m_flagsData->setFlagString4("Decel Cut");
-        m_flagsData->setFlagString5("Gear Switch");
-        m_flagsData->setFlagString6("Torque Red.");
-        m_flagsData->setFlagString7("Flat Shift");
-        m_flagsData->setFlagString8("Aux RPM Limit");
-        m_flagsData->setFlagString9("Antilag");
-        m_flagsData->setFlagString10("MIL");
-        m_flagsData->setFlagString11("Batt. Light");
-        m_flagsData->setFlagString12("Eng. Limiter");
-        m_flagsData->setFlagString13("Ignition");
-        m_flagsData->setFlagString14("NOS Stage 1");
-        m_flagsData->setFlagString15("NOS Stage 2");
-        m_flagsData->setFlagString16("NOS Stage 3");
-
-        QProcess *process = new QProcess(this);
-        process->start("/home/pi/Haltech/HaltechV2");
-        m_udpreceiver->startreceiver();
-    }
-
-    if (ecuSelect == 7)
-    {
-        m_udpreceiver->startreceiver();
-    }
-     //Dicktator
-    if (ecuSelect == 9)
-    {
-
-        initConnectPort();
-        m_Connectport->setPortName(portName);
-        m_Connectport->setBaudRate(QConnectPort::Baud19200);
-        m_Connectport->setParity(QConnectPort::NoParity);
-        m_Connectport->setDataBits(QConnectPort::Data8);
-        m_Connectport->setStopBits(QConnectPort::OneStop);
-        m_Connectport->setFlowControl(QConnectPort::NoFlowControl);
-
-        if(m_Connectport->open(QIODevice::ReadWrite) == false)
-        {
-            m_connectionData->setSerialStat(m_Connectport->errorString());
-        }
-        else
-        {
-            m_connectionData->setSerialStat(QString("Connected to Connectport"));
-        }
-    }*/
+    m_udpreceiver->startreceiver();
 }
 void Connect::closeConnection()
 {
     // qDebug() << "Closing"<<ecu;
     m_calculations->stop();
-    switch (ecu) {
-    case 0:
-        m_udpreceiver->closeConnection();
-        break;
-    case 1:  // Apexi
-        m_apexi->closeConnection();
-        break;
-    case 2:
-        // qDebug() << "Clsoing now";
-        m_udpreceiver->closeConnection();
-        break;
-    case 3:
-        m_udpreceiver->closeConnection();
-        break;
-    default:
-        m_udpreceiver->closeConnection();
-        break;
-    }
-    // model: [ "CAN","PowerFC","Consult","OBD2"]
-    m_calculations->stop();
+    m_udpreceiver->closeConnection();
 }
 
 void Connect::update()

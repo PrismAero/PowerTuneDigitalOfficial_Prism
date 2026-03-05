@@ -1,6 +1,6 @@
 TEMPLATE = app
 
-QT += qml quick serialport serialbus network charts location positioning sensors multimedia widgets
+QT += qml quick serialbus network widgets
 
 CONFIG += c++11
 
@@ -17,14 +17,12 @@ static {
 INCLUDEPATH += \
     Core \
     Core/Models \
-    ECU \
     Hardware \
     Utils
 
 SOURCES += main.cpp \
     Core/connect.cpp \
     Core/dashboard.cpp \
-    Core/serialport.cpp \
     Core/appsettings.cpp \
     Core/Models/EngineData.cpp \
     Core/Models/VehicleData.cpp \
@@ -35,23 +33,15 @@ SOURCES += main.cpp \
     Core/Models/ElectricMotorData.cpp \
     Core/Models/FlagsData.cpp \
     Core/Models/TimingData.cpp \
-    ECU/Apexi.cpp \
-    ECU/AdaptronicSelect.cpp \
-    ECU/arduino.cpp \
     Hardware/Extender.cpp \
-    Hardware/gopro.cpp \
-    Hardware/gps.cpp \
-    Hardware/sensors.cpp \
     Utils/DataLogger.cpp \
     Utils/Calculations.cpp \
     Utils/downloadmanager.cpp \
-    Utils/iomapdata.cpp \
     Utils/ParseGithubData.cpp \
     Utils/shcalc.cpp \
     Utils/textprogressbar.cpp \
     Utils/UDPReceiver.cpp \
-    Utils/wifiscanner.cpp \
-    Utils/Speedo.cpp
+    Utils/wifiscanner.cpp
 
 
 RESOURCES += qml.qrc
@@ -65,7 +55,6 @@ include(deployment.pri)
 HEADERS += \
     Core/connect.h \
     Core/dashboard.h \
-    Core/serialport.h \
     Core/appsettings.h \
     Core/Models/DataModels.h \
     Core/Models/EngineData.h \
@@ -77,18 +66,10 @@ HEADERS += \
     Core/Models/ElectricMotorData.h \
     Core/Models/FlagsData.h \
     Core/Models/TimingData.h \
-    ECU/Apexi.h \
-    ECU/AdaptronicSelect.h \
-    ECU/arduino.h \
-    ECU/obd.h \
     Hardware/Extender.h \
-    Hardware/gopro.h \
-    Hardware/gps.h \
-    Hardware/sensors.h \
     Utils/DataLogger.h \
     Utils/Calculations.h \
     Utils/downloadmanager.h \
-    Utils/iomapdata.h \
     Utils/ParseGithubData.h \
     Utils/shcalc.h \
     Utils/textprogressbar.h \

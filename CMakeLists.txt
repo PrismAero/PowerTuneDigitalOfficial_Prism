@@ -28,16 +28,8 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS
     Quick
     QuickControls2
     Network
-    SerialPort
     SerialBus
-    Charts
-    Positioning
-    Sensors
-    Multimedia
 )
-
-# * Optional: Location module (may not be available on all platforms)
-find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Location QUIET)
 
 # * Qt6-specific: Qt5Compat for GraphicalEffects and other Qt5 modules
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
@@ -54,15 +46,16 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
 endif()
 
 # * Optional: ddcutil support (Linux display brightness control)
-if(EXISTS "/usr/lib/libddcutil.so.4")
+option(FORCE_DDCUTIL "Force enable ddcutil support for DDC/CI brightness control" OFF)
+if(FORCE_DDCUTIL OR EXISTS "/usr/lib/libddcutil.so.4")
     add_compile_definitions(HAVE_DDCUTIL)
+    message(STATUS "DDC/CI brightness control enabled (ddcutil)")
 endif()
 
 # * Source files - Core
 set(CORE_SOURCES
     Core/connect.cpp
     Core/dashboard.cpp
-    Core/serialport.cpp
     Core/appsettings.cpp
     Core/PropertyRouter.cpp
     Core/SensorRegistry.cpp
@@ -85,7 +78,6 @@ set(CORE_SOURCES
 set(CORE_HEADERS
     Core/connect.h
     Core/dashboard.h
-    Core/serialport.h
     Core/appsettings.h
     Core/PropertyRouter.h
     Core/SensorRegistry.h
@@ -106,34 +98,13 @@ set(CORE_HEADERS
     Core/Models/SettingsData.h
 )
 
-# * Source files - ECU protocols
-set(ECU_SOURCES
-    ECU/Apexi.cpp
-    ECU/AdaptronicSelect.cpp
-    ECU/arduino.cpp
-    ECU/obd.cpp
-)
-
-set(ECU_HEADERS
-    ECU/Apexi.h
-    ECU/AdaptronicSelect.h
-    ECU/arduino.h
-    ECU/obd.h
-)
-
 # * Source files - Hardware interfaces
 set(HARDWARE_SOURCES
     Hardware/Extender.cpp
-    Hardware/gopro.cpp
-    Hardware/gps.cpp
-    Hardware/sensors.cpp
 )
 
 set(HARDWARE_HEADERS
     Hardware/Extender.h
-    Hardware/gopro.h
-    Hardware/gps.h
-    Hardware/sensors.h
 )
 
 # * Source files - Utilities
@@ -144,13 +115,11 @@ set(UTILS_SOURCES
     Utils/CalibrationHelper.cpp
     Utils/SignalSmoother.cpp
     Utils/downloadmanager.cpp
-    Utils/iomapdata.cpp
     Utils/ParseGithubData.cpp
     Utils/shcalc.cpp
     Utils/textprogressbar.cpp
     Utils/UDPReceiver.cpp
     Utils/wifiscanner.cpp
-    Utils/Speedo.cpp
 )
 
 set(UTILS_HEADERS
@@ -160,10 +129,8 @@ set(UTILS_HEADERS
     Utils/CalibrationHelper.h
     Utils/SignalSmoother.h
     Utils/downloadmanager.h
-    Utils/iomapdata.h
     Utils/ParseGithubData.h
     Utils/shcalc.h
-    Utils/Speedo.h
     Utils/textprogressbar.h
     Utils/UDPReceiver.h
     Utils/wifiscanner.h
@@ -173,14 +140,12 @@ set(UTILS_HEADERS
 set(PROJECT_SOURCES
     main.cpp
     ${CORE_SOURCES}
-    ${ECU_SOURCES}
     ${HARDWARE_SOURCES}
     ${UTILS_SOURCES}
 )
 
 set(PROJECT_HEADERS
     ${CORE_HEADERS}
-    ${ECU_HEADERS}
     ${HARDWARE_HEADERS}
     ${UTILS_HEADERS}
 )
@@ -210,7 +175,6 @@ endif()
 target_include_directories(${PROJECT_NAME} PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/Core
-    ${CMAKE_CURRENT_SOURCE_DIR}/ECU
     ${CMAKE_CURRENT_SOURCE_DIR}/Hardware
     ${CMAKE_CURRENT_SOURCE_DIR}/Utils
 )
@@ -223,20 +187,8 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     Qt${QT_VERSION_MAJOR}::Quick
     Qt${QT_VERSION_MAJOR}::QuickControls2
     Qt${QT_VERSION_MAJOR}::Network
-    Qt${QT_VERSION_MAJOR}::SerialPort
     Qt${QT_VERSION_MAJOR}::SerialBus
-    Qt${QT_VERSION_MAJOR}::Charts
-    Qt${QT_VERSION_MAJOR}::Positioning
-    Qt${QT_VERSION_MAJOR}::Sensors
-    Qt${QT_VERSION_MAJOR}::Multimedia
 )
-
-# * Link Location if available
-if(Qt${QT_VERSION_MAJOR}Location_FOUND)
-    target_link_libraries(${PROJECT_NAME} PRIVATE
-        Qt${QT_VERSION_MAJOR}::Location
-    )
-endif()
 
 # * Link Qt5Compat for GraphicalEffects (Qt6 only)
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6 AND Qt6Qt5Compat_FOUND)
@@ -359,26 +311,17 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
             PowerTune/Gauges/SportDash.qml
             PowerTune/Gauges/Advanced.qml
             # Specialty gauges
-            PowerTune/Gauges/GPS.qml
             PowerTune/Gauges/ForceMeter.qml
-            PowerTune/Gauges/Charts.qml
-            PowerTune/Gauges/Dyno.qml
-            PowerTune/Gauges/VirtualDyno.qml
             PowerTune/Gauges/SpeedMeasurements.qml
             PowerTune/Gauges/TyreMonitor.qml
             PowerTune/Gauges/ShiftLights.qml
             # Sensor displays
-            PowerTune/Gauges/PFCSensors.qml
             PowerTune/Gauges/HaltechFlags.qml
-            PowerTune/Gauges/SensorTest.qml
-            PowerTune/Gauges/ConsultTest.qml
             # User dashboards
             PowerTune/Gauges/Userdash1.qml
             PowerTune/Gauges/Userdash2.qml
             PowerTune/Gauges/Userdash3.qml
-            # Media/utility
-            PowerTune/Gauges/Camera.qml
-            PowerTune/Gauges/Mediaplayer.qml
+            # Utility
             PowerTune/Gauges/Screentoggle.qml
             PowerTune/Gauges/Keypad.qml
             # UI helpers
@@ -436,7 +379,6 @@ set(QML_IMPORT_PATH
     "${CMAKE_CURRENT_SOURCE_DIR}/PowerTune/Settings"
     "${CMAKE_CURRENT_SOURCE_DIR}/PowerTune/Gauges"
     "${CMAKE_CURRENT_SOURCE_DIR}/PowerTune/Utils"
-    "${CMAKE_CURRENT_SOURCE_DIR}/GPSTracks"
     CACHE STRING "Qt Creator/Design Studio QML import paths"
     FORCE
 )

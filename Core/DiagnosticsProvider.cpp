@@ -12,6 +12,7 @@
 #include "SensorRegistry.h"
 
 #include <QFile>
+#include <QRegularExpression>
 #include <QTextStream>
 #include <QDebug>
 

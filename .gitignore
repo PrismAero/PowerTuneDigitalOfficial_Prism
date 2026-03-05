@@ -112,3 +112,9 @@ cmake/**/.generated/*
 cmake/**/CMake*
 out/
 reference_sourcecode/
+
+# Device backup (too large for git)
+device-backup/
+
+# Remote SSH credentials
+remotessh.login

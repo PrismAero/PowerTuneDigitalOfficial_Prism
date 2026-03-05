@@ -46,8 +46,6 @@
         <file>Resources/graphics/Flags/fr.png</file>
         <file>Resources/graphics/Flags/ae.png</file>
 
-        <!-- Resources/Sounds -->
-        <file>Resources/Sounds/alarm.wav</file>
 
         <!-- Resources/Fonts -->
         <file>Resources/fonts/MaterialSymbolsOutlined.ttf</file>

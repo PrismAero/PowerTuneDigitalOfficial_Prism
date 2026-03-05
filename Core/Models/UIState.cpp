@@ -25,7 +25,7 @@ void UIState::setBrightness(int Brightness)
         return;
 
     m_Brightness = Brightness;
-    emit BrightnessChanged(m_Brightness);
+    emit brightnessChanged(m_Brightness);
 }
 
 void UIState::setVisibledashes(int Visibledashes)

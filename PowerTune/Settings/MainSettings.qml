@@ -2,7 +2,6 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
-import QtMultimedia
 import Qt.labs.settings 1.0
 import PowerTune.Settings 1.0
 import PowerTune.Utils 1.0
@@ -33,8 +32,7 @@ Rectangle {
             property alias auxunit2: unitaux2.text
             property alias aux3: an3V0.text
             property alias aux4: an4V5.text
-            property alias goProVariant: goProSelect.currentIndex
-            property alias password: goPropass.text
+
             property alias vehicleweight: weight.text
             property alias unitSelector1: unitSelect1.currentIndex
             property alias unitSelector: unitSelect.currentIndex
@@ -48,10 +46,6 @@ Rectangle {
             property alias languagecombobox: languageselect.currentIndex
         }
 
-        SoundEffect {
-            id: warnsound
-            source: "qrc:/Resources/Sounds/alarm.wav"
-        }
 
         Connections {
             target: Vehicle
@@ -457,58 +451,6 @@ Rectangle {
                     onClicked: logger.datalogger()
                 }
 
-                StyledSwitch {
-                    id: nmeaLog
-                    label: Translator.translate("NMEA Logger", Settings.language)
-                    onClicked: GPS.setNMEAlog(nmeaLog.checked ? 1 : 0)
-                    Component.onCompleted: tabView.currentIndex = 1
-                }
-            }
-
-            // * GoPro Section
-            SettingsSection {
-                title: "GoPro"
-                Layout.fillWidth: true
-
-                RowLayout {
-                    spacing: 12
-                    Text {
-                        text: Translator.translate("GoPro Variant", Settings.language)
-                        font.pixelSize: 16
-                        font.family: "Lato"
-                        color: "#FFFFFF"
-                        Layout.preferredWidth: 140
-                    }
-                    StyledComboBox {
-                        id: goProSelect
-                        width: 200
-                        model: ["Hero", "Hero2", "Hero3"]
-                    }
-                }
-
-                RowLayout {
-                    spacing: 12
-                    Text {
-                        text: Translator.translate("GoPro Pasword", Settings.language)
-                        font.pixelSize: 16
-                        font.family: "Lato"
-                        color: "#FFFFFF"
-                        Layout.preferredWidth: 140
-                    }
-                    StyledTextField {
-                        id: goPropass
-                        width: 200
-                        placeholderText: Translator.translate("GoPro Pasword", Settings.language)
-                        inputMethodHints: Qt.ImhNoAutoUppercase | Qt.ImhPreferLowercase | Qt.ImhSensitiveData | Qt.ImhNoPredictiveText
-                        Component.onCompleted: transferSettings.sendSettings()
-                    }
-                }
-
-                StyledSwitch {
-                    id: record
-                    label: Translator.translate("GoPro rec", Settings.language)
-                    onClicked: { transferSettings.sendSettings(); goproRec.rec() }
-                }
             }
 
             // * Analog Inputs Section (PowerFC only)
@@ -714,20 +656,6 @@ Rectangle {
     }
 
     Item {
-        id: goproRec
-        property int recording: 0
-        function rec() {
-            if (record.checked) {
-                goproRec.recording = 1
-                GoPro.goprorec(recording)
-            } else {
-                goproRec.recording = 0
-                GoPro.goprorec(recording)
-            }
-        }
-    }
-
-    Item {
         id: logger
         property int loggeron: 0
         function datalogger() {
@@ -742,19 +670,12 @@ Rectangle {
     }
 
     Item {
-        id: transferSettings
-        function sendSettings() {
-            GoPro.goProSettings(goProSelect.currentIndex, goPropass.text)
-        }
-    }
-
-    Item {
         id: functconnect
         function connectfunc() {
             Connect.setOdometer(odometer.text)
             Connect.setWeight(weight.text)
             Connect.openConnection(serialName.currentText, ecuSelect.currentIndex, baseadresstext.text, shiftlightbaseadresstext.text)
-            Apexi.calculatorAux(an1V0.text, an2V5.text, an3V0.text, an4V5.text, unitaux1.text, unitaux2.text)
+            if (typeof Apexi !== "undefined") Apexi.calculatorAux(an1V0.text, an2V5.text, an3V0.text, an4V5.text, unitaux1.text, unitaux2.text)
             connected = 1
         }
     }
@@ -770,7 +691,6 @@ Rectangle {
     Item {
         id: playwarning
         function start() {
-            if (!warnsound.playing) warnsound.play()
         }
     }
 
@@ -785,7 +705,7 @@ Rectangle {
         id: autoconnectArd
         Component.onCompleted: autoconnectArd.auto()
         function auto() {
-            if (Connection.externalspeedconnectionrequest === 1) {
+            if (typeof Arduino !== "undefined" && Connection.externalspeedconnectionrequest === 1) {
                 Arduino.openConnection(Connection.externalspeedport, "9600")
             }
         }

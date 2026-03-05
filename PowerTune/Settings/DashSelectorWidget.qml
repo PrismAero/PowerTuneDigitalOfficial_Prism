@@ -47,7 +47,7 @@ Rectangle {
             ]
 
             onCurrentIndexChanged: {
-                if (visible) linkedLoader.source = dashselector.getDashByIndex(currentIndex)
+                linkedLoader.source = dashselector.getDashByIndex(currentIndex)
             }
             onVisibleChanged: {
                 if (visible) linkedLoader.source = dashselector.getDashByIndex(currentIndex)

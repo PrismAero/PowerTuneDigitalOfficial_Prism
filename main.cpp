@@ -1,7 +1,6 @@
 #include "Core/connect.h"
 #include "Hardware/Extender.h"
 #include "Utils/downloadmanager.h"
-#include "Utils/iomapdata.h"
 
 #include <QGuiApplication>
 #include <QDateTime>
@@ -13,7 +12,6 @@
 #include <QtQml>
 
 #include <cstdio>
-ioMapData mpd;
 
 // Modified by Kai Wyborny - 2026 (QGuiApplication migration, memory optimization)
 
@@ -31,10 +29,8 @@ int main(int argc, char *argv[])
     // * Add QML module import paths for PowerTune modules
     engine.addImportPath("qrc:/qt/qml");
     
-    qmlRegisterType<ioMapData>("IMD", 1, 0, "IMD");
     qmlRegisterType<DownloadManager>("DLM", 1, 0, "DLM");
     qmlRegisterType<Connect>("com.powertune", 1, 0, "ConnectObject");
-    engine.rootContext()->setContextProperty("IMD", new ioMapData(&engine));
     engine.rootContext()->setContextProperty("DLM", new DownloadManager(&engine));
     engine.rootContext()->setContextProperty("Connect", new Connect(&engine));
     engine.rootContext()->setContextProperty("Extender2", new Extender(&engine));

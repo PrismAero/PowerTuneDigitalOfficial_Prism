@@ -2,8 +2,6 @@ import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
 import Qt.labs.settings 1.0
-import QtSensors
-import QtMultimedia
 import DLM 1.0
 import PowerTune.Core 1.0
 import PowerTune.Settings 1.0

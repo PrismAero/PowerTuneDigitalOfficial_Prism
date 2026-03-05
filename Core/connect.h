@@ -28,21 +28,13 @@
 #include <QObject>
 #include <QProcess>
 #include <QTimer>
-#include <QtSerialPort/QSerialPort>
 
 
-class SerialPort;
-class Sensors;
 class DashBoard;
-class AdaptronicSelect;
-class Apexi;
 class datalogger;
 class calculations;
 class AppSettings;
-class GoPro;
-class GPS;
 class udpreceiver;
-class Arduino;
 class WifiScanner;
 class Extender;
 // * Data Models (Phase 2 & 3 - Modularization)
@@ -131,15 +123,9 @@ public:
     QStringList portsNames() const { return m_portsNames; }
 
 private:
-    SerialPort *m_serialport;
     DashBoard *m_dashBoard;
     AppSettings *m_appSettings;
-    GoPro *m_gopro;
-    GPS *m_gps;
     udpreceiver *m_udpreceiver;
-    AdaptronicSelect *m_adaptronicselect;
-    Apexi *m_apexi;
-    Sensors *m_sensors;
     datalogger *m_datalogger;
     calculations *m_calculations;
     QStringList m_portsNames;
@@ -147,7 +133,6 @@ private:
     QProcess process;
     QFileSystemModel *dirModel;
     QFileSystemModel *fileModel;
-    Arduino *m_arduino;
     WifiScanner *m_wifiscanner;
     Extender *m_extender;
     // * Data Models (Phase 2 & 3 - Modularization)
@@ -180,7 +165,6 @@ signals:
 
 public slots:
     void updatefinished(int exitCode, QProcess::ExitStatus exitStatus);
-    void getPorts();
     void setPortsNames(QStringList portsNames)
     {
         if (m_portsNames == portsNames)

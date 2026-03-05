@@ -36,7 +36,7 @@ class UIState : public QObject
     Q_PROPERTY(QStringList backroundpictures READ backroundpictures WRITE setbackroundpictures NOTIFY backroundpicturesChanged)
 
     // * Display brightness (0-255)
-    Q_PROPERTY(int Brightness READ Brightness WRITE setBrightness NOTIFY BrightnessChanged)
+    Q_PROPERTY(int Brightness READ Brightness WRITE setBrightness NOTIFY brightnessChanged)
 
     // * Number of visible dashboards
     Q_PROPERTY(int Visibledashes READ Visibledashes WRITE setVisibledashes NOTIFY VisibledashesChanged)
@@ -85,7 +85,7 @@ public slots:
 
 signals:
     void draggableChanged(int draggable);
-    void BrightnessChanged(int Brightness);
+    void brightnessChanged(int Brightness);
     void VisibledashesChanged(int Visibledashes);
     void screenChanged(bool screen);
     void rpmstyle1Changed(int rpmstyle1);
