@@ -24,18 +24,10 @@ Rectangle {
     function getDashByIndex(index) {
         var basePath = "qrc:/qt/qml/PowerTune/Gauges/PowerTune/Gauges/"
         switch (index) {
-            case 0: return basePath + "Cluster.qml"
-            case 1: return basePath + "GPS.qml"
-            case 2: return "qrc:/GPSTracks/Laptimer.qml"
-            case 3: return basePath + "PFCSensors.qml"
-            case 4: return basePath + "Userdash1.qml"
-            case 5: return basePath + "Userdash2.qml"
-            case 6: return basePath + "Userdash3.qml"
-            case 7: return basePath + "ForceMeter.qml"
-            case 8: return basePath + "Mediaplayer.qml"
-            case 9: return basePath + "Screentoggle.qml"
-            case 10: return basePath + "SpeedMeasurements.qml"
-            case 11: return "qrc:/qt/qml/PowerTune/Settings/PowerTune/Settings/CanMonitor.qml"
+            case 0: return basePath + "Userdash1.qml"
+            case 1: return basePath + "Userdash2.qml"
+            case 2: return basePath + "Userdash3.qml"
+            case 3: return "qrc:/qt/qml/PowerTune/Settings/PowerTune/Settings/CanMonitor.qml"
         }
     }
 
@@ -84,7 +76,7 @@ Rectangle {
 
                 Text {
                     text: Translator.translate("ActiveDashboards", Settings.language)
-                    font.pixelSize: 16
+                    font.pixelSize: 18
                     font.family: "Lato"
                     color: "#FFFFFF"
                     Layout.preferredWidth: 200
@@ -92,7 +84,6 @@ Rectangle {
 
                 StyledComboBox {
                     id: numberofdashes
-                    width: 150
                     model: ["1", "2", "3", "4"]
                     currentIndex: -1
                     onCurrentIndexChanged: {

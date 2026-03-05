@@ -51,7 +51,7 @@ Rectangle {
                     spacing: 12
                     Text {
                         text: Translator.translate("WaterTemp", Settings.language)
-                        font.pixelSize: 16
+                        font.pixelSize: 18
                         font.family: "Lato"
                         color: "#FFFFFF"
                         Layout.preferredWidth: 160
@@ -69,7 +69,7 @@ Rectangle {
                     spacing: 12
                     Text {
                         text: Translator.translate("Boost", Settings.language)
-                        font.pixelSize: 16
+                        font.pixelSize: 18
                         font.family: "Lato"
                         color: "#FFFFFF"
                         Layout.preferredWidth: 160
@@ -87,7 +87,7 @@ Rectangle {
                     spacing: 12
                     Text {
                         text: Translator.translate("Revs", Settings.language)
-                        font.pixelSize: 16
+                        font.pixelSize: 18
                         font.family: "Lato"
                         color: "#FFFFFF"
                         Layout.preferredWidth: 160
@@ -105,7 +105,7 @@ Rectangle {
                     spacing: 12
                     Text {
                         text: Translator.translate("Knock", Settings.language)
-                        font.pixelSize: 16
+                        font.pixelSize: 18
                         font.family: "Lato"
                         color: "#FFFFFF"
                         Layout.preferredWidth: 160
@@ -123,7 +123,7 @@ Rectangle {
                     spacing: 12
                     Text {
                         text: Translator.translate("Lamdamultiply", Settings.language)
-                        font.pixelSize: 16
+                        font.pixelSize: 18
                         font.family: "Lato"
                         color: "#FFFFFF"
                         Layout.preferredWidth: 160
@@ -171,7 +171,7 @@ Rectangle {
                     spacing: 12
                     Text {
                         text: Translator.translate("Gear", Settings.language) + " 1"
-                        font.pixelSize: 16
+                        font.pixelSize: 18
                         font.family: "Lato"
                         color: "#FFFFFF"
                         Layout.preferredWidth: 160
@@ -189,7 +189,7 @@ Rectangle {
                     spacing: 12
                     Text {
                         text: Translator.translate("Gear", Settings.language) + " 2"
-                        font.pixelSize: 16
+                        font.pixelSize: 18
                         font.family: "Lato"
                         color: "#FFFFFF"
                         Layout.preferredWidth: 160
@@ -207,7 +207,7 @@ Rectangle {
                     spacing: 12
                     Text {
                         text: Translator.translate("Gear", Settings.language) + " 3"
-                        font.pixelSize: 16
+                        font.pixelSize: 18
                         font.family: "Lato"
                         color: "#FFFFFF"
                         Layout.preferredWidth: 160
@@ -225,7 +225,7 @@ Rectangle {
                     spacing: 12
                     Text {
                         text: Translator.translate("Gear", Settings.language) + " 4"
-                        font.pixelSize: 16
+                        font.pixelSize: 18
                         font.family: "Lato"
                         color: "#FFFFFF"
                         Layout.preferredWidth: 160
@@ -243,7 +243,7 @@ Rectangle {
                     spacing: 12
                     Text {
                         text: Translator.translate("Gear", Settings.language) + " 5"
-                        font.pixelSize: 16
+                        font.pixelSize: 18
                         font.family: "Lato"
                         color: "#FFFFFF"
                         Layout.preferredWidth: 160
@@ -261,7 +261,7 @@ Rectangle {
                     spacing: 12
                     Text {
                         text: Translator.translate("Gear", Settings.language) + " 6"
-                        font.pixelSize: 16
+                        font.pixelSize: 18
                         font.family: "Lato"
                         color: "#FFFFFF"
                         Layout.preferredWidth: 160
@@ -278,7 +278,7 @@ Rectangle {
 
                 Text {
                     text: "Enter RPM/Speed ratio values for each gear"
-                    font.pixelSize: 14
+                    font.pixelSize: 16
                     font.family: "Lato"
                     color: "#707070"
                     font.italic: true

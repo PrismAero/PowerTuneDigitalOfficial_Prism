@@ -1273,24 +1273,31 @@ void Connect::openConnection(const QString &portName, const int &ecuSelect, cons
     selectedPort = portName;
     canbaseadress = canbase;
     rpmcanbaseadress = rpmcanbase;
-    // model: [ "CAN","PowerFC","Consult","OBD2"]
-    // model: [ "CAN","PowerFC","Consult","OBD2"]
-    // UDP receiver
+
+    if (m_diagnosticsProvider) {
+        m_diagnosticsProvider->addLogMessage(
+            QStringLiteral("INFO"),
+            QStringLiteral("Opening connection (ECU=%1, CAN base=%2)").arg(ecuSelect).arg(canbase));
+        m_diagnosticsProvider->setCanStatus(true, QStringLiteral("Generic CAN"));
+    }
 
     m_extender->openCAN(canbaseadress, rpmcanbaseadress);
-
-
     m_udpreceiver->startreceiver();
 }
 void Connect::closeConnection()
 {
-    // qDebug() << "Closing"<<ecu;
+    if (m_diagnosticsProvider) {
+        m_diagnosticsProvider->addLogMessage(QStringLiteral("INFO"), QStringLiteral("Connection closed"));
+        m_diagnosticsProvider->setCanStatus(false, QString());
+    }
     m_calculations->stop();
     m_udpreceiver->closeConnection();
 }
 
 void Connect::update()
 {
+    if (m_diagnosticsProvider)
+        m_diagnosticsProvider->addLogMessage(QStringLiteral("INFO"), QStringLiteral("System update initiated"));
     QProcess *p = new QProcess(this);
 
     if (p) {
@@ -1300,7 +1307,6 @@ void Connect::update()
         p->waitForStarted();
 
         connect(p, &QProcess::readyReadStandardOutput, this, &Connect::processOutput);
-        // connect(p, &QProcess::readyReadStandardError, this, &Connect::ReadErr);
     }
 }
 
@@ -1319,25 +1325,17 @@ void Connect::changefolderpermission()
 void Connect::shutdown()
 {
     m_connectionData->setSerialStat("Shutting Down");
-    QProcess *process = new QProcess(this);
-    QString program = "sudo";
-    QStringList arguments;
-    arguments << "shutdown" << "-h" << "now";
-
-    process->start(program, arguments);
-    process->waitForFinished(600000);  // 10 minutes time before timeout
+    if (m_diagnosticsProvider)
+        m_diagnosticsProvider->addLogMessage(QStringLiteral("WARN"), QStringLiteral("System shutdown initiated"));
+    QProcess::startDetached(QStringLiteral("shutdown"), QStringList() << QStringLiteral("-h") << QStringLiteral("now"));
 }
 
 void Connect::reboot()
 {
     m_connectionData->setSerialStat("Rebooting");
-    QProcess *process = new QProcess(this);
-    QString program = "sudo";
-    QStringList arguments;
-    arguments << "reboot";
-
-    process->start(program, arguments);
-    process->waitForFinished(600000);  // 10 minutes time before timeout
+    if (m_diagnosticsProvider)
+        m_diagnosticsProvider->addLogMessage(QStringLiteral("INFO"), QStringLiteral("System reboot initiated"));
+    QProcess::startDetached(QStringLiteral("reboot"), QStringList());
 }
 
 void Connect::turnscreen()
@@ -1433,9 +1431,11 @@ void Connect::RequestLicence()
 
 void Connect::restartDaemon()
 {
+    if (m_diagnosticsProvider)
+        m_diagnosticsProvider->addLogMessage(QStringLiteral("INFO"), QStringLiteral("Daemon restart initiated"));
     QProcess *process = new QProcess(this);
     QString program = "/home/pi/startdaemon.sh";
-    QStringList arguments;  // Assuming no arguments are needed for this script
+    QStringList arguments;
 
     process->start(program, arguments);
     connect(process, &QProcess::readyReadStandardOutput, this, &Connect::processOutput);

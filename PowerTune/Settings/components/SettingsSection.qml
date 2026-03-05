@@ -35,7 +35,7 @@ Rectangle {
 
             Text {
                 text: root.title
-                font.pixelSize: 18
+                font.pixelSize: 20
                 font.weight: Font.Bold
                 font.family: "Lato"
                 color: "#009688"

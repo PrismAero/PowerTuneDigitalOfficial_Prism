@@ -260,6 +260,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
             PowerTune/Settings/AnalogSettings.qml
             PowerTune/Settings/RPMSettings.qml
             PowerTune/Settings/StartupSettings.qml
+            PowerTune/Settings/VehicleRPMSettings.qml
             PowerTune/Settings/NetworkSettings.qml
             PowerTune/Settings/CanMonitor.qml
             PowerTune/Settings/DiagnosticsSettings.qml

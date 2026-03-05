@@ -24,6 +24,7 @@
 
 #ifdef Q_OS_LINUX
 #include <QProcess>
+#include <sys/statvfs.h>
 #endif
 
 
@@ -50,6 +51,8 @@ DiagnosticsProvider::DiagnosticsProvider(QObject *parent)
 
     // Initial system info read
     updateSystemInfo();
+
+    addLogMessage(QStringLiteral("INFO"), QStringLiteral("Diagnostics provider initialized"));
 }
 
 
@@ -127,6 +130,26 @@ QString DiagnosticsProvider::systemTime() const
     return QDateTime::currentDateTime().toString(QStringLiteral("yyyy-MM-dd hh:mm:ss"));
 }
 
+double DiagnosticsProvider::cpuLoadAverage() const
+{
+    return m_cpuLoadAvg;
+}
+
+double DiagnosticsProvider::diskUsagePercent() const
+{
+    return m_diskUsage;
+}
+
+double DiagnosticsProvider::memoryUsedMB() const
+{
+    return m_memUsedMB;
+}
+
+double DiagnosticsProvider::memoryTotalMB() const
+{
+    return m_memTotalMB;
+}
+
 
 // ---------------------------------------------------------------------------
 // CAN Bus accessors
@@ -175,6 +198,15 @@ int DiagnosticsProvider::canTotalMessages() const
 QString DiagnosticsProvider::daemonName() const
 {
     return m_daemonName;
+}
+
+QString DiagnosticsProvider::canStatusText() const
+{
+    if (!m_canConnected)
+        return QStringLiteral("Disconnected");
+    if (m_lastCanMsgTimeValid && m_lastCanMsgTime.elapsed() <= 5000)
+        return QStringLiteral("Active");
+    return QStringLiteral("Waiting");
 }
 
 
@@ -464,6 +496,8 @@ void DiagnosticsProvider::recordCanMessage()
 {
     ++m_canMessagesThisSecond;
     ++m_canTotalMessages;
+    m_lastCanMsgTime.restart();
+    m_lastCanMsgTimeValid = true;
 }
 
 /**
@@ -474,6 +508,8 @@ void DiagnosticsProvider::recordCanMessage()
 void DiagnosticsProvider::recordCanError()
 {
     ++m_canErrorCount;
+    addLogMessage(QStringLiteral("ERROR"),
+                  QStringLiteral("CAN error #%1").arg(m_canErrorCount));
     emit canStatusChanged();
 }
 
@@ -489,6 +525,13 @@ void DiagnosticsProvider::setCanStatus(bool connected, const QString &daemon)
     if (m_canConnected != connected || m_daemonName != daemon) {
         m_canConnected = connected;
         m_daemonName = daemon;
+        if (connected) {
+            addLogMessage(QStringLiteral("INFO"),
+                          QStringLiteral("CAN connected (daemon: %1)").arg(daemon));
+        } else {
+            m_lastCanMsgTimeValid = false;
+            addLogMessage(QStringLiteral("WARN"), QStringLiteral("CAN disconnected"));
+        }
         emit canStatusChanged();
     }
 }
@@ -524,20 +567,12 @@ void DiagnosticsProvider::setConnectionInfo(bool connected, const QString &port,
  */
 void DiagnosticsProvider::updateSystemInfo()
 {
-    double newTemp = readCpuTemperature();
-    double newMem = readMemoryUsage();
+    m_cpuTemp = readCpuTemperature();
+    m_memoryUsage = readMemoryUsage();
+    m_cpuLoadAvg = readCpuLoadAverage();
+    m_diskUsage = readDiskUsage();
+    readMemoryAbsolute(m_memUsedMB, m_memTotalMB);
 
-    bool changed = false;
-    if (qAbs(newTemp - m_cpuTemp) > 0.01) {
-        m_cpuTemp = newTemp;
-        changed = true;
-    }
-    if (qAbs(newMem - m_memoryUsage) > 0.01) {
-        m_memoryUsage = newMem;
-        changed = true;
-    }
-
-    // Always emit for uptime/systemTime updates
     emit systemInfoChanged();
 }
 
@@ -690,5 +725,94 @@ double DiagnosticsProvider::readMemoryUsage() const
     return (static_cast<double>(used) / static_cast<double>(total)) * 100.0;
 #else
     return 0.0;
+#endif
+}
+
+double DiagnosticsProvider::readCpuLoadAverage() const
+{
+#ifdef Q_OS_LINUX
+    QFile loadFile(QStringLiteral("/proc/loadavg"));
+    if (loadFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        QTextStream in(&loadFile);
+        QString line = in.readLine().trimmed();
+        loadFile.close();
+        QStringList parts = line.split(QStringLiteral(" "));
+        if (!parts.isEmpty()) {
+            bool ok = false;
+            double avg1 = parts.at(0).toDouble(&ok);
+            if (ok) return avg1;
+        }
+    }
+    return 0.0;
+#else
+    return 0.0;
+#endif
+}
+
+double DiagnosticsProvider::readDiskUsage() const
+{
+#ifdef Q_OS_LINUX
+    struct statvfs stat;
+    if (statvfs("/", &stat) == 0) {
+        double total = static_cast<double>(stat.f_blocks) * stat.f_frsize;
+        double avail = static_cast<double>(stat.f_bavail) * stat.f_frsize;
+        if (total > 0) {
+            return ((total - avail) / total) * 100.0;
+        }
+    }
+    return 0.0;
+#else
+    return 0.0;
+#endif
+}
+
+void DiagnosticsProvider::readMemoryAbsolute(double &usedMB, double &totalMB) const
+{
+#ifdef Q_OS_LINUX
+    QFile memFile(QStringLiteral("/proc/meminfo"));
+    if (!memFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        usedMB = 0.0;
+        totalMB = 0.0;
+        return;
+    }
+    QTextStream in(&memFile);
+    double memTotalKB = 0.0;
+    double memAvailKB = 0.0;
+    bool foundTotal = false, foundAvail = false;
+    while (!in.atEnd()) {
+        QString line = in.readLine();
+        if (line.startsWith(QStringLiteral("MemTotal:"))) {
+            QStringList parts = line.split(QRegularExpression(QStringLiteral("\\s+")));
+            if (parts.size() >= 2) { memTotalKB = parts.at(1).toDouble(); foundTotal = true; }
+        } else if (line.startsWith(QStringLiteral("MemAvailable:"))) {
+            QStringList parts = line.split(QRegularExpression(QStringLiteral("\\s+")));
+            if (parts.size() >= 2) { memAvailKB = parts.at(1).toDouble(); foundAvail = true; }
+        }
+        if (foundTotal && foundAvail) break;
+    }
+    memFile.close();
+    totalMB = memTotalKB / 1024.0;
+    usedMB = (memTotalKB - memAvailKB) / 1024.0;
+#elif defined(Q_OS_MACOS)
+    mach_port_t host = mach_host_self();
+    vm_statistics64_data_t vmStats;
+    mach_msg_type_number_t count = HOST_VM_INFO64_COUNT;
+    kern_return_t result = host_statistics64(host, HOST_VM_INFO64,
+                                             reinterpret_cast<host_info64_t>(&vmStats), &count);
+    if (result != KERN_SUCCESS) { usedMB = 0.0; totalMB = 0.0; return; }
+    vm_size_t pageSize = 0;
+    host_page_size(host, &pageSize);
+    uint64_t active = static_cast<uint64_t>(vmStats.active_count) * pageSize;
+    uint64_t wired = static_cast<uint64_t>(vmStats.wire_count) * pageSize;
+    uint64_t compressed = static_cast<uint64_t>(vmStats.compressor_page_count) * pageSize;
+    uint64_t inactive = static_cast<uint64_t>(vmStats.inactive_count) * pageSize;
+    uint64_t free_mem = static_cast<uint64_t>(vmStats.free_count) * pageSize;
+    uint64_t used = active + wired + compressed;
+    uint64_t total = active + inactive + wired + free_mem + compressed;
+    totalMB = static_cast<double>(total) / (1024.0 * 1024.0);
+    usedMB = static_cast<double>(used) / (1024.0 * 1024.0);
+#else
+    usedMB = 0.0;
+    totalMB = 0.0;
 #endif
 }

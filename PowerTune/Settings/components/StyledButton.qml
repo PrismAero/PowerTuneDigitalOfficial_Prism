@@ -1,17 +1,15 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 
-// * StyledButton - Primary and secondary button variants
-
 Button {
     id: root
 
     property bool primary: true
     property bool danger: false
 
-    width: 280
-    height: 48
-    font.pixelSize: 20
+    implicitWidth: contentItem.implicitWidth + 40
+    implicitHeight: Math.max(48, contentItem.implicitHeight + 20)
+    font.pixelSize: 22
     font.family: "Lato"
     font.weight: Font.DemiBold
 

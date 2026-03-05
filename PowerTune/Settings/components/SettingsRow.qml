@@ -48,6 +48,6 @@ RowLayout {
     Item {
         id: controlContainer
         Layout.preferredWidth: 280
-        Layout.preferredHeight: 44
+        Layout.preferredHeight: 48
     }
 }

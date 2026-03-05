@@ -11,8 +11,8 @@ Rectangle {
     property string statusText: "Unknown"
     property string status: "unknown" // "connected", "disconnected", "pending", "unknown"
 
-    width: 280
-    height: 44
+    implicitWidth: 200
+    implicitHeight: 44
     radius: 8
     color: "#2D2D2D"
     border.color: {

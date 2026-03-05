@@ -52,7 +52,7 @@ Rectangle {
 
                 Text {
                     text: listView.model.count + " messages"
-                    font.pixelSize: 16
+                    font.pixelSize: 18
                     font.family: "Lato"
                     color: "#B0B0B0"
                 }
@@ -73,7 +73,7 @@ Rectangle {
 
                 Text {
                     text: "CAN ID"
-                    font.pixelSize: 16
+                    font.pixelSize: 18
                     font.weight: Font.DemiBold
                     font.family: "Lato"
                     color: "#009688"
@@ -82,7 +82,7 @@ Rectangle {
 
                 Text {
                     text: "Payload (Hex)"
-                    font.pixelSize: 16
+                    font.pixelSize: 18
                     font.weight: Font.DemiBold
                     font.family: "Lato"
                     color: "#009688"

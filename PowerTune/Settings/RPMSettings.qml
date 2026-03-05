@@ -37,7 +37,7 @@ Rectangle {
 
                 Text {
                     text: "MAX RPM"
-                    font.pixelSize: 16
+                    font.pixelSize: 18
                     font.weight: Font.DemiBold
                     font.family: "Lato"
                     color: "#FFFFFF"
@@ -61,7 +61,7 @@ Rectangle {
 
             Text {
                 text: "Configure RPM thresholds for each shift light stage"
-                font.pixelSize: 14
+                font.pixelSize: 16
                 font.family: "Lato"
                 color: "#707070"
                 font.italic: true
@@ -87,7 +87,7 @@ Rectangle {
 
                         Text {
                             text: Translator.translate("Stage", Settings.language) + " 1"
-                            font.pixelSize: 16
+                            font.pixelSize: 18
                             font.weight: Font.DemiBold
                             font.family: "Lato"
                             color: "#4CAF50"
@@ -105,7 +105,7 @@ Rectangle {
 
                         Text {
                             text: "RPM"
-                            font.pixelSize: 14
+                            font.pixelSize: 16
                             font.family: "Lato"
                             color: "#B0B0B0"
                             Layout.alignment: Qt.AlignHCenter
@@ -129,7 +129,7 @@ Rectangle {
 
                         Text {
                             text: Translator.translate("Stage", Settings.language) + " 2"
-                            font.pixelSize: 16
+                            font.pixelSize: 18
                             font.weight: Font.DemiBold
                             font.family: "Lato"
                             color: "#FFEB3B"
@@ -147,7 +147,7 @@ Rectangle {
 
                         Text {
                             text: "RPM"
-                            font.pixelSize: 14
+                            font.pixelSize: 16
                             font.family: "Lato"
                             color: "#B0B0B0"
                             Layout.alignment: Qt.AlignHCenter
@@ -171,7 +171,7 @@ Rectangle {
 
                         Text {
                             text: Translator.translate("Stage", Settings.language) + " 3"
-                            font.pixelSize: 16
+                            font.pixelSize: 18
                             font.weight: Font.DemiBold
                             font.family: "Lato"
                             color: "#FF9800"
@@ -189,7 +189,7 @@ Rectangle {
 
                         Text {
                             text: "RPM"
-                            font.pixelSize: 14
+                            font.pixelSize: 16
                             font.family: "Lato"
                             color: "#B0B0B0"
                             Layout.alignment: Qt.AlignHCenter
@@ -213,7 +213,7 @@ Rectangle {
 
                         Text {
                             text: Translator.translate("Stage", Settings.language) + " 4"
-                            font.pixelSize: 16
+                            font.pixelSize: 18
                             font.weight: Font.DemiBold
                             font.family: "Lato"
                             color: "#F44336"
@@ -231,7 +231,7 @@ Rectangle {
 
                         Text {
                             text: "RPM"
-                            font.pixelSize: 14
+                            font.pixelSize: 16
                             font.family: "Lato"
                             color: "#B0B0B0"
                             Layout.alignment: Qt.AlignHCenter

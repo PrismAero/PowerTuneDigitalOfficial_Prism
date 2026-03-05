@@ -14,38 +14,35 @@ Rectangle {
     property int connected: 0
     property int hexstring: 0
     property int hexstring2: 0
-    property int currentLanguage: Settings.language
+    property int currentLanguage: Settings ? Settings.language : 0
 
-    // * Settings persistence
+    readonly property var ecuBackendMap: [0, 4]
+    readonly property int genericCanDaemonIndex: 40
+
+    function ecuDropdownFromBackend(backendIdx) {
+        for (var i = 0; i < ecuBackendMap.length; i++) {
+            if (ecuBackendMap[i] === backendIdx) return i
+        }
+        return 0
+    }
+
     Item {
         id: powerTuneSettings
         Settings {
             property alias connectECUAtStartup: connectButton.enabled
-            property alias connectGPSAtStartup: connectButtonGPS.enabled
-            property alias serialPortName: serialName.currentText
-            property alias gpsPortName: serialNameGPS.currentText
-            property alias gpsPortNameindex: serialNameGPS.currentIndex
             property alias ecuType: ecuSelect.currentText
-            property alias auxunit1: unitaux1.text
-            property alias aux1: an1V0.text
-            property alias aux2: an2V5.text
-            property alias auxunit2: unitaux2.text
-            property alias aux3: an3V0.text
-            property alias aux4: an4V5.text
-
             property alias vehicleweight: weight.text
             property alias unitSelector1: unitSelect1.currentIndex
             property alias unitSelector: unitSelect.currentIndex
             property alias unitSelector2: unitSelect2.currentIndex
             property alias odometervalue: odometer.text
             property alias tripmetervalue: tripmeter.text
-            property alias smoothingrpm: smoothrpm.currentIndex
-            property alias smoothingspeed: smoothspeed.currentIndex
             property alias extendercanbase: baseadresstext.text
             property alias shiftlightcanbase: shiftlightbaseadresstext.text
             property alias languagecombobox: languageselect.currentIndex
+            property alias mainspeedsource: mainspeedsource.currentIndex
+            property alias bitrateselect: canbitrateselect.currentIndex
         }
-
 
         Connections {
             target: Vehicle
@@ -69,33 +66,31 @@ Rectangle {
         }
         Connections {
             target: Engine
-            onBoostPresChanged: { if (Engine.BoostPres > Settings.boostwarn) playwarning.start() }
+            onBoostpresChanged: { if (Engine.BoostPres > Settings.boostwarn) playwarning.start() }
         }
     }
 
     RowLayout {
         anchors.fill: parent
         anchors.margins: 16
-        spacing: 12
+        spacing: 16
 
         // * LEFT COLUMN
         ColumnLayout {
-            Layout.preferredWidth: (root.width - 56) / 3
+            Layout.preferredWidth: (root.width - 64) / 3
             Layout.fillHeight: true
             Layout.alignment: Qt.AlignTop
-            spacing: 10
+            spacing: 12
 
-            // * Connection Section
             SettingsSection {
                 title: Translator.translate("Connection", Settings.language)
                 Layout.fillWidth: true
 
                 RowLayout {
-                    spacing: 8
+                    spacing: 12
                     StyledButton {
                         id: connectButton
                         text: Translator.translate("Connect", Settings.language)
-                        width: 150
                         onClicked: {
                             functconnect.connectfunc()
                             connectButton.enabled = false
@@ -106,7 +101,6 @@ Rectangle {
                     StyledButton {
                         id: disconnectButton
                         text: Translator.translate("Disconnect", Settings.language)
-                        width: 150
                         primary: false
                         enabled: false
                         onClicked: {
@@ -118,167 +112,60 @@ Rectangle {
                     }
                 }
 
-                RowLayout {
-                    spacing: 8
-                    StyledButton {
-                        id: connectButtonGPS
-                        text: Translator.translate("GPS Connect", Settings.language)
-                        width: 150
-                        Component.onCompleted: autoconnectGPS.auto()
-                        onClicked: {
-                            connectButtonGPS.enabled = false
-                            disconnectButtonGPS.enabled = true
-                            autoconnectGPS.auto()
-                        }
-                    }
-                    StyledButton {
-                        id: disconnectButtonGPS
-                        text: Translator.translate("GPS Disconnect", Settings.language)
-                        width: 150
-                        primary: false
-                        enabled: false
-                        onClicked: {
-                            connectButtonGPS.enabled = true
-                            disconnectButtonGPS.enabled = false
-                            Gps.closeConnection()
-                        }
-                    }
-                }
-
-                // * ECU Serial Port (visible for PowerFC)
-                RowLayout {
-                    visible: ecuSelect.currentIndex === 1
-                    spacing: 12
-                    Text {
-                        text: Translator.translate("ECU Serial Port", Settings.language)
-                        font.pixelSize: 16
-                        font.family: "Lato"
-                        color: "#FFFFFF"
-                        Layout.preferredWidth: 140
-                    }
-                    StyledComboBox {
-                        id: serialName
-                        width: 200
-                        model: Connect.portsNames
-                        property bool initialized: false
-                        onCurrentIndexChanged: {
-                            if (initialized) AppSettings.setBaudRate(currentIndex)
-                        }
-                        Component.onCompleted: {
-                            currentIndex = AppSettings.getBaudRate()
-                            initialized = true
-                            autoconnect.auto()
-                        }
-                    }
-                }
+                Item { height: 8; Layout.fillWidth: true }
 
                 RowLayout {
                     spacing: 12
                     Text {
-                        text: Translator.translate("GPS Port", Settings.language)
-                        font.pixelSize: 16
+                        text: "CAN Status"
+                        font.pixelSize: 18
                         font.family: "Lato"
                         color: "#FFFFFF"
-                        Layout.preferredWidth: 140
-                    }
-                    StyledComboBox {
-                        id: serialNameGPS
-                        width: 200
-                        model: Connect.portsNames
-                    }
-                }
-
-                RowLayout {
-                    spacing: 12
-                    Text {
-                        text: Translator.translate("Serial Status", Settings.language)
-                        font.pixelSize: 16
-                        font.family: "Lato"
-                        color: "#FFFFFF"
-                        Layout.preferredWidth: 140
+                        Layout.preferredWidth: 160
                     }
                     ConnectionStatusIndicator {
-                        statusText: Connection.SerialStat
-                        status: Connection.SerialStat === "Connected" ? "connected" : "disconnected"
-                        width: 200
+                        statusText: Diagnostics.canStatusText
+                        status: {
+                            if (Diagnostics.canStatusText === "Active") return "connected"
+                            if (Diagnostics.canStatusText === "Waiting") return "pending"
+                            return "disconnected"
+                        }
+                        Layout.fillWidth: true
                     }
                 }
-            }
-
-            // * ECU Configuration Section
-            SettingsSection {
-                title: Translator.translate("ECU Configuration", Settings.language)
-                Layout.fillWidth: true
 
                 RowLayout {
                     spacing: 12
                     Text {
                         text: Translator.translate("ECU Selection", Settings.language)
-                        font.pixelSize: 16
+                        font.pixelSize: 18
                         font.family: "Lato"
                         color: "#FFFFFF"
-                        Layout.preferredWidth: 140
+                        Layout.preferredWidth: 160
                     }
                     StyledComboBox {
                         id: ecuSelect
-                        width: 200
-                        model: ["CAN", "PowerFC", "Consult", "OBD2", "Generic CAN"]
+                        Layout.fillWidth: true
+                        model: ["CAN", "Generic CAN"]
                         property bool initialized: false
                         onCurrentIndexChanged: {
                             if (initialized) {
-                                AppSettings.setECU(currentIndex)
-                                Connection.setecu(ecuSelect.currentIndex)
+                                var backendIdx = ecuBackendMap[currentIndex]
+                                AppSettings.setECU(backendIdx)
+                                Connection.setecu(backendIdx)
                             }
                         }
                         Component.onCompleted: {
-                            currentIndex = AppSettings.getECU()
-                            Connection.setecu(ecuSelect.currentIndex)
+                            var stored = AppSettings.getECU()
+                            currentIndex = ecuDropdownFromBackend(stored)
+                            Connection.setecu(ecuBackendMap[currentIndex])
                             initialized = true
+                            autoconnect.auto()
                         }
-                    }
-                }
-
-                // * Smoothing options (visible for Consult)
-                RowLayout {
-                    visible: Connection.ecu === 2
-                    spacing: 12
-                    Text {
-                        text: Translator.translate("RPM Smoothing", Settings.language)
-                        font.pixelSize: 16
-                        font.family: "Lato"
-                        color: "#FFFFFF"
-                        Layout.preferredWidth: 140
-                    }
-                    StyledComboBox {
-                        id: smoothrpm
-                        width: 200
-                        model: [Translator.translate("OFF", Settings.language), "2", "3", "4", "5", "6", "7", "8", "9", "10"]
-                        onCurrentIndexChanged: Settings.setsmoothrpm(smoothrpm.currentIndex)
-                        Component.onCompleted: Settings.setsmoothrpm(smoothrpm.currentIndex)
-                    }
-                }
-
-                RowLayout {
-                    visible: Connection.ecu === 2
-                    spacing: 12
-                    Text {
-                        text: Translator.translate("Speed Smoothing", Settings.language)
-                        font.pixelSize: 16
-                        font.family: "Lato"
-                        color: "#FFFFFF"
-                        Layout.preferredWidth: 140
-                    }
-                    StyledComboBox {
-                        id: smoothspeed
-                        width: 200
-                        model: [Translator.translate("OFF", Settings.language), "2", "3", "4", "5", "6", "7", "8", "9", "10"]
-                        onCurrentIndexChanged: Settings.setsmoothspeed(smoothspeed.currentIndex)
-                        Component.onCompleted: Settings.setsmoothspeed(smoothspeed.currentIndex)
                     }
                 }
             }
 
-            // * Units Section
             SettingsSection {
                 title: Translator.translate("Units", Settings.language)
                 Layout.fillWidth: true
@@ -287,14 +174,14 @@ Rectangle {
                     spacing: 12
                     Text {
                         text: Translator.translate("Speed units", Settings.language)
-                        font.pixelSize: 16
+                        font.pixelSize: 18
                         font.family: "Lato"
                         color: "#FFFFFF"
-                        Layout.preferredWidth: 140
+                        Layout.preferredWidth: 160
                     }
                     StyledComboBox {
                         id: unitSelect1
-                        width: 200
+                        Layout.fillWidth: true
                         model: [Translator.translate("Metric", Settings.language), Translator.translate("Imperial", Settings.language)]
                         Component.onCompleted: {
                             Connect.setSpeedUnits(currentIndex)
@@ -311,14 +198,14 @@ Rectangle {
                     spacing: 12
                     Text {
                         text: Translator.translate("Temp units", Settings.language)
-                        font.pixelSize: 16
+                        font.pixelSize: 18
                         font.family: "Lato"
                         color: "#FFFFFF"
-                        Layout.preferredWidth: 140
+                        Layout.preferredWidth: 160
                     }
                     StyledComboBox {
                         id: unitSelect
-                        width: 200
+                        Layout.fillWidth: true
                         model: [Translator.translate("C", Settings.language), Translator.translate("F", Settings.language)]
                         Component.onCompleted: {
                             Connect.setUnits(currentIndex)
@@ -335,14 +222,14 @@ Rectangle {
                     spacing: 12
                     Text {
                         text: Translator.translate("Pressure units", Settings.language)
-                        font.pixelSize: 16
+                        font.pixelSize: 18
                         font.family: "Lato"
                         color: "#FFFFFF"
-                        Layout.preferredWidth: 140
+                        Layout.preferredWidth: 160
                     }
                     StyledComboBox {
                         id: unitSelect2
-                        width: 200
+                        Layout.fillWidth: true
                         model: ["kPa", "PSI"]
                         Component.onCompleted: Connect.setPressUnits(currentIndex)
                         onCurrentIndexChanged: Connect.setPressUnits(currentIndex)
@@ -353,12 +240,11 @@ Rectangle {
 
         // * MIDDLE COLUMN
         ColumnLayout {
-            Layout.preferredWidth: (root.width - 56) / 3
+            Layout.preferredWidth: (root.width - 64) / 3
             Layout.fillHeight: true
             Layout.alignment: Qt.AlignTop
-            spacing: 10
+            spacing: 12
 
-            // * Vehicle Section
             SettingsSection {
                 title: Translator.translate("Vehicle", Settings.language)
                 Layout.fillWidth: true
@@ -368,14 +254,14 @@ Rectangle {
                     Text {
                         id: weighttext
                         text: Translator.translate("Weight", Settings.language) + " kg"
-                        font.pixelSize: 16
+                        font.pixelSize: 18
                         font.family: "Lato"
                         color: "#FFFFFF"
-                        Layout.preferredWidth: 140
+                        Layout.preferredWidth: 160
                     }
                     StyledTextField {
                         id: weight
-                        width: 200
+                        Layout.fillWidth: true
                         inputMethodHints: Qt.ImhFormattedNumbersOnly
                     }
                 }
@@ -384,14 +270,14 @@ Rectangle {
                     spacing: 12
                     Text {
                         text: Translator.translate("Odo", Settings.language)
-                        font.pixelSize: 16
+                        font.pixelSize: 18
                         font.family: "Lato"
                         color: "#FFFFFF"
-                        Layout.preferredWidth: 140
+                        Layout.preferredWidth: 160
                     }
                     StyledTextField {
                         id: odometer
-                        width: 200
+                        Layout.fillWidth: true
                         text: "0"
                         inputMethodHints: Qt.ImhFormattedNumbersOnly
                     }
@@ -401,28 +287,88 @@ Rectangle {
                     spacing: 12
                     Text {
                         text: Translator.translate("Trip", Settings.language)
-                        font.pixelSize: 16
+                        font.pixelSize: 18
                         font.family: "Lato"
                         color: "#FFFFFF"
-                        Layout.preferredWidth: 140
+                        Layout.preferredWidth: 160
                     }
                     StyledTextField {
                         id: tripmeter
-                        width: 140
+                        Layout.fillWidth: true
                         text: "0"
                         readOnly: true
                         Component.onCompleted: Vehicle.setTrip(tripmeter.text)
                     }
                     StyledButton {
                         text: Translator.translate("Trip Reset", Settings.language)
-                        width: 100
                         primary: false
                         onClicked: Calculations.resettrip()
                     }
                 }
             }
 
-            // * Data Logging Section
+            SettingsSection {
+                title: Translator.translate("Startup / CAN", Settings.language)
+                Layout.fillWidth: true
+
+                RowLayout {
+                    spacing: 12
+                    Text {
+                        text: Translator.translate("Daemon", Settings.language)
+                        font.pixelSize: 18
+                        font.family: "Lato"
+                        color: "#FFFFFF"
+                        Layout.preferredWidth: 160
+                    }
+                    StyledComboBox {
+                        Layout.fillWidth: true
+                        model: ["Generic CAN"]
+                        enabled: false
+                    }
+                }
+
+                RowLayout {
+                    spacing: 12
+                    Text {
+                        text: Translator.translate("Can Bitrate", Settings.language)
+                        font.pixelSize: 18
+                        font.family: "Lato"
+                        color: "#FFFFFF"
+                        Layout.preferredWidth: 160
+                    }
+                    StyledComboBox {
+                        id: canbitrateselect
+                        Layout.fillWidth: true
+                        model: ["250 kbit/s", "500 kbit/s", "1 Mbit/s"]
+                    }
+                }
+
+                RowLayout {
+                    spacing: 12
+                    Text {
+                        text: Translator.translate("Speed Source", Settings.language)
+                        font.pixelSize: 18
+                        font.family: "Lato"
+                        color: "#FFFFFF"
+                        Layout.preferredWidth: 160
+                    }
+                    StyledComboBox {
+                        id: mainspeedsource
+                        Layout.fillWidth: true
+                        model: ["ECU Speed", "LF Wheel", "RF Wheel", "LR Wheel", "RR Wheel", "GPS", "VR Sensor"]
+                        onCurrentIndexChanged: AppSettings.writeStartupSettings(mainspeedsource.currentIndex)
+                    }
+                }
+
+                StyledButton {
+                    text: Translator.translate("Apply Startup", Settings.language)
+                    onClicked: {
+                        Connect.daemonstartup(genericCanDaemonIndex)
+                        Connect.canbitratesetup(canbitrateselect.currentIndex)
+                    }
+                }
+            }
+
             SettingsSection {
                 title: Translator.translate("Data Logging", Settings.language)
                 Layout.fillWidth: true
@@ -431,14 +377,14 @@ Rectangle {
                     spacing: 12
                     Text {
                         text: Translator.translate("Logfile name", Settings.language)
-                        font.pixelSize: 16
+                        font.pixelSize: 18
                         font.family: "Lato"
                         color: "#FFFFFF"
-                        Layout.preferredWidth: 140
+                        Layout.preferredWidth: 160
                     }
                     StyledTextField {
                         id: logfilenameSelect
-                        width: 200
+                        Layout.fillWidth: true
                         text: "DataLog"
                         inputMethodHints: Qt.ImhNoAutoUppercase | Qt.ImhPreferLowercase | Qt.ImhSensitiveData | Qt.ImhNoPredictiveText
                     }
@@ -450,71 +396,41 @@ Rectangle {
                     Component.onCompleted: logger.datalogger()
                     onClicked: logger.datalogger()
                 }
-
-            }
-
-            // * Analog Inputs Section (PowerFC only)
-            SettingsSection {
-                title: "Analog Inputs"
-                visible: ecuSelect.currentIndex === 1
-                Layout.fillWidth: true
-
-                GridLayout {
-                    columns: 4
-                    rowSpacing: 4
-                    columnSpacing: 8
-
-                    Text { text: ""; font.pixelSize: 14; color: "#B0B0B0" }
-                    Text { text: "0V"; font.pixelSize: 14; color: "#B0B0B0" }
-                    Text { text: "5V"; font.pixelSize: 14; color: "#B0B0B0" }
-                    Text { text: "Name"; font.pixelSize: 14; color: "#B0B0B0" }
-
-                    Text { text: "AN1-2"; font.pixelSize: 14; color: "#FFFFFF" }
-                    StyledTextField { id: an1V0; width: 80; placeholderText: "9"; inputMethodHints: Qt.ImhFormattedNumbersOnly }
-                    StyledTextField { id: an2V5; width: 80; placeholderText: "16"; inputMethodHints: Qt.ImhFormattedNumbersOnly }
-                    StyledTextField { id: unitaux1; width: 80; placeholderText: "AFR" }
-
-                    Text { text: "AN3-4"; font.pixelSize: 14; color: "#FFFFFF" }
-                    StyledTextField { id: an3V0; width: 80; placeholderText: "0"; inputMethodHints: Qt.ImhFormattedNumbersOnly }
-                    StyledTextField { id: an4V5; width: 80; placeholderText: "5"; inputMethodHints: Qt.ImhFormattedNumbersOnly }
-                    StyledTextField { id: unitaux2; width: 80; placeholderText: "AFR" }
-                }
             }
         }
 
         // * RIGHT COLUMN
         ColumnLayout {
-            Layout.preferredWidth: (root.width - 56) / 3
+            Layout.preferredWidth: (root.width - 64) / 3
             Layout.fillHeight: true
             Layout.alignment: Qt.AlignTop
-            spacing: 10
+            spacing: 12
 
-            // * CAN Configuration Section
             SettingsSection {
                 title: "CAN Configuration"
                 Layout.fillWidth: true
 
-                // CAN Extender
                 Text {
                     text: "CAN Extender"
-                    font.pixelSize: 16
+                    font.pixelSize: 18
                     font.weight: Font.DemiBold
                     font.family: "Lato"
                     color: "#009688"
                 }
 
+                Text {
+                    text: Translator.translate("base adress", Settings.language) + " " + Translator.translate("(decimal)", Settings.language)
+                    font.pixelSize: 16
+                    font.family: "Lato"
+                    color: "#B0B0B0"
+                }
+
                 RowLayout {
-                    spacing: 12
-                    Text {
-                        text: Translator.translate("base adress", Settings.language) + " " + Translator.translate("(decimal)", Settings.language)
-                        font.pixelSize: 14
-                        font.family: "Lato"
-                        color: "#FFFFFF"
-                        Layout.preferredWidth: 160
-                    }
+                    spacing: 16
+                    Layout.fillWidth: true
                     StyledTextField {
                         id: baseadresstext
-                        width: 100
+                        width: 120
                         enabled: connectButton.enabled
                         placeholderText: "1024"
                         inputMethodHints: Qt.ImhFormattedNumbersOnly
@@ -523,33 +439,36 @@ Rectangle {
                     }
                     Text {
                         text: "HEX: 0x" + (hexstring + 0x1000).toString(16).substr(-3).toUpperCase()
-                        font.pixelSize: 14
+                        font.pixelSize: 18
+                        font.weight: Font.DemiBold
                         font.family: "Lato"
                         color: "#009688"
                     }
                 }
 
-                // Shiftlight CAN
+                Item { height: 4; Layout.fillWidth: true }
+
                 Text {
                     text: "Shiftlight CAN"
-                    font.pixelSize: 16
+                    font.pixelSize: 18
                     font.weight: Font.DemiBold
                     font.family: "Lato"
                     color: "#009688"
                 }
 
+                Text {
+                    text: Translator.translate("base adress", Settings.language) + " " + Translator.translate("(decimal)", Settings.language)
+                    font.pixelSize: 16
+                    font.family: "Lato"
+                    color: "#B0B0B0"
+                }
+
                 RowLayout {
-                    spacing: 12
-                    Text {
-                        text: Translator.translate("base adress", Settings.language) + " " + Translator.translate("(decimal)", Settings.language)
-                        font.pixelSize: 14
-                        font.family: "Lato"
-                        color: "#FFFFFF"
-                        Layout.preferredWidth: 160
-                    }
+                    spacing: 16
+                    Layout.fillWidth: true
                     StyledTextField {
                         id: shiftlightbaseadresstext
-                        width: 100
+                        width: 120
                         enabled: connectButton.enabled
                         placeholderText: "1024"
                         inputMethodHints: Qt.ImhFormattedNumbersOnly
@@ -558,24 +477,22 @@ Rectangle {
                     }
                     Text {
                         text: "HEX: 0x" + (hexstring2 + 0x1000).toString(16).substr(-3).toUpperCase()
-                        font.pixelSize: 14
+                        font.pixelSize: 18
+                        font.weight: Font.DemiBold
                         font.family: "Lato"
                         color: "#009688"
                     }
                 }
             }
 
-            // * Language Section
             SettingsSection {
                 title: Translator.translate("Language", Settings.language)
                 Layout.fillWidth: true
 
                 StyledComboBox {
                     id: languageselect
-                    width: 280
-
+                    Layout.fillWidth: true
                     model: ["English", "Deutsch", "\u65E5\u672C\u8A9E", "Espanol"]
-
                     onCurrentIndexChanged: {
                         functLanguageselect.languageselectfunct()
                         changeweighttext.changetext()
@@ -583,38 +500,34 @@ Rectangle {
                 }
             }
 
-            // * System Section
             SettingsSection {
                 title: Translator.translate("System", Settings.language)
                 Layout.fillWidth: true
 
                 Text {
                     text: "V 1.99F " + Connection.Platform
-                    font.pixelSize: 14
+                    font.pixelSize: 16
                     font.family: "Lato"
                     color: "#B0B0B0"
                 }
 
                 RowLayout {
-                    spacing: 8
+                    spacing: 12
 
                     StyledButton {
                         text: Translator.translate("Quit", Settings.language)
-                        width: 120
                         primary: false
                         onClicked: Qt.quit()
                     }
 
                     StyledButton {
                         text: Translator.translate("Reboot", Settings.language)
-                        width: 120
                         primary: false
                         onClicked: Connect.reboot()
                     }
 
                     StyledButton {
                         text: Translator.translate("Shutdown", Settings.language)
-                        width: 120
                         danger: true
                         onClicked: Connect.shutdown()
                     }
@@ -623,7 +536,6 @@ Rectangle {
         }
     }
 
-    // * Helper Functions
     Item {
         id: autoconnect
         function auto() {
@@ -631,16 +543,6 @@ Rectangle {
                 functconnect.connectfunc()
                 ecuSelect.enabled = false
                 disconnectButton.enabled = true
-            }
-        }
-    }
-
-    Item {
-        id: autoconnectGPS
-        function auto() {
-            if (connectButtonGPS.enabled === false) {
-                Gps.openConnection(serialNameGPS.currentText, "9600")
-                disconnectButtonGPS.enabled = true
             }
         }
     }
@@ -674,8 +576,8 @@ Rectangle {
         function connectfunc() {
             Connect.setOdometer(odometer.text)
             Connect.setWeight(weight.text)
-            Connect.openConnection(serialName.currentText, ecuSelect.currentIndex, baseadresstext.text, shiftlightbaseadresstext.text)
-            if (typeof Apexi !== "undefined") Apexi.calculatorAux(an1V0.text, an2V5.text, an3V0.text, an4V5.text, unitaux1.text, unitaux2.text)
+            var backendIdx = ecuBackendMap[ecuSelect.currentIndex]
+            Connect.openConnection("", backendIdx, baseadresstext.text, shiftlightbaseadresstext.text)
             connected = 1
         }
     }
@@ -698,16 +600,6 @@ Rectangle {
         id: functLanguageselect
         function languageselectfunct() {
             AppSettings.writeLanguage(languageselect.currentIndex)
-        }
-    }
-
-    Item {
-        id: autoconnectArd
-        Component.onCompleted: autoconnectArd.auto()
-        function auto() {
-            if (typeof Arduino !== "undefined" && Connection.externalspeedconnectionrequest === 1) {
-                Arduino.openConnection(Connection.externalspeedport, "9600")
-            }
         }
     }
 }

@@ -24,14 +24,14 @@ ApplicationWindow {
     property int brightnessIncrease: 175
     property int ddcUtilBrightnessIncrease: 50
 
-    property int digitalInput1: Expander.EXDigitalInput1
-    property int digitalInput2: Expander.EXDigitalInput2
-    property int digitalInput3: Expander.EXDigitalInput3
-    property int digitalInput4: Expander.EXDigitalInput4
-    property int digitalInput5: Expander.EXDigitalInput5
-    property int digitalInput6: Expander.EXDigitalInput6
-    property int digitalInput7: Expander.EXDigitalInput7
-    property int digitalInput8: Expander.EXDigitalInput8
+    property int digitalInput1: Expander ? Expander.EXDigitalInput1 : 0
+    property int digitalInput2: Expander ? Expander.EXDigitalInput2 : 0
+    property int digitalInput3: Expander ? Expander.EXDigitalInput3 : 0
+    property int digitalInput4: Expander ? Expander.EXDigitalInput4 : 0
+    property int digitalInput5: Expander ? Expander.EXDigitalInput5 : 0
+    property int digitalInput6: Expander ? Expander.EXDigitalInput6 : 0
+    property int digitalInput7: Expander ? Expander.EXDigitalInput7 : 0
+    property int digitalInput8: Expander ? Expander.EXDigitalInput8 : 0
 
     Settings{
         id: appSettings

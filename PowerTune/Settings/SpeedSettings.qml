@@ -39,7 +39,7 @@ Rectangle {
 
                 Text {
                     text: Translator.translate("SpeedCorrection", Settings.language) + " %"
-                    font.pixelSize: 16
+                    font.pixelSize: 18
                     font.family: "Lato"
                     color: "#FFFFFF"
                     Layout.preferredWidth: 220
@@ -58,7 +58,7 @@ Rectangle {
 
                 Text {
                     text: "(100 = no correction)"
-                    font.pixelSize: 14
+                    font.pixelSize: 16
                     font.family: "Lato"
                     color: "#707070"
                     font.italic: true
@@ -90,7 +90,7 @@ Rectangle {
             // * Conditional settings (visible when checkbox is checked)
             ColumnLayout {
                 visible: usbvrcheckbox.checked
-                spacing: 8
+                spacing: 12
                 Layout.fillWidth: true
 
                 RowLayout {
@@ -99,7 +99,7 @@ Rectangle {
 
                     Text {
                         text: Translator.translate("Pulses per mile", Settings.language)
-                        font.pixelSize: 16
+                        font.pixelSize: 18
                         font.family: "Lato"
                         color: "#FFFFFF"
                         Layout.preferredWidth: 220
@@ -123,7 +123,7 @@ Rectangle {
 
                     Text {
                         text: Translator.translate("External Speed port", Settings.language)
-                        font.pixelSize: 16
+                        font.pixelSize: 18
                         font.family: "Lato"
                         color: "#FFFFFF"
                         Layout.preferredWidth: 220

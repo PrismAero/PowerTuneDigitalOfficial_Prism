@@ -8,8 +8,8 @@ Switch {
 
     property string label: ""
 
-    height: 44
-    font.pixelSize: 20
+    height: 48
+    font.pixelSize: 22
     font.family: "Lato"
 
     indicator: Rectangle {

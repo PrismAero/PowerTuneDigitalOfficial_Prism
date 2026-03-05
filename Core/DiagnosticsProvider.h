@@ -45,6 +45,18 @@ class DiagnosticsProvider : public QObject
     /// Current system time formatted as "yyyy-MM-dd hh:mm:ss"
     Q_PROPERTY(QString systemTime READ systemTime NOTIFY systemInfoChanged)
 
+    /// CPU load average (1 minute)
+    Q_PROPERTY(double cpuLoadAverage READ cpuLoadAverage NOTIFY systemInfoChanged)
+
+    /// Disk usage percentage for root filesystem
+    Q_PROPERTY(double diskUsagePercent READ diskUsagePercent NOTIFY systemInfoChanged)
+
+    /// Memory used in MB
+    Q_PROPERTY(double memoryUsedMB READ memoryUsedMB NOTIFY systemInfoChanged)
+
+    /// Memory total in MB
+    Q_PROPERTY(double memoryTotalMB READ memoryTotalMB NOTIFY systemInfoChanged)
+
     // -- CAN Bus --
 
     /// Whether the CAN bus daemon connection is active
@@ -61,6 +73,9 @@ class DiagnosticsProvider : public QObject
 
     /// Name of the active CAN daemon
     Q_PROPERTY(QString daemonName READ daemonName NOTIFY canStatusChanged)
+
+    /// Human-readable CAN status: "Active", "Waiting", or "Disconnected"
+    Q_PROPERTY(QString canStatusText READ canStatusText NOTIFY canStatusChanged)
 
     // -- Connection --
 
@@ -130,6 +145,11 @@ public:
      */
     QString systemTime() const;
 
+    double cpuLoadAverage() const;
+    double diskUsagePercent() const;
+    double memoryUsedMB() const;
+    double memoryTotalMB() const;
+
     // -- CAN Bus accessors --
 
     /**
@@ -161,6 +181,13 @@ public:
      * @return Daemon name string
      */
     QString daemonName() const;
+
+    /**
+     * @brief Get human-readable CAN status based on actual message flow.
+     * @return "Active" if messages received in last 5s, "Waiting" if connected
+     *         but no recent messages, "Disconnected" if not connected
+     */
+    QString canStatusText() const;
 
     // -- Connection accessors --
 
@@ -338,6 +365,10 @@ private:
     // System info
     double m_cpuTemp = 0.0;
     double m_memoryUsage = 0.0;
+    double m_cpuLoadAvg = 0.0;
+    double m_diskUsage = 0.0;
+    double m_memUsedMB = 0.0;
+    double m_memTotalMB = 0.0;
     QElapsedTimer m_uptimeTimer;
 
     // CAN bus
@@ -347,6 +378,8 @@ private:
     int m_canTotalMessages = 0;
     int m_canMessagesThisSecond = 0;
     QString m_daemonName;
+    QElapsedTimer m_lastCanMsgTime;
+    bool m_lastCanMsgTimeValid = false;
 
     // Connection
     QString m_connectionType;
@@ -384,6 +417,9 @@ private:
      * @return Usage as percentage 0-100, or 0.0 if unavailable
      */
     double readMemoryUsage() const;
+    double readCpuLoadAverage() const;
+    double readDiskUsage() const;
+    void readMemoryAbsolute(double &usedMB, double &totalMB) const;
 };
 
 #endif // DIAGNOSTICSPROVIDER_H

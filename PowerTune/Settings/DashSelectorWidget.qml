@@ -40,10 +40,8 @@ Rectangle {
             font.pixelSize: 18
             font.family: "Lato"
             model: [
-                "Main Dash", "GPS", "Laptimer", "PowerFC Sensors",
                 "User Dash 1", "User Dash 2", "User Dash 3",
-                "G-Force", "Mediaplayer", "Screen Toggle",
-                "Drag Timer", "CAN monitor"
+                "CAN Monitor"
             ]
 
             onCurrentIndexChanged: {
