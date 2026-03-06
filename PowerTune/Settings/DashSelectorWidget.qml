@@ -19,6 +19,14 @@ Rectangle {
     property int index
     property var linkedLoader
 
+    Connections {
+        target: linkedLoader
+        function onLoaded() {
+            if (linkedLoader.item && linkedLoader.item.dashIndex !== undefined)
+                linkedLoader.item.dashIndex = cbox.currentIndex;
+        }
+    }
+
     ColumnLayout {
         anchors.fill: parent
         anchors.margins: 12
@@ -46,9 +54,15 @@ Rectangle {
 
             onCurrentIndexChanged: {
                 linkedLoader.source = dashselector.getDashByIndex(currentIndex)
+                if (linkedLoader.item && linkedLoader.item.dashIndex !== undefined)
+                    linkedLoader.item.dashIndex = currentIndex;
             }
             onVisibleChanged: {
-                if (visible) linkedLoader.source = dashselector.getDashByIndex(currentIndex)
+                if (visible) {
+                    linkedLoader.source = dashselector.getDashByIndex(currentIndex)
+                    if (linkedLoader.item && linkedLoader.item.dashIndex !== undefined)
+                        linkedLoader.item.dashIndex = currentIndex;
+                }
             }
 
             background: Rectangle {

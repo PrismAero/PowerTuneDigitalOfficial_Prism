@@ -319,9 +319,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
             # Sensor displays
             PowerTune/Gauges/HaltechFlags.qml
             # User dashboards
-            PowerTune/Gauges/Userdash1.qml
-            PowerTune/Gauges/Userdash2.qml
-            PowerTune/Gauges/Userdash3.qml
+            PowerTune/Gauges/UserDashboard.qml
             # Utility
             PowerTune/Gauges/Screentoggle.qml
             PowerTune/Gauges/Keypad.qml
@@ -331,21 +329,13 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
             PowerTune/Gauges/StateGIF.qml
             PowerTune/Gauges/MyTextLabel.qml
             PowerTune/Gauges/ColorList.qml
-            PowerTune/Gauges/ColorpickerCombobox.qml
             PowerTune/Gauges/DatasourcesList.qml
-            PowerTune/Gauges/Datasources.qml
+            PowerTune/Gauges/DatasourceService.qml
+            PowerTune/Gauges/GaugeFactory.qml
             # Warning system
             PowerTune/Gauges/Warning.qml
             PowerTune/Gauges/WarningLoader.qml
         RESOURCES
-            PowerTune/Gauges/createMaindash.js
-            PowerTune/Gauges/createPicture.js
-            PowerTune/Gauges/createRoundGauge.js
-            PowerTune/Gauges/createsquaregaugeUserDash.js
-            PowerTune/Gauges/createStateGIF.js
-            PowerTune/Gauges/createStatePicture.js
-            PowerTune/Gauges/createText.js
-            PowerTune/Gauges/createverticalbargauge.js
         RESOURCE_PREFIX /qt/qml
         OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/qt/qml/PowerTune/Gauges
     )

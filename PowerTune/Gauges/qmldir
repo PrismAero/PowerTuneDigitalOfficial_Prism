@@ -48,9 +48,7 @@ SensorTest 1.0 SensorTest.qml
 ConsultTest 1.0 ConsultTest.qml
 
 # User dashboards
-Userdash1 1.0 Userdash1.qml
-Userdash2 1.0 Userdash2.qml
-Userdash3 1.0 Userdash3.qml
+UserDashboard 1.0 UserDashboard.qml
 
 # Media/utility
 Camera 1.0 Camera.qml

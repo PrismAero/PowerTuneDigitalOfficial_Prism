@@ -24,11 +24,15 @@ Rectangle {
     function getDashByIndex(index) {
         var basePath = "qrc:/qt/qml/PowerTune/Gauges/PowerTune/Gauges/"
         switch (index) {
-            case 0: return basePath + "Userdash1.qml"
-            case 1: return basePath + "Userdash2.qml"
-            case 2: return basePath + "Userdash3.qml"
+            case 0: return basePath + "UserDashboard.qml"
+            case 1: return basePath + "UserDashboard.qml"
+            case 2: return basePath + "UserDashboard.qml"
             case 3: return "qrc:/qt/qml/PowerTune/Settings/PowerTune/Settings/CanMonitor.qml"
         }
+    }
+
+    function getDashIndex(comboIndex) {
+        return comboIndex;
     }
 
     function adremove() {
