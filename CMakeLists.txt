@@ -203,8 +203,14 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     # * Suppress Qt policy warning about qmldir files
     qt_policy(SET QTP0004 OLD)
     
-    # * Define singleton for Translator
+    # * Define singletons
     set_source_files_properties(PowerTune/Utils/Translator.qml PROPERTIES
+        QT_QML_SINGLETON_TYPE TRUE
+    )
+    set_source_files_properties(PowerTune/Gauges/GaugeFactory.qml PROPERTIES
+        QT_QML_SINGLETON_TYPE TRUE
+    )
+    set_source_files_properties(PowerTune/Gauges/DatasourceService.qml PROPERTIES
         QT_QML_SINGLETON_TYPE TRUE
     )
     
@@ -213,6 +219,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_library(PowerTuneCoreLib STATIC)
     qt_add_library(PowerTuneSettingsLib STATIC)
     qt_add_library(PowerTuneGaugesLib STATIC)
+    qt_add_library(PrismPTDashboardLib STATIC)
     qt_add_library(PrismKeyboardLib STATIC)
     
     # * PowerTune.Utils module - Translator singleton and icon utilities
@@ -312,15 +319,22 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
             PowerTune/Gauges/SportDash.qml
             PowerTune/Gauges/Advanced.qml
             # Specialty gauges
+            PowerTune/Gauges/GPS.qml
             PowerTune/Gauges/ForceMeter.qml
+            PowerTune/Gauges/Charts.qml
+            PowerTune/Gauges/Dyno.qml
+            PowerTune/Gauges/VirtualDyno.qml
             PowerTune/Gauges/SpeedMeasurements.qml
             PowerTune/Gauges/TyreMonitor.qml
             PowerTune/Gauges/ShiftLights.qml
             # Sensor displays
+            PowerTune/Gauges/PFCSensors.qml
             PowerTune/Gauges/HaltechFlags.qml
-            # User dashboards
-            PowerTune/Gauges/UserDashboard.qml
-            # Utility
+            PowerTune/Gauges/SensorTest.qml
+            PowerTune/Gauges/ConsultTest.qml
+            # Media/utility
+            PowerTune/Gauges/Camera.qml
+            PowerTune/Gauges/Mediaplayer.qml
             PowerTune/Gauges/Screentoggle.qml
             PowerTune/Gauges/Keypad.qml
             # UI helpers
@@ -338,6 +352,19 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         RESOURCES
         RESOURCE_PREFIX /qt/qml
         OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/qt/qml/PowerTune/Gauges
+    )
+    
+    # * PrismPT.Dashboard module - User dashboard canvas and panels
+    qt_add_qml_module(PrismPTDashboardLib
+        URI PrismPT.Dashboard
+        VERSION 1.0
+        QML_FILES
+            PowerTune/Dashboard/UserDashboard.qml
+            PowerTune/Dashboard/GaugeCreationMenu.qml
+            PowerTune/Dashboard/ColorSelectionPanel.qml
+            PowerTune/Dashboard/BackgroundSettingsPanel.qml
+        RESOURCE_PREFIX /qt/qml
+        OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/qt/qml/PrismPT/Dashboard
     )
     
     # * Prism.Keyboard module - Custom virtual keyboard
@@ -359,6 +386,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         PowerTuneCoreLibplugin
         PowerTuneSettingsLibplugin
         PowerTuneGaugesLibplugin
+        PrismPTDashboardLibplugin
         PrismKeyboardLibplugin
     )
 endif()
@@ -370,6 +398,7 @@ set(QML_IMPORT_PATH
     "${CMAKE_CURRENT_SOURCE_DIR}/PowerTune/Settings"
     "${CMAKE_CURRENT_SOURCE_DIR}/PowerTune/Gauges"
     "${CMAKE_CURRENT_SOURCE_DIR}/PowerTune/Utils"
+    "${CMAKE_CURRENT_SOURCE_DIR}/PowerTune/Dashboard"
     CACHE STRING "Qt Creator/Design Studio QML import paths"
     FORCE
 )

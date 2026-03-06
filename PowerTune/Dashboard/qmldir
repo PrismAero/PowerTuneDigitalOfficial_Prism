@@ -1,0 +1,5 @@
+module PrismPT.Dashboard
+UserDashboard 1.0 UserDashboard.qml
+GaugeCreationMenu 1.0 GaugeCreationMenu.qml
+ColorSelectionPanel 1.0 ColorSelectionPanel.qml
+BackgroundSettingsPanel 1.0 BackgroundSettingsPanel.qml

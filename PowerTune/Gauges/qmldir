@@ -47,9 +47,6 @@ HaltechFlags 1.0 HaltechFlags.qml
 SensorTest 1.0 SensorTest.qml
 ConsultTest 1.0 ConsultTest.qml
 
-# User dashboards
-UserDashboard 1.0 UserDashboard.qml
-
 # Media/utility
 Camera 1.0 Camera.qml
 Mediaplayer 1.0 Mediaplayer.qml

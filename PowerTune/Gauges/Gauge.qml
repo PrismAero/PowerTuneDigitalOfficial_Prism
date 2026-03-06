@@ -93,8 +93,9 @@ Item {
 
         Item {
             id: tickmarkItem
+            property int tickIndex: index
             property real stepSize: style && style.tickmarkStepSize ? style.tickmarkStepSize : root.tickmarkStepSize
-            property real tickValue: root.minimumValue + index * stepSize
+            property real tickValue: root.minimumValue + tickIndex * stepSize
             property real tickPosition: {
                 var range = root.maximumValue - root.minimumValue;
                 if (range === 0) return 0;
@@ -108,7 +109,7 @@ Item {
 
                 property var styleData: QtObject {
                     readonly property real value: tickmarkItem.tickValue
-                    readonly property int index: tickmarkItem.index
+                    readonly property int index: tickmarkItem.tickIndex
                 }
 
                 x: isVertical 
@@ -126,7 +127,7 @@ Item {
 
                 property var styleData: QtObject {
                     readonly property real value: tickmarkItem.tickValue
-                    readonly property int index: tickmarkItem.index
+                    readonly property int index: tickmarkItem.tickIndex
                 }
 
                 x: isVertical

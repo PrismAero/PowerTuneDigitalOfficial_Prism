@@ -19,15 +19,17 @@ Rectangle {
         property alias numberofdash: numberofdashes.currentIndex
     }
 
-    // * Returns resource path for dashboard component
-    // * Uses qt_add_qml_module resource paths (prefix + source path)
     function getDashByIndex(index) {
-        var basePath = "qrc:/qt/qml/PowerTune/Gauges/PowerTune/Gauges/"
+        var dashPath = "qrc:/qt/qml/PrismPT/Dashboard/PowerTune/Dashboard/";
         switch (index) {
-            case 0: return basePath + "UserDashboard.qml"
-            case 1: return basePath + "UserDashboard.qml"
-            case 2: return basePath + "UserDashboard.qml"
-            case 3: return "qrc:/qt/qml/PowerTune/Settings/PowerTune/Settings/CanMonitor.qml"
+        case 0:
+            return dashPath + "UserDashboard.qml";
+        case 1:
+            return dashPath + "UserDashboard.qml";
+        case 2:
+            return dashPath + "UserDashboard.qml";
+        case 3:
+            return "qrc:/qt/qml/PowerTune/Settings/PowerTune/Settings/CanMonitor.qml";
         }
     }
 
@@ -36,28 +38,37 @@ Rectangle {
     }
 
     function adremove() {
-        UI.Visibledashes = numberofdashes.currentIndex + 1
+        UI.Visibledashes = numberofdashes.currentIndex + 1;
 
         while (dashView.count > numberofdashes.currentIndex + 2) {
-            dashView.takeItem(dashView.count - 2)
+            dashView.takeItem(dashView.count - 2);
         }
 
         while (dashView.count < numberofdashes.currentIndex + 2) {
             switch (dashView.count) {
-                case 2: dashView.insertItem(1, secondPageLoader); break
-                case 3: dashView.insertItem(2, thirdPageLoader); break
-                case 4: dashView.insertItem(3, fourthPageLoader); break
+            case 2:
+                dashView.insertItem(1, secondPageLoader);
+                break;
+            case 3:
+                dashView.insertItem(2, thirdPageLoader);
+                break;
+            case 4:
+                dashView.insertItem(3, fourthPageLoader);
+                break;
             }
         }
     }
 
     Component.onCompleted: {
         if (numberofdashes.currentIndex >= 0) {
-            adremove()
-            firstPageLoader.source = getDashByIndex(dash1.currentIndex)
-            if (dash2.currentIndex >= 0) secondPageLoader.source = getDashByIndex(dash2.currentIndex)
-            if (dash3.currentIndex >= 0) thirdPageLoader.source = getDashByIndex(dash3.currentIndex)
-            if (dash4.currentIndex >= 0) fourthPageLoader.source = getDashByIndex(dash4.currentIndex)
+            adremove();
+            firstPageLoader.source = getDashByIndex(dash1.currentIndex);
+            if (dash2.currentIndex >= 0)
+                secondPageLoader.source = getDashByIndex(dash2.currentIndex);
+            if (dash3.currentIndex >= 0)
+                thirdPageLoader.source = getDashByIndex(dash3.currentIndex);
+            if (dash4.currentIndex >= 0)
+                fourthPageLoader.source = getDashByIndex(dash4.currentIndex);
         }
     }
 
@@ -66,7 +77,9 @@ Rectangle {
         anchors.margins: 16
         spacing: 16
 
-        Item { Layout.fillHeight: true }
+        Item {
+            Layout.fillHeight: true
+        }
 
         // * Active Dashboards Section
         SettingsSection {
@@ -91,8 +104,8 @@ Rectangle {
                     model: ["1", "2", "3", "4"]
                     currentIndex: -1
                     onCurrentIndexChanged: {
-                        adremove()
-                        AppSettings.writeSelectedDashSettings(numberofdashes.currentIndex + 1)
+                        adremove();
+                        AppSettings.writeSelectedDashSettings(numberofdashes.currentIndex + 1);
                     }
                 }
             }
@@ -136,6 +149,8 @@ Rectangle {
             }
         }
 
-        Item { Layout.fillHeight: true }
+        Item {
+            Layout.fillHeight: true
+        }
     }
 }

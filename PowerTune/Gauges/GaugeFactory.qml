@@ -5,14 +5,14 @@ QtObject {
     id: factory
 
     readonly property var typeRegistry: ({
-        "Round gauge":      "qrc:/qt/qml/PowerTune/Gauges/RoundGauge.qml",
-        "Square gauge":     "qrc:/qt/qml/PowerTune/Gauges/SquareGauge.qml",
-        "Bar gauge":        "qrc:/qt/qml/PowerTune/Gauges/VerticalBarGauge.qml",
-        "Text label gauge": "qrc:/qt/qml/PowerTune/Gauges/MyTextLabel.qml",
-        "gauge image":      "qrc:/qt/qml/PowerTune/Gauges/Picture.qml",
-        "State gauge":      "qrc:/qt/qml/PowerTune/Gauges/StatePicture.qml",
-        "State GIF":        "qrc:/qt/qml/PowerTune/Gauges/StateGIF.qml",
-        "Main gauge":       "qrc:/qt/qml/PowerTune/Gauges/SquareGaugeMain.qml"
+        "Round gauge":      "qrc:/qt/qml/PowerTune/Gauges/PowerTune/Gauges/RoundGauge.qml",
+        "Square gauge":     "qrc:/qt/qml/PowerTune/Gauges/PowerTune/Gauges/SquareGauge.qml",
+        "Bar gauge":        "qrc:/qt/qml/PowerTune/Gauges/PowerTune/Gauges/VerticalBarGauge.qml",
+        "Text label gauge": "qrc:/qt/qml/PowerTune/Gauges/PowerTune/Gauges/MyTextLabel.qml",
+        "gauge image":      "qrc:/qt/qml/PowerTune/Gauges/PowerTune/Gauges/Picture.qml",
+        "State gauge":      "qrc:/qt/qml/PowerTune/Gauges/PowerTune/Gauges/StatePicture.qml",
+        "State GIF":        "qrc:/qt/qml/PowerTune/Gauges/PowerTune/Gauges/StateGIF.qml",
+        "Main gauge":       "qrc:/qt/qml/PowerTune/Gauges/PowerTune/Gauges/SquareGaugeMain.qml"
     })
 
     readonly property var _propertyKeys: ({
