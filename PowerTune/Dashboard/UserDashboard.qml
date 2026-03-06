@@ -2,7 +2,8 @@ import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Controls.Material 2.0
 import Qt.labs.settings 1.0
-import PowerTune.Gauges 1.0
+import PowerTune.Gauges.Media 1.0
+import PowerTune.Gauges.Shared 1.0
 import PowerTune.Utils 1.0
 
 Item {
@@ -179,7 +180,7 @@ Item {
                 extraLoader.source = "";
                 break;
             case 1:
-                extraLoader.setSource("qrc:/qt/qml/PowerTune/Gauges/PowerTune/Gauges/PFCSensors.qml", {
+                extraLoader.setSource("qrc:/qt/qml/PowerTune/Gauges/Sensors/PowerTune/Gauges/Sensors/PFCSensors.qml", {
                     sizeoftext: mainwindow.width / 54
                 });
                 break;

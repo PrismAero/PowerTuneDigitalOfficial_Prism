@@ -1,6 +1,6 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
-import PowerTune.Gauges 1.0
+import PowerTune.Gauges.Shared 1.0
 import PowerTune.Utils 1.0
 
 Rectangle {
@@ -74,7 +74,7 @@ Rectangle {
     }
 
     Grid {
-        rows: 8
+        rows: 10
         columns: 2
         x: 0
         y: 45
@@ -299,6 +299,75 @@ Rectangle {
         }
 
         Button {
+            id: btnaddArcFill
+            width: dashWindow ? dashWindow.width * 0.118 : 150
+            height: dashWindow ? dashWindow.height * 0.083 : 40
+            text: "Arc Fill"
+            font.pixelSize: dashWindow ? dashWindow.width * 0.015 : 12
+            onClicked: {
+                var ds = DatasourceService.allSources.get(cbx_sources.currentIndex);
+                GaugeFactory.createGauge("Arc fill gauge", gaugeParent, {
+                    "width": 200, "height": 200, "x": 20, "y": 20,
+                    "mainvaluename": ds.sourcename,
+                    "maxvalue": ds.maxvalue, "minvalue": 0,
+                    "warnvaluehigh": ds.maxvalue, "warnvaluelow": -20000,
+                    "decimalpoints": ds.decimalpoints,
+                    "unittext": ds.defaultsymbol, "labeltext": ds.titlename
+                });
+            }
+        }
+        Button {
+            id: btnaddNumericCell
+            width: dashWindow ? dashWindow.width * 0.118 : 150
+            height: dashWindow ? dashWindow.height * 0.083 : 40
+            text: "Numeric"
+            font.pixelSize: dashWindow ? dashWindow.width * 0.015 : 12
+            onClicked: {
+                var ds = DatasourceService.allSources.get(cbx_sources.currentIndex);
+                GaugeFactory.createGauge("Numeric cell", gaugeParent, {
+                    "width": 160, "height": 80, "x": 20, "y": 20,
+                    "mainvaluename": ds.sourcename,
+                    "warnvaluehigh": ds.maxvalue, "warnvaluelow": -20000,
+                    "decimalpoints": ds.decimalpoints,
+                    "unittext": ds.defaultsymbol, "labeltext": ds.titlename
+                });
+            }
+        }
+        Button {
+            id: btnaddGearIndicator
+            width: dashWindow ? dashWindow.width * 0.118 : 150
+            height: dashWindow ? dashWindow.height * 0.083 : 40
+            text: "Gear"
+            font.pixelSize: dashWindow ? dashWindow.width * 0.015 : 12
+            onClicked: {
+                GaugeFactory.createGauge("Gear indicator", gaugeParent, {
+                    "width": 120, "height": 120, "x": 20, "y": 20,
+                    "mainvaluename": "gear"
+                });
+            }
+        }
+        Button {
+            id: btnaddModernRound
+            width: dashWindow ? dashWindow.width * 0.118 : 150
+            height: dashWindow ? dashWindow.height * 0.083 : 40
+            text: "Modern"
+            font.pixelSize: dashWindow ? dashWindow.width * 0.015 : 12
+            onClicked: {
+                var ds = DatasourceService.allSources.get(cbx_sources.currentIndex);
+                GaugeFactory.createGauge("Modern round gauge", gaugeParent, {
+                    "width": 300, "height": 300, "x": 20, "y": 20,
+                    "mainvaluename": ds.sourcename,
+                    "maxvalue": ds.maxvalue, "minvalue": 0,
+                    "warnvaluehigh": ds.maxvalue, "warnvaluelow": -20000,
+                    "decimalpoints": ds.decimalpoints,
+                    "unittext": ds.defaultsymbol, "labeltext": ds.titlename,
+                    "startangle": -225, "endangle": 45,
+                    "tickcount": 10, "minortickcount": 4
+                });
+            }
+        }
+
+        Button {
             id: btnopencolorselect
             width: dashWindow ? dashWindow.width * 0.118 : 150
             height: dashWindow ? dashWindow.height * 0.083 : 40
@@ -429,6 +498,10 @@ Rectangle {
         btnaddStateGIF.visible = false;
         btnaddBar.visible = false;
         btnaddSquare.visible = false;
+        btnaddArcFill.visible = false;
+        btnaddNumericCell.visible = false;
+        btnaddGearIndicator.visible = false;
+        btnaddModernRound.visible = false;
         btnopencolorselect.visible = false;
         btnclear.visible = false;
         loadfromfile.visible = false;
@@ -452,6 +525,10 @@ Rectangle {
         btnaddStateGIF.visible = true;
         btnaddBar.visible = true;
         btnaddSquare.visible = true;
+        btnaddArcFill.visible = true;
+        btnaddNumericCell.visible = true;
+        btnaddGearIndicator.visible = true;
+        btnaddModernRound.visible = true;
         btnopencolorselect.visible = true;
         btnclear.visible = true;
         loadfromfile.visible = true;

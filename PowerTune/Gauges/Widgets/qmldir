@@ -1,0 +1,14 @@
+module PowerTune.Gauges.Widgets
+RoundGauge 1.0 RoundGauge.qml
+SquareGauge 1.0 SquareGauge.qml
+SquareGaugeMain 1.0 SquareGaugeMain.qml
+SquareGaugeRaceDash 1.0 SquareGaugeRaceDash.qml
+BarGauge 1.0 BarGauge.qml
+VerticalBarGauge 1.0 VerticalBarGauge.qml
+RPMBar 1.0 RPMBar.qml
+ForceMeter 1.0 ForceMeter.qml
+ShiftLights 1.0 ShiftLights.qml
+ArcFillGauge 1.0 ArcFillGauge.qml
+NumericCell 1.0 NumericCell.qml
+GearIndicator 1.0 GearIndicator.qml
+ModernRoundGauge 1.0 ModernRoundGauge.qml

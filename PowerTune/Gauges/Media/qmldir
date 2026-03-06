@@ -1,0 +1,9 @@
+module PowerTune.Gauges.Media
+MyTextLabel 1.0 MyTextLabel.qml
+Picture 1.0 Picture.qml
+StatePicture 1.0 StatePicture.qml
+StateGIF 1.0 StateGIF.qml
+Camera 1.0 Camera.qml
+Mediaplayer 1.0 Mediaplayer.qml
+Screentoggle 1.0 Screentoggle.qml
+Keypad 1.0 Keypad.qml

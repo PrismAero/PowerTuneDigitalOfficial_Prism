@@ -1,0 +1,5 @@
+module PowerTune.Gauges.Core
+CircularGauge 1.0 CircularGauge.qml
+CircularGaugeStyle 1.0 CircularGaugeStyle.qml
+Gauge 1.0 Gauge.qml
+GaugeStyle 1.0 GaugeStyle.qml

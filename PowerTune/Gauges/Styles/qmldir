@@ -1,0 +1,7 @@
+module PowerTune.Gauges.Styles
+DashboardGaugeStyle 1.0 DashboardGaugeStyle.qml
+NormalGaugeStyle 1.0 NormalGaugeStyle.qml
+TachometerStyle 1.0 TachometerStyle.qml
+RPMBarStyle1 1.0 RPMBarStyle1.qml
+RPMBarStyle2 1.0 RPMBarStyle2.qml
+RPMBarStyle3 1.0 RPMBarStyle3.qml

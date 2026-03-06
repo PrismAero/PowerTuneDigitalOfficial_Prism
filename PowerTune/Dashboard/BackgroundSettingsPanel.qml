@@ -1,6 +1,6 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
-import PowerTune.Gauges 1.0
+import PowerTune.Gauges.Shared 1.0
 import PowerTune.Utils 1.0
 
 Rectangle {
@@ -35,16 +35,16 @@ Rectangle {
             rpmSourceChanged("");
             break;
         case 1:
-            rpmSourceChanged("qrc:/qt/qml/PowerTune/Gauges/PowerTune/Gauges/RPMBarStyle1.qml");
+            rpmSourceChanged("qrc:/qt/qml/PowerTune/Gauges/Styles/PowerTune/Gauges/Styles/RPMBarStyle1.qml");
             break;
         case 2:
-            rpmSourceChanged("qrc:/qt/qml/PowerTune/Gauges/PowerTune/Gauges/RPMBarStyle2.qml");
+            rpmSourceChanged("qrc:/qt/qml/PowerTune/Gauges/Styles/PowerTune/Gauges/Styles/RPMBarStyle2.qml");
             break;
         case 3:
-            rpmSourceChanged("qrc:/qt/qml/PowerTune/Gauges/PowerTune/Gauges/RPMBarStyle3.qml");
+            rpmSourceChanged("qrc:/qt/qml/PowerTune/Gauges/Styles/PowerTune/Gauges/Styles/RPMBarStyle3.qml");
             break;
         case 4:
-            rpmSourceChanged("qrc:/qt/qml/PowerTune/Gauges/PowerTune/Gauges/RPMBar.qml");
+            rpmSourceChanged("qrc:/qt/qml/PowerTune/Gauges/Widgets/PowerTune/Gauges/Widgets/RPMBar.qml");
             break;
         }
     }
