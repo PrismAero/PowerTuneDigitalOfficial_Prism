@@ -445,18 +445,31 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     )
     
     # * Link all QML modules to main executable
+    # Both the base lib (contains resources) and plugin (contains type registration) are needed
     target_link_libraries(${PROJECT_NAME} PRIVATE
+        PowerTuneUtilsLib
         PowerTuneUtilsLibplugin
+        PowerTuneCoreLib
         PowerTuneCoreLibplugin
+        PowerTuneSettingsLib
         PowerTuneSettingsLibplugin
+        GaugesCoreLib
         GaugesCoreLibplugin
+        GaugesStylesLib
         GaugesStylesLibplugin
+        GaugesWidgetsLib
         GaugesWidgetsLibplugin
+        GaugesMediaLib
         GaugesMediaLibplugin
+        GaugesViewsLib
         GaugesViewsLibplugin
+        GaugesSensorsLib
         GaugesSensorsLibplugin
+        GaugesSharedLib
         GaugesSharedLibplugin
+        PrismPTDashboardLib
         PrismPTDashboardLibplugin
+        PrismKeyboardLib
         PrismKeyboardLibplugin
     )
 endif()

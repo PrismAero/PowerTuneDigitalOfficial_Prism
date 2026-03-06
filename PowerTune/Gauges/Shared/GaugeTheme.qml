@@ -2,8 +2,11 @@ pragma Singleton
 import QtQuick 2.15
 import Qt.labs.settings 1.0
 
-QtObject {
+Item {
     id: theme
+    visible: false
+    width: 0
+    height: 0
 
     property bool highContrast: _settings.highContrast
 
