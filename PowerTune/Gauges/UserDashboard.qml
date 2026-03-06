@@ -505,7 +505,7 @@ Item {
         }
 
         Grid{
-            rows:7
+            rows:8
             columns: 2
             x:0
             y:45

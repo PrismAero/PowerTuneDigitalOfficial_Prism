@@ -1,14 +1,20 @@
 pragma Singleton
 import QtQuick 2.15
 
-QtObject {
+Item {
     id: service
+    visible: false
+    width: 0
+    height: 0
 
-    readonly property ListModel allSources: DatasourcesList {}
+    DatasourcesList { id: _allSources }
+    ListModel { id: _filteredSources }
+
+    readonly property alias allSources: _allSources
+    readonly property alias filteredSources: _filteredSources
 
     property string searchText: ""
     property string ecuFilter: ""
-    readonly property ListModel filteredSources: ListModel {}
 
     readonly property var _keys: [
         "titlename", "sourcename", "supportedECUs",
@@ -30,10 +36,10 @@ QtObject {
     }
 
     function filter() {
-        filteredSources.clear();
+        _filteredSources.clear();
         var lowerSearch = searchText.toLowerCase();
-        for (var i = 0; i < allSources.count; i++) {
-            var item = allSources.get(i);
+        for (var i = 0; i < _allSources.count; i++) {
+            var item = _allSources.get(i);
             var matchesSearch = searchText === ""
                 || item.titlename.toLowerCase().indexOf(lowerSearch) >= 0
                 || item.sourcename.toLowerCase().indexOf(lowerSearch) >= 0;
@@ -41,21 +47,21 @@ QtObject {
                 || (item.supportedECUs !== undefined
                     && item.supportedECUs.indexOf(ecuFilter) >= 0);
             if (matchesSearch && matchesEcu)
-                filteredSources.append(_safeItem(item));
+                _filteredSources.append(_safeItem(item));
         }
     }
 
     function getBySourceName(name) {
-        for (var i = 0; i < allSources.count; i++) {
-            if (allSources.get(i).sourcename === name)
-                return allSources.get(i);
+        for (var i = 0; i < _allSources.count; i++) {
+            if (_allSources.get(i).sourcename === name)
+                return _allSources.get(i);
         }
         return null;
     }
 
     function getIndexBySourceName(name) {
-        for (var i = 0; i < allSources.count; i++) {
-            if (allSources.get(i).sourcename === name)
+        for (var i = 0; i < _allSources.count; i++) {
+            if (_allSources.get(i).sourcename === name)
                 return i;
         }
         return -1;
