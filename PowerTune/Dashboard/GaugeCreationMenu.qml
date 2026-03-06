@@ -121,8 +121,6 @@ Rectangle {
                     "textFonttype": "Lato",
                     "valueFonttype": "Lato"
                 });
-                root.visible = false;
-                root.menuClosed();
             }
         }
         Button {
@@ -146,8 +144,6 @@ Rectangle {
                     "warnvaluehigh": 1000,
                     "warnvaluelow": 0
                 });
-                root.visible = false;
-                root.menuClosed();
             }
         }
         Button {
@@ -224,8 +220,6 @@ Rectangle {
                     "desctextdisplaytext": dsRound.titlename,
                     "desctextdisplaytextcolor": "red"
                 });
-                root.visible = false;
-                root.menuClosed();
             }
         }
         Button {
@@ -249,8 +243,6 @@ Rectangle {
                     "warnvaluehigh": 20000,
                     "warnvaluelow": -20000
                 });
-                root.visible = false;
-                root.menuClosed();
             }
         }
         Button {
@@ -266,8 +258,6 @@ Rectangle {
                     "pictureheight": 100,
                     "picturesource": "qrc:/Resources/graphics/slectImage.png"
                 });
-                root.visible = false;
-                root.menuClosed();
             }
         }
         Button {
@@ -286,8 +276,6 @@ Rectangle {
                     "statepicturesourceoff": "qrc:/Resources/graphics/selectStateImage.png",
                     "statepicturesourceon": "qrc:/Resources/graphics/selectStateImage.png"
                 });
-                root.visible = false;
-                root.menuClosed();
             }
         }
         Button {
@@ -307,8 +295,6 @@ Rectangle {
                     "statepicturesourceon": "qrc:/Resources/graphics/StateGIF.gif",
                     "triggeroffvalue": 0
                 });
-                root.visible = false;
-                root.menuClosed();
             }
         }
 
