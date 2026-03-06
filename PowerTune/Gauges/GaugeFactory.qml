@@ -264,6 +264,32 @@ QtObject {
         return parts.join(",");
     }
 
+    function serializeDashboardToJSON(parentItem) {
+        var gauges = [];
+        for (var i = 0; i < parentItem.children.length; ++i) {
+            var child = parentItem.children[i];
+            if (child.information) {
+                var data = serializeGauge(child);
+                if (data)
+                    gauges.push(data);
+            }
+        }
+        return JSON.stringify({ "version": 2, "gauges": gauges }, null, 2);
+    }
+
+    function deserializeDashboardFromJSON(jsonString, parentItem) {
+        var doc = JSON.parse(jsonString);
+        if (!doc || !doc.gauges)
+            return 0;
+        var count = 0;
+        for (var i = 0; i < doc.gauges.length; ++i) {
+            var gauge = deserializeGauge(doc.gauges[i], parentItem);
+            if (gauge)
+                count++;
+        }
+        return count;
+    }
+
     function deserializeCSVLine(csvLine, parent) {
         var parts = csvLine.split(",");
         var typeName = parts[0];

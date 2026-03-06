@@ -767,7 +767,7 @@ Item {
                 id: savetofile
                 width: mainwindow.width * 0.118
                 height: mainwindow.height * 0.083
-                text: Translator.translate("Export", Settings.language)
+                text: Translator.translate("Export", Settings.language) + " CSV"
                 font.pixelSize: mainwindow.width * 0.015
 
                 onClicked: {
@@ -782,6 +782,27 @@ Item {
                     savedash();
                     saveDashtofile();
                     Connect.saveDashtoFile("Dash" + (dashIndex + 1) + "Export",saveDashtofilestring);
+                }
+            }
+            Button{
+                id: savetofileJSON
+                width: mainwindow.width * 0.118
+                height: mainwindow.height * 0.083
+                text: Translator.translate("Export", Settings.language) + " JSON"
+                font.pixelSize: mainwindow.width * 0.015
+
+                onClicked: {
+                    squaregaugemenu.visible = false;
+                    UI.draggable = 0;
+                    btnaddRound.visible = false;
+                    btnaddText.visible = false;
+                    btnaddPicture.visible = false;
+                    btnaddStatePicture.visible = false;
+                    btnaddStateGIF.visible = false;
+                    selectcolor.visible = false;
+                    savedash();
+                    var jsonStr = GaugeFactory.serializeDashboardToJSON(userDash);
+                    Connect.saveDashtoFile("Dash" + (dashIndex + 1) + "Export.json", jsonStr);
                 }
             }
             Button{

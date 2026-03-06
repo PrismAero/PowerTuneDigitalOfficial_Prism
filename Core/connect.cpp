@@ -243,13 +243,17 @@ Connect::Connect(QObject *parent)
 Connect::~Connect() = default;
 void Connect::saveDashtoFile(const QString &filename, const QString &dashstring)
 {
-    // qDebug()<<"Filename" << filename + "txt";
+    QString fullName = filename;
+    if (!filename.contains('.'))
+        fullName += ".txt";
+
     QString fixformat = dashstring;
-    fixformat.replace(",,", ", ,");
-    QStringList fields = fixformat.split(QRegularExpression("[\r\n]"));
-    QFile file("/home/pi/UserDashboards/" + filename + ".txt");
-    // QFile file(filename + ".txt" );
-    file.remove();  // remove file if it exists to avoid appending of existing file
+    if (fullName.endsWith(".txt")) {
+        fixformat.replace(",,", ", ,");
+    }
+
+    QFile file("/home/pi/UserDashboards/" + fullName);
+    file.remove();
     if (file.open(QIODevice::ReadWrite)) {
         QTextStream stream(&file);
         stream << fixformat << Qt::endl;
