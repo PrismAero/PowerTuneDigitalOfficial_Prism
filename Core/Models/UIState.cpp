@@ -6,7 +6,9 @@
 #include "UIState.h"
 
 UIState::UIState(QObject *parent)
-    : QObject(parent)
+    : QObject(parent),
+      m_dashSetups(3),
+      m_rpmStyles(3, 0)
 {
 }
 
@@ -46,31 +48,16 @@ void UIState::setscreen(bool screen)
     emit screenChanged(m_screen);
 }
 
-void UIState::setrpmstyle1(int rpmstyle1)
+void UIState::setDashboardCount(int count)
 {
-    if (m_rpmstyle1 == rpmstyle1)
+    if (count < 1)
+        count = 1;
+    if (m_dashboardCount == count)
         return;
 
-    m_rpmstyle1 = rpmstyle1;
-    emit rpmstyle1Changed(m_rpmstyle1);
-}
-
-void UIState::setrpmstyle2(int rpmstyle2)
-{
-    if (m_rpmstyle2 == rpmstyle2)
-        return;
-
-    m_rpmstyle2 = rpmstyle2;
-    emit rpmstyle2Changed(m_rpmstyle2);
-}
-
-void UIState::setrpmstyle3(int rpmstyle3)
-{
-    if (m_rpmstyle3 == rpmstyle3)
-        return;
-
-    m_rpmstyle3 = rpmstyle3;
-    emit rpmstyle3Changed(m_rpmstyle3);
+    m_dashboardCount = count;
+    ensureDashCapacity(count - 1);
+    emit dashboardCountChanged(m_dashboardCount);
 }
 
 void UIState::setmaindashsetup(const QStringList &maindashsetup)
@@ -91,33 +78,6 @@ void UIState::setdashfiles(const QStringList &dashfiles)
     emit dashfilesChanged(m_dashfiles);
 }
 
-void UIState::setdashsetup1(const QStringList &dashsetup1)
-{
-    if (m_dashsetup1 == dashsetup1)
-        return;
-
-    m_dashsetup1 = dashsetup1;
-    emit dashsetup1Changed(m_dashsetup1);
-}
-
-void UIState::setdashsetup2(const QStringList &dashsetup2)
-{
-    if (m_dashsetup2 == dashsetup2)
-        return;
-
-    m_dashsetup2 = dashsetup2;
-    emit dashsetup2Changed(m_dashsetup2);
-}
-
-void UIState::setdashsetup3(const QStringList &dashsetup3)
-{
-    if (m_dashsetup3 == dashsetup3)
-        return;
-
-    m_dashsetup3 = dashsetup3;
-    emit dashsetup3Changed(m_dashsetup3);
-}
-
 void UIState::setbackroundpictures(const QStringList &backroundpictures)
 {
     if (m_backroundpictures == backroundpictures)
@@ -125,4 +85,62 @@ void UIState::setbackroundpictures(const QStringList &backroundpictures)
 
     m_backroundpictures = backroundpictures;
     emit backroundpicturesChanged(m_backroundpictures);
+}
+
+QStringList UIState::dashSetup(int index) const
+{
+    if (index < 0 || index >= m_dashSetups.size())
+        return {};
+    return m_dashSetups.at(index);
+}
+
+int UIState::rpmStyle(int index) const
+{
+    if (index < 0 || index >= m_rpmStyles.size())
+        return 0;
+    return m_rpmStyles.at(index);
+}
+
+void UIState::setDashSetup(int index, const QStringList &setup)
+{
+    if (index < 0)
+        return;
+
+    ensureDashCapacity(index);
+
+    if (m_dashSetups.at(index) == setup)
+        return;
+
+    m_dashSetups[index] = setup;
+    emit dashSetupChanged(index, setup);
+
+    if (index == 0) emit dashsetup1Changed(setup);
+    else if (index == 1) emit dashsetup2Changed(setup);
+    else if (index == 2) emit dashsetup3Changed(setup);
+}
+
+void UIState::setRpmStyle(int index, int style)
+{
+    if (index < 0)
+        return;
+
+    ensureDashCapacity(index);
+
+    if (m_rpmStyles.at(index) == style)
+        return;
+
+    m_rpmStyles[index] = style;
+    emit rpmStyleChanged(index, style);
+
+    if (index == 0) emit rpmstyle1Changed(style);
+    else if (index == 1) emit rpmstyle2Changed(style);
+    else if (index == 2) emit rpmstyle3Changed(style);
+}
+
+void UIState::ensureDashCapacity(int index)
+{
+    while (m_dashSetups.size() <= index)
+        m_dashSetups.append(QStringList());
+    while (m_rpmStyles.size() <= index)
+        m_rpmStyles.append(0);
 }

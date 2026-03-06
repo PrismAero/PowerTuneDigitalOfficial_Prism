@@ -70,17 +70,24 @@ public:
     ~Connect() override;
     explicit Connect(QObject *parent = nullptr);
     Q_INVOKABLE void saveDashtoFile(const QString &filename, const QString &dashstring);
-    Q_INVOKABLE void setfilename1(const QString &file1);
-    Q_INVOKABLE void setfilename2(const QString &file2);
-    Q_INVOKABLE void setfilename3(const QString &file3);
+    // Indexed dashboard methods (Phase 5 - dynamic dashboard support)
+    Q_INVOKABLE void setDashFilename(int index, const QString &filename);
+    Q_INVOKABLE void readDashSetup(int index);
+    Q_INVOKABLE void setRpmStyle(int index, int style);
+
+    // Legacy methods delegate to indexed versions
+    Q_INVOKABLE void setfilename1(const QString &file1) { setDashFilename(0, file1); }
+    Q_INVOKABLE void setfilename2(const QString &file2) { setDashFilename(1, file2); }
+    Q_INVOKABLE void setfilename3(const QString &file3) { setDashFilename(2, file3); }
+    Q_INVOKABLE void readdashsetup1() { readDashSetup(0); }
+    Q_INVOKABLE void readdashsetup2() { readDashSetup(1); }
+    Q_INVOKABLE void readdashsetup3() { readDashSetup(2); }
+    Q_INVOKABLE void setrpm(const int &dash1, const int &dash2, const int &dash3);
+
     Q_INVOKABLE void checkifraspberrypi();
     Q_INVOKABLE void readavailabledashfiles();
     Q_INVOKABLE void readavailablebackrounds();
-    Q_INVOKABLE void setrpm(const int &dash1, const int &dash2, const int &dash3);
     Q_INVOKABLE void readMaindashsetup();
-    Q_INVOKABLE void readdashsetup3();
-    Q_INVOKABLE void readdashsetup2();
-    Q_INVOKABLE void readdashsetup1();
     Q_INVOKABLE void setSreenbrightness(const int &brightness);
     Q_INVOKABLE void setSpeedUnits(const int &units1);
     Q_INVOKABLE void setUnits(const int &units);

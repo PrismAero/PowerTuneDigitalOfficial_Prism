@@ -33,7 +33,7 @@ Item {
 
 
     Connections{
-        target: Dashboard
+        target: UI
         function onDraggableChanged() { togglemousearea(); }
     }
 

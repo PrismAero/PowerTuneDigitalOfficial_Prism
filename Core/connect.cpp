@@ -48,6 +48,7 @@
 #include <QTextStream>
 #include <QTime>
 #include <QTimer>
+#include <QVector>
 
 int ecu;      // 0=apex, 1=adaptronic;2= OBD; 3= Dicktator ECU
 int logging;  // 0 Logging off , 1 Logging to file
@@ -57,9 +58,7 @@ int rpmcanbaseadress;
 QByteArray checksumhex;
 QByteArray recvchecksumhex;
 QString selectedPort;
-QString dashfilename1;
-QString dashfilename2;
-QString dashfilename3;
+QVector<QString> dashfilenames(3);
 
 Connect::Connect(QObject *parent)
     : QObject(parent),
@@ -257,23 +256,25 @@ void Connect::saveDashtoFile(const QString &filename, const QString &dashstring)
     }
     file.close();
 }
-void Connect::setfilename1(const QString &file1)
+void Connect::setDashFilename(int index, const QString &filename)
 {
-    dashfilename1 = file1;
+    if (index < 0)
+        return;
+    while (dashfilenames.size() <= index)
+        dashfilenames.append(QString());
+    dashfilenames[index] = filename;
 }
-void Connect::setfilename2(const QString &file2)
+
+void Connect::setRpmStyle(int index, int style)
 {
-    dashfilename2 = file2;
+    m_uiState->setRpmStyle(index, style);
 }
-void Connect::setfilename3(const QString &file3)
-{
-    dashfilename3 = file3;
-}
+
 void Connect::setrpm(const int &dash1, const int &dash2, const int &dash3)
 {
-    m_uiState->setrpmstyle1(dash1);
-    m_uiState->setrpmstyle2(dash2);
-    m_uiState->setrpmstyle3(dash3);
+    m_uiState->setRpmStyle(0, dash1);
+    m_uiState->setRpmStyle(1, dash2);
+    m_uiState->setRpmStyle(2, dash3);
 }
 void Connect::checkifraspberrypi()
 {
@@ -349,80 +350,24 @@ void Connect::readMaindashsetup()
         inputFile.close();
     }
 }
-void Connect::readdashsetup3()
+void Connect::readDashSetup(int index)
 {
-    // QString path = dashfilename1;//for Windows
-    QString path = "/home/pi/UserDashboards/" + dashfilename3;
+    if (index < 0 || index >= dashfilenames.size())
+        return;
+
+    const QString &filename = dashfilenames.at(index);
+    if (filename.isEmpty())
+        return;
+
+    QString path = "/home/pi/UserDashboards/" + filename;
     QFile inputFile(path);
-    // QStringList list;
     if (inputFile.open(QIODevice::ReadOnly)) {
         QTextStream in(&inputFile);
         while (!in.atEnd()) {
             QString line = in.readLine();
-            QStringList list;
-            // if (line.contains("gauge")){
-            list = line.split(QRegularExpression("\\,"));
-            //}
-            /*
-            else
-            {
-             line.prepend("Square gauge,");
-             list = line.split(QRegularExpression("\\,"));
-            }*/
+            QStringList list = line.split(QRegularExpression("\\,"));
             list.removeAll(QString(""));
-            m_uiState->setdashsetup3(list);
-        }
-        inputFile.close();
-    }
-}
-void Connect::readdashsetup2()
-{
-    // QString path = dashfilename1;//for Windows
-    QString path = "/home/pi/UserDashboards/" + dashfilename2;
-    QFile inputFile(path);
-    // QStringList list;
-    if (inputFile.open(QIODevice::ReadOnly)) {
-        QTextStream in(&inputFile);
-        while (!in.atEnd()) {
-            QString line = in.readLine();
-            QStringList list;
-            // if (line.contains("gauge")){
-            list = line.split(QRegularExpression("\\,"));
-            //}
-            /*
-            else
-            {
-             line.prepend("Square gauge,");
-             list = line.split(QRegularExpression("\\,"));
-            }*/
-            list.removeAll(QString(""));
-            m_uiState->setdashsetup2(list);
-        }
-        inputFile.close();
-    }
-}
-void Connect::readdashsetup1()
-{
-    // QString path = dashfilename1;//for Windows
-    QString path = "/home/pi/UserDashboards/" + dashfilename1;
-    QFile inputFile(path);
-    // QStringList list;
-    if (inputFile.open(QIODevice::ReadOnly)) {
-        QTextStream in(&inputFile);
-        while (!in.atEnd()) {
-            QString line = in.readLine();
-            QStringList list;
-            // if (line.contains("gauge")){
-            list = line.split(QRegularExpression("\\,"));
-            //}
-            /*
-            else
-            {
-             line.prepend("Square gauge,");
-             list = line.split(QRegularExpression("\\,"));
-            }*/
-            list.removeAll(QString(""));
-            m_uiState->setdashsetup1(list);
+            m_uiState->setDashSetup(index, list);
         }
         inputFile.close();
     }

@@ -93,12 +93,13 @@ Item {
 
     ////////Readout Gauge Elements from file and create dynamically ( only needed for importing a dash)
     Connections{
-        target: Dashboard
+        target: UI
 
         function onBackroundpicturesChanged() { updatppiclist(); }
         function onDashSetupChanged(index)
         {
             if (index !== dashIndex) return;
+            dashvalue.model = UI.dashSetup(dashIndex);
             if (dashvalue.textAt(1) !== "") {
                 var csvLine = "";
                 for (var k = 0; k < dashvalue.count; k++) {

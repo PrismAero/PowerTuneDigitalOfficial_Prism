@@ -74,7 +74,7 @@ Item {
     }
 
     Connections{
-        target: Dashboard
+        target: UI
         function onMaindashsetupChanged() {
             if (dashvalue.textAt(8) === "true") {val1 = true};
             if (dashvalue.textAt(8) === "false") {val1 = false};
