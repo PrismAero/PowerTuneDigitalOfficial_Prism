@@ -10,7 +10,7 @@ import PowerTune.Utils 1.0
 
 Item {
     id: mainwindow
-    required property int dashIndex
+    property int dashIndex: 0
     anchors.fill: parent
     property string datastore: ""
     property string saveDashtofilestring : ""

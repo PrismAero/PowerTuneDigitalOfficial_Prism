@@ -10,8 +10,24 @@ QtObject {
     property string ecuFilter: ""
     readonly property ListModel filteredSources: ListModel {}
 
+    readonly property var _keys: [
+        "titlename", "sourcename", "supportedECUs",
+        "decimalpoints", "decimalpoints2", "maxvalue",
+        "defaultsymbol", "stepsize", "divisor", "supportedECU"
+    ]
+
     onSearchTextChanged: filter()
     onEcuFilterChanged: filter()
+
+    function _safeItem(src) {
+        var obj = {};
+        for (var k = 0; k < _keys.length; k++) {
+            var key = _keys[k];
+            var val = src[key];
+            obj[key] = (val !== undefined) ? val : "";
+        }
+        return obj;
+    }
 
     function filter() {
         filteredSources.clear();
@@ -25,7 +41,7 @@ QtObject {
                 || (item.supportedECUs !== undefined
                     && item.supportedECUs.indexOf(ecuFilter) >= 0);
             if (matchesSearch && matchesEcu)
-                filteredSources.append(item);
+                filteredSources.append(_safeItem(item));
         }
     }
 
