@@ -78,8 +78,9 @@ Item {
 
         Item {
             id: majorTickmarkContainer
+            property int tickIndex: index
             property real tickmarkStepSize: style && style.tickmarkStepSize ? style.tickmarkStepSize : 10
-            property real tickValue: root.minimumValue + index * tickmarkStepSize
+            property real tickValue: root.minimumValue + tickIndex * tickmarkStepSize
             property real tickAngle: valueToAngle(tickValue)
             property real inset: style && style.tickmarkInset !== undefined ? style.tickmarkInset : 0
 
@@ -91,13 +92,12 @@ Item {
                 id: majorTickmarkLoader
                 sourceComponent: style && style.tickmark ? style.tickmark : defaultTickmark
                 
-                // * Position at top center, then rotate
                 x: parent.width / 2 - (item ? item.implicitWidth / 2 : 2)
                 y: majorTickmarkContainer.inset
 
                 property var styleData: QtObject {
                     readonly property real value: majorTickmarkContainer.tickValue
-                    readonly property int index: majorTickmarkContainer.index
+                    readonly property int index: majorTickmarkContainer.tickIndex
                 }
 
                 transform: Rotation {
@@ -122,10 +122,11 @@ Item {
 
         Item {
             id: minorTickmarkContainer
+            property int tickIndex: index
             property real tickmarkStepSize: style && style.tickmarkStepSize ? style.tickmarkStepSize : 10
             property int minorTickmarkCount: style && style.minorTickmarkCount !== undefined ? style.minorTickmarkCount : 4
-            property int majorIndex: Math.floor(index / minorTickmarkCount)
-            property int minorIndex: index % minorTickmarkCount
+            property int majorIndex: Math.floor(tickIndex / minorTickmarkCount)
+            property int minorIndex: tickIndex % minorTickmarkCount
             property real minorStep: tickmarkStepSize / (minorTickmarkCount + 1)
             property real tickValue: root.minimumValue + majorIndex * tickmarkStepSize + (minorIndex + 1) * minorStep
             property real tickAngle: valueToAngle(tickValue)
@@ -144,7 +145,7 @@ Item {
 
                 property var styleData: QtObject {
                     readonly property real value: minorTickmarkContainer.tickValue
-                    readonly property int index: minorTickmarkContainer.index
+                    readonly property int index: minorTickmarkContainer.tickIndex
                 }
 
                 transform: Rotation {
@@ -167,8 +168,9 @@ Item {
 
         Loader {
             id: labelLoader
+            property int tickIndex: index
             property real labelStepSize: style && style.labelStepSize ? style.labelStepSize : (style && style.tickmarkStepSize ? style.tickmarkStepSize : 10)
-            property real labelValue: root.minimumValue + index * labelStepSize
+            property real labelValue: root.minimumValue + tickIndex * labelStepSize
             property real labelAngle: valueToAngle(labelValue)
             property real labelInset: style && style.labelInset !== undefined ? style.labelInset : root.outerRadius * 0.25
             property real labelRadius: root.outerRadius - labelInset
@@ -177,7 +179,7 @@ Item {
 
             property var styleData: QtObject {
                 readonly property real value: labelLoader.labelValue
-                readonly property int index: labelLoader.index
+                readonly property int index: labelLoader.tickIndex
             }
 
             x: root.width / 2 + labelRadius * Math.sin(degToRad(labelAngle)) - (item ? item.width / 2 : 0)

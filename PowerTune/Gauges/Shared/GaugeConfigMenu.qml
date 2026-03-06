@@ -12,7 +12,8 @@ Rectangle {
 
     property Item target
     property int maxHeight: 600
-    property list<QtObject> sections
+
+    default property alias content: contentColumn.data
 
     signal deleteRequested
     signal closed
@@ -38,19 +39,6 @@ Rectangle {
             id: contentColumn
             width: flickable.width
             spacing: 8
-
-            Repeater {
-                model: root.sections
-                delegate: Loader {
-                    Layout.fillWidth: true
-                    sourceComponent: modelData.component
-                    active: modelData.active !== undefined ? modelData.active : true
-                    onLoaded: {
-                        if (item && root.target)
-                            item.target = root.target;
-                    }
-                }
-            }
 
             RowLayout {
                 Layout.fillWidth: true

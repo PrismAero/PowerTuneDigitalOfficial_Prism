@@ -69,7 +69,7 @@ Rectangle {
 
     Accessible.role: Accessible.Indicator
     Accessible.name: "Gear"
-    Accessible.value: root._gearText
+    Accessible.description: root._gearText
 
     GaugeConfigMenu {
         id: configMenu

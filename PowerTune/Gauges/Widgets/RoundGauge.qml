@@ -295,67 +295,28 @@ Rectangle{
                     }
                 }
 
-                ShaderEffect {
+                Shape {
                     id: needleTrail
                     anchors.fill: parent
-                    visible: true
+                    visible: trailSweep > 0
 
-                    property real startAngleRad: (startangle - 90) * Math.PI / 180
-                    property real sweepAngleRad: (roundGauge.valueToAngle(gauge.value) - startangle) * Math.PI / 180
-                    property color outerColor: outerneedlecolortrail || "transparent"
-                    property color middleColor: middleneedlecortrail || "transparent"
-                    property color lowerColor: lowerneedlecolortrail || "transparent"
-                    property color innerColor: innerneedlecolortrail || "transparent"
-                    property real trailHighBorder: trailhighboarder
-                    property real trailMidBorder: trailmidboarder
-                    property real trailLowBorder: traillowboarder
-                    property real trailBottomBorder: trailbottomboarder
+                    property real trailSweep: roundGauge.valueToAngle(gauge.value) - startangle
 
-                    fragmentShader: "
-                        varying highp vec2 qt_TexCoord0;
-                        uniform lowp float qt_Opacity;
-                        uniform highp float startAngleRad;
-                        uniform highp float sweepAngleRad;
-                        uniform highp vec4 outerColor;
-                        uniform highp vec4 middleColor;
-                        uniform highp vec4 lowerColor;
-                        uniform highp vec4 innerColor;
-                        uniform highp float trailHighBorder;
-                        uniform highp float trailMidBorder;
-                        uniform highp float trailLowBorder;
-                        uniform highp float trailBottomBorder;
+                    ShapePath {
+                        strokeWidth: roundGauge.outerRadius * (trailhighboarder - trailbottomboarder)
+                        strokeColor: outerneedlecolortrail || "transparent"
+                        fillColor: "transparent"
+                        capStyle: ShapePath.FlatCap
 
-                        void main() {
-                            highp vec2 uv = qt_TexCoord0 - vec2(0.5);
-                            highp float dist = length(uv);
-                            highp float angle = atan(uv.x, -uv.y);
-                            if (angle < 0.0) angle += 6.283185307;
-
-                            highp float normStart = startAngleRad;
-                            if (normStart < 0.0) normStart += 6.283185307;
-
-                            highp float relAngle = angle - normStart;
-                            if (relAngle < 0.0) relAngle += 6.283185307;
-
-                            if (dist <= 0.5 && dist >= trailBottomBorder && relAngle <= sweepAngleRad && sweepAngleRad > 0.0) {
-                                highp float t = dist;
-                                highp vec4 color;
-                                if (t < trailBottomBorder)
-                                    color = vec4(0.0);
-                                else if (t < trailLowBorder)
-                                    color = mix(innerColor, lowerColor, (t - trailBottomBorder) / (trailLowBorder - trailBottomBorder));
-                                else if (t < trailMidBorder)
-                                    color = mix(lowerColor, middleColor, (t - trailLowBorder) / (trailMidBorder - trailLowBorder));
-                                else if (t < trailHighBorder)
-                                    color = mix(middleColor, outerColor, (t - trailMidBorder) / (trailHighBorder - trailMidBorder));
-                                else
-                                    color = outerColor;
-                                gl_FragColor = color * qt_Opacity;
-                            } else {
-                                gl_FragColor = vec4(0.0);
-                            }
+                        PathAngleArc {
+                            centerX: needleTrail.width / 2
+                            centerY: needleTrail.height / 2
+                            radiusX: roundGauge.outerRadius * ((trailhighboarder + trailbottomboarder) / 2)
+                            radiusY: radiusX
+                            startAngle: startangle - 90
+                            sweepAngle: needleTrail.trailSweep
                         }
-                    "
+                    }
                 }
             }
 

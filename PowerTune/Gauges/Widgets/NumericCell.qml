@@ -106,7 +106,7 @@ Rectangle {
 
     Accessible.role: Accessible.Indicator
     Accessible.name: root.labeltext || root.information
-    Accessible.value: root.mainvalue.toFixed(root.decimalpoints)
+    Accessible.description: root.mainvalue.toFixed(root.decimalpoints)
 
     GaugeConfigMenu {
         id: configMenu

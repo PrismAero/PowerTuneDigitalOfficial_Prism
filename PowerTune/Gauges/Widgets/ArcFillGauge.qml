@@ -87,6 +87,8 @@ Item {
             fillColor: "transparent"
             capStyle: ShapePath.RoundCap
 
+            Behavior on strokeColor { ColorAnimation { duration: 150 } }
+
             PathAngleArc {
                 centerX: fillShape.width / 2
                 centerY: fillShape.height / 2
@@ -96,8 +98,6 @@ Item {
                 sweepAngle: root._valueSweep
             }
         }
-
-        Behavior on ShapePath.strokeColor { ColorAnimation { duration: 150 } }
     }
 
     Column {
@@ -154,7 +154,7 @@ Item {
 
     Accessible.role: Accessible.Indicator
     Accessible.name: root.labeltext || root.information
-    Accessible.value: root.mainvalue.toFixed(root.decimalpoints)
+    Accessible.description: root.mainvalue.toFixed(root.decimalpoints)
 
     GaugeConfigMenu {
         id: configMenu
