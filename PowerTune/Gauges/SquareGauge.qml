@@ -1,8 +1,5 @@
 import QtQuick 2.15
-import Qt5Compat.GraphicalEffects
 import QtQuick.Controls 2.15
-import PowerTune.Gauges 1.0
-import PowerTune.Utils 1.0
 import PowerTune.Gauges 1.0
 import PowerTune.Utils 1.0
 import Qt.labs.settings 1.0
@@ -86,7 +83,7 @@ Rectangle {
     // }
 
     Drag.active: true
-    DatasourcesList{id: powertunedatasource}
+
 /*
     //Intro
     SequentialAnimation {
@@ -752,11 +749,11 @@ Rectangle {
             id: cbxMain
             visible: false
             textRole: "titlename"
-            model: powertunedatasource
+            model: DatasourceService.allSources
             font.pixelSize: 12
             Component.onCompleted: {
                 for(var i = 0; i < cbxMain.model.count; ++i)
-                    if (powertunedatasource.get(i).sourcename === mainvaluename)
+                    if (DatasourceService.allSources.get(i).sourcename === mainvaluename)
                         cbxMain.currentIndex = i
 
                 if(gauge.width > 250){
@@ -785,9 +782,9 @@ Rectangle {
             onClicked: {
                 cbxMain.visible = false;
                 btnMainSrc.visible = false;
-                mainvaluename = powertunedatasource.get(cbxMain.currentIndex).sourcename;
+                mainvaluename = DatasourceService.allSources.get(cbxMain.currentIndex).sourcename;
                 toggledecimal();
-                //mainvalue = Qt.binding(function(){return Dashboard[powertunedatasource.get(cbxMain.currentIndex).sourcename]});
+                //mainvalue = Qt.binding(function(){return Dashboard[DatasourceService.allSources.get(cbxMain.currentIndex).sourcename]});
             }
         }
 
@@ -801,11 +798,11 @@ Rectangle {
             id: cbxSecondary
             visible: false
             textRole: "titlename"
-            model: powertunedatasource
+            model: DatasourceService.allSources
             font.pixelSize: 12
             Component.onCompleted: {
                 for(var i = 0; i < cbxSecondary.model.count; ++i)
-                    if (powertunedatasource.get(i).sourcename === secvaluename)cbxSecondary.currentIndex = i
+                    if (DatasourceService.allSources.get(i).sourcename === secvaluename)cbxSecondary.currentIndex = i
 
                 if(gauge.width > 250){
                     cbxSecondary.width = 240
@@ -833,9 +830,9 @@ Rectangle {
             onClicked: {
                 cbxSecondary.visible = false;
                 btnSecSrc.visible = false;
-                secvaluename = powertunedatasource.get(cbxSecondary.currentIndex).sourcename;
+                secvaluename = DatasourceService.allSources.get(cbxSecondary.currentIndex).sourcename;
                 toggledecimal2();
-                //secvalue = Qt.binding(function(){return Dashboard[powertunedatasource.get(cbxSecondary.currentIndex).sourcename]});
+                //secvalue = Qt.binding(function(){return Dashboard[DatasourceService.allSources.get(cbxSecondary.currentIndex).sourcename]});
             }
         }
     }

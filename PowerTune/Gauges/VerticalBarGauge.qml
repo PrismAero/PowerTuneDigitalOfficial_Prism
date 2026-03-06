@@ -1,8 +1,5 @@
 import QtQuick 2.15
-import Qt5Compat.GraphicalEffects
 import QtQuick.Controls 2.15
-import PowerTune.Gauges 1.0
-import PowerTune.Utils 1.0
 import PowerTune.Gauges 1.0
 import PowerTune.Utils 1.0
 import Qt.labs.settings 1.0

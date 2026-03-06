@@ -31,7 +31,7 @@ Item {
         checkdatasource();
     }
 
-    DatasourcesList{id: powertunedatasource}
+
     Connections{
         target: Dashboard
         function onDraggableChanged() { togglemousearea(); }
@@ -46,7 +46,7 @@ Item {
     //         changesize.visible = true;
 
     //         for(var i = 0; i < colorselect.model.count; ++i) if (colorselect.textAt(i) === textcolor)colorselect.currentIndex = i ;
-    //         for(var j = 0; j < cbx_sources.model.count; ++j) if (powertunedatasource.get(j).sourcename === datasourcename)cbx_sources.currentIndex = j;
+    //         for(var j = 0; j < cbx_sources.model.count; ++j) if (DatasourceService.allSources.get(j).sourcename === datasourcename)cbx_sources.currentIndex = j;
     //     }
     // }
 
@@ -71,7 +71,7 @@ Item {
                 changesize.visible = true;
 
                 for(var i = 0; i < colorselect.model.count; ++i) if (colorselect.textAt(i) === textcolor)colorselect.currentIndex = i ;
-                for(var j = 0; j < cbx_sources.model.count; ++j) if (powertunedatasource.get(j).sourcename === datasourcename)cbx_sources.currentIndex = j;
+                for(var j = 0; j < cbx_sources.model.count; ++j) if (DatasourceService.allSources.get(j).sourcename === datasourcename)cbx_sources.currentIndex = j;
             }
         }
     }
@@ -236,7 +236,7 @@ Item {
                 textRole: "titlename"
                 width: 200
                 height: 40
-                model: powertunedatasource
+                model: DatasourceService.allSources
                 currentIndex: 1
                 delegate: ItemDelegate {
                     width: cbx_sources.width
@@ -318,8 +318,8 @@ Item {
                 width: parent.width
                 font.pixelSize: 15
                 onClicked: {
-                    datasourcename = powertunedatasource.get(cbx_sources.currentIndex).sourcename;
-                    decimalpoints = powertunedatasource.get(cbx_sources.currentIndex).decimalpoints;
+                    datasourcename = DatasourceService.allSources.get(cbx_sources.currentIndex).sourcename;
+                    decimalpoints = DatasourceService.allSources.get(cbx_sources.currentIndex).decimalpoints;
                     checkdatasource();
                 }
             }

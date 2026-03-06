@@ -23,7 +23,7 @@ Item {
     property real lastTouchTime: 0
     
     Drag.active: true
-    DatasourcesList{id: powertunedatasource}
+
     Component.onCompleted: {togglemousearea();
                             bind();
                             }
@@ -247,11 +247,11 @@ Item {
             ComboBox {
                 id: cbxMain
                 textRole: "titlename"
-                model: powertunedatasource
+                model: DatasourceService.allSources
                 width: 800 * 0.175 //140
                 height: 480 * 0.083 //40
                 font.pixelSize: 800 * (12 / 800)
-                Component.onCompleted: {for(var i = 0; i < cbxMain.model.count; ++i) if (powertunedatasource.get(i).sourcename === mainvaluename)cbxMain.currentIndex = i,bind()}
+                Component.onCompleted: {for(var i = 0; i < cbxMain.model.count; ++i) if (DatasourceService.allSources.get(i).sourcename === mainvaluename)cbxMain.currentIndex = i,bind()}
                 onCurrentIndexChanged: bind();                
                 delegate: ItemDelegate{
                     width: cbxMain.width
@@ -301,7 +301,7 @@ Item {
                 onClicked: {
                     triggervalue = triggeronvalue.text;
                     triggeroffvalue = triggerofffvalue.text;
-                    mainvaluename = powertunedatasource.get(cbxMain.currentIndex).sourcename;
+                    mainvaluename = DatasourceService.allSources.get(cbxMain.currentIndex).sourcename;
                     changesize.visible = false;
             }
                 }

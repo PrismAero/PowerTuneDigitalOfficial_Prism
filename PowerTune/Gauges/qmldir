@@ -64,9 +64,9 @@ StatePicture 1.0 StatePicture.qml
 StateGIF 1.0 StateGIF.qml
 MyTextLabel 1.0 MyTextLabel.qml
 ColorList 1.0 ColorList.qml
-ColorpickerCombobox 1.0 ColorpickerCombobox.qml
 DatasourcesList 1.0 DatasourcesList.qml
-Datasources 1.0 Datasources.qml
+singleton DatasourceService 1.0 DatasourceService.qml
+singleton GaugeFactory 1.0 GaugeFactory.qml
 
 # Warning system
 Warning 1.0 Warning.qml

@@ -5,13 +5,6 @@ import QtQml.Models 2.3
 import Qt.labs.settings 1.0
 import QtQuick.Dialogs
 import "../Gauges"
-import "./createRoundGauge.js" as CreateRoundgaugeScript
-import "./createsquaregaugeUserDash.js" as CreateSquareGaugeScript
-import "./createverticalbargauge.js" as CreateBargaugeScript
-import "./createText.js" as CreateTextScript
-import "./createPicture.js" as CreatePictureScript
-import "./createStatePicture.js" as CreateStatePictureScript
-import "./createStateGIF.js" as CreateStateGIFScript
 import PowerTune.Gauges 1.0
 import PowerTune.Utils 1.0
 
@@ -76,7 +69,7 @@ Item {
         }
     }
 
-    DatasourcesList{id: powertunedatasource}
+
 
     Component.onCompleted: {
         if (datastore3) {
@@ -104,45 +97,13 @@ Item {
         function onDashsetup3Changed()
         {
             if (dashvalue.textAt(1) !== "") {
-
-              //  console.log("new item " +dashvalue.textAt(0) );
-
-
-                if (dashvalue.textAt(0) === "Bar gauge")
-                {
-                    CreateBargaugeScript.createVerticalGauge(dashvalue.textAt(1),dashvalue.textAt(2),dashvalue.textAt(3),dashvalue.textAt(4),dashvalue.textAt(5),dashvalue.textAt(6),dashvalue.textAt(7),dashvalue.textAt(8),dashvalue.textAt(9),dashvalue.textAt(10),dashvalue.textAt(11));
+                var csvLine = "";
+                for (var k = 0; k < dashvalue.count; k++) {
+                    if (k > 0) csvLine += ",";
+                    csvLine += dashvalue.textAt(k);
                 }
-                if (dashvalue.textAt(0) === "Round gauge")
-                {
-                    CreateRoundgaugeScript.createRoundGauge(dashvalue.textAt(1),dashvalue.textAt(2),dashvalue.textAt(3),dashvalue.textAt(4),dashvalue.textAt(5),dashvalue.textAt(6),dashvalue.textAt(7),dashvalue.textAt(8),dashvalue.textAt(9),dashvalue.textAt(10),dashvalue.textAt(11),dashvalue.textAt(12),dashvalue.textAt(13),dashvalue.textAt(14),dashvalue.textAt(15),dashvalue.textAt(16),dashvalue.textAt(17),dashvalue.textAt(18),dashvalue.textAt(19),dashvalue.textAt(20),dashvalue.textAt(21),dashvalue.textAt(22),dashvalue.textAt(23),dashvalue.textAt(24),dashvalue.textAt(25),dashvalue.textAt(26),dashvalue.textAt(27),dashvalue.textAt(28),dashvalue.textAt(29),dashvalue.textAt(30),dashvalue.textAt(31),dashvalue.textAt(32),dashvalue.textAt(33),dashvalue.textAt(34),dashvalue.textAt(35),dashvalue.textAt(36),dashvalue.textAt(37),dashvalue.textAt(38),dashvalue.textAt(39),dashvalue.textAt(40),dashvalue.textAt(41),dashvalue.textAt(42),dashvalue.textAt(43),dashvalue.textAt(44),dashvalue.textAt(45),dashvalue.textAt(46),dashvalue.textAt(47),dashvalue.textAt(48),(dashvalue.textAt(49).toLowerCase() === 'true' ? true : false),(dashvalue.textAt(50).toLowerCase() === 'true' ? true : false),(dashvalue.textAt(51).toLowerCase() === 'true' ? true : false),dashvalue.textAt(52),dashvalue.textAt(53),dashvalue.textAt(54),dashvalue.textAt(55),(dashvalue.textAt(56).toLowerCase() === 'true' ? true : false),dashvalue.textAt(57),dashvalue.textAt(58),dashvalue.textAt(59),dashvalue.textAt(60),dashvalue.textAt(61),dashvalue.textAt(62),dashvalue.textAt(63),dashvalue.textAt(64),dashvalue.textAt(65),(dashvalue.textAt(66).toLowerCase() === 'true' ? true : false));
-                }
-
-                if (dashvalue.textAt(0) === "Square gauge")
-                {
-                    CreateSquareGaugeScript.createSquareGauge(dashvalue.textAt(1),dashvalue.textAt(2),dashvalue.textAt(3),dashvalue.textAt(4),dashvalue.textAt(5),dashvalue.textAt(6),dashvalue.textAt(7),dashvalue.textAt(8),(dashvalue.textAt(9).toLowerCase() === 'true' ? true : false),(dashvalue.textAt(10).toLowerCase() === 'true' ? true : false),(dashvalue.textAt(11).toLowerCase() === 'true' ? true : false),dashvalue.textAt(12),dashvalue.textAt(13),dashvalue.textAt(14),dashvalue.textAt(15),dashvalue.textAt(16),dashvalue.textAt(17),dashvalue.textAt(18),dashvalue.textAt(19),dashvalue.textAt(20),dashvalue.textAt(21),dashvalue.textAt(22),dashvalue.textAt(23),dashvalue.textAt(24),dashvalue.textAt(25),dashvalue.textAt(26),dashvalue.textAt(27),dashvalue.textAt(28));
-                }
-
-                if (dashvalue.textAt(0) === "gauge image")
-                {
-                    CreatePictureScript.createPicture(dashvalue.textAt(1),dashvalue.textAt(2),dashvalue.textAt(3),dashvalue.textAt(4));
-                }
-                if (dashvalue.textAt(0) === "Text label gauge")
-                {
-                    CreateTextScript.createText(dashvalue.textAt(1),dashvalue.textAt(2),dashvalue.textAt(3),dashvalue.textAt(4),dashvalue.textAt(5),dashvalue.textAt(6),dashvalue.textAt(7),(dashvalue.textAt(8).toLowerCase() === 'true' ? true : false),dashvalue.textAt(9),dashvalue.textAt(10),dashvalue.textAt(11));
-                }
-                if (dashvalue.textAt(0) === "State gauge")
-                {
-                    // //console.log("Create image")
-                    CreateStatePictureScript.createPicture(dashvalue.textAt(1),dashvalue.textAt(2),dashvalue.textAt(3),dashvalue.textAt(4),dashvalue.textAt(5),dashvalue.textAt(6),dashvalue.textAt(7));
-                }
-                if (dashvalue.textAt(0) === "State GIF")
-                {
-                    // //console.log("Create image")
-                    CreateStateGIFScript.createPicture(dashvalue.textAt(1),dashvalue.textAt(2),dashvalue.textAt(3),dashvalue.textAt(4),dashvalue.textAt(5),dashvalue.textAt(6),dashvalue.textAt(7),dashvalue.textAt(8));
-                }
-
+                GaugeFactory.deserializeCSVLine(csvLine, userDash);
             }
-
         }
 
     }
@@ -452,8 +413,8 @@ Item {
 
             // Filter the model based on the condition
             Component.onCompleted: {
-                powertunedatasource.append({supportedECUs: "Microtech"}); // Add a dummy element to trigger filtering
-                powertunedatasource.remove(powertunedatasource.count - 1); // Remove the dummy element
+                DatasourceService.allSources.append({supportedECUs: "Microtech"}); // Add a dummy element to trigger filtering
+                DatasourceService.allSources.remove(DatasourceService.allSources.count - 1); // Remove the dummy element
             }
 
             // Filter and sort the model alphabetically
@@ -465,8 +426,8 @@ Item {
                 // Create an array to store the filtered elements
                 var filteredElements = [];
 
-                for (var i = 0; i < powertunedatasource.count; ++i) {
-                    var element = powertunedatasource.get(i);
+                for (var i = 0; i < DatasourceService.allSources.count; ++i) {
+                    var element = DatasourceService.allSources.get(i);
                     if (element.supportedECUs !== undefined && element.supportedECUs !== null) {
                         // Remove trailing commas and split the string into an array
                         var ecuList = element.supportedECUs.replace(/,+$/, '').split(',');
@@ -500,7 +461,7 @@ Item {
             textRole: "titlename"
             width: parent.width
             height: parent.height * 0.083
-            model: powertunedatasource
+            model: DatasourceService.allSources
             delegate: ItemDelegate {
                 width: cbx_sources.width
                 text: cbx_sources.textRole ? (Array.isArray(cbx_sources.model) ? modelData[cbx_sources.textRole] : model[cbx_sources.textRole]) : modelData
@@ -556,8 +517,21 @@ Item {
                 text:  Translator.translate("Square", Settings.language)
                 font.pixelSize: mainwindow.width * 0.015
                 onClicked: {
-                    console.log(powertunedatasource.get(cbx_sources.currentIndex).decimalpoints);
-                    CreateSquareGaugeScript.createSquareGauge(266,119,0,240,248,powertunedatasource.get(cbx_sources.currentIndex).decimalpoints,powertunedatasource.get(cbx_sources.currentIndex).defaultsymbol,powertunedatasource.get(cbx_sources.currentIndex).titlename,false,true,false,"Dashboard",powertunedatasource.get(cbx_sources.currentIndex).sourcename,powertunedatasource.get(cbx_sources.currentIndex).sourcename,10000,-20000,"lightsteelblue","black","lightsteelblue","white","white","blue",25,40,powertunedatasource.get(cbx_sources.currentIndex).decimalpoints2,"Lato","Lato");
+                    var ds = DatasourceService.allSources.get(cbx_sources.currentIndex);
+                    GaugeFactory.createGauge("Square gauge", userDash, {
+                        "width": 266, "height": 119, "x": 0, "y": 240,
+                        "maxvalue": 248, "decimalpoints": ds.decimalpoints,
+                        "mainunit": ds.defaultsymbol, "title": ds.titlename,
+                        "vertgaugevisible": false, "horigaugevisible": true,
+                        "secvaluevisible": false, "mainvaluename": ds.sourcename,
+                        "secvaluename": ds.sourcename, "warnvaluehigh": 10000,
+                        "warnvaluelow": -20000, "framecolor": "lightsteelblue",
+                        "resetbackroundcolor": "black", "resettitlecolor": "lightsteelblue",
+                        "titletextcolor": "white", "textcolor": "white",
+                        "barcolor": "blue", "titlefontsize": 25, "mainfontsize": 40,
+                        "decimalpoints2": ds.decimalpoints2,
+                        "textFonttype": "Lato", "valueFonttype": "Lato"
+                    });
                     squaregaugemenu.visible = false;
                     selectcolor.visible =false;
                     UI.draggable = 0;
@@ -570,7 +544,15 @@ Item {
                 text: Translator.translate("Bar", Settings.language)
                 font.pixelSize: mainwindow.width * 0.015
                 onClicked: {
-                    CreateBargaugeScript.createVerticalGauge(320,80,10,0,0,8000,powertunedatasource.get(cbx_sources.currentIndex).decimalpoints,powertunedatasource.get(cbx_sources.currentIndex).titlename,powertunedatasource.get(cbx_sources.currentIndex).sourcename,1000,0);
+                    var dsBar = DatasourceService.allSources.get(cbx_sources.currentIndex);
+                    GaugeFactory.createGauge("Bar gauge", userDash, {
+                        "width": 320, "height": 80, "x": 10, "y": 0,
+                        "minvalue": 0, "maxvalue": 8000,
+                        "decimalpoints": dsBar.decimalpoints,
+                        "gaugename": dsBar.titlename,
+                        "mainvaluename": dsBar.sourcename,
+                        "warnvaluehigh": 1000, "warnvaluelow": 0
+                    });
                     squaregaugemenu.visible = false;
                     selectcolor.visible =false;
                     UI.draggable = 0;
@@ -583,7 +565,51 @@ Item {
                 text: Translator.translate("Round", Settings.language)
                 font.pixelSize: mainwindow.width * 0.015
                 onClicked: {
-                    CreateRoundgaugeScript.createRoundGauge(400,20,20,powertunedatasource.get(cbx_sources.currentIndex).sourcename,powertunedatasource.get(cbx_sources.currentIndex).maxvalue,0,powertunedatasource.get(cbx_sources.currentIndex).maxvalue,-1000,-145,90,powertunedatasource.get(cbx_sources.currentIndex).maxvalue,powertunedatasource.get(cbx_sources.currentIndex).divisor,powertunedatasource.get(cbx_sources.currentIndex).stepsize,1,powertunedatasource.get(cbx_sources.currentIndex).stepsize,powertunedatasource.get(cbx_sources.currentIndex).decimalpoints,2,38,3,3,8,3,15,5,0.50,0.40,0.33,0.25,20,5,93,8,0,0,"red","darkred","aliceblue","red","grey","darkgrey","darkgrey","black","grey","black","dodgerblue","deepskyblue","lightskyblue","transparent",true,true,true,"Lato",30,50,10,false,"Lato",powertunedatasource.get(cbx_sources.currentIndex).titlename,"red",0,0,0,0,0,0,"false");
+                    var dsRound = DatasourceService.allSources.get(cbx_sources.currentIndex);
+                    GaugeFactory.createGauge("Round gauge", userDash, {
+                        "width": 400, "height": 400, "x": 20, "y": 20,
+                        "mainvaluename": dsRound.sourcename,
+                        "maxvalue": dsRound.maxvalue, "minvalue": 0,
+                        "warnvaluehigh": dsRound.maxvalue, "warnvaluelow": -1000,
+                        "startangle": -145, "endangle": 90,
+                        "redareastart": dsRound.maxvalue,
+                        "divider": dsRound.divisor,
+                        "tickmarksteps": dsRound.stepsize,
+                        "minortickmarksteps": 1,
+                        "setlabelsteps": dsRound.stepsize,
+                        "decimalpoints": dsRound.decimalpoints,
+                        "needleinset": 2, "setlabelinset": 38,
+                        "setminortickmarkinset": 3, "setmajortickmarkinset": 3,
+                        "minortickmarkheight": 8, "minortickmarkwidth": 3,
+                        "tickmarkheight": 15, "tickmarkwidth": 5,
+                        "trailhighboarder": 0.50, "trailmidboarder": 0.40,
+                        "traillowboarder": 0.33, "trailbottomboarder": 0.25,
+                        "labelfontsize": 20, "needleTipWidth": 5,
+                        "needleLength": 93, "needleBaseWidth": 8,
+                        "redareainset": 0, "redareawidth": 0,
+                        "needlecolor": "red", "needlecolor2": "darkred",
+                        "backroundcolor": "aliceblue", "warningcolor": "red",
+                        "minortickmarkcoloractive": "grey",
+                        "minortickmarkcolorinactive": "darkgrey",
+                        "majortickmarkcoloractive": "darkgrey",
+                        "majortickmarkcolorinactive": "black",
+                        "labelcoloractive": "grey", "labelcolorinactive": "black",
+                        "outerneedlecolortrailsave": "dodgerblue",
+                        "middleneedlecortrailsave": "deepskyblue",
+                        "lowerneedlecolortrailsave": "lightskyblue",
+                        "innerneedlecolortrailsave": "transparent",
+                        "outerneedlecolortrail": "dodgerblue",
+                        "middleneedlecortrail": "deepskyblue",
+                        "lowerneedlecolortrail": "lightskyblue",
+                        "innerneedlecolortrail": "transparent",
+                        "needlevisible": true, "ringvisible": true,
+                        "needlecentervisisble": true, "labelfont": "Lato",
+                        "desctextx": 30, "desctexty": 50,
+                        "desctextfontsize": 10, "desctextfontbold": false,
+                        "desctextfonttype": "Lato",
+                        "desctextdisplaytext": dsRound.titlename,
+                        "desctextdisplaytextcolor": "red"
+                    });
                     squaregaugemenu.visible = false;
                     selectcolor.visible =false;
                     UI.draggable = 0;
@@ -596,7 +622,13 @@ Item {
                 text: Translator.translate("Text", Settings.language)
                 font.pixelSize: mainwindow.width * 0.015
                 onClicked: {
-                    CreateTextScript.createText(100,50,"Textelement","Lato",15,"red","",true,0,20000,-20000)
+                    GaugeFactory.createGauge("Text label gauge", userDash, {
+                        "x": 100, "y": 50, "displaytext": "Textelement",
+                        "fonttype": "Lato", "fontsize": 15, "textcolor": "red",
+                        "resettextcolor": "red", "datasourcename": "",
+                        "fontbold": true, "decimalpoints": 0,
+                        "warnvaluehigh": 20000, "warnvaluelow": -20000
+                    })
                     squaregaugemenu.visible = false;
                     selectcolor.visible =false;
                     UI.draggable = 0;
@@ -609,7 +641,10 @@ Item {
                 text: Translator.translate("Image", Settings.language)
                 font.pixelSize: mainwindow.width * 0.015
                 onClicked: {
-                    CreatePictureScript.createPicture(10,10,100,"qrc:/Resources/graphics/slectImage.png")
+                    GaugeFactory.createGauge("gauge image", userDash, {
+                        "x": 10, "y": 10, "pictureheight": 100,
+                        "picturesource": "qrc:/Resources/graphics/slectImage.png"
+                    })
                     squaregaugemenu.visible = false;
                     selectcolor.visible =false;
                     UI.draggable = 0;
@@ -622,8 +657,12 @@ Item {
                 text: Translator.translate("State", Settings.language) + " " + Translator.translate("Image", Settings.language)
                 font.pixelSize: mainwindow.width * 0.015
                 onClicked: {
-                   // console.log("create State gauge ");
-                    CreateStatePictureScript.createPicture(10,10,100,"speed",1,"qrc:/Resources/graphics/selectStateImage.png","qrc:/Resources/graphics/selectStateImage.png");
+                    GaugeFactory.createGauge("State gauge", userDash, {
+                        "x": 10, "y": 10, "pictureheight": 100,
+                        "mainvaluename": "speed", "triggervalue": 1,
+                        "statepicturesourceoff": "qrc:/Resources/graphics/selectStateImage.png",
+                        "statepicturesourceon": "qrc:/Resources/graphics/selectStateImage.png"
+                    });
                     squaregaugemenu.visible = false;
                     selectcolor.visible =false;
                     UI.draggable = 0;
@@ -636,8 +675,13 @@ Item {
                 text: Translator.translate("State", Settings.language) + " " + Translator.translate("GIF", Settings.language)
                 font.pixelSize: mainwindow.width * 0.015
                 onClicked: {
-                   // console.log("create State gauge ");
-                    CreateStateGIFScript.createPicture(10,10,100,"speed",1,"qrc:/Resources/graphics/StateGIF.gif","qrc:/Resources/graphics/StateGIF.gif,0");
+                    GaugeFactory.createGauge("State GIF", userDash, {
+                        "x": 10, "y": 10, "pictureheight": 100,
+                        "mainvaluename": "speed", "triggervalue": 1,
+                        "statepicturesourceoff": "qrc:/Resources/graphics/StateGIF.gif",
+                        "statepicturesourceon": "qrc:/Resources/graphics/StateGIF.gif",
+                        "triggeroffvalue": 0
+                    });
                     squaregaugemenu.visible = false;
                     selectcolor.visible =false;
                     UI.draggable = 0;
@@ -832,210 +876,17 @@ Item {
     function saveDashtofile()
     {
         saveDashtofilestring = ""
-        for (var i=0; i<userDash.children.length; ++i)
-        {
-            if (userDash.children[i].information === "Bar gauge")
-            {
-                saveDashtofilestring += (userDash.children[i].information+","+userDash.children[i].width+","+userDash.children[i].height+","+userDash.children[i].x+","+userDash.children[i].y+","+userDash.children[i].minvalue+","+userDash.children[i].maxvalue+","+userDash.children[i].decimalpoints+","+userDash.children[i].gaugename+","+userDash.children[i].mainvaluename+","+userDash.children[i].warnvaluehigh+","+userDash.children[i].warnvaluelow+","+userDash.children[i].decimalpoints2+","+"\r\n");
-            }
-            if (userDash.children[i].information === "Square gauge")
-            {
-                saveDashtofilestring += (userDash.children[i].information+","+userDash.children[i].width+","+userDash.children[i].height+","+userDash.children[i].x+","+userDash.children[i].y+","+userDash.children[i].maxvalue+","+userDash.children[i].decimalpoints+","+userDash.children[i].mainunit+","+userDash.children[i].title+","+userDash.children[i].vertgaugevisible+","+userDash.children[i].horigaugevisible+","+userDash.children[i].secvaluevisible+","+"Dashboard"+","+userDash.children[i].mainvaluename+","+userDash.children[i].secvaluename+","+userDash.children[i].warnvaluehigh+","+userDash.children[i].warnvaluelow+","+userDash.children[i].framecolor+","+userDash.children[i].resetbackroundcolor+","+userDash.children[i].resettitlecolor+","+userDash.children[i].titletextcolor+","+userDash.children[i].textcolor+","+userDash.children[i].barcolor+","+userDash.children[i].titlefontsize+","+userDash.children[i].mainfontsize+","+userDash.children[i].decimalpoints2+","+userDash.children[i].textFonttype+","+userDash.children[i].valueFonttype+",\r\n");
-            }
-            if (userDash.children[i].information === "gauge image")
-            {
-                saveDashtofilestring += (userDash.children[i].information+","+userDash.children[i].x+","+userDash.children[i].y+","+userDash.children[i].pictureheight+","+userDash.children[i].picturesource+"\r\n");
-            }
-            if (userDash.children[i].information === "Text label gauge")
-            {
-                saveDashtofilestring += (userDash.children[i].information+","+userDash.children[i].x+","+userDash.children[i].y+","+userDash.children[i].displaytext+","+userDash.children[i].fonttype+","+userDash.children[i].fontsize+","+userDash.children[i].textcolor+","+userDash.children[i].datasourcename+","+userDash.children[i].fontbold+","+userDash.children[i].decimalpoints+","+userDash.children[i].warnvaluehigh+","+userDash.children[i].warnvaluelow+",\r\n");
-            }
-            if (userDash.children[i].information === "Round gauge")
-            {
-                saveDashtofilestring += (userDash.children[i].information+","+
-                                         userDash.children[i].width+","+
-                                         userDash.children[i].x+","+
-                                         userDash.children[i].y+","+
-                                         userDash.children[i].mainvaluename+","+
-                                         userDash.children[i].maxvalue+","+
-                                         userDash.children[i].minvalue+","+
-                                         userDash.children[i].warnvaluehigh+","+
-                                         userDash.children[i].warnvaluelow+","+
-                                         userDash.children[i].startangle+","+
-                                         userDash.children[i].endangle+","+
-                                         userDash.children[i].redareastart+","+
-                                         userDash.children[i].divider+","+
-                                         userDash.children[i].tickmarksteps+","+
-                                         userDash.children[i].minortickmarksteps+","+
-                                         userDash.children[i].setlabelsteps+","+
-                                         userDash.children[i].decimalpoints+","+
-                                         userDash.children[i].needleinset+","+
-                                         userDash.children[i].setlabelinset+","+
-                                         userDash.children[i].setminortickmarkinset+","+
-                                         userDash.children[i].setmajortickmarkinset+","+
-                                         userDash.children[i].minortickmarkheight+","+
-                                         userDash.children[i].minortickmarkwidth+","+
-                                         userDash.children[i].tickmarkheight+","+
-                                         userDash.children[i].tickmarkwidth+","+
-                                         userDash.children[i].trailhighboarder+","+
-                                         userDash.children[i].trailmidboarder+","+
-                                         userDash.children[i].traillowboarder+","+
-                                         userDash.children[i].trailbottomboarder+","+
-                                         userDash.children[i].labelfontsize+","+
-                                         userDash.children[i].needleTipWidth+","+
-                                         userDash.children[i].needleLength+","+
-                                         userDash.children[i].needleBaseWidth+","+
-                                         userDash.children[i].redareainset+","+
-                                         userDash.children[i].redareawidth+","+
-                                         userDash.children[i].needlecolor+","+
-                                         userDash.children[i].needlecolor2+","+
-                                         userDash.children[i].backroundcolor+","+
-                                         userDash.children[i].warningcolor+","+
-                                         userDash.children[i].minortickmarkcoloractive+","+
-                                         userDash.children[i].minortickmarkcolorinactive+","+
-                                         userDash.children[i].majortickmarkcoloractive+","+
-                                         userDash.children[i].majortickmarkcolorinactive+","+
-                                         userDash.children[i].labelcoloractive+","+
-                                         userDash.children[i].labelcolorinactive+","+
-                                         userDash.children[i].outerneedlecolortrailsave+","+
-                                         userDash.children[i].middleneedlecortrailsave+","+
-                                         userDash.children[i].lowerneedlecolortrailsave+","+
-                                         userDash.children[i].innerneedlecolortrailsave+","+
-                                         userDash.children[i].needlevisible+","+
-                                         userDash.children[i].ringvisible+","+
-                                         userDash.children[i].needlecentervisisble+","+
-                                         userDash.children[i].labelfont+","+
-                                         userDash.children[i].desctextx+","+
-                                         userDash.children[i].desctexty+","+
-                                         userDash.children[i].desctextfontsize+","+
-                                         userDash.children[i].desctextfontbold+","+
-                                         userDash.children[i].desctextfonttype+","+
-                                         userDash.children[i].desctextdisplaytext+","+
-                                         userDash.children[i].desctextdisplaytextcolor+","+
-                                         userDash.children[i].peakneedlecolor+","+
-                                         userDash.children[i].peakneedlecolor2+","+
-                                         userDash.children[i].peakneedlelenght+","+
-                                         userDash.children[i].peakneedlebasewidth+","+
-                                         userDash.children[i].peakneedletipwidth+","+
-                                         userDash.children[i].peakneedleoffset+","+
-                                         userDash.children[i].peakneedlevisible+"\r\n");
-            }
-            if (userDash.children[i].information === "State gauge")
-            {
-                saveDashtofilestring += (userDash.children[i].information+","+userDash.children[i].x+","+userDash.children[i].y+","+userDash.children[i].pictureheight+","+userDash.children[i].mainvaluename+","+userDash.children[i].triggervalue+","+userDash.children[i].statepicturesourceoff+","+userDash.children[i].statepicturesourceon+"\r\n");
-            }
-
-            if (userDash.children[i].information === "State GIF")
-            {
-                saveDashtofilestring += (userDash.children[i].information+","+userDash.children[i].x+","+userDash.children[i].y+","+userDash.children[i].pictureheight+","+userDash.children[i].mainvaluename+","+userDash.children[i].triggervalue+","+userDash.children[i].statepicturesourceoff+","+userDash.children[i].statepicturesourceon+","+userDash.children[i].triggeroffvalue+"\r\n");
+        for (var i = 0; i < userDash.children.length; ++i) {
+            if (userDash.children[i].information) {
+                saveDashtofilestring += GaugeFactory.serializeGaugeForCSV(userDash.children[i]) + "\r\n";
             }
         }
     }
     function createDash()
     {
-
-        for (var i=0; i<gaugelist.rowCount(); ++i)
-        {
-            switch (gaugelist.get(i).info) {
-
-            case "Bar gauge": {
-                //                                                     setWidth,              setHeight,              setX,               setY,             setMinValue,                setMaxValue,            setDecPlace,             setUnit,                   SetValueProperty,              SetWarnvaluehigh,              Setwarnvaluelow
-                CreateBargaugeScript.createVerticalGauge(gaugelist.get(i).width,gaugelist.get(i).height,gaugelist.get(i).x,gaugelist.get(i).y,gaugelist.get(i).minvalue,gaugelist.get(i).maxvalue,gaugelist.get(i).decplace,gaugelist.get(i).unit,gaugelist.get(i).valuepropertymain,gaugelist.get(i).warnvaluehigh,gaugelist.get(i).warnvaluelow);
-                break;
-            }
-            case "Square gauge": {
-                CreateSquareGaugeScript.createSquareGauge(gaugelist.get(i).width,gaugelist.get(i).height,gaugelist.get(i).x,gaugelist.get(i).y,gaugelist.get(i).maxvalue,gaugelist.get(i).decplace,gaugelist.get(i).unit,gaugelist.get(i).id,gaugelist.get(i).vertgaugevis,gaugelist.get(i).horigaugevis,gaugelist.get(i).secvaluevis,"Dashboard",gaugelist.get(i).valuepropertymain,gaugelist.get(i).valuepropertysec,gaugelist.get(i).warnvaluehigh,gaugelist.get(i).warnvaluelow,gaugelist.get(i).framecolor,gaugelist.get(i).backroundcolor,gaugelist.get(i).titlecolor,gaugelist.get(i).titletextcolor,gaugelist.get(i).textcolor,gaugelist.get(i).barcolor,gaugelist.get(i).titlefontsize,gaugelist.get(i).mainfontsize,gaugelist.get(i).decplace2,gaugelist.get(i).textfont,gaugelist.get(i).valuefont);
-                break;
-            }
-            case "gauge image": {
-                CreatePictureScript.createPicture(gaugelist.get(i).x,gaugelist.get(i).y,gaugelist.get(i).pictureheight,gaugelist.get(i).picturesource);
-                break;
-            }
-            case "Text label gauge": {
-                CreateTextScript.createText(gaugelist.get(i).x,gaugelist.get(i).y,gaugelist.get(i).displaytext,gaugelist.get(i).fonttype,gaugelist.get(i).fontsize,gaugelist.get(i).textcolor,gaugelist.get(i).datasourcename,gaugelist.get(i).fontbold,gaugelist.get(i).decimalpoints,gaugelist.get(i).warnvaluehigh,gaugelist.get(i).warnvaluelow);
-                break;
-            }
-            case "Round gauge": {
-                CreateRoundgaugeScript.createRoundGauge(gaugelist.get(i).width,
-                                                        gaugelist.get(i).x,
-                                                        gaugelist.get(i).y,
-                                                        gaugelist.get(i).mainvaluename,
-                                                        gaugelist.get(i).maxvalue,
-                                                        gaugelist.get(i).minvalue,
-                                                        gaugelist.get(i).warnvaluehigh,
-                                                        gaugelist.get(i).warnvaluelow,
-                                                        gaugelist.get(i).startangle,
-                                                        gaugelist.get(i).endangle,
-                                                        gaugelist.get(i).redareastart,
-                                                        gaugelist.get(i).divider,
-                                                        gaugelist.get(i).tickmarksteps,
-                                                        gaugelist.get(i).minortickmarksteps,
-                                                        gaugelist.get(i).setlabelsteps,
-                                                        gaugelist.get(i).decimalpoints,
-                                                        gaugelist.get(i).needleinset,
-                                                        gaugelist.get(i).setlabelinset,
-                                                        gaugelist.get(i).setminortickmarkinset,
-                                                        gaugelist.get(i).setmajortickmarkinset,
-                                                        gaugelist.get(i).minortickmarkheight,
-                                                        gaugelist.get(i).minortickmarkwidth,
-                                                        gaugelist.get(i).tickmarkheight,
-                                                        gaugelist.get(i).tickmarkwidth,
-                                                        gaugelist.get(i).trailhighboarder,
-                                                        gaugelist.get(i).trailmidboarder,
-                                                        gaugelist.get(i).traillowboarder,
-                                                        gaugelist.get(i).trailbottomboarder,
-                                                        gaugelist.get(i).labelfontsize,
-                                                        gaugelist.get(i).needleTipWidth,
-                                                        gaugelist.get(i).needleLength,
-                                                        gaugelist.get(i).needleBaseWidth,
-                                                        gaugelist.get(i).redareainset,
-                                                        gaugelist.get(i).redareawidth,
-                                                        gaugelist.get(i).needlecolor,
-                                                        gaugelist.get(i).needlecolor2,
-                                                        gaugelist.get(i).backroundcolor,
-                                                        gaugelist.get(i).warningcolor,
-                                                        gaugelist.get(i).minortickmarkcoloractive,
-                                                        gaugelist.get(i).minortickmarkcolorinactive,
-                                                        gaugelist.get(i).majortickmarkcoloractive,
-                                                        gaugelist.get(i).majortickmarkcolorinactive,
-                                                        gaugelist.get(i).labelcoloractive,
-                                                        gaugelist.get(i).labelcolorinactive,
-                                                        gaugelist.get(i).outerneedlecolortrailsave,
-                                                        gaugelist.get(i).middleneedlecortrailsave,
-                                                        gaugelist.get(i).lowerneedlecolortrailsave,
-                                                        gaugelist.get(i).innerneedlecolortrailsave,
-                                                        gaugelist.get(i).needlevisible,
-                                                        gaugelist.get(i).ringvisible,
-                                                        gaugelist.get(i).needlecentervisisble,
-                                                        gaugelist.get(i).labelfont,
-                                                        gaugelist.get(i).desctextx,
-                                                        gaugelist.get(i).desctexty,
-                                                        gaugelist.get(i).desctextfontsize,
-                                                        gaugelist.get(i).desctextfontbold,
-                                                        gaugelist.get(i).desctextfonttype,
-                                                        gaugelist.get(i).desctextdisplaytext,
-                                                        gaugelist.get(i).desctextdisplaytextcolor,
-                                                        gaugelist.get(i).peakneedlecolor,
-                                                        gaugelist.get(i).peakneedlecolor2,
-                                                        gaugelist.get(i).peakneedlelenght,
-                                                        gaugelist.get(i).peakneedlebasewidth,
-                                                        gaugelist.get(i).peakneedletipwidth,
-                                                        gaugelist.get(i).peakneedleoffset,
-                                                        gaugelist.get(i).peakneedlevisible
-                                                        );
-                break;
-            }
-            case "State gauge": {
-                //console.log("Save state");
-                CreateStatePictureScript.createPicture(gaugelist.get(i).x,gaugelist.get(i).y,gaugelist.get(i).height,gaugelist.get(i).source,gaugelist.get(i).trigger,gaugelist.get(i).pictureoff,gaugelist.get(i).pictureon);
-                break;
-            }
-            case "State GIF": {
-                //console.log("Save state");
-                CreateStateGIFScript.createPicture(gaugelist.get(i).x,gaugelist.get(i).y,gaugelist.get(i).height,gaugelist.get(i).source,gaugelist.get(i).trigger,gaugelist.get(i).pictureoff,gaugelist.get(i).pictureon,gaugelist.get(i).triggeroff);
-                break;
-            }
-            }
+        for (var i = 0; i < gaugelist.rowCount(); ++i) {
+            var item = gaugelist.get(i);
+            GaugeFactory.deserializeGauge(item, userDash);
         }
     }
 
@@ -1108,135 +959,12 @@ Item {
     }
     function savedash()
     {
-
         gaugelist.clear()
-        for (var i=0; i<userDash.children.length; ++i)
-        {
-
-
-            //Check which type of gauges we have and send info to console
-            if(userDash.children[i].information === "Square gauge"){
-                //console.log("Save Square");
-                //Apend all values of each gauge to the List Model
-                gaugelist.append({"type": userDash.children[i].title,"width":userDash.children[i].width,"height":userDash.children[i].height,"x":userDash.children[i].x,"y":userDash.children[i].y,"maxvalue":userDash.children[i].maxvalue,"decplace":userDash.children[i].decimalpoints,"unit":userDash.children[i].mainunit,"id":userDash.children[i].title,"vertgaugevis":userDash.children[i].vertgaugevisible,"horigaugevis":userDash.children[i].horigaugevisible,"secvaluevis":userDash.children[i].secvaluevisible,"valuepropertymain":userDash.children[i].mainvaluename,"valuepropertysec":userDash.children[i].secvaluename,"warnvaluehigh":userDash.children[i].warnvaluehigh,"warnvaluelow":userDash.children[i].warnvaluelow,"framecolor":userDash.children[i].framecolor,"backroundcolor":userDash.children[i].resetbackroundcolor,"titlecolor":userDash.children[i].resettitlecolor,"titletextcolor":userDash.children[i].titletextcolor,"textcolor":userDash.children[i].textcolor,"barcolor":userDash.children[i].barcolor,"titlefontsize":userDash.children[i].titlefontsize,"mainfontsize":userDash.children[i].mainfontsize,"info":userDash.children[i].information,"decplace2":userDash.children[i].decimalpoints2,"textfont":userDash.children[i].textFonttype,"valuefont":userDash.children[i].valueFonttype})
-            }
-            if(userDash.children[i].information === "Bar gauge"){
-
-
-                gaugelist.append({"type": userDash.children[i].title,"width":userDash.children[i].width,"height":userDash.children[i].height,"x":userDash.children[i].x,"y":userDash.children[i].y,"maxvalue":userDash.children[i].maxvalue,"decplace":userDash.children[i].decimalpoints,"unit":userDash.children[i].gaugename,"id":userDash.children[i].title,"valuepropertymain":userDash.children[i].mainvaluename,"warnvaluehigh":userDash.children[i].warnvaluehigh,"warnvaluelow":userDash.children[i].warnvaluelow,"info":userDash.children[i].information,"minvalue":userDash.children[i].minvalue})
-
-                ;
-
-            }
-            if(userDash.children[i].information === "gauge image"){
-                //console.log("Save Image");
-                gaugelist.append({"info":userDash.children[i].information,"x":userDash.children[i].x,"y":userDash.children[i].y,"pictureheight":userDash.children[i].pictureheight,"picturesource":userDash.children[i].picturesource})
-            }
-            if(userDash.children[i].information === "Text label gauge"){
-                //console.log("Text label gauge");
-
-                gaugelist.append({"info":userDash.children[i].information,"width":userDash.children[i].width,"height":userDash.children[i].height,"x":userDash.children[i].x,"y":userDash.children[i].y,"displaytext":userDash.children[i].displaytext,"fonttype":userDash.children[i].fonttype,"fontsize":userDash.children[i].fontsize,"textcolor":userDash.children[i].textcolor,"datasourcename":userDash.children[i].datasourcename,"fontbold":userDash.children[i].fontbold,"decimalpoints":userDash.children[i].decimalpoints,"warnvaluehigh":userDash.children[i].warnvaluehigh,"warnvaluelow":userDash.children[i].warnvaluelow})
-
-            }
-
-            if(userDash.children[i].information === "Round gauge"){
-                //console.log("Round gauge");
-                //                                                                                              Width,                               setX,                     setY,                         Setmainvalue,                                    Setmaxvalue,                               Setminvalue,                              Setwarnvaluehigh,                                      Setwarnvaluelow,                                 Setredareastart,                                    Setdivider,                              Setneedletipwidth,                                    Setneedlelenght,                                    Setneedlebasewidth,                                     Setstartangle,                                 Setendangle,                               Settickmarksteps,                                     Setminortickmarksteps,                                         Setlabelsteps,                                    Setlabelinset,                                    Setminortickmarkinset,                                            Setmajortickmarkinset,                                           Setredareainset,                                   Settickmarkcolor,                                    Setneedlecolor,                                    Setdecimalpoints,                                  Setouterneedlecolortrail,                                            Setmiddleneedlecortrail,                                            Setlowerneedlecolortrail,                                           Setinnerneedlecolortrail,                                            Setwarningcolor,                                    Setlabelfontsize,                                    Setlabelcolor1,                                 Setlabelcolor2,                                  Setminortickmarkheight,                                          Setminortickmarkwidth,                                          Settickmarkheight,                                     Settickmarkwidth,                                   Setneedlevisible,S                                    etRingvisible,                                   SetBackroundcolor
-                gaugelist.append({  "info":userDash.children[i].information,
-                                     "width":userDash.children[i].width,
-                                     "x":userDash.children[i].x,
-                                     "y":userDash.children[i].y,
-                                     "mainvaluename":userDash.children[i].mainvaluename,
-                                     "maxvalue":userDash.children[i].maxvalue,
-                                     "minvalue":userDash.children[i].minvalue,
-                                     "warnvaluehigh":userDash.children[i].warnvaluehigh,
-                                     "warnvaluelow":userDash.children[i].warnvaluelow,
-                                     "startangle":userDash.children[i].startangle,
-                                     "endangle":userDash.children[i].endangle,
-                                     "redareastart":userDash.children[i].redareastart,
-                                     "divider":userDash.children[i].divider,
-                                     "tickmarksteps":userDash.children[i].tickmarksteps,
-                                     "minortickmarksteps":userDash.children[i].minortickmarksteps,
-                                     "setlabelsteps":userDash.children[i].setlabelsteps,
-                                     "decimalpoints":userDash.children[i].decimalpoints,
-                                     "needleinset":userDash.children[i].needleinset,
-                                     "setlabelinset":userDash.children[i].setlabelinset,
-                                     "setminortickmarkinset":userDash.children[i].setminortickmarkinset,
-                                     "setmajortickmarkinset":userDash.children[i].setmajortickmarkinset,
-                                     "minortickmarkheight":userDash.children[i].minortickmarkheight,
-                                     "minortickmarkwidth":userDash.children[i].minortickmarkwidth,
-                                     "tickmarkheight":userDash.children[i].tickmarkheight,
-                                     "tickmarkwidth":userDash.children[i].tickmarkwidth,
-                                     "trailhighboarder":userDash.children[i].trailhighboarder,
-                                     "trailmidboarder":userDash.children[i].trailmidboarder,
-                                     "traillowboarder":userDash.children[i].traillowboarder,
-                                     "trailbottomboarder":userDash.children[i].trailbottomboarder,
-                                     "labelfontsize":userDash.children[i].labelfontsize,
-                                     "needleTipWidth":userDash.children[i].needleTipWidth,
-                                     "needleLength":userDash.children[i].needleLength,
-                                     "needleBaseWidth":userDash.children[i].needleBaseWidth,
-                                     "redareainset":userDash.children[i].redareainset,
-                                     "redareawidth":userDash.children[i].redareawidth,
-                                     "tickmarkcolor":userDash.children[i].tickmarkcolor,
-                                     "needlecolor":userDash.children[i].needlecolor,
-                                     "needlecolor2":userDash.children[i].needlecolor2,
-                                     "backroundcolor":userDash.children[i].backroundcolor,
-                                     "warningcolor":userDash.children[i].warningcolor,
-                                     "minortickmarkcoloractive":userDash.children[i].minortickmarkcoloractive,
-                                     "minortickmarkcolorinactive":userDash.children[i].minortickmarkcolorinactive,
-                                     "majortickmarkcoloractive":userDash.children[i].majortickmarkcoloractive,
-                                     "majortickmarkcolorinactive":userDash.children[i].majortickmarkcolorinactive,
-                                     "labelcoloractive":userDash.children[i].labelcoloractive,
-                                     "labelcolorinactive":userDash.children[i].labelcolorinactive,
-                                     "outerneedlecolortrailsave":userDash.children[i].outerneedlecolortrailsave,
-                                     "middleneedlecortrailsave":userDash.children[i].middleneedlecortrailsave,
-                                     "lowerneedlecolortrailsave":userDash.children[i].lowerneedlecolortrailsave,
-                                     "innerneedlecolortrailsave":userDash.children[i].innerneedlecolortrailsave,
-                                     "needlevisible":userDash.children[i].needlevisible,
-                                     "ringvisible":userDash.children[i].ringvisible,
-                                     "needlecentervisisble":userDash.children[i].needlecentervisisble,
-                                     "labelfont":userDash.children[i].labelfont,
-                                     "desctextx":userDash.children[i].desctextx,
-                                     "desctexty":userDash.children[i].desctexty,
-                                     "desctextfontsize":userDash.children[i].desctextfontsize,
-                                     "desctextfontbold":userDash.children[i].desctextfontbold,
-                                     "desctextfonttype":userDash.children[i].desctextfonttype,
-                                     "desctextdisplaytext":userDash.children[i].desctextdisplaytext,
-                                     "desctextdisplaytextcolor":userDash.children[i].desctextdisplaytextcolor,
-                                     "peakneedlecolor":userDash.children[i].peakneedlecolor,
-                                     "peakneedlecolor2":userDash.children[i].peakneedlecolor2,
-                                     "peakneedlelenght":userDash.children[i].peakneedlelenght,
-                                     "peakneedlebasewidth":userDash.children[i].peakneedlebasewidth,
-                                     "peakneedletipwidth":userDash.children[i].peakneedletipwidth,
-                                     "peakneedleoffset":userDash.children[i].peakneedleoffset,
-                                     "peakneedlevisible":userDash.children[i].peakneedlevisible
-                                 })
-            }
-
-            if(userDash.children[i].information === "State gauge"){
-                //console.log("Save Image" ,userDash.children[i].mainvaluename);
-                gaugelist.append({   "info":userDash.children[i].information,
-                                     "x":userDash.children[i].x,
-                                     "y":userDash.children[i].y,
-                                     "height":userDash.children[i].pictureheight,
-                                     "source":userDash.children[i].mainvaluename,
-                                     "trigger":userDash.children[i].triggervalue,
-                                     "pictureoff":userDash.children[i].statepicturesourceoff,
-                                     "pictureon":userDash.children[i].statepicturesourceon})
-            }
-            if(userDash.children[i].information === "State GIF"){
-                //console.log("Save Image" ,userDash.children[i].mainvaluename);
-                gaugelist.append({   "info":userDash.children[i].information,
-                                     "x":userDash.children[i].x,
-                                     "y":userDash.children[i].y,
-                                     "height":userDash.children[i].pictureheight,
-                                     "source":userDash.children[i].mainvaluename,
-                                     "trigger":userDash.children[i].triggervalue,
-                                     "pictureoff":userDash.children[i].statepicturesourceoff,
-                                     "pictureon":userDash.children[i].statepicturesourceon,
-                                     "triggeroff":userDash.children[i].triggeroffvalue,
-
-})
+        for (var i = 0; i < userDash.children.length; ++i) {
+            if (userDash.children[i].information) {
+                var data = GaugeFactory.serializeGauge(userDash.children[i]);
+                if (data)
+                    gaugelist.append(data);
             }
         }
         var datamodel = []

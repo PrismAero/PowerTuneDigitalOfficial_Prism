@@ -1,8 +1,5 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
-import Qt5Compat.GraphicalEffects
-import PowerTune.Gauges 1.0
-import PowerTune.Utils 1.0
 import PowerTune.Gauges 1.0
 import PowerTune.Utils 1.0
 
@@ -94,7 +91,7 @@ Rectangle{
     property real lastTouchTime: 0
 
     Drag.active: true
-    DatasourcesList{id: powertunedatasource}
+
 
     SequentialAnimation {
         id: intro
@@ -543,9 +540,9 @@ Rectangle{
             width:popupmenu.width
             visible: true
             textRole: "titlename"
-            model: powertunedatasource
-            //powertunedatasource.get(cbxMain.currentIndex).sourcename;
-            Component.onCompleted: {for(var i = 0; i < cbxDatasource.model.count; ++i) if (powertunedatasource.get(i).sourcename === mainvaluename)cbxDatasource.currentIndex = i}
+            model: DatasourceService.allSources
+            //DatasourceService.allSources.get(cbxMain.currentIndex).sourcename;
+            Component.onCompleted: {for(var i = 0; i < cbxDatasource.model.count; ++i) if (DatasourceService.allSources.get(i).sourcename === mainvaluename)cbxDatasource.currentIndex = i}
 
         }
         RoundButton{
@@ -554,7 +551,7 @@ Rectangle{
             font.pixelSize : 15
             width: parent.width /1.07
             onClicked: {
-                mainvaluename = powertunedatasource.get(cbxDatasource.currentIndex).sourcename;
+                mainvaluename = DatasourceService.allSources.get(cbxDatasource.currentIndex).sourcename;
                 datasourcemenue.close();
                 touchArea.enabled = true;}
         }

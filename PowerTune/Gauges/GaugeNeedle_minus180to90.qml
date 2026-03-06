@@ -5,7 +5,6 @@ https://github.com/alex-adam/Tesla
 */
 
 import QtQuick 2.15
-import Qt5Compat.GraphicalEffects
 
 Canvas {
     id: canvas

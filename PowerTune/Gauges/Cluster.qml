@@ -7,9 +7,6 @@ import Qt.labs.settings 1.0
 import PowerTune.Gauges 1.0
 import PowerTune.Utils 1.0
 import "../Gauges"
-import "./createsquaregaugeUserDash.js" as CreateSquareGaugeScript
-import PowerTune.Gauges 1.0
-import PowerTune.Utils 1.0
 
 
 
@@ -75,7 +72,6 @@ Item {
             hoverEnabled: dashvalue.hoverEnabled
         }
     }
-    DatasourcesList{id: powertunedatasource}
 
     Connections{
         target: Dashboard
@@ -98,7 +94,20 @@ Item {
             if (dashvalue.textAt(23) !== "") {val13 = dashvalue.textAt(23);}else {val13 = 50;}
 
             if (dashvalue.textAt(0) !== "") {
-            CreateSquareGaugeScript.createSquareGauge(dashvalue.textAt(0),dashvalue.textAt(1),dashvalue.textAt(2),dashvalue.textAt(3),dashvalue.textAt(4),dashvalue.textAt(5),dashvalue.textAt(6),dashvalue.textAt(7),val1,val2,val3,Dashboard,dashvalue.textAt(12),dashvalue.textAt(13),val4,val5,val6,val7,val8,val9,val10,val11,val12,val13);
+            GaugeFactory.createGauge("Square gauge", userDash, {
+                "width": dashvalue.textAt(0), "height": dashvalue.textAt(1),
+                "x": dashvalue.textAt(2), "y": dashvalue.textAt(3),
+                "maxvalue": dashvalue.textAt(4), "decimalpoints": dashvalue.textAt(5),
+                "mainunit": dashvalue.textAt(6), "title": dashvalue.textAt(7),
+                "vertgaugevisible": val1, "horigaugevisible": val2,
+                "secvaluevisible": val3, "mainvaluename": dashvalue.textAt(12),
+                "secvaluename": dashvalue.textAt(13), "warnvaluehigh": val4,
+                "warnvaluelow": val5, "framecolor": val6,
+                "resetbackroundcolor": val7, "resettitlecolor": val8,
+                "titletextcolor": val9, "textcolor": val10,
+                "barcolor": val11, "titlefontsize": val12,
+                "mainfontsize": val13
+            });
             }
         }
 
@@ -471,7 +480,7 @@ Item {
             textRole: "titlename"
             width: squaregaugemenu.width
             height: mainwindow.height * 0.08333
-            model: powertunedatasource
+            model: DatasourceService.allSources
             font.pixelSize: mainwindow.width * 0.018
             delegate: ItemDelegate {
                 width: cbx_sources.width
@@ -522,7 +531,19 @@ Item {
                 text: qsTr("ADD")
                 font.pixelSize: mainwindow.width * 0.018
                 onClicked: {
-                    CreateSquareGaugeScript.createSquareGauge(266,119,0,240,248,0,powertunedatasource.get(cbx_sources.currentIndex).defaultsymbol,powertunedatasource.get(cbx_sources.currentIndex).titlename,false,true,false,"Dashboard",powertunedatasource.get(cbx_sources.currentIndex).sourcename,powertunedatasource.get(cbx_sources.currentIndex).sourcename,10000,-20000,"lightsteelblue","black","lightsteelblue","white","white","blue",25,40);
+                    var ds = DatasourceService.allSources.get(cbx_sources.currentIndex);
+                    GaugeFactory.createGauge("Square gauge", userDash, {
+                        "width": 266, "height": 119, "x": 0, "y": 240,
+                        "maxvalue": 248, "decimalpoints": 0,
+                        "mainunit": ds.defaultsymbol, "title": ds.titlename,
+                        "vertgaugevisible": false, "horigaugevisible": true,
+                        "secvaluevisible": false, "mainvaluename": ds.sourcename,
+                        "secvaluename": ds.sourcename, "warnvaluehigh": 10000,
+                        "warnvaluelow": -20000, "framecolor": "lightsteelblue",
+                        "resetbackroundcolor": "black", "resettitlecolor": "lightsteelblue",
+                        "titletextcolor": "white", "textcolor": "white",
+                        "barcolor": "blue", "titlefontsize": 25, "mainfontsize": 40
+                    });
                     squaregaugemenu.visible = false;
                     selectcolor.visible =false;
                     UI.draggable = 0;
@@ -732,8 +753,11 @@ Item {
     function createDash()
     {
         console.log("create Dashboard")
-        for (var i=0; i<gaugelist.rowCount(); ++i)
-            CreateSquareGaugeScript.createSquareGauge(gaugelist.get(i).width,gaugelist.get(i).height,gaugelist.get(i).x,gaugelist.get(i).y,gaugelist.get(i).maxvalue,gaugelist.get(i).decplace,gaugelist.get(i).unit,gaugelist.get(i).id,gaugelist.get(i).vertgaugevis,gaugelist.get(i).horigaugevis,gaugelist.get(i).secvaluevis,"Dashboard",gaugelist.get(i).valuepropertymain,gaugelist.get(i).valuepropertysec,gaugelist.get(i).warnvaluehigh,gaugelist.get(i).warnvaluelow,gaugelist.get(i).framecolor,gaugelist.get(i).backroundcolor,gaugelist.get(i).titlecolor,gaugelist.get(i).titletextcolor,gaugelist.get(i).textcolor,gaugelist.get(i).barcolor,gaugelist.get(i).titlefontsize,gaugelist.get(i).mainfontsize);
+        for (var i=0; i<gaugelist.rowCount(); ++i) {
+            var item = gaugelist.get(i);
+            item.info = "Square gauge";
+            GaugeFactory.deserializeGauge(item, userDash);
+        }
 
     }
     function changeframeclolor()
