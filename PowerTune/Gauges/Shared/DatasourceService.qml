@@ -7,7 +7,8 @@ Item {
     width: 0
     height: 0
 
-    DatasourcesList { id: _allSources }
+    DatasourcesList { id: _rawSources }
+    ListModel { id: _allSources }
     ListModel { id: _filteredSources }
 
     readonly property alias allSources: _allSources
@@ -25,14 +26,33 @@ Item {
     onSearchTextChanged: filter()
     onEcuFilterChanged: filter()
 
+    function _defaultFor(key) {
+        switch (key) {
+        case "decimalpoints":
+        case "decimalpoints2":
+        case "maxvalue":
+        case "stepsize":
+        case "divisor":
+            return 0;
+        default:
+            return "";
+        }
+    }
+
     function _safeItem(src) {
         var obj = {};
         for (var k = 0; k < _keys.length; k++) {
             var key = _keys[k];
             var val = src[key];
-            obj[key] = (val !== undefined) ? val : "";
+            obj[key] = (val !== undefined) ? val : _defaultFor(key);
         }
         return obj;
+    }
+
+    function normalizeSources() {
+        _allSources.clear();
+        for (var i = 0; i < _rawSources.count; i++)
+            _allSources.append(_safeItem(_rawSources.get(i)));
     }
 
     function filter() {
@@ -67,5 +87,8 @@ Item {
         return -1;
     }
 
-    Component.onCompleted: filter()
+    Component.onCompleted: {
+        normalizeSources();
+        filter();
+    }
 }

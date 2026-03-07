@@ -160,5 +160,22 @@ Item {
         id: configMenu
         target: root
         onDeleteRequested: root.destroy()
+
+        DatasourceSection { target: root }
+        LabelSection { target: root }
+        RangeSection { target: root }
+        SizeSection { target: root }
+        ArcSettingsSection { target: root }
+        ColorsSection {
+            target: root
+            colorBindings: [
+                { label: "Track", prop: "arcTrackColor" },
+                { label: "Fill", prop: "arcFillColor" },
+                { label: "Danger", prop: "arcDangerColor" },
+                { label: "Value", prop: "valueTextColor" },
+                { label: "Label", prop: "labelTextColor" },
+                { label: "Unit", prop: "unitTextColor" }
+            ]
+        }
     }
 }

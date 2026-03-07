@@ -112,5 +112,18 @@ Rectangle {
         id: configMenu
         target: root
         onDeleteRequested: root.destroy()
+
+        DatasourceSection { target: root }
+        LabelSection { target: root }
+        RangeSection { target: root }
+        SizeSection { target: root }
+        ColorsSection {
+            target: root
+            colorBindings: [
+                { label: "Label", prop: "labelColor" },
+                { label: "Value", prop: "valueColor" },
+                { label: "Unit", prop: "unitColor" }
+            ]
+        }
     }
 }

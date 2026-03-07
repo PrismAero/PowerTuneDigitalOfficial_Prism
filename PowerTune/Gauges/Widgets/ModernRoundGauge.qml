@@ -241,5 +241,27 @@ Item {
         id: configMenu
         target: root
         onDeleteRequested: root.destroy()
+
+        DatasourceSection { target: root }
+        LabelSection { target: root }
+        RangeSection { target: root }
+        SizeSection { target: root }
+        ArcSettingsSection { target: root }
+        NeedleSection { target: root }
+        TicksSection { target: root }
+        ColorsSection {
+            target: root
+            colorBindings: [
+                { label: "Track Arc", prop: "arcTrackColor" },
+                { label: "Fill Arc", prop: "arcFillColor" },
+                { label: "Danger Arc", prop: "arcDangerColor" },
+                { label: "Needle", prop: "needleColor" },
+                { label: "Needle Glow", prop: "needleGlowColor" },
+                { label: "Value", prop: "textColor" },
+                { label: "Label", prop: "labelColor" },
+                { label: "Unit", prop: "unitColor" },
+                { label: "Ticks", prop: "tickColor" }
+            ]
+        }
     }
 }

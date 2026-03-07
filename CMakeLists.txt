@@ -413,6 +413,22 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
             PowerTune/Gauges/Shared/DatasourceComboBox.qml
             PowerTune/Gauges/Shared/FontComboBox.qml
             PowerTune/Gauges/Shared/GaugeConfigMenu.qml
+            PowerTune/Gauges/Shared/DatasourceSection.qml
+            PowerTune/Gauges/Shared/RangeSection.qml
+            PowerTune/Gauges/Shared/SizeSection.qml
+            PowerTune/Gauges/Shared/ColorsSection.qml
+            PowerTune/Gauges/Shared/ArcSettingsSection.qml
+            PowerTune/Gauges/Shared/NeedleSection.qml
+            PowerTune/Gauges/Shared/TicksSection.qml
+            PowerTune/Gauges/Shared/LabelSection.qml
+            PowerTune/Gauges/Shared/VisibilityTogglesSection.qml
+            PowerTune/Gauges/Shared/NeedleTrailSection.qml
+            PowerTune/Gauges/Shared/WarningRedZoneSection.qml
+            PowerTune/Gauges/Shared/DescriptionSection.qml
+            PowerTune/Gauges/Shared/FontSettingsSection.qml
+            PowerTune/Gauges/Shared/ImagePickerSection.qml
+            PowerTune/Gauges/Shared/SecondarySourceSection.qml
+            PowerTune/Gauges/Shared/UnitSymbolSection.qml
             PowerTune/Gauges/Shared/GaugeTheme.qml
         RESOURCE_PREFIX /qt/qml
         OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/qt/qml/PowerTune/Gauges/Shared
