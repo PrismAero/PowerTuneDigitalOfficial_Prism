@@ -52,13 +52,6 @@ Item {
                 border.color: keypadButton3.down ? "darkgrey" : "grey"
                 border.width: keypad.width / 60
                 }
-            Image{
-                source: "qrc:/Resources/graphics/fanIcon.jpg"
-                //anchors.fill: plusBrightness
-                width: keypadButton3.width
-                height: keypadButton3.height
-                //anchors.centerIn: keypadButton3.horizontalCenter
-                }
         }
 
         Button{

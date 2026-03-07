@@ -216,10 +216,17 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     set_source_files_properties(PowerTune/Gauges/Shared/GaugeTheme.qml PROPERTIES
         QT_QML_SINGLETON_TYPE TRUE
     )
+    set_source_files_properties(PowerTune/UI/Theme.qml PROPERTIES
+        QT_QML_SINGLETON_TYPE TRUE
+    )
+    set_source_files_properties(PowerTune/Dashboard/DashboardTheme.qml PROPERTIES
+        QT_QML_SINGLETON_TYPE TRUE
+    )
     
     # * Create backing library targets for QML modules
     qt_add_library(PowerTuneUtilsLib STATIC)
     qt_add_library(PowerTuneCoreLib STATIC)
+    qt_add_library(PowerTuneUiLib STATIC)
     qt_add_library(PowerTuneSettingsLib STATIC)
     qt_add_library(GaugesCoreLib STATIC)
     qt_add_library(GaugesStylesLib STATIC)
@@ -260,6 +267,25 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
             PowerTune/Core/Laptimecontainer.qml
         RESOURCE_PREFIX /qt/qml
         OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/qt/qml/PowerTune/Core
+    )
+
+    # * PowerTune.UI module - Shared non-gauge UI primitives
+    qt_add_qml_module(PowerTuneUiLib
+        URI PowerTune.UI
+        VERSION 1.0
+        QML_FILES
+            PowerTune/UI/Theme.qml
+            PowerTune/Settings/components/SettingsPage.qml
+            PowerTune/Settings/components/SettingsSection.qml
+            PowerTune/Settings/components/SettingsRow.qml
+            PowerTune/Settings/components/StyledButton.qml
+            PowerTune/Settings/components/StyledComboBox.qml
+            PowerTune/Settings/components/StyledSwitch.qml
+            PowerTune/Settings/components/StyledTextField.qml
+            PowerTune/Settings/components/StyledCheckBox.qml
+            PowerTune/Settings/components/ConnectionStatusIndicator.qml
+        RESOURCE_PREFIX /qt/qml
+        OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/qt/qml/PowerTune/UI
     )
     
     # * PowerTune.Settings module - Settings pages
@@ -423,6 +449,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         URI PrismPT.Dashboard
         VERSION 1.0
         QML_FILES
+            PowerTune/Dashboard/DashboardTheme.qml
             PowerTune/Dashboard/UserDashboard.qml
             PowerTune/Dashboard/GaugeCreationMenu.qml
             PowerTune/Dashboard/ColorSelectionPanel.qml
@@ -448,6 +475,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     target_link_libraries(${PROJECT_NAME} PRIVATE
         PowerTuneUtilsLibplugin
         PowerTuneCoreLibplugin
+        PowerTuneUiLibplugin
         PowerTuneSettingsLibplugin
         GaugesCoreLibplugin
         GaugesStylesLibplugin
@@ -466,6 +494,7 @@ set(QML_IMPORT_PATH
     "${CMAKE_CURRENT_SOURCE_DIR}/PowerTune"
     "${CMAKE_CURRENT_SOURCE_DIR}/PowerTune/Core"
     "${CMAKE_CURRENT_SOURCE_DIR}/PowerTune/Settings"
+    "${CMAKE_CURRENT_SOURCE_DIR}/PowerTune/UI"
     "${CMAKE_CURRENT_SOURCE_DIR}/PowerTune/Gauges/Core"
     "${CMAKE_CURRENT_SOURCE_DIR}/PowerTune/Gauges/Styles"
     "${CMAKE_CURRENT_SOURCE_DIR}/PowerTune/Gauges/Widgets"

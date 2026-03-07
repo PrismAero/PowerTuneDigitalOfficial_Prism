@@ -65,7 +65,7 @@ Rectangle {
     function setloadersource()
     {
         if (rpmwarn || boostwarn || coolanttempwarn || knockwarn) {
-            warningSign.setSource("qrc:/qt/qml/PowerTune/Gauges/Shared/PowerTune/Gauges/Shared/Warning.qml", { "warningtext": warnmsg.text })
+            warningSign.setSource(Qt.resolvedUrl("Warning.qml"), { "warningtext": warnmsg.text })
         }
         if (!rpmwarn && !boostwarn && !coolanttempwarn && !knockwarn)
             warningSign.source = "" //Removes all warning signs

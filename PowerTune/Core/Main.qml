@@ -84,7 +84,7 @@ ApplicationWindow {
         Loader {
             id: firstPageLoader
             // * Default dashboard - shows Intro until user configures via DashSelector
-            source: "qrc:/qt/qml/PowerTune/Core/PowerTune/Core/Intro.qml"
+            source: Qt.resolvedUrl("Intro.qml")
         }
 
         Loader {

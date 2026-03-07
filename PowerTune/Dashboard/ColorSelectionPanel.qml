@@ -9,7 +9,10 @@ Rectangle {
     y: 0
     height: dashWindow ? dashWindow.height * 0.41 : 200
     width: dashWindow ? dashWindow.width * 0.625 : 500
-    color: "darkgrey"
+    color: DashboardTheme.panelBackground
+    radius: DashboardTheme.panelRadius
+    border.color: DashboardTheme.panelBorder
+    border.width: 1
     z: 200
     visible: false
 

@@ -5,18 +5,18 @@ QtObject {
     id: factory
 
     readonly property var typeRegistry: ({
-        "Round gauge":      "qrc:/qt/qml/PowerTune/Gauges/Widgets/PowerTune/Gauges/Widgets/RoundGauge.qml",
-        "Square gauge":     "qrc:/qt/qml/PowerTune/Gauges/Widgets/PowerTune/Gauges/Widgets/SquareGauge.qml",
-        "Bar gauge":        "qrc:/qt/qml/PowerTune/Gauges/Widgets/PowerTune/Gauges/Widgets/VerticalBarGauge.qml",
-        "Text label gauge": "qrc:/qt/qml/PowerTune/Gauges/Media/PowerTune/Gauges/Media/MyTextLabel.qml",
-        "gauge image":      "qrc:/qt/qml/PowerTune/Gauges/Media/PowerTune/Gauges/Media/Picture.qml",
-        "State gauge":      "qrc:/qt/qml/PowerTune/Gauges/Media/PowerTune/Gauges/Media/StatePicture.qml",
-        "State GIF":        "qrc:/qt/qml/PowerTune/Gauges/Media/PowerTune/Gauges/Media/StateGIF.qml",
-        "Main gauge":       "qrc:/qt/qml/PowerTune/Gauges/Widgets/PowerTune/Gauges/Widgets/SquareGaugeMain.qml",
-        "Arc fill gauge":   "qrc:/qt/qml/PowerTune/Gauges/Widgets/PowerTune/Gauges/Widgets/ArcFillGauge.qml",
-        "Numeric cell":     "qrc:/qt/qml/PowerTune/Gauges/Widgets/PowerTune/Gauges/Widgets/NumericCell.qml",
-        "Gear indicator":   "qrc:/qt/qml/PowerTune/Gauges/Widgets/PowerTune/Gauges/Widgets/GearIndicator.qml",
-        "Modern round gauge": "qrc:/qt/qml/PowerTune/Gauges/Widgets/PowerTune/Gauges/Widgets/ModernRoundGauge.qml"
+        "Round gauge":      Qt.resolvedUrl("../Widgets/RoundGauge.qml"),
+        "Square gauge":     Qt.resolvedUrl("../Widgets/SquareGauge.qml"),
+        "Bar gauge":        Qt.resolvedUrl("../Widgets/VerticalBarGauge.qml"),
+        "Text label gauge": Qt.resolvedUrl("../Media/MyTextLabel.qml"),
+        "gauge image":      Qt.resolvedUrl("../Media/Picture.qml"),
+        "State gauge":      Qt.resolvedUrl("../Media/StatePicture.qml"),
+        "State GIF":        Qt.resolvedUrl("../Media/StateGIF.qml"),
+        "Main gauge":       Qt.resolvedUrl("../Widgets/SquareGaugeMain.qml"),
+        "Arc fill gauge":   Qt.resolvedUrl("../Widgets/ArcFillGauge.qml"),
+        "Numeric cell":     Qt.resolvedUrl("../Widgets/NumericCell.qml"),
+        "Gear indicator":   Qt.resolvedUrl("../Widgets/GearIndicator.qml"),
+        "Modern round gauge": Qt.resolvedUrl("../Widgets/ModernRoundGauge.qml")
     })
 
     readonly property var _propertyKeys: ({

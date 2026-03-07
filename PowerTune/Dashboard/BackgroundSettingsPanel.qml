@@ -7,7 +7,10 @@ Rectangle {
     id: root
     width: dashWindow ? dashWindow.width * 0.25 : 200
     height: dashWindow ? dashWindow.height * 0.625 : 300
-    color: "darkgrey"
+    color: DashboardTheme.panelBackground
+    radius: DashboardTheme.panelRadius
+    border.color: DashboardTheme.panelBorder
+    border.width: 1
     x: 0
     y: 0
     z: 200
@@ -35,16 +38,16 @@ Rectangle {
             rpmSourceChanged("");
             break;
         case 1:
-            rpmSourceChanged("qrc:/qt/qml/PowerTune/Gauges/Styles/PowerTune/Gauges/Styles/RPMBarStyle1.qml");
+            rpmSourceChanged(Qt.resolvedUrl("../Gauges/Styles/RPMBarStyle1.qml"));
             break;
         case 2:
-            rpmSourceChanged("qrc:/qt/qml/PowerTune/Gauges/Styles/PowerTune/Gauges/Styles/RPMBarStyle2.qml");
+            rpmSourceChanged(Qt.resolvedUrl("../Gauges/Styles/RPMBarStyle2.qml"));
             break;
         case 3:
-            rpmSourceChanged("qrc:/qt/qml/PowerTune/Gauges/Styles/PowerTune/Gauges/Styles/RPMBarStyle3.qml");
+            rpmSourceChanged(Qt.resolvedUrl("../Gauges/Styles/RPMBarStyle3.qml"));
             break;
         case 4:
-            rpmSourceChanged("qrc:/qt/qml/PowerTune/Gauges/Widgets/PowerTune/Gauges/Widgets/RPMBar.qml");
+            rpmSourceChanged(Qt.resolvedUrl("../Gauges/Widgets/RPMBar.qml"));
             break;
         }
     }

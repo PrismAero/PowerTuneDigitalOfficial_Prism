@@ -13,7 +13,7 @@ Rectangle {
     Loader {
         id: rpmbarloader
         anchors.fill: measurements
-        source: "qrc:/qt/qml/PowerTune/Gauges/Styles/PowerTune/Gauges/Styles/RPMBarStyle1.qml"
+        source: Qt.resolvedUrl("../Styles/RPMBarStyle1.qml")
     }
 
     //STAGING Lights
