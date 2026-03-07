@@ -64,9 +64,13 @@ Item {
     Component.onCompleted: {
         if (datastore) {
             gaugelist.clear();
-            var datamodel = JSON.parse(datastore);
-            for (var i = 0; i < datamodel.length; ++i)
-                gaugelist.append(datamodel[i]);
+            try {
+                var datamodel = JSON.parse(datastore);
+                for (var i = 0; i < datamodel.length; ++i)
+                    gaugelist.append(datamodel[i]);
+            } catch (e) {
+                console.warn("UserDashboard: Ignoring invalid stored dash JSON:", e);
+            }
         }
         createDash();
         bgPanel.syncBackgroundColor(mainbackroundcolor.color);
@@ -180,7 +184,7 @@ Item {
                 extraLoader.source = "";
                 break;
             case 1:
-                extraLoader.setSource("qrc:/qt/qml/PowerTune/Gauges/Sensors/PowerTune/Gauges/Sensors/PFCSensors.qml", {
+                extraLoader.setSource(Qt.resolvedUrl("../Gauges/Sensors/PFCSensors.qml"), {
                     sizeoftext: mainwindow.width / 54
                 });
                 break;

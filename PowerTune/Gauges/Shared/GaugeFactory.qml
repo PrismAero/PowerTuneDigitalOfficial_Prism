@@ -339,7 +339,13 @@ QtObject {
     }
 
     function deserializeDashboardFromJSON(jsonString, parentItem) {
-        var doc = JSON.parse(jsonString);
+        var doc = null;
+        try {
+            doc = JSON.parse(jsonString);
+        } catch (e) {
+            console.warn("GaugeFactory: Invalid dashboard JSON:", e);
+            return 0;
+        }
         if (!doc || !doc.gauges)
             return 0;
         var count = 0;

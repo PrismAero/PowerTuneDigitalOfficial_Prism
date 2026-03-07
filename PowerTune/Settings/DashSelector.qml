@@ -20,17 +20,17 @@ Rectangle {
     }
 
     function getDashByIndex(index) {
-        var dashPath = "qrc:/qt/qml/PrismPT/Dashboard/PowerTune/Dashboard/";
         switch (index) {
         case 0:
-            return dashPath + "UserDashboard.qml";
+            return Qt.resolvedUrl("../Dashboard/UserDashboard.qml");
         case 1:
-            return dashPath + "UserDashboard.qml";
+            return Qt.resolvedUrl("../Dashboard/UserDashboard.qml");
         case 2:
-            return dashPath + "UserDashboard.qml";
+            return Qt.resolvedUrl("../Dashboard/UserDashboard.qml");
         case 3:
-            return "qrc:/qt/qml/PowerTune/Settings/PowerTune/Settings/CanMonitor.qml";
+            return Qt.resolvedUrl("CanMonitor.qml");
         }
+        return "";
     }
 
     function getDashIndex(comboIndex) {

@@ -634,8 +634,7 @@ ApplicationWindow {
                 && item.hasOwnProperty("cursorPosition")
                 && item.hasOwnProperty("inputMethodHints")
                 && !item.hasOwnProperty("currentIndex")  // Exclude ComboBox
-                && item.hasOwnProperty("readOnly") !== undefined
-                && !item.readOnly) {
+                && (!item.hasOwnProperty("readOnly") || !item.readOnly)) {
                 prismKeyboard.show(item)
             } else {
                 if (prismKeyboard.visible) {

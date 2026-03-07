@@ -20,8 +20,12 @@ Item {
         units.unitadjust()
         if (datastore) {
             gaugelist.clear()
-            var datamodel = JSON.parse(datastore)
-            for (var i = 0; i < datamodel.length; ++i) gaugelist.append(datamodel[i])
+            try {
+                var datamodel = JSON.parse(datastore)
+                for (var i = 0; i < datamodel.length; ++i) gaugelist.append(datamodel[i])
+            } catch (e) {
+                console.warn("Cluster: Ignoring invalid stored dash JSON:", e)
+            }
         }
         createDash()
     }
