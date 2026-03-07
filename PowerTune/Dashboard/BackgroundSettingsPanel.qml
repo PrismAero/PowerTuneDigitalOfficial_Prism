@@ -1,5 +1,6 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
+import PrismPT.Dashboard 1.0
 import PowerTune.Gauges.Shared 1.0
 import PowerTune.Utils 1.0
 
@@ -41,26 +42,13 @@ Rectangle {
             rpmSourceChanged(Qt.resolvedUrl("../Gauges/Styles/RPMBarStyle1.qml"));
             break;
         case 2:
-            rpmSourceChanged(Qt.resolvedUrl("../Gauges/Styles/RPMBarStyle2.qml"));
-            break;
-        case 3:
-            rpmSourceChanged(Qt.resolvedUrl("../Gauges/Styles/RPMBarStyle3.qml"));
-            break;
-        case 4:
             rpmSourceChanged(Qt.resolvedUrl("../Gauges/Widgets/RPMBar.qml"));
             break;
         }
     }
 
     function selectExtra() {
-        switch (extraSelector.currentIndex) {
-        case 0:
-            extraChanged(0);
-            break;
-        case 1:
-            extraChanged(1);
-            break;
-        }
+        extraChanged(0);
     }
 
     function updatePicList(currentSource) {
@@ -87,7 +75,7 @@ Rectangle {
             width: dashWindow ? dashWindow.width * 0.25 : 200
             height: dashWindow ? dashWindow.height * 0.083 : 40
             font.pixelSize: dashWindow ? dashWindow.width * 0.018 : 15
-            model: [Translator.translate("None", Settings.language), Translator.translate("Style", Settings.language) + " 1", Translator.translate("Style", Settings.language) + " 2", Translator.translate("Style", Settings.language) + " 3", Translator.translate("Style", Settings.language) + " 4"]
+            model: [Translator.translate("None", Settings.language), Translator.translate("Style", Settings.language) + " 1", Translator.translate("Style", Settings.language) + " 2"]
             onCurrentIndexChanged: selectRpmStyle()
             delegate: ItemDelegate {
                 width: rpmstyleselector.width
@@ -181,7 +169,7 @@ Rectangle {
             width: dashWindow ? dashWindow.width * 0.25 : 200
             height: dashWindow ? dashWindow.height * 0.083 : 40
             font.pixelSize: dashWindow ? dashWindow.width * 0.018 : 15
-            model: [Translator.translate(Translator.translate("None", Settings.language), Settings.language), "PFC Sensors"]
+            model: [Translator.translate(Translator.translate("None", Settings.language), Settings.language)]
             onCurrentIndexChanged: selectExtra()
             delegate: ItemDelegate {
                 width: extraSelector.width

@@ -34,7 +34,6 @@ Rectangle {
             }
         }
         function onPimChanged() { updateBoostWarning() }
-        function onBoostpresChanged() { updateBoostWarning() }
         function onWatertempChanged() {
             if (Engine.Watertemp > Settings.waterwarn) {
                 coolanttempwarn = true

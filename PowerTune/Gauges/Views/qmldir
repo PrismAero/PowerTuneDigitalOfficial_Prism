@@ -1,8 +1,0 @@
-module PowerTune.Gauges.Views
-Dashboard 1.0 Dashboard.qml
-Cluster 1.0 Cluster.qml
-SportDash 1.0 SportDash.qml
-Advanced 1.0 Advanced.qml
-SpeedMeasurements 1.0 SpeedMeasurements.qml
-GaugeNeedle_minus90to180 1.0 GaugeNeedle_minus90to180.qml
-GaugeNeedle_minus180to90 1.0 GaugeNeedle_minus180to90.qml

@@ -1,5 +1,6 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
+import PrismPT.Dashboard 1.0
 import PowerTune.Gauges.Shared 1.0
 import PowerTune.Utils 1.0
 
@@ -249,77 +250,6 @@ Rectangle {
             }
         }
         Button {
-            id: btnaddPicture
-            width: dashWindow ? dashWindow.width * 0.118 : 150
-            height: dashWindow ? dashWindow.height * 0.083 : 40
-            text: Translator.translate("Image", Settings.language)
-            font.pixelSize: dashWindow ? dashWindow.width * 0.015 : 12
-            onClicked: {
-                GaugeFactory.createGauge("gauge image", gaugeParent, {
-                    "x": 10,
-                    "y": 10,
-                    "pictureheight": 100,
-                    "picturesource": "qrc:/Resources/graphics/slectImage.png"
-                });
-            }
-        }
-        Button {
-            id: btnaddStatePicture
-            width: dashWindow ? dashWindow.width * 0.118 : 150
-            height: dashWindow ? dashWindow.height * 0.083 : 40
-            text: Translator.translate("State", Settings.language) + " " + Translator.translate("Image", Settings.language)
-            font.pixelSize: dashWindow ? dashWindow.width * 0.015 : 12
-            onClicked: {
-                GaugeFactory.createGauge("State gauge", gaugeParent, {
-                    "x": 10,
-                    "y": 10,
-                    "pictureheight": 100,
-                    "mainvaluename": "speed",
-                    "triggervalue": 1,
-                    "statepicturesourceoff": "qrc:/Resources/graphics/selectStateImage.png",
-                    "statepicturesourceon": "qrc:/Resources/graphics/selectStateImage.png"
-                });
-            }
-        }
-        Button {
-            id: btnaddStateGIF
-            width: dashWindow ? dashWindow.width * 0.118 : 150
-            height: dashWindow ? dashWindow.height * 0.083 : 40
-            text: Translator.translate("State", Settings.language) + " " + Translator.translate("GIF", Settings.language)
-            font.pixelSize: dashWindow ? dashWindow.width * 0.015 : 12
-            onClicked: {
-                GaugeFactory.createGauge("State GIF", gaugeParent, {
-                    "x": 10,
-                    "y": 10,
-                    "pictureheight": 100,
-                    "mainvaluename": "speed",
-                    "triggervalue": 1,
-                    "statepicturesourceoff": "qrc:/Resources/graphics/StateGIF.gif",
-                    "statepicturesourceon": "qrc:/Resources/graphics/StateGIF.gif",
-                    "triggeroffvalue": 0
-                });
-            }
-        }
-
-        Button {
-            id: btnaddArcFill
-            width: dashWindow ? dashWindow.width * 0.118 : 150
-            height: dashWindow ? dashWindow.height * 0.083 : 40
-            text: "Arc Fill"
-            font.pixelSize: dashWindow ? dashWindow.width * 0.015 : 12
-            onClicked: {
-                var ds = DatasourceService.allSources.get(cbx_sources.currentIndex);
-                GaugeFactory.createGauge("Arc fill gauge", gaugeParent, {
-                    "width": 200, "height": 200, "x": 20, "y": 20,
-                    "mainvaluename": ds.sourcename,
-                    "maxvalue": ds.maxvalue, "minvalue": 0,
-                    "warnvaluehigh": ds.maxvalue, "warnvaluelow": -20000,
-                    "decimalpoints": ds.decimalpoints,
-                    "unittext": ds.defaultsymbol, "labeltext": ds.titlename
-                });
-            }
-        }
-        Button {
             id: btnaddNumericCell
             width: dashWindow ? dashWindow.width * 0.118 : 150
             height: dashWindow ? dashWindow.height * 0.083 : 40
@@ -496,12 +426,8 @@ Rectangle {
     function showImportMode() {
         btnaddRound.visible = false;
         btnaddText.visible = false;
-        btnaddPicture.visible = false;
-        btnaddStatePicture.visible = false;
-        btnaddStateGIF.visible = false;
         btnaddBar.visible = false;
         btnaddSquare.visible = false;
-        btnaddArcFill.visible = false;
         btnaddNumericCell.visible = false;
         btnaddGearIndicator.visible = false;
         btnaddModernRound.visible = false;
@@ -523,12 +449,8 @@ Rectangle {
     function showNormalMode() {
         btnaddRound.visible = true;
         btnaddText.visible = true;
-        btnaddPicture.visible = true;
-        btnaddStatePicture.visible = true;
-        btnaddStateGIF.visible = true;
         btnaddBar.visible = true;
         btnaddSquare.visible = true;
-        btnaddArcFill.visible = true;
         btnaddNumericCell.visible = true;
         btnaddGearIndicator.visible = true;
         btnaddModernRound.visible = true;

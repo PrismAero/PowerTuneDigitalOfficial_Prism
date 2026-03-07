@@ -2,7 +2,7 @@ import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Controls.Material 2.0
 import Qt.labs.settings 1.0
-import PowerTune.Gauges.Media 1.0
+import PowerTune.Gauges.Widgets 1.0
 import PowerTune.Gauges.Shared 1.0
 import PowerTune.Utils 1.0
 
@@ -179,16 +179,7 @@ Item {
             mainbackroundcolor.color = c;
         }
         onExtraChanged: function (index) {
-            switch (index) {
-            case 0:
-                extraLoader.source = "";
-                break;
-            case 1:
-                extraLoader.setSource(Qt.resolvedUrl("../Gauges/Sensors/PFCSensors.qml"), {
-                    sizeoftext: mainwindow.width / 54
-                });
-                break;
-            }
+            extraLoader.source = "";
         }
     }
 

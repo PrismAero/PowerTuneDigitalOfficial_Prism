@@ -1,12 +1,7 @@
 <RCC>
     <qresource prefix="/">
-        <!-- GPS Tracks (not part of PowerTune modules) -->
-        <file>GPSTracks/Laptimer.qml</file>
-
         <!-- Resources/Graphics -->
         <file>Resources/graphics/Tacho_Mitte.png</file>
-        <file>Resources/graphics/Racedash800x480.png</file>
-        <file>Resources/graphics/MainDash.png</file>
         <file>Resources/graphics/vertrevcanvas.png</file>
         <file>Resources/graphics/next.png</file>
         <file>Resources/graphics/pause.png</file>
@@ -23,15 +18,11 @@
         <file>Resources/graphics/fueltechempty.png</file>
         <file>Resources/graphics/fueltechfill.png</file>
         <file>Resources/graphics/Racedash.png</file>
-        <file>Resources/graphics/MainDashnew.png</file>
         <file>Resources/graphics/Logo.png</file>
         <file>Resources/graphics/needle.svg</file>
         <file>Resources/graphics/RoungGaugeRing.png</file>
-        <file>Resources/graphics/slectImage.png</file>
-        <file>Resources/graphics/selectStateImage.png</file>
         <file>Resources/graphics/brightness.png</file>
         <file>Resources/graphics/green_Light.png</file>
-        <file>Resources/graphics/StateGIF.gif</file>
         <file>Resources/graphics/contactQR.png</file>
         <file>Resources/graphics/facebookQR.png</file>
         <file>Resources/graphics/instagramQR.png</file>
@@ -49,6 +40,12 @@
 
         <!-- Resources/Fonts -->
         <file>Resources/fonts/MaterialSymbolsOutlined.ttf</file>
+        <file>Resources/fonts/hyperspacerace-regular.otf</file>
+        <file>Resources/fonts/hyperspacerace-bold.otf</file>
+        <file>Resources/fonts/hyperspacerace-condensedbold.otf</file>
+        <file>Resources/fonts/hyperspacerace-condensedheavy.otf</file>
+        <file>Resources/fonts/hyperspacerace-compressedbold.otf</file>
+        <file>Resources/fonts/hyperspacerace-light.otf</file>
 
         <!-- Resources/KTracks -->
         <file>Resources/KTracks/Countries.txt</file>

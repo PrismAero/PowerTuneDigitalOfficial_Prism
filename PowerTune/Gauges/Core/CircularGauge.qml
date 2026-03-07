@@ -97,7 +97,7 @@ Item {
 
                 property var styleData: QtObject {
                     readonly property real value: majorTickmarkContainer.tickValue
-                    readonly property int index: majorTickmarkContainer.index
+                    readonly property int index: index
                 }
 
                 transform: Rotation {
@@ -144,7 +144,7 @@ Item {
 
                 property var styleData: QtObject {
                     readonly property real value: minorTickmarkContainer.tickValue
-                    readonly property int index: minorTickmarkContainer.index
+                    readonly property int index: index
                 }
 
                 transform: Rotation {
@@ -177,7 +177,7 @@ Item {
 
             property var styleData: QtObject {
                 readonly property real value: labelLoader.labelValue
-                readonly property int index: labelLoader.index
+                readonly property int index: index
             }
 
             x: root.width / 2 + labelRadius * Math.sin(degToRad(labelAngle)) - (item ? item.width / 2 : 0)

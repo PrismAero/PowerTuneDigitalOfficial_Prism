@@ -1,5 +1,6 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
+import PrismPT.Dashboard 1.0
 import PowerTune.Gauges.Shared 1.0
 import PowerTune.Utils 1.0
 
