@@ -1,0 +1,2285 @@
+{
+  "qrcFileCount": 6,
+  "inventory": [
+    {
+      "qrcFile": "docs-misc/device-backup/home/pi/Recoverysrc/qml.qrc",
+      "resources": [
+        {
+          "prefix": "/",
+          "entries": [
+            {
+              "file": "main.qml",
+              "alias": "",
+              "folderDepth": 0,
+              "registeredPath": "/main.qml"
+            },
+            {
+              "file": "WifiCountryList.qml",
+              "alias": "",
+              "folderDepth": 0,
+              "registeredPath": "/WifiCountryList.qml"
+            },
+            {
+              "file": "Logo.png",
+              "alias": "",
+              "folderDepth": 0,
+              "registeredPath": "/Logo.png"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "qrcFile": "docs-misc/device-backup/home/pi/src/graphics.qrc",
+      "resources": [
+        {
+          "prefix": "/",
+          "entries": [
+            {
+              "file": "graphics/background.png",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/graphics/background.png"
+            },
+            {
+              "file": "graphics/Dial.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/graphics/Dial.qml"
+            },
+            {
+              "file": "graphics/needle.png",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/graphics/needle.png"
+            },
+            {
+              "file": "graphics/needle_shadow.png",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/graphics/needle_shadow.png"
+            },
+            {
+              "file": "graphics/overlay.png",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/graphics/overlay.png"
+            },
+            {
+              "file": "graphics/quit.png",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/graphics/quit.png"
+            },
+            {
+              "file": "graphics/QuitButton.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/graphics/QuitButton.qml"
+            },
+            {
+              "file": "graphics/vertrevcanvas.png",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/graphics/vertrevcanvas.png"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "qrcFile": "docs-misc/device-backup/home/pi/src/qml.qrc",
+      "resources": [
+        {
+          "prefix": "/",
+          "entries": [
+            {
+              "file": "main.qml",
+              "alias": "",
+              "folderDepth": 0,
+              "registeredPath": "/main.qml"
+            },
+            {
+              "file": "SerialSettings.qml",
+              "alias": "",
+              "folderDepth": 0,
+              "registeredPath": "/SerialSettings.qml"
+            },
+            {
+              "file": "Settings/main.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Settings/main.qml"
+            },
+            {
+              "file": "Settings/DashSelector.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Settings/DashSelector.qml"
+            },
+            {
+              "file": "Settings/sensehat.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Settings/sensehat.qml"
+            },
+            {
+              "file": "Settings/warn_gear.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Settings/warn_gear.qml"
+            },
+            {
+              "file": "Settings/speed.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Settings/speed.qml"
+            },
+            {
+              "file": "Settings/analog.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Settings/analog.qml"
+            },
+            {
+              "file": "Settings/rpm.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Settings/rpm.qml"
+            },
+            {
+              "file": "Settings/startup.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Settings/startup.qml"
+            },
+            {
+              "file": "Settings/network.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Settings/network.qml"
+            },
+            {
+              "file": "Settings/WifiCountryList.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Settings/WifiCountryList.qml"
+            },
+            {
+              "file": "Settings/DashSelectorWidget.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Settings/DashSelectorWidget.qml"
+            },
+            {
+              "file": "graphics/Tacho_Mitte.png",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/graphics/Tacho_Mitte.png"
+            },
+            {
+              "file": "Gauges/DashboardGaugeStyle.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Gauges/DashboardGaugeStyle.qml"
+            },
+            {
+              "file": "Gauges/TachometerStyle.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Gauges/TachometerStyle.qml"
+            },
+            {
+              "file": "Gauges/PFCSensors.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Gauges/PFCSensors.qml"
+            },
+            {
+              "file": "Gauges/BarGauge.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Gauges/BarGauge.qml"
+            },
+            {
+              "file": "Gauges/GPS.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Gauges/GPS.qml"
+            },
+            {
+              "file": "graphics/Racedash800x480.png",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/graphics/Racedash800x480.png"
+            },
+            {
+              "file": "graphics/MainDash.png",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/graphics/MainDash.png"
+            },
+            {
+              "file": "Gauges/GaugeNeedle_minus90to180.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Gauges/GaugeNeedle_minus90to180.qml"
+            },
+            {
+              "file": "Gauges/GaugeNeedle_minus180to90.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Gauges/GaugeNeedle_minus180to90.qml"
+            },
+            {
+              "file": "Gauges/Charts.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Gauges/Charts.qml"
+            },
+            {
+              "file": "Gauges/ForceMeter.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Gauges/ForceMeter.qml"
+            },
+            {
+              "file": "Gauges/SensorTest.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Gauges/SensorTest.qml"
+            },
+            {
+              "file": "Gauges/createverticalbargauge.js",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Gauges/createverticalbargauge.js"
+            },
+            {
+              "file": "Gauges/Dyno.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Gauges/Dyno.qml"
+            },
+            {
+              "file": "Gauges/Camera.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Gauges/Camera.qml"
+            },
+            {
+              "file": "graphics/vertrevcanvas.png",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/graphics/vertrevcanvas.png"
+            },
+            {
+              "file": "Gauges/Cluster.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Gauges/Cluster.qml"
+            },
+            {
+              "file": "Gauges/Squaregauge.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Gauges/Squaregauge.qml"
+            },
+            {
+              "file": "Sounds/alarm.wav",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Sounds/alarm.wav"
+            },
+            {
+              "file": "graphics/next.png",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/graphics/next.png"
+            },
+            {
+              "file": "graphics/pause.png",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/graphics/pause.png"
+            },
+            {
+              "file": "graphics/play.png",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/graphics/play.png"
+            },
+            {
+              "file": "graphics/previous.png",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/graphics/previous.png"
+            },
+            {
+              "file": "Gauges/Mediaplayer.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Gauges/Mediaplayer.qml"
+            },
+            {
+              "file": "Gauges/Screentoggle.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Gauges/Screentoggle.qml"
+            },
+            {
+              "file": "Gauges/ConsultTest.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Gauges/ConsultTest.qml"
+            },
+            {
+              "file": "Gauges/HaltechFlags.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Gauges/HaltechFlags.qml"
+            },
+            {
+              "file": "graphics/ledgreen.png",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/graphics/ledgreen.png"
+            },
+            {
+              "file": "graphics/ledoff.png",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/graphics/ledoff.png"
+            },
+            {
+              "file": "graphics/ledred.png",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/graphics/ledred.png"
+            },
+            {
+              "file": "graphics/ledyellow.png",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/graphics/ledyellow.png"
+            },
+            {
+              "file": "graphics/RPM_BG.png",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/graphics/RPM_BG.png"
+            },
+            {
+              "file": "graphics/RPM_Fill.png",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/graphics/RPM_Fill.png"
+            },
+            {
+              "file": "graphics/empty.png",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/graphics/empty.png"
+            },
+            {
+              "file": "graphics/fill.png",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/graphics/fill.png"
+            },
+            {
+              "file": "Gauges/RPMbar.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Gauges/RPMbar.qml"
+            },
+            {
+              "file": "Gauges/ShiftLights.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Gauges/ShiftLights.qml"
+            },
+            {
+              "file": "graphics/fueltechempty.png",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/graphics/fueltechempty.png"
+            },
+            {
+              "file": "graphics/fueltechfill.png",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/graphics/fueltechfill.png"
+            },
+            {
+              "file": "Gauges/Warning.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Gauges/Warning.qml"
+            },
+            {
+              "file": "Gauges/WarningLoader.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Gauges/WarningLoader.qml"
+            },
+            {
+              "file": "graphics/Racedash.png",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/graphics/Racedash.png"
+            },
+            {
+              "file": "Gauges/RPMBarStyle1.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Gauges/RPMBarStyle1.qml"
+            },
+            {
+              "file": "Gauges/RPMBARStyle2.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Gauges/RPMBARStyle2.qml"
+            },
+            {
+              "file": "OBDPIDS.qml",
+              "alias": "",
+              "folderDepth": 0,
+              "registeredPath": "/OBDPIDS.qml"
+            },
+            {
+              "file": "ConsultRegs.qml",
+              "alias": "",
+              "folderDepth": 0,
+              "registeredPath": "/ConsultRegs.qml"
+            },
+            {
+              "file": "GPSTracks/Laptimer.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/GPSTracks/Laptimer.qml"
+            },
+            {
+              "file": "Gauges/Userdash1.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Gauges/Userdash1.qml"
+            },
+            {
+              "file": "Gauges/Userdash2.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Gauges/Userdash2.qml"
+            },
+            {
+              "file": "Gauges/Userdash3.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Gauges/Userdash3.qml"
+            },
+            {
+              "file": "Gauges/createsquaregaugeUserDash.js",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Gauges/createsquaregaugeUserDash.js"
+            },
+            {
+              "file": "Gauges/RPMbarStyle3.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Gauges/RPMbarStyle3.qml"
+            },
+            {
+              "file": "graphics/MainDashnew.png",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/graphics/MainDashnew.png"
+            },
+            {
+              "file": "graphics/Logo.png",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/graphics/Logo.png"
+            },
+            {
+              "file": "Intro.qml",
+              "alias": "",
+              "folderDepth": 0,
+              "registeredPath": "/Intro.qml"
+            },
+            {
+              "file": "Gauges/DatasourcesList.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Gauges/DatasourcesList.qml"
+            },
+            {
+              "file": "Gauges/ColorList.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Gauges/ColorList.qml"
+            },
+            {
+              "file": "Gauges/ColorpickerCombobox.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Gauges/ColorpickerCombobox.qml"
+            },
+            {
+              "file": "Gauges/RoundGauge.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Gauges/RoundGauge.qml"
+            },
+            {
+              "file": "Gauges/Verticalbargauge.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Gauges/Verticalbargauge.qml"
+            },
+            {
+              "file": "Gauges/createRoundGauge.js",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Gauges/createRoundGauge.js"
+            },
+            {
+              "file": "graphics/needle.svg",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/graphics/needle.svg"
+            },
+            {
+              "file": "graphics/RoungGaugeRing.png",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/graphics/RoungGaugeRing.png"
+            },
+            {
+              "file": "Gauges/MyTextLabel.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Gauges/MyTextLabel.qml"
+            },
+            {
+              "file": "Gauges/createText.js",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Gauges/createText.js"
+            },
+            {
+              "file": "Gauges/createPicture.js",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Gauges/createPicture.js"
+            },
+            {
+              "file": "Gauges/Picture.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Gauges/Picture.qml"
+            },
+            {
+              "file": "graphics/slectImage.png",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/graphics/slectImage.png"
+            },
+            {
+              "file": "AnalogInputs.qml",
+              "alias": "",
+              "folderDepth": 0,
+              "registeredPath": "/AnalogInputs.qml"
+            },
+            {
+              "file": "Gauges/Statepicture.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Gauges/Statepicture.qml"
+            },
+            {
+              "file": "Gauges/createStatePicture.js",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Gauges/createStatePicture.js"
+            },
+            {
+              "file": "graphics/selectStateImage.png",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/graphics/selectStateImage.png"
+            },
+            {
+              "file": "graphics/brightness.png",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/graphics/brightness.png"
+            },
+            {
+              "file": "Gauges/SpeedMeasurements.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Gauges/SpeedMeasurements.qml"
+            },
+            {
+              "file": "graphics/green_Light.png",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/graphics/green_Light.png"
+            },
+            {
+              "file": "Gauges/StateGIF.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Gauges/StateGIF.qml"
+            },
+            {
+              "file": "Gauges/createStateGIF.js",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Gauges/createStateGIF.js"
+            },
+            {
+              "file": "graphics/StateGIF.gif",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/graphics/StateGIF.gif"
+            },
+            {
+              "file": "KTracks/Countries.txt",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/KTracks/Countries.txt"
+            },
+            {
+              "file": "KTracks/Australia/Luddenham.txt",
+              "alias": "",
+              "folderDepth": 2,
+              "registeredPath": "/KTracks/Australia/Luddenham.txt"
+            },
+            {
+              "file": "KTracks/Australia/Archer Field Drift Park.txt",
+              "alias": "",
+              "folderDepth": 2,
+              "registeredPath": "/KTracks/Australia/Archer Field Drift Park.txt"
+            },
+            {
+              "file": "KTracks/Canada/Toronto Motorsports Park.txt",
+              "alias": "",
+              "folderDepth": 2,
+              "registeredPath": "/KTracks/Canada/Toronto Motorsports Park.txt"
+            },
+            {
+              "file": "KTracks/Australia/Lakeside Park.txt",
+              "alias": "",
+              "folderDepth": 2,
+              "registeredPath": "/KTracks/Australia/Lakeside Park.txt"
+            },
+            {
+              "file": "KTracks/Japan/Mt Haruna (Akina).txt",
+              "alias": "",
+              "folderDepth": 2,
+              "registeredPath": "/KTracks/Japan/Mt Haruna (Akina).txt"
+            },
+            {
+              "file": "KTracks/Australia/Barbagallo Large.txt",
+              "alias": "",
+              "folderDepth": 2,
+              "registeredPath": "/KTracks/Australia/Barbagallo Large.txt"
+            },
+            {
+              "file": "KTracks/New Zealand/Bruce McLaren Motorsportpark Large.txt",
+              "alias": "",
+              "folderDepth": 2,
+              "registeredPath": "/KTracks/New Zealand/Bruce McLaren Motorsportpark Large.txt"
+            },
+            {
+              "file": "KTracks/Japan/Tsukuba Circuit.txt",
+              "alias": "",
+              "folderDepth": 2,
+              "registeredPath": "/KTracks/Japan/Tsukuba Circuit.txt"
+            },
+            {
+              "file": "KTracks/Malaysia/Sepang F1 Circuit.txt",
+              "alias": "",
+              "folderDepth": 2,
+              "registeredPath": "/KTracks/Malaysia/Sepang F1 Circuit.txt"
+            },
+            {
+              "file": "KTracks/Australia/Queensland Layout 1.txt",
+              "alias": "",
+              "folderDepth": 2,
+              "registeredPath": "/KTracks/Australia/Queensland Layout 1.txt"
+            },
+            {
+              "file": "KTracks/Australia/Queensland Layout 2.txt",
+              "alias": "",
+              "folderDepth": 2,
+              "registeredPath": "/KTracks/Australia/Queensland Layout 2.txt"
+            },
+            {
+              "file": "KTracks/Australia/Queensland Layout 3.txt",
+              "alias": "",
+              "folderDepth": 2,
+              "registeredPath": "/KTracks/Australia/Queensland Layout 3.txt"
+            },
+            {
+              "file": "KTracks/Australia/Wakefield inner Circuit.txt",
+              "alias": "",
+              "folderDepth": 2,
+              "registeredPath": "/KTracks/Australia/Wakefield inner Circuit.txt"
+            },
+            {
+              "file": "KTracks/Australia/Wakefield outer Circuit.txt",
+              "alias": "",
+              "folderDepth": 2,
+              "registeredPath": "/KTracks/Australia/Wakefield outer Circuit.txt"
+            },
+            {
+              "file": "KTracks/Australia/Collie Motorplex.txt",
+              "alias": "",
+              "folderDepth": 2,
+              "registeredPath": "/KTracks/Australia/Collie Motorplex.txt"
+            },
+            {
+              "file": "KTracks/New Zealand/Pukekohe Park Raceway.txt",
+              "alias": "",
+              "folderDepth": 2,
+              "registeredPath": "/KTracks/New Zealand/Pukekohe Park Raceway.txt"
+            },
+            {
+              "file": "KTracks/Australia/Carnell Raceway.txt",
+              "alias": "",
+              "folderDepth": 2,
+              "registeredPath": "/KTracks/Australia/Carnell Raceway.txt"
+            },
+            {
+              "file": "KTracks/USA/Button Willow 1.txt",
+              "alias": "",
+              "folderDepth": 2,
+              "registeredPath": "/KTracks/USA/Button Willow 1.txt"
+            },
+            {
+              "file": "KTracks/Australia/Morgan Park B.txt",
+              "alias": "",
+              "folderDepth": 2,
+              "registeredPath": "/KTracks/Australia/Morgan Park B.txt"
+            },
+            {
+              "file": "KTracks/Australia/Morgan Park D.txt",
+              "alias": "",
+              "folderDepth": 2,
+              "registeredPath": "/KTracks/Australia/Morgan Park D.txt"
+            },
+            {
+              "file": "KTracks/Australia/Morgan Park E.txt",
+              "alias": "",
+              "folderDepth": 2,
+              "registeredPath": "/KTracks/Australia/Morgan Park E.txt"
+            },
+            {
+              "file": "KTracks/Australia/Morgan Park K.txt",
+              "alias": "",
+              "folderDepth": 2,
+              "registeredPath": "/KTracks/Australia/Morgan Park K.txt"
+            },
+            {
+              "file": "KTracks/Canada/Colabogie Big.txt",
+              "alias": "",
+              "folderDepth": 2,
+              "registeredPath": "/KTracks/Canada/Colabogie Big.txt"
+            },
+            {
+              "file": "KTracks/USA/Laguna Seca.txt",
+              "alias": "",
+              "folderDepth": 2,
+              "registeredPath": "/KTracks/USA/Laguna Seca.txt"
+            },
+            {
+              "file": "KTracks/Australia/Eastern Creek GP Circuit.txt",
+              "alias": "",
+              "folderDepth": 2,
+              "registeredPath": "/KTracks/Australia/Eastern Creek GP Circuit.txt"
+            },
+            {
+              "file": "KTracks/Australia/The Bend International Circuit.txt",
+              "alias": "",
+              "folderDepth": 2,
+              "registeredPath": "/KTracks/Australia/The Bend International Circuit.txt"
+            },
+            {
+              "file": "KTracks/Australia/The Bend West Circuit.txt",
+              "alias": "",
+              "folderDepth": 2,
+              "registeredPath": "/KTracks/Australia/The Bend West Circuit.txt"
+            },
+            {
+              "file": "ExBoardAnalog.qml",
+              "alias": "",
+              "folderDepth": 0,
+              "registeredPath": "/ExBoardAnalog.qml"
+            },
+            {
+              "file": "Gauges/TyreMonitor.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Gauges/TyreMonitor.qml"
+            },
+            {
+              "file": "Settings/CanMonitor.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Settings/CanMonitor.qml"
+            },
+            {
+              "file": "Translator.js",
+              "alias": "",
+              "folderDepth": 0,
+              "registeredPath": "/Translator.js"
+            },
+            {
+              "file": "graphics/Flags/de.png",
+              "alias": "",
+              "folderDepth": 2,
+              "registeredPath": "/graphics/Flags/de.png"
+            },
+            {
+              "file": "graphics/Flags/es.png",
+              "alias": "",
+              "folderDepth": 2,
+              "registeredPath": "/graphics/Flags/es.png"
+            },
+            {
+              "file": "graphics/Flags/jp.png",
+              "alias": "",
+              "folderDepth": 2,
+              "registeredPath": "/graphics/Flags/jp.png"
+            },
+            {
+              "file": "graphics/Flags/us.png",
+              "alias": "",
+              "folderDepth": 2,
+              "registeredPath": "/graphics/Flags/us.png"
+            },
+            {
+              "file": "graphics/Flags/fr.png",
+              "alias": "",
+              "folderDepth": 2,
+              "registeredPath": "/graphics/Flags/fr.png"
+            },
+            {
+              "file": "graphics/Flags/ae.png",
+              "alias": "",
+              "folderDepth": 2,
+              "registeredPath": "/graphics/Flags/ae.png"
+            },
+            {
+              "file": "BrightnessPopUp.qml",
+              "alias": "",
+              "folderDepth": 0,
+              "registeredPath": "/BrightnessPopUp.qml"
+            },
+            {
+              "file": "Settings/help.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Settings/help.qml"
+            },
+            {
+              "file": "graphics/contactQR.png",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/graphics/contactQR.png"
+            },
+            {
+              "file": "graphics/facebookQR.png",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/graphics/facebookQR.png"
+            },
+            {
+              "file": "graphics/instagramQR.png",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/graphics/instagramQR.png"
+            },
+            {
+              "file": "graphics/warrantyQR.png",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/graphics/warrantyQR.png"
+            },
+            {
+              "file": "graphics/userManualQR.png",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/graphics/userManualQR.png"
+            },
+            {
+              "file": "graphics/brightnessIncrease.png",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/graphics/brightnessIncrease.png"
+            },
+            {
+              "file": "graphics/brightnessDecrease.png",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/graphics/brightnessDecrease.png"
+            },
+            {
+              "file": "Gauges/Keypad.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Gauges/Keypad.qml"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "qrcFile": "docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/graphics.qrc",
+      "resources": [
+        {
+          "prefix": "/",
+          "entries": [
+            {
+              "file": "graphics/background.png",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/graphics/background.png"
+            },
+            {
+              "file": "graphics/Dial.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/graphics/Dial.qml"
+            },
+            {
+              "file": "graphics/needle.png",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/graphics/needle.png"
+            },
+            {
+              "file": "graphics/needle_shadow.png",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/graphics/needle_shadow.png"
+            },
+            {
+              "file": "graphics/overlay.png",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/graphics/overlay.png"
+            },
+            {
+              "file": "graphics/quit.png",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/graphics/quit.png"
+            },
+            {
+              "file": "graphics/QuitButton.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/graphics/QuitButton.qml"
+            },
+            {
+              "file": "graphics/vertrevcanvas.png",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/graphics/vertrevcanvas.png"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "qrcFile": "docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc",
+      "resources": [
+        {
+          "prefix": "/",
+          "entries": [
+            {
+              "file": "main.qml",
+              "alias": "",
+              "folderDepth": 0,
+              "registeredPath": "/main.qml"
+            },
+            {
+              "file": "SerialSettings.qml",
+              "alias": "",
+              "folderDepth": 0,
+              "registeredPath": "/SerialSettings.qml"
+            },
+            {
+              "file": "Settings/main.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Settings/main.qml"
+            },
+            {
+              "file": "Settings/DashSelector.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Settings/DashSelector.qml"
+            },
+            {
+              "file": "Settings/sensehat.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Settings/sensehat.qml"
+            },
+            {
+              "file": "Settings/warn_gear.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Settings/warn_gear.qml"
+            },
+            {
+              "file": "Settings/speed.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Settings/speed.qml"
+            },
+            {
+              "file": "Settings/analog.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Settings/analog.qml"
+            },
+            {
+              "file": "Settings/rpm.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Settings/rpm.qml"
+            },
+            {
+              "file": "Settings/startup.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Settings/startup.qml"
+            },
+            {
+              "file": "Settings/network.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Settings/network.qml"
+            },
+            {
+              "file": "Settings/WifiCountryList.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Settings/WifiCountryList.qml"
+            },
+            {
+              "file": "Settings/DashSelectorWidget.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Settings/DashSelectorWidget.qml"
+            },
+            {
+              "file": "graphics/Tacho_Mitte.png",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/graphics/Tacho_Mitte.png"
+            },
+            {
+              "file": "Gauges/DashboardGaugeStyle.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Gauges/DashboardGaugeStyle.qml"
+            },
+            {
+              "file": "Gauges/TachometerStyle.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Gauges/TachometerStyle.qml"
+            },
+            {
+              "file": "Gauges/PFCSensors.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Gauges/PFCSensors.qml"
+            },
+            {
+              "file": "Gauges/BarGauge.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Gauges/BarGauge.qml"
+            },
+            {
+              "file": "Gauges/GPS.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Gauges/GPS.qml"
+            },
+            {
+              "file": "graphics/Racedash800x480.png",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/graphics/Racedash800x480.png"
+            },
+            {
+              "file": "graphics/MainDash.png",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/graphics/MainDash.png"
+            },
+            {
+              "file": "Gauges/GaugeNeedle_minus90to180.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Gauges/GaugeNeedle_minus90to180.qml"
+            },
+            {
+              "file": "Gauges/GaugeNeedle_minus180to90.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Gauges/GaugeNeedle_minus180to90.qml"
+            },
+            {
+              "file": "Gauges/Charts.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Gauges/Charts.qml"
+            },
+            {
+              "file": "Gauges/ForceMeter.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Gauges/ForceMeter.qml"
+            },
+            {
+              "file": "Gauges/SensorTest.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Gauges/SensorTest.qml"
+            },
+            {
+              "file": "Gauges/createverticalbargauge.js",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Gauges/createverticalbargauge.js"
+            },
+            {
+              "file": "Gauges/Dyno.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Gauges/Dyno.qml"
+            },
+            {
+              "file": "Gauges/Camera.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Gauges/Camera.qml"
+            },
+            {
+              "file": "graphics/vertrevcanvas.png",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/graphics/vertrevcanvas.png"
+            },
+            {
+              "file": "Gauges/Cluster.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Gauges/Cluster.qml"
+            },
+            {
+              "file": "Gauges/Squaregauge.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Gauges/Squaregauge.qml"
+            },
+            {
+              "file": "Sounds/alarm.wav",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Sounds/alarm.wav"
+            },
+            {
+              "file": "graphics/next.png",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/graphics/next.png"
+            },
+            {
+              "file": "graphics/pause.png",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/graphics/pause.png"
+            },
+            {
+              "file": "graphics/play.png",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/graphics/play.png"
+            },
+            {
+              "file": "graphics/previous.png",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/graphics/previous.png"
+            },
+            {
+              "file": "Gauges/Mediaplayer.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Gauges/Mediaplayer.qml"
+            },
+            {
+              "file": "Gauges/Screentoggle.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Gauges/Screentoggle.qml"
+            },
+            {
+              "file": "Gauges/ConsultTest.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Gauges/ConsultTest.qml"
+            },
+            {
+              "file": "Gauges/HaltechFlags.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Gauges/HaltechFlags.qml"
+            },
+            {
+              "file": "graphics/ledgreen.png",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/graphics/ledgreen.png"
+            },
+            {
+              "file": "graphics/ledoff.png",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/graphics/ledoff.png"
+            },
+            {
+              "file": "graphics/ledred.png",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/graphics/ledred.png"
+            },
+            {
+              "file": "graphics/ledyellow.png",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/graphics/ledyellow.png"
+            },
+            {
+              "file": "graphics/RPM_BG.png",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/graphics/RPM_BG.png"
+            },
+            {
+              "file": "graphics/RPM_Fill.png",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/graphics/RPM_Fill.png"
+            },
+            {
+              "file": "graphics/empty.png",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/graphics/empty.png"
+            },
+            {
+              "file": "graphics/fill.png",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/graphics/fill.png"
+            },
+            {
+              "file": "Gauges/RPMbar.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Gauges/RPMbar.qml"
+            },
+            {
+              "file": "Gauges/ShiftLights.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Gauges/ShiftLights.qml"
+            },
+            {
+              "file": "graphics/fueltechempty.png",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/graphics/fueltechempty.png"
+            },
+            {
+              "file": "graphics/fueltechfill.png",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/graphics/fueltechfill.png"
+            },
+            {
+              "file": "Gauges/Warning.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Gauges/Warning.qml"
+            },
+            {
+              "file": "Gauges/WarningLoader.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Gauges/WarningLoader.qml"
+            },
+            {
+              "file": "graphics/Racedash.png",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/graphics/Racedash.png"
+            },
+            {
+              "file": "Gauges/RPMBarStyle1.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Gauges/RPMBarStyle1.qml"
+            },
+            {
+              "file": "Gauges/RPMBARStyle2.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Gauges/RPMBARStyle2.qml"
+            },
+            {
+              "file": "OBDPIDS.qml",
+              "alias": "",
+              "folderDepth": 0,
+              "registeredPath": "/OBDPIDS.qml"
+            },
+            {
+              "file": "ConsultRegs.qml",
+              "alias": "",
+              "folderDepth": 0,
+              "registeredPath": "/ConsultRegs.qml"
+            },
+            {
+              "file": "GPSTracks/Laptimer.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/GPSTracks/Laptimer.qml"
+            },
+            {
+              "file": "Gauges/Userdash1.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Gauges/Userdash1.qml"
+            },
+            {
+              "file": "Gauges/Userdash2.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Gauges/Userdash2.qml"
+            },
+            {
+              "file": "Gauges/Userdash3.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Gauges/Userdash3.qml"
+            },
+            {
+              "file": "Gauges/createsquaregaugeUserDash.js",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Gauges/createsquaregaugeUserDash.js"
+            },
+            {
+              "file": "Gauges/RPMbarStyle3.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Gauges/RPMbarStyle3.qml"
+            },
+            {
+              "file": "graphics/MainDashnew.png",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/graphics/MainDashnew.png"
+            },
+            {
+              "file": "graphics/Logo.png",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/graphics/Logo.png"
+            },
+            {
+              "file": "Intro.qml",
+              "alias": "",
+              "folderDepth": 0,
+              "registeredPath": "/Intro.qml"
+            },
+            {
+              "file": "Gauges/DatasourcesList.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Gauges/DatasourcesList.qml"
+            },
+            {
+              "file": "Gauges/ColorList.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Gauges/ColorList.qml"
+            },
+            {
+              "file": "Gauges/ColorpickerCombobox.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Gauges/ColorpickerCombobox.qml"
+            },
+            {
+              "file": "Gauges/RoundGauge.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Gauges/RoundGauge.qml"
+            },
+            {
+              "file": "Gauges/Verticalbargauge.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Gauges/Verticalbargauge.qml"
+            },
+            {
+              "file": "Gauges/createRoundGauge.js",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Gauges/createRoundGauge.js"
+            },
+            {
+              "file": "graphics/needle.svg",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/graphics/needle.svg"
+            },
+            {
+              "file": "graphics/RoungGaugeRing.png",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/graphics/RoungGaugeRing.png"
+            },
+            {
+              "file": "Gauges/MyTextLabel.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Gauges/MyTextLabel.qml"
+            },
+            {
+              "file": "Gauges/createText.js",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Gauges/createText.js"
+            },
+            {
+              "file": "Gauges/createPicture.js",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Gauges/createPicture.js"
+            },
+            {
+              "file": "Gauges/Picture.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Gauges/Picture.qml"
+            },
+            {
+              "file": "graphics/slectImage.png",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/graphics/slectImage.png"
+            },
+            {
+              "file": "AnalogInputs.qml",
+              "alias": "",
+              "folderDepth": 0,
+              "registeredPath": "/AnalogInputs.qml"
+            },
+            {
+              "file": "Gauges/Statepicture.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Gauges/Statepicture.qml"
+            },
+            {
+              "file": "Gauges/createStatePicture.js",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Gauges/createStatePicture.js"
+            },
+            {
+              "file": "graphics/selectStateImage.png",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/graphics/selectStateImage.png"
+            },
+            {
+              "file": "graphics/brightness.png",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/graphics/brightness.png"
+            },
+            {
+              "file": "Gauges/SpeedMeasurements.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Gauges/SpeedMeasurements.qml"
+            },
+            {
+              "file": "graphics/green_Light.png",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/graphics/green_Light.png"
+            },
+            {
+              "file": "Gauges/StateGIF.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Gauges/StateGIF.qml"
+            },
+            {
+              "file": "Gauges/createStateGIF.js",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Gauges/createStateGIF.js"
+            },
+            {
+              "file": "graphics/StateGIF.gif",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/graphics/StateGIF.gif"
+            },
+            {
+              "file": "KTracks/Countries.txt",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/KTracks/Countries.txt"
+            },
+            {
+              "file": "KTracks/Australia/Luddenham.txt",
+              "alias": "",
+              "folderDepth": 2,
+              "registeredPath": "/KTracks/Australia/Luddenham.txt"
+            },
+            {
+              "file": "KTracks/Australia/Archer Field Drift Park.txt",
+              "alias": "",
+              "folderDepth": 2,
+              "registeredPath": "/KTracks/Australia/Archer Field Drift Park.txt"
+            },
+            {
+              "file": "KTracks/Canada/Toronto Motorsports Park.txt",
+              "alias": "",
+              "folderDepth": 2,
+              "registeredPath": "/KTracks/Canada/Toronto Motorsports Park.txt"
+            },
+            {
+              "file": "KTracks/Australia/Lakeside Park.txt",
+              "alias": "",
+              "folderDepth": 2,
+              "registeredPath": "/KTracks/Australia/Lakeside Park.txt"
+            },
+            {
+              "file": "KTracks/Japan/Mt Haruna (Akina).txt",
+              "alias": "",
+              "folderDepth": 2,
+              "registeredPath": "/KTracks/Japan/Mt Haruna (Akina).txt"
+            },
+            {
+              "file": "KTracks/Australia/Barbagallo Large.txt",
+              "alias": "",
+              "folderDepth": 2,
+              "registeredPath": "/KTracks/Australia/Barbagallo Large.txt"
+            },
+            {
+              "file": "KTracks/New Zealand/Bruce McLaren Motorsportpark Large.txt",
+              "alias": "",
+              "folderDepth": 2,
+              "registeredPath": "/KTracks/New Zealand/Bruce McLaren Motorsportpark Large.txt"
+            },
+            {
+              "file": "KTracks/Japan/Tsukuba Circuit.txt",
+              "alias": "",
+              "folderDepth": 2,
+              "registeredPath": "/KTracks/Japan/Tsukuba Circuit.txt"
+            },
+            {
+              "file": "KTracks/Malaysia/Sepang F1 Circuit.txt",
+              "alias": "",
+              "folderDepth": 2,
+              "registeredPath": "/KTracks/Malaysia/Sepang F1 Circuit.txt"
+            },
+            {
+              "file": "KTracks/Australia/Queensland Layout 1.txt",
+              "alias": "",
+              "folderDepth": 2,
+              "registeredPath": "/KTracks/Australia/Queensland Layout 1.txt"
+            },
+            {
+              "file": "KTracks/Australia/Queensland Layout 2.txt",
+              "alias": "",
+              "folderDepth": 2,
+              "registeredPath": "/KTracks/Australia/Queensland Layout 2.txt"
+            },
+            {
+              "file": "KTracks/Australia/Queensland Layout 3.txt",
+              "alias": "",
+              "folderDepth": 2,
+              "registeredPath": "/KTracks/Australia/Queensland Layout 3.txt"
+            },
+            {
+              "file": "KTracks/Australia/Wakefield inner Circuit.txt",
+              "alias": "",
+              "folderDepth": 2,
+              "registeredPath": "/KTracks/Australia/Wakefield inner Circuit.txt"
+            },
+            {
+              "file": "KTracks/Australia/Wakefield outer Circuit.txt",
+              "alias": "",
+              "folderDepth": 2,
+              "registeredPath": "/KTracks/Australia/Wakefield outer Circuit.txt"
+            },
+            {
+              "file": "KTracks/Australia/Collie Motorplex.txt",
+              "alias": "",
+              "folderDepth": 2,
+              "registeredPath": "/KTracks/Australia/Collie Motorplex.txt"
+            },
+            {
+              "file": "KTracks/New Zealand/Pukekohe Park Raceway.txt",
+              "alias": "",
+              "folderDepth": 2,
+              "registeredPath": "/KTracks/New Zealand/Pukekohe Park Raceway.txt"
+            },
+            {
+              "file": "KTracks/Australia/Carnell Raceway.txt",
+              "alias": "",
+              "folderDepth": 2,
+              "registeredPath": "/KTracks/Australia/Carnell Raceway.txt"
+            },
+            {
+              "file": "KTracks/USA/Button Willow 1.txt",
+              "alias": "",
+              "folderDepth": 2,
+              "registeredPath": "/KTracks/USA/Button Willow 1.txt"
+            },
+            {
+              "file": "KTracks/Australia/Morgan Park B.txt",
+              "alias": "",
+              "folderDepth": 2,
+              "registeredPath": "/KTracks/Australia/Morgan Park B.txt"
+            },
+            {
+              "file": "KTracks/Australia/Morgan Park D.txt",
+              "alias": "",
+              "folderDepth": 2,
+              "registeredPath": "/KTracks/Australia/Morgan Park D.txt"
+            },
+            {
+              "file": "KTracks/Australia/Morgan Park E.txt",
+              "alias": "",
+              "folderDepth": 2,
+              "registeredPath": "/KTracks/Australia/Morgan Park E.txt"
+            },
+            {
+              "file": "KTracks/Australia/Morgan Park K.txt",
+              "alias": "",
+              "folderDepth": 2,
+              "registeredPath": "/KTracks/Australia/Morgan Park K.txt"
+            },
+            {
+              "file": "KTracks/Canada/Colabogie Big.txt",
+              "alias": "",
+              "folderDepth": 2,
+              "registeredPath": "/KTracks/Canada/Colabogie Big.txt"
+            },
+            {
+              "file": "KTracks/USA/Laguna Seca.txt",
+              "alias": "",
+              "folderDepth": 2,
+              "registeredPath": "/KTracks/USA/Laguna Seca.txt"
+            },
+            {
+              "file": "KTracks/Australia/Eastern Creek GP Circuit.txt",
+              "alias": "",
+              "folderDepth": 2,
+              "registeredPath": "/KTracks/Australia/Eastern Creek GP Circuit.txt"
+            },
+            {
+              "file": "KTracks/Australia/The Bend International Circuit.txt",
+              "alias": "",
+              "folderDepth": 2,
+              "registeredPath": "/KTracks/Australia/The Bend International Circuit.txt"
+            },
+            {
+              "file": "KTracks/Australia/The Bend West Circuit.txt",
+              "alias": "",
+              "folderDepth": 2,
+              "registeredPath": "/KTracks/Australia/The Bend West Circuit.txt"
+            },
+            {
+              "file": "ExBoardAnalog.qml",
+              "alias": "",
+              "folderDepth": 0,
+              "registeredPath": "/ExBoardAnalog.qml"
+            },
+            {
+              "file": "Gauges/TyreMonitor.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Gauges/TyreMonitor.qml"
+            },
+            {
+              "file": "Settings/CanMonitor.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Settings/CanMonitor.qml"
+            },
+            {
+              "file": "Translator.js",
+              "alias": "",
+              "folderDepth": 0,
+              "registeredPath": "/Translator.js"
+            },
+            {
+              "file": "graphics/Flags/de.png",
+              "alias": "",
+              "folderDepth": 2,
+              "registeredPath": "/graphics/Flags/de.png"
+            },
+            {
+              "file": "graphics/Flags/es.png",
+              "alias": "",
+              "folderDepth": 2,
+              "registeredPath": "/graphics/Flags/es.png"
+            },
+            {
+              "file": "graphics/Flags/jp.png",
+              "alias": "",
+              "folderDepth": 2,
+              "registeredPath": "/graphics/Flags/jp.png"
+            },
+            {
+              "file": "graphics/Flags/us.png",
+              "alias": "",
+              "folderDepth": 2,
+              "registeredPath": "/graphics/Flags/us.png"
+            },
+            {
+              "file": "graphics/Flags/fr.png",
+              "alias": "",
+              "folderDepth": 2,
+              "registeredPath": "/graphics/Flags/fr.png"
+            },
+            {
+              "file": "graphics/Flags/ae.png",
+              "alias": "",
+              "folderDepth": 2,
+              "registeredPath": "/graphics/Flags/ae.png"
+            },
+            {
+              "file": "BrightnessPopUp.qml",
+              "alias": "",
+              "folderDepth": 0,
+              "registeredPath": "/BrightnessPopUp.qml"
+            },
+            {
+              "file": "Settings/help.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Settings/help.qml"
+            },
+            {
+              "file": "graphics/contactQR.png",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/graphics/contactQR.png"
+            },
+            {
+              "file": "graphics/facebookQR.png",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/graphics/facebookQR.png"
+            },
+            {
+              "file": "graphics/instagramQR.png",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/graphics/instagramQR.png"
+            },
+            {
+              "file": "graphics/warrantyQR.png",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/graphics/warrantyQR.png"
+            },
+            {
+              "file": "graphics/userManualQR.png",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/graphics/userManualQR.png"
+            },
+            {
+              "file": "graphics/brightnessIncrease.png",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/graphics/brightnessIncrease.png"
+            },
+            {
+              "file": "graphics/brightnessDecrease.png",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/graphics/brightnessDecrease.png"
+            },
+            {
+              "file": "Gauges/Keypad.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/Gauges/Keypad.qml"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "qrcFile": "qml.qrc",
+      "resources": [
+        {
+          "prefix": "/",
+          "entries": [
+            {
+              "file": "GPSTracks/Laptimer.qml",
+              "alias": "",
+              "folderDepth": 1,
+              "registeredPath": "/GPSTracks/Laptimer.qml"
+            },
+            {
+              "file": "Resources/graphics/Tacho_Mitte.png",
+              "alias": "",
+              "folderDepth": 2,
+              "registeredPath": "/Resources/graphics/Tacho_Mitte.png"
+            },
+            {
+              "file": "Resources/graphics/Racedash800x480.png",
+              "alias": "",
+              "folderDepth": 2,
+              "registeredPath": "/Resources/graphics/Racedash800x480.png"
+            },
+            {
+              "file": "Resources/graphics/MainDash.png",
+              "alias": "",
+              "folderDepth": 2,
+              "registeredPath": "/Resources/graphics/MainDash.png"
+            },
+            {
+              "file": "Resources/graphics/vertrevcanvas.png",
+              "alias": "",
+              "folderDepth": 2,
+              "registeredPath": "/Resources/graphics/vertrevcanvas.png"
+            },
+            {
+              "file": "Resources/graphics/next.png",
+              "alias": "",
+              "folderDepth": 2,
+              "registeredPath": "/Resources/graphics/next.png"
+            },
+            {
+              "file": "Resources/graphics/pause.png",
+              "alias": "",
+              "folderDepth": 2,
+              "registeredPath": "/Resources/graphics/pause.png"
+            },
+            {
+              "file": "Resources/graphics/play.png",
+              "alias": "",
+              "folderDepth": 2,
+              "registeredPath": "/Resources/graphics/play.png"
+            },
+            {
+              "file": "Resources/graphics/previous.png",
+              "alias": "",
+              "folderDepth": 2,
+              "registeredPath": "/Resources/graphics/previous.png"
+            },
+            {
+              "file": "Resources/graphics/ledgreen.png",
+              "alias": "",
+              "folderDepth": 2,
+              "registeredPath": "/Resources/graphics/ledgreen.png"
+            },
+            {
+              "file": "Resources/graphics/ledoff.png",
+              "alias": "",
+              "folderDepth": 2,
+              "registeredPath": "/Resources/graphics/ledoff.png"
+            },
+            {
+              "file": "Resources/graphics/ledred.png",
+              "alias": "",
+              "folderDepth": 2,
+              "registeredPath": "/Resources/graphics/ledred.png"
+            },
+            {
+              "file": "Resources/graphics/ledyellow.png",
+              "alias": "",
+              "folderDepth": 2,
+              "registeredPath": "/Resources/graphics/ledyellow.png"
+            },
+            {
+              "file": "Resources/graphics/RPM_BG.png",
+              "alias": "",
+              "folderDepth": 2,
+              "registeredPath": "/Resources/graphics/RPM_BG.png"
+            },
+            {
+              "file": "Resources/graphics/RPM_Fill.png",
+              "alias": "",
+              "folderDepth": 2,
+              "registeredPath": "/Resources/graphics/RPM_Fill.png"
+            },
+            {
+              "file": "Resources/graphics/empty.png",
+              "alias": "",
+              "folderDepth": 2,
+              "registeredPath": "/Resources/graphics/empty.png"
+            },
+            {
+              "file": "Resources/graphics/fill.png",
+              "alias": "",
+              "folderDepth": 2,
+              "registeredPath": "/Resources/graphics/fill.png"
+            },
+            {
+              "file": "Resources/graphics/fueltechempty.png",
+              "alias": "",
+              "folderDepth": 2,
+              "registeredPath": "/Resources/graphics/fueltechempty.png"
+            },
+            {
+              "file": "Resources/graphics/fueltechfill.png",
+              "alias": "",
+              "folderDepth": 2,
+              "registeredPath": "/Resources/graphics/fueltechfill.png"
+            },
+            {
+              "file": "Resources/graphics/Racedash.png",
+              "alias": "",
+              "folderDepth": 2,
+              "registeredPath": "/Resources/graphics/Racedash.png"
+            },
+            {
+              "file": "Resources/graphics/MainDashnew.png",
+              "alias": "",
+              "folderDepth": 2,
+              "registeredPath": "/Resources/graphics/MainDashnew.png"
+            },
+            {
+              "file": "Resources/graphics/Logo.png",
+              "alias": "",
+              "folderDepth": 2,
+              "registeredPath": "/Resources/graphics/Logo.png"
+            },
+            {
+              "file": "Resources/graphics/needle.svg",
+              "alias": "",
+              "folderDepth": 2,
+              "registeredPath": "/Resources/graphics/needle.svg"
+            },
+            {
+              "file": "Resources/graphics/RoungGaugeRing.png",
+              "alias": "",
+              "folderDepth": 2,
+              "registeredPath": "/Resources/graphics/RoungGaugeRing.png"
+            },
+            {
+              "file": "Resources/graphics/slectImage.png",
+              "alias": "",
+              "folderDepth": 2,
+              "registeredPath": "/Resources/graphics/slectImage.png"
+            },
+            {
+              "file": "Resources/graphics/selectStateImage.png",
+              "alias": "",
+              "folderDepth": 2,
+              "registeredPath": "/Resources/graphics/selectStateImage.png"
+            },
+            {
+              "file": "Resources/graphics/brightness.png",
+              "alias": "",
+              "folderDepth": 2,
+              "registeredPath": "/Resources/graphics/brightness.png"
+            },
+            {
+              "file": "Resources/graphics/green_Light.png",
+              "alias": "",
+              "folderDepth": 2,
+              "registeredPath": "/Resources/graphics/green_Light.png"
+            },
+            {
+              "file": "Resources/graphics/StateGIF.gif",
+              "alias": "",
+              "folderDepth": 2,
+              "registeredPath": "/Resources/graphics/StateGIF.gif"
+            },
+            {
+              "file": "Resources/graphics/contactQR.png",
+              "alias": "",
+              "folderDepth": 2,
+              "registeredPath": "/Resources/graphics/contactQR.png"
+            },
+            {
+              "file": "Resources/graphics/facebookQR.png",
+              "alias": "",
+              "folderDepth": 2,
+              "registeredPath": "/Resources/graphics/facebookQR.png"
+            },
+            {
+              "file": "Resources/graphics/instagramQR.png",
+              "alias": "",
+              "folderDepth": 2,
+              "registeredPath": "/Resources/graphics/instagramQR.png"
+            },
+            {
+              "file": "Resources/graphics/warrantyQR.png",
+              "alias": "",
+              "folderDepth": 2,
+              "registeredPath": "/Resources/graphics/warrantyQR.png"
+            },
+            {
+              "file": "Resources/graphics/userManualQR.png",
+              "alias": "",
+              "folderDepth": 2,
+              "registeredPath": "/Resources/graphics/userManualQR.png"
+            },
+            {
+              "file": "Resources/graphics/brightnessIncrease.png",
+              "alias": "",
+              "folderDepth": 2,
+              "registeredPath": "/Resources/graphics/brightnessIncrease.png"
+            },
+            {
+              "file": "Resources/graphics/brightnessDecrease.png",
+              "alias": "",
+              "folderDepth": 2,
+              "registeredPath": "/Resources/graphics/brightnessDecrease.png"
+            },
+            {
+              "file": "Resources/graphics/Flags/de.png",
+              "alias": "",
+              "folderDepth": 3,
+              "registeredPath": "/Resources/graphics/Flags/de.png"
+            },
+            {
+              "file": "Resources/graphics/Flags/es.png",
+              "alias": "",
+              "folderDepth": 3,
+              "registeredPath": "/Resources/graphics/Flags/es.png"
+            },
+            {
+              "file": "Resources/graphics/Flags/jp.png",
+              "alias": "",
+              "folderDepth": 3,
+              "registeredPath": "/Resources/graphics/Flags/jp.png"
+            },
+            {
+              "file": "Resources/graphics/Flags/us.png",
+              "alias": "",
+              "folderDepth": 3,
+              "registeredPath": "/Resources/graphics/Flags/us.png"
+            },
+            {
+              "file": "Resources/graphics/Flags/fr.png",
+              "alias": "",
+              "folderDepth": 3,
+              "registeredPath": "/Resources/graphics/Flags/fr.png"
+            },
+            {
+              "file": "Resources/graphics/Flags/ae.png",
+              "alias": "",
+              "folderDepth": 3,
+              "registeredPath": "/Resources/graphics/Flags/ae.png"
+            },
+            {
+              "file": "Resources/fonts/MaterialSymbolsOutlined.ttf",
+              "alias": "",
+              "folderDepth": 2,
+              "registeredPath": "/Resources/fonts/MaterialSymbolsOutlined.ttf"
+            },
+            {
+              "file": "Resources/KTracks/Countries.txt",
+              "alias": "",
+              "folderDepth": 2,
+              "registeredPath": "/Resources/KTracks/Countries.txt"
+            },
+            {
+              "file": "Resources/KTracks/Australia/Luddenham.txt",
+              "alias": "",
+              "folderDepth": 3,
+              "registeredPath": "/Resources/KTracks/Australia/Luddenham.txt"
+            },
+            {
+              "file": "Resources/KTracks/Australia/Archer Field Drift Park.txt",
+              "alias": "",
+              "folderDepth": 3,
+              "registeredPath": "/Resources/KTracks/Australia/Archer Field Drift Park.txt"
+            },
+            {
+              "file": "Resources/KTracks/Canada/Toronto Motorsports Park.txt",
+              "alias": "",
+              "folderDepth": 3,
+              "registeredPath": "/Resources/KTracks/Canada/Toronto Motorsports Park.txt"
+            },
+            {
+              "file": "Resources/KTracks/Australia/Lakeside Park.txt",
+              "alias": "",
+              "folderDepth": 3,
+              "registeredPath": "/Resources/KTracks/Australia/Lakeside Park.txt"
+            },
+            {
+              "file": "Resources/KTracks/Japan/Mt Haruna (Akina).txt",
+              "alias": "",
+              "folderDepth": 3,
+              "registeredPath": "/Resources/KTracks/Japan/Mt Haruna (Akina).txt"
+            },
+            {
+              "file": "Resources/KTracks/Australia/Barbagallo Large.txt",
+              "alias": "",
+              "folderDepth": 3,
+              "registeredPath": "/Resources/KTracks/Australia/Barbagallo Large.txt"
+            },
+            {
+              "file": "Resources/KTracks/New Zealand/Bruce McLaren Motorsportpark Large.txt",
+              "alias": "",
+              "folderDepth": 3,
+              "registeredPath": "/Resources/KTracks/New Zealand/Bruce McLaren Motorsportpark Large.txt"
+            },
+            {
+              "file": "Resources/KTracks/Japan/Tsukuba Circuit.txt",
+              "alias": "",
+              "folderDepth": 3,
+              "registeredPath": "/Resources/KTracks/Japan/Tsukuba Circuit.txt"
+            },
+            {
+              "file": "Resources/KTracks/Malaysia/Sepang F1 Circuit.txt",
+              "alias": "",
+              "folderDepth": 3,
+              "registeredPath": "/Resources/KTracks/Malaysia/Sepang F1 Circuit.txt"
+            },
+            {
+              "file": "Resources/KTracks/Australia/Queensland Layout 1.txt",
+              "alias": "",
+              "folderDepth": 3,
+              "registeredPath": "/Resources/KTracks/Australia/Queensland Layout 1.txt"
+            },
+            {
+              "file": "Resources/KTracks/Australia/Queensland Layout 2.txt",
+              "alias": "",
+              "folderDepth": 3,
+              "registeredPath": "/Resources/KTracks/Australia/Queensland Layout 2.txt"
+            },
+            {
+              "file": "Resources/KTracks/Australia/Queensland Layout 3.txt",
+              "alias": "",
+              "folderDepth": 3,
+              "registeredPath": "/Resources/KTracks/Australia/Queensland Layout 3.txt"
+            },
+            {
+              "file": "Resources/KTracks/Australia/Wakefield inner Circuit.txt",
+              "alias": "",
+              "folderDepth": 3,
+              "registeredPath": "/Resources/KTracks/Australia/Wakefield inner Circuit.txt"
+            },
+            {
+              "file": "Resources/KTracks/Australia/Wakefield outer Circuit.txt",
+              "alias": "",
+              "folderDepth": 3,
+              "registeredPath": "/Resources/KTracks/Australia/Wakefield outer Circuit.txt"
+            },
+            {
+              "file": "Resources/KTracks/Australia/Collie Motorplex.txt",
+              "alias": "",
+              "folderDepth": 3,
+              "registeredPath": "/Resources/KTracks/Australia/Collie Motorplex.txt"
+            },
+            {
+              "file": "Resources/KTracks/New Zealand/Pukekohe Park Raceway.txt",
+              "alias": "",
+              "folderDepth": 3,
+              "registeredPath": "/Resources/KTracks/New Zealand/Pukekohe Park Raceway.txt"
+            },
+            {
+              "file": "Resources/KTracks/Australia/Carnell Raceway.txt",
+              "alias": "",
+              "folderDepth": 3,
+              "registeredPath": "/Resources/KTracks/Australia/Carnell Raceway.txt"
+            },
+            {
+              "file": "Resources/KTracks/USA/Button Willow 1.txt",
+              "alias": "",
+              "folderDepth": 3,
+              "registeredPath": "/Resources/KTracks/USA/Button Willow 1.txt"
+            },
+            {
+              "file": "Resources/KTracks/Australia/Morgan Park B.txt",
+              "alias": "",
+              "folderDepth": 3,
+              "registeredPath": "/Resources/KTracks/Australia/Morgan Park B.txt"
+            },
+            {
+              "file": "Resources/KTracks/Australia/Morgan Park D.txt",
+              "alias": "",
+              "folderDepth": 3,
+              "registeredPath": "/Resources/KTracks/Australia/Morgan Park D.txt"
+            },
+            {
+              "file": "Resources/KTracks/Australia/Morgan Park E.txt",
+              "alias": "",
+              "folderDepth": 3,
+              "registeredPath": "/Resources/KTracks/Australia/Morgan Park E.txt"
+            },
+            {
+              "file": "Resources/KTracks/Australia/Morgan Park K.txt",
+              "alias": "",
+              "folderDepth": 3,
+              "registeredPath": "/Resources/KTracks/Australia/Morgan Park K.txt"
+            },
+            {
+              "file": "Resources/KTracks/Canada/Colabogie Big.txt",
+              "alias": "",
+              "folderDepth": 3,
+              "registeredPath": "/Resources/KTracks/Canada/Colabogie Big.txt"
+            },
+            {
+              "file": "Resources/KTracks/USA/Laguna Seca.txt",
+              "alias": "",
+              "folderDepth": 3,
+              "registeredPath": "/Resources/KTracks/USA/Laguna Seca.txt"
+            },
+            {
+              "file": "Resources/KTracks/Australia/Eastern Creek GP Circuit.txt",
+              "alias": "",
+              "folderDepth": 3,
+              "registeredPath": "/Resources/KTracks/Australia/Eastern Creek GP Circuit.txt"
+            },
+            {
+              "file": "Resources/KTracks/Australia/The Bend International Circuit.txt",
+              "alias": "",
+              "folderDepth": 3,
+              "registeredPath": "/Resources/KTracks/Australia/The Bend International Circuit.txt"
+            },
+            {
+              "file": "Resources/KTracks/Australia/The Bend West Circuit.txt",
+              "alias": "",
+              "folderDepth": 3,
+              "registeredPath": "/Resources/KTracks/Australia/The Bend West Circuit.txt"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

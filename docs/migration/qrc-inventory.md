@@ -1,0 +1,473 @@
+# QRC Inventory
+
+- QRC files found: **6**
+- Total registered entries: **370**
+- Duplicate registered paths: **147**
+
+## Files
+
+### `docs-misc/device-backup/home/pi/Recoverysrc/qml.qrc`
+- Prefix `/`: 3 entries
+
+### `docs-misc/device-backup/home/pi/src/graphics.qrc`
+- Prefix `/`: 8 entries
+
+### `docs-misc/device-backup/home/pi/src/qml.qrc`
+- Prefix `/`: 140 entries
+
+### `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/graphics.qrc`
+- Prefix `/`: 8 entries
+
+### `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc`
+- Prefix `/`: 140 entries
+
+### `qml.qrc`
+- Prefix `/`: 71 entries
+
+## Duplicate Registrations
+
+- `/AnalogInputs.qml`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/BrightnessPopUp.qml`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/ConsultRegs.qml`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/ExBoardAnalog.qml`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/GPSTracks/Laptimer.qml`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+  - `qml.qrc` (prefix `/`)
+- `/Gauges/BarGauge.qml`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/Gauges/Camera.qml`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/Gauges/Charts.qml`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/Gauges/Cluster.qml`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/Gauges/ColorList.qml`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/Gauges/ColorpickerCombobox.qml`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/Gauges/ConsultTest.qml`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/Gauges/DashboardGaugeStyle.qml`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/Gauges/DatasourcesList.qml`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/Gauges/Dyno.qml`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/Gauges/ForceMeter.qml`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/Gauges/GPS.qml`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/Gauges/GaugeNeedle_minus180to90.qml`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/Gauges/GaugeNeedle_minus90to180.qml`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/Gauges/HaltechFlags.qml`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/Gauges/Keypad.qml`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/Gauges/Mediaplayer.qml`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/Gauges/MyTextLabel.qml`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/Gauges/PFCSensors.qml`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/Gauges/Picture.qml`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/Gauges/RPMBARStyle2.qml`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/Gauges/RPMBarStyle1.qml`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/Gauges/RPMbar.qml`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/Gauges/RPMbarStyle3.qml`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/Gauges/RoundGauge.qml`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/Gauges/Screentoggle.qml`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/Gauges/SensorTest.qml`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/Gauges/ShiftLights.qml`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/Gauges/SpeedMeasurements.qml`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/Gauges/Squaregauge.qml`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/Gauges/StateGIF.qml`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/Gauges/Statepicture.qml`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/Gauges/TachometerStyle.qml`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/Gauges/TyreMonitor.qml`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/Gauges/Userdash1.qml`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/Gauges/Userdash2.qml`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/Gauges/Userdash3.qml`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/Gauges/Verticalbargauge.qml`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/Gauges/Warning.qml`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/Gauges/WarningLoader.qml`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/Gauges/createPicture.js`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/Gauges/createRoundGauge.js`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/Gauges/createStateGIF.js`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/Gauges/createStatePicture.js`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/Gauges/createText.js`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/Gauges/createsquaregaugeUserDash.js`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/Gauges/createverticalbargauge.js`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/Intro.qml`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/KTracks/Australia/Archer Field Drift Park.txt`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/KTracks/Australia/Barbagallo Large.txt`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/KTracks/Australia/Carnell Raceway.txt`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/KTracks/Australia/Collie Motorplex.txt`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/KTracks/Australia/Eastern Creek GP Circuit.txt`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/KTracks/Australia/Lakeside Park.txt`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/KTracks/Australia/Luddenham.txt`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/KTracks/Australia/Morgan Park B.txt`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/KTracks/Australia/Morgan Park D.txt`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/KTracks/Australia/Morgan Park E.txt`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/KTracks/Australia/Morgan Park K.txt`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/KTracks/Australia/Queensland Layout 1.txt`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/KTracks/Australia/Queensland Layout 2.txt`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/KTracks/Australia/Queensland Layout 3.txt`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/KTracks/Australia/The Bend International Circuit.txt`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/KTracks/Australia/The Bend West Circuit.txt`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/KTracks/Australia/Wakefield inner Circuit.txt`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/KTracks/Australia/Wakefield outer Circuit.txt`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/KTracks/Canada/Colabogie Big.txt`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/KTracks/Canada/Toronto Motorsports Park.txt`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/KTracks/Countries.txt`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/KTracks/Japan/Mt Haruna (Akina).txt`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/KTracks/Japan/Tsukuba Circuit.txt`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/KTracks/Malaysia/Sepang F1 Circuit.txt`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/KTracks/New Zealand/Bruce McLaren Motorsportpark Large.txt`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/KTracks/New Zealand/Pukekohe Park Raceway.txt`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/KTracks/USA/Button Willow 1.txt`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/KTracks/USA/Laguna Seca.txt`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/OBDPIDS.qml`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/SerialSettings.qml`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/Settings/CanMonitor.qml`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/Settings/DashSelector.qml`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/Settings/DashSelectorWidget.qml`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/Settings/WifiCountryList.qml`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/Settings/analog.qml`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/Settings/help.qml`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/Settings/main.qml`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/Settings/network.qml`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/Settings/rpm.qml`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/Settings/sensehat.qml`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/Settings/speed.qml`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/Settings/startup.qml`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/Settings/warn_gear.qml`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/Sounds/alarm.wav`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/Translator.js`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/graphics/Dial.qml`
+  - `docs-misc/device-backup/home/pi/src/graphics.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/graphics.qrc` (prefix `/`)
+- `/graphics/Flags/ae.png`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/graphics/Flags/de.png`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/graphics/Flags/es.png`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/graphics/Flags/fr.png`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/graphics/Flags/jp.png`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/graphics/Flags/us.png`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/graphics/Logo.png`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/graphics/MainDash.png`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/graphics/MainDashnew.png`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/graphics/QuitButton.qml`
+  - `docs-misc/device-backup/home/pi/src/graphics.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/graphics.qrc` (prefix `/`)
+- `/graphics/RPM_BG.png`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/graphics/RPM_Fill.png`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/graphics/Racedash.png`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/graphics/Racedash800x480.png`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/graphics/RoungGaugeRing.png`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/graphics/StateGIF.gif`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/graphics/Tacho_Mitte.png`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/graphics/background.png`
+  - `docs-misc/device-backup/home/pi/src/graphics.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/graphics.qrc` (prefix `/`)
+- `/graphics/brightness.png`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/graphics/brightnessDecrease.png`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/graphics/brightnessIncrease.png`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/graphics/contactQR.png`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/graphics/empty.png`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/graphics/facebookQR.png`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/graphics/fill.png`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/graphics/fueltechempty.png`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/graphics/fueltechfill.png`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/graphics/green_Light.png`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/graphics/instagramQR.png`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/graphics/ledgreen.png`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/graphics/ledoff.png`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/graphics/ledred.png`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/graphics/ledyellow.png`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/graphics/needle.png`
+  - `docs-misc/device-backup/home/pi/src/graphics.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/graphics.qrc` (prefix `/`)
+- `/graphics/needle.svg`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/graphics/needle_shadow.png`
+  - `docs-misc/device-backup/home/pi/src/graphics.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/graphics.qrc` (prefix `/`)
+- `/graphics/next.png`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/graphics/overlay.png`
+  - `docs-misc/device-backup/home/pi/src/graphics.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/graphics.qrc` (prefix `/`)
+- `/graphics/pause.png`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/graphics/play.png`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/graphics/previous.png`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/graphics/quit.png`
+  - `docs-misc/device-backup/home/pi/src/graphics.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/graphics.qrc` (prefix `/`)
+- `/graphics/selectStateImage.png`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/graphics/slectImage.png`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/graphics/userManualQR.png`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/graphics/vertrevcanvas.png`
+  - `docs-misc/device-backup/home/pi/src/graphics.qrc` (prefix `/`)
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/graphics.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/graphics/warrantyQR.png`
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
+- `/main.qml`
+  - `docs-misc/device-backup/home/pi/Recoverysrc/qml.qrc` (prefix `/`)
+  - `docs-misc/device-backup/home/pi/src/qml.qrc` (prefix `/`)
+  - `docs-misc/reference_sourcecode/PowerTuneDigitalOfficial/qml.qrc` (prefix `/`)
