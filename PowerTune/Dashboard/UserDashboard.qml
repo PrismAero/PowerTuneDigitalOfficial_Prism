@@ -2,7 +2,7 @@ import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Controls.Material 2.0
 import Qt.labs.settings 1.0
-import PowerTune.Gauges.Media 1.0
+import PowerTune.Gauges.Widgets 1.0
 import PowerTune.Gauges.Shared 1.0
 import PowerTune.Utils 1.0
 
@@ -64,9 +64,13 @@ Item {
     Component.onCompleted: {
         if (datastore) {
             gaugelist.clear();
-            var datamodel = JSON.parse(datastore);
-            for (var i = 0; i < datamodel.length; ++i)
-                gaugelist.append(datamodel[i]);
+            try {
+                var datamodel = JSON.parse(datastore);
+                for (var i = 0; i < datamodel.length; ++i)
+                    gaugelist.append(datamodel[i]);
+            } catch (e) {
+                console.warn("UserDashboard: Ignoring invalid stored dash JSON:", e);
+            }
         }
         createDash();
         bgPanel.syncBackgroundColor(mainbackroundcolor.color);
@@ -175,16 +179,7 @@ Item {
             mainbackroundcolor.color = c;
         }
         onExtraChanged: function (index) {
-            switch (index) {
-            case 0:
-                extraLoader.source = "";
-                break;
-            case 1:
-                extraLoader.setSource("qrc:/qt/qml/PowerTune/Gauges/Sensors/PowerTune/Gauges/Sensors/PFCSensors.qml", {
-                    sizeoftext: mainwindow.width / 54
-                });
-                break;
-            }
+            extraLoader.source = "";
         }
     }
 

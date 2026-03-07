@@ -7,13 +7,8 @@ QtObject {
     readonly property var typeRegistry: ({
         "Round gauge":      "qrc:/qt/qml/PowerTune/Gauges/Widgets/PowerTune/Gauges/Widgets/RoundGauge.qml",
         "Square gauge":     "qrc:/qt/qml/PowerTune/Gauges/Widgets/PowerTune/Gauges/Widgets/SquareGauge.qml",
-        "Bar gauge":        "qrc:/qt/qml/PowerTune/Gauges/Widgets/PowerTune/Gauges/Widgets/VerticalBarGauge.qml",
-        "Text label gauge": "qrc:/qt/qml/PowerTune/Gauges/Media/PowerTune/Gauges/Media/MyTextLabel.qml",
-        "gauge image":      "qrc:/qt/qml/PowerTune/Gauges/Media/PowerTune/Gauges/Media/Picture.qml",
-        "State gauge":      "qrc:/qt/qml/PowerTune/Gauges/Media/PowerTune/Gauges/Media/StatePicture.qml",
-        "State GIF":        "qrc:/qt/qml/PowerTune/Gauges/Media/PowerTune/Gauges/Media/StateGIF.qml",
-        "Main gauge":       "qrc:/qt/qml/PowerTune/Gauges/Widgets/PowerTune/Gauges/Widgets/SquareGaugeMain.qml",
-        "Arc fill gauge":   "qrc:/qt/qml/PowerTune/Gauges/Widgets/PowerTune/Gauges/Widgets/ArcFillGauge.qml",
+        "Bar gauge":        "qrc:/qt/qml/PowerTune/Gauges/Widgets/PowerTune/Gauges/Widgets/BarGauge.qml",
+        "Text label gauge": "qrc:/qt/qml/PowerTune/Gauges/Widgets/PowerTune/Gauges/Widgets/MyTextLabel.qml",
         "Numeric cell":     "qrc:/qt/qml/PowerTune/Gauges/Widgets/PowerTune/Gauges/Widgets/NumericCell.qml",
         "Gear indicator":   "qrc:/qt/qml/PowerTune/Gauges/Widgets/PowerTune/Gauges/Widgets/GearIndicator.qml",
         "Modern round gauge": "qrc:/qt/qml/PowerTune/Gauges/Widgets/PowerTune/Gauges/Widgets/ModernRoundGauge.qml"
@@ -63,24 +58,6 @@ QtObject {
             "datasourcename", "fontbold", "decimalpoints",
             "warnvaluehigh", "warnvaluelow"
         ],
-        "gauge image": [
-            "x", "y", "pictureheight", "picturesource"
-        ],
-        "State gauge": [
-            "x", "y", "pictureheight", "mainvaluename", "triggervalue",
-            "statepicturesourceoff", "statepicturesourceon"
-        ],
-        "State GIF": [
-            "x", "y", "pictureheight", "mainvaluename", "triggervalue",
-            "statepicturesourceoff", "statepicturesourceon", "triggeroffvalue"
-        ],
-        "Arc fill gauge": [
-            "width", "height", "x", "y", "mainvaluename", "maxvalue", "minvalue",
-            "warnvaluehigh", "warnvaluelow", "decimalpoints",
-            "unittext", "labeltext", "arcTrackColor", "arcFillColor",
-            "arcDangerColor", "valueTextColor", "labelTextColor", "unitTextColor",
-            "arcStartAngle", "arcEndAngle", "arcStrokeWidth", "dangerThreshold"
-        ],
         "Numeric cell": [
             "width", "height", "x", "y", "mainvaluename",
             "warnvaluehigh", "warnvaluelow", "decimalpoints",
@@ -129,9 +106,18 @@ QtObject {
         if (!component)
             return null;
         if (component.status === Component.Ready) {
-            var gauge = component.createObject(parent, properties || {});
-            if (!gauge)
+            var gauge = component.createObject(parent);
+            if (!gauge) {
                 console.error("GaugeFactory: Error creating", typeName);
+                return null;
+            }
+            var props = properties || {};
+            for (var key in props) {
+                if (!props.hasOwnProperty(key))
+                    continue;
+                if (gauge[key] !== undefined)
+                    gauge[key] = props[key];
+            }
             return gauge;
         }
         console.warn("GaugeFactory: Async component load for", typeName, "not yet supported");
@@ -229,10 +215,6 @@ QtObject {
                        gauge.mainfontsize, gauge.decimalpoints2,
                        gauge.textFonttype, gauge.valueFonttype);
             break;
-        case "gauge image":
-            parts.push(gauge.x, gauge.y, gauge.pictureheight,
-                       gauge.picturesource);
-            break;
         case "Text label gauge":
             parts.push(gauge.x, gauge.y, gauge.displaytext, gauge.fonttype,
                        gauge.fontsize, gauge.textcolor, gauge.datasourcename,
@@ -277,28 +259,6 @@ QtObject {
                        gauge.peakneedletipwidth, gauge.peakneedleoffset,
                        gauge.peakneedlevisible);
             break;
-        case "State gauge":
-            parts.push(gauge.x, gauge.y, gauge.pictureheight,
-                       gauge.mainvaluename, gauge.triggervalue,
-                       gauge.statepicturesourceoff,
-                       gauge.statepicturesourceon);
-            break;
-        case "State GIF":
-            parts.push(gauge.x, gauge.y, gauge.pictureheight,
-                       gauge.mainvaluename, gauge.triggervalue,
-                       gauge.statepicturesourceoff,
-                       gauge.statepicturesourceon, gauge.triggeroffvalue);
-            break;
-        case "Arc fill gauge":
-            parts.push(gauge.width, gauge.height, gauge.x, gauge.y,
-                       gauge.mainvaluename, gauge.maxvalue, gauge.minvalue,
-                       gauge.warnvaluehigh, gauge.warnvaluelow, gauge.decimalpoints,
-                       gauge.unittext, gauge.labeltext,
-                       gauge.arcTrackColor, gauge.arcFillColor, gauge.arcDangerColor,
-                       gauge.valueTextColor, gauge.labelTextColor, gauge.unitTextColor,
-                       gauge.arcStartAngle, gauge.arcEndAngle,
-                       gauge.arcStrokeWidth, gauge.dangerThreshold);
-            break;
         case "Numeric cell":
             parts.push(gauge.width, gauge.height, gauge.x, gauge.y,
                        gauge.mainvaluename, gauge.warnvaluehigh, gauge.warnvaluelow,
@@ -339,7 +299,13 @@ QtObject {
     }
 
     function deserializeDashboardFromJSON(jsonString, parentItem) {
-        var doc = JSON.parse(jsonString);
+        var doc = null;
+        try {
+            doc = JSON.parse(jsonString);
+        } catch (e) {
+            console.warn("GaugeFactory: Invalid dashboard JSON:", e);
+            return 0;
+        }
         if (!doc || !doc.gauges)
             return 0;
         var count = 0;
@@ -431,12 +397,6 @@ QtObject {
                 "valueFonttype": parts[27]
             };
             break;
-        case "gauge image":
-            props = {
-                "x": parts[1], "y": parts[2],
-                "pictureheight": parts[3], "picturesource": parts[4]
-            };
-            break;
         case "Text label gauge":
             props = {
                 "x": parts[1], "y": parts[2], "displaytext": parts[3],
@@ -445,34 +405,6 @@ QtObject {
                 "fontbold": (parts[8] && parts[8].toLowerCase() === 'true'),
                 "decimalpoints": parts[9], "warnvaluehigh": parts[10],
                 "warnvaluelow": parts[11]
-            };
-            break;
-        case "State gauge":
-            props = {
-                "x": parts[1], "y": parts[2], "pictureheight": parts[3],
-                "mainvaluename": parts[4], "triggervalue": parts[5],
-                "statepicturesourceoff": parts[6], "statepicturesourceon": parts[7]
-            };
-            break;
-        case "State GIF":
-            props = {
-                "x": parts[1], "y": parts[2], "pictureheight": parts[3],
-                "mainvaluename": parts[4], "triggervalue": parts[5],
-                "statepicturesourceoff": parts[6], "statepicturesourceon": parts[7],
-                "triggeroffvalue": parts[8]
-            };
-            break;
-        case "Arc fill gauge":
-            props = {
-                "width": parts[1], "height": parts[2], "x": parts[3], "y": parts[4],
-                "mainvaluename": parts[5], "maxvalue": parts[6], "minvalue": parts[7],
-                "warnvaluehigh": parts[8], "warnvaluelow": parts[9],
-                "decimalpoints": parts[10], "unittext": parts[11], "labeltext": parts[12],
-                "arcTrackColor": parts[13], "arcFillColor": parts[14],
-                "arcDangerColor": parts[15], "valueTextColor": parts[16],
-                "labelTextColor": parts[17], "unitTextColor": parts[18],
-                "arcStartAngle": parts[19], "arcEndAngle": parts[20],
-                "arcStrokeWidth": parts[21], "dangerThreshold": parts[22]
             };
             break;
         case "Numeric cell":

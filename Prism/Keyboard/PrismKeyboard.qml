@@ -250,6 +250,8 @@ Item {
     // Shows the keyboard for the given text field, auto-detecting the appropriate layout.
     // Attempts to find the field label from placeholderText or sibling Text elements.
     function show(textField) {
+        if (!isEditableTarget(textField))
+            return
         target = textField
 
         // Try to get field context label
@@ -293,8 +295,12 @@ Item {
     function sendKey(value) {
         if (!target) return
         var pos = target.cursorPosition
-        var txt = target.text
-        target.text = txt.substring(0, pos) + value + txt.substring(pos)
+        if (target.insert) {
+            target.insert(pos, value)
+        } else {
+            var txt = target.text
+            target.text = txt.substring(0, pos) + value + txt.substring(pos)
+        }
         target.cursorPosition = pos + value.length
     }
 
@@ -303,8 +309,12 @@ Item {
         if (!target) return
         var pos = target.cursorPosition
         if (pos > 0) {
-            var txt = target.text
-            target.text = txt.substring(0, pos - 1) + txt.substring(pos)
+            if (target.remove) {
+                target.remove(pos - 1, 1)
+            } else {
+                var txt = target.text
+                target.text = txt.substring(0, pos - 1) + txt.substring(pos)
+            }
             target.cursorPosition = pos - 1
         }
     }
@@ -312,7 +322,24 @@ Item {
     // Clears all text in the target field and resets cursor to position 0.
     function sendClear() {
         if (!target) return
-        target.text = ""
+        if (target.clear)
+            target.clear()
+        else
+            target.text = ""
         target.cursorPosition = 0
+    }
+
+    function isEditableTarget(item) {
+        if (!item)
+            return false
+        if (!item.hasOwnProperty("text"))
+            return false
+        if (!item.hasOwnProperty("cursorPosition"))
+            return false
+        if (item.hasOwnProperty("readOnly") && item.readOnly)
+            return false
+        if (item.hasOwnProperty("enabled") && !item.enabled)
+            return false
+        return true
     }
 }

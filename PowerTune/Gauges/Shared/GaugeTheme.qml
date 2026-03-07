@@ -61,4 +61,47 @@ Item {
     readonly property color menuBorder: highContrast ? "#FFFFFF" : "#444444"
 
     readonly property string accessibleRoleGauge: "Indicator"
+
+    readonly property color aimArcGreen: "#BBFF00"
+    readonly property color aimArcYellowGreen: "#DDFF00"
+    readonly property color aimArcYellow: "#FFCC00"
+    readonly property color aimArcRed: "#FF2200"
+    readonly property color aimArcTrack: "#2A2A2A"
+    readonly property color aimGearColor: "#FFFFFF"
+    readonly property color aimCellBorder: "#3A3A3A"
+    readonly property color aimLabelGrey: "#999999"
+    readonly property color aimUnitGrey: "#888888"
+    readonly property color aimDimTick: "#555555"
+    readonly property color aimBezelColor: "#222222"
+    readonly property color aimNeedle: "#FFFFFF"
+    readonly property color aimNeedleGlow: Qt.rgba(1, 1, 1, 0.15)
+    readonly property color aimStatusGood: "#00FF00"
+    readonly property color aimStatusWarning: "#FFAA00"
+    readonly property color aimStatusBad: "#FF0000"
+    readonly property color aimStatusBarBg: "#0A0A0A"
+    readonly property color aimStatusBarText: "#BBBBBB"
+    readonly property color aimPanelOuter: "#141414"
+    readonly property color aimPanelInner: "#050505"
+    readonly property color aimPanelInset: "#0B0B0B"
+    readonly property color aimPanelGloss: Qt.rgba(1, 1, 1, 0.08)
+    readonly property color aimPanelGlossSoft: Qt.rgba(1, 1, 1, 0.03)
+    readonly property color aimPanelShadow: Qt.rgba(0, 0, 0, 0.65)
+    readonly property color aimPanelStrokeBright: "#585858"
+    readonly property color aimPanelStrokeSoft: "#242424"
+    readonly property color aimSeparator: "#303030"
+    readonly property color aimGaugeFaceOuter: "#0D0D0D"
+    readonly property color aimGaugeFaceInner: "#010101"
+    readonly property color aimGaugeInnerRing: "#1A1A1A"
+    readonly property color aimGaugeSpecular: Qt.rgba(1, 1, 1, 0.07)
+    readonly property color aimGaugeSpecularSoft: Qt.rgba(1, 1, 1, 0.02)
+    readonly property color aimGaugeShadow: Qt.rgba(0, 0, 0, 0.72)
+    readonly property color aimValueWhite: "#F7F7F7"
+    readonly property color aimTextStrong: "#E7E7E7"
+    readonly property color aimTextMuted: "#777777"
+    readonly property color aimCyan: "#26D8F4"
+    readonly property color aimLime: "#D9F500"
+    readonly property color aimTrackName: "#8E8E8E"
+    readonly property color aimBottomStrip: "#101010"
+    readonly property color aimBottomStripEdge: "#1E1E1E"
+    readonly property color aimBottomStripGlow: Qt.rgba(1, 1, 1, 0.04)
 }

@@ -1,5 +1,0 @@
-module Prism.Keyboard
-PrismKeyboard 1.0 PrismKeyboard.qml
-KeyButton 1.0 KeyButton.qml
-NumericPad 1.0 NumericPad.qml
-QwertyLayout 1.0 QwertyLayout.qml

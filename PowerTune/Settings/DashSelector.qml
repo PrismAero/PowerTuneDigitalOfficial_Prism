@@ -4,6 +4,7 @@ import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
 import Qt.labs.settings 1.0
 import PowerTune.Settings 1.0
+import PowerTune.UI 1.0
 import PowerTune.Utils 1.0
 
 Rectangle {
@@ -20,17 +21,19 @@ Rectangle {
     }
 
     function getDashByIndex(index) {
-        var dashPath = "qrc:/qt/qml/PrismPT/Dashboard/PowerTune/Dashboard/";
         switch (index) {
         case 0:
-            return dashPath + "UserDashboard.qml";
+            return "qrc:/qt/qml/PrismPT/Dashboard/PowerTune/Dashboard/UserDashboard.qml";
         case 1:
-            return dashPath + "UserDashboard.qml";
+            return "qrc:/qt/qml/PrismPT/Dashboard/PowerTune/Dashboard/UserDashboard.qml";
         case 2:
-            return dashPath + "UserDashboard.qml";
+            return "qrc:/qt/qml/PrismPT/Dashboard/PowerTune/Dashboard/UserDashboard.qml";
         case 3:
-            return "qrc:/qt/qml/PowerTune/Settings/PowerTune/Settings/CanMonitor.qml";
+            return Qt.resolvedUrl("CanMonitor.qml");
+        case 4:
+            return "qrc:/qt/qml/PrismPT/Dashboard/PowerTune/Dashboard/AiMRaceDash.qml";
         }
+        return "";
     }
 
     function getDashIndex(comboIndex) {

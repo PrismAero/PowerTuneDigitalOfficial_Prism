@@ -1,5 +1,6 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
+import PrismPT.Dashboard 1.0
 import PowerTune.Gauges.Shared 1.0
 import PowerTune.Utils 1.0
 
@@ -9,7 +10,10 @@ Rectangle {
     y: 0
     height: dashWindow ? dashWindow.height * 0.41 : 200
     width: dashWindow ? dashWindow.width * 0.625 : 500
-    color: "darkgrey"
+    color: DashboardTheme.panelBackground
+    radius: DashboardTheme.panelRadius
+    border.color: DashboardTheme.panelBorder
+    border.width: 1
     z: 200
     visible: false
 

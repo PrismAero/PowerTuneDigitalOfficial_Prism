@@ -24,14 +24,14 @@ ApplicationWindow {
     property int brightnessIncrease: 175
     property int ddcUtilBrightnessIncrease: 50
 
-    property int digitalInput1: Expander ? Expander.EXDigitalInput1 : 0
-    property int digitalInput2: Expander ? Expander.EXDigitalInput2 : 0
-    property int digitalInput3: Expander ? Expander.EXDigitalInput3 : 0
-    property int digitalInput4: Expander ? Expander.EXDigitalInput4 : 0
-    property int digitalInput5: Expander ? Expander.EXDigitalInput5 : 0
-    property int digitalInput6: Expander ? Expander.EXDigitalInput6 : 0
-    property int digitalInput7: Expander ? Expander.EXDigitalInput7 : 0
-    property int digitalInput8: Expander ? Expander.EXDigitalInput8 : 0
+    property int digitalInput1: (Expander && Expander.EXDigitalInput1 !== undefined) ? Expander.EXDigitalInput1 : 0
+    property int digitalInput2: (Expander && Expander.EXDigitalInput2 !== undefined) ? Expander.EXDigitalInput2 : 0
+    property int digitalInput3: (Expander && Expander.EXDigitalInput3 !== undefined) ? Expander.EXDigitalInput3 : 0
+    property int digitalInput4: (Expander && Expander.EXDigitalInput4 !== undefined) ? Expander.EXDigitalInput4 : 0
+    property int digitalInput5: (Expander && Expander.EXDigitalInput5 !== undefined) ? Expander.EXDigitalInput5 : 0
+    property int digitalInput6: (Expander && Expander.EXDigitalInput6 !== undefined) ? Expander.EXDigitalInput6 : 0
+    property int digitalInput7: (Expander && Expander.EXDigitalInput7 !== undefined) ? Expander.EXDigitalInput7 : 0
+    property int digitalInput8: (Expander && Expander.EXDigitalInput8 !== undefined) ? Expander.EXDigitalInput8 : 0
 
     Settings{
         id: appSettings
@@ -84,7 +84,7 @@ ApplicationWindow {
         Loader {
             id: firstPageLoader
             // * Default dashboard - shows Intro until user configures via DashSelector
-            source: "qrc:/qt/qml/PowerTune/Core/PowerTune/Core/Intro.qml"
+            source: Qt.resolvedUrl("Intro.qml")
         }
 
         Loader {
@@ -634,8 +634,7 @@ ApplicationWindow {
                 && item.hasOwnProperty("cursorPosition")
                 && item.hasOwnProperty("inputMethodHints")
                 && !item.hasOwnProperty("currentIndex")  // Exclude ComboBox
-                && item.hasOwnProperty("readOnly") !== undefined
-                && !item.readOnly) {
+                && (!item.hasOwnProperty("readOnly") || !item.readOnly)) {
                 prismKeyboard.show(item)
             } else {
                 if (prismKeyboard.visible) {

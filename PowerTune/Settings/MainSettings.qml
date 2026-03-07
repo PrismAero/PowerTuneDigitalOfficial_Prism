@@ -4,6 +4,7 @@ import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
 import Qt.labs.settings 1.0
 import PowerTune.Settings 1.0
+import PowerTune.UI 1.0
 import PowerTune.Utils 1.0
 import PowerTune.Gauges.Shared 1.0
 
@@ -15,7 +16,7 @@ Rectangle {
     property int connected: 0
     property int hexstring: 0
     property int hexstring2: 0
-    property int currentLanguage: Settings ? Settings.language : 0
+    property int currentLanguage: (Settings && Settings.language !== undefined) ? Settings.language : 0
 
     readonly property var ecuBackendMap: [0, 4]
     readonly property int genericCanDaemonIndex: 40
@@ -65,10 +66,7 @@ Rectangle {
             target: Engine
             onKnockChanged: { if (Engine.Knock > Settings.knockwarn) playwarning.start() }
         }
-        Connections {
-            target: Engine
-            onBoostpresChanged: { if (Engine.BoostPres > Settings.boostwarn) playwarning.start() }
-        }
+        // Boost warning is evaluated by the shared warning loader.
     }
 
     RowLayout {

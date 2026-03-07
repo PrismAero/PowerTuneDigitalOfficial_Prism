@@ -17,38 +17,12 @@ Rectangle {
     }
 
     function loadersource() {
-        // * Load appropriate ECU-specific component
-        switch (Connection.ecu) {
-            case "0":
-            case "1":
-                pageLoader.sourceComponent = analogInputsComponent
-                break
-            case "2":
-                pageLoader.sourceComponent = consultRegsComponent
-                break
-            case "3":
-            case "4":
-                pageLoader.sourceComponent = obdPidsComponent
-                break
-            default:
-                pageLoader.sourceComponent = analogInputsComponent
-        }
+        pageLoader.sourceComponent = analogInputsComponent
     }
 
-    // * Component definitions for each ECU type
     Component {
         id: analogInputsComponent
         AnalogInputs {}
-    }
-
-    Component {
-        id: consultRegsComponent
-        ConsultRegs {}
-    }
-
-    Component {
-        id: obdPidsComponent
-        OBDPIDS {}
     }
 
     Connections {
