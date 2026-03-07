@@ -1,8 +1,8 @@
 # QRC Disconnects and Orphans
 
-- Referenced QRC paths: **59**
+- Referenced QRC paths: **38**
 - Registered QRC paths: **219**
-- Referenced but not registered: **27**
+- Referenced but not registered: **6**
 - Registered but not referenced: **187**
 - Paths with nested duplicate segments: **0**
 
@@ -13,28 +13,7 @@
 - `/Resources/graphics/`
 - `/Resources/graphics/fanIcon.jpg`
 - `/qt/qml`
-- `/qt/qml/PowerTune/Core/PowerTune/Core/Intro.qml`
 - `/qt/qml/PowerTune/Core/PowerTune/Core/Main.qml`
-- `/qt/qml/PowerTune/Gauges/Media/PowerTune/Gauges/Media/MyTextLabel.qml`
-- `/qt/qml/PowerTune/Gauges/Media/PowerTune/Gauges/Media/Picture.qml`
-- `/qt/qml/PowerTune/Gauges/Media/PowerTune/Gauges/Media/StateGIF.qml`
-- `/qt/qml/PowerTune/Gauges/Media/PowerTune/Gauges/Media/StatePicture.qml`
-- `/qt/qml/PowerTune/Gauges/Sensors/PowerTune/Gauges/Sensors/PFCSensors.qml`
-- `/qt/qml/PowerTune/Gauges/Shared/PowerTune/Gauges/Shared/Warning.qml`
-- `/qt/qml/PowerTune/Gauges/Styles/PowerTune/Gauges/Styles/RPMBarStyle1.qml`
-- `/qt/qml/PowerTune/Gauges/Styles/PowerTune/Gauges/Styles/RPMBarStyle2.qml`
-- `/qt/qml/PowerTune/Gauges/Styles/PowerTune/Gauges/Styles/RPMBarStyle3.qml`
-- `/qt/qml/PowerTune/Gauges/Widgets/PowerTune/Gauges/Widgets/ArcFillGauge.qml`
-- `/qt/qml/PowerTune/Gauges/Widgets/PowerTune/Gauges/Widgets/GearIndicator.qml`
-- `/qt/qml/PowerTune/Gauges/Widgets/PowerTune/Gauges/Widgets/ModernRoundGauge.qml`
-- `/qt/qml/PowerTune/Gauges/Widgets/PowerTune/Gauges/Widgets/NumericCell.qml`
-- `/qt/qml/PowerTune/Gauges/Widgets/PowerTune/Gauges/Widgets/RPMBar.qml`
-- `/qt/qml/PowerTune/Gauges/Widgets/PowerTune/Gauges/Widgets/RoundGauge.qml`
-- `/qt/qml/PowerTune/Gauges/Widgets/PowerTune/Gauges/Widgets/SquareGauge.qml`
-- `/qt/qml/PowerTune/Gauges/Widgets/PowerTune/Gauges/Widgets/SquareGaugeMain.qml`
-- `/qt/qml/PowerTune/Gauges/Widgets/PowerTune/Gauges/Widgets/VerticalBarGauge.qml`
-- `/qt/qml/PowerTune/Settings/PowerTune/Settings/CanMonitor.qml`
-- `/qt/qml/PrismPT/Dashboard/PowerTune/Dashboard/`
 
 ## Registered but Not Referenced
 
@@ -232,4 +211,4 @@
 
 ## Mixed PrismPT and PowerTune Roots
 
-- `/qt/qml/PrismPT/Dashboard/PowerTune/Dashboard/`
+- None
