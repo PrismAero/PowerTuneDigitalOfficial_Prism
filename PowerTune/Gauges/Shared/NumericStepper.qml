@@ -14,8 +14,6 @@ Row {
     property int displayWidth: 60
     property int displayFontSize: 15
 
-    signal valueChanged(real newValue)
-
     RoundButton {
         text: "-"
         width: root.buttonWidth
@@ -74,8 +72,10 @@ Row {
         repeat: true
         running: direction !== 0
         onTriggered: {
-            if (direction > 0) _increment();
-            else _decrement();
+            if (direction > 0)
+                _increment();
+            else
+                _decrement();
         }
     }
 
@@ -89,6 +89,5 @@ Row {
 
     function _apply(v) {
         value = v;
-        valueChanged(v);
     }
 }
