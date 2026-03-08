@@ -2,7 +2,6 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
-import Qt.labs.settings 1.0
 import PowerTune.Settings 1.0
 import PowerTune.UI 1.0
 import PowerTune.Utils 1.0
@@ -12,15 +11,13 @@ Rectangle {
     anchors.fill: parent
     color: "#1a1a2e"
 
-    Item {
-        id: speedcorretionsettings
-        Settings {
-            property alias speedpercentsetting: speedpercent.text
-            property alias pulsespermilesetting: pulsespermile.text
-            property alias usbvrsensorcheckstate: usbvrcheckbox.checked
-            property alias connectbuttonenabled: connectButtonArd.enabled
-            property alias disconnectbuttonenabled: disconnectButtonArd.enabled
-        }
+    Component.onCompleted: {
+        var sp = AppSettings.getValue("Speedcorrection", 1)
+        speedpercent.text = String(Math.round(sp * 100))
+        pulsespermile.text = AppSettings.getValue("Pulsespermile", "100000")
+        usbvrcheckbox.checked = AppSettings.getValue("ui/usbVrSensor", false)
+        connectButtonArd.enabled = AppSettings.getValue("ui/speedConnectEnabled", true)
+        disconnectButtonArd.enabled = AppSettings.getValue("ui/speedDisconnectEnabled", false)
     }
 
     ColumnLayout {

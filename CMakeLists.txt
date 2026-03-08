@@ -150,24 +150,17 @@ set(PROJECT_HEADERS
     ${UTILS_HEADERS}
 )
 
-# * QML Resource file
-set(QML_RESOURCES
-    qml.qrc
-)
-
 # * Create executable
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(${PROJECT_NAME}
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
         ${PROJECT_HEADERS}
-        ${QML_RESOURCES}
     )
 else()
     add_executable(${PROJECT_NAME}
         ${PROJECT_SOURCES}
         ${PROJECT_HEADERS}
-        ${QML_RESOURCES}
     )
 endif()
 
@@ -210,9 +203,6 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     set_source_files_properties(PowerTune/Gauges/Shared/DatasourceService.qml PROPERTIES
         QT_QML_SINGLETON_TYPE TRUE
     )
-    set_source_files_properties(PowerTune/UI/Theme.qml PROPERTIES
-        QT_QML_SINGLETON_TYPE TRUE
-    )
     set_source_files_properties(PowerTune/Dashboard/DashboardTheme.qml PROPERTIES
         QT_QML_SINGLETON_TYPE TRUE
     )
@@ -225,6 +215,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_library(GaugesSharedLib STATIC)
     qt_add_library(PrismPTDashboardLib STATIC)
     qt_add_library(PrismKeyboardLib STATIC)
+
     
     # * PowerTune.Utils module - Translator singleton and icon utilities
     qt_add_qml_module(PowerTuneUtilsLib
@@ -259,7 +250,6 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         URI PowerTune.UI
         VERSION 1.0
         QML_FILES
-            PowerTune/UI/Theme.qml
             PowerTune/Settings/components/SettingsPage.qml
             PowerTune/Settings/components/SettingsSection.qml
             PowerTune/Settings/components/SettingsRow.qml
@@ -334,6 +324,63 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/qt/qml/Prism/Keyboard
     )
     
+    # * Static assets (graphics, fonts) - embedded directly into the executable
+    qt_add_resources(${PROJECT_NAME} "resources"
+        PREFIX /
+        FILES
+            Resources/fonts/MaterialSymbolsOutlined.ttf
+            Resources/fonts/HyperspaceRaceVariable.otf
+            Resources/graphics/Logo.png
+            Resources/graphics/brightness.png
+            Resources/graphics/brightnessIncrease.png
+            Resources/graphics/brightnessDecrease.png
+            Resources/graphics/contactQR.png
+            Resources/graphics/facebookQR.png
+            Resources/graphics/instagramQR.png
+            Resources/graphics/userManualQR.png
+            Resources/graphics/warrantyQR.png
+            Resources/graphics/Tacho_Mitte.png
+            Resources/graphics/vertrevcanvas.png
+            Resources/graphics/next.png
+            Resources/graphics/pause.png
+            Resources/graphics/play.png
+            Resources/graphics/previous.png
+            Resources/graphics/ledgreen.png
+            Resources/graphics/ledoff.png
+            Resources/graphics/ledred.png
+            Resources/graphics/ledyellow.png
+            Resources/graphics/RPM_BG.png
+            Resources/graphics/RPM_Fill.png
+            Resources/graphics/empty.png
+            Resources/graphics/fill.png
+            Resources/graphics/fueltechempty.png
+            Resources/graphics/fueltechfill.png
+            Resources/graphics/Racedash.png
+            Resources/graphics/Racedash800x480.png
+            Resources/graphics/needle.svg
+            Resources/graphics/RoungGaugeRing.png
+            Resources/graphics/green_Light.png
+            Resources/graphics/Indicator_left.png
+            Resources/graphics/Indicator_left_off.png
+            Resources/graphics/Indicator_right.png
+            Resources/graphics/Indicator_right_off.png
+            Resources/graphics/MainDash.png
+            Resources/graphics/MainDashBlue.png
+            Resources/graphics/MainDashnew.png
+            Resources/graphics/SelectStategif.png
+            Resources/graphics/StateGIF.gif
+            Resources/graphics/rotary.gif
+            Resources/graphics/selectStateImage.png
+            Resources/graphics/slectImage.png
+            Resources/graphics/test.png
+            Resources/graphics/Flags/ae.png
+            Resources/graphics/Flags/de.png
+            Resources/graphics/Flags/es.png
+            Resources/graphics/Flags/fr.png
+            Resources/graphics/Flags/jp.png
+            Resources/graphics/Flags/us.png
+    )
+
     # * Link all QML modules to main executable
     target_link_libraries(${PROJECT_NAME} PRIVATE
         PowerTuneUtilsLibplugin

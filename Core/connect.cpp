@@ -28,13 +28,13 @@
 #include "../Utils/SteinhartCalculator.h"
 #include "../Utils/UDPReceiver.h"
 #include "../Utils/wifiscanner.h"
-#include "appsettings.h"
-#include "dashboard.h"
+#include "DiagnosticsProvider.h"
+#include "Models/DataModels.h"
+#include "Models/UIState.h"
 #include "PropertyRouter.h"
 #include "SensorRegistry.h"
-#include "DiagnosticsProvider.h"
-#include "Models/UIState.h"
-#include "Models/DataModels.h"
+#include "appsettings.h"
+#include "dashboard.h"
 
 #include <QByteArrayMatcher>
 #include <QDebug>
@@ -49,6 +49,7 @@
 #include <QTime>
 #include <QTimer>
 #include <QVector>
+
 
 int ecu;      // 0=apex, 1=adaptronic;2= OBD; 3= Dicktator ECU
 int logging;  // 0 Logging off , 1 Logging to file
@@ -109,71 +110,29 @@ Connect::Connect(QObject *parent)
     m_connectionData = new ConnectionData(this);
     m_settingsData = new SettingsData(this);
     // * Phase 5: AppSettings now writes directly to domain models (no Dashboard fallback)
-    m_appSettings = new AppSettings(
-        m_dashBoard,
-        m_settingsData,
-        m_uiState,
-        m_vehicleData,
-        m_analogInputs,
-        m_expanderBoardData,
-        m_engineData,
-        m_connectionData,
-        m_digitalInputs,
-        this
-    );
+    m_appSettings = new AppSettings(m_dashBoard, m_settingsData, m_uiState, m_vehicleData, m_analogInputs,
+                                    m_expanderBoardData, m_engineData, m_connectionData, m_digitalInputs, this);
     // * Phase 3: Create PropertyRouter for dynamic QML property access
-    m_propertyRouter = new PropertyRouter(
-        m_engineData,
-        m_vehicleData,
-        m_gpsData,
-        m_analogInputs,
-        m_digitalInputs,
-        m_expanderBoardData,
-        m_electricMotorData,
-        m_flagsData,
-        m_sensorData,
-        m_connectionData,
-        m_settingsData,
-        m_timingData,
-        m_uiState,
-        this
-    );
+    m_propertyRouter = new PropertyRouter(m_engineData, m_vehicleData, m_gpsData, m_analogInputs, m_digitalInputs,
+                                          m_expanderBoardData, m_electricMotorData, m_flagsData, m_sensorData,
+                                          m_connectionData, m_settingsData, m_timingData, m_uiState, this);
     // * Phase 1: UDPReceiver now writes directly to domain models
-    m_udpreceiver = new udpreceiver(
-        m_engineData,
-        m_vehicleData,
-        m_gpsData,
-        m_analogInputs,
-        m_digitalInputs,
-        m_expanderBoardData,
-        m_electricMotorData,
-        m_flagsData,
-        m_sensorData,
-        m_connectionData,
-        m_settingsData,
-        this
-    );
+    m_udpreceiver =
+        new udpreceiver(m_engineData, m_vehicleData, m_gpsData, m_analogInputs, m_digitalInputs, m_expanderBoardData,
+                        m_electricMotorData, m_flagsData, m_sensorData, m_connectionData, m_settingsData, this);
     // * Phase 5: DataLogger now reads from domain models
-    m_datalogger = new datalogger(
-        m_engineData,
-        m_vehicleData,
-        m_gpsData,
-        m_sensorData,
-        m_flagsData,
-        m_analogInputs,
-        m_expanderBoardData,
-        m_digitalInputs,
-        m_connectionData,
-        m_timingData,
-        this
-    );
+    m_datalogger = new datalogger(m_engineData, m_vehicleData, m_gpsData, m_sensorData, m_flagsData, m_analogInputs,
+                                  m_expanderBoardData, m_digitalInputs, m_connectionData, m_timingData, this);
     // * Phase 4: Calculations now writes directly to domain models
     m_calculations = new calculations(m_dashBoard, m_vehicleData, m_engineData, m_timingData, m_settingsData, this);
     m_wifiscanner = new WifiScanner(m_connectionData, this);
     // * Phase 4: Extender now writes directly to domain models
-    m_extender = new Extender(m_digitalInputs, m_expanderBoardData, m_engineData, m_settingsData, m_vehicleData, m_connectionData, this);
-    // * Phase 6: Create SteinhartCalculator and CalibrationHelper for sensor calibration
+    m_extender = new Extender(m_digitalInputs, m_expanderBoardData, m_engineData, m_settingsData, m_vehicleData,
+                              m_connectionData, this);
+    // * Phase 6: Create SteinhartCalculator, wire into Extender, connect calibration signals
     m_steinhartCalc = new SteinhartCalculator(this);
+    m_extender->setSteinhartCalculator(m_steinhartCalc);
+    m_extender->connectCalibrationSignals();
     m_calibrationHelper = new CalibrationHelper(m_steinhartCalc, this);
     // * Phase 7: Create SensorRegistry for runtime sensor tracking
     m_sensorRegistry = new SensorRegistry(this);
@@ -184,7 +143,7 @@ Connect::Connect(QObject *parent)
     // Use AppDataLocation instead of "/" to prevent QFileSystemModel from
     // indexing the entire filesystem (saves 0.5-2GB+ RAM on macOS dev builds)
     QString mPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
-    QDir().mkpath(mPath); // Ensure the directory exists
+    QDir().mkpath(mPath);  // Ensure the directory exists
     // DIRECTORIES
     dirModel = new QFileSystemModel(this);
     // Set filter
@@ -231,6 +190,8 @@ Connect::Connect(QObject *parent)
     engine->rootContext()->setContextProperty("SensorRegistry", m_sensorRegistry);
     // * Phase 8: Expose DiagnosticsProvider to QML
     engine->rootContext()->setContextProperty("Diagnostics", m_diagnosticsProvider);
+    m_appSettings->setExtender(m_extender);
+    m_appSettings->setSteinhartCalculator(m_steinhartCalc);
     m_appSettings->readandApplySettings();
     // * Phase 7: Populate SensorRegistry with configured input channels
     m_sensorRegistry->refreshEcuAnalogChannels();
@@ -315,7 +276,7 @@ void Connect::readavailabledashfiles()
 void Connect::readavailablebackrounds()
 {
     QStringList dashfiles;
-    
+
 #ifdef Q_OS_LINUX
     // * Linux (Raspberry Pi) - use /home/pi/Logo directory
     QDir directory("/home/pi/Logo");
@@ -323,7 +284,7 @@ void Connect::readavailablebackrounds()
 #elif defined(Q_OS_MACOS)
     // * macOS - list bundled graphics resources for development testing
     // * The files are in the qrc, so we provide a static list of available images
-    dashfiles << "Logo.png" << "MainDash.png" << "MainDashBlue.png" << "MainDashnew.png" 
+    dashfiles << "Logo.png" << "MainDash.png" << "MainDashBlue.png" << "MainDashnew.png"
               << "Racedash.png" << "Racedash800x480.png" << "RPM_BG.png" << "rotary.gif"
               << "test.png" << "StateGIF.gif";
 #elif defined(Q_OS_WIN)
@@ -334,7 +295,7 @@ void Connect::readavailablebackrounds()
     QDir directory("./Logo");
     dashfiles = directory.entryList(QStringList() << "*.png" << "*.gif", QDir::Files);
 #endif
-    
+
     dashfiles.prepend("None");
     m_uiState->setbackroundpictures(dashfiles);
 }

@@ -2,7 +2,6 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
-import Qt.labs.settings 1.0
 import PowerTune.Settings 1.0
 import PowerTune.UI 1.0
 import PowerTune.Utils 1.0
@@ -15,12 +14,9 @@ Rectangle {
     // Generic CAN daemon index in the C++ backend mapping
     readonly property int genericCanDaemonIndex: 40
 
-    Item {
-        id: startupsettings
-        Settings {
-            property alias mainspeedsource: mainspeedsource.currentIndex
-            property alias bitrateselect: canbitrateselect.currentIndex
-        }
+    Component.onCompleted: {
+        mainspeedsource.currentIndex = AppSettings.getValue("ui/mainSpeedSource", 0)
+        canbitrateselect.currentIndex = AppSettings.getValue("ui/bitrateSelect", 0)
     }
 
     ColumnLayout {

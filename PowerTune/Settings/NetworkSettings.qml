@@ -2,7 +2,6 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
-import Qt.labs.settings 1.0
 import PowerTune.Settings 1.0
 import PowerTune.UI 1.0
 import PowerTune.Utils 1.0
@@ -24,8 +23,8 @@ Rectangle {
         id: wificountrynames
     }
 
-    Settings {
-        property alias wificountryindex: wificountrycbx.currentIndex
+    Component.onCompleted: {
+        wificountrycbx.currentIndex = AppSettings.getValue("ui/wifiCountryIndex", 0)
     }
 
     RowLayout {
@@ -61,6 +60,7 @@ Rectangle {
                         Layout.fillWidth: true
                         model: wificountrynames
                         textRole: "name"
+                        onCurrentIndexChanged: AppSettings.setValue("ui/wifiCountryIndex", currentIndex)
                     }
                 }
 

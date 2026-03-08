@@ -2,7 +2,6 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
-import Qt.labs.settings 1.0
 import PowerTune.Settings 1.0
 import PowerTune.UI 1.0
 import PowerTune.Utils 1.0
@@ -12,15 +11,12 @@ Rectangle {
     anchors.fill: parent
     color: "#1a1a2e"
 
-    Item {
-        id: sensehatsettings
-        Settings {
-            property alias accelswitch: accelsens.checked
-            property alias gyrowitch: gyrosense.checked
-            property alias compassswitch: compass.checked
-            property alias tempswitch: tempsense.checked
-            property alias pressureswitch: pressuresens.checked
-        }
+    Component.onCompleted: {
+        accelsens.checked = AppSettings.getValue("sensehat/accel", false)
+        gyrosense.checked = AppSettings.getValue("sensehat/gyro", false)
+        compass.checked = AppSettings.getValue("sensehat/compass", false)
+        tempsense.checked = AppSettings.getValue("sensehat/temp", false)
+        pressuresens.checked = AppSettings.getValue("sensehat/pressure", false)
     }
 
     ColumnLayout {
@@ -99,6 +95,7 @@ Rectangle {
 
                         StyledSwitch {
                             id: accelsens
+                            onCheckedChanged: AppSettings.setValue("sensehat/accel", checked)
                             onClicked: { if (accelsens.checked) Sens.Accel() }
                         }
                     }
@@ -156,6 +153,7 @@ Rectangle {
 
                         StyledSwitch {
                             id: gyrosense
+                            onCheckedChanged: AppSettings.setValue("sensehat/gyro", checked)
                             onClicked: { if (gyrosense.checked) Sens.Gyro() }
                         }
                     }
@@ -213,6 +211,7 @@ Rectangle {
 
                         StyledSwitch {
                             id: compass
+                            onCheckedChanged: AppSettings.setValue("sensehat/compass", checked)
                             onClicked: { if (compass.checked) Sens.Comp() }
                         }
                     }
@@ -270,6 +269,7 @@ Rectangle {
 
                         StyledSwitch {
                             id: pressuresens
+                            onCheckedChanged: AppSettings.setValue("sensehat/pressure", checked)
                             onClicked: { if (pressuresens.checked) Sens.Pressure() }
                         }
                     }
@@ -327,6 +327,7 @@ Rectangle {
 
                         StyledSwitch {
                             id: tempsense
+                            onCheckedChanged: AppSettings.setValue("sensehat/temp", checked)
                             onClicked: { if (tempsense.checked) Sens.Temperature() }
                         }
                     }

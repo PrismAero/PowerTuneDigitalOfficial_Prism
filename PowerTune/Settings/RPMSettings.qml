@@ -2,7 +2,6 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
-import Qt.labs.settings 1.0
 import PowerTune.Settings 1.0
 import PowerTune.UI 1.0
 import PowerTune.Utils 1.0
@@ -12,14 +11,12 @@ Rectangle {
     anchors.fill: parent
     color: "#1a1a2e"
 
-    Item {
-        Settings {
-            property alias maxrpm: maxRPM.text
-            property alias shift1: stage1.text
-            property alias shift2: stage2.text
-            property alias shift3: stage3.text
-            property alias shift4: stage4.text
-        }
+    Component.onCompleted: {
+        maxRPM.text = AppSettings.getValue("Max RPM", "10000")
+        stage1.text = AppSettings.getValue("Shift Light1", "3000")
+        stage2.text = AppSettings.getValue("Shift Light2", "5500")
+        stage3.text = AppSettings.getValue("Shift Light3", "5500")
+        stage4.text = AppSettings.getValue("Shift Light4", "7500")
     }
 
     ColumnLayout {

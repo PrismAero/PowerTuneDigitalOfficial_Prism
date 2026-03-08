@@ -2,7 +2,6 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
-import Qt.labs.settings 1.0
 import PowerTune.Settings 1.0
 import PowerTune.UI 1.0
 import PowerTune.Utils 1.0
@@ -11,14 +10,6 @@ Rectangle {
     id: dashselector
     anchors.fill: parent
     color: "#1a1a2e"
-
-    Settings {
-        property alias dashselect1: dash1.currentIndex
-        property alias dashselect2: dash2.currentIndex
-        property alias dashselect3: dash3.currentIndex
-        property alias dashselect4: dash4.currentIndex
-        property alias numberofdash: numberofdashes.currentIndex
-    }
 
     function getDashByIndex(index) {
         switch (index) {
@@ -61,6 +52,11 @@ Rectangle {
     }
 
     Component.onCompleted: {
+        dash1.currentIndex = AppSettings.getValue("ui/dashSelect1", 0)
+        dash2.currentIndex = AppSettings.getValue("ui/dashSelect2", 0)
+        dash3.currentIndex = AppSettings.getValue("ui/dashSelect3", 0)
+        dash4.currentIndex = AppSettings.getValue("ui/dashSelect4", 0)
+        numberofdashes.currentIndex = AppSettings.getValue("ui/dashCount", 0)
         if (numberofdashes.currentIndex >= 0) {
             adremove();
             firstPageLoader.source = getDashByIndex(dash1.currentIndex);
@@ -107,6 +103,7 @@ Rectangle {
                     onCurrentIndexChanged: {
                         adremove();
                         AppSettings.writeSelectedDashSettings(numberofdashes.currentIndex + 1);
+                        AppSettings.setValue("ui/dashCount", currentIndex);
                     }
                 }
             }
@@ -127,18 +124,21 @@ Rectangle {
                     id: dash1
                     index: 1
                     linkedLoader: firstPageLoader
+                    onCurrentIndexChanged: AppSettings.setValue("ui/dashSelect1", currentIndex)
                 }
 
                 DashSelectorWidget {
                     id: dash2
                     index: 2
                     linkedLoader: secondPageLoader
+                    onCurrentIndexChanged: AppSettings.setValue("ui/dashSelect2", currentIndex)
                 }
 
                 DashSelectorWidget {
                     id: dash3
                     index: 3
                     linkedLoader: thirdPageLoader
+                    onCurrentIndexChanged: AppSettings.setValue("ui/dashSelect3", currentIndex)
                 }
 
                 DashSelectorWidget {
@@ -146,6 +146,7 @@ Rectangle {
                     index: 4
                     linkedLoader: fourthPageLoader
                     Component.onCompleted: tabView.currentIndex = 0
+                    onCurrentIndexChanged: AppSettings.setValue("ui/dashSelect4", currentIndex)
                 }
             }
         }

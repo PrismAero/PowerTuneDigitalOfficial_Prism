@@ -2,6 +2,7 @@
 #define APPSETTINGS_H
 
 #include <QObject>
+#include <QVariant>
 
 class DashBoard;
 class SettingsData;
@@ -12,6 +13,8 @@ class ExpanderBoardData;
 class EngineData;
 class ConnectionData;
 class DigitalInputs;
+class Extender;
+class SteinhartCalculator;
 
 class AppSettings : public QObject
 {
@@ -26,6 +29,8 @@ public:
                          EngineData *engineData, ConnectionData *connectionData,
                          DigitalInputs *digitalInputs, QObject *parent = nullptr);
 
+    Q_INVOKABLE void setValue(const QString &key, const QVariant &value);
+    Q_INVOKABLE QVariant getValue(const QString &key, const QVariant &defaultValue = QVariant()) const;
 
     Q_INVOKABLE int getBaudRate();
     Q_INVOKABLE void setBaudRate(const int &arg);
@@ -91,11 +96,14 @@ public:
     Q_INVOKABLE void writeDaemonLicenseKey(const QString &DaemonLicenseKey);
     Q_INVOKABLE void writeHolleyProductID(const QString &HolleyProductID);
     Q_INVOKABLE QString getDaemonActivationKey();
+    void setExtender(Extender *extender);
+    void setSteinhartCalculator(SteinhartCalculator *calc);
     Q_INVOKABLE void readandApplySettings();
 
+    Q_INVOKABLE void writeDashboardConfig(int index, const QString &bgPicture, const QString &bgColor);
+    Q_INVOKABLE QVariantMap loadDashboardConfig(int index) const;
+
 private:
-    void setValue(const QString &key, const QVariant &value);
-    QVariant getValue(const QString &key);
     DashBoard *m_dashboard;
     SettingsData *m_settingsData;
     UIState *m_uiState;
@@ -105,6 +113,8 @@ private:
     EngineData *m_engineData;
     ConnectionData *m_connectionData;
     DigitalInputs *m_digitalInputs;
+    Extender *m_extender = nullptr;
+    SteinhartCalculator *m_steinhartCalc = nullptr;
 };
 
 #endif  // APPSETTINGS_H

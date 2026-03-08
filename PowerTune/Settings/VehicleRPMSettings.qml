@@ -2,7 +2,6 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
-import Qt.labs.settings 1.0
 import PowerTune.Settings 1.0
 import PowerTune.UI 1.0
 import PowerTune.Utils 1.0
@@ -14,39 +13,26 @@ Rectangle {
 
     property int gercalactive: 0
 
-    Item {
-        id: warnSettings
-        Settings {
-            property alias watertempwarning: watertempwarn.text
-            property alias boostwarning: boostwarn.text
-            property alias rpmwarning: rpmwarn.text
-            property alias knockwarning: knockwarn.text
-            property alias lambdamultiplier: lambdamultiply.text
-            property alias gearcalcselectswitch: gearcalcselect.checked
-            property alias gearval1: valgear1.text
-            property alias gearval2: valgear2.text
-            property alias gearval3: valgear3.text
-            property alias gearval4: valgear4.text
-            property alias gearval5: valgear5.text
-            property alias gearval6: valgear6.text
-        }
-    }
-
-    Item {
-        Settings {
-            property alias maxrpm: maxRPM.text
-            property alias shift1: stage1.text
-            property alias shift2: stage2.text
-            property alias shift3: stage3.text
-            property alias shift4: stage4.text
-        }
-    }
-
-    Item {
-        id: speedSettings
-        Settings {
-            property alias speedpercentsetting: speedpercent.text
-        }
+    Component.onCompleted: {
+        watertempwarn.text = AppSettings.getValue("waterwarn", "110")
+        boostwarn.text = AppSettings.getValue("boostwarn", "0.9")
+        rpmwarn.text = AppSettings.getValue("rpmwarn", "10000")
+        knockwarn.text = AppSettings.getValue("knockwarn", "80")
+        lambdamultiply.text = AppSettings.getValue("lambdamultiply", "14.7")
+        gearcalcselect.checked = AppSettings.getValue("gercalactive", 0) > 0
+        maxRPM.text = AppSettings.getValue("Max RPM", "10000")
+        stage1.text = AppSettings.getValue("Shift Light1", "3000")
+        stage2.text = AppSettings.getValue("Shift Light2", "5500")
+        stage3.text = AppSettings.getValue("Shift Light3", "5500")
+        stage4.text = AppSettings.getValue("Shift Light4", "7500")
+        valgear1.text = AppSettings.getValue("valgear1", "120")
+        valgear2.text = AppSettings.getValue("valgear2", "74")
+        valgear3.text = AppSettings.getValue("valgear3", "54")
+        valgear4.text = AppSettings.getValue("valgear4", "37")
+        valgear5.text = AppSettings.getValue("valgear5", "28")
+        valgear6.text = AppSettings.getValue("valgear6", "")
+        var sp = AppSettings.getValue("Speedcorrection", 1)
+        speedpercent.text = String(Math.round(sp * 100))
     }
 
     RowLayout {

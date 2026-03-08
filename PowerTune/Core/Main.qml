@@ -1,7 +1,6 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Window 2.15
-import Qt.labs.settings 1.0
 import com.powertune 1.0
 import PowerTune.Core 1.0
 import PowerTune.Utils 1.0
@@ -33,13 +32,8 @@ ApplicationWindow {
     property int digitalInput7: (Expander && Expander.EXDigitalInput7 !== undefined) ? Expander.EXDigitalInput7 : 0
     property int digitalInput8: (Expander && Expander.EXDigitalInput8 !== undefined) ? Expander.EXDigitalInput8 : 0
 
-    Settings{
-        id: appSettings
-        property alias sampleActionEnabled: popUpLoader.enabled
-
-    }
-
     Component.onCompleted: {
+        popUpLoader.enabled = AppSettings.getValue("ui/brightnessPopupEnabled", true)
         popUpLoader.sourceComponent = Qt.createComponent("BrightnessPopUp.qml")
         custom.executeOnBootAction()
         if(Qt.platform.os === "linux" && HAVE_DDCUTIL){
@@ -147,8 +141,8 @@ ApplicationWindow {
     Loader {
         id: popUpLoader
         visible: false
-        enabled: appSettings.sampleActionEnabled
         anchors.right: parent.right
+        onEnabledChanged: AppSettings.setValue("ui/brightnessPopupEnabled", enabled)
         width: window.width * 0.15
         //anchors.verticalCenter: parent.verticalCenter
         Component.onCompleted: {
@@ -458,7 +452,6 @@ ApplicationWindow {
                     }
                     onPositionChanged: {
                         popUpLoader.enabled = !popUpLoader.enabled;
-                        appSettings.sampleActionEnabled = popUpLoader.enabled //setValue
                         popUpLoader.visible = false
                         if(popUpLoader.enabled){
                             disablePopUp.text = "On"

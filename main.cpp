@@ -21,7 +21,7 @@ int main(int argc, char *argv[])
     // * This suppresses native style customization warnings on macOS
     QQuickStyle::setStyle("Basic");
     QGuiApplication app(argc, argv);
-    app.setOrganizationName("Power-Tune");
+    app.setOrganizationName("PowerTune");
     app.setOrganizationDomain("power-tune.org");
     app.setApplicationName("PowerTune");
     QQmlApplicationEngine engine;

@@ -5,7 +5,6 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
-import Qt.labs.settings 1.0
 import PowerTune.Utils 1.0
 import PowerTune.Settings 1.0
 import PowerTune.UI 1.0
@@ -201,117 +200,7 @@ Rectangle {
         function onTextChanged() { if (exdigi8nameField.text !== exdigi8nameRef.text) exdigi8nameField.text = exdigi8nameRef.text }
     }
 
-    Item {
-        id: exsave
-        Settings {
-            id: settings
-            property alias ex00save: ex00.text
-            property alias ex05save: ex05.text
-            property alias ex10save: ex10.text
-            property alias ex15save: ex15.text
-            property alias ex20save: ex20.text
-            property alias ex25save: ex25.text
-            property alias ex30save: ex30.text
-            property alias ex35save: ex35.text
-            property alias ex40save: ex40.text
-            property alias ex45save: ex45.text
-            property alias ex50save: ex50.text
-            property alias ex55save: ex55.text
-            property alias ex60save: ex60.text
-            property alias ex65save: ex65.text
-            property alias ex70save: ex70.text
-            property alias ex75save: ex75.text
-
-            property alias checkan0ntcsave: checkan0ntc.checkState
-            property alias checkan1ntcsave: checkan1ntc.checkState
-            property alias checkan2ntcsave: checkan2ntc.checkState
-            property alias checkan3ntcsave: checkan3ntc.checkState
-            property alias checkan4ntcsave: checkan4ntc.checkState
-            property alias checkan5ntcsave: checkan5ntc.checkState
-
-            property alias checkan0100save: checkan0100.checkState
-            property alias checkan01Ksave: checkan01k.checkState
-            property alias checkan1100save: checkan1100.checkState
-            property alias checkan11Ksave: checkan11k.checkState
-            property alias checkan2100save: checkan2100.checkState
-            property alias checkan21Ksave: checkan21k.checkState
-            property alias checkan3100save: checkan3100.checkState
-            property alias checkan31Ksave: checkan31k.checkState
-            property alias checkan4100save: checkan4100.checkState
-            property alias checkan41Ksave: checkan41k.checkState
-            property alias checkan5100save: checkan5100.checkState
-            property alias checkan51Ksave: checkan51k.checkState
-
-            property alias rpmcheckboxsave: rpmcheckbox.checkState
-            property alias cylindercomboboxsave: cylindercombobox.currentIndex
-            property alias cylindercomboboxv2save: cylindercomboboxv2.currentIndex
-            property alias rpmcanversionselectorsave: rpmcanversionselector.currentIndex
-
-            property alias t10save: t10.text
-            property alias r10save: r10.text
-            property alias t20save: t20.text
-            property alias r20save: r20.text
-            property alias t30save: t30.text
-            property alias r30save: r30.text
-            property alias t11save: t11.text
-            property alias r11save: r11.text
-            property alias t21save: t21.text
-            property alias r21save: r21.text
-            property alias t31save: t31.text
-            property alias r31save: r31.text
-            property alias t12save: t12.text
-            property alias r12save: r12.text
-            property alias t22save: t22.text
-            property alias r22save: r22.text
-            property alias t32save: t32.text
-            property alias r32save: r32.text
-            property alias t13save: t13.text
-            property alias r13save: r13.text
-            property alias t23save: t23.text
-            property alias r23save: r23.text
-            property alias t33save: t33.text
-            property alias r33save: r33.text
-            property alias t14save: t14.text
-            property alias r14save: r14.text
-            property alias t24save: t24.text
-            property alias r24save: r24.text
-            property alias t34save: t34.text
-            property alias r34save: r34.text
-            property alias t15save: t15.text
-            property alias r15save: r15.text
-            property alias t25save: t25.text
-            property alias r25save: r25.text
-            property alias t35save: t35.text
-            property alias r35save: r35.text
-
-            property alias an7dampingfactorsave: an7dampingfactor.text
-
-            property alias selectedValue: digitalExtender.currentIndex
-            property alias switchValue: maxBrightnessBoot.checked
-
-            property alias rpmsourcesave: rpmsourceselector.currentIndex
-            property alias cylindercomboboxDi1save: cylindercomboboxDi1.currentIndex
-
-            property alias exan0name: exan0nameField.text
-            property alias exan1name: exan1nameField.text
-            property alias exan2name: exan2nameField.text
-            property alias exan3name: exan3nameField.text
-            property alias exan4name: exan4nameField.text
-            property alias exan5name: exan5nameField.text
-            property alias exan6name: exan6nameField.text
-            property alias exan7name: exan7nameField.text
-            property alias exdigi1name: exdigi1nameField.text
-            property alias exdigi2name: exdigi2nameField.text
-            property alias exdigi3name: exdigi3nameField.text
-            property alias exdigi4name: exdigi4nameField.text
-            property alias exdigi5name: exdigi5nameField.text
-            property alias exdigi6name: exdigi6nameField.text
-            property alias exdigi7name: exdigi7nameField.text
-            property alias exdigi8name: exdigi8nameField.text
-        }
-    }
-
-    property int rpmCheckboxSaveValue: settings.rpmcheckboxsave
+    property int rpmCheckboxSaveValue: AppSettings.getValue("ui/exboard/rpmcheckbox", 0)
     function getRpmCheckboxSaveValue() {
         return rpmCheckboxSaveValue;
     }
@@ -337,6 +226,29 @@ Rectangle {
             } else if (rpmsourceselector.currentIndex === 2) {
                 AppSettings.writeRPMFrequencySettings(rpmfrequencydivider, 1);
             }
+            AppSettings.setValue("ui/exboard/selectedValue", digitalExtender.currentIndex)
+            AppSettings.setValue("ui/exboard/switchValue", maxBrightnessBoot.checked)
+            AppSettings.setValue("ui/exboard/rpmSource", rpmsourceselector.currentIndex)
+            AppSettings.setValue("ui/exboard/cylinderCombobox", cylindercombobox.currentIndex)
+            AppSettings.setValue("ui/exboard/cylinderComboboxV2", cylindercomboboxv2.currentIndex)
+            AppSettings.setValue("ui/exboard/cylinderComboboxDi1", cylindercomboboxDi1.currentIndex)
+            AppSettings.setValue("ui/exboard/rpmcheckbox", rpmcheckbox.checkState)
+            AppSettings.setValue("ui/exboard/exan0name", exan0nameField.text)
+            AppSettings.setValue("ui/exboard/exan1name", exan1nameField.text)
+            AppSettings.setValue("ui/exboard/exan2name", exan2nameField.text)
+            AppSettings.setValue("ui/exboard/exan3name", exan3nameField.text)
+            AppSettings.setValue("ui/exboard/exan4name", exan4nameField.text)
+            AppSettings.setValue("ui/exboard/exan5name", exan5nameField.text)
+            AppSettings.setValue("ui/exboard/exan6name", exan6nameField.text)
+            AppSettings.setValue("ui/exboard/exan7name", exan7nameField.text)
+            AppSettings.setValue("ui/exboard/exdigi1name", exdigi1nameField.text)
+            AppSettings.setValue("ui/exboard/exdigi2name", exdigi2nameField.text)
+            AppSettings.setValue("ui/exboard/exdigi3name", exdigi3nameField.text)
+            AppSettings.setValue("ui/exboard/exdigi4name", exdigi4nameField.text)
+            AppSettings.setValue("ui/exboard/exdigi5name", exdigi5nameField.text)
+            AppSettings.setValue("ui/exboard/exdigi6name", exdigi6nameField.text)
+            AppSettings.setValue("ui/exboard/exdigi7name", exdigi7nameField.text)
+            AppSettings.setValue("ui/exboard/exdigi8name", exdigi8nameField.text)
         }
     }
 
@@ -1101,12 +1013,8 @@ Rectangle {
                         StyledSwitch {
                             id: maxBrightnessBoot
                             text: checked ? "On" : "Off"
-                            checked: settings.value("switchChecked", false)
                             Layout.preferredWidth: 100
-                            onClicked: {
-                                settings.setValue("switchChecked", checked);
-                                maxBrightnessBoot.text = checked ? "On" : "Off";
-                            }
+                            onCheckedChanged: inputs.setInputs()
                         }
                         Item { Layout.fillWidth: true }
                     }
@@ -1207,11 +1115,105 @@ Rectangle {
     }
 
     Component.onCompleted: {
+        ex00.text = AppSettings.getValue("EXA00", "0")
+        ex05.text = AppSettings.getValue("EXA05", "5")
+        ex10.text = AppSettings.getValue("EXA10", "0")
+        ex15.text = AppSettings.getValue("EXA15", "5")
+        ex20.text = AppSettings.getValue("EXA20", "0")
+        ex25.text = AppSettings.getValue("EXA25", "5")
+        ex30.text = AppSettings.getValue("EXA30", "0")
+        ex35.text = AppSettings.getValue("EXA35", "5")
+        ex40.text = AppSettings.getValue("EXA40", "0")
+        ex45.text = AppSettings.getValue("EXA45", "5")
+        ex50.text = AppSettings.getValue("EXA50", "0")
+        ex55.text = AppSettings.getValue("EXA55", "5")
+        ex60.text = AppSettings.getValue("EXA60", "0")
+        ex65.text = AppSettings.getValue("EXA65", "5")
+        ex70.text = AppSettings.getValue("EXA70", "0")
+        ex75.text = AppSettings.getValue("EXA75", "5")
+        checkan0ntc.checkState = AppSettings.getValue("steinhartcalc0on", 0)
+        checkan1ntc.checkState = AppSettings.getValue("steinhartcalc1on", 0)
+        checkan2ntc.checkState = AppSettings.getValue("steinhartcalc2on", 0)
+        checkan3ntc.checkState = AppSettings.getValue("steinhartcalc3on", 0)
+        checkan4ntc.checkState = AppSettings.getValue("steinhartcalc4on", 0)
+        checkan5ntc.checkState = AppSettings.getValue("steinhartcalc5on", 0)
+        checkan0100.checkState = AppSettings.getValue("AN0R3VAL", 0)
+        checkan01k.checkState = AppSettings.getValue("AN0R4VAL", 0)
+        checkan1100.checkState = AppSettings.getValue("AN1R3VAL", 0)
+        checkan11k.checkState = AppSettings.getValue("AN1R4VAL", 0)
+        checkan2100.checkState = AppSettings.getValue("AN2R3VAL", 0)
+        checkan21k.checkState = AppSettings.getValue("AN2R4VAL", 0)
+        checkan3100.checkState = AppSettings.getValue("AN3R3VAL", 0)
+        checkan31k.checkState = AppSettings.getValue("AN3R4VAL", 0)
+        checkan4100.checkState = AppSettings.getValue("AN4R3VAL", 0)
+        checkan41k.checkState = AppSettings.getValue("AN4R4VAL", 0)
+        checkan5100.checkState = AppSettings.getValue("AN5R3VAL", 0)
+        checkan51k.checkState = AppSettings.getValue("AN5R4VAL", 0)
+        rpmcheckbox.checkState = AppSettings.getValue("ui/exboard/rpmcheckbox", 0)
+        an7dampingfactor.text = AppSettings.getValue("AN7Damping", "0")
+        t10.text = AppSettings.getValue("T01", "0")
+        t20.text = AppSettings.getValue("T02", "0")
+        t30.text = AppSettings.getValue("T03", "0")
+        r10.text = AppSettings.getValue("R01", "0")
+        r20.text = AppSettings.getValue("R02", "0")
+        r30.text = AppSettings.getValue("R03", "0")
+        t11.text = AppSettings.getValue("T11", "0")
+        t21.text = AppSettings.getValue("T12", "0")
+        t31.text = AppSettings.getValue("T13", "0")
+        r11.text = AppSettings.getValue("R11", "0")
+        r21.text = AppSettings.getValue("R12", "0")
+        r31.text = AppSettings.getValue("R13", "0")
+        t12.text = AppSettings.getValue("T21", "0")
+        t22.text = AppSettings.getValue("T22", "0")
+        t32.text = AppSettings.getValue("T23", "0")
+        r12.text = AppSettings.getValue("R21", "0")
+        r22.text = AppSettings.getValue("R22", "0")
+        r32.text = AppSettings.getValue("R23", "0")
+        t13.text = AppSettings.getValue("T31", "0")
+        t23.text = AppSettings.getValue("T32", "0")
+        t33.text = AppSettings.getValue("T33", "0")
+        r13.text = AppSettings.getValue("R31", "0")
+        r23.text = AppSettings.getValue("R32", "0")
+        r33.text = AppSettings.getValue("R33", "0")
+        t14.text = AppSettings.getValue("T41", "0")
+        t24.text = AppSettings.getValue("T42", "0")
+        t34.text = AppSettings.getValue("T43", "0")
+        r14.text = AppSettings.getValue("R41", "0")
+        r24.text = AppSettings.getValue("R42", "0")
+        r34.text = AppSettings.getValue("R43", "0")
+        t15.text = AppSettings.getValue("T51", "0")
+        t25.text = AppSettings.getValue("T52", "0")
+        t35.text = AppSettings.getValue("T53", "0")
+        r15.text = AppSettings.getValue("R51", "0")
+        r25.text = AppSettings.getValue("R52", "0")
+        r35.text = AppSettings.getValue("R53", "0")
+        digitalExtender.currentIndex = AppSettings.getValue("ui/exboard/selectedValue", 0)
+        maxBrightnessBoot.checked = AppSettings.getValue("ui/exboard/switchValue", false)
+        rpmsourceselector.currentIndex = AppSettings.getValue("ui/exboard/rpmSource", 0)
+        cylindercombobox.currentIndex = AppSettings.getValue("ui/exboard/cylinderCombobox", 0)
+        cylindercomboboxv2.currentIndex = AppSettings.getValue("ui/exboard/cylinderComboboxV2", 0)
+        cylindercomboboxDi1.currentIndex = AppSettings.getValue("ui/exboard/cylinderComboboxDi1", 0)
+        exan0nameField.text = AppSettings.getValue("ui/exboard/exan0name", "")
+        exan1nameField.text = AppSettings.getValue("ui/exboard/exan1name", "")
+        exan2nameField.text = AppSettings.getValue("ui/exboard/exan2name", "")
+        exan3nameField.text = AppSettings.getValue("ui/exboard/exan3name", "")
+        exan4nameField.text = AppSettings.getValue("ui/exboard/exan4name", "")
+        exan5nameField.text = AppSettings.getValue("ui/exboard/exan5name", "")
+        exan6nameField.text = AppSettings.getValue("ui/exboard/exan6name", "")
+        exan7nameField.text = AppSettings.getValue("ui/exboard/exan7name", "")
+        exdigi1nameField.text = AppSettings.getValue("ui/exboard/exdigi1name", "")
+        exdigi2nameField.text = AppSettings.getValue("ui/exboard/exdigi2name", "")
+        exdigi3nameField.text = AppSettings.getValue("ui/exboard/exdigi3name", "")
+        exdigi4nameField.text = AppSettings.getValue("ui/exboard/exdigi4name", "")
+        exdigi5nameField.text = AppSettings.getValue("ui/exboard/exdigi5name", "")
+        exdigi6nameField.text = AppSettings.getValue("ui/exboard/exdigi6name", "")
+        exdigi7nameField.text = AppSettings.getValue("ui/exboard/exdigi7name", "")
+        exdigi8nameField.text = AppSettings.getValue("ui/exboard/exdigi8name", "")
         inputs.setInputs();
     }
 
     function executeOnBootAction() {
-        if (settings.switchValue) {
+        if (AppSettings.getValue("ui/exboard/switchValue", false)) {
             maxBrightnessOnBoot = 1;
         }
     }

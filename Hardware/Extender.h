@@ -21,7 +21,7 @@
 #include <QCanBusDevice>
 #include <QCanBusFrame>
 #include <QObject>
-
+#include <QVector>
 
 class DigitalInputs;
 class ExpanderBoardData;
@@ -29,29 +29,44 @@ class EngineData;
 class SettingsData;
 class VehicleData;
 class ConnectionData;
+class SteinhartCalculator;
+
+static constexpr int EX_ANALOG_CHANNELS = 8;
+
+struct ChannelCalibration {
+    qreal val0v = 0.0;
+    qreal val5v = 5.0;
+    bool ntcEnabled = false;
+};
 
 class Extender : public QObject
 {
     Q_OBJECT
 public:
     explicit Extender(QObject *parent = nullptr);
-    explicit Extender(DigitalInputs *digitalInputs,
-                      ExpanderBoardData *expanderBoardData,
-                      EngineData *engineData,
-                      SettingsData *settingsData,
-                      VehicleData *vehicleData,
-                      ConnectionData *connectionData,
+    explicit Extender(DigitalInputs *digitalInputs, ExpanderBoardData *expanderBoardData, EngineData *engineData,
+                      SettingsData *settingsData, VehicleData *vehicleData, ConnectionData *connectionData,
                       QObject *parent = nullptr);
     ~Extender() override;
 
+    void setSteinhartCalculator(SteinhartCalculator *calc);
+    void connectCalibrationSignals();
 
 public slots:
     void openCAN(const int &ExtenderBaseID, const int &RPMCANBaseID);
     void closeConnection();
     void readyToRead();
 
+    Q_INVOKABLE void setChannelCalibration(int channel, qreal val0v, qreal val5v, bool ntcEnabled);
+
+signals:
+    void NewCanFrameReceived(int canId, QString payload);
+    void Newtestsignal();
+
 private:
-    QCanBusDevice *m_canDevice;
+    void applyCalibration(int channel, qreal voltage);
+
+    QCanBusDevice *m_canDevice = nullptr;
     QString byteArrayToHex(const QByteArray &byteArray);
     DigitalInputs *m_digitalInputs;
     ExpanderBoardData *m_expanderBoardData;
@@ -59,6 +74,8 @@ private:
     SettingsData *m_settingsData;
     VehicleData *m_vehicleData;
     ConnectionData *m_connectionData;
+    SteinhartCalculator *m_steinhartCalc = nullptr;
+
     double pkgpayload[8];
     struct payload
     {
@@ -83,11 +100,15 @@ private:
     };
     int m_units;
 
+    quint32 m_canBaseAddress = 0;
+    quint32 m_address1 = 0;
+    quint32 m_address2 = 0;
+    quint32 m_address3 = 0;
+    quint32 m_address5 = 0;
+    QVector<int> m_hzAverage;
+    qreal m_avgHz = 0;
 
-signals:
-
-    void NewCanFrameReceived(int canId, QString payload);
-    void Newtestsignal();
+    ChannelCalibration m_calibration[EX_ANALOG_CHANNELS];
 };
 
 #endif  // Extender_H

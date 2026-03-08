@@ -2,7 +2,6 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
-import Qt.labs.settings 1.0
 import PowerTune.Settings 1.0
 import PowerTune.UI 1.0
 import PowerTune.Utils 1.0
@@ -27,46 +26,43 @@ Rectangle {
         return 0
     }
 
-    Item {
-        id: powerTuneSettings
-        Settings {
-            property alias connectECUAtStartup: connectButton.enabled
-            property alias ecuType: ecuSelect.currentText
-            property alias vehicleweight: weight.text
-            property alias unitSelector1: unitSelect1.currentIndex
-            property alias unitSelector: unitSelect.currentIndex
-            property alias unitSelector2: unitSelect2.currentIndex
-            property alias odometervalue: odometer.text
-            property alias tripmetervalue: tripmeter.text
-            property alias extendercanbase: baseadresstext.text
-            property alias shiftlightcanbase: shiftlightbaseadresstext.text
-            property alias languagecombobox: languageselect.currentIndex
-            property alias mainspeedsource: mainspeedsource.currentIndex
-            property alias bitrateselect: canbitrateselect.currentIndex
-        }
-
-        Connections {
-            target: Vehicle
-            onOdoChanged: odometer.text = Vehicle.Odo.toFixed(3)
-        }
-        Connections {
-            target: Vehicle
-            onTripChanged: tripmeter.text = Vehicle.Trip.toFixed(3)
-        }
-        Connections {
-            target: Engine
-            onWatertempChanged: { if (Engine.Watertemp > Settings.waterwarn) playwarning.start() }
-        }
-        Connections {
-            target: Engine
-            onRpmChanged: { if (Engine.rpm > Settings.rpmwarn) playwarning.start() }
-        }
-        Connections {
-            target: Engine
-            onKnockChanged: { if (Engine.Knock > Settings.knockwarn) playwarning.start() }
-        }
-        // Boost warning is evaluated by the shared warning loader.
+    Component.onCompleted: {
+        connectButton.enabled = AppSettings.getValue("ui/connectAtStartup", false)
+        weight.text = AppSettings.getValue("ui/vehicleWeight", "0")
+        unitSelect1.currentIndex = AppSettings.getValue("ui/unitSelector1", 0)
+        unitSelect.currentIndex = AppSettings.getValue("ui/unitSelector", 0)
+        unitSelect2.currentIndex = AppSettings.getValue("ui/unitSelector2", 0)
+        odometer.text = AppSettings.getValue("ui/odometer", "0")
+        tripmeter.text = AppSettings.getValue("ui/tripmeter", "0")
+        baseadresstext.text = AppSettings.getValue("ui/extenderCanBase", "")
+        shiftlightbaseadresstext.text = AppSettings.getValue("ui/shiftLightCanBase", "")
+        languageselect.currentIndex = AppSettings.getValue("Language", 0)
+        mainspeedsource.currentIndex = AppSettings.getValue("ui/mainSpeedSource", 0)
+        canbitrateselect.currentIndex = AppSettings.getValue("ui/bitrateSelect", 0)
+        autoconnect.auto()
     }
+
+    Connections {
+        target: Vehicle
+        onOdoChanged: odometer.text = Vehicle.Odo.toFixed(3)
+    }
+    Connections {
+        target: Vehicle
+        onTripChanged: tripmeter.text = Vehicle.Trip.toFixed(3)
+    }
+    Connections {
+        target: Engine
+        onWatertempChanged: { if (Engine.Watertemp > Settings.waterwarn) playwarning.start() }
+    }
+    Connections {
+        target: Engine
+        onRpmChanged: { if (Engine.rpm > Settings.rpmwarn) playwarning.start() }
+    }
+    Connections {
+        target: Engine
+        onKnockChanged: { if (Engine.Knock > Settings.knockwarn) playwarning.start() }
+    }
+    // Boost warning is evaluated by the shared warning loader.
 
     RowLayout {
         anchors.fill: parent
@@ -89,6 +85,7 @@ Rectangle {
                     StyledButton {
                         id: connectButton
                         text: Translator.translate("Connect", Settings.language)
+                        onEnabledChanged: AppSettings.setValue("ui/connectAtStartup", enabled)
                         onClicked: {
                             functconnect.connectfunc()
                             connectButton.enabled = false
@@ -188,6 +185,7 @@ Rectangle {
                         onCurrentIndexChanged: {
                             Connect.setSpeedUnits(currentIndex)
                             changeweighttext.changetext()
+                            AppSettings.setValue("ui/unitSelector1", currentIndex)
                         }
                     }
                 }
@@ -212,6 +210,7 @@ Rectangle {
                         onCurrentIndexChanged: {
                             Connect.setUnits(currentIndex)
                             changeweighttext.changetext()
+                            AppSettings.setValue("ui/unitSelector", currentIndex)
                         }
                     }
                 }
@@ -230,7 +229,10 @@ Rectangle {
                         Layout.fillWidth: true
                         model: ["kPa", "PSI"]
                         Component.onCompleted: Connect.setPressUnits(currentIndex)
-                        onCurrentIndexChanged: Connect.setPressUnits(currentIndex)
+                        onCurrentIndexChanged: {
+                            Connect.setPressUnits(currentIndex)
+                            AppSettings.setValue("ui/unitSelector2", currentIndex)
+                        }
                     }
                 }
             }
@@ -261,6 +263,7 @@ Rectangle {
                         id: weight
                         Layout.fillWidth: true
                         inputMethodHints: Qt.ImhFormattedNumbersOnly
+                        onEditingFinished: AppSettings.setValue("ui/vehicleWeight", text)
                     }
                 }
 
@@ -278,6 +281,7 @@ Rectangle {
                         Layout.fillWidth: true
                         text: "0"
                         inputMethodHints: Qt.ImhFormattedNumbersOnly
+                        onTextChanged: AppSettings.setValue("ui/odometer", text)
                     }
                 }
 
@@ -296,6 +300,7 @@ Rectangle {
                         text: "0"
                         readOnly: true
                         Component.onCompleted: Vehicle.setTrip(tripmeter.text)
+                        onTextChanged: AppSettings.setValue("ui/tripmeter", text)
                     }
                     StyledButton {
                         text: Translator.translate("Trip Reset", Settings.language)
@@ -338,6 +343,7 @@ Rectangle {
                         id: canbitrateselect
                         Layout.fillWidth: true
                         model: ["250 kbit/s", "500 kbit/s", "1 Mbit/s"]
+                        onCurrentIndexChanged: AppSettings.setValue("ui/bitrateSelect", currentIndex)
                     }
                 }
 
@@ -354,7 +360,10 @@ Rectangle {
                         id: mainspeedsource
                         Layout.fillWidth: true
                         model: ["ECU Speed", "LF Wheel", "RF Wheel", "LR Wheel", "RR Wheel", "GPS", "VR Sensor"]
-                        onCurrentIndexChanged: AppSettings.writeStartupSettings(mainspeedsource.currentIndex)
+                        onCurrentIndexChanged: {
+                            AppSettings.writeStartupSettings(mainspeedsource.currentIndex)
+                            AppSettings.setValue("ui/mainSpeedSource", currentIndex)
+                        }
                     }
                 }
 
@@ -434,6 +443,7 @@ Rectangle {
                         inputMethodHints: Qt.ImhFormattedNumbersOnly
                         validator: IntValidator { bottom: 0; top: 4000 }
                         onTextChanged: hexstring = parseInt(baseadresstext.text) || 0
+                        onEditingFinished: AppSettings.setValue("ui/extenderCanBase", text)
                     }
                     Text {
                         text: "HEX: 0x" + (hexstring + 0x1000).toString(16).substr(-3).toUpperCase()
@@ -472,6 +482,7 @@ Rectangle {
                         inputMethodHints: Qt.ImhFormattedNumbersOnly
                         validator: IntValidator { bottom: 0; top: 4000 }
                         onTextChanged: hexstring2 = parseInt(shiftlightbaseadresstext.text) || 0
+                        onEditingFinished: AppSettings.setValue("ui/shiftLightCanBase", text)
                     }
                     Text {
                         text: "HEX: 0x" + (hexstring2 + 0x1000).toString(16).substr(-3).toUpperCase()
@@ -494,6 +505,7 @@ Rectangle {
                     onCurrentIndexChanged: {
                         functLanguageselect.languageselectfunct()
                         changeweighttext.changetext()
+                        AppSettings.setValue("Language", currentIndex)
                     }
                 }
             }

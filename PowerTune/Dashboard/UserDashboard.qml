@@ -1,6 +1,5 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
-import Qt.labs.settings 1.0
 import PowerTune.Gauges.Shared 1.0
 
 Item {
@@ -10,10 +9,17 @@ Item {
     property int dashIndex: 0
     property string backroundpicturesource: ""
 
+    Component.onCompleted: {
+        var config = AppSettings.loadDashboardConfig(dashIndex)
+        mainbackroundcolor.color = config.backgroundColor
+        backroundpicture.source = config.backgroundPicture
+    }
+
     Rectangle {
         id: mainbackroundcolor
         anchors.fill: parent
         color: "#000000"
+        onColorChanged: AppSettings.writeDashboardConfig(dashIndex, backroundpicture.source.toString(), color.toString())
     }
 
     Image {
@@ -24,13 +30,8 @@ Item {
         onSourceChanged: {
             if (source.toString().endsWith("None") || source.toString() === "")
                 source = "";
+            AppSettings.writeDashboardConfig(dashIndex, source.toString(), mainbackroundcolor.color.toString())
         }
-    }
-
-    Settings {
-        category: "UserDashboard_" + dashIndex
-        property alias savebackroundpicture: backroundpicture.source
-        property alias savemainbackroundcolor: mainbackroundcolor.color
     }
 
     Item {
