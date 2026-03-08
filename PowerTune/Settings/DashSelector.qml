@@ -30,8 +30,6 @@ Rectangle {
             return "qrc:/qt/qml/PrismPT/Dashboard/PowerTune/Dashboard/UserDashboard.qml";
         case 3:
             return Qt.resolvedUrl("CanMonitor.qml");
-        case 4:
-            return "qrc:/qt/qml/PrismPT/Dashboard/PowerTune/Dashboard/AiMRaceDash.qml";
         }
         return "";
     }

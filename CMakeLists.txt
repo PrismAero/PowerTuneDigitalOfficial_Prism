@@ -328,7 +328,6 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
             PowerTune/Gauges/Styles/NormalGaugeStyle.qml
             PowerTune/Gauges/Styles/TachometerStyle.qml
             PowerTune/Gauges/Styles/RPMBarStyle1.qml
-            PowerTune/Gauges/Styles/AiMGaugeStyle.qml
         RESOURCE_PREFIX /qt/qml
         OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/qt/qml/PowerTune/Gauges/Styles
     )
@@ -346,14 +345,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
             PowerTune/Gauges/Widgets/NumericCell.qml
             PowerTune/Gauges/Widgets/GearIndicator.qml
             PowerTune/Gauges/Widgets/ModernRoundGauge.qml
-            PowerTune/Gauges/Widgets/AiMArcGauge.qml
             PowerTune/Gauges/Widgets/MyTextLabel.qml
-            PowerTune/Gauges/Widgets/AiMSpeedTach.qml
-            PowerTune/Gauges/Widgets/AiMGearIndicator.qml
-            PowerTune/Gauges/Widgets/AiMInfoCell.qml
-            PowerTune/Gauges/Widgets/AiMStatusBar.qml
-            PowerTune/Gauges/Widgets/AiMSensorLabel.qml
-            PowerTune/Gauges/Widgets/AiMBrakeBias.qml
         RESOURCE_PREFIX /qt/qml
         OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/qt/qml/PowerTune/Gauges/Widgets
     )
@@ -390,7 +382,6 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
             PowerTune/Dashboard/GaugeCreationMenu.qml
             PowerTune/Dashboard/ColorSelectionPanel.qml
             PowerTune/Dashboard/BackgroundSettingsPanel.qml
-            PowerTune/Dashboard/AiMRaceDash.qml
         RESOURCE_PREFIX /qt/qml
         OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/qt/qml/PrismPT/Dashboard
     )
