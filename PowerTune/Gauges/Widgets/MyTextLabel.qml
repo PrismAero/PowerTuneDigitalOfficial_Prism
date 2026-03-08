@@ -17,7 +17,7 @@ Item {
     property int decimalpoints
     property string increasedecreaseident
     property double warnvaluehigh: 20000
-    property double warnvaluelow : -20000
+    property double warnvaluelow: -20000
     property string resettextcolor
 
     // * Double-tap detection properties
@@ -31,10 +31,11 @@ Item {
         checkdatasource();
     }
 
-
-    Connections{
+    Connections {
         target: UI
-        function onDraggableChanged() { togglemousearea(); }
+        function onDraggableChanged() {
+            togglemousearea();
+        }
     }
 
     MouseArea {
@@ -43,7 +44,7 @@ Item {
         drag.target: parent
         enabled: false
         z: 100  // * Higher z-order to receive events over dashboard background
-        onPressed: function(mouse) {
+        onPressed: function (mouse) {
             touchCounter++;
             if (touchCounter == 1) {
                 lastTouchTime = Date.now();
@@ -57,8 +58,12 @@ Item {
                 timerDoubleClick.stop();
                 changesize.visible = true;
 
-                for(var i = 0; i < colorselect.model.count; ++i) if (colorselect.textAt(i) === textcolor)colorselect.currentIndex = i ;
-                for(var j = 0; j < cbx_sources.model.count; ++j) if (DatasourceService.allSources.get(j).sourcename === datasourcename)cbx_sources.currentIndex = j;
+                for (var i = 0; i < colorselect.model.count; ++i)
+                    if (colorselect.textAt(i) === textcolor)
+                        colorselect.currentIndex = i;
+                for (var j = 0; j < cbx_sources.model.count; ++j)
+                    if (DatasourceService.allSources.get(j).sourcename === datasourcename)
+                        cbx_sources.currentIndex = j;
             }
         }
     }
@@ -72,7 +77,6 @@ Item {
         }
     }
 
-
     Text {
         id: mytext
         text: displaytext
@@ -81,8 +85,8 @@ Item {
         font.bold: fontbold
         color: textcolor
         anchors.centerIn: parent
-        onTextChanged: warningindication.warn();
-        }
+        onTextChanged: warningindication.warn()
+    }
     SequentialAnimation {
         id: anim
         loops: Animation.Infinite
@@ -95,12 +99,12 @@ Item {
             duration: 700
         }
     }
-    Rectangle{
-        id : changesize
+    Rectangle {
+        id: changesize
         color: "darkgrey"
         visible: false
-        width : 200
-        height :480
+        width: 200
+        height: 480
         x: 0
         y: 0
         z: 200          //ensure the Menu is always in the foreground
@@ -115,73 +119,84 @@ Item {
             changesize.y = -mytextlabel.y;
         }
 
-
         Grid {
-            width: parent.width
-            height:parent.height
             id: popupgrid
+            width: parent.width
+            height: parent.height
             rows: 12
             columns: 1
-            rowSpacing :5
+            rowSpacing: 5
             Grid {
                 rows: 1
                 columns: 5
-                rowSpacing :5
-                RoundButton{text: "-"
-                    width: changesize.width /3
-                    onPressAndHold: {timer.running = true;
-                        increasedecreaseident = "decreasefontsize"}
-                    onReleased: {timer.running = false;}
-                    onClicked: {fontsize--}
+                rowSpacing: 5
+                RoundButton {
+                    text: "-"
+                    width: changesize.width / 3
+                    onPressAndHold: {
+                        timer.running = true;
+                        increasedecreaseident = "decreasefontsize";
+                    }
+                    onReleased: {
+                        timer.running = false;
+                    }
+                    onClicked: {
+                        fontsize--;
+                    }
                 }
-                Text{id: sizeTxt
+                Text {
+                    id: sizeTxt
                     text: fontsize
                     font.pixelSize: 15
-                    width: changesize.width /3
+                    width: changesize.width / 3
                     horizontalAlignment: Text.AlignHCenter
                     onTextChanged: fontsize = sizeTxt.text
                 }
-                RoundButton{ text: "+"
-                    width: changesize.width /3
-                    onPressAndHold: {timer.running = true;
-                        increasedecreaseident = "increasefontsize"}
-                    onReleased: {timer.running = false;}
-                    onClicked: {fontsize++}
+                RoundButton {
+                    text: "+"
+                    width: changesize.width / 3
+                    onPressAndHold: {
+                        timer.running = true;
+                        increasedecreaseident = "increasefontsize";
+                    }
+                    onReleased: {
+                        timer.running = false;
+                    }
+                    onClicked: {
+                        fontsize++;
+                    }
                 }
             }
 
-            TextField{
+            TextField {
                 id: changetext
-                text : displaytext
+                text: displaytext
                 width: parent.width
                 font.pixelSize: 15
-                inputMethodHints: Qt.ImhNoAutoUppercase | Qt.ImhPreferLowercase
-                                  | Qt.ImhSensitiveData | Qt.ImhNoPredictiveText
+                inputMethodHints: Qt.ImhNoAutoUppercase | Qt.ImhPreferLowercase | Qt.ImhSensitiveData | Qt.ImhNoPredictiveText
                 onTextChanged: {
                     displaytext = changetext.text;
-                    }
-
+                }
             }
             ComboBox {
                 id: colorselect
-                width: 200;
-                model: ColorList{}
+                width: 200
+                model: ColorList {}
                 visible: true
                 font.pixelSize: 15
                 currentIndex: 1
-                onCurrentIndexChanged: {textcolor = colorselect.textAt(colorselect.currentIndex);
-                                        mytext.color =  textcolor;
+                onCurrentIndexChanged: {
+                    textcolor = colorselect.textAt(colorselect.currentIndex);
+                    mytext.color = textcolor;
                 }
-                delegate:
-
-                    ItemDelegate {
-                    id:itemDelegate2
+                delegate: ItemDelegate {
+                    id: itemDelegate2
                     width: colorselect.width
                     font.pixelSize: 15
                     Rectangle {
                         width: colorselect.width
                         height: 50
-                        color:  itemColor
+                        color: itemColor
                         Text {
                             text: itemColor
                             anchors.centerIn: parent
@@ -190,23 +205,23 @@ Item {
                     }
                 }
 
-                background:Rectangle{
+                background: Rectangle {
                     width: colorselect.width
                     height: colorselect.height
-                    color:  colorselect.currentText
+                    color: colorselect.currentText
                 }
             }
-            ComboBox{
+            ComboBox {
                 id: cbx_titlefontstyle
                 width: parent.width
                 model: Qt.fontFamilies()
-                visible:true
+                visible: true
                 font.pixelSize: 15
                 currentIndex: 1
-                onCurrentIndexChanged: {fonttype = cbx_titlefontstyle.textAt(cbx_titlefontstyle.currentIndex)
+                onCurrentIndexChanged: {
+                    fonttype = cbx_titlefontstyle.textAt(cbx_titlefontstyle.currentIndex);
                 }
-                delegate:
-                    ItemDelegate {
+                delegate: ItemDelegate {
                     text: modelData
                     width: cbx_titlefontstyle.width
                     font.pixelSize: 15
@@ -231,69 +246,99 @@ Item {
                     hoverEnabled: cbx_sources.hoverEnabled
                 }
             }
-        Text{
-            text: Translator.translate("Warn value high", Settings.language)
-            font.pixelSize: 15
+            Text {
+                text: Translator.translate("Warn value high", Settings.language)
+                font.pixelSize: 15
             }
             Grid {
                 rows: 1
                 columns: 3
-                rowSpacing :5
-                RoundButton{text: "-"
-                    width: popupgrid.width /3.2
-                    onPressAndHold: {timer.running = true;
-                        increasedecreaseident = "decreasewarnvaluehigh"}
-                    onReleased: {timer.running = false;}
-                    onClicked: {warnvaluehigh--}
+                rowSpacing: 5
+                RoundButton {
+                    text: "-"
+                    width: popupgrid.width / 3.2
+                    onPressAndHold: {
+                        timer.running = true;
+                        increasedecreaseident = "decreasewarnvaluehigh";
+                    }
+                    onReleased: {
+                        timer.running = false;
+                    }
+                    onClicked: {
+                        warnvaluehigh--;
+                    }
                 }
-                TextField{id: warnvaluehightxt
+                TextField {
+                    id: warnvaluehightxt
                     text: warnvaluehigh
-                    width: popupgrid.width /3.2
+                    width: popupgrid.width / 3.2
                     font.pixelSize: 12
                     horizontalAlignment: Text.AlignHCenter
                     inputMethodHints: Qt.ImhDigitsOnly
                     onTextChanged: warnvaluehigh = warnvaluehightxt.text
                 }
-                RoundButton{ text: "+"
-                    width: popupgrid.width /3.2
-                    onPressAndHold: {timer.running = true;
-                        increasedecreaseident = "increasewarnvaluehigh"}
-                    onReleased: {timer.running = false;}
-                    onClicked: {warnvaluehigh++}
+                RoundButton {
+                    text: "+"
+                    width: popupgrid.width / 3.2
+                    onPressAndHold: {
+                        timer.running = true;
+                        increasedecreaseident = "increasewarnvaluehigh";
+                    }
+                    onReleased: {
+                        timer.running = false;
+                    }
+                    onClicked: {
+                        warnvaluehigh++;
+                    }
                 }
             }
-            Text{
+            Text {
                 text: Translator.translate("Warn value low", Settings.language)
                 font.pixelSize: 15
-                }
+            }
             Grid {
                 rows: 1
                 columns: 3
-                rowSpacing :5
-                RoundButton{text: "-"
-                    width: popupgrid.width /3.2
-                    onPressAndHold: {timer.running = true;
-                        increasedecreaseident = "decreasewarnvaluelow"}
-                    onReleased: {timer.running = false;}
-                    onClicked: {warnvaluelow--}
+                rowSpacing: 5
+                RoundButton {
+                    text: "-"
+                    width: popupgrid.width / 3.2
+                    onPressAndHold: {
+                        timer.running = true;
+                        increasedecreaseident = "decreasewarnvaluelow";
+                    }
+                    onReleased: {
+                        timer.running = false;
+                    }
+                    onClicked: {
+                        warnvaluelow--;
+                    }
                 }
-                TextField{id: warnvaluelowxt
+                TextField {
+                    id: warnvaluelowxt
                     text: warnvaluelow
-                    width: popupgrid.width /3.2
+                    width: popupgrid.width / 3.2
                     font.pixelSize: 12
                     horizontalAlignment: Text.AlignHCenter
                     onTextChanged: warnvaluelow = warnvaluelowxt.text
                     inputMethodHints: Qt.ImhDigitsOnly
                 }
-                RoundButton{ text: "+"
-                    width: popupgrid.width /3.2
-                    onPressAndHold: {timer.running = true;
-                        increasedecreaseident = "increasewarnvaluelow"}
-                    onReleased: {timer.running = false;}
-                    onClicked: {warnvaluelow++}
+                RoundButton {
+                    text: "+"
+                    width: popupgrid.width / 3.2
+                    onPressAndHold: {
+                        timer.running = true;
+                        increasedecreaseident = "increasewarnvaluelow";
+                    }
+                    onReleased: {
+                        timer.running = false;
+                    }
+                    onClicked: {
+                        warnvaluelow++;
+                    }
                 }
             }
-            RoundButton{
+            RoundButton {
                 text: Translator.translate("Use Datasource", Settings.language)
                 width: parent.width
                 font.pixelSize: 15
@@ -307,13 +352,13 @@ Item {
                 text: Translator.translate("Delete", Settings.language)
                 font.pixelSize: 15
                 width: parent.width
-                onClicked: mytextlabel.destroy();
+                onClicked: mytextlabel.destroy()
             }
-            RoundButton{
+            RoundButton {
                 text: Translator.translate("Close", Settings.language)
                 width: parent.width
                 font.pixelSize: 15
-                onClicked: changesize.visible = false;
+                onClicked: changesize.visible = false
             }
         }
     }
@@ -321,77 +366,79 @@ Item {
     Item {
         Timer {
             id: timer
-            interval: 50; running: false; repeat: true
-            onTriggered: {increaseDecrease()}
+            interval: 50
+            running: false
+            repeat: true
+            onTriggered: {
+                increaseDecrease();
+            }
         }
 
-        Text { id: time }
+        Text {
+            id: time
+        }
     }
-    function checkdatasource()
-    {
-        if (datasourcename != ""){
-            if (decimalpoints < 4)
-            {
-                changetext.text  = Qt.binding(function(){return PropertyRouter.getValue(datasourcename).toFixed(decimalpoints)});
-            }
-            else
-                changetext.text  = Qt.binding(function(){return PropertyRouter.getValue(datasourcename)});
+    function checkdatasource() {
+        if (datasourcename != "") {
+            if (decimalpoints < 4) {
+                changetext.text = Qt.binding(function () {
+                    return PropertyRouter.getValue(datasourcename).toFixed(decimalpoints);
+                });
+            } else
+                changetext.text = Qt.binding(function () {
+                    return PropertyRouter.getValue(datasourcename);
+                });
         }
     }
     Item {
         id: warningindication
-        function warn()
-        {
-
+        function warn() {
             if (mytext.text > warnvaluehigh || mytext.text < warnvaluelow) {
                 anim.running = true;
             } else {
                 anim.running = false;
                 mytext.color = resettextcolor;
             }
-
         }
     }
-    function togglemousearea()
-    {
-
-        if (UI.draggable === 1)
-        {
+    function togglemousearea() {
+        if (UI.draggable === 1) {
             touchArea.enabled = true;
-        }
-        else
+        } else
             touchArea.enabled = false;
     }
-    function increaseDecrease()
-    {
-
-        switch(increasedecreaseident)
-        {
-
-        case "increasefontsize": {
-            fontsize++;
-            break;
-        }
-        case "increasewarnvaluelow" :{
-            warnvaluelow++;
-            break;
-        }
-        case "increasewarnvaluehigh" :{
-            warnvaluehigh++;
-            break;
-        }
-        case "decreasewarnvaluelow" :{
-            warnvaluelow--;
-            break;
-        }
-        case "decreasewarnvaluehigh" :{
-            warnvaluehigh--;
-            break;
-        }
-        case "decreasefontsize": {
-            fontsize--;
-            break;
-        }
+    function increaseDecrease() {
+        switch (increasedecreaseident) {
+        case "increasefontsize":
+            {
+                fontsize++;
+                break;
+            }
+        case "increasewarnvaluelow":
+            {
+                warnvaluelow++;
+                break;
+            }
+        case "increasewarnvaluehigh":
+            {
+                warnvaluehigh++;
+                break;
+            }
+        case "decreasewarnvaluelow":
+            {
+                warnvaluelow--;
+                break;
+            }
+        case "decreasewarnvaluehigh":
+            {
+                warnvaluehigh--;
+                break;
+            }
+        case "decreasefontsize":
+            {
+                fontsize--;
+                break;
+            }
         }
     }
 }

@@ -104,4 +104,17 @@ Item {
     readonly property color aimBottomStrip: "#101010"
     readonly property color aimBottomStripEdge: "#1E1E1E"
     readonly property color aimBottomStripGlow: Qt.rgba(1, 1, 1, 0.04)
+
+    readonly property color aimArcOrange: "#FF7C09"
+    readonly property color aimArcSpeedRed: "#8B1000"
+    readonly property color aimStatusBarGradientA: "#C5C5C5"
+    readonly property color aimStatusBarGradientB: "#9F9F9F"
+    readonly property color aimChromeRing: "#606060"
+    readonly property color aimDarkTrack: "#141414"
+    readonly property color aimInnerDisc: "#1A1A1A"
+
+    readonly property color aimArcBgLight: "#2A2A2A"
+    readonly property color aimArcBgDark: "#0F0F0F"
+    readonly property color aimOuterStroke: "#4A4A4A"
+    readonly property color aimInnerStroke: "#2E2E2E"
 }

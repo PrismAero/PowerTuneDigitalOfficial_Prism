@@ -352,6 +352,8 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
             PowerTune/Gauges/Widgets/AiMGearIndicator.qml
             PowerTune/Gauges/Widgets/AiMInfoCell.qml
             PowerTune/Gauges/Widgets/AiMStatusBar.qml
+            PowerTune/Gauges/Widgets/AiMSensorLabel.qml
+            PowerTune/Gauges/Widgets/AiMBrakeBias.qml
         RESOURCE_PREFIX /qt/qml
         OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/qt/qml/PowerTune/Gauges/Widgets
     )
