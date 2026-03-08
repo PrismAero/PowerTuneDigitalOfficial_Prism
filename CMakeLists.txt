@@ -207,13 +207,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     set_source_files_properties(PowerTune/Utils/Translator.qml PROPERTIES
         QT_QML_SINGLETON_TYPE TRUE
     )
-    set_source_files_properties(PowerTune/Gauges/Shared/GaugeFactory.qml PROPERTIES
-        QT_QML_SINGLETON_TYPE TRUE
-    )
     set_source_files_properties(PowerTune/Gauges/Shared/DatasourceService.qml PROPERTIES
-        QT_QML_SINGLETON_TYPE TRUE
-    )
-    set_source_files_properties(PowerTune/Gauges/Shared/GaugeTheme.qml PROPERTIES
         QT_QML_SINGLETON_TYPE TRUE
     )
     set_source_files_properties(PowerTune/UI/Theme.qml PROPERTIES
@@ -228,9 +222,6 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_library(PowerTuneCoreLib STATIC)
     qt_add_library(PowerTuneUiLib STATIC)
     qt_add_library(PowerTuneSettingsLib STATIC)
-    qt_add_library(GaugesCoreLib STATIC)
-    qt_add_library(GaugesStylesLib STATIC)
-    qt_add_library(GaugesWidgetsLib STATIC)
     qt_add_library(GaugesSharedLib STATIC)
     qt_add_library(PrismPTDashboardLib STATIC)
     qt_add_library(PrismKeyboardLib STATIC)
@@ -306,68 +297,15 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/qt/qml/PowerTune/Settings
     )
     
-    # * PowerTune.Gauges.Core module - Base gauge primitives
-    qt_add_qml_module(GaugesCoreLib
-        URI PowerTune.Gauges.Core
-        VERSION 1.0
-        QML_FILES
-            PowerTune/Gauges/Core/CircularGauge.qml
-            PowerTune/Gauges/Core/CircularGaugeStyle.qml
-            PowerTune/Gauges/Core/Gauge.qml
-            PowerTune/Gauges/Core/GaugeStyle.qml
-        RESOURCE_PREFIX /qt/qml
-        OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/qt/qml/PowerTune/Gauges/Core
-    )
-    
-    # * PowerTune.Gauges.Styles module - Gauge visual styles
-    qt_add_qml_module(GaugesStylesLib
-        URI PowerTune.Gauges.Styles
-        VERSION 1.0
-        QML_FILES
-            PowerTune/Gauges/Styles/DashboardGaugeStyle.qml
-            PowerTune/Gauges/Styles/NormalGaugeStyle.qml
-            PowerTune/Gauges/Styles/TachometerStyle.qml
-            PowerTune/Gauges/Styles/RPMBarStyle1.qml
-        RESOURCE_PREFIX /qt/qml
-        OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/qt/qml/PowerTune/Gauges/Styles
-    )
-    
-    # * PowerTune.Gauges.Widgets module - User-facing gauge widgets
-    qt_add_qml_module(GaugesWidgetsLib
-        URI PowerTune.Gauges.Widgets
-        VERSION 1.0
-        QML_FILES
-            PowerTune/Gauges/Widgets/RoundGauge.qml
-            PowerTune/Gauges/Widgets/SquareGauge.qml
-            PowerTune/Gauges/Widgets/BarGauge.qml
-            PowerTune/Gauges/Widgets/RPMBar.qml
-            PowerTune/Gauges/Widgets/ShiftLights.qml
-            PowerTune/Gauges/Widgets/NumericCell.qml
-            PowerTune/Gauges/Widgets/GearIndicator.qml
-            PowerTune/Gauges/Widgets/ModernRoundGauge.qml
-            PowerTune/Gauges/Widgets/MyTextLabel.qml
-        RESOURCE_PREFIX /qt/qml
-        OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/qt/qml/PowerTune/Gauges/Widgets
-    )
-    
-    # * PowerTune.Gauges.Shared module - Shared helpers, factories, singletons
+    # * PowerTune.Gauges.Shared module - Shared helpers, datasources, singletons
     qt_add_qml_module(GaugesSharedLib
         URI PowerTune.Gauges.Shared
         VERSION 1.0
         QML_FILES
-            PowerTune/Gauges/Shared/ColorList.qml
             PowerTune/Gauges/Shared/DatasourcesList.qml
             PowerTune/Gauges/Shared/DatasourceService.qml
-            PowerTune/Gauges/Shared/GaugeFactory.qml
             PowerTune/Gauges/Shared/Warning.qml
             PowerTune/Gauges/Shared/WarningLoader.qml
-            PowerTune/Gauges/Shared/GaugeMouseHandler.qml
-            PowerTune/Gauges/Shared/NumericStepper.qml
-            PowerTune/Gauges/Shared/ColorComboBox.qml
-            PowerTune/Gauges/Shared/DatasourceComboBox.qml
-            PowerTune/Gauges/Shared/FontComboBox.qml
-            PowerTune/Gauges/Shared/GaugeConfigMenu.qml
-            PowerTune/Gauges/Shared/GaugeTheme.qml
         RESOURCE_PREFIX /qt/qml
         OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/qt/qml/PowerTune/Gauges/Shared
     )
@@ -379,9 +317,6 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         QML_FILES
             PowerTune/Dashboard/DashboardTheme.qml
             PowerTune/Dashboard/UserDashboard.qml
-            PowerTune/Dashboard/GaugeCreationMenu.qml
-            PowerTune/Dashboard/ColorSelectionPanel.qml
-            PowerTune/Dashboard/BackgroundSettingsPanel.qml
         RESOURCE_PREFIX /qt/qml
         OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/qt/qml/PrismPT/Dashboard
     )
@@ -405,9 +340,6 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         PowerTuneCoreLibplugin
         PowerTuneUiLibplugin
         PowerTuneSettingsLibplugin
-        GaugesCoreLibplugin
-        GaugesStylesLibplugin
-        GaugesWidgetsLibplugin
         GaugesSharedLibplugin
         PrismPTDashboardLibplugin
         PrismKeyboardLibplugin
@@ -420,9 +352,6 @@ set(QML_IMPORT_PATH
     "${CMAKE_CURRENT_SOURCE_DIR}/PowerTune/Core"
     "${CMAKE_CURRENT_SOURCE_DIR}/PowerTune/Settings"
     "${CMAKE_CURRENT_SOURCE_DIR}/PowerTune/UI"
-    "${CMAKE_CURRENT_SOURCE_DIR}/PowerTune/Gauges/Core"
-    "${CMAKE_CURRENT_SOURCE_DIR}/PowerTune/Gauges/Styles"
-    "${CMAKE_CURRENT_SOURCE_DIR}/PowerTune/Gauges/Widgets"
     "${CMAKE_CURRENT_SOURCE_DIR}/PowerTune/Gauges/Shared"
     "${CMAKE_CURRENT_SOURCE_DIR}/PowerTune/Utils"
     "${CMAKE_CURRENT_SOURCE_DIR}/PowerTune/Dashboard"

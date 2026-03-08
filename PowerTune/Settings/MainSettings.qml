@@ -6,7 +6,6 @@ import Qt.labs.settings 1.0
 import PowerTune.Settings 1.0
 import PowerTune.UI 1.0
 import PowerTune.Utils 1.0
-import PowerTune.Gauges.Shared 1.0
 
 Rectangle {
     id: root
@@ -496,18 +495,6 @@ Rectangle {
                         functLanguageselect.languageselectfunct()
                         changeweighttext.changetext()
                     }
-                }
-            }
-
-            SettingsSection {
-                title: Translator.translate("Display", Settings.language)
-                Layout.fillWidth: true
-
-                StyledSwitch {
-                    id: highContrastSwitch
-                    label: "High Contrast Gauges"
-                    checked: GaugeTheme.highContrast
-                    onCheckedChanged: GaugeTheme.setHighContrast(checked)
                 }
             }
 
