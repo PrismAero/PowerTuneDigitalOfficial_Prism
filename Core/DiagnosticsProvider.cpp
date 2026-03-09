@@ -9,6 +9,7 @@
  */
 
 #include "DiagnosticsProvider.h"
+#include "PropertyRouter.h"
 #include "SensorRegistry.h"
 
 #include <QFile>
@@ -27,32 +28,55 @@
 #include <sys/statvfs.h>
 #endif
 
+DiagnosticsProvider *DiagnosticsProvider::s_instance = nullptr;
+QtMessageHandler DiagnosticsProvider::s_previousHandler = nullptr;
 
-/**
- * @brief Construct a DiagnosticsProvider.
- * @param parent Parent QObject
- *
- * Initializes the uptime timer and starts periodic polling for system info (2s)
- * and CAN message rate calculation (1s).
- */
+void DiagnosticsProvider::qtMessageHandler(QtMsgType type, const QMessageLogContext &context, const QString &msg)
+{
+    QString level;
+    int levelInt = 0;
+    switch (type) {
+    case QtDebugMsg:    level = QStringLiteral("DEBUG"); levelInt = 0; break;
+    case QtInfoMsg:     level = QStringLiteral("INFO");  levelInt = 1; break;
+    case QtWarningMsg:  level = QStringLiteral("WARN");  levelInt = 2; break;
+    case QtCriticalMsg: level = QStringLiteral("ERROR"); levelInt = 3; break;
+    case QtFatalMsg:    level = QStringLiteral("FATAL"); levelInt = 3; break;
+    }
+
+    if (s_instance) {
+        QMetaObject::invokeMethod(s_instance, [=]() {
+            s_instance->addLogMessage(level, msg);
+        }, Qt::QueuedConnection);
+    }
+
+    if (s_previousHandler)
+        s_previousHandler(type, context, msg);
+    else
+        fprintf(stderr, "[%s] %s\n", level.toUtf8().constData(), msg.toUtf8().constData());
+}
+
 DiagnosticsProvider::DiagnosticsProvider(QObject *parent)
     : QObject(parent)
 {
-    // Start uptime tracking
+    s_instance = this;
+    s_previousHandler = qInstallMessageHandler(qtMessageHandler);
+
     m_uptimeTimer.start();
 
-    // System info polling every 2 seconds
     connect(&m_systemInfoTimer, &QTimer::timeout, this, &DiagnosticsProvider::updateSystemInfo);
     m_systemInfoTimer.start(2000);
 
-    // CAN rate calculation every 1 second
     connect(&m_canRateTimer, &QTimer::timeout, this, &DiagnosticsProvider::updateCanRate);
     m_canRateTimer.start(1000);
 
-    // Initial system info read
     updateSystemInfo();
 
     addLogMessage(QStringLiteral("INFO"), QStringLiteral("Diagnostics provider initialized"));
+}
+
+DiagnosticsProvider *DiagnosticsProvider::instance()
+{
+    return s_instance;
 }
 
 
@@ -70,6 +94,11 @@ void DiagnosticsProvider::setSensorRegistry(SensorRegistry *registry)
         connect(m_sensorRegistry, &SensorRegistry::sensorsChanged,
                 this, &DiagnosticsProvider::sensorDataChanged);
     }
+}
+
+void DiagnosticsProvider::setPropertyRouter(PropertyRouter *router)
+{
+    m_propertyRouter = router;
 }
 
 
@@ -293,13 +322,44 @@ int DiagnosticsProvider::totalSensorCount() const
 // Log accessors
 // ---------------------------------------------------------------------------
 
-/**
- * @brief Get the log message buffer.
- * @return List of log strings, newest first
- */
 QStringList DiagnosticsProvider::logMessages() const
 {
     return m_logMessages;
+}
+
+QStringList DiagnosticsProvider::filteredLogMessages() const
+{
+    if (m_logLevel <= 0)
+        return m_logMessages;
+
+    QStringList filtered;
+    for (const auto &entry : m_logEntries) {
+        if (entry.level >= m_logLevel)
+            filtered.append(entry.text);
+    }
+    return filtered;
+}
+
+int DiagnosticsProvider::logLevel() const
+{
+    return m_logLevel;
+}
+
+void DiagnosticsProvider::setLogLevel(int level)
+{
+    if (m_logLevel != level) {
+        m_logLevel = level;
+        emit logLevelChanged();
+        emit logChanged();
+    }
+}
+
+void DiagnosticsProvider::rebuildLogCache()
+{
+    m_logMessages.clear();
+    m_logMessages.reserve(m_logEntries.size());
+    for (const auto &entry : m_logEntries)
+        m_logMessages.append(entry.text);
 }
 
 
@@ -320,22 +380,28 @@ QVariantList DiagnosticsProvider::getLiveSensorData() const
 {
     QVariantList result;
 
-    if (!m_sensorRegistry) {
+    if (!m_sensorRegistry)
         return result;
-    }
 
     const QVariantList sensors = m_sensorRegistry->availableSensors();
     for (const QVariant &v : sensors) {
         QVariantMap sensorMap = v.toMap();
+        QString key = sensorMap.value(QStringLiteral("key")).toString();
+
         QVariantMap entry;
-        entry[QStringLiteral("key")] = sensorMap.value(QStringLiteral("key"));
+        entry[QStringLiteral("key")] = key;
         entry[QStringLiteral("displayName")] = sensorMap.value(QStringLiteral("displayName"));
         entry[QStringLiteral("unit")] = sensorMap.value(QStringLiteral("unit"));
         entry[QStringLiteral("source")] = sensorMap.value(QStringLiteral("source"));
-        entry[QStringLiteral("active")] = sensorMap.value(QStringLiteral("active"));
-        // TODO: Wire rawValue and calibratedValue via PropertyRouter when integration is complete
-        entry[QStringLiteral("rawValue")] = 0.0;
-        entry[QStringLiteral("calibratedValue")] = 0.0;
+
+        double rawValue = 0.0;
+        if (m_propertyRouter && m_propertyRouter->hasProperty(key)) {
+            QVariant val = m_propertyRouter->getValue(key);
+            rawValue = val.toDouble();
+        }
+        entry[QStringLiteral("rawValue")] = rawValue;
+        entry[QStringLiteral("calibratedValue")] = rawValue;
+        entry[QStringLiteral("active")] = (qAbs(rawValue) > 0.0001);
         result.append(entry);
     }
 
@@ -355,15 +421,27 @@ QVariantList DiagnosticsProvider::getAnalogInputDiagnostics() const
     QVariantList result;
 
     for (int i = 0; i <= 10; ++i) {
+        QString rawKey = QStringLiteral("Analog%1").arg(i);
+        QString calcKey = QStringLiteral("AnalogCalc%1").arg(i);
+
+        double rawVoltage = 0.0;
+        double calibrated = 0.0;
+
+        if (m_propertyRouter) {
+            if (m_propertyRouter->hasProperty(rawKey))
+                rawVoltage = m_propertyRouter->getValue(rawKey).toDouble();
+            if (m_propertyRouter->hasProperty(calcKey))
+                calibrated = m_propertyRouter->getValue(calcKey).toDouble();
+        }
+
         QVariantMap entry;
         entry[QStringLiteral("channel")] = i;
-        entry[QStringLiteral("label")] = QStringLiteral("Analog%1").arg(i);
-        // TODO: Wire rawVoltage from AnalogInputs model when integration is complete
-        entry[QStringLiteral("rawVoltage")] = 0.0;
-        entry[QStringLiteral("calibratedValue")] = 0.0;
+        entry[QStringLiteral("label")] = rawKey;
+        entry[QStringLiteral("rawVoltage")] = rawVoltage;
+        entry[QStringLiteral("calibratedValue")] = calibrated;
         entry[QStringLiteral("presetName")] = QString();
         entry[QStringLiteral("unit")] = QStringLiteral("V");
-        entry[QStringLiteral("configured")] = false;
+        entry[QStringLiteral("configured")] = (qAbs(rawVoltage) > 0.001 || qAbs(calibrated) > 0.001);
         result.append(entry);
     }
 
@@ -383,12 +461,17 @@ QVariantList DiagnosticsProvider::getDigitalInputDiagnostics() const
     QVariantList result;
 
     for (int i = 1; i <= 7; ++i) {
+        QString key = QStringLiteral("DigitalInput%1").arg(i);
+
+        bool state = false;
+        if (m_propertyRouter && m_propertyRouter->hasProperty(key))
+            state = m_propertyRouter->getValue(key).toBool();
+
         QVariantMap entry;
         entry[QStringLiteral("channel")] = i;
-        entry[QStringLiteral("label")] = QStringLiteral("DigitalInput%1").arg(i);
-        // TODO: Wire state from DigitalInputs model when integration is complete
-        entry[QStringLiteral("state")] = false;
-        entry[QStringLiteral("configured")] = false;
+        entry[QStringLiteral("label")] = key;
+        entry[QStringLiteral("state")] = state;
+        entry[QStringLiteral("configured")] = state;
         result.append(entry);
     }
 
@@ -408,15 +491,27 @@ QVariantList DiagnosticsProvider::getExpanderBoardDiagnostics() const
     QVariantList result;
 
     for (int i = 0; i <= 7; ++i) {
+        QString rawKey = QStringLiteral("EXAnalogInput%1").arg(i);
+        QString calcKey = QStringLiteral("EXAnalogCalc%1").arg(i);
+
+        double rawVoltage = 0.0;
+        double calibrated = 0.0;
+
+        if (m_propertyRouter) {
+            if (m_propertyRouter->hasProperty(rawKey))
+                rawVoltage = m_propertyRouter->getValue(rawKey).toDouble();
+            if (m_propertyRouter->hasProperty(calcKey))
+                calibrated = m_propertyRouter->getValue(calcKey).toDouble();
+        }
+
         QVariantMap entry;
         entry[QStringLiteral("channel")] = i;
-        entry[QStringLiteral("label")] = QStringLiteral("EXAnalogInput%1").arg(i);
-        // TODO: Wire rawVoltage from ExpanderBoardData model when integration is complete
-        entry[QStringLiteral("rawVoltage")] = 0.0;
-        entry[QStringLiteral("calibratedValue")] = 0.0;
+        entry[QStringLiteral("label")] = rawKey;
+        entry[QStringLiteral("rawVoltage")] = rawVoltage;
+        entry[QStringLiteral("calibratedValue")] = calibrated;
         entry[QStringLiteral("presetName")] = QString();
         entry[QStringLiteral("unit")] = QStringLiteral("V");
-        entry[QStringLiteral("configured")] = false;
+        entry[QStringLiteral("configured")] = (qAbs(rawVoltage) > 0.001 || qAbs(calibrated) > 0.001);
         result.append(entry);
     }
 
@@ -436,47 +531,49 @@ QVariantList DiagnosticsProvider::getExtenderDigitalDiagnostics() const
     QVariantList result;
 
     for (int i = 1; i <= 8; ++i) {
+        QString key = QStringLiteral("EXDigitalInput%1").arg(i);
+
+        bool state = false;
+        if (m_propertyRouter && m_propertyRouter->hasProperty(key))
+            state = m_propertyRouter->getValue(key).toBool();
+
         QVariantMap entry;
         entry[QStringLiteral("channel")] = i;
-        entry[QStringLiteral("label")] = QStringLiteral("EXDigitalInput%1").arg(i);
-        // TODO: Wire state from ExpanderBoardData model when integration is complete
-        entry[QStringLiteral("state")] = false;
-        entry[QStringLiteral("configured")] = false;
+        entry[QStringLiteral("label")] = key;
+        entry[QStringLiteral("state")] = state;
+        entry[QStringLiteral("configured")] = state;
         result.append(entry);
     }
 
     return result;
 }
 
-/**
- * @brief Add a log message to the circular buffer.
- * @param level Log level: "INFO", "WARN", "ERROR"
- * @param message The log message text
- *
- * Prepends a timestamped entry "[HH:mm:ss] [LEVEL] message" to the buffer.
- * If the buffer exceeds MAX_LOG_ENTRIES, the oldest entry is removed.
- */
 void DiagnosticsProvider::addLogMessage(const QString &level, const QString &message)
 {
+    int levelInt = 1;
+    if (level == QLatin1String("DEBUG"))      levelInt = 0;
+    else if (level == QLatin1String("INFO"))  levelInt = 1;
+    else if (level == QLatin1String("WARN"))  levelInt = 2;
+    else if (level == QLatin1String("ERROR") || level == QLatin1String("FATAL")) levelInt = 3;
+
     QString timestamp = QDateTime::currentDateTime().toString(QStringLiteral("hh:mm:ss"));
-    QString entry = QStringLiteral("[%1] [%2] %3").arg(timestamp, level, message);
+    QString text = QStringLiteral("[%1] [%2] %3").arg(timestamp, level, message);
 
-    m_logMessages.prepend(entry);
+    LogEntry entry{levelInt, text};
+    m_logEntries.prepend(entry);
+    m_logMessages.prepend(text);
 
-    while (m_logMessages.size() > MAX_LOG_ENTRIES) {
+    while (m_logEntries.size() > MAX_LOG_ENTRIES) {
+        m_logEntries.removeLast();
         m_logMessages.removeLast();
     }
 
     emit logChanged();
 }
 
-/**
- * @brief Clear the log buffer.
- *
- * Removes all entries and emits logChanged.
- */
 void DiagnosticsProvider::clearLog()
 {
+    m_logEntries.clear();
     m_logMessages.clear();
     emit logChanged();
 }

@@ -378,17 +378,46 @@ Item {
                             text: "System Log"
                             font.pixelSize: 18; font.weight: Font.Bold; font.family: "Lato"
                             color: accentColor
-                            Layout.fillWidth: true
+                        }
+
+                        Item { Layout.fillWidth: true }
+
+                        Repeater {
+                            model: [
+                                { label: "All",   level: 0 },
+                                { label: "Info",  level: 1 },
+                                { label: "Warn",  level: 2 },
+                                { label: "Error", level: 3 }
+                            ]
+
+                            Rectangle {
+                                required property var modelData
+                                required property int index
+                                width: 50; height: 26; radius: 4
+                                color: Diagnostics.logLevel === modelData.level ? accentColor : "#2a2a4a"
+                                border.color: Diagnostics.logLevel === modelData.level ? accentColor : "#3D3D3D"
+                                border.width: 1
+                                Text {
+                                    anchors.centerIn: parent
+                                    text: modelData.label
+                                    font.pixelSize: 12; font.family: "Lato"
+                                    color: Diagnostics.logLevel === modelData.level ? "#FFFFFF" : textSecondary
+                                }
+                                MouseArea {
+                                    anchors.fill: parent
+                                    onClicked: Diagnostics.logLevel = modelData.level
+                                }
+                            }
                         }
 
                         Rectangle {
-                            width: 60; height: 28; radius: 4
+                            width: 50; height: 26; radius: 4
                             color: clearArea.pressed ? "#3D3D3D" : "#2a2a4a"
                             border.color: "#3D3D3D"; border.width: 1
                             Text {
                                 anchors.centerIn: parent
                                 text: "Clear"
-                                font.pixelSize: 14; font.family: "Lato"; color: textPrimary
+                                font.pixelSize: 12; font.family: "Lato"; color: textPrimary
                             }
                             MouseArea {
                                 id: clearArea
@@ -411,14 +440,22 @@ Item {
                             anchors.fill: parent
                             anchors.margins: 6
                             clip: true
-                            model: Diagnostics.logMessages
+                            model: Diagnostics.filteredLogMessages
                             spacing: 1
 
                             delegate: Text {
                                 width: logListView.width
                                 text: modelData
-                                font.pixelSize: 14; font.family: "Courier New"
-                                color: consoleText
+                                font.pixelSize: 13; font.family: "Courier New"
+                                color: {
+                                    if (modelData.indexOf("[ERROR]") !== -1 || modelData.indexOf("[FATAL]") !== -1)
+                                        return "#ff1744";
+                                    if (modelData.indexOf("[WARN]") !== -1)
+                                        return "#FF9800";
+                                    if (modelData.indexOf("[DEBUG]") !== -1)
+                                        return "#666680";
+                                    return consoleText;
+                                }
                                 wrapMode: Text.WrapAnywhere
                             }
 

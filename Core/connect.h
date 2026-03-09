@@ -60,6 +60,10 @@ class CalibrationHelper;
 class SensorRegistry;
 // * Phase 8: Diagnostics provider
 class DiagnosticsProvider;
+// * Dashboard test simulator
+class UdpTestSimulator;
+// * Overlay configuration persistence
+class OverlayConfigManager;
 
 class Connect : public QObject
 {
@@ -165,6 +169,10 @@ private:
     SensorRegistry *m_sensorRegistry;
     // * Phase 8: Diagnostics provider
     DiagnosticsProvider *m_diagnosticsProvider;
+    // * Dashboard test simulator
+    UdpTestSimulator *m_testSimulator;
+    // * Overlay configuration persistence
+    OverlayConfigManager *m_overlayConfigManager;
 
 
 signals:

@@ -49,7 +49,7 @@ Rectangle {
             font.family: "Lato"
             model: [
                 "User Dash 1", "User Dash 2", "User Dash 3",
-                "CAN Monitor"
+                "Racedash", "CAN Monitor"
             ]
 
             onCurrentIndexChanged: {

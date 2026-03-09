@@ -119,6 +119,8 @@ set(UTILS_SOURCES
     Utils/shcalc.cpp
     Utils/textprogressbar.cpp
     Utils/UDPReceiver.cpp
+    Utils/UdpTestSimulator.cpp
+    Utils/OverlayConfigManager.cpp
     Utils/wifiscanner.cpp
 )
 
@@ -133,6 +135,8 @@ set(UTILS_HEADERS
     Utils/shcalc.h
     Utils/textprogressbar.h
     Utils/UDPReceiver.h
+    Utils/UdpTestSimulator.h
+    Utils/OverlayConfigManager.h
     Utils/wifiscanner.h
 )
 
@@ -281,6 +285,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
             PowerTune/Settings/NetworkSettings.qml
             PowerTune/Settings/CanMonitor.qml
             PowerTune/Settings/DiagnosticsSettings.qml
+            PowerTune/Settings/DashboardTestSim.qml
             PowerTune/Settings/HelpPage.qml
             PowerTune/Settings/WifiCountryList.qml
         RESOURCE_PREFIX /qt/qml
@@ -307,6 +312,17 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         QML_FILES
             PowerTune/Dashboard/DashboardTheme.qml
             PowerTune/Dashboard/UserDashboard.qml
+            PowerTune/Dashboard/RaceDash.qml
+            PowerTune/Dashboard/ArcGauge.qml
+            PowerTune/Dashboard/ShiftIndicator.qml
+            PowerTune/Dashboard/SensorCard.qml
+            PowerTune/Dashboard/StatusBox.qml
+            PowerTune/Dashboard/BrakeBiasBar.qml
+            PowerTune/Dashboard/BottomStatusBar.qml
+            PowerTune/Dashboard/GearIndicator.qml
+            PowerTune/Dashboard/ArcFillOverlay.qml
+            PowerTune/Dashboard/DraggableOverlay.qml
+            PowerTune/Dashboard/OverlayConfigPopup.qml
         RESOURCE_PREFIX /qt/qml
         OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/qt/qml/PrismPT/Dashboard
     )
@@ -357,6 +373,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
             Resources/graphics/fueltechfill.png
             Resources/graphics/Racedash.png
             Resources/graphics/Racedash800x480.png
+            Resources/graphics/Racedash_AiM.png
             Resources/graphics/needle.svg
             Resources/graphics/RoungGaugeRing.png
             Resources/graphics/green_Light.png
@@ -380,6 +397,21 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
             Resources/graphics/Flags/jp.png
             Resources/graphics/Flags/us.png
     )
+
+    # * Compile GLSL shaders to .qsb bundles for RaceDash arc gauges
+    if(Qt6ShaderTools_FOUND)
+        qt_add_shaders(${PROJECT_NAME} "racedash_shaders"
+            BATCHABLE
+            PRECOMPILE
+            OPTIMIZED
+            PREFIX "/shaders"
+            FILES
+                Shaders/arcgauge.vert
+                Shaders/arcgauge.frag
+        )
+    else()
+        message(WARNING "Qt6 ShaderTools not found - RaceDash arc gauge shaders will not be compiled")
+    endif()
 
     # * Link all QML modules to main executable
     target_link_libraries(${PROJECT_NAME} PRIVATE

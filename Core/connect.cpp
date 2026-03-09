@@ -29,6 +29,8 @@
 #include "../Utils/UDPReceiver.h"
 #include "../Utils/wifiscanner.h"
 #include "DiagnosticsProvider.h"
+#include "../Utils/UdpTestSimulator.h"
+#include "../Utils/OverlayConfigManager.h"
 #include "Models/DataModels.h"
 #include "Models/UIState.h"
 #include "PropertyRouter.h"
@@ -139,6 +141,9 @@ Connect::Connect(QObject *parent)
     // * Phase 8: Create DiagnosticsProvider and wire to SensorRegistry
     m_diagnosticsProvider = new DiagnosticsProvider(this);
     m_diagnosticsProvider->setSensorRegistry(m_sensorRegistry);
+    m_diagnosticsProvider->setPropertyRouter(m_propertyRouter);
+    m_testSimulator = new UdpTestSimulator(this);
+    m_overlayConfigManager = new OverlayConfigManager(this);
     // m_wifiscanner = new WifScanner(this);
     // Use AppDataLocation instead of "/" to prevent QFileSystemModel from
     // indexing the entire filesystem (saves 0.5-2GB+ RAM on macOS dev builds)
@@ -190,6 +195,8 @@ Connect::Connect(QObject *parent)
     engine->rootContext()->setContextProperty("SensorRegistry", m_sensorRegistry);
     // * Phase 8: Expose DiagnosticsProvider to QML
     engine->rootContext()->setContextProperty("Diagnostics", m_diagnosticsProvider);
+    engine->rootContext()->setContextProperty("TestSim", m_testSimulator);
+    engine->rootContext()->setContextProperty("OverlayConfig", m_overlayConfigManager);
     m_appSettings->setExtender(m_extender);
     m_appSettings->setSteinhartCalculator(m_steinhartCalc);
     m_appSettings->readandApplySettings();
