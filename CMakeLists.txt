@@ -45,12 +45,8 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     find_package(Qt6 COMPONENTS ShaderTools QUIET)
 endif()
 
-# * Optional: ddcutil support (Linux display brightness control)
-option(FORCE_DDCUTIL "Force enable ddcutil support for DDC/CI brightness control" OFF)
-if(FORCE_DDCUTIL OR EXISTS "/usr/lib/libddcutil.so.4")
-    add_compile_definitions(HAVE_DDCUTIL)
-    message(STATUS "DDC/CI brightness control enabled (ddcutil)")
-endif()
+# Brightness control is detected at runtime via Connect::checkifraspberrypi().
+# ddcutil (or sysfs backlight) presence is probed on startup -- no compile-time flag needed.
 
 # * Source files - Core
 set(CORE_SOURCES
@@ -121,6 +117,7 @@ set(UTILS_SOURCES
     Utils/UDPReceiver.cpp
     Utils/UdpTestSimulator.cpp
     Utils/OverlayConfigManager.cpp
+    Utils/ShiftIndicatorHelper.cpp
     Utils/wifiscanner.cpp
 )
 
@@ -137,6 +134,7 @@ set(UTILS_HEADERS
     Utils/UDPReceiver.h
     Utils/UdpTestSimulator.h
     Utils/OverlayConfigManager.h
+    Utils/ShiftIndicatorHelper.h
     Utils/wifiscanner.h
 )
 
@@ -346,6 +344,16 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         FILES
             Resources/fonts/MaterialSymbolsOutlined.ttf
             Resources/fonts/HyperspaceRaceVariable.otf
+            Resources/fonts/Lato-Regular.ttf
+            Resources/fonts/Lato-Bold.ttf
+            Resources/fonts/Lato-Italic.ttf
+            Resources/fonts/Lato-BoldItalic.ttf
+            Resources/fonts/Lato-Light.ttf
+            Resources/fonts/Lato-LightItalic.ttf
+            Resources/fonts/Lato-Thin.ttf
+            Resources/fonts/Lato-ThinItalic.ttf
+            Resources/fonts/Lato-Black.ttf
+            Resources/fonts/Lato-BlackItalic.ttf
             Resources/graphics/Logo.png
             Resources/graphics/brightness.png
             Resources/graphics/brightnessIncrease.png

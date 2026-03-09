@@ -4,7 +4,6 @@ import QtQuick.Layouts 1.15
 
 Item {
     id: root
-    anchors.fill: parent
 
     readonly property color bgDark: "#111122"
     readonly property color panelBg: "#1a1a36"

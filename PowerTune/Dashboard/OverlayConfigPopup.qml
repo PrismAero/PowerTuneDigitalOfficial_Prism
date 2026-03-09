@@ -24,7 +24,6 @@ Popup {
     property string shiftPattern: "center-out"
 
     property int selectedCategoryIndex: 0
-    property var sensorListModel: []
 
     signal configSaved(string overlayId)
 
@@ -44,90 +43,54 @@ Popup {
     }
 
     function openFor(id, type) {
-        overlayId = id;
-        configType = type;
+        overlayId = id
+        configType = type
 
-        var cfg = OverlayConfig.getConfig(id);
-        selectedSensorKey = cfg.sensorKey || "";
-        labelText = cfg.label || "";
-        unitText = cfg.unit || "";
-        thresholdValue = cfg.threshold !== undefined ? Number(cfg.threshold) : 0.5;
-        minValue = cfg.minValue !== undefined ? Number(cfg.minValue) : 0;
-        maxValue = cfg.maxValue !== undefined ? Number(cfg.maxValue) : 100;
-        staticText = cfg.text || "";
-        decimals = cfg.decimals !== undefined ? Number(cfg.decimals) : 0;
-        arcColorStart = cfg.arcColorStart || "";
-        arcColorEnd = cfg.arcColorEnd || "";
-        gearSensorKey = cfg.gearKey || "Gear";
-        shiftPoint = cfg.shiftPoint !== undefined ? Number(cfg.shiftPoint) : 0.75;
-        shiftCount = cfg.shiftCount !== undefined ? Number(cfg.shiftCount) : 11;
-        shiftPattern = cfg.shiftPattern || "center-out";
+        var cfg = OverlayConfig.getConfigForPopup(id, type)
+        selectedSensorKey = cfg.sensorKey || ""
+        labelText = cfg.label || ""
+        unitText = cfg.unit || ""
+        thresholdValue = Number(cfg.threshold)
+        minValue = Number(cfg.minValue)
+        maxValue = Number(cfg.maxValue)
+        staticText = cfg.text || ""
+        decimals = Number(cfg.decimals)
+        arcColorStart = cfg.arcColorStart || ""
+        arcColorEnd = cfg.arcColorEnd || ""
+        gearSensorKey = cfg.gearKey || "Gear"
+        shiftPoint = Number(cfg.shiftPoint)
+        shiftCount = Number(cfg.shiftCount)
+        shiftPattern = cfg.shiftPattern || "center-out"
 
-        if (type === "tachGroup" && maxValue <= 0) {
-            var m = AppSettings.getValue("Max RPM", 10000);
-            maxValue = m > 0 ? m : 10000;
-        }
-        if (type === "tachGroup" && shiftPoint <= 0) {
-            var s1 = Number(AppSettings.getValue("Shift Light1", 3000));
-            shiftPoint = maxValue > 0 ? s1 / maxValue : 0.75;
-        }
-
-        refreshSensorList();
-        open();
-    }
-
-    function refreshSensorList() {
-        var cats = SensorRegistry.availableCategories;
-        if (cats.length === 0)
-            cats = [""];
-        var catName = selectedCategoryIndex < cats.length ? cats[selectedCategoryIndex] : "";
-        var sensors = SensorRegistry.getSensorsByCategory(catName);
-        sensorListModel = sensors;
+        selectedCategoryIndex = 0
+        open()
     }
 
     function doSave() {
-        var cfg = {};
-        if (configType === "sensorCard") {
-            cfg.sensorKey = selectedSensorKey;
-            cfg.label = labelText;
-            cfg.unit = unitText;
-            cfg.decimals = decimals;
-        } else if (configType === "statusRow") {
-            cfg.sensorKey = selectedSensorKey;
-            cfg.label = labelText;
-            cfg.threshold = thresholdValue;
-        } else if (configType === "tachGroup") {
-            cfg.sensorKey = selectedSensorKey;
-            cfg.minValue = minValue;
-            cfg.maxValue = maxValue;
-            cfg.unit = unitText;
-            cfg.arcColorStart = arcColorStart;
-            cfg.arcColorEnd = arcColorEnd;
-            cfg.gearKey = gearSensorKey;
-            cfg.shiftPoint = shiftPoint;
-            cfg.shiftCount = shiftCount;
-            cfg.shiftPattern = shiftPattern;
-            cfg.decimals = decimals;
-        } else if (configType === "speedGroup") {
-            cfg.sensorKey = selectedSensorKey;
-            cfg.minValue = minValue;
-            cfg.maxValue = maxValue;
-            cfg.unit = unitText;
-            cfg.arcColorStart = arcColorStart;
-            cfg.arcColorEnd = arcColorEnd;
-            cfg.decimals = decimals;
-        } else if (configType === "staticText") {
-            cfg.text = staticText;
-        }
-        OverlayConfig.saveConfig(overlayId, cfg);
-        configSaved(overlayId);
-        close();
+        OverlayConfig.saveConfigFromPopup(overlayId, configType, {
+            "sensorKey": selectedSensorKey,
+            "label": labelText,
+            "unit": unitText,
+            "threshold": thresholdValue,
+            "minValue": minValue,
+            "maxValue": maxValue,
+            "text": staticText,
+            "decimals": decimals,
+            "arcColorStart": arcColorStart,
+            "arcColorEnd": arcColorEnd,
+            "gearKey": gearSensorKey,
+            "shiftPoint": shiftPoint,
+            "shiftCount": shiftCount,
+            "shiftPattern": shiftPattern
+        })
+        configSaved(overlayId)
+        close()
     }
 
     function doReset() {
-        OverlayConfig.resetConfig(overlayId);
-        configSaved(overlayId);
-        close();
+        OverlayConfig.resetConfig(overlayId)
+        configSaved(overlayId)
+        close()
     }
 
     readonly property color accent: "#009688"
@@ -206,10 +169,7 @@ Popup {
                 Layout.preferredHeight: 40
                 model: SensorRegistry.availableCategories
                 currentIndex: popup.selectedCategoryIndex
-                onCurrentIndexChanged: {
-                    popup.selectedCategoryIndex = currentIndex;
-                    popup.refreshSensorList();
-                }
+                onCurrentIndexChanged: popup.selectedCategoryIndex = currentIndex
                 background: Rectangle {
                     radius: 6
                     color: fieldBg
@@ -235,27 +195,23 @@ Popup {
                 id: sensorCombo
                 Layout.fillWidth: true
                 Layout.preferredHeight: 40
-                model: {
-                    var names = [];
-                    for (var i = 0; i < popup.sensorListModel.length; i++)
-                        names.push(popup.sensorListModel[i].displayName + " (" + popup.sensorListModel[i].key + ")");
-                    return names;
+
+                readonly property string activeCat: {
+                    var cats = SensorRegistry.availableCategories
+                    return popup.selectedCategoryIndex < cats.length ? cats[popup.selectedCategoryIndex] : ""
                 }
-                currentIndex: {
-                    for (var i = 0; i < popup.sensorListModel.length; i++) {
-                        if (popup.sensorListModel[i].key === popup.selectedSensorKey)
-                            return i;
-                    }
-                    return -1;
-                }
+
+                model: SensorRegistry.sensorDisplayNames(activeCat)
+                currentIndex: SensorRegistry.indexOfSensorKey(popup.selectedSensorKey, activeCat)
                 onActivated: function (idx) {
-                    if (idx >= 0 && idx < popup.sensorListModel.length) {
-                        var s = popup.sensorListModel[idx];
-                        popup.selectedSensorKey = s.key;
+                    var sensors = SensorRegistry.getSensorsByCategory(activeCat)
+                    if (idx >= 0 && idx < sensors.length) {
+                        var s = sensors[idx]
+                        popup.selectedSensorKey = s.key
                         if (hasLabel)
-                            popup.labelText = s.displayName;
+                            popup.labelText = s.displayName
                         if (hasUnit)
-                            popup.unitText = s.unit;
+                            popup.unitText = s.unit
                     }
                 }
                 background: Rectangle {

@@ -64,13 +64,19 @@ class DiagnosticsProvider;
 class UdpTestSimulator;
 // * Overlay configuration persistence
 class OverlayConfigManager;
+class ShiftIndicatorHelper;
 
 class Connect : public QObject
 {
     Q_OBJECT
     Q_PROPERTY(QStringList portsNames READ portsNames WRITE setPortsNames NOTIFY sig_portsNamesChanged)
+    Q_PROPERTY(bool hasDdcBrightness READ hasDdcBrightness CONSTANT)
 
 public:
+    enum class BrightnessMethod { None, Sysfs, DdcUtil };
+
+    bool hasDdcBrightness() const { return m_brightnessMethod == BrightnessMethod::DdcUtil; }
+
     ~Connect() override;
     explicit Connect(QObject *parent = nullptr);
     Q_INVOKABLE void saveDashtoFile(const QString &filename, const QString &dashstring);
@@ -173,6 +179,8 @@ private:
     UdpTestSimulator *m_testSimulator;
     // * Overlay configuration persistence
     OverlayConfigManager *m_overlayConfigManager;
+    ShiftIndicatorHelper *m_shiftIndicatorHelper;
+    BrightnessMethod m_brightnessMethod = BrightnessMethod::None;
 
 
 signals:

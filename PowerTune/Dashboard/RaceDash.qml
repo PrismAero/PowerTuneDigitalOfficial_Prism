@@ -17,19 +17,12 @@ Item {
     // -- Tach group (drives arc, text, gear, shift lights) --
     property string tachSensorKey: "rpm"
     property real tachMin: 0
-    property real tachMax: {
-        var m = AppSettings.getValue("Max RPM", 10000);
-        return m > 0 ? m : 10000;
-    }
+    property real tachMax: 10000
     property string tachUnit: "RPM"
     property string tachArcColorStart: "#E88A1A"
     property string tachArcColorEnd: "#C45A00"
     property string tachGearKey: "Gear"
-    property real tachShiftPoint: {
-        var stage1 = Number(AppSettings.getValue("Shift Light1", 3000));
-        var max = raceDash.tachMax;
-        return max > 0 ? stage1 / max : 0.75;
-    }
+    property real tachShiftPoint: 0.75
     property int tachShiftCount: 11
     property string tachShiftPattern: "center-out"
     property int tachDecimals: 0
@@ -66,80 +59,40 @@ Item {
     // -- Bottom bar --
     property string bbTeamName: "Cardinal Racing"
 
-    function reloadOverlayConfig(overlayId) {
-        var cfg = OverlayConfig.getConfig(overlayId);
-        switch (overlayId) {
-        case "waterTemp":
-            wtSensorKey = cfg.sensorKey || "Watertemp";
-            wtLabel = cfg.label || "Water Temp";
-            wtUnit = cfg.unit || "F\u00B0";
-            wtDecimals = cfg.decimals !== undefined ? Number(cfg.decimals) : 2;
-            break;
-        case "oilPressure":
-            opSensorKey = cfg.sensorKey || "oilpres";
-            opLabel = cfg.label || "Oil Pressure";
-            opUnit = cfg.unit || "PSI";
-            opDecimals = cfg.decimals !== undefined ? Number(cfg.decimals) : 2;
-            break;
-        case "statusRow0":
-            sr0SensorKey = cfg.sensorKey || "DigitalInput1";
-            sr0Label = cfg.label || "Digital 1:";
-            sr0Threshold = cfg.threshold !== undefined ? Number(cfg.threshold) : 0.5;
-            break;
-        case "statusRow1":
-            sr1SensorKey = cfg.sensorKey || "DigitalInput2";
-            sr1Label = cfg.label || "Digital 2:";
-            sr1Threshold = cfg.threshold !== undefined ? Number(cfg.threshold) : 0.5;
-            break;
-        case "tachGroup":
-            {
-                var defMax = (function () {
-                        var m = AppSettings.getValue("Max RPM", 10000);
-                        return m > 0 ? m : 10000;
-                    })();
-                var defShift = (function () {
-                        var s1 = Number(AppSettings.getValue("Shift Light1", 3000));
-                        return defMax > 0 ? s1 / defMax : 0.75;
-                    })();
-                tachSensorKey = cfg.sensorKey || "rpm";
-                tachMin = cfg.minValue !== undefined ? Number(cfg.minValue) : 0;
-                tachMax = cfg.maxValue !== undefined ? Number(cfg.maxValue) : defMax;
-                tachUnit = cfg.unit || "RPM";
-                tachArcColorStart = cfg.arcColorStart || "#E88A1A";
-                tachArcColorEnd = cfg.arcColorEnd || "#C45A00";
-                tachGearKey = cfg.gearKey || "Gear";
-                tachShiftPoint = cfg.shiftPoint !== undefined ? Number(cfg.shiftPoint) : defShift;
-                tachShiftCount = cfg.shiftCount !== undefined ? Number(cfg.shiftCount) : 11;
-                tachShiftPattern = cfg.shiftPattern || "center-out";
-                tachDecimals = cfg.decimals !== undefined ? Number(cfg.decimals) : 0;
-                break;
-            }
-        case "speedGroup":
-            speedSensorKey = cfg.sensorKey || "speed";
-            speedMin = cfg.minValue !== undefined ? Number(cfg.minValue) : 0;
-            speedMax = cfg.maxValue !== undefined ? Number(cfg.maxValue) : 200;
-            speedUnit = cfg.unit || "MPH";
-            speedArcColorStart = cfg.arcColorStart || "#AA1111";
-            speedArcColorEnd = cfg.arcColorEnd || "#880000";
-            speedDecimals = cfg.decimals !== undefined ? Number(cfg.decimals) : 0;
-            break;
-        case "bottomBar":
-            bbTeamName = cfg.text || "Cardinal Racing";
-            break;
+    function applyOverlayProps(overlayId) {
+        var p = OverlayConfig.getOverlayProperties(overlayId)
+        if (overlayId === "waterTemp") {
+            wtSensorKey = p.sensorKey; wtLabel = p.label; wtUnit = p.unit; wtDecimals = p.decimals
+        } else if (overlayId === "oilPressure") {
+            opSensorKey = p.sensorKey; opLabel = p.label; opUnit = p.unit; opDecimals = p.decimals
+        } else if (overlayId === "statusRow0") {
+            sr0SensorKey = p.sensorKey; sr0Label = p.label; sr0Threshold = p.threshold
+        } else if (overlayId === "statusRow1") {
+            sr1SensorKey = p.sensorKey; sr1Label = p.label; sr1Threshold = p.threshold
+        } else if (overlayId === "tachGroup") {
+            tachSensorKey = p.sensorKey; tachMin = p.minValue; tachMax = p.maxValue
+            tachUnit = p.unit; tachArcColorStart = p.arcColorStart; tachArcColorEnd = p.arcColorEnd
+            tachGearKey = p.gearKey; tachShiftPoint = p.shiftPoint
+            tachShiftCount = p.shiftCount; tachShiftPattern = p.shiftPattern; tachDecimals = p.decimals
+        } else if (overlayId === "speedGroup") {
+            speedSensorKey = p.sensorKey; speedMin = p.minValue; speedMax = p.maxValue
+            speedUnit = p.unit; speedArcColorStart = p.arcColorStart; speedArcColorEnd = p.arcColorEnd
+            speedDecimals = p.decimals
+        } else if (overlayId === "bottomBar") {
+            bbTeamName = p.text
         }
     }
 
     Component.onCompleted: {
-        var ids = ["waterTemp", "oilPressure", "statusRow0", "statusRow1", "tachGroup", "speedGroup", "bottomBar"];
-        for (var i = 0; i < ids.length; i++)
-            reloadOverlayConfig(ids[i]);
+        applyOverlayProps("waterTemp"); applyOverlayProps("oilPressure")
+        applyOverlayProps("statusRow0"); applyOverlayProps("statusRow1")
+        applyOverlayProps("tachGroup"); applyOverlayProps("speedGroup")
+        applyOverlayProps("bottomBar")
     }
 
     Connections {
         target: OverlayConfig
-        function onConfigChanged(overlayId) {
-            raceDash.reloadOverlayConfig(overlayId);
-        }
+        function onConfigChanged(overlayId) { raceDash.applyOverlayProps(overlayId) }
     }
 
     OverlayConfigPopup {

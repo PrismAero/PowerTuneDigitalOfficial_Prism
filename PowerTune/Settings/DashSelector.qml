@@ -8,7 +8,6 @@ import PowerTune.Utils 1.0
 
 Rectangle {
     id: dashselector
-    anchors.fill: parent
     color: "#1a1a2e"
 
     function getDashByIndex(index) {

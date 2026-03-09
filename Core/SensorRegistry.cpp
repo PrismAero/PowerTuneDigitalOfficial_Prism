@@ -132,11 +132,29 @@ QVariantList SensorRegistry::getSensorsByCategory(const QString &category) const
     return result;
 }
 
-/**
- * @brief Check from QML if a sensor key is available.
- * @param key Sensor property key
- * @return true if available
- */
+QStringList SensorRegistry::sensorDisplayNames(const QString &category) const
+{
+    QStringList names;
+    for (auto it = m_sensors.constBegin(); it != m_sensors.constEnd(); ++it) {
+        if (category.isEmpty() || it->category == category)
+            names.append(it->displayName + QStringLiteral(" (") + it->key + QStringLiteral(")"));
+    }
+    return names;
+}
+
+int SensorRegistry::indexOfSensorKey(const QString &key, const QString &category) const
+{
+    int idx = 0;
+    for (auto it = m_sensors.constBegin(); it != m_sensors.constEnd(); ++it) {
+        if (!category.isEmpty() && it->category != category)
+            continue;
+        if (it->key == key)
+            return idx;
+        ++idx;
+    }
+    return -1;
+}
+
 bool SensorRegistry::isAvailable(const QString &key) const
 {
     return isSensorAvailable(key);

@@ -8,10 +8,17 @@ import PowerTune.Utils 1.0
 
 Rectangle {
     id: root
-    anchors.fill: parent
     color: "#1a1a2e"
 
     property int gercalactive: 0
+
+    ListModel {
+        id: shiftStageModel
+        ListElement { label: "1"; stageColor: "#4CAF50"; fieldId: "stage1" }
+        ListElement { label: "2"; stageColor: "#FFEB3B"; fieldId: "stage2" }
+        ListElement { label: "3"; stageColor: "#FF9800"; fieldId: "stage3" }
+        ListElement { label: "4"; stageColor: "#F44336"; fieldId: "stage4" }
+    }
 
     Component.onCompleted: {
         watertempwarn.text = AppSettings.getValue("waterwarn", "110")
@@ -186,18 +193,13 @@ Rectangle {
                     Layout.fillWidth: true
 
                     Repeater {
-                        model: [
-                            { label: "1", color: "#4CAF50", fieldId: "stage1" },
-                            { label: "2", color: "#FFEB3B", fieldId: "stage2" },
-                            { label: "3", color: "#FF9800", fieldId: "stage3" },
-                            { label: "4", color: "#F44336", fieldId: "stage4" }
-                        ]
+                        model: shiftStageModel
                         delegate: Rectangle {
                             Layout.fillWidth: true
                             Layout.preferredHeight: 100
                             color: "#2D2D2D"
                             radius: 8
-                            border.color: modelData.color
+                            border.color: model.stageColor
                             border.width: 2
 
                             ColumnLayout {
@@ -206,9 +208,9 @@ Rectangle {
                                 spacing: 4
 
                                 Text {
-                                    text: Translator.translate("Stage", Settings.language) + " " + modelData.label
+                                    text: Translator.translate("Stage", Settings.language) + " " + model.label
                                     font.pixelSize: 16; font.weight: Font.DemiBold
-                                    font.family: "Lato"; color: modelData.color
+                                    font.family: "Lato"; color: model.stageColor
                                     Layout.alignment: Qt.AlignHCenter
                                 }
 
@@ -221,10 +223,10 @@ Rectangle {
                                     horizontalAlignment: Text.AlignHCenter
                                     onEditingFinished: applyRPM.start()
                                     Component.onCompleted: {
-                                        if (modelData.fieldId === "stage1") root.stage1Ref = stageField
-                                        else if (modelData.fieldId === "stage2") root.stage2Ref = stageField
-                                        else if (modelData.fieldId === "stage3") root.stage3Ref = stageField
-                                        else if (modelData.fieldId === "stage4") root.stage4Ref = stageField
+                                        if (model.fieldId === "stage1") root.stage1Ref = stageField
+                                        else if (model.fieldId === "stage2") root.stage2Ref = stageField
+                                        else if (model.fieldId === "stage3") root.stage3Ref = stageField
+                                        else if (model.fieldId === "stage4") root.stage4Ref = stageField
                                     }
                                 }
 

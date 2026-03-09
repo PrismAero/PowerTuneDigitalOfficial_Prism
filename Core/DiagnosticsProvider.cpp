@@ -15,6 +15,7 @@
 #include <QFile>
 #include <QRegularExpression>
 #include <QTextStream>
+#include <QTime>
 #include <QDebug>
 
 #ifdef Q_OS_MACOS
@@ -33,14 +34,15 @@ QtMessageHandler DiagnosticsProvider::s_previousHandler = nullptr;
 
 void DiagnosticsProvider::qtMessageHandler(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
+    Q_UNUSED(context)
+
     QString level;
-    int levelInt = 0;
     switch (type) {
-    case QtDebugMsg:    level = QStringLiteral("DEBUG"); levelInt = 0; break;
-    case QtInfoMsg:     level = QStringLiteral("INFO");  levelInt = 1; break;
-    case QtWarningMsg:  level = QStringLiteral("WARN");  levelInt = 2; break;
-    case QtCriticalMsg: level = QStringLiteral("ERROR"); levelInt = 3; break;
-    case QtFatalMsg:    level = QStringLiteral("FATAL"); levelInt = 3; break;
+    case QtDebugMsg:    level = QStringLiteral("DEBUG"); break;
+    case QtInfoMsg:     level = QStringLiteral("INFO");  break;
+    case QtWarningMsg:  level = QStringLiteral("WARN");  break;
+    case QtCriticalMsg: level = QStringLiteral("ERROR"); break;
+    case QtFatalMsg:    level = QStringLiteral("FATAL"); break;
     }
 
     if (s_instance) {
@@ -68,6 +70,9 @@ DiagnosticsProvider::DiagnosticsProvider(QObject *parent)
 
     connect(&m_canRateTimer, &QTimer::timeout, this, &DiagnosticsProvider::updateCanRate);
     m_canRateTimer.start(1000);
+
+    connect(&m_liveSensorTimer, &QTimer::timeout, this, &DiagnosticsProvider::refreshLiveSensorEntries);
+    m_liveSensorTimer.start(1000);
 
     updateSystemInfo();
 
@@ -319,6 +324,112 @@ int DiagnosticsProvider::totalSensorCount() const
 
 
 // ---------------------------------------------------------------------------
+// Live Sensor Table
+// ---------------------------------------------------------------------------
+
+QVariantList DiagnosticsProvider::liveSensorEntries() const
+{
+    return m_liveSensorEntries;
+}
+
+bool DiagnosticsProvider::showAllSensors() const
+{
+    return m_showAllSensors;
+}
+
+void DiagnosticsProvider::setShowAllSensors(bool showAll)
+{
+    if (m_showAllSensors != showAll) {
+        m_showAllSensors = showAll;
+        emit showAllSensorsChanged();
+        refreshLiveSensorEntries();
+    }
+}
+
+QString DiagnosticsProvider::displayTime() const
+{
+    QTime now = QTime::currentTime();
+    int h = now.hour();
+    int m = now.minute();
+    QString ampm = h >= 12 ? QStringLiteral("Pm") : QStringLiteral("Am");
+    h = h % 12;
+    if (h == 0) h = 12;
+    return QStringLiteral("%1:%2 %3").arg(h).arg(m, 2, 10, QLatin1Char('0')).arg(ampm);
+}
+
+void DiagnosticsProvider::refreshLiveSensorEntries()
+{
+    struct SensorDef {
+        const char *name;
+        const char *source;
+        const char *key;
+        const char *unit;
+    };
+
+    static const SensorDef sensors[] = {
+        {"RPM",           "Engine",   "rpm",             "rpm"},
+        {"Speed",         "Vehicle",  "speed",           "km/h"},
+        {"Water Temp",    "Engine",   "Watertemp",       "C"},
+        {"Intake Temp",   "Engine",   "Intaketemp",      "C"},
+        {"Boost",         "Engine",   "BoostPres",       "kPa"},
+        {"MAP",           "Engine",   "MAP",             "kPa"},
+        {"TPS",           "Engine",   "TPS",             "%"},
+        {"Inj Duty",      "Engine",   "InjDuty",         "%"},
+        {"Ignition",      "Engine",   "Ign",             "deg"},
+        {"AFR",           "Engine",   "AFR",             ""},
+        {"Knock",         "Engine",   "Knock",           ""},
+        {"Battery",       "Engine",   "BatteryV",        "V"},
+        {"Oil Pressure",  "Engine",   "oilpres",         "kPa"},
+        {"Oil Temp",      "Engine",   "oiltemp",         "C"},
+        {"Fuel Pressure", "Engine",   "FuelPress",       "kPa"},
+        {"Gear",          "Vehicle",  "Gear",            ""},
+        {"Odometer",      "Vehicle",  "Odo",             "km"},
+        {"EX AN 0",       "Expander", "EXAnalogInput0",  "V"},
+        {"EX AN 1",       "Expander", "EXAnalogInput1",  "V"},
+        {"EX AN 2",       "Expander", "EXAnalogInput2",  "V"},
+        {"EX AN 3",       "Expander", "EXAnalogInput3",  "V"},
+        {"EX AN 4",       "Expander", "EXAnalogInput4",  "V"},
+        {"EX AN 5",       "Expander", "EXAnalogInput5",  "V"},
+        {"EX AN 6",       "Expander", "EXAnalogInput6",  "V"},
+        {"EX AN 7",       "Expander", "EXAnalogInput7",  "V"},
+        {"Analog 0",      "ECU",      "Analog0",         "V"},
+        {"Analog 1",      "ECU",      "Analog1",         "V"},
+        {"Analog 2",      "ECU",      "Analog2",         "V"},
+        {"Analog 3",      "ECU",      "Analog3",         "V"},
+        {"Analog 4",      "ECU",      "Analog4",         "V"},
+        {"EX Digi 1",     "Expander", "EXDigitalInput1", ""},
+        {"EX Digi 2",     "Expander", "EXDigitalInput2", ""},
+        {"EX Digi 3",     "Expander", "EXDigitalInput3", ""},
+        {"EX Digi 4",     "Expander", "EXDigitalInput4", ""},
+        {"EX Digi 5",     "Expander", "EXDigitalInput5", ""},
+        {"EX Digi 6",     "Expander", "EXDigitalInput6", ""},
+        {"EX Digi 7",     "Expander", "EXDigitalInput7", ""},
+        {"EX Digi 8",     "Expander", "EXDigitalInput8", ""},
+    };
+
+    QVariantList entries;
+    for (const auto &s : sensors) {
+        double value = 0.0;
+        if (m_propertyRouter && m_propertyRouter->hasProperty(QLatin1String(s.key)))
+            value = m_propertyRouter->getValue(QLatin1String(s.key)).toDouble();
+
+        if (!m_showAllSensors && qAbs(value) < 0.001)
+            continue;
+
+        QVariantMap entry;
+        entry[QStringLiteral("name")] = QLatin1String(s.name);
+        entry[QStringLiteral("source")] = QLatin1String(s.source);
+        entry[QStringLiteral("value")] = value;
+        entry[QStringLiteral("unit")] = QLatin1String(s.unit);
+        entries.append(entry);
+    }
+
+    m_liveSensorEntries = entries;
+    emit liveSensorEntriesChanged();
+}
+
+
+// ---------------------------------------------------------------------------
 // Log accessors
 // ---------------------------------------------------------------------------
 
@@ -386,16 +497,16 @@ QVariantList DiagnosticsProvider::getLiveSensorData() const
     const QVariantList sensors = m_sensorRegistry->availableSensors();
     for (const QVariant &v : sensors) {
         QVariantMap sensorMap = v.toMap();
-        QString key = sensorMap.value(QStringLiteral("key")).toString();
+        QString key = sensorMap.value(QStringLiteral("key"), QString()).toString();
 
         QVariantMap entry;
         entry[QStringLiteral("key")] = key;
-        entry[QStringLiteral("displayName")] = sensorMap.value(QStringLiteral("displayName"));
-        entry[QStringLiteral("unit")] = sensorMap.value(QStringLiteral("unit"));
-        entry[QStringLiteral("source")] = sensorMap.value(QStringLiteral("source"));
+        entry[QStringLiteral("displayName")] = sensorMap.value(QStringLiteral("displayName"), QString()).toString();
+        entry[QStringLiteral("unit")] = sensorMap.value(QStringLiteral("unit"), QString()).toString();
+        entry[QStringLiteral("source")] = sensorMap.value(QStringLiteral("source"), QString()).toString();
 
         double rawValue = 0.0;
-        if (m_propertyRouter && m_propertyRouter->hasProperty(key)) {
+        if (m_propertyRouter && !key.isEmpty() && m_propertyRouter->hasProperty(key)) {
             QVariant val = m_propertyRouter->getValue(key);
             rawValue = val.toDouble();
         }

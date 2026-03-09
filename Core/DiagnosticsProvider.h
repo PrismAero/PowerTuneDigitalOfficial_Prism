@@ -100,6 +100,19 @@ class DiagnosticsProvider : public QObject
     /// Total number of registered sensors
     Q_PROPERTY(int totalSensorCount READ totalSensorCount NOTIFY sensorDataChanged)
 
+    // -- Live Sensor Table (replaces QML JS refreshLiveData) --
+
+    /// Pre-built list of {name, source, value, unit} maps for the diagnostics live table
+    Q_PROPERTY(QVariantList liveSensorEntries READ liveSensorEntries NOTIFY liveSensorEntriesChanged)
+
+    /// Filter toggle: true shows all sensors, false shows only those with non-zero values
+    Q_PROPERTY(bool showAllSensors READ showAllSensors WRITE setShowAllSensors NOTIFY showAllSensorsChanged)
+
+    // -- Display Time (12h format for bottom status bar clock) --
+
+    /// Current time formatted as "h:mm AM/PM"
+    Q_PROPERTY(QString displayTime READ displayTime NOTIFY systemInfoChanged)
+
     // -- Log --
 
     /// Circular log buffer (newest first, max 500 entries)
@@ -245,6 +258,16 @@ public:
      */
     int totalSensorCount() const;
 
+    // -- Live Sensor Table accessors --
+
+    QVariantList liveSensorEntries() const;
+    bool showAllSensors() const;
+    void setShowAllSensors(bool showAll);
+
+    // -- Display Time accessor --
+
+    QString displayTime() const;
+
     // -- Log accessors --
 
     /**
@@ -367,6 +390,12 @@ signals:
     /// Emitted when sensor summary counts change
     void sensorDataChanged();
 
+    /// Emitted when the pre-built live sensor entries list is updated
+    void liveSensorEntriesChanged();
+
+    /// Emitted when showAllSensors filter changes
+    void showAllSensorsChanged();
+
     /// Emitted when log buffer is modified
     void logChanged();
 
@@ -388,6 +417,14 @@ private slots:
      * Sets m_canMessageRate = m_canMessagesThisSecond, then resets counter.
      */
     void updateCanRate();
+
+    /**
+     * @brief Periodic callback to rebuild the live sensor entries list.
+     *
+     * Connected to m_liveSensorTimer (1-second interval).
+     * Reads all known sensors via PropertyRouter and rebuilds m_liveSensorEntries.
+     */
+    void refreshLiveSensorEntries();
 
 private:
     // System info
@@ -431,9 +468,14 @@ private:
 
     void rebuildLogCache();
 
+    // Live sensor table
+    QVariantList m_liveSensorEntries;
+    bool m_showAllSensors = true;
+
     // Timers
     QTimer m_systemInfoTimer;  // 2-second interval for system info
     QTimer m_canRateTimer;     // 1-second interval for CAN message rate
+    QTimer m_liveSensorTimer;  // 1-second interval for live sensor table
 
     /**
      * @brief Read CPU temperature from system.

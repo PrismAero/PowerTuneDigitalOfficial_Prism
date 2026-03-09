@@ -8,7 +8,6 @@ import PowerTune.Utils 1.0
 
 Rectangle {
     id: root
-    anchors.fill: parent
     color: "#1a1a2e"
 
     property int connected: 0
@@ -44,23 +43,14 @@ Rectangle {
 
     Connections {
         target: Vehicle
-        onOdoChanged: odometer.text = Vehicle.Odo.toFixed(3)
-    }
-    Connections {
-        target: Vehicle
-        onTripChanged: tripmeter.text = Vehicle.Trip.toFixed(3)
+        function onOdoChanged() { odometer.text = Vehicle.Odo.toFixed(3) }
+        function onTripChanged() { tripmeter.text = Vehicle.Trip.toFixed(3) }
     }
     Connections {
         target: Engine
-        onWatertempChanged: { if (Engine.Watertemp > Settings.waterwarn) playwarning.start() }
-    }
-    Connections {
-        target: Engine
-        onRpmChanged: { if (Engine.rpm > Settings.rpmwarn) playwarning.start() }
-    }
-    Connections {
-        target: Engine
-        onKnockChanged: { if (Engine.Knock > Settings.knockwarn) playwarning.start() }
+        function onWatertempChanged() { if (Engine.Watertemp > Settings.waterwarn) playwarning.start() }
+        function onRpmChanged() { if (Engine.rpm > Settings.rpmwarn) playwarning.start() }
+        function onKnockChanged() { if (Engine.Knock > Settings.knockwarn) playwarning.start() }
     }
     // Boost warning is evaluated by the shared warning loader.
 

@@ -11,7 +11,6 @@ import PowerTune.UI 1.0
 
 Rectangle {
     id: mainWindow
-    anchors.fill: parent
     color: "#1a1a2e"
     property double rpmfrequencydivider
 

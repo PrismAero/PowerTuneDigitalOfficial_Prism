@@ -23,20 +23,20 @@ ApplicationWindow {
     property int brightnessIncrease: 175
     property int ddcUtilBrightnessIncrease: 50
 
-    property int digitalInput1: (Expander && Expander.EXDigitalInput1 !== undefined) ? Expander.EXDigitalInput1 : 0
-    property int digitalInput2: (Expander && Expander.EXDigitalInput2 !== undefined) ? Expander.EXDigitalInput2 : 0
-    property int digitalInput3: (Expander && Expander.EXDigitalInput3 !== undefined) ? Expander.EXDigitalInput3 : 0
-    property int digitalInput4: (Expander && Expander.EXDigitalInput4 !== undefined) ? Expander.EXDigitalInput4 : 0
-    property int digitalInput5: (Expander && Expander.EXDigitalInput5 !== undefined) ? Expander.EXDigitalInput5 : 0
-    property int digitalInput6: (Expander && Expander.EXDigitalInput6 !== undefined) ? Expander.EXDigitalInput6 : 0
-    property int digitalInput7: (Expander && Expander.EXDigitalInput7 !== undefined) ? Expander.EXDigitalInput7 : 0
-    property int digitalInput8: (Expander && Expander.EXDigitalInput8 !== undefined) ? Expander.EXDigitalInput8 : 0
+    property int digitalInput1: Digital ? Digital.EXDigitalInput1 : 0
+    property int digitalInput2: Digital ? Digital.EXDigitalInput2 : 0
+    property int digitalInput3: Digital ? Digital.EXDigitalInput3 : 0
+    property int digitalInput4: Digital ? Digital.EXDigitalInput4 : 0
+    property int digitalInput5: Digital ? Digital.EXDigitalInput5 : 0
+    property int digitalInput6: Digital ? Digital.EXDigitalInput6 : 0
+    property int digitalInput7: Digital ? Digital.EXDigitalInput7 : 0
+    property int digitalInput8: Digital ? Digital.EXDigitalInput8 : 0
 
     Component.onCompleted: {
         popUpLoader.enabled = AppSettings.getValue("ui/brightnessPopupEnabled", true)
         popUpLoader.sourceComponent = Qt.createComponent("BrightnessPopUp.qml")
         custom.executeOnBootAction()
-        if(Qt.platform.os === "linux" && HAVE_DDCUTIL){
+        if(Connect.hasDdcBrightness){
             ddcutilDigitalLoop()
         }else{
             digitalLoop()
@@ -271,13 +271,12 @@ ApplicationWindow {
                      brightness.visible = false
                  }
 
-                 // Check if HAVE_DDCUTIL is defined
-                 if (Qt.platform.os === "linux" && HAVE_DDCUTIL) {
-                     from = 0;  // Adjust based on your requirements
-                     to = 100;  // Adjust based on your requirements
+                 if (Connect.hasDdcBrightness) {
+                     from = 0
+                     to = 100
                  } else {
-                     from = 20;  // Default values if HAVE_DDCUTIL is not defined
-                     to = 255;  // Default values if HAVE_DDCUTIL is not defined
+                     from = 20
+                     to = 255
                  }
              }
          }
@@ -306,7 +305,7 @@ ApplicationWindow {
                          }
                      }
                      onClicked: {
-                         if (Qt.platform.os === "linux" && HAVE_DDCUTIL) {
+                         if (Connect.hasDdcBrightness) {
                              ddcUtilBrightnessIncrease += 25;  // increase by 10% every time button is pressed
                              if(ddcUtilBrightnessIncrease > 75){ //if the variable goes above 100 bring it back down
                                  ddcUtilBrightnessIncrease = 75
@@ -358,7 +357,7 @@ ApplicationWindow {
                      }
 
                      onClicked: {
-                         if (Qt.platform.os === "linux" && HAVE_DDCUTIL) {
+                         if (Connect.hasDdcBrightness) {
                              ddcUtilBrightnessIncrease -= 25;  // increase by 10% every time button is pressed
                              if(ddcUtilBrightnessIncrease < 0){ //if the variable goes above 100 bring it back down
                                  ddcUtilBrightnessIncrease = 0
@@ -485,7 +484,7 @@ ApplicationWindow {
     //Check if any of the EXDigitalInput values have changed and if so run the function.
     onDigitalInput1Changed: {
        // //console.log("Digital Input 1 Channel Changed" + digitalInput1)
-        if(Qt.platform.os === "linux" && HAVE_DDCUTIL){
+        if(Connect.hasDdcBrightness){
             ddcutilDigitalLoop()
         }else{
             digitalLoop()
@@ -493,7 +492,7 @@ ApplicationWindow {
     }
 
     onDigitalInput2Changed: {
-        if(Qt.platform.os === "linux" && HAVE_DDCUTIL){
+        if(Connect.hasDdcBrightness){
             ddcutilDigitalLoop()
         }else{
             digitalLoop()
@@ -501,7 +500,7 @@ ApplicationWindow {
     }
 
     onDigitalInput3Changed: {
-        if(Qt.platform.os === "linux" && HAVE_DDCUTIL){
+        if(Connect.hasDdcBrightness){
             ddcutilDigitalLoop()
         }else{
             digitalLoop()
@@ -509,7 +508,7 @@ ApplicationWindow {
     }
 
     onDigitalInput4Changed: {
-        if(Qt.platform.os === "linux" && HAVE_DDCUTIL){
+        if(Connect.hasDdcBrightness){
             ddcutilDigitalLoop()
         }else{
             digitalLoop()
@@ -517,7 +516,7 @@ ApplicationWindow {
     }
 
     onDigitalInput5Changed: {
-        if(Qt.platform.os === "linux" && HAVE_DDCUTIL){
+        if(Connect.hasDdcBrightness){
             ddcutilDigitalLoop()
         }else{
             digitalLoop()
@@ -525,7 +524,7 @@ ApplicationWindow {
     }
 
     onDigitalInput6Changed: {
-        if(Qt.platform.os === "linux" && HAVE_DDCUTIL){
+        if(Connect.hasDdcBrightness){
             ddcutilDigitalLoop()
         }else{
             digitalLoop()
@@ -533,7 +532,7 @@ ApplicationWindow {
     }
 
     onDigitalInput7Changed: {
-        if(Qt.platform.os === "linux" && HAVE_DDCUTIL){
+        if(Connect.hasDdcBrightness){
             ddcutilDigitalLoop()
         }else{
             digitalLoop()
@@ -541,7 +540,7 @@ ApplicationWindow {
     }
 
     onDigitalInput8Changed: {
-        if(Qt.platform.os === "linux" && HAVE_DDCUTIL){
+        if(Connect.hasDdcBrightness){
             ddcutilDigitalLoop()
         }else{
             digitalLoop()
@@ -553,7 +552,7 @@ ApplicationWindow {
       running: true
       onTriggered: {
             if(custom.maxBrightnessOnBoot == 1){
-                if (Qt.platform.os === "linux" && HAVE_DDCUTIL) {
+                if (Connect.hasDdcBrightness) {
                   Connect.setSreenbrightness(75);
                   AppSettings.writebrightnessettings(75);
                 } else {

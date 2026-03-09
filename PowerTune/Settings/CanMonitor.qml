@@ -168,8 +168,14 @@ Rectangle {
     Connections {
         target: Connection
         function onCanChanged() {
+            if (Connection.can.length < 2)
+                return;
             var canId = Connection.can[0]
             var payload = Connection.can[1]
+            if (canId === undefined || canId === null)
+                return;
+            if (payload === undefined || payload === null)
+                payload = "";
             var itemFound = false
 
             for (var i = 0; i < listView.model.count; ++i) {

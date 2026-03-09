@@ -153,7 +153,10 @@ QVariant PropertyRouter::getValue(const QString &propertyName) const
         return QVariant(0);
     }
 
-    return model->property(propertyName.toLatin1().constData());
+    QVariant val = model->property(propertyName.toLatin1().constData());
+    if (!val.isValid())
+        return QVariant(0);
+    return val;
 }
 
 QString PropertyRouter::getModelName(const QString &propertyName) const

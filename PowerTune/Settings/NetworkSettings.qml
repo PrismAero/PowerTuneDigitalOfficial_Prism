@@ -8,12 +8,11 @@ import PowerTune.Utils 1.0
 
 Rectangle {
     id: root
-    anchors.fill: parent
     color: "#1a1a2e"
 
     Connections {
         target: Connection
-        onSerialStatChanged: {
+        function onSerialStatChanged() {
             consoleText.append(Connection.SerialStat)
             consoleFlickable.contentY = consoleFlickable.contentHeight - consoleFlickable.height
         }

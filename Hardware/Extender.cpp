@@ -190,7 +190,7 @@ void Extender::readyToRead()
         if (m_connectionData) {
             m_connectionData->setcan(list);
         }
-        qDebug() << "Received message" << list;
+        // CAN frame forwarded to ConnectionData for CanMonitor
         // Can Monitor end
         // Just for testing  start
         QString view;

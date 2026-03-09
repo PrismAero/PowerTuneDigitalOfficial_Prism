@@ -31,6 +31,7 @@
 #include "DiagnosticsProvider.h"
 #include "../Utils/UdpTestSimulator.h"
 #include "../Utils/OverlayConfigManager.h"
+#include "../Utils/ShiftIndicatorHelper.h"
 #include "Models/DataModels.h"
 #include "Models/UIState.h"
 #include "PropertyRouter.h"
@@ -144,6 +145,7 @@ Connect::Connect(QObject *parent)
     m_diagnosticsProvider->setPropertyRouter(m_propertyRouter);
     m_testSimulator = new UdpTestSimulator(this);
     m_overlayConfigManager = new OverlayConfigManager(this);
+    m_shiftIndicatorHelper = new ShiftIndicatorHelper(this);
     // m_wifiscanner = new WifScanner(this);
     // Use AppDataLocation instead of "/" to prevent QFileSystemModel from
     // indexing the entire filesystem (saves 0.5-2GB+ RAM on macOS dev builds)
@@ -197,6 +199,7 @@ Connect::Connect(QObject *parent)
     engine->rootContext()->setContextProperty("Diagnostics", m_diagnosticsProvider);
     engine->rootContext()->setContextProperty("TestSim", m_testSimulator);
     engine->rootContext()->setContextProperty("OverlayConfig", m_overlayConfigManager);
+    engine->rootContext()->setContextProperty("ShiftHelper", m_shiftIndicatorHelper);
     m_appSettings->setExtender(m_extender);
     m_appSettings->setSteinhartCalculator(m_steinhartCalc);
     m_appSettings->readandApplySettings();
@@ -250,26 +253,31 @@ void Connect::setrpm(const int &dash1, const int &dash2, const int &dash3)
 }
 void Connect::checkifraspberrypi()
 {
-    QString path = "/sys/class/backlight/rpi_backlight/brightness";
-    QFile inputFile(path);
+    static const QString sysfsPath = QStringLiteral("/sys/class/backlight/rpi_backlight/brightness");
 
-    if (inputFile.open(QIODevice::ReadOnly)) {
-        QTextStream in(&inputFile);
-        QString line = in.readLine();
-        bool ok;
-        int val = line.toInt(&ok);
-        // qDebug() <<"Bright " << val ;
-        m_uiState->setBrightness(val);
-        inputFile.close();
-    }
-    if (QFileInfo::exists(path)) {
+    if (QFileInfo::exists(sysfsPath)) {
+        QFile inputFile(sysfsPath);
+        if (inputFile.open(QIODevice::ReadOnly)) {
+            QTextStream in(&inputFile);
+            bool ok;
+            int val = in.readLine().toInt(&ok);
+            if (ok)
+                m_uiState->setBrightness(val);
+            inputFile.close();
+        }
         m_uiState->setscreen(true);
-    } else {
-        m_uiState->setscreen(false);
+        m_brightnessMethod = BrightnessMethod::Sysfs;
+        return;
     }
-#ifdef HAVE_DDCUTIL
-    m_uiState->setscreen(true);
-#endif
+
+    if (QFileInfo::exists(QStringLiteral("/usr/bin/ddcutil"))) {
+        m_uiState->setscreen(true);
+        m_brightnessMethod = BrightnessMethod::DdcUtil;
+        return;
+    }
+
+    m_uiState->setscreen(false);
+    m_brightnessMethod = BrightnessMethod::None;
 }
 void Connect::readavailabledashfiles()
 {
@@ -347,19 +355,28 @@ void Connect::readDashSetup(int index)
 
 void Connect::setSreenbrightness(const int &brightness)
 {
-#ifdef HAVE_DDCUTIL
-    QString val = QString::number(brightness);
-    QProcess::execute("ddcutil", {"setvcp", "10", val, "12", val, "13", val});
-#else
-    // Use standard interface
-    QFile f("/sys/class/backlight/rpi_backlight/brightness");
-    // f.close();
-    f.open(QIODevice::WriteOnly | QIODevice::Truncate);
-    QTextStream out(&f);
-    out << brightness;
-    // qDebug() << brightness;
-    f.close();
-#endif
+    switch (m_brightnessMethod) {
+    case BrightnessMethod::DdcUtil: {
+        QString val = QString::number(brightness);
+        QProcess::execute(QStringLiteral("ddcutil"),
+                          {QStringLiteral("setvcp"),
+                           QStringLiteral("10"), val,
+                           QStringLiteral("12"), val,
+                           QStringLiteral("13"), val});
+        break;
+    }
+    case BrightnessMethod::Sysfs: {
+        QFile f(QStringLiteral("/sys/class/backlight/rpi_backlight/brightness"));
+        if (f.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
+            QTextStream out(&f);
+            out << brightness;
+            f.close();
+        }
+        break;
+    }
+    case BrightnessMethod::None:
+        break;
+    }
 }
 void Connect::setSpeedUnits(const int &units1)
 {

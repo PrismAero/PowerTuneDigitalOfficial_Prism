@@ -38,14 +38,9 @@ Rectangle{
                 font.pixelSize: popUp1.width / 7.5
 
                 onClicked: {
-                    if (Qt.platform.os === "linux" && HAVE_DDCUTIL) {
-                        brightnessValue = 10;
-                    }else{
-                        brightnessValue = 25
-                    }
-                        Connect.setSreenbrightness(brightnessValue);
-                        AppSettings.writebrightnessettings(brightnessValue);
-
+                    brightnessValue = Connect.hasDdcBrightness ? 10 : 25
+                    Connect.setSreenbrightness(brightnessValue)
+                    AppSettings.writebrightnessettings(brightnessValue)
                 }
                 background: Rectangle {
                     radius: popUp1.width / 1.2
@@ -67,14 +62,9 @@ Rectangle{
                 transformOrigin: Item.Center
 
                 onClicked: {
-                    if (Qt.platform.os === "linux" && HAVE_DDCUTIL) {
-                        brightnessValue = 75;
-                    }else{
-                        brightnessValue = 255
-                    }
-                        Connect.setSreenbrightness(brightnessValue);
-                        AppSettings.writebrightnessettings(brightnessValue);
-
+                    brightnessValue = Connect.hasDdcBrightness ? 75 : 255
+                    Connect.setSreenbrightness(brightnessValue)
+                    AppSettings.writebrightnessettings(brightnessValue)
                 }
                 background: Rectangle {
                             radius: popUp1.width / 1.2

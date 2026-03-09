@@ -7,7 +7,6 @@ import PowerTune.Settings 1.0
 
 Item {
     id: root
-    anchors.fill: parent
 
     readonly property color panelBg: "#1e1e3a"
     readonly property color panelBorder: "#2a2a4a"
@@ -21,68 +20,14 @@ Item {
     readonly property color consoleBg: "#0d0d1a"
     readonly property color consoleText: "#00ff88"
 
-    property bool showAllSensors: true
+    property bool showAllSensors: Diagnostics.showAllSensors
 
     ListModel {
-        id: liveDataModel
-    }
-
-    Timer {
-        id: liveDataTimer
-        interval: 1000
-        running: true
-        repeat: true
-        triggeredOnStart: true
-        onTriggered: refreshLiveData()
-    }
-
-    function refreshLiveData() {
-        liveDataModel.clear()
-        var entries = [
-            { name: "RPM",            source: "Engine",   value: Engine ? Engine.rpm : 0,                     unit: "rpm" },
-            { name: "Speed",          source: "Vehicle",  value: Vehicle ? Vehicle.speed : 0,                 unit: "km/h" },
-            { name: "Water Temp",     source: "Engine",   value: Engine ? Engine.Watertemp : 0,               unit: "C" },
-            { name: "Intake Temp",    source: "Engine",   value: Engine ? Engine.Intaketemp : 0,              unit: "C" },
-            { name: "Boost",          source: "Engine",   value: Engine ? Engine.BoostPres : 0,               unit: "kPa" },
-            { name: "MAP",            source: "Engine",   value: Engine ? Engine.MAP : 0,                     unit: "kPa" },
-            { name: "TPS",            source: "Engine",   value: Engine ? Engine.TPS : 0,                     unit: "%" },
-            { name: "Inj Duty",       source: "Engine",   value: Engine ? Engine.InjDuty : 0,                 unit: "%" },
-            { name: "Ignition",       source: "Engine",   value: Engine ? Engine.Ign : 0,                     unit: "deg" },
-            { name: "AFR",            source: "Engine",   value: Engine ? Engine.AFR : 0,                     unit: "" },
-            { name: "Knock",          source: "Engine",   value: Engine ? Engine.Knock : 0,                   unit: "" },
-            { name: "Battery",        source: "Engine",   value: Engine ? Engine.BatteryV : 0,                unit: "V" },
-            { name: "Oil Pressure",   source: "Engine",   value: Engine ? Engine.oilpres : 0,                 unit: "kPa" },
-            { name: "Oil Temp",       source: "Engine",   value: Engine ? Engine.oiltemp : 0,                 unit: "C" },
-            { name: "Fuel Pressure",  source: "Engine",   value: Engine ? Engine.FuelPress : 0,               unit: "kPa" },
-            { name: "Gear",           source: "Vehicle",  value: Vehicle ? Vehicle.Gear : 0,                  unit: "" },
-            { name: "Odometer",       source: "Vehicle",  value: Vehicle ? Vehicle.Odo : 0,                   unit: "km" },
-            { name: "EX AN 0",        source: "Expander", value: Expander ? Expander.EXAnalogInput0 : 0,      unit: "V" },
-            { name: "EX AN 1",        source: "Expander", value: Expander ? Expander.EXAnalogInput1 : 0,      unit: "V" },
-            { name: "EX AN 2",        source: "Expander", value: Expander ? Expander.EXAnalogInput2 : 0,      unit: "V" },
-            { name: "EX AN 3",        source: "Expander", value: Expander ? Expander.EXAnalogInput3 : 0,      unit: "V" },
-            { name: "EX AN 4",        source: "Expander", value: Expander ? Expander.EXAnalogInput4 : 0,      unit: "V" },
-            { name: "EX AN 5",        source: "Expander", value: Expander ? Expander.EXAnalogInput5 : 0,      unit: "V" },
-            { name: "EX AN 6",        source: "Expander", value: Expander ? Expander.EXAnalogInput6 : 0,      unit: "V" },
-            { name: "EX AN 7",        source: "Expander", value: Expander ? Expander.EXAnalogInput7 : 0,      unit: "V" },
-            { name: "Analog 0",       source: "ECU",      value: Analog ? Analog.Analog0 : 0,                 unit: "V" },
-            { name: "Analog 1",       source: "ECU",      value: Analog ? Analog.Analog1 : 0,                 unit: "V" },
-            { name: "Analog 2",       source: "ECU",      value: Analog ? Analog.Analog2 : 0,                 unit: "V" },
-            { name: "Analog 3",       source: "ECU",      value: Analog ? Analog.Analog3 : 0,                 unit: "V" },
-            { name: "Analog 4",       source: "ECU",      value: Analog ? Analog.Analog4 : 0,                 unit: "V" },
-            { name: "EX Digi 1",      source: "Expander", value: Expander ? Expander.EXDigitalInput1 : 0,     unit: "" },
-            { name: "EX Digi 2",      source: "Expander", value: Expander ? Expander.EXDigitalInput2 : 0,     unit: "" },
-            { name: "EX Digi 3",      source: "Expander", value: Expander ? Expander.EXDigitalInput3 : 0,     unit: "" },
-            { name: "EX Digi 4",      source: "Expander", value: Expander ? Expander.EXDigitalInput4 : 0,     unit: "" },
-            { name: "EX Digi 5",      source: "Expander", value: Expander ? Expander.EXDigitalInput5 : 0,     unit: "" },
-            { name: "EX Digi 6",      source: "Expander", value: Expander ? Expander.EXDigitalInput6 : 0,     unit: "" },
-            { name: "EX Digi 7",      source: "Expander", value: Expander ? Expander.EXDigitalInput7 : 0,     unit: "" },
-            { name: "EX Digi 8",      source: "Expander", value: Expander ? Expander.EXDigitalInput8 : 0,     unit: "" }
-        ]
-        for (var i = 0; i < entries.length; i++) {
-            if (showAllSensors || Math.abs(entries[i].value) > 0.001) {
-                liveDataModel.append(entries[i])
-            }
-        }
+        id: logLevelModel
+        ListElement { label: "All";   level: 0 }
+        ListElement { label: "Info";  level: 1 }
+        ListElement { label: "Warn";  level: 2 }
+        ListElement { label: "Error"; level: 3 }
     }
 
     Rectangle {
@@ -267,7 +212,7 @@ Item {
                             Layout.fillWidth: true
                         }
                         Text {
-                            text: liveDataModel.count + " sensors"
+                            text: Diagnostics.liveSensorEntries.length + " sensors"
                             font.pixelSize: 14; font.family: "Lato"
                             color: textSecondary
                         }
@@ -283,7 +228,7 @@ Item {
                             MouseArea {
                                 id: toggleArea
                                 anchors.fill: parent
-                                onClicked: { showAllSensors = !showAllSensors; refreshLiveData() }
+                                onClicked: Diagnostics.showAllSensors = !Diagnostics.showAllSensors
                             }
                         }
                     }
@@ -306,10 +251,12 @@ Item {
                         Layout.fillWidth: true
                         Layout.fillHeight: true
                         clip: true
-                        model: liveDataModel
+                        model: Diagnostics.liveSensorEntries
                         spacing: 1
 
                         delegate: Rectangle {
+                            required property var modelData
+                            required property int index
                             width: sensorListView.width
                             height: 28
                             color: index % 2 === 0 ? "#1e1e3a" : "#1a1a2e"
@@ -321,27 +268,27 @@ Item {
                                 spacing: 4
 
                                 Text {
-                                    text: model.name
+                                    text: modelData.name
                                     font.pixelSize: 14; font.family: "Lato"
                                     color: textPrimary
                                     Layout.preferredWidth: 160
                                     elide: Text.ElideRight
                                 }
                                 Text {
-                                    text: model.source
+                                    text: modelData.source
                                     font.pixelSize: 14; font.family: "Lato"
                                     color: textSecondary
                                     Layout.preferredWidth: 100
                                 }
                                 Text {
-                                    text: typeof model.value === "number" ? model.value.toFixed(model.unit === "" ? 0 : 3) : String(model.value)
+                                    text: modelData.unit === "" ? Number(modelData.value).toFixed(0) : Number(modelData.value).toFixed(3)
                                     font.pixelSize: 14; font.family: "Lato"
                                     font.weight: Font.DemiBold
-                                    color: Math.abs(model.value) > 0.001 ? "#4CAF50" : "#606060"
+                                    color: Math.abs(modelData.value) > 0.001 ? "#4CAF50" : "#606060"
                                     Layout.fillWidth: true
                                 }
                                 Text {
-                                    text: model.unit
+                                    text: modelData.unit
                                     font.pixelSize: 14; font.family: "Lato"
                                     color: textSecondary
                                     Layout.preferredWidth: 60
@@ -383,29 +330,22 @@ Item {
                         Item { Layout.fillWidth: true }
 
                         Repeater {
-                            model: [
-                                { label: "All",   level: 0 },
-                                { label: "Info",  level: 1 },
-                                { label: "Warn",  level: 2 },
-                                { label: "Error", level: 3 }
-                            ]
+                            model: logLevelModel
 
                             Rectangle {
-                                required property var modelData
-                                required property int index
                                 width: 50; height: 26; radius: 4
-                                color: Diagnostics.logLevel === modelData.level ? accentColor : "#2a2a4a"
-                                border.color: Diagnostics.logLevel === modelData.level ? accentColor : "#3D3D3D"
+                                color: Diagnostics.logLevel === model.level ? accentColor : "#2a2a4a"
+                                border.color: Diagnostics.logLevel === model.level ? accentColor : "#3D3D3D"
                                 border.width: 1
                                 Text {
                                     anchors.centerIn: parent
-                                    text: modelData.label
+                                    text: model.label
                                     font.pixelSize: 12; font.family: "Lato"
-                                    color: Diagnostics.logLevel === modelData.level ? "#FFFFFF" : textSecondary
+                                    color: Diagnostics.logLevel === model.level ? "#FFFFFF" : textSecondary
                                 }
                                 MouseArea {
                                     anchors.fill: parent
-                                    onClicked: Diagnostics.logLevel = modelData.level
+                                    onClicked: Diagnostics.logLevel = model.level
                                 }
                             }
                         }
