@@ -134,6 +134,7 @@ void Extender::openCAN(const int &ExtenderBaseID, const int &RPMCANBaseID)
     m_address2 = m_canBaseAddress + 2;
     m_address3 = m_canBaseAddress + 3;
     m_address5 = RPMCANBaseID + 1;
+    emit baseIdsChanged();
     if (QCanBus::instance()->plugins().contains(QStringLiteral("socketcan"))) {
         QString errorString;
         m_canDevice =

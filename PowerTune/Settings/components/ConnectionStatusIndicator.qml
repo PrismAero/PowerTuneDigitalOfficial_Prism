@@ -12,15 +12,15 @@ Rectangle {
     property string status: "unknown" // "connected", "disconnected", "pending", "unknown"
 
     implicitWidth: 200
-    implicitHeight: 44
-    radius: 8
-    color: "#2D2D2D"
+    implicitHeight: SettingsTheme.controlHeight
+    radius: SettingsTheme.radiusSmall
+    color: SettingsTheme.controlBg
     border.color: {
         switch (root.status) {
-            case "connected": return "#4CAF50"
-            case "disconnected": return "#F44336"
-            case "pending": return "#FF9800"
-            default: return "#3D3D3D"
+            case "connected": return SettingsTheme.success
+            case "disconnected": return SettingsTheme.error
+            case "pending": return SettingsTheme.warning
+            default: return SettingsTheme.border
         }
     }
     border.width: 2
@@ -34,15 +34,15 @@ Rectangle {
 
         // * Status indicator dot
         Rectangle {
-            width: 12
-            height: 12
-            radius: 6
+            width: SettingsTheme.statusDotSize
+            height: SettingsTheme.statusDotSize
+            radius: SettingsTheme.statusDotSize / 2
             color: {
                 switch (root.status) {
-                    case "connected": return "#4CAF50"
-                    case "disconnected": return "#F44336"
-                    case "pending": return "#FF9800"
-                    default: return "#707070"
+                    case "connected": return SettingsTheme.success
+                    case "disconnected": return SettingsTheme.error
+                    case "pending": return SettingsTheme.warning
+                    default: return SettingsTheme.textPlaceholder
                 }
             }
 
@@ -59,9 +59,9 @@ Rectangle {
 
         Text {
             text: root.statusText
-            font.pixelSize: 18
-            font.family: "Lato"
-            color: "#FFFFFF"
+            font.pixelSize: SettingsTheme.fontControl
+            font.family: SettingsTheme.fontFamily
+            color: SettingsTheme.textPrimary
             Layout.fillWidth: true
             elide: Text.ElideRight
             verticalAlignment: Text.AlignVCenter

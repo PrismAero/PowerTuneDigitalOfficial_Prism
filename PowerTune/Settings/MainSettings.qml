@@ -6,17 +6,18 @@ import PowerTune.Settings 1.0
 import PowerTune.UI 1.0
 import PowerTune.Utils 1.0
 
-Rectangle {
+SettingsPage {
     id: root
-    color: "#1a1a2e"
 
     property int connected: 0
     property int hexstring: 0
     property int hexstring2: 0
     property int currentLanguage: (Settings && Settings.language !== undefined) ? Settings.language : 0
+    property bool settingsLoaded: false
 
-    readonly property var ecuBackendMap: [0, 4]
+    readonly property var ecuBackendMap: [5, 0, 4]
     readonly property int genericCanDaemonIndex: 40
+    readonly property bool isExtenderOnly: ecuBackendMap[ecuSelect.currentIndex] === 5
 
     function ecuDropdownFromBackend(backendIdx) {
         for (var i = 0; i < ecuBackendMap.length; i++) {
@@ -38,6 +39,8 @@ Rectangle {
         languageselect.currentIndex = AppSettings.getValue("Language", 0)
         mainspeedsource.currentIndex = AppSettings.getValue("ui/mainSpeedSource", 0)
         canbitrateselect.currentIndex = AppSettings.getValue("ui/bitrateSelect", 0)
+        Vehicle.setTrip(tripmeter.text)
+        settingsLoaded = true
         autoconnect.auto()
     }
 
@@ -55,27 +58,26 @@ Rectangle {
     // Boost warning is evaluated by the shared warning loader.
 
     RowLayout {
-        anchors.fill: parent
-        anchors.margins: 16
-        spacing: 16
+        Layout.fillWidth: true
+        spacing: SettingsTheme.sectionSpacing
 
         // * LEFT COLUMN
         ColumnLayout {
-            Layout.preferredWidth: (root.width - 64) / 3
+            Layout.fillWidth: true
             Layout.fillHeight: true
             Layout.alignment: Qt.AlignTop
-            spacing: 12
+            spacing: SettingsTheme.sectionPadding
 
             SettingsSection {
                 title: Translator.translate("Connection", Settings.language)
                 Layout.fillWidth: true
 
                 RowLayout {
-                    spacing: 12
+                    spacing: SettingsTheme.sectionPadding
                     StyledButton {
                         id: connectButton
                         text: Translator.translate("Connect", Settings.language)
-                        onEnabledChanged: AppSettings.setValue("ui/connectAtStartup", enabled)
+                        onEnabledChanged: if (settingsLoaded) AppSettings.setValue("ui/connectAtStartup", enabled)
                         onClicked: {
                             functconnect.connectfunc()
                             connectButton.enabled = false
@@ -97,41 +99,27 @@ Rectangle {
                     }
                 }
 
-                Item { height: 8; Layout.fillWidth: true }
-
-                RowLayout {
-                    spacing: 12
-                    Text {
-                        text: "CAN Status"
-                        font.pixelSize: 18
-                        font.family: "Lato"
-                        color: "#FFFFFF"
-                        Layout.preferredWidth: 160
-                    }
+                SettingsRow {
+                    label: "CAN Status"
                     ConnectionStatusIndicator {
+                        width: parent.width
+                        height: parent.height
                         statusText: Diagnostics.canStatusText
                         status: {
                             if (Diagnostics.canStatusText === "Active") return "connected"
                             if (Diagnostics.canStatusText === "Waiting") return "pending"
                             return "disconnected"
                         }
-                        Layout.fillWidth: true
                     }
                 }
 
-                RowLayout {
-                    spacing: 12
-                    Text {
-                        text: Translator.translate("ECU Selection", Settings.language)
-                        font.pixelSize: 18
-                        font.family: "Lato"
-                        color: "#FFFFFF"
-                        Layout.preferredWidth: 160
-                    }
+                SettingsRow {
+                    label: Translator.translate("ECU Selection", Settings.language)
                     StyledComboBox {
                         id: ecuSelect
-                        Layout.fillWidth: true
-                        model: ["CAN", "Generic CAN"]
+                        width: parent.width
+                        height: parent.height
+                        model: ["Extender Only", "CAN", "Generic CAN"]
                         property bool initialized: false
                         onCurrentIndexChanged: {
                             if (initialized) {
@@ -155,18 +143,12 @@ Rectangle {
                 title: Translator.translate("Units", Settings.language)
                 Layout.fillWidth: true
 
-                RowLayout {
-                    spacing: 12
-                    Text {
-                        text: Translator.translate("Speed units", Settings.language)
-                        font.pixelSize: 18
-                        font.family: "Lato"
-                        color: "#FFFFFF"
-                        Layout.preferredWidth: 160
-                    }
+                SettingsRow {
+                    label: Translator.translate("Speed units", Settings.language)
                     StyledComboBox {
                         id: unitSelect1
-                        Layout.fillWidth: true
+                        width: parent.width
+                        height: parent.height
                         model: [Translator.translate("Metric", Settings.language), Translator.translate("Imperial", Settings.language)]
                         Component.onCompleted: {
                             Connect.setSpeedUnits(currentIndex)
@@ -175,23 +157,17 @@ Rectangle {
                         onCurrentIndexChanged: {
                             Connect.setSpeedUnits(currentIndex)
                             changeweighttext.changetext()
-                            AppSettings.setValue("ui/unitSelector1", currentIndex)
+                            if (settingsLoaded) AppSettings.setValue("ui/unitSelector1", currentIndex)
                         }
                     }
                 }
 
-                RowLayout {
-                    spacing: 12
-                    Text {
-                        text: Translator.translate("Temp units", Settings.language)
-                        font.pixelSize: 18
-                        font.family: "Lato"
-                        color: "#FFFFFF"
-                        Layout.preferredWidth: 160
-                    }
+                SettingsRow {
+                    label: Translator.translate("Temp units", Settings.language)
                     StyledComboBox {
                         id: unitSelect
-                        Layout.fillWidth: true
+                        width: parent.width
+                        height: parent.height
                         model: [Translator.translate("C", Settings.language), Translator.translate("F", Settings.language)]
                         Component.onCompleted: {
                             Connect.setUnits(currentIndex)
@@ -200,28 +176,22 @@ Rectangle {
                         onCurrentIndexChanged: {
                             Connect.setUnits(currentIndex)
                             changeweighttext.changetext()
-                            AppSettings.setValue("ui/unitSelector", currentIndex)
+                            if (settingsLoaded) AppSettings.setValue("ui/unitSelector", currentIndex)
                         }
                     }
                 }
 
-                RowLayout {
-                    spacing: 12
-                    Text {
-                        text: Translator.translate("Pressure units", Settings.language)
-                        font.pixelSize: 18
-                        font.family: "Lato"
-                        color: "#FFFFFF"
-                        Layout.preferredWidth: 160
-                    }
+                SettingsRow {
+                    label: Translator.translate("Pressure units", Settings.language)
                     StyledComboBox {
                         id: unitSelect2
-                        Layout.fillWidth: true
+                        width: parent.width
+                        height: parent.height
                         model: ["kPa", "PSI"]
                         Component.onCompleted: Connect.setPressUnits(currentIndex)
                         onCurrentIndexChanged: {
                             Connect.setPressUnits(currentIndex)
-                            AppSettings.setValue("ui/unitSelector2", currentIndex)
+                            if (settingsLoaded) AppSettings.setValue("ui/unitSelector2", currentIndex)
                         }
                     }
                 }
@@ -230,67 +200,56 @@ Rectangle {
 
         // * MIDDLE COLUMN
         ColumnLayout {
-            Layout.preferredWidth: (root.width - 64) / 3
+            Layout.fillWidth: true
             Layout.fillHeight: true
             Layout.alignment: Qt.AlignTop
-            spacing: 12
+            spacing: SettingsTheme.sectionPadding
 
             SettingsSection {
                 title: Translator.translate("Vehicle", Settings.language)
                 Layout.fillWidth: true
 
-                RowLayout {
-                    spacing: 12
-                    Text {
-                        id: weighttext
-                        text: Translator.translate("Weight", Settings.language) + " kg"
-                        font.pixelSize: 18
-                        font.family: "Lato"
-                        color: "#FFFFFF"
-                        Layout.preferredWidth: 160
-                    }
+                SettingsRow {
+                    id: weightRow
+                    label: Translator.translate("Weight", Settings.language) + " kg"
                     StyledTextField {
                         id: weight
-                        Layout.fillWidth: true
+                        width: parent.width
+                        height: parent.height
                         inputMethodHints: Qt.ImhFormattedNumbersOnly
                         onEditingFinished: AppSettings.setValue("ui/vehicleWeight", text)
                     }
                 }
 
-                RowLayout {
-                    spacing: 12
-                    Text {
-                        text: Translator.translate("Odo", Settings.language)
-                        font.pixelSize: 18
-                        font.family: "Lato"
-                        color: "#FFFFFF"
-                        Layout.preferredWidth: 160
-                    }
+                SettingsRow {
+                    label: Translator.translate("Odo", Settings.language)
                     StyledTextField {
                         id: odometer
-                        Layout.fillWidth: true
+                        width: parent.width
+                        height: parent.height
                         text: "0"
                         inputMethodHints: Qt.ImhFormattedNumbersOnly
-                        onTextChanged: AppSettings.setValue("ui/odometer", text)
+                        onTextChanged: if (settingsLoaded) AppSettings.setValue("ui/odometer", text)
                     }
                 }
 
                 RowLayout {
-                    spacing: 12
+                    spacing: SettingsTheme.sectionPadding
+                    Layout.fillWidth: true
+
                     Text {
                         text: Translator.translate("Trip", Settings.language)
-                        font.pixelSize: 18
-                        font.family: "Lato"
-                        color: "#FFFFFF"
-                        Layout.preferredWidth: 160
+                        font.pixelSize: SettingsTheme.fontLabel
+                        font.family: SettingsTheme.fontFamily
+                        color: SettingsTheme.textPrimary
+                        Layout.preferredWidth: SettingsTheme.labelWidth
                     }
                     StyledTextField {
                         id: tripmeter
                         Layout.fillWidth: true
                         text: "0"
                         readOnly: true
-                        Component.onCompleted: Vehicle.setTrip(tripmeter.text)
-                        onTextChanged: AppSettings.setValue("ui/tripmeter", text)
+                        onTextChanged: if (settingsLoaded) AppSettings.setValue("ui/tripmeter", text)
                     }
                     StyledButton {
                         text: Translator.translate("Trip Reset", Settings.language)
@@ -301,58 +260,53 @@ Rectangle {
             }
 
             SettingsSection {
-                title: Translator.translate("Startup / CAN", Settings.language)
+                title: Translator.translate("CAN Bus", Settings.language)
                 Layout.fillWidth: true
 
-                RowLayout {
-                    spacing: 12
-                    Text {
-                        text: Translator.translate("Daemon", Settings.language)
-                        font.pixelSize: 18
-                        font.family: "Lato"
-                        color: "#FFFFFF"
-                        Layout.preferredWidth: 160
-                    }
+                SettingsRow {
+                    label: Translator.translate("Can Bitrate", Settings.language)
                     StyledComboBox {
-                        Layout.fillWidth: true
+                        id: canbitrateselect
+                        width: parent.width
+                        height: parent.height
+                        model: ["250 kbit/s", "500 kbit/s", "1 Mbit/s"]
+                        onCurrentIndexChanged: if (settingsLoaded) AppSettings.setValue("ui/bitrateSelect", currentIndex)
+                    }
+                }
+
+                StyledButton {
+                    text: Translator.translate("Apply Bitrate", Settings.language)
+                    onClicked: Connect.canbitratesetup(canbitrateselect.currentIndex)
+                }
+            }
+
+            SettingsSection {
+                title: Translator.translate("Daemon / Startup", Settings.language)
+                Layout.fillWidth: true
+                visible: !isExtenderOnly
+
+                SettingsRow {
+                    label: Translator.translate("Daemon", Settings.language)
+                    StyledComboBox {
+                        width: parent.width
+                        height: parent.height
                         model: ["Generic CAN"]
                         enabled: false
                     }
                 }
 
-                RowLayout {
-                    spacing: 12
-                    Text {
-                        text: Translator.translate("Can Bitrate", Settings.language)
-                        font.pixelSize: 18
-                        font.family: "Lato"
-                        color: "#FFFFFF"
-                        Layout.preferredWidth: 160
-                    }
-                    StyledComboBox {
-                        id: canbitrateselect
-                        Layout.fillWidth: true
-                        model: ["250 kbit/s", "500 kbit/s", "1 Mbit/s"]
-                        onCurrentIndexChanged: AppSettings.setValue("ui/bitrateSelect", currentIndex)
-                    }
-                }
-
-                RowLayout {
-                    spacing: 12
-                    Text {
-                        text: Translator.translate("Speed Source", Settings.language)
-                        font.pixelSize: 18
-                        font.family: "Lato"
-                        color: "#FFFFFF"
-                        Layout.preferredWidth: 160
-                    }
+                SettingsRow {
+                    label: Translator.translate("Speed Source", Settings.language)
                     StyledComboBox {
                         id: mainspeedsource
-                        Layout.fillWidth: true
+                        width: parent.width
+                        height: parent.height
                         model: ["ECU Speed", "LF Wheel", "RF Wheel", "LR Wheel", "RR Wheel", "GPS", "VR Sensor"]
                         onCurrentIndexChanged: {
-                            AppSettings.writeStartupSettings(mainspeedsource.currentIndex)
-                            AppSettings.setValue("ui/mainSpeedSource", currentIndex)
+                            if (settingsLoaded) {
+                                AppSettings.writeStartupSettings(mainspeedsource.currentIndex)
+                                AppSettings.setValue("ui/mainSpeedSource", currentIndex)
+                            }
                         }
                     }
                 }
@@ -370,18 +324,12 @@ Rectangle {
                 title: Translator.translate("Data Logging", Settings.language)
                 Layout.fillWidth: true
 
-                RowLayout {
-                    spacing: 12
-                    Text {
-                        text: Translator.translate("Logfile name", Settings.language)
-                        font.pixelSize: 18
-                        font.family: "Lato"
-                        color: "#FFFFFF"
-                        Layout.preferredWidth: 160
-                    }
+                SettingsRow {
+                    label: Translator.translate("Logfile name", Settings.language)
                     StyledTextField {
                         id: logfilenameSelect
-                        Layout.fillWidth: true
+                        width: parent.width
+                        height: parent.height
                         text: "DataLog"
                         inputMethodHints: Qt.ImhNoAutoUppercase | Qt.ImhPreferLowercase | Qt.ImhSensitiveData | Qt.ImhNoPredictiveText
                     }
@@ -398,10 +346,10 @@ Rectangle {
 
         // * RIGHT COLUMN
         ColumnLayout {
-            Layout.preferredWidth: (root.width - 64) / 3
+            Layout.fillWidth: true
             Layout.fillHeight: true
             Layout.alignment: Qt.AlignTop
-            spacing: 12
+            spacing: SettingsTheme.sectionPadding
 
             SettingsSection {
                 title: "CAN Configuration"
@@ -409,25 +357,25 @@ Rectangle {
 
                 Text {
                     text: "CAN Extender"
-                    font.pixelSize: 18
+                    font.pixelSize: SettingsTheme.fontLabel
                     font.weight: Font.DemiBold
-                    font.family: "Lato"
-                    color: "#009688"
+                    font.family: SettingsTheme.fontFamily
+                    color: SettingsTheme.accent
                 }
 
                 Text {
                     text: Translator.translate("base adress", Settings.language) + " " + Translator.translate("(decimal)", Settings.language)
-                    font.pixelSize: 16
-                    font.family: "Lato"
-                    color: "#B0B0B0"
+                    font.pixelSize: SettingsTheme.fontStatus
+                    font.family: SettingsTheme.fontFamily
+                    color: SettingsTheme.textSecondary
                 }
 
                 RowLayout {
-                    spacing: 16
+                    spacing: SettingsTheme.controlGap
                     Layout.fillWidth: true
                     StyledTextField {
                         id: baseadresstext
-                        width: 120
+                        Layout.preferredWidth: SettingsTheme.textFieldMinWidth
                         enabled: connectButton.enabled
                         placeholderText: "1024"
                         inputMethodHints: Qt.ImhFormattedNumbersOnly
@@ -437,36 +385,36 @@ Rectangle {
                     }
                     Text {
                         text: "HEX: 0x" + (hexstring + 0x1000).toString(16).substr(-3).toUpperCase()
-                        font.pixelSize: 18
+                        font.pixelSize: SettingsTheme.fontLabel
                         font.weight: Font.DemiBold
-                        font.family: "Lato"
-                        color: "#009688"
+                        font.family: SettingsTheme.fontFamily
+                        color: SettingsTheme.accent
                     }
                 }
 
-                Item { height: 4; Layout.fillWidth: true }
+                Item { height: SettingsTheme.contentSpacing / 2; Layout.fillWidth: true }
 
                 Text {
                     text: "Shiftlight CAN"
-                    font.pixelSize: 18
+                    font.pixelSize: SettingsTheme.fontLabel
                     font.weight: Font.DemiBold
-                    font.family: "Lato"
-                    color: "#009688"
+                    font.family: SettingsTheme.fontFamily
+                    color: SettingsTheme.accent
                 }
 
                 Text {
                     text: Translator.translate("base adress", Settings.language) + " " + Translator.translate("(decimal)", Settings.language)
-                    font.pixelSize: 16
-                    font.family: "Lato"
-                    color: "#B0B0B0"
+                    font.pixelSize: SettingsTheme.fontStatus
+                    font.family: SettingsTheme.fontFamily
+                    color: SettingsTheme.textSecondary
                 }
 
                 RowLayout {
-                    spacing: 16
+                    spacing: SettingsTheme.controlGap
                     Layout.fillWidth: true
                     StyledTextField {
                         id: shiftlightbaseadresstext
-                        width: 120
+                        Layout.preferredWidth: SettingsTheme.textFieldMinWidth
                         enabled: connectButton.enabled
                         placeholderText: "1024"
                         inputMethodHints: Qt.ImhFormattedNumbersOnly
@@ -476,11 +424,21 @@ Rectangle {
                     }
                     Text {
                         text: "HEX: 0x" + (hexstring2 + 0x1000).toString(16).substr(-3).toUpperCase()
-                        font.pixelSize: 18
+                        font.pixelSize: SettingsTheme.fontLabel
                         font.weight: Font.DemiBold
-                        font.family: "Lato"
-                        color: "#009688"
+                        font.family: SettingsTheme.fontFamily
+                        color: SettingsTheme.accent
                     }
+                }
+            }
+
+            SettingsSection {
+                title: "Display"
+                Layout.fillWidth: true
+
+                StyledButton {
+                    text: "Show Brightness Popup"
+                    onClicked: window.showBrightnessPopup()
                 }
             }
 
@@ -495,7 +453,7 @@ Rectangle {
                     onCurrentIndexChanged: {
                         functLanguageselect.languageselectfunct()
                         changeweighttext.changetext()
-                        AppSettings.setValue("Language", currentIndex)
+                        if (settingsLoaded) AppSettings.setValue("Language", currentIndex)
                     }
                 }
             }
@@ -506,13 +464,13 @@ Rectangle {
 
                 Text {
                     text: "V 1.99F " + Connection.Platform
-                    font.pixelSize: 16
-                    font.family: "Lato"
-                    color: "#B0B0B0"
+                    font.pixelSize: SettingsTheme.fontStatus
+                    font.family: SettingsTheme.fontFamily
+                    color: SettingsTheme.textSecondary
                 }
 
                 RowLayout {
-                    spacing: 12
+                    spacing: SettingsTheme.sectionPadding
 
                     StyledButton {
                         text: Translator.translate("Quit", Settings.language)
@@ -536,7 +494,9 @@ Rectangle {
         }
     }
 
+    // * Non-visual helper items
     Item {
+        visible: false
         id: autoconnect
         function auto() {
             if (connectButton.enabled === false) {
@@ -548,16 +508,18 @@ Rectangle {
     }
 
     Item {
+        visible: false
         id: changeweighttext
         function changetext() {
             if (unitSelect.currentIndex === 0)
-                weighttext.text = Translator.translate("Weight", Settings.language) + " kg"
+                weightRow.label = Translator.translate("Weight", Settings.language) + " kg"
             if (unitSelect.currentIndex === 1)
-                weighttext.text = Translator.translate("Weight", Settings.language) + " lbs"
+                weightRow.label = Translator.translate("Weight", Settings.language) + " lbs"
         }
     }
 
     Item {
+        visible: false
         id: logger
         property int loggeron: 0
         function datalogger() {
@@ -572,6 +534,7 @@ Rectangle {
     }
 
     Item {
+        visible: false
         id: functconnect
         function connectfunc() {
             Connect.setOdometer(odometer.text)
@@ -583,6 +546,7 @@ Rectangle {
     }
 
     Item {
+        visible: false
         id: functdisconnect
         function disconnectfunc() {
             Connect.closeConnection()
@@ -591,12 +555,14 @@ Rectangle {
     }
 
     Item {
+        visible: false
         id: playwarning
         function start() {
         }
     }
 
     Item {
+        visible: false
         id: functLanguageselect
         function languageselectfunct() {
             AppSettings.writeLanguage(languageselect.currentIndex)

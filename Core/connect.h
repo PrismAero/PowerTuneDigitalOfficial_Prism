@@ -65,6 +65,7 @@ class UdpTestSimulator;
 // * Overlay configuration persistence
 class OverlayConfigManager;
 class ShiftIndicatorHelper;
+class CanFrameModel;
 
 class Connect : public QObject
 {
@@ -180,6 +181,7 @@ private:
     // * Overlay configuration persistence
     OverlayConfigManager *m_overlayConfigManager;
     ShiftIndicatorHelper *m_shiftIndicatorHelper;
+    CanFrameModel *m_canFrameModel;
     BrightnessMethod m_brightnessMethod = BrightnessMethod::None;
 
 

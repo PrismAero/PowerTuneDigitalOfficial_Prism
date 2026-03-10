@@ -27,7 +27,7 @@ Item {
             anchors.topMargin: parent.height / 5
             anchors.horizontalCenter: parent.horizontalCenter
             font.bold: true
-            font.family: "Eurostile"
+            font.family: "Lato"
             color: "black"
         }
 
@@ -39,7 +39,7 @@ Item {
             anchors.topMargin: parent.height / 5
             anchors.horizontalCenter: parent.horizontalCenter
             font.bold: true
-            font.family: "Eurostile"
+            font.family: "Lato"
             color: "black"
         }
     }

@@ -13,6 +13,7 @@ Rectangle {
     anchors.fill: parent
     color: "#1a1a2e"
     id: main
+    property bool settingsLoaded: false
 
     // * Dense layout constants for 1600x684 content area
     readonly property int rowHeight: 32
@@ -88,6 +89,7 @@ Rectangle {
         preset9.currentIndex = AppSettings.getValue("ui/analogPreset9", 0)
         preset10.currentIndex = AppSettings.getValue("ui/analogPreset10", 0)
         inputs.setInputs()
+        settingsLoaded = true
     }
 
     Item {
@@ -203,7 +205,7 @@ Rectangle {
                 model: presetNames
                 onCurrentIndexChanged: {
                     if (currentIndex > 0) applyPreset(currentText, an00, an05)
-                    AppSettings.setValue("ui/analogPreset0", currentIndex)
+                    if (settingsLoaded) AppSettings.setValue("ui/analogPreset0", currentIndex)
                 }
             }
             StyledTextField {
@@ -271,7 +273,7 @@ Rectangle {
                 model: presetNames
                 onCurrentIndexChanged: {
                     if (currentIndex > 0) applyPreset(currentText, an10, an15)
-                    AppSettings.setValue("ui/analogPreset1", currentIndex)
+                    if (settingsLoaded) AppSettings.setValue("ui/analogPreset1", currentIndex)
                 }
             }
             StyledTextField {
@@ -339,7 +341,7 @@ Rectangle {
                 model: presetNames
                 onCurrentIndexChanged: {
                     if (currentIndex > 0) applyPreset(currentText, an20, an25)
-                    AppSettings.setValue("ui/analogPreset2", currentIndex)
+                    if (settingsLoaded) AppSettings.setValue("ui/analogPreset2", currentIndex)
                 }
             }
             StyledTextField {
@@ -407,7 +409,7 @@ Rectangle {
                 model: presetNames
                 onCurrentIndexChanged: {
                     if (currentIndex > 0) applyPreset(currentText, an30, an35)
-                    AppSettings.setValue("ui/analogPreset3", currentIndex)
+                    if (settingsLoaded) AppSettings.setValue("ui/analogPreset3", currentIndex)
                 }
             }
             StyledTextField {
@@ -475,7 +477,7 @@ Rectangle {
                 model: presetNames
                 onCurrentIndexChanged: {
                     if (currentIndex > 0) applyPreset(currentText, an40, an45)
-                    AppSettings.setValue("ui/analogPreset4", currentIndex)
+                    if (settingsLoaded) AppSettings.setValue("ui/analogPreset4", currentIndex)
                 }
             }
             StyledTextField {
@@ -543,7 +545,7 @@ Rectangle {
                 model: presetNames
                 onCurrentIndexChanged: {
                     if (currentIndex > 0) applyPreset(currentText, an50, an55)
-                    AppSettings.setValue("ui/analogPreset5", currentIndex)
+                    if (settingsLoaded) AppSettings.setValue("ui/analogPreset5", currentIndex)
                 }
             }
             StyledTextField {
@@ -611,7 +613,7 @@ Rectangle {
                 model: presetNames
                 onCurrentIndexChanged: {
                     if (currentIndex > 0) applyPreset(currentText, an60, an65)
-                    AppSettings.setValue("ui/analogPreset6", currentIndex)
+                    if (settingsLoaded) AppSettings.setValue("ui/analogPreset6", currentIndex)
                 }
             }
             StyledTextField {
@@ -679,7 +681,7 @@ Rectangle {
                 model: presetNames
                 onCurrentIndexChanged: {
                     if (currentIndex > 0) applyPreset(currentText, an70, an75)
-                    AppSettings.setValue("ui/analogPreset7", currentIndex)
+                    if (settingsLoaded) AppSettings.setValue("ui/analogPreset7", currentIndex)
                 }
             }
             StyledTextField {
@@ -747,7 +749,7 @@ Rectangle {
                 model: presetNames
                 onCurrentIndexChanged: {
                     if (currentIndex > 0) applyPreset(currentText, an80, an85)
-                    AppSettings.setValue("ui/analogPreset8", currentIndex)
+                    if (settingsLoaded) AppSettings.setValue("ui/analogPreset8", currentIndex)
                 }
             }
             StyledTextField {
@@ -815,7 +817,7 @@ Rectangle {
                 model: presetNames
                 onCurrentIndexChanged: {
                     if (currentIndex > 0) applyPreset(currentText, an90, an95)
-                    AppSettings.setValue("ui/analogPreset9", currentIndex)
+                    if (settingsLoaded) AppSettings.setValue("ui/analogPreset9", currentIndex)
                 }
             }
             StyledTextField {
@@ -883,7 +885,7 @@ Rectangle {
                 model: presetNames
                 onCurrentIndexChanged: {
                     if (currentIndex > 0) applyPreset(currentText, an100, an105)
-                    AppSettings.setValue("ui/analogPreset10", currentIndex)
+                    if (settingsLoaded) AppSettings.setValue("ui/analogPreset10", currentIndex)
                 }
             }
             StyledTextField {

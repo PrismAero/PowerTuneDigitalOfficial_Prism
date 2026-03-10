@@ -7,10 +7,10 @@ Button {
     property bool primary: true
     property bool danger: false
 
-    implicitWidth: contentItem.implicitWidth + 40
-    implicitHeight: Math.max(48, contentItem.implicitHeight + 20)
-    font.pixelSize: 22
-    font.family: "Lato"
+    implicitWidth: Math.max(SettingsTheme.buttonMinWidth, contentItem.implicitWidth + 40)
+    implicitHeight: Math.max(SettingsTheme.controlHeight, contentItem.implicitHeight + 20)
+    font.pixelSize: SettingsTheme.fontControl
+    font.family: SettingsTheme.fontFamily
     font.weight: Font.DemiBold
 
     contentItem: Text {
@@ -18,9 +18,9 @@ Button {
         font: root.font
         opacity: root.enabled ? 1.0 : 0.5
         color: {
-            if (root.danger) return "#FFFFFF"
-            if (root.primary) return "#FFFFFF"
-            return root.pressed ? "#FFFFFF" : "#009688"
+            if (root.danger) return SettingsTheme.textPrimary
+            if (root.primary) return SettingsTheme.textPrimary
+            return root.pressed ? SettingsTheme.textPrimary : SettingsTheme.accent
         }
         horizontalAlignment: Text.AlignHCenter
         verticalAlignment: Text.AlignVCenter
@@ -28,25 +28,25 @@ Button {
     }
 
     background: Rectangle {
-        radius: 8
+        radius: SettingsTheme.radiusSmall
         opacity: root.enabled ? 1.0 : 0.5
 
         color: {
             if (root.danger) {
-                return root.pressed ? "#C62828" : (root.hovered ? "#E53935" : "#F44336")
+                return root.pressed ? SettingsTheme.errorPressed : SettingsTheme.error
             }
             if (root.primary) {
-                return root.pressed ? "#00796B" : (root.hovered ? "#00897B" : "#009688")
+                return root.pressed ? SettingsTheme.accentPressed : SettingsTheme.accent
             }
-            return root.pressed ? "#009688" : "transparent"
+            return root.pressed ? SettingsTheme.surfacePressed : "transparent"
         }
 
         border.color: {
             if (root.danger) return "transparent"
             if (root.primary) return "transparent"
-            return root.hovered ? "#00897B" : "#009688"
+            return SettingsTheme.accent
         }
-        border.width: root.primary ? 0 : 2
+        border.width: root.primary ? 0 : SettingsTheme.borderWidth
 
         Behavior on color { ColorAnimation { duration: 100 } }
     }

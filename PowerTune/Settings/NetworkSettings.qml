@@ -6,9 +6,9 @@ import PowerTune.Settings 1.0
 import PowerTune.UI 1.0
 import PowerTune.Utils 1.0
 
-Rectangle {
+SettingsPage {
     id: root
-    color: "#1a1a2e"
+    property bool settingsLoaded: false
 
     Connections {
         target: Connection
@@ -24,87 +24,61 @@ Rectangle {
 
     Component.onCompleted: {
         wificountrycbx.currentIndex = AppSettings.getValue("ui/wifiCountryIndex", 0)
+        settingsLoaded = true
     }
 
     RowLayout {
-        anchors.fill: parent
-        anchors.margins: 16
-        spacing: 16
+        Layout.fillWidth: true
+        Layout.minimumHeight: root.height - 2 * SettingsTheme.pageMargin
+        spacing: SettingsTheme.sectionSpacing
 
         // * Settings Column (constrained width)
         ColumnLayout {
             Layout.preferredWidth: 480
             Layout.maximumWidth: 520
             Layout.fillHeight: true
-            spacing: 12
+            spacing: SettingsTheme.sectionPadding
 
             SettingsSection {
                 title: Translator.translate("WIFI Configuration", Settings.language)
                 Layout.fillWidth: true
 
-                RowLayout {
-                    spacing: 16
-                    Layout.fillWidth: true
-
-                    Text {
-                        text: Translator.translate("WIFI Country", Settings.language)
-                        font.pixelSize: 18
-                        font.family: "Lato"
-                        color: "#FFFFFF"
-                        Layout.preferredWidth: 160
-                    }
-
+                SettingsRow {
+                    label: Translator.translate("WIFI Country", Settings.language)
                     StyledComboBox {
                         id: wificountrycbx
-                        Layout.fillWidth: true
+                        width: parent.width
+                        height: parent.height
                         model: wificountrynames
                         textRole: "name"
-                        onCurrentIndexChanged: AppSettings.setValue("ui/wifiCountryIndex", currentIndex)
+                        onCurrentIndexChanged: if (settingsLoaded) AppSettings.setValue("ui/wifiCountryIndex", currentIndex)
                     }
                 }
 
-                RowLayout {
-                    spacing: 16
-                    Layout.fillWidth: true
-
-                    Text {
-                        text: Translator.translate("WIFI 1", Settings.language)
-                        font.pixelSize: 18
-                        font.family: "Lato"
-                        color: "#FFFFFF"
-                        Layout.preferredWidth: 160
-                    }
-
+                SettingsRow {
+                    label: Translator.translate("WIFI 1", Settings.language)
                     StyledComboBox {
                         id: wifilistbox
-                        Layout.fillWidth: true
+                        width: parent.width
+                        height: parent.height
                         model: Connection.wifi
                         onCountChanged: btnScanNetwork.enabled = true
                     }
                 }
 
-                RowLayout {
-                    spacing: 16
-                    Layout.fillWidth: true
-
-                    Text {
-                        text: Translator.translate("Password 1", Settings.language)
-                        font.pixelSize: 18
-                        font.family: "Lato"
-                        color: "#FFFFFF"
-                        Layout.preferredWidth: 160
-                    }
-
+                SettingsRow {
+                    label: Translator.translate("Password 1", Settings.language)
                     StyledTextField {
                         id: pw1
-                        Layout.fillWidth: true
+                        width: parent.width
+                        height: parent.height
                         placeholderText: qsTr("Passphrase")
                         echoMode: TextInput.Password
                     }
                 }
 
                 RowLayout {
-                    spacing: 12
+                    spacing: SettingsTheme.sectionPadding
 
                     StyledButton {
                         id: btnScanNetwork
@@ -135,43 +109,25 @@ Rectangle {
                 title: Translator.translate("Network Status", Settings.language)
                 Layout.fillWidth: true
 
-                RowLayout {
-                    spacing: 16
-                    Layout.fillWidth: true
-
-                    Text {
-                        text: Translator.translate("Ethernet IP Address", Settings.language)
-                        font.pixelSize: 18
-                        font.family: "Lato"
-                        color: "#FFFFFF"
-                        Layout.preferredWidth: 160
-                    }
-
+                SettingsRow {
+                    label: Translator.translate("Ethernet IP Address", Settings.language)
                     ConnectionStatusIndicator {
                         id: ethernetstatus
+                        width: parent.width
+                        height: parent.height
                         statusText: Connection.EthernetStat
                         status: Connection.EthernetStat === "NOT CONNECTED" ? "disconnected" : "connected"
-                        Layout.fillWidth: true
                     }
                 }
 
-                RowLayout {
-                    spacing: 16
-                    Layout.fillWidth: true
-
-                    Text {
-                        text: Translator.translate("WLAN IP Address", Settings.language)
-                        font.pixelSize: 18
-                        font.family: "Lato"
-                        color: "#FFFFFF"
-                        Layout.preferredWidth: 160
-                    }
-
+                SettingsRow {
+                    label: Translator.translate("WLAN IP Address", Settings.language)
                     ConnectionStatusIndicator {
                         id: wifistatus
+                        width: parent.width
+                        height: parent.height
                         statusText: Connection.WifiStat
                         status: Connection.WifiStat === "NOT CONNECTED" ? "disconnected" : "connected"
-                        Layout.fillWidth: true
                     }
                 }
             }
@@ -181,7 +137,7 @@ Rectangle {
                 Layout.fillWidth: true
 
                 RowLayout {
-                    spacing: 12
+                    spacing: SettingsTheme.sectionPadding
 
                     StyledButton {
                         id: updateBtn
@@ -214,28 +170,28 @@ Rectangle {
         Rectangle {
             Layout.fillWidth: true
             Layout.fillHeight: true
-            color: "#0A0A0A"
-            radius: 8
-            border.color: "#3D3D3D"
-            border.width: 1
+            color: SettingsTheme.consoleBg
+            radius: SettingsTheme.radiusLarge
+            border.color: SettingsTheme.border
+            border.width: SettingsTheme.borderWidth
 
             ColumnLayout {
                 anchors.fill: parent
-                anchors.margins: 12
-                spacing: 8
+                anchors.margins: SettingsTheme.sectionPadding
+                spacing: SettingsTheme.contentSpacing
 
                 Text {
                     text: "Console Output"
-                    font.pixelSize: 20
+                    font.pixelSize: SettingsTheme.fontSectionTitle
                     font.weight: Font.Bold
-                    font.family: "Lato"
-                    color: "#009688"
+                    font.family: SettingsTheme.fontFamily
+                    color: SettingsTheme.accent
                 }
 
                 Rectangle {
                     Layout.fillWidth: true
-                    height: 1
-                    color: "#3D3D3D"
+                    height: SettingsTheme.borderWidth
+                    color: SettingsTheme.border
                 }
 
                 Flickable {
@@ -250,9 +206,9 @@ Rectangle {
                         width: parent.width
                         wrapMode: TextArea.Wrap
                         readOnly: true
-                        color: "#4CAF50"
-                        font.pixelSize: 14
-                        font.family: "Courier New"
+                        color: SettingsTheme.consoleText
+                        font.pixelSize: SettingsTheme.fontCaption
+                        font.family: SettingsTheme.fontFamilyMono
                         background: Rectangle { color: "transparent" }
                     }
 

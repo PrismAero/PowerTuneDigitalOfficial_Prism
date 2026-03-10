@@ -1,6 +1,7 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
+import PowerTune.UI 1.0
 
 Rectangle {
     id: root
@@ -14,7 +15,6 @@ Rectangle {
         anchors.margins: 16
         spacing: 16
 
-        // * Header
         Rectangle {
             Layout.fillWidth: true
             Layout.preferredHeight: 60
@@ -30,20 +30,43 @@ Rectangle {
                     text: "CAN Bus Monitor"
                     font.pixelSize: 24
                     font.weight: Font.DemiBold
-                    font.family: "Lato"
+                    font.family: SettingsTheme.fontFamily
                     color: "#FFFFFF"
                 }
 
                 Item { Layout.fillWidth: true }
 
+                RowLayout {
+                    spacing: 8
+                    Text {
+                        text: "Extender Only"
+                        font.pixelSize: 16
+                        font.family: SettingsTheme.fontFamily
+                        color: CanMonitorModel.showAllFrames ? "#707070" : "#009688"
+                    }
+                    Switch {
+                        id: frameFilterSwitch
+                        checked: CanMonitorModel.showAllFrames
+                        onCheckedChanged: CanMonitorModel.showAllFrames = checked
+                    }
+                    Text {
+                        text: "All Frames"
+                        font.pixelSize: 16
+                        font.family: SettingsTheme.fontFamily
+                        color: CanMonitorModel.showAllFrames ? "#009688" : "#707070"
+                    }
+                }
+
+                Item { width: 16 }
+
                 Rectangle {
                     width: 12
                     height: 12
                     radius: 6
-                    color: listView.model.count > 0 ? "#4CAF50" : "#707070"
+                    color: CanMonitorModel.messageCount > 0 ? "#4CAF50" : "#707070"
 
                     SequentialAnimation on opacity {
-                        running: listView.model.count > 0
+                        running: CanMonitorModel.messageCount > 0
                         loops: Animation.Infinite
                         NumberAnimation { to: 0.5; duration: 500 }
                         NumberAnimation { to: 1.0; duration: 500 }
@@ -51,15 +74,14 @@ Rectangle {
                 }
 
                 Text {
-                    text: listView.model.count + " messages"
+                    text: CanMonitorModel.messageCount + " messages"
                     font.pixelSize: 18
-                    font.family: "Lato"
+                    font.family: SettingsTheme.fontFamily
                     color: "#B0B0B0"
                 }
             }
         }
 
-        // * CAN Message List Header
         Rectangle {
             Layout.fillWidth: true
             Layout.preferredHeight: 40
@@ -75,7 +97,7 @@ Rectangle {
                     text: "CAN ID"
                     font.pixelSize: 18
                     font.weight: Font.DemiBold
-                    font.family: "Lato"
+                    font.family: SettingsTheme.fontFamily
                     color: "#009688"
                     Layout.preferredWidth: 150
                 }
@@ -84,14 +106,13 @@ Rectangle {
                     text: "Payload (Hex)"
                     font.pixelSize: 18
                     font.weight: Font.DemiBold
-                    font.family: "Lato"
+                    font.family: SettingsTheme.fontFamily
                     color: "#009688"
                     Layout.fillWidth: true
                 }
             }
         }
 
-        // * CAN Message ListView
         Rectangle {
             Layout.fillWidth: true
             Layout.fillHeight: true
@@ -107,7 +128,7 @@ Rectangle {
                 clip: true
                 spacing: 2
 
-                model: ListModel {}
+                model: CanMonitorModel
 
                 delegate: Rectangle {
                     width: listView.width
@@ -120,7 +141,6 @@ Rectangle {
                         anchors.margins: 8
                         spacing: 20
 
-                        // * CAN ID with badge style
                         Rectangle {
                             width: 120
                             height: 24
@@ -132,16 +152,15 @@ Rectangle {
                                 text: model.canId
                                 font.pixelSize: 14
                                 font.weight: Font.DemiBold
-                                font.family: "Courier New"
+                                font.family: SettingsTheme.fontFamilyMono
                                 color: "#FFFFFF"
                             }
                         }
 
-                        // * Payload
                         Text {
                             text: model.payload
                             font.pixelSize: 14
-                            font.family: "Courier New"
+                            font.family: SettingsTheme.fontFamilyMono
                             color: "#FFFFFF"
                             Layout.fillWidth: true
                         }
@@ -153,41 +172,13 @@ Rectangle {
                 }
             }
 
-            // * Empty state
             Text {
                 anchors.centerIn: parent
                 text: "No CAN messages received"
                 font.pixelSize: 18
-                font.family: "Lato"
+                font.family: SettingsTheme.fontFamily
                 color: "#707070"
-                visible: listView.model.count === 0
-            }
-        }
-    }
-
-    Connections {
-        target: Connection
-        function onCanChanged() {
-            if (Connection.can.length < 2)
-                return;
-            var canId = Connection.can[0]
-            var payload = Connection.can[1]
-            if (canId === undefined || canId === null)
-                return;
-            if (payload === undefined || payload === null)
-                payload = "";
-            var itemFound = false
-
-            for (var i = 0; i < listView.model.count; ++i) {
-                if (listView.model.get(i).canId === canId) {
-                    listView.model.setProperty(i, "payload", payload)
-                    itemFound = true
-                    break
-                }
-            }
-
-            if (!itemFound) {
-                listView.model.append({ "canId": canId, "payload": payload })
+                visible: CanMonitorModel.messageCount === 0
             }
         }
     }
