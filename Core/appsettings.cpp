@@ -71,6 +71,12 @@ QVariant AppSettings::getValue(const QString &key, const QVariant &defaultValue)
     return settings.value(key, defaultValue);
 }
 
+void AppSettings::sync()
+{
+    QSettings settings(ORG_NAME, APP_NAME, this);
+    settings.sync();
+}
+
 int AppSettings::getBaudRate()
 {
     return getValue("serial/baudrate").toInt();

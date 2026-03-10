@@ -32,6 +32,7 @@
 #include "../Utils/UdpTestSimulator.h"
 #include "../Utils/OverlayConfigManager.h"
 #include "../Utils/ShiftIndicatorHelper.h"
+#include "Models/CanFrameModel.h"
 #include "Models/DataModels.h"
 #include "Models/UIState.h"
 #include "PropertyRouter.h"
@@ -40,6 +41,7 @@
 #include "dashboard.h"
 
 #include <QByteArrayMatcher>
+#include <QCoreApplication>
 #include <QDebug>
 #include <QFile>
 #include <QFileInfo>
@@ -146,6 +148,7 @@ Connect::Connect(QObject *parent)
     m_testSimulator = new UdpTestSimulator(this);
     m_overlayConfigManager = new OverlayConfigManager(this);
     m_shiftIndicatorHelper = new ShiftIndicatorHelper(this);
+    m_canFrameModel = new CanFrameModel(m_connectionData, m_extender, this);
     // m_wifiscanner = new WifScanner(this);
     // Use AppDataLocation instead of "/" to prevent QFileSystemModel from
     // indexing the entire filesystem (saves 0.5-2GB+ RAM on macOS dev builds)
@@ -200,14 +203,18 @@ Connect::Connect(QObject *parent)
     engine->rootContext()->setContextProperty("TestSim", m_testSimulator);
     engine->rootContext()->setContextProperty("OverlayConfig", m_overlayConfigManager);
     engine->rootContext()->setContextProperty("ShiftHelper", m_shiftIndicatorHelper);
+    engine->rootContext()->setContextProperty("CanMonitorModel", m_canFrameModel);
     m_appSettings->setExtender(m_extender);
     m_appSettings->setSteinhartCalculator(m_steinhartCalc);
     m_appSettings->readandApplySettings();
+    connect(qApp, &QCoreApplication::aboutToQuit, m_appSettings, &AppSettings::sync);
     // * Phase 7: Populate SensorRegistry with configured input channels
     m_sensorRegistry->refreshEcuAnalogChannels();
     m_sensorRegistry->refreshExtenderAnalogInputs();
     m_sensorRegistry->refreshExtenderDigitalInputs();
     m_sensorRegistry->refreshEcuDigitalInputs();
+
+    checkifraspberrypi();
 }
 
 
@@ -1261,6 +1268,8 @@ void Connect::shutdown()
     m_connectionData->setSerialStat("Shutting Down");
     if (m_diagnosticsProvider)
         m_diagnosticsProvider->addLogMessage(QStringLiteral("WARN"), QStringLiteral("System shutdown initiated"));
+    if (m_appSettings)
+        m_appSettings->sync();
     QProcess::startDetached(QStringLiteral("shutdown"), QStringList() << QStringLiteral("-h") << QStringLiteral("now"));
 }
 
@@ -1269,6 +1278,8 @@ void Connect::reboot()
     m_connectionData->setSerialStat("Rebooting");
     if (m_diagnosticsProvider)
         m_diagnosticsProvider->addLogMessage(QStringLiteral("INFO"), QStringLiteral("System reboot initiated"));
+    if (m_appSettings)
+        m_appSettings->sync();
     QProcess::startDetached(QStringLiteral("reboot"), QStringList());
 }
 

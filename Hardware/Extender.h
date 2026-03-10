@@ -42,7 +42,12 @@ struct ChannelCalibration {
 class Extender : public QObject
 {
     Q_OBJECT
+    Q_PROPERTY(int extenderBaseId READ extenderBaseId NOTIFY baseIdsChanged)
+    Q_PROPERTY(int rpmBaseId READ rpmBaseId NOTIFY baseIdsChanged)
 public:
+    int extenderBaseId() const { return static_cast<int>(m_canBaseAddress); }
+    int rpmBaseId() const { return static_cast<int>(m_address5 > 0 ? m_address5 - 1 : 0); }
+
     explicit Extender(QObject *parent = nullptr);
     explicit Extender(DigitalInputs *digitalInputs, ExpanderBoardData *expanderBoardData, EngineData *engineData,
                       SettingsData *settingsData, VehicleData *vehicleData, ConnectionData *connectionData,
@@ -60,6 +65,7 @@ public slots:
     Q_INVOKABLE void setChannelCalibration(int channel, qreal val0v, qreal val5v, bool ntcEnabled);
 
 signals:
+    void baseIdsChanged();
     void NewCanFrameReceived(int canId, QString payload);
     void Newtestsignal();
 

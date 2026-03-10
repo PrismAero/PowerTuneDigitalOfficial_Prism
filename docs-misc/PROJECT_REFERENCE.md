@@ -47,7 +47,7 @@ build system, deployment, file locations, and cross-check rules.
 | Qt Version (dev)    | Qt 6.x (CMake build)                                     |
 | Qt Version (device) | Qt 5.15.7 (qmake build on Yocto)                         |
 | Target Hardware     | Raspberry Pi 4 (ARMv7, 32-bit Poky/Yocto)                |
-| Display             | EGLFS (no X11), touchscreen, 800x480 or 1024x600         |
+| Display             | EGLFS (no X11), touchscreen, 1600x720                    |
 | Repository          | PowerTuneDigitalOfficial/Prism                           |
 | Git Branch Model    | main -> release/_ -> staging -> dev -> feature/_, bug/\* |
 
@@ -151,7 +151,7 @@ PowerTuneDigitalOfficial_Prism/
 |-- PowerTune/                   QML source organized by module
 |   |-- Core/                    PowerTune.Core -- main application pages
 |   |   |-- Main.qml             Root window, SwipeView, dashboard loader
-|   |   |-- SerialSettings.qml   Settings TabBar + StackLayout
+|   |   |-- SettingsManager.qml  Settings TabBar + StackLayout
 |   |   |-- ExBoardAnalog.qml    Extender board calibration page
 |   |   |-- Intro.qml            Splash/intro screen
 |   |   |-- BrightnessPopUp.qml  Brightness control popup
@@ -176,12 +176,10 @@ PowerTuneDigitalOfficial_Prism/
 |   |   |-- DashSelector.qml     Dashboard selection/management
 |   |   |-- DashSelectorWidget.qml  Dashboard dropdown widget
 |   |   |-- CanMonitor.qml       Raw CAN frame monitor
-|   |   |-- AnalogSettings.qml   Analog input calibration
 |   |   |-- HelpPage.qml         QR codes and contact info
-|   |   |-- (+ legacy stubs: StartupSettings, WarnGearSettings, SpeedSettings,
-|   |   |     RPMSettings, SenseHatSettings -- content moved elsewhere)
 |   |   |-- WifiCountryList.qml  WiFi country code list
 |   |   |-- components/          Shared styled UI primitives
+|   |       |-- SettingsTheme.qml Design token singleton (colors, fonts, spacing)
 |   |       |-- SettingsPage.qml
 |   |       |-- SettingsSection.qml
 |   |       |-- SettingsRow.qml
@@ -269,7 +267,7 @@ Seven QML modules are built as static libraries and linked to the executable:
 | Module URI              | Library Target       | Key Files                                                   |
 | ----------------------- | -------------------- | ----------------------------------------------------------- |
 | PowerTune.Utils         | PowerTuneUtilsLib    | Translator.qml (singleton), MaterialIcon.qml                |
-| PowerTune.Core          | PowerTuneCoreLib     | Main.qml, SerialSettings.qml, ExBoardAnalog.qml             |
+| PowerTune.Core          | PowerTuneCoreLib     | Main.qml, SettingsManager.qml, ExBoardAnalog.qml            |
 | PowerTune.UI            | PowerTuneUiLib       | Settings/components/\* (SettingsPage, StyledButton, etc.)   |
 | PowerTune.Settings      | PowerTuneSettingsLib | MainSettings.qml, DiagnosticsSettings.qml, DashSelector.qml |
 | PowerTune.Gauges.Shared | GaugesSharedLib      | DatasourcesList.qml, DatasourceService.qml (singleton)      |
@@ -920,7 +918,7 @@ Provides system health data to the DiagnosticsSettings.qml page:
 
 ### 16.1 Tab Layout
 
-`SerialSettings.qml` defines the settings area as a `TabBar` + `StackLayout`:
+`SettingsManager.qml` defines the settings area as a `TabBar` + `StackLayout`:
 
 | Index | Tab Name    | Component               |
 | ----- | ----------- | ----------------------- |
@@ -937,6 +935,7 @@ All settings pages use shared styled components from `Settings/components/`:
 
 | Component                 | Purpose                                 |
 | ------------------------- | --------------------------------------- |
+| SettingsTheme             | Design token singleton (colors, spacing)|
 | SettingsPage              | Page wrapper with consistent padding    |
 | SettingsSection           | Card-style section with title           |
 | SettingsRow               | Label + control row layout              |
@@ -1097,11 +1096,11 @@ making changes to avoid breaking the application.
 | -------------------------------------- | ---------------------------------------------------- |
 | A QML file name                        | `CMakeLists.txt` QML_FILES entry                     |
 | A QML file name                        | Any `Loader.source` or `Component` references        |
-| Tab order in `SerialSettings.qml`      | `StackLayout` indices match new tab order            |
+| Tab order in `SettingsManager.qml`     | `StackLayout` indices match new tab order            |
 | `StyledComboBox` model items           | All `onCurrentIndexChanged` handlers                 |
 | Dashboard page in `DashSelector.qml`   | `Main.qml` SwipeView page indices                    |
 | An `AppSettings` key name              | Existing user data under old key will be lost        |
-| `SettingsSection` or component styling | Test on target resolution (800x480 or 1024x600)      |
+| `SettingsSection` or component styling | Test on target resolution (1600x720)                  |
 
 ### 20.3 Build System Changes
 
@@ -1142,10 +1141,10 @@ making changes to avoid breaking the application.
 4. *(Resolved)* Two config file locations have been unified into a single
    `PowerTune/PowerTune.conf` via the `AppSettings` C++ class.
 
-5. **Legacy QML stubs in CMake**: Several settings pages (StartupSettings,
-   WarnGearSettings, SpeedSettings, RPMSettings, SenseHatSettings) are still
-   listed in CMakeLists.txt QML_FILES but their content has been moved to
-   other pages. They exist as stubs and should be removed eventually.
+5. *(Resolved)* Legacy QML stubs (StartupSettings, WarnGearSettings,
+   SpeedSettings, RPMSettings, SenseHatSettings, AnalogSettings) have been
+   removed from disk and CMakeLists.txt. Their content was consolidated into
+   MainSettings, VehicleRPMSettings, and ExBoardAnalog.
 
 ---
 
@@ -1179,7 +1178,7 @@ For any new developer or AI agent joining this project:
 8. **Key files to read for orientation:**
    - `Core/connect.cpp` -- how everything is wired together
    - `PowerTune/Core/Main.qml` -- the application root
-   - `PowerTune/Core/SerialSettings.qml` -- settings tab structure
+   - `PowerTune/Core/SettingsManager.qml` -- settings tab structure
    - `Core/Models/EngineData.h` -- example of the Q_PROPERTY pattern
    - `Utils/UDPReceiver.cpp` -- the data intake pipeline
    - `Hardware/Extender.cpp` -- direct CAN frame parsing

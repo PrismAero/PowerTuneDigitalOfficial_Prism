@@ -279,12 +279,6 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
             PowerTune/Settings/MainSettings.qml
             PowerTune/Settings/DashSelector.qml
             PowerTune/Settings/DashSelectorWidget.qml
-            PowerTune/Settings/SenseHatSettings.qml
-            PowerTune/Settings/WarnGearSettings.qml
-            PowerTune/Settings/SpeedSettings.qml
-            PowerTune/Settings/AnalogSettings.qml
-            PowerTune/Settings/RPMSettings.qml
-            PowerTune/Settings/StartupSettings.qml
             PowerTune/Settings/VehicleRPMSettings.qml
             PowerTune/Settings/NetworkSettings.qml
             PowerTune/Settings/CanMonitor.qml

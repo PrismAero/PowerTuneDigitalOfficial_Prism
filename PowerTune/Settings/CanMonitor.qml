@@ -14,7 +14,6 @@ Rectangle {
         anchors.margins: 16
         spacing: 16
 
-        // * Header
         Rectangle {
             Layout.fillWidth: true
             Layout.preferredHeight: 60
@@ -36,14 +35,37 @@ Rectangle {
 
                 Item { Layout.fillWidth: true }
 
+                RowLayout {
+                    spacing: 8
+                    Text {
+                        text: "Extender Only"
+                        font.pixelSize: 16
+                        font.family: "Lato"
+                        color: CanMonitorModel.showAllFrames ? "#707070" : "#009688"
+                    }
+                    Switch {
+                        id: frameFilterSwitch
+                        checked: CanMonitorModel.showAllFrames
+                        onCheckedChanged: CanMonitorModel.showAllFrames = checked
+                    }
+                    Text {
+                        text: "All Frames"
+                        font.pixelSize: 16
+                        font.family: "Lato"
+                        color: CanMonitorModel.showAllFrames ? "#009688" : "#707070"
+                    }
+                }
+
+                Item { width: 16 }
+
                 Rectangle {
                     width: 12
                     height: 12
                     radius: 6
-                    color: listView.model.count > 0 ? "#4CAF50" : "#707070"
+                    color: CanMonitorModel.messageCount > 0 ? "#4CAF50" : "#707070"
 
                     SequentialAnimation on opacity {
-                        running: listView.model.count > 0
+                        running: CanMonitorModel.messageCount > 0
                         loops: Animation.Infinite
                         NumberAnimation { to: 0.5; duration: 500 }
                         NumberAnimation { to: 1.0; duration: 500 }
@@ -51,7 +73,7 @@ Rectangle {
                 }
 
                 Text {
-                    text: listView.model.count + " messages"
+                    text: CanMonitorModel.messageCount + " messages"
                     font.pixelSize: 18
                     font.family: "Lato"
                     color: "#B0B0B0"
@@ -59,7 +81,6 @@ Rectangle {
             }
         }
 
-        // * CAN Message List Header
         Rectangle {
             Layout.fillWidth: true
             Layout.preferredHeight: 40
@@ -91,7 +112,6 @@ Rectangle {
             }
         }
 
-        // * CAN Message ListView
         Rectangle {
             Layout.fillWidth: true
             Layout.fillHeight: true
@@ -107,7 +127,7 @@ Rectangle {
                 clip: true
                 spacing: 2
 
-                model: ListModel {}
+                model: CanMonitorModel
 
                 delegate: Rectangle {
                     width: listView.width
@@ -120,7 +140,6 @@ Rectangle {
                         anchors.margins: 8
                         spacing: 20
 
-                        // * CAN ID with badge style
                         Rectangle {
                             width: 120
                             height: 24
@@ -137,7 +156,6 @@ Rectangle {
                             }
                         }
 
-                        // * Payload
                         Text {
                             text: model.payload
                             font.pixelSize: 14
@@ -153,41 +171,13 @@ Rectangle {
                 }
             }
 
-            // * Empty state
             Text {
                 anchors.centerIn: parent
                 text: "No CAN messages received"
                 font.pixelSize: 18
                 font.family: "Lato"
                 color: "#707070"
-                visible: listView.model.count === 0
-            }
-        }
-    }
-
-    Connections {
-        target: Connection
-        function onCanChanged() {
-            if (Connection.can.length < 2)
-                return;
-            var canId = Connection.can[0]
-            var payload = Connection.can[1]
-            if (canId === undefined || canId === null)
-                return;
-            if (payload === undefined || payload === null)
-                payload = "";
-            var itemFound = false
-
-            for (var i = 0; i < listView.model.count; ++i) {
-                if (listView.model.get(i).canId === canId) {
-                    listView.model.setProperty(i, "payload", payload)
-                    itemFound = true
-                    break
-                }
-            }
-
-            if (!itemFound) {
-                listView.model.append({ "canId": canId, "payload": payload })
+                visible: CanMonitorModel.messageCount === 0
             }
         }
     }
