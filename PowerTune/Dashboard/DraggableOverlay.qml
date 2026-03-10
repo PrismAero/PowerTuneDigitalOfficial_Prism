@@ -1,4 +1,5 @@
 import QtQuick
+import PowerTune.UI 1.0
 
 Item {
     id: root
@@ -51,7 +52,7 @@ Item {
         id: guideH
         visible: root._isDragging
         width: 1600; height: 1
-        color: "#40009688"
+        color: Qt.rgba(SettingsTheme.accent.r, SettingsTheme.accent.g, SettingsTheme.accent.b, 0.25)
         x: -root.x
         y: root.height / 2
         z: 200
@@ -60,7 +61,7 @@ Item {
         id: guideV
         visible: root._isDragging
         width: 1; height: 720
-        color: "#40009688"
+        color: Qt.rgba(SettingsTheme.accent.r, SettingsTheme.accent.g, SettingsTheme.accent.b, 0.25)
         x: root.width / 2
         y: -root.y
         z: 200
@@ -70,7 +71,7 @@ Item {
         id: guideCenterH
         visible: root._isDragging
         width: 1600; height: 1
-        color: "#20FFFFFF"
+        color: Qt.rgba(SettingsTheme.textPrimary.r, SettingsTheme.textPrimary.g, SettingsTheme.textPrimary.b, 0.125)
         x: -root.x
         y: 360 - root.y
         z: 199
@@ -79,7 +80,7 @@ Item {
         id: guideCenterV
         visible: root._isDragging
         width: 1; height: 720
-        color: "#20FFFFFF"
+        color: Qt.rgba(SettingsTheme.textPrimary.r, SettingsTheme.textPrimary.g, SettingsTheme.textPrimary.b, 0.125)
         x: 800 - root.x
         y: -root.y
         z: 199
@@ -89,8 +90,9 @@ Item {
     Text {
         visible: root._isDragging
         text: Math.round(root.x) + ", " + Math.round(root.y)
-        font.pixelSize: 12
-        color: "#80009688"
+        font.pixelSize: SettingsTheme.fontCaption
+        font.family: SettingsTheme.fontFamily
+        color: Qt.rgba(SettingsTheme.accent.r, SettingsTheme.accent.g, SettingsTheme.accent.b, 0.5)
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: parent.bottom
         anchors.topMargin: 4
@@ -102,7 +104,7 @@ Item {
         anchors.fill: parent
         anchors.margins: -4
         color: "transparent"
-        border.color: editMode ? "#60009688" : "transparent"
+        border.color: editMode ? Qt.rgba(SettingsTheme.accent.r, SettingsTheme.accent.g, SettingsTheme.accent.b, 0.375) : "transparent"
         border.width: editMode ? 2 : 0
         radius: 4
         visible: editMode
@@ -111,8 +113,8 @@ Item {
             id: closeBtn
             width: 28; height: 28
             radius: 14
-            color: "#CC333333"
-            border.color: "#80FFFFFF"
+            color: Qt.rgba(SettingsTheme.surface.r, SettingsTheme.surface.g, SettingsTheme.surface.b, 0.8)
+            border.color: Qt.rgba(SettingsTheme.textPrimary.r, SettingsTheme.textPrimary.g, SettingsTheme.textPrimary.b, 0.5)
             border.width: 1
             anchors.top: parent.top
             anchors.right: parent.right
@@ -120,9 +122,10 @@ Item {
 
             Text {
                 text: "X"
-                font.pixelSize: 14
+                font.pixelSize: SettingsTheme.fontCaption
                 font.weight: Font.Bold
-                color: "#FFFFFF"
+                font.family: SettingsTheme.fontFamily
+                color: SettingsTheme.textPrimary
                 anchors.centerIn: parent
             }
 
@@ -135,8 +138,8 @@ Item {
             id: configBtn
             width: 28; height: 28
             radius: 14
-            color: "#CC333333"
-            border.color: "#80009688"
+            color: Qt.rgba(SettingsTheme.surface.r, SettingsTheme.surface.g, SettingsTheme.surface.b, 0.8)
+            border.color: Qt.rgba(SettingsTheme.accent.r, SettingsTheme.accent.g, SettingsTheme.accent.b, 0.5)
             border.width: 1
             anchors.top: parent.top
             anchors.left: parent.left
@@ -145,9 +148,10 @@ Item {
 
             Text {
                 text: "C"
-                font.pixelSize: 14
+                font.pixelSize: SettingsTheme.fontCaption
                 font.weight: Font.Bold
-                color: "#009688"
+                font.family: SettingsTheme.fontFamily
+                color: SettingsTheme.accent
                 anchors.centerIn: parent
             }
 
@@ -159,7 +163,8 @@ Item {
         Text {
             text: root.overlayId
             font.pixelSize: 10
-            color: "#80FFFFFF"
+            font.family: SettingsTheme.fontFamily
+            color: Qt.rgba(SettingsTheme.textPrimary.r, SettingsTheme.textPrimary.g, SettingsTheme.textPrimary.b, 0.5)
             anchors.bottom: parent.bottom
             anchors.left: parent.left
             anchors.margins: 4
@@ -168,7 +173,8 @@ Item {
         Text {
             text: Math.round(root.x) + ", " + Math.round(root.y)
             font.pixelSize: 10
-            color: "#80FFFFFF"
+            font.family: SettingsTheme.fontFamily
+            color: Qt.rgba(SettingsTheme.textPrimary.r, SettingsTheme.textPrimary.g, SettingsTheme.textPrimary.b, 0.5)
             anchors.bottom: parent.bottom
             anchors.right: parent.right
             anchors.margins: 4

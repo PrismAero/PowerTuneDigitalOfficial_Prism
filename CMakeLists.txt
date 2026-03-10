@@ -269,6 +269,8 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
             PowerTune/Settings/components/StyledSwitch.qml
             PowerTune/Settings/components/StyledTextField.qml
             PowerTune/Settings/components/StyledCheckBox.qml
+            PowerTune/Settings/components/StyledSpinBox.qml
+            PowerTune/Settings/components/StyledColorPicker.qml
             PowerTune/Settings/components/ConnectionStatusIndicator.qml
         RESOURCE_PREFIX /qt/qml
         OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/qt/qml/PowerTune/UI
@@ -310,6 +312,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_qml_module(PrismPTDashboardLib
         URI PrismPT.Dashboard
         VERSION 1.0
+        IMPORTS PowerTuneUiLib
         QML_FILES
             PowerTune/Dashboard/DashboardTheme.qml
             PowerTune/Dashboard/UserDashboard.qml

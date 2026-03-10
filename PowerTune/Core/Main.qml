@@ -346,6 +346,7 @@ ApplicationWindow {
 
     PrismKeyboard {
         id: prismKeyboard
+        parent: Overlay.overlay
     }
 
     Connections {
