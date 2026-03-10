@@ -213,6 +213,9 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     set_source_files_properties(PowerTune/Settings/components/SettingsTheme.qml PROPERTIES
         QT_QML_SINGLETON_TYPE TRUE
     )
+    set_source_files_properties(Prism/Keyboard/KeyboardTheme.qml PROPERTIES
+        QT_QML_SINGLETON_TYPE TRUE
+    )
     
     # * Create backing library targets for QML modules
     qt_add_library(PowerTuneUtilsLib STATIC)
@@ -330,6 +333,8 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         URI Prism.Keyboard
         VERSION 1.0
         QML_FILES
+            Prism/Keyboard/KeyboardTheme.qml
+            Prism/Keyboard/KeyIcon.qml
             Prism/Keyboard/KeyButton.qml
             Prism/Keyboard/NumericPad.qml
             Prism/Keyboard/QwertyLayout.qml

@@ -9,32 +9,56 @@ Rectangle {
     property bool isAccent: false
     property bool isDestructive: false
     property real keyWidth: 1.0
-    property int keyHeight: 48
-    property int fontSize: 18
+    property int keyHeight: KeyboardTheme.controlHeight
+    property int fontSize: KeyboardTheme.fontKey
     property bool repeatEnabled: false
+
+    // Icon support: when iconName is set, a Material icon is shown instead of text
+    property string iconName: ""
+    property int iconSize: 20
 
     signal keyPressed(string value)
 
     width: keyWidth * 64  // base key width
     height: keyHeight
-    radius: 6
-    color: pressArea.pressed
-           ? (isAccent ? "#00796b" : isDestructive ? "#4a1a1a" : "#2a4a7e")
-           : (isAccent ? "#009688" : isDestructive ? "#5c2a2a" : "#16213e")
-    border.width: 1
-    border.color: "#2a3a5e"
+    radius: KeyboardTheme.radiusSmall
+    color: {
+        if (pressArea.pressed) {
+            if (isAccent) return KeyboardTheme.accentPressed
+            if (isDestructive) return KeyboardTheme.errorPressed
+            return KeyboardTheme.surfacePressed
+        }
+        if (isAccent) return KeyboardTheme.accent
+        if (isDestructive) return KeyboardTheme.error
+        return KeyboardTheme.controlBg
+    }
+    border.width: KeyboardTheme.borderWidth
+    border.color: KeyboardTheme.border
 
-    Behavior on color { ColorAnimation { duration: 80 } }
+    Behavior on color { ColorAnimation { duration: KeyboardTheme.colorAnimationDuration } }
 
-    scale: pressArea.pressed ? 0.95 : 1.0
-    Behavior on scale { NumberAnimation { duration: 60 } }
+    scale: pressArea.pressed ? KeyboardTheme.pressScale : 1.0
+    Behavior on scale { NumberAnimation { duration: KeyboardTheme.scaleAnimationDuration } }
 
+    // Text label (visible when no icon is set)
     Text {
         anchors.centerIn: parent
+        visible: root.iconName === ""
         text: root.text
-        color: pressArea.pressed || root.isAccent ? "#ffffff" : "#e0e0e0"
+        color: pressArea.pressed || root.isAccent || root.isDestructive
+               ? "#ffffff" : KeyboardTheme.textPrimary
         font.pixelSize: root.fontSize
-        font.family: "Lato"
+        font.family: KeyboardTheme.fontFamily
+    }
+
+    // Material icon (visible when iconName is set)
+    KeyIcon {
+        anchors.centerIn: parent
+        visible: root.iconName !== ""
+        icon: root.iconName
+        iconSize: root.iconSize
+        iconColor: pressArea.pressed || root.isAccent || root.isDestructive
+                   ? "#ffffff" : KeyboardTheme.textPrimary
     }
 
     MouseArea {

@@ -28,46 +28,49 @@ Item {
     // Height depends on layout
     height: currentLayout === "numeric" ? numericHeight : qwertyHeight
 
-    property int numericHeight: Math.min(parent ? parent.height * 0.35 : 240, 240)
-    property int qwertyHeight: Math.min(parent ? parent.height * 0.45 : 300, 300)
+    property int numericHeight: Math.min(parent ? parent.height * 0.40 : 280, 280)
+    property int qwertyHeight: Math.min(parent ? parent.height * 0.48 : 340, 340)
 
     visible: false
     y: parent ? parent.height : 0  // start off-screen
     z: 9999
 
+    // Clip to prevent child elements from rendering outside keyboard bounds
+    clip: true
+
     // Background
     Rectangle {
         id: backgroundRect
         anchors.fill: parent
-        color: "#1a1a2e"
-        border.width: keyboard.docked ? 1 : 2
-        border.color: keyboard.docked ? "#2a2a4e" : "#2a3a5e"
-        radius: keyboard.docked ? 0 : 12
+        color: KeyboardTheme.surfaceElevated
+        border.width: keyboard.docked ? KeyboardTheme.borderWidth : 2
+        border.color: KeyboardTheme.borderStrong
+        radius: keyboard.docked ? 0 : KeyboardTheme.radiusLarge
 
         // Top accent border line (teal separator)
         Rectangle {
             anchors.top: parent.top
             anchors.left: parent.left
             anchors.right: parent.right
-            anchors.topMargin: keyboard.docked ? 0 : 12
-            anchors.leftMargin: keyboard.docked ? 0 : 1
-            anchors.rightMargin: keyboard.docked ? 0 : 1
-            height: 1
-            color: "#009688"
+            anchors.topMargin: keyboard.docked ? 0 : KeyboardTheme.radiusLarge
+            anchors.leftMargin: keyboard.docked ? 0 : 2
+            anchors.rightMargin: keyboard.docked ? 0 : 2
+            height: 2
+            color: KeyboardTheme.accent
             z: 1
         }
 
-        // Top edge gradient shadow
+        // Top edge gradient glow below accent line
         Rectangle {
             anchors.top: parent.top
             anchors.left: parent.left
             anchors.right: parent.right
-            anchors.topMargin: keyboard.docked ? 1 : 13
-            anchors.leftMargin: keyboard.docked ? 0 : 1
-            anchors.rightMargin: keyboard.docked ? 0 : 1
-            height: 4
+            anchors.topMargin: keyboard.docked ? 2 : KeyboardTheme.radiusLarge + 2
+            anchors.leftMargin: keyboard.docked ? 0 : 2
+            anchors.rightMargin: keyboard.docked ? 0 : 2
+            height: 6
             gradient: Gradient {
-                GradientStop { position: 0.0; color: "#20009688" }
+                GradientStop { position: 0.0; color: "#30009688" }
                 GradientStop { position: 1.0; color: "#00009688" }
             }
             z: 1
@@ -79,10 +82,9 @@ Item {
             anchors.top: parent.top
             anchors.left: parent.left
             anchors.right: parent.right
-            anchors.topMargin: keyboard.docked ? 1 : 13
-            height: 32
-            color: "#0f0f23"
-            radius: keyboard.docked ? 0 : 0
+            anchors.topMargin: keyboard.docked ? 1 : KeyboardTheme.radiusLarge + 1
+            height: KeyboardTheme.previewBarHeight
+            color: KeyboardTheme.previewBg
 
             // Drag handle indicator (only in popout mode)
             Rectangle {
@@ -92,7 +94,7 @@ Item {
                 width: 40
                 height: 4
                 radius: 2
-                color: "#3a3a5e"
+                color: KeyboardTheme.border
                 visible: !keyboard.docked
             }
 
@@ -108,9 +110,9 @@ Item {
                     if (label !== "") return label + ": " + value
                     return value
                 }
-                color: "#009688"
-                font.pixelSize: 16
-                font.family: "Lato"
+                color: KeyboardTheme.accent
+                font.pixelSize: KeyboardTheme.fontPreview
+                font.family: KeyboardTheme.fontFamily
                 elide: Text.ElideLeft
                 horizontalAlignment: Text.AlignHCenter
             }
@@ -123,17 +125,16 @@ Item {
                 anchors.rightMargin: 6
                 width: 28
                 height: 22
-                radius: 4
-                color: popoutArea.pressed ? "#2a4a7e" : "#16213e"
-                border.width: 1
-                border.color: "#2a3a5e"
+                radius: KeyboardTheme.radiusSmall - 2
+                color: popoutArea.pressed ? KeyboardTheme.surfacePressed : KeyboardTheme.surfaceElevated
+                border.width: KeyboardTheme.borderWidth
+                border.color: KeyboardTheme.border
 
-                Text {
+                KeyIcon {
                     anchors.centerIn: parent
-                    text: keyboard.docked ? "[^]" : "[v]"
-                    color: "#e0e0e0"
-                    font.pixelSize: 11
-                    font.family: "Lato"
+                    icon: keyboard.docked ? "open_in_full" : "close_fullscreen"
+                    iconSize: 14
+                    iconColor: KeyboardTheme.textSecondary
                 }
 
                 MouseArea {
@@ -175,7 +176,10 @@ Item {
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.bottom: parent.bottom
-            anchors.margins: 4
+            anchors.topMargin: 6
+            anchors.leftMargin: 10
+            anchors.rightMargin: 10
+            anchors.bottomMargin: 8
 
             NumericPad {
                 id: numPad
