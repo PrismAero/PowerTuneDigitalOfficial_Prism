@@ -6,9 +6,9 @@ import PowerTune.Settings 1.0
 import PowerTune.UI 1.0
 import PowerTune.Utils 1.0
 
-Rectangle {
+SettingsPage {
     id: dashselector
-    color: "#1a1a2e"
+    property bool settingsLoaded: false
 
     function getDashByIndex(index) {
         switch (index) {
@@ -68,92 +68,81 @@ Rectangle {
             if (dash4.currentIndex >= 0)
                 fourthPageLoader.source = getDashByIndex(dash4.currentIndex);
         }
+        settingsLoaded = true
     }
 
-    ColumnLayout {
-        anchors.fill: parent
-        anchors.margins: 16
-        spacing: 16
+    Item {
+        Layout.fillHeight: true
+    }
 
-        Item {
-            Layout.fillHeight: true
-        }
+    // * Active Dashboards Section
+    SettingsSection {
+        title: Translator.translate("ActiveDashboards", Settings.language)
+        Layout.fillWidth: true
+        Layout.maximumWidth: 800
+        Layout.alignment: Qt.AlignHCenter
 
-        // * Active Dashboards Section
-        SettingsSection {
-            title: Translator.translate("ActiveDashboards", Settings.language)
-            Layout.fillWidth: true
-            Layout.maximumWidth: 800
-            Layout.alignment: Qt.AlignHCenter
+        SettingsRow {
+            label: Translator.translate("ActiveDashboards", Settings.language)
 
-            RowLayout {
-                spacing: 16
-
-                Text {
-                    text: Translator.translate("ActiveDashboards", Settings.language)
-                    font.pixelSize: 18
-                    font.family: "Lato"
-                    color: "#FFFFFF"
-                    Layout.preferredWidth: 200
-                }
-
-                StyledComboBox {
-                    id: numberofdashes
-                    model: ["1", "2", "3", "4"]
-                    currentIndex: -1
-                    onCurrentIndexChanged: {
-                        adremove();
+            StyledComboBox {
+                id: numberofdashes
+                model: ["1", "2", "3", "4"]
+                currentIndex: -1
+                onCurrentIndexChanged: {
+                    adremove();
+                    if (settingsLoaded) {
                         AppSettings.writeSelectedDashSettings(numberofdashes.currentIndex + 1);
                         AppSettings.setValue("ui/dashCount", currentIndex);
                     }
                 }
             }
         }
+    }
 
-        // * Dashboard Selection Section
-        SettingsSection {
-            title: "Dashboard Selection"
+    // * Dashboard Selection Section
+    SettingsSection {
+        title: "Dashboard Selection"
+        Layout.fillWidth: true
+        Layout.maximumWidth: 800
+        Layout.alignment: Qt.AlignHCenter
+
+        RowLayout {
+            spacing: SettingsTheme.controlGap
             Layout.fillWidth: true
-            Layout.maximumWidth: 800
-            Layout.alignment: Qt.AlignHCenter
 
-            RowLayout {
-                spacing: 16
-                Layout.fillWidth: true
+            DashSelectorWidget {
+                id: dash1
+                index: 1
+                linkedLoader: firstPageLoader
+                onCurrentIndexChanged: if (settingsLoaded) AppSettings.setValue("ui/dashSelect1", currentIndex)
+            }
 
-                DashSelectorWidget {
-                    id: dash1
-                    index: 1
-                    linkedLoader: firstPageLoader
-                    onCurrentIndexChanged: AppSettings.setValue("ui/dashSelect1", currentIndex)
-                }
+            DashSelectorWidget {
+                id: dash2
+                index: 2
+                linkedLoader: secondPageLoader
+                onCurrentIndexChanged: if (settingsLoaded) AppSettings.setValue("ui/dashSelect2", currentIndex)
+            }
 
-                DashSelectorWidget {
-                    id: dash2
-                    index: 2
-                    linkedLoader: secondPageLoader
-                    onCurrentIndexChanged: AppSettings.setValue("ui/dashSelect2", currentIndex)
-                }
+            DashSelectorWidget {
+                id: dash3
+                index: 3
+                linkedLoader: thirdPageLoader
+                onCurrentIndexChanged: if (settingsLoaded) AppSettings.setValue("ui/dashSelect3", currentIndex)
+            }
 
-                DashSelectorWidget {
-                    id: dash3
-                    index: 3
-                    linkedLoader: thirdPageLoader
-                    onCurrentIndexChanged: AppSettings.setValue("ui/dashSelect3", currentIndex)
-                }
-
-                DashSelectorWidget {
-                    id: dash4
-                    index: 4
-                    linkedLoader: fourthPageLoader
-                    Component.onCompleted: tabView.currentIndex = 0
-                    onCurrentIndexChanged: AppSettings.setValue("ui/dashSelect4", currentIndex)
-                }
+            DashSelectorWidget {
+                id: dash4
+                index: 4
+                linkedLoader: fourthPageLoader
+                Component.onCompleted: tabView.currentIndex = 0
+                onCurrentIndexChanged: if (settingsLoaded) AppSettings.setValue("ui/dashSelect4", currentIndex)
             }
         }
+    }
 
-        Item {
-            Layout.fillHeight: true
-        }
+    Item {
+        Layout.fillHeight: true
     }
 }

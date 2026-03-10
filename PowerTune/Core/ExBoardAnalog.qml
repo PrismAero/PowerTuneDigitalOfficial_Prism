@@ -1,6 +1,6 @@
 // Copyright (c) PowerTune Digital, Kai Wyborny. All rights reserved.
 // ExBoardAnalog.qml - EX Board analog input calibration with NTC + linear presets
-// Layout: ScrollView with SettingsSection cards
+// Layout: SettingsPage with SettingsSection cards
 
 import QtQuick 2.15
 import QtQuick.Controls 2.15
@@ -9,16 +9,13 @@ import PowerTune.Utils 1.0
 import PowerTune.Settings 1.0
 import PowerTune.UI 1.0
 
-Rectangle {
+SettingsPage {
     id: mainWindow
-    color: "#1a1a2e"
     property double rpmfrequencydivider
 
     property int digiValue
     property string digiStringValue
     property int maxBrightnessOnBoot
-
-    readonly property int contentMargin: 16
 
     readonly property int chanColW: 70
     readonly property int linPresetColW: 145
@@ -206,6 +203,7 @@ Rectangle {
 
     Item {
         id: inputs
+        visible: false
         function setInputs() {
             AppSettings.writeExternalrpm(rpmsourceselector.currentIndex > 0);
             AppSettings.writeEXAN7dampingSettings(an7dampingfactor.text);
@@ -253,858 +251,819 @@ Rectangle {
 
     Item {
         id: cylindercalcrpmdi1
+        visible: false
         function cylindercalcrpmdi1() {
             rpmfrequencydivider = Calibration.frequencyDividerForCylinders(cylindercomboboxDi1.currentIndex);
             inputs.setInputs();
         }
     }
 
-    // =========================================================================
-    // MAIN LAYOUT: ScrollView > ColumnLayout with SettingsSection cards
-    // =========================================================================
-    ScrollView {
-        id: scrollView
-        anchors.fill: parent
-        anchors.margins: contentMargin
-        contentWidth: availableWidth
-        clip: true
+    // =============================================================
+    // SECTION 1: Linear Calibration (with live data columns)
+    // =============================================================
+    SettingsSection {
+        title: "Linear Calibration"
+        Layout.fillWidth: true
 
         ColumnLayout {
-            width: scrollView.availableWidth
-            spacing: 16
+            Layout.fillWidth: true
+            spacing: SettingsTheme.contentSpacing
 
-            // =============================================================
-            // SECTION 1: Linear Calibration (with live data columns)
-            // =============================================================
-            SettingsSection {
-                title: "Linear Calibration"
+            RowLayout {
                 Layout.fillWidth: true
+                Layout.preferredHeight: 28
+                Layout.leftMargin: SettingsTheme.sectionPadding
+                Layout.rightMargin: SettingsTheme.sectionPadding
+                spacing: 4
+                Text { text: "Channel"; font.pixelSize: SettingsTheme.fontStatus; font.bold: true; font.family: SettingsTheme.fontFamily; color: SettingsTheme.textSecondary; Layout.preferredWidth: chanColW }
+                Text { text: "Preset"; font.pixelSize: SettingsTheme.fontStatus; font.bold: true; font.family: SettingsTheme.fontFamily; color: SettingsTheme.textSecondary; Layout.preferredWidth: linPresetColW }
+                Text { text: "Val 0V"; font.pixelSize: SettingsTheme.fontStatus; font.bold: true; font.family: SettingsTheme.fontFamily; color: SettingsTheme.textSecondary; Layout.preferredWidth: val0vColW }
+                Text { text: "Val 5V"; font.pixelSize: SettingsTheme.fontStatus; font.bold: true; font.family: SettingsTheme.fontFamily; color: SettingsTheme.textSecondary; Layout.preferredWidth: val5vColW }
+                Text { text: "Unit"; font.pixelSize: SettingsTheme.fontStatus; font.bold: true; font.family: SettingsTheme.fontFamily; color: SettingsTheme.textSecondary; Layout.preferredWidth: unitColW }
+                Text { text: "Min V"; font.pixelSize: SettingsTheme.fontStatus; font.bold: true; font.family: SettingsTheme.fontFamily; color: SettingsTheme.textSecondary; Layout.preferredWidth: vRangeColW }
+                Text { text: "Max V"; font.pixelSize: SettingsTheme.fontStatus; font.bold: true; font.family: SettingsTheme.fontFamily; color: SettingsTheme.textSecondary; Layout.preferredWidth: vRangeColW }
+                Text { text: "Live V"; font.pixelSize: SettingsTheme.fontStatus; font.bold: true; font.family: SettingsTheme.fontFamily; color: SettingsTheme.textSecondary; Layout.preferredWidth: liveVColW }
+                Text { text: "Calibrated"; font.pixelSize: SettingsTheme.fontStatus; font.bold: true; font.family: SettingsTheme.fontFamily; color: SettingsTheme.textSecondary; Layout.preferredWidth: calibColW }
+                Text { text: ""; font.pixelSize: SettingsTheme.fontStatus; font.bold: true; font.family: SettingsTheme.fontFamily; color: SettingsTheme.textSecondary; Layout.preferredWidth: statusColW }
+            }
 
-                ColumnLayout {
-                    Layout.fillWidth: true
-                    spacing: 6
+            // EX AN 0
+            RowLayout {
+                Layout.fillWidth: true; Layout.preferredHeight: SettingsTheme.controlHeight + 2; spacing: 4
+                Layout.leftMargin: SettingsTheme.sectionPadding; Layout.rightMargin: SettingsTheme.sectionPadding
+                Text { text: "EX AN 0"; font.pixelSize: SettingsTheme.fontStatus; font.family: SettingsTheme.fontFamily; color: SettingsTheme.textPrimary; Layout.preferredWidth: chanColW; verticalAlignment: Text.AlignVCenter }
+                StyledComboBox {
+                    id: linPreset0
+                    model: linearPresetNames
+                    Layout.preferredWidth: linPresetColW; Layout.preferredHeight: SettingsTheme.controlHeight
+                    font.pixelSize: SettingsTheme.fontStatus
+                    onActivated: applyLinearPreset(currentText, ex00, ex05)
+                }
+                StyledTextField {
+                    id: ex00; text: "0"; Layout.preferredWidth: val0vColW; Layout.preferredHeight: SettingsTheme.controlHeight
+                    font.pixelSize: SettingsTheme.fontStatus; inputMethodHints: Qt.ImhFormattedNumbersOnly
+                    enabled: !checkan0ntc.checked; onEditingFinished: inputs.setInputs()
+                }
+                StyledTextField {
+                    id: ex05; text: "5"; Layout.preferredWidth: val5vColW; Layout.preferredHeight: SettingsTheme.controlHeight
+                    font.pixelSize: SettingsTheme.fontStatus; inputMethodHints: Qt.ImhFormattedNumbersOnly
+                    enabled: !checkan0ntc.checked; onEditingFinished: inputs.setInputs()
+                }
+                Text { text: getLinearUnit(linPreset0.currentText); font.pixelSize: SettingsTheme.fontStatus; font.family: SettingsTheme.fontFamily; color: SettingsTheme.textSecondary; Layout.preferredWidth: unitColW; verticalAlignment: Text.AlignVCenter }
+                Text { text: linPreset0.currentIndex > 0 ? Calibration.getPresetMinVoltage(linPreset0.currentText).toFixed(1) : ""; font.pixelSize: SettingsTheme.fontStatus; font.family: SettingsTheme.fontFamily; color: SettingsTheme.textPlaceholder; Layout.preferredWidth: vRangeColW; verticalAlignment: Text.AlignVCenter }
+                Text { text: linPreset0.currentIndex > 0 ? Calibration.getPresetMaxVoltage(linPreset0.currentText).toFixed(1) : ""; font.pixelSize: SettingsTheme.fontStatus; font.family: SettingsTheme.fontFamily; color: SettingsTheme.textPlaceholder; Layout.preferredWidth: vRangeColW; verticalAlignment: Text.AlignVCenter }
+                Text { text: (Expander ? Expander.EXAnalogInput0 : 0).toFixed(3); font.pixelSize: SettingsTheme.fontStatus; font.family: SettingsTheme.fontFamily; color: (Expander ? Expander.EXAnalogInput0 : 0) > 0.001 ? SettingsTheme.success : SettingsTheme.textDisabled; Layout.preferredWidth: liveVColW; verticalAlignment: Text.AlignVCenter }
+                Text { text: checkan0ntc.checked ? "NTC" : (parseFloat(ex00.text) + ((Expander ? Expander.EXAnalogInput0 : 0) / 5.0) * (parseFloat(ex05.text) - parseFloat(ex00.text))).toFixed(2); font.pixelSize: SettingsTheme.fontStatus; font.family: SettingsTheme.fontFamily; color: SettingsTheme.textPrimary; Layout.preferredWidth: calibColW; verticalAlignment: Text.AlignVCenter }
+                Item { Layout.preferredWidth: statusColW; Layout.preferredHeight: SettingsTheme.controlHeight; Rectangle { anchors.centerIn: parent; width: SettingsTheme.statusDotSize; height: SettingsTheme.statusDotSize; radius: SettingsTheme.statusDotSize / 2; color: (Expander ? Expander.EXAnalogInput0 : 0) > 0.001 ? SettingsTheme.success : SettingsTheme.textDisabled } }
+            }
 
-                    RowLayout {
-                        Layout.fillWidth: true
-                        Layout.preferredHeight: 28
-                        Layout.leftMargin: 12
-                        Layout.rightMargin: 12
-                        spacing: 4
-                        Text { text: "Channel"; font.pixelSize: 15; font.bold: true; color: "#a0a0a0"; Layout.preferredWidth: chanColW }
-                        Text { text: "Preset"; font.pixelSize: 15; font.bold: true; color: "#a0a0a0"; Layout.preferredWidth: linPresetColW }
-                        Text { text: "Val 0V"; font.pixelSize: 15; font.bold: true; color: "#a0a0a0"; Layout.preferredWidth: val0vColW }
-                        Text { text: "Val 5V"; font.pixelSize: 15; font.bold: true; color: "#a0a0a0"; Layout.preferredWidth: val5vColW }
-                        Text { text: "Unit"; font.pixelSize: 15; font.bold: true; color: "#a0a0a0"; Layout.preferredWidth: unitColW }
-                        Text { text: "Min V"; font.pixelSize: 15; font.bold: true; color: "#a0a0a0"; Layout.preferredWidth: vRangeColW }
-                        Text { text: "Max V"; font.pixelSize: 15; font.bold: true; color: "#a0a0a0"; Layout.preferredWidth: vRangeColW }
-                        Text { text: "Live V"; font.pixelSize: 15; font.bold: true; color: "#a0a0a0"; Layout.preferredWidth: liveVColW }
-                        Text { text: "Calibrated"; font.pixelSize: 15; font.bold: true; color: "#a0a0a0"; Layout.preferredWidth: calibColW }
-                        Text { text: ""; font.pixelSize: 15; font.bold: true; color: "#a0a0a0"; Layout.preferredWidth: statusColW }
-                    }
+            // EX AN 1
+            RowLayout {
+                Layout.fillWidth: true; Layout.preferredHeight: SettingsTheme.controlHeight + 2; spacing: 4
+                Layout.leftMargin: SettingsTheme.sectionPadding; Layout.rightMargin: SettingsTheme.sectionPadding
+                Text { text: "EX AN 1"; font.pixelSize: SettingsTheme.fontStatus; font.family: SettingsTheme.fontFamily; color: SettingsTheme.textPrimary; Layout.preferredWidth: chanColW; verticalAlignment: Text.AlignVCenter }
+                StyledComboBox {
+                    id: linPreset1
+                    model: linearPresetNames
+                    Layout.preferredWidth: linPresetColW; Layout.preferredHeight: SettingsTheme.controlHeight
+                    font.pixelSize: SettingsTheme.fontStatus
+                    onActivated: applyLinearPreset(currentText, ex10, ex15)
+                }
+                StyledTextField {
+                    id: ex10; text: "0"; Layout.preferredWidth: val0vColW; Layout.preferredHeight: SettingsTheme.controlHeight
+                    font.pixelSize: SettingsTheme.fontStatus; inputMethodHints: Qt.ImhFormattedNumbersOnly
+                    enabled: !checkan1ntc.checked; onEditingFinished: inputs.setInputs()
+                }
+                StyledTextField {
+                    id: ex15; text: "5"; Layout.preferredWidth: val5vColW; Layout.preferredHeight: SettingsTheme.controlHeight
+                    font.pixelSize: SettingsTheme.fontStatus; inputMethodHints: Qt.ImhFormattedNumbersOnly
+                    enabled: !checkan1ntc.checked; onEditingFinished: inputs.setInputs()
+                }
+                Text { text: getLinearUnit(linPreset1.currentText); font.pixelSize: SettingsTheme.fontStatus; font.family: SettingsTheme.fontFamily; color: SettingsTheme.textSecondary; Layout.preferredWidth: unitColW; verticalAlignment: Text.AlignVCenter }
+                Text { text: linPreset1.currentIndex > 0 ? Calibration.getPresetMinVoltage(linPreset1.currentText).toFixed(1) : ""; font.pixelSize: SettingsTheme.fontStatus; font.family: SettingsTheme.fontFamily; color: SettingsTheme.textPlaceholder; Layout.preferredWidth: vRangeColW; verticalAlignment: Text.AlignVCenter }
+                Text { text: linPreset1.currentIndex > 0 ? Calibration.getPresetMaxVoltage(linPreset1.currentText).toFixed(1) : ""; font.pixelSize: SettingsTheme.fontStatus; font.family: SettingsTheme.fontFamily; color: SettingsTheme.textPlaceholder; Layout.preferredWidth: vRangeColW; verticalAlignment: Text.AlignVCenter }
+                Text { text: (Expander ? Expander.EXAnalogInput1 : 0).toFixed(3); font.pixelSize: SettingsTheme.fontStatus; font.family: SettingsTheme.fontFamily; color: (Expander ? Expander.EXAnalogInput1 : 0) > 0.001 ? SettingsTheme.success : SettingsTheme.textDisabled; Layout.preferredWidth: liveVColW; verticalAlignment: Text.AlignVCenter }
+                Text { text: checkan1ntc.checked ? "NTC" : (parseFloat(ex10.text) + ((Expander ? Expander.EXAnalogInput1 : 0) / 5.0) * (parseFloat(ex15.text) - parseFloat(ex10.text))).toFixed(2); font.pixelSize: SettingsTheme.fontStatus; font.family: SettingsTheme.fontFamily; color: SettingsTheme.textPrimary; Layout.preferredWidth: calibColW; verticalAlignment: Text.AlignVCenter }
+                Item { Layout.preferredWidth: statusColW; Layout.preferredHeight: SettingsTheme.controlHeight; Rectangle { anchors.centerIn: parent; width: SettingsTheme.statusDotSize; height: SettingsTheme.statusDotSize; radius: SettingsTheme.statusDotSize / 2; color: (Expander ? Expander.EXAnalogInput1 : 0) > 0.001 ? SettingsTheme.success : SettingsTheme.textDisabled } }
+            }
 
-                    // EX AN 0
-                    RowLayout {
-                        Layout.fillWidth: true; Layout.preferredHeight: 38; spacing: 4
-                        Layout.leftMargin: 12; Layout.rightMargin: 12
-                        Text { text: "EX AN 0"; font.pixelSize: 15; color: "#FFFFFF"; Layout.preferredWidth: chanColW; verticalAlignment: Text.AlignVCenter }
-                        StyledComboBox {
-                            id: linPreset0
-                            model: linearPresetNames
-                            Layout.preferredWidth: linPresetColW; Layout.preferredHeight: 36
-                            font.pixelSize: 15
-                            onActivated: applyLinearPreset(currentText, ex00, ex05)
-                        }
-                        StyledTextField {
-                            id: ex00; text: "0"; Layout.preferredWidth: val0vColW; Layout.preferredHeight: 36
-                            font.pixelSize: 15; inputMethodHints: Qt.ImhFormattedNumbersOnly
-                            enabled: !checkan0ntc.checked; onEditingFinished: inputs.setInputs()
-                        }
-                        StyledTextField {
-                            id: ex05; text: "5"; Layout.preferredWidth: val5vColW; Layout.preferredHeight: 36
-                            font.pixelSize: 15; inputMethodHints: Qt.ImhFormattedNumbersOnly
-                            enabled: !checkan0ntc.checked; onEditingFinished: inputs.setInputs()
-                        }
-                        Text { text: getLinearUnit(linPreset0.currentText); font.pixelSize: 15; color: "#a0a0a0"; Layout.preferredWidth: unitColW; verticalAlignment: Text.AlignVCenter }
-                        Text { text: linPreset0.currentIndex > 0 ? Calibration.getPresetMinVoltage(linPreset0.currentText).toFixed(1) : ""; font.pixelSize: 15; color: "#808080"; Layout.preferredWidth: vRangeColW; verticalAlignment: Text.AlignVCenter }
-                        Text { text: linPreset0.currentIndex > 0 ? Calibration.getPresetMaxVoltage(linPreset0.currentText).toFixed(1) : ""; font.pixelSize: 15; color: "#808080"; Layout.preferredWidth: vRangeColW; verticalAlignment: Text.AlignVCenter }
-                        Text { text: (Expander ? Expander.EXAnalogInput0 : 0).toFixed(3); font.pixelSize: 15; color: (Expander ? Expander.EXAnalogInput0 : 0) > 0.001 ? "#4CAF50" : "#606060"; Layout.preferredWidth: liveVColW; verticalAlignment: Text.AlignVCenter }
-                        Text { text: checkan0ntc.checked ? "NTC" : (parseFloat(ex00.text) + ((Expander ? Expander.EXAnalogInput0 : 0) / 5.0) * (parseFloat(ex05.text) - parseFloat(ex00.text))).toFixed(2); font.pixelSize: 15; color: "#e0e0e0"; Layout.preferredWidth: calibColW; verticalAlignment: Text.AlignVCenter }
-                        Item { Layout.preferredWidth: statusColW; Layout.preferredHeight: 36; Rectangle { anchors.centerIn: parent; width: 10; height: 10; radius: 5; color: (Expander ? Expander.EXAnalogInput0 : 0) > 0.001 ? "#4CAF50" : "#555555" } }
-                    }
+            // EX AN 2
+            RowLayout {
+                Layout.fillWidth: true; Layout.preferredHeight: SettingsTheme.controlHeight + 2; spacing: 4
+                Layout.leftMargin: SettingsTheme.sectionPadding; Layout.rightMargin: SettingsTheme.sectionPadding
+                Text { text: "EX AN 2"; font.pixelSize: SettingsTheme.fontStatus; font.family: SettingsTheme.fontFamily; color: SettingsTheme.textPrimary; Layout.preferredWidth: chanColW; verticalAlignment: Text.AlignVCenter }
+                StyledComboBox {
+                    id: linPreset2
+                    model: linearPresetNames
+                    Layout.preferredWidth: linPresetColW; Layout.preferredHeight: SettingsTheme.controlHeight
+                    font.pixelSize: SettingsTheme.fontStatus
+                    onActivated: applyLinearPreset(currentText, ex20, ex25)
+                }
+                StyledTextField {
+                    id: ex20; text: "0"; Layout.preferredWidth: val0vColW; Layout.preferredHeight: SettingsTheme.controlHeight
+                    font.pixelSize: SettingsTheme.fontStatus; inputMethodHints: Qt.ImhFormattedNumbersOnly
+                    enabled: !checkan2ntc.checked; onEditingFinished: inputs.setInputs()
+                }
+                StyledTextField {
+                    id: ex25; text: "5"; Layout.preferredWidth: val5vColW; Layout.preferredHeight: SettingsTheme.controlHeight
+                    font.pixelSize: SettingsTheme.fontStatus; inputMethodHints: Qt.ImhFormattedNumbersOnly
+                    enabled: !checkan2ntc.checked; onEditingFinished: inputs.setInputs()
+                }
+                Text { text: getLinearUnit(linPreset2.currentText); font.pixelSize: SettingsTheme.fontStatus; font.family: SettingsTheme.fontFamily; color: SettingsTheme.textSecondary; Layout.preferredWidth: unitColW; verticalAlignment: Text.AlignVCenter }
+                Text { text: linPreset2.currentIndex > 0 ? Calibration.getPresetMinVoltage(linPreset2.currentText).toFixed(1) : ""; font.pixelSize: SettingsTheme.fontStatus; font.family: SettingsTheme.fontFamily; color: SettingsTheme.textPlaceholder; Layout.preferredWidth: vRangeColW; verticalAlignment: Text.AlignVCenter }
+                Text { text: linPreset2.currentIndex > 0 ? Calibration.getPresetMaxVoltage(linPreset2.currentText).toFixed(1) : ""; font.pixelSize: SettingsTheme.fontStatus; font.family: SettingsTheme.fontFamily; color: SettingsTheme.textPlaceholder; Layout.preferredWidth: vRangeColW; verticalAlignment: Text.AlignVCenter }
+                Text { text: (Expander ? Expander.EXAnalogInput2 : 0).toFixed(3); font.pixelSize: SettingsTheme.fontStatus; font.family: SettingsTheme.fontFamily; color: (Expander ? Expander.EXAnalogInput2 : 0) > 0.001 ? SettingsTheme.success : SettingsTheme.textDisabled; Layout.preferredWidth: liveVColW; verticalAlignment: Text.AlignVCenter }
+                Text { text: checkan2ntc.checked ? "NTC" : (parseFloat(ex20.text) + ((Expander ? Expander.EXAnalogInput2 : 0) / 5.0) * (parseFloat(ex25.text) - parseFloat(ex20.text))).toFixed(2); font.pixelSize: SettingsTheme.fontStatus; font.family: SettingsTheme.fontFamily; color: SettingsTheme.textPrimary; Layout.preferredWidth: calibColW; verticalAlignment: Text.AlignVCenter }
+                Item { Layout.preferredWidth: statusColW; Layout.preferredHeight: SettingsTheme.controlHeight; Rectangle { anchors.centerIn: parent; width: SettingsTheme.statusDotSize; height: SettingsTheme.statusDotSize; radius: SettingsTheme.statusDotSize / 2; color: (Expander ? Expander.EXAnalogInput2 : 0) > 0.001 ? SettingsTheme.success : SettingsTheme.textDisabled } }
+            }
 
-                    // EX AN 1
-                    RowLayout {
-                        Layout.fillWidth: true; Layout.preferredHeight: 38; spacing: 4
-                        Layout.leftMargin: 12; Layout.rightMargin: 12
-                        Text { text: "EX AN 1"; font.pixelSize: 15; color: "#FFFFFF"; Layout.preferredWidth: chanColW; verticalAlignment: Text.AlignVCenter }
-                        StyledComboBox {
-                            id: linPreset1
-                            model: linearPresetNames
-                            Layout.preferredWidth: linPresetColW; Layout.preferredHeight: 36
-                            font.pixelSize: 15
-                            onActivated: applyLinearPreset(currentText, ex10, ex15)
-                        }
-                        StyledTextField {
-                            id: ex10; text: "0"; Layout.preferredWidth: val0vColW; Layout.preferredHeight: 36
-                            font.pixelSize: 15; inputMethodHints: Qt.ImhFormattedNumbersOnly
-                            enabled: !checkan1ntc.checked; onEditingFinished: inputs.setInputs()
-                        }
-                        StyledTextField {
-                            id: ex15; text: "5"; Layout.preferredWidth: val5vColW; Layout.preferredHeight: 36
-                            font.pixelSize: 15; inputMethodHints: Qt.ImhFormattedNumbersOnly
-                            enabled: !checkan1ntc.checked; onEditingFinished: inputs.setInputs()
-                        }
-                        Text { text: getLinearUnit(linPreset1.currentText); font.pixelSize: 15; color: "#a0a0a0"; Layout.preferredWidth: unitColW; verticalAlignment: Text.AlignVCenter }
-                        Text { text: linPreset1.currentIndex > 0 ? Calibration.getPresetMinVoltage(linPreset1.currentText).toFixed(1) : ""; font.pixelSize: 15; color: "#808080"; Layout.preferredWidth: vRangeColW; verticalAlignment: Text.AlignVCenter }
-                        Text { text: linPreset1.currentIndex > 0 ? Calibration.getPresetMaxVoltage(linPreset1.currentText).toFixed(1) : ""; font.pixelSize: 15; color: "#808080"; Layout.preferredWidth: vRangeColW; verticalAlignment: Text.AlignVCenter }
-                        Text { text: (Expander ? Expander.EXAnalogInput1 : 0).toFixed(3); font.pixelSize: 15; color: (Expander ? Expander.EXAnalogInput1 : 0) > 0.001 ? "#4CAF50" : "#606060"; Layout.preferredWidth: liveVColW; verticalAlignment: Text.AlignVCenter }
-                        Text { text: checkan1ntc.checked ? "NTC" : (parseFloat(ex10.text) + ((Expander ? Expander.EXAnalogInput1 : 0) / 5.0) * (parseFloat(ex15.text) - parseFloat(ex10.text))).toFixed(2); font.pixelSize: 15; color: "#e0e0e0"; Layout.preferredWidth: calibColW; verticalAlignment: Text.AlignVCenter }
-                        Item { Layout.preferredWidth: statusColW; Layout.preferredHeight: 36; Rectangle { anchors.centerIn: parent; width: 10; height: 10; radius: 5; color: (Expander ? Expander.EXAnalogInput1 : 0) > 0.001 ? "#4CAF50" : "#555555" } }
-                    }
+            // EX AN 3
+            RowLayout {
+                Layout.fillWidth: true; Layout.preferredHeight: SettingsTheme.controlHeight + 2; spacing: 4
+                Layout.leftMargin: SettingsTheme.sectionPadding; Layout.rightMargin: SettingsTheme.sectionPadding
+                Text { text: "EX AN 3"; font.pixelSize: SettingsTheme.fontStatus; font.family: SettingsTheme.fontFamily; color: SettingsTheme.textPrimary; Layout.preferredWidth: chanColW; verticalAlignment: Text.AlignVCenter }
+                StyledComboBox {
+                    id: linPreset3
+                    model: linearPresetNames
+                    Layout.preferredWidth: linPresetColW; Layout.preferredHeight: SettingsTheme.controlHeight
+                    font.pixelSize: SettingsTheme.fontStatus
+                    onActivated: applyLinearPreset(currentText, ex30, ex35)
+                }
+                StyledTextField {
+                    id: ex30; text: "0"; Layout.preferredWidth: val0vColW; Layout.preferredHeight: SettingsTheme.controlHeight
+                    font.pixelSize: SettingsTheme.fontStatus; inputMethodHints: Qt.ImhFormattedNumbersOnly
+                    enabled: !checkan3ntc.checked; onEditingFinished: inputs.setInputs()
+                }
+                StyledTextField {
+                    id: ex35; text: "5"; Layout.preferredWidth: val5vColW; Layout.preferredHeight: SettingsTheme.controlHeight
+                    font.pixelSize: SettingsTheme.fontStatus; inputMethodHints: Qt.ImhFormattedNumbersOnly
+                    enabled: !checkan3ntc.checked; onEditingFinished: inputs.setInputs()
+                }
+                Text { text: getLinearUnit(linPreset3.currentText); font.pixelSize: SettingsTheme.fontStatus; font.family: SettingsTheme.fontFamily; color: SettingsTheme.textSecondary; Layout.preferredWidth: unitColW; verticalAlignment: Text.AlignVCenter }
+                Text { text: linPreset3.currentIndex > 0 ? Calibration.getPresetMinVoltage(linPreset3.currentText).toFixed(1) : ""; font.pixelSize: SettingsTheme.fontStatus; font.family: SettingsTheme.fontFamily; color: SettingsTheme.textPlaceholder; Layout.preferredWidth: vRangeColW; verticalAlignment: Text.AlignVCenter }
+                Text { text: linPreset3.currentIndex > 0 ? Calibration.getPresetMaxVoltage(linPreset3.currentText).toFixed(1) : ""; font.pixelSize: SettingsTheme.fontStatus; font.family: SettingsTheme.fontFamily; color: SettingsTheme.textPlaceholder; Layout.preferredWidth: vRangeColW; verticalAlignment: Text.AlignVCenter }
+                Text { text: (Expander ? Expander.EXAnalogInput3 : 0).toFixed(3); font.pixelSize: SettingsTheme.fontStatus; font.family: SettingsTheme.fontFamily; color: (Expander ? Expander.EXAnalogInput3 : 0) > 0.001 ? SettingsTheme.success : SettingsTheme.textDisabled; Layout.preferredWidth: liveVColW; verticalAlignment: Text.AlignVCenter }
+                Text { text: checkan3ntc.checked ? "NTC" : (parseFloat(ex30.text) + ((Expander ? Expander.EXAnalogInput3 : 0) / 5.0) * (parseFloat(ex35.text) - parseFloat(ex30.text))).toFixed(2); font.pixelSize: SettingsTheme.fontStatus; font.family: SettingsTheme.fontFamily; color: SettingsTheme.textPrimary; Layout.preferredWidth: calibColW; verticalAlignment: Text.AlignVCenter }
+                Item { Layout.preferredWidth: statusColW; Layout.preferredHeight: SettingsTheme.controlHeight; Rectangle { anchors.centerIn: parent; width: SettingsTheme.statusDotSize; height: SettingsTheme.statusDotSize; radius: SettingsTheme.statusDotSize / 2; color: (Expander ? Expander.EXAnalogInput3 : 0) > 0.001 ? SettingsTheme.success : SettingsTheme.textDisabled } }
+            }
 
-                    // EX AN 2
-                    RowLayout {
-                        Layout.fillWidth: true; Layout.preferredHeight: 38; spacing: 4
-                        Layout.leftMargin: 12; Layout.rightMargin: 12
-                        Text { text: "EX AN 2"; font.pixelSize: 15; color: "#FFFFFF"; Layout.preferredWidth: chanColW; verticalAlignment: Text.AlignVCenter }
-                        StyledComboBox {
-                            id: linPreset2
-                            model: linearPresetNames
-                            Layout.preferredWidth: linPresetColW; Layout.preferredHeight: 36
-                            font.pixelSize: 15
-                            onActivated: applyLinearPreset(currentText, ex20, ex25)
-                        }
-                        StyledTextField {
-                            id: ex20; text: "0"; Layout.preferredWidth: val0vColW; Layout.preferredHeight: 36
-                            font.pixelSize: 15; inputMethodHints: Qt.ImhFormattedNumbersOnly
-                            enabled: !checkan2ntc.checked; onEditingFinished: inputs.setInputs()
-                        }
-                        StyledTextField {
-                            id: ex25; text: "5"; Layout.preferredWidth: val5vColW; Layout.preferredHeight: 36
-                            font.pixelSize: 15; inputMethodHints: Qt.ImhFormattedNumbersOnly
-                            enabled: !checkan2ntc.checked; onEditingFinished: inputs.setInputs()
-                        }
-                        Text { text: getLinearUnit(linPreset2.currentText); font.pixelSize: 15; color: "#a0a0a0"; Layout.preferredWidth: unitColW; verticalAlignment: Text.AlignVCenter }
-                        Text { text: linPreset2.currentIndex > 0 ? Calibration.getPresetMinVoltage(linPreset2.currentText).toFixed(1) : ""; font.pixelSize: 15; color: "#808080"; Layout.preferredWidth: vRangeColW; verticalAlignment: Text.AlignVCenter }
-                        Text { text: linPreset2.currentIndex > 0 ? Calibration.getPresetMaxVoltage(linPreset2.currentText).toFixed(1) : ""; font.pixelSize: 15; color: "#808080"; Layout.preferredWidth: vRangeColW; verticalAlignment: Text.AlignVCenter }
-                        Text { text: (Expander ? Expander.EXAnalogInput2 : 0).toFixed(3); font.pixelSize: 15; color: (Expander ? Expander.EXAnalogInput2 : 0) > 0.001 ? "#4CAF50" : "#606060"; Layout.preferredWidth: liveVColW; verticalAlignment: Text.AlignVCenter }
-                        Text { text: checkan2ntc.checked ? "NTC" : (parseFloat(ex20.text) + ((Expander ? Expander.EXAnalogInput2 : 0) / 5.0) * (parseFloat(ex25.text) - parseFloat(ex20.text))).toFixed(2); font.pixelSize: 15; color: "#e0e0e0"; Layout.preferredWidth: calibColW; verticalAlignment: Text.AlignVCenter }
-                        Item { Layout.preferredWidth: statusColW; Layout.preferredHeight: 36; Rectangle { anchors.centerIn: parent; width: 10; height: 10; radius: 5; color: (Expander ? Expander.EXAnalogInput2 : 0) > 0.001 ? "#4CAF50" : "#555555" } }
-                    }
+            // EX AN 4
+            RowLayout {
+                Layout.fillWidth: true; Layout.preferredHeight: SettingsTheme.controlHeight + 2; spacing: 4
+                Layout.leftMargin: SettingsTheme.sectionPadding; Layout.rightMargin: SettingsTheme.sectionPadding
+                Text { text: "EX AN 4"; font.pixelSize: SettingsTheme.fontStatus; font.family: SettingsTheme.fontFamily; color: SettingsTheme.textPrimary; Layout.preferredWidth: chanColW; verticalAlignment: Text.AlignVCenter }
+                StyledComboBox {
+                    id: linPreset4
+                    model: linearPresetNames
+                    Layout.preferredWidth: linPresetColW; Layout.preferredHeight: SettingsTheme.controlHeight
+                    font.pixelSize: SettingsTheme.fontStatus
+                    onActivated: applyLinearPreset(currentText, ex40, ex45)
+                }
+                StyledTextField {
+                    id: ex40; text: "0"; Layout.preferredWidth: val0vColW; Layout.preferredHeight: SettingsTheme.controlHeight
+                    font.pixelSize: SettingsTheme.fontStatus; inputMethodHints: Qt.ImhFormattedNumbersOnly
+                    enabled: !checkan4ntc.checked; onEditingFinished: inputs.setInputs()
+                }
+                StyledTextField {
+                    id: ex45; text: "5"; Layout.preferredWidth: val5vColW; Layout.preferredHeight: SettingsTheme.controlHeight
+                    font.pixelSize: SettingsTheme.fontStatus; inputMethodHints: Qt.ImhFormattedNumbersOnly
+                    enabled: !checkan4ntc.checked; onEditingFinished: inputs.setInputs()
+                }
+                Text { text: getLinearUnit(linPreset4.currentText); font.pixelSize: SettingsTheme.fontStatus; font.family: SettingsTheme.fontFamily; color: SettingsTheme.textSecondary; Layout.preferredWidth: unitColW; verticalAlignment: Text.AlignVCenter }
+                Text { text: linPreset4.currentIndex > 0 ? Calibration.getPresetMinVoltage(linPreset4.currentText).toFixed(1) : ""; font.pixelSize: SettingsTheme.fontStatus; font.family: SettingsTheme.fontFamily; color: SettingsTheme.textPlaceholder; Layout.preferredWidth: vRangeColW; verticalAlignment: Text.AlignVCenter }
+                Text { text: linPreset4.currentIndex > 0 ? Calibration.getPresetMaxVoltage(linPreset4.currentText).toFixed(1) : ""; font.pixelSize: SettingsTheme.fontStatus; font.family: SettingsTheme.fontFamily; color: SettingsTheme.textPlaceholder; Layout.preferredWidth: vRangeColW; verticalAlignment: Text.AlignVCenter }
+                Text { text: (Expander ? Expander.EXAnalogInput4 : 0).toFixed(3); font.pixelSize: SettingsTheme.fontStatus; font.family: SettingsTheme.fontFamily; color: (Expander ? Expander.EXAnalogInput4 : 0) > 0.001 ? SettingsTheme.success : SettingsTheme.textDisabled; Layout.preferredWidth: liveVColW; verticalAlignment: Text.AlignVCenter }
+                Text { text: checkan4ntc.checked ? "NTC" : (parseFloat(ex40.text) + ((Expander ? Expander.EXAnalogInput4 : 0) / 5.0) * (parseFloat(ex45.text) - parseFloat(ex40.text))).toFixed(2); font.pixelSize: SettingsTheme.fontStatus; font.family: SettingsTheme.fontFamily; color: SettingsTheme.textPrimary; Layout.preferredWidth: calibColW; verticalAlignment: Text.AlignVCenter }
+                Item { Layout.preferredWidth: statusColW; Layout.preferredHeight: SettingsTheme.controlHeight; Rectangle { anchors.centerIn: parent; width: SettingsTheme.statusDotSize; height: SettingsTheme.statusDotSize; radius: SettingsTheme.statusDotSize / 2; color: (Expander ? Expander.EXAnalogInput4 : 0) > 0.001 ? SettingsTheme.success : SettingsTheme.textDisabled } }
+            }
 
-                    // EX AN 3
-                    RowLayout {
-                        Layout.fillWidth: true; Layout.preferredHeight: 38; spacing: 4
-                        Layout.leftMargin: 12; Layout.rightMargin: 12
-                        Text { text: "EX AN 3"; font.pixelSize: 15; color: "#FFFFFF"; Layout.preferredWidth: chanColW; verticalAlignment: Text.AlignVCenter }
-                        StyledComboBox {
-                            id: linPreset3
-                            model: linearPresetNames
-                            Layout.preferredWidth: linPresetColW; Layout.preferredHeight: 36
-                            font.pixelSize: 15
-                            onActivated: applyLinearPreset(currentText, ex30, ex35)
-                        }
-                        StyledTextField {
-                            id: ex30; text: "0"; Layout.preferredWidth: val0vColW; Layout.preferredHeight: 36
-                            font.pixelSize: 15; inputMethodHints: Qt.ImhFormattedNumbersOnly
-                            enabled: !checkan3ntc.checked; onEditingFinished: inputs.setInputs()
-                        }
-                        StyledTextField {
-                            id: ex35; text: "5"; Layout.preferredWidth: val5vColW; Layout.preferredHeight: 36
-                            font.pixelSize: 15; inputMethodHints: Qt.ImhFormattedNumbersOnly
-                            enabled: !checkan3ntc.checked; onEditingFinished: inputs.setInputs()
-                        }
-                        Text { text: getLinearUnit(linPreset3.currentText); font.pixelSize: 15; color: "#a0a0a0"; Layout.preferredWidth: unitColW; verticalAlignment: Text.AlignVCenter }
-                        Text { text: linPreset3.currentIndex > 0 ? Calibration.getPresetMinVoltage(linPreset3.currentText).toFixed(1) : ""; font.pixelSize: 15; color: "#808080"; Layout.preferredWidth: vRangeColW; verticalAlignment: Text.AlignVCenter }
-                        Text { text: linPreset3.currentIndex > 0 ? Calibration.getPresetMaxVoltage(linPreset3.currentText).toFixed(1) : ""; font.pixelSize: 15; color: "#808080"; Layout.preferredWidth: vRangeColW; verticalAlignment: Text.AlignVCenter }
-                        Text { text: (Expander ? Expander.EXAnalogInput3 : 0).toFixed(3); font.pixelSize: 15; color: (Expander ? Expander.EXAnalogInput3 : 0) > 0.001 ? "#4CAF50" : "#606060"; Layout.preferredWidth: liveVColW; verticalAlignment: Text.AlignVCenter }
-                        Text { text: checkan3ntc.checked ? "NTC" : (parseFloat(ex30.text) + ((Expander ? Expander.EXAnalogInput3 : 0) / 5.0) * (parseFloat(ex35.text) - parseFloat(ex30.text))).toFixed(2); font.pixelSize: 15; color: "#e0e0e0"; Layout.preferredWidth: calibColW; verticalAlignment: Text.AlignVCenter }
-                        Item { Layout.preferredWidth: statusColW; Layout.preferredHeight: 36; Rectangle { anchors.centerIn: parent; width: 10; height: 10; radius: 5; color: (Expander ? Expander.EXAnalogInput3 : 0) > 0.001 ? "#4CAF50" : "#555555" } }
-                    }
+            // EX AN 5
+            RowLayout {
+                Layout.fillWidth: true; Layout.preferredHeight: SettingsTheme.controlHeight + 2; spacing: 4
+                Layout.leftMargin: SettingsTheme.sectionPadding; Layout.rightMargin: SettingsTheme.sectionPadding
+                Text { text: "EX AN 5"; font.pixelSize: SettingsTheme.fontStatus; font.family: SettingsTheme.fontFamily; color: SettingsTheme.textPrimary; Layout.preferredWidth: chanColW; verticalAlignment: Text.AlignVCenter }
+                StyledComboBox {
+                    id: linPreset5
+                    model: linearPresetNames
+                    Layout.preferredWidth: linPresetColW; Layout.preferredHeight: SettingsTheme.controlHeight
+                    font.pixelSize: SettingsTheme.fontStatus
+                    onActivated: applyLinearPreset(currentText, ex50, ex55)
+                }
+                StyledTextField {
+                    id: ex50; text: "0"; Layout.preferredWidth: val0vColW; Layout.preferredHeight: SettingsTheme.controlHeight
+                    font.pixelSize: SettingsTheme.fontStatus; inputMethodHints: Qt.ImhFormattedNumbersOnly
+                    enabled: !checkan5ntc.checked; onEditingFinished: inputs.setInputs()
+                }
+                StyledTextField {
+                    id: ex55; text: "5"; Layout.preferredWidth: val5vColW; Layout.preferredHeight: SettingsTheme.controlHeight
+                    font.pixelSize: SettingsTheme.fontStatus; inputMethodHints: Qt.ImhFormattedNumbersOnly
+                    enabled: !checkan5ntc.checked; onEditingFinished: inputs.setInputs()
+                }
+                Text { text: getLinearUnit(linPreset5.currentText); font.pixelSize: SettingsTheme.fontStatus; font.family: SettingsTheme.fontFamily; color: SettingsTheme.textSecondary; Layout.preferredWidth: unitColW; verticalAlignment: Text.AlignVCenter }
+                Text { text: linPreset5.currentIndex > 0 ? Calibration.getPresetMinVoltage(linPreset5.currentText).toFixed(1) : ""; font.pixelSize: SettingsTheme.fontStatus; font.family: SettingsTheme.fontFamily; color: SettingsTheme.textPlaceholder; Layout.preferredWidth: vRangeColW; verticalAlignment: Text.AlignVCenter }
+                Text { text: linPreset5.currentIndex > 0 ? Calibration.getPresetMaxVoltage(linPreset5.currentText).toFixed(1) : ""; font.pixelSize: SettingsTheme.fontStatus; font.family: SettingsTheme.fontFamily; color: SettingsTheme.textPlaceholder; Layout.preferredWidth: vRangeColW; verticalAlignment: Text.AlignVCenter }
+                Text { text: (Expander ? Expander.EXAnalogInput5 : 0).toFixed(3); font.pixelSize: SettingsTheme.fontStatus; font.family: SettingsTheme.fontFamily; color: (Expander ? Expander.EXAnalogInput5 : 0) > 0.001 ? SettingsTheme.success : SettingsTheme.textDisabled; Layout.preferredWidth: liveVColW; verticalAlignment: Text.AlignVCenter }
+                Text { text: checkan5ntc.checked ? "NTC" : (parseFloat(ex50.text) + ((Expander ? Expander.EXAnalogInput5 : 0) / 5.0) * (parseFloat(ex55.text) - parseFloat(ex50.text))).toFixed(2); font.pixelSize: SettingsTheme.fontStatus; font.family: SettingsTheme.fontFamily; color: SettingsTheme.textPrimary; Layout.preferredWidth: calibColW; verticalAlignment: Text.AlignVCenter }
+                Item { Layout.preferredWidth: statusColW; Layout.preferredHeight: SettingsTheme.controlHeight; Rectangle { anchors.centerIn: parent; width: SettingsTheme.statusDotSize; height: SettingsTheme.statusDotSize; radius: SettingsTheme.statusDotSize / 2; color: (Expander ? Expander.EXAnalogInput5 : 0) > 0.001 ? SettingsTheme.success : SettingsTheme.textDisabled } }
+            }
 
-                    // EX AN 4
-                    RowLayout {
-                        Layout.fillWidth: true; Layout.preferredHeight: 38; spacing: 4
-                        Layout.leftMargin: 12; Layout.rightMargin: 12
-                        Text { text: "EX AN 4"; font.pixelSize: 15; color: "#FFFFFF"; Layout.preferredWidth: chanColW; verticalAlignment: Text.AlignVCenter }
-                        StyledComboBox {
-                            id: linPreset4
-                            model: linearPresetNames
-                            Layout.preferredWidth: linPresetColW; Layout.preferredHeight: 36
-                            font.pixelSize: 15
-                            onActivated: applyLinearPreset(currentText, ex40, ex45)
-                        }
-                        StyledTextField {
-                            id: ex40; text: "0"; Layout.preferredWidth: val0vColW; Layout.preferredHeight: 36
-                            font.pixelSize: 15; inputMethodHints: Qt.ImhFormattedNumbersOnly
-                            enabled: !checkan4ntc.checked; onEditingFinished: inputs.setInputs()
-                        }
-                        StyledTextField {
-                            id: ex45; text: "5"; Layout.preferredWidth: val5vColW; Layout.preferredHeight: 36
-                            font.pixelSize: 15; inputMethodHints: Qt.ImhFormattedNumbersOnly
-                            enabled: !checkan4ntc.checked; onEditingFinished: inputs.setInputs()
-                        }
-                        Text { text: getLinearUnit(linPreset4.currentText); font.pixelSize: 15; color: "#a0a0a0"; Layout.preferredWidth: unitColW; verticalAlignment: Text.AlignVCenter }
-                        Text { text: linPreset4.currentIndex > 0 ? Calibration.getPresetMinVoltage(linPreset4.currentText).toFixed(1) : ""; font.pixelSize: 15; color: "#808080"; Layout.preferredWidth: vRangeColW; verticalAlignment: Text.AlignVCenter }
-                        Text { text: linPreset4.currentIndex > 0 ? Calibration.getPresetMaxVoltage(linPreset4.currentText).toFixed(1) : ""; font.pixelSize: 15; color: "#808080"; Layout.preferredWidth: vRangeColW; verticalAlignment: Text.AlignVCenter }
-                        Text { text: (Expander ? Expander.EXAnalogInput4 : 0).toFixed(3); font.pixelSize: 15; color: (Expander ? Expander.EXAnalogInput4 : 0) > 0.001 ? "#4CAF50" : "#606060"; Layout.preferredWidth: liveVColW; verticalAlignment: Text.AlignVCenter }
-                        Text { text: checkan4ntc.checked ? "NTC" : (parseFloat(ex40.text) + ((Expander ? Expander.EXAnalogInput4 : 0) / 5.0) * (parseFloat(ex45.text) - parseFloat(ex40.text))).toFixed(2); font.pixelSize: 15; color: "#e0e0e0"; Layout.preferredWidth: calibColW; verticalAlignment: Text.AlignVCenter }
-                        Item { Layout.preferredWidth: statusColW; Layout.preferredHeight: 36; Rectangle { anchors.centerIn: parent; width: 10; height: 10; radius: 5; color: (Expander ? Expander.EXAnalogInput4 : 0) > 0.001 ? "#4CAF50" : "#555555" } }
-                    }
+            // EX AN 6 (no NTC)
+            RowLayout {
+                Layout.fillWidth: true; Layout.preferredHeight: SettingsTheme.controlHeight + 2; spacing: 4
+                Layout.leftMargin: SettingsTheme.sectionPadding; Layout.rightMargin: SettingsTheme.sectionPadding
+                Text { text: "EX AN 6"; font.pixelSize: SettingsTheme.fontStatus; font.family: SettingsTheme.fontFamily; color: SettingsTheme.textPrimary; Layout.preferredWidth: chanColW; verticalAlignment: Text.AlignVCenter }
+                StyledComboBox {
+                    id: linPreset6
+                    model: linearPresetNames
+                    Layout.preferredWidth: linPresetColW; Layout.preferredHeight: SettingsTheme.controlHeight
+                    font.pixelSize: SettingsTheme.fontStatus
+                    onActivated: applyLinearPreset(currentText, ex60, ex65)
+                }
+                StyledTextField {
+                    id: ex60; text: "0"; Layout.preferredWidth: val0vColW; Layout.preferredHeight: SettingsTheme.controlHeight
+                    font.pixelSize: SettingsTheme.fontStatus; inputMethodHints: Qt.ImhFormattedNumbersOnly
+                    onEditingFinished: inputs.setInputs()
+                }
+                StyledTextField {
+                    id: ex65; text: "5"; Layout.preferredWidth: val5vColW; Layout.preferredHeight: SettingsTheme.controlHeight
+                    font.pixelSize: SettingsTheme.fontStatus; inputMethodHints: Qt.ImhFormattedNumbersOnly
+                    onEditingFinished: inputs.setInputs()
+                }
+                Text { text: getLinearUnit(linPreset6.currentText); font.pixelSize: SettingsTheme.fontStatus; font.family: SettingsTheme.fontFamily; color: SettingsTheme.textSecondary; Layout.preferredWidth: unitColW; verticalAlignment: Text.AlignVCenter }
+                Text { text: linPreset6.currentIndex > 0 ? Calibration.getPresetMinVoltage(linPreset6.currentText).toFixed(1) : ""; font.pixelSize: SettingsTheme.fontStatus; font.family: SettingsTheme.fontFamily; color: SettingsTheme.textPlaceholder; Layout.preferredWidth: vRangeColW; verticalAlignment: Text.AlignVCenter }
+                Text { text: linPreset6.currentIndex > 0 ? Calibration.getPresetMaxVoltage(linPreset6.currentText).toFixed(1) : ""; font.pixelSize: SettingsTheme.fontStatus; font.family: SettingsTheme.fontFamily; color: SettingsTheme.textPlaceholder; Layout.preferredWidth: vRangeColW; verticalAlignment: Text.AlignVCenter }
+                Text { text: (Expander ? Expander.EXAnalogInput6 : 0).toFixed(3); font.pixelSize: SettingsTheme.fontStatus; font.family: SettingsTheme.fontFamily; color: (Expander ? Expander.EXAnalogInput6 : 0) > 0.001 ? SettingsTheme.success : SettingsTheme.textDisabled; Layout.preferredWidth: liveVColW; verticalAlignment: Text.AlignVCenter }
+                Text { text: (parseFloat(ex60.text) + ((Expander ? Expander.EXAnalogInput6 : 0) / 5.0) * (parseFloat(ex65.text) - parseFloat(ex60.text))).toFixed(2); font.pixelSize: SettingsTheme.fontStatus; font.family: SettingsTheme.fontFamily; color: SettingsTheme.textPrimary; Layout.preferredWidth: calibColW; verticalAlignment: Text.AlignVCenter }
+                Item { Layout.preferredWidth: statusColW; Layout.preferredHeight: SettingsTheme.controlHeight; Rectangle { anchors.centerIn: parent; width: SettingsTheme.statusDotSize; height: SettingsTheme.statusDotSize; radius: SettingsTheme.statusDotSize / 2; color: (Expander ? Expander.EXAnalogInput6 : 0) > 0.001 ? SettingsTheme.success : SettingsTheme.textDisabled } }
+            }
 
-                    // EX AN 5
-                    RowLayout {
-                        Layout.fillWidth: true; Layout.preferredHeight: 38; spacing: 4
-                        Layout.leftMargin: 12; Layout.rightMargin: 12
-                        Text { text: "EX AN 5"; font.pixelSize: 15; color: "#FFFFFF"; Layout.preferredWidth: chanColW; verticalAlignment: Text.AlignVCenter }
-                        StyledComboBox {
-                            id: linPreset5
-                            model: linearPresetNames
-                            Layout.preferredWidth: linPresetColW; Layout.preferredHeight: 36
-                            font.pixelSize: 15
-                            onActivated: applyLinearPreset(currentText, ex50, ex55)
-                        }
-                        StyledTextField {
-                            id: ex50; text: "0"; Layout.preferredWidth: val0vColW; Layout.preferredHeight: 36
-                            font.pixelSize: 15; inputMethodHints: Qt.ImhFormattedNumbersOnly
-                            enabled: !checkan5ntc.checked; onEditingFinished: inputs.setInputs()
-                        }
-                        StyledTextField {
-                            id: ex55; text: "5"; Layout.preferredWidth: val5vColW; Layout.preferredHeight: 36
-                            font.pixelSize: 15; inputMethodHints: Qt.ImhFormattedNumbersOnly
-                            enabled: !checkan5ntc.checked; onEditingFinished: inputs.setInputs()
-                        }
-                        Text { text: getLinearUnit(linPreset5.currentText); font.pixelSize: 15; color: "#a0a0a0"; Layout.preferredWidth: unitColW; verticalAlignment: Text.AlignVCenter }
-                        Text { text: linPreset5.currentIndex > 0 ? Calibration.getPresetMinVoltage(linPreset5.currentText).toFixed(1) : ""; font.pixelSize: 15; color: "#808080"; Layout.preferredWidth: vRangeColW; verticalAlignment: Text.AlignVCenter }
-                        Text { text: linPreset5.currentIndex > 0 ? Calibration.getPresetMaxVoltage(linPreset5.currentText).toFixed(1) : ""; font.pixelSize: 15; color: "#808080"; Layout.preferredWidth: vRangeColW; verticalAlignment: Text.AlignVCenter }
-                        Text { text: (Expander ? Expander.EXAnalogInput5 : 0).toFixed(3); font.pixelSize: 15; color: (Expander ? Expander.EXAnalogInput5 : 0) > 0.001 ? "#4CAF50" : "#606060"; Layout.preferredWidth: liveVColW; verticalAlignment: Text.AlignVCenter }
-                        Text { text: checkan5ntc.checked ? "NTC" : (parseFloat(ex50.text) + ((Expander ? Expander.EXAnalogInput5 : 0) / 5.0) * (parseFloat(ex55.text) - parseFloat(ex50.text))).toFixed(2); font.pixelSize: 15; color: "#e0e0e0"; Layout.preferredWidth: calibColW; verticalAlignment: Text.AlignVCenter }
-                        Item { Layout.preferredWidth: statusColW; Layout.preferredHeight: 36; Rectangle { anchors.centerIn: parent; width: 10; height: 10; radius: 5; color: (Expander ? Expander.EXAnalogInput5 : 0) > 0.001 ? "#4CAF50" : "#555555" } }
-                    }
+            // EX AN 7 (no NTC)
+            RowLayout {
+                Layout.fillWidth: true; Layout.preferredHeight: SettingsTheme.controlHeight + 2; spacing: 4
+                Layout.leftMargin: SettingsTheme.sectionPadding; Layout.rightMargin: SettingsTheme.sectionPadding
+                Text { text: "EX AN 7"; font.pixelSize: SettingsTheme.fontStatus; font.family: SettingsTheme.fontFamily; color: SettingsTheme.textPrimary; Layout.preferredWidth: chanColW; verticalAlignment: Text.AlignVCenter }
+                StyledComboBox {
+                    id: linPreset7
+                    model: linearPresetNames
+                    Layout.preferredWidth: linPresetColW; Layout.preferredHeight: SettingsTheme.controlHeight
+                    font.pixelSize: SettingsTheme.fontStatus
+                    onActivated: applyLinearPreset(currentText, ex70, ex75)
+                }
+                StyledTextField {
+                    id: ex70; text: "0"; Layout.preferredWidth: val0vColW; Layout.preferredHeight: SettingsTheme.controlHeight
+                    font.pixelSize: SettingsTheme.fontStatus; inputMethodHints: Qt.ImhFormattedNumbersOnly
+                    onEditingFinished: inputs.setInputs()
+                }
+                StyledTextField {
+                    id: ex75; text: "5"; Layout.preferredWidth: val5vColW; Layout.preferredHeight: SettingsTheme.controlHeight
+                    font.pixelSize: SettingsTheme.fontStatus; inputMethodHints: Qt.ImhFormattedNumbersOnly
+                    onEditingFinished: inputs.setInputs()
+                }
+                Text { text: getLinearUnit(linPreset7.currentText); font.pixelSize: SettingsTheme.fontStatus; font.family: SettingsTheme.fontFamily; color: SettingsTheme.textSecondary; Layout.preferredWidth: unitColW; verticalAlignment: Text.AlignVCenter }
+                Text { text: linPreset7.currentIndex > 0 ? Calibration.getPresetMinVoltage(linPreset7.currentText).toFixed(1) : ""; font.pixelSize: SettingsTheme.fontStatus; font.family: SettingsTheme.fontFamily; color: SettingsTheme.textPlaceholder; Layout.preferredWidth: vRangeColW; verticalAlignment: Text.AlignVCenter }
+                Text { text: linPreset7.currentIndex > 0 ? Calibration.getPresetMaxVoltage(linPreset7.currentText).toFixed(1) : ""; font.pixelSize: SettingsTheme.fontStatus; font.family: SettingsTheme.fontFamily; color: SettingsTheme.textPlaceholder; Layout.preferredWidth: vRangeColW; verticalAlignment: Text.AlignVCenter }
+                Text { text: (Expander ? Expander.EXAnalogInput7 : 0).toFixed(3); font.pixelSize: SettingsTheme.fontStatus; font.family: SettingsTheme.fontFamily; color: (Expander ? Expander.EXAnalogInput7 : 0) > 0.001 ? SettingsTheme.success : SettingsTheme.textDisabled; Layout.preferredWidth: liveVColW; verticalAlignment: Text.AlignVCenter }
+                Text { text: (parseFloat(ex70.text) + ((Expander ? Expander.EXAnalogInput7 : 0) / 5.0) * (parseFloat(ex75.text) - parseFloat(ex70.text))).toFixed(2); font.pixelSize: SettingsTheme.fontStatus; font.family: SettingsTheme.fontFamily; color: SettingsTheme.textPrimary; Layout.preferredWidth: calibColW; verticalAlignment: Text.AlignVCenter }
+                Item { Layout.preferredWidth: statusColW; Layout.preferredHeight: SettingsTheme.controlHeight; Rectangle { anchors.centerIn: parent; width: SettingsTheme.statusDotSize; height: SettingsTheme.statusDotSize; radius: SettingsTheme.statusDotSize / 2; color: (Expander ? Expander.EXAnalogInput7 : 0) > 0.001 ? SettingsTheme.success : SettingsTheme.textDisabled } }
+            }
+        }
+    }
 
-                    // EX AN 6 (no NTC)
-                    RowLayout {
-                        Layout.fillWidth: true; Layout.preferredHeight: 38; spacing: 4
-                        Layout.leftMargin: 12; Layout.rightMargin: 12
-                        Text { text: "EX AN 6"; font.pixelSize: 15; color: "#FFFFFF"; Layout.preferredWidth: chanColW; verticalAlignment: Text.AlignVCenter }
-                        StyledComboBox {
-                            id: linPreset6
-                            model: linearPresetNames
-                            Layout.preferredWidth: linPresetColW; Layout.preferredHeight: 36
-                            font.pixelSize: 15
-                            onActivated: applyLinearPreset(currentText, ex60, ex65)
-                        }
-                        StyledTextField {
-                            id: ex60; text: "0"; Layout.preferredWidth: val0vColW; Layout.preferredHeight: 36
-                            font.pixelSize: 15; inputMethodHints: Qt.ImhFormattedNumbersOnly
-                            onEditingFinished: inputs.setInputs()
-                        }
-                        StyledTextField {
-                            id: ex65; text: "5"; Layout.preferredWidth: val5vColW; Layout.preferredHeight: 36
-                            font.pixelSize: 15; inputMethodHints: Qt.ImhFormattedNumbersOnly
-                            onEditingFinished: inputs.setInputs()
-                        }
-                        Text { text: getLinearUnit(linPreset6.currentText); font.pixelSize: 15; color: "#a0a0a0"; Layout.preferredWidth: unitColW; verticalAlignment: Text.AlignVCenter }
-                        Text { text: linPreset6.currentIndex > 0 ? Calibration.getPresetMinVoltage(linPreset6.currentText).toFixed(1) : ""; font.pixelSize: 15; color: "#808080"; Layout.preferredWidth: vRangeColW; verticalAlignment: Text.AlignVCenter }
-                        Text { text: linPreset6.currentIndex > 0 ? Calibration.getPresetMaxVoltage(linPreset6.currentText).toFixed(1) : ""; font.pixelSize: 15; color: "#808080"; Layout.preferredWidth: vRangeColW; verticalAlignment: Text.AlignVCenter }
-                        Text { text: (Expander ? Expander.EXAnalogInput6 : 0).toFixed(3); font.pixelSize: 15; color: (Expander ? Expander.EXAnalogInput6 : 0) > 0.001 ? "#4CAF50" : "#606060"; Layout.preferredWidth: liveVColW; verticalAlignment: Text.AlignVCenter }
-                        Text { text: (parseFloat(ex60.text) + ((Expander ? Expander.EXAnalogInput6 : 0) / 5.0) * (parseFloat(ex65.text) - parseFloat(ex60.text))).toFixed(2); font.pixelSize: 15; color: "#e0e0e0"; Layout.preferredWidth: calibColW; verticalAlignment: Text.AlignVCenter }
-                        Item { Layout.preferredWidth: statusColW; Layout.preferredHeight: 36; Rectangle { anchors.centerIn: parent; width: 10; height: 10; radius: 5; color: (Expander ? Expander.EXAnalogInput6 : 0) > 0.001 ? "#4CAF50" : "#555555" } }
-                    }
+    // =============================================================
+    // SECTION 2: NTC Temperature / Voltage Divider
+    // =============================================================
+    SettingsSection {
+        title: Translator.translate("NTC Temperature / Voltage Divider", Settings.language)
+        Layout.fillWidth: true
 
-                    // EX AN 7 (no NTC)
-                    RowLayout {
-                        Layout.fillWidth: true; Layout.preferredHeight: 38; spacing: 4
-                        Layout.leftMargin: 12; Layout.rightMargin: 12
-                        Text { text: "EX AN 7"; font.pixelSize: 15; color: "#FFFFFF"; Layout.preferredWidth: chanColW; verticalAlignment: Text.AlignVCenter }
-                        StyledComboBox {
-                            id: linPreset7
-                            model: linearPresetNames
-                            Layout.preferredWidth: linPresetColW; Layout.preferredHeight: 36
-                            font.pixelSize: 15
-                            onActivated: applyLinearPreset(currentText, ex70, ex75)
-                        }
-                        StyledTextField {
-                            id: ex70; text: "0"; Layout.preferredWidth: val0vColW; Layout.preferredHeight: 36
-                            font.pixelSize: 15; inputMethodHints: Qt.ImhFormattedNumbersOnly
-                            onEditingFinished: inputs.setInputs()
-                        }
-                        StyledTextField {
-                            id: ex75; text: "5"; Layout.preferredWidth: val5vColW; Layout.preferredHeight: 36
-                            font.pixelSize: 15; inputMethodHints: Qt.ImhFormattedNumbersOnly
-                            onEditingFinished: inputs.setInputs()
-                        }
-                        Text { text: getLinearUnit(linPreset7.currentText); font.pixelSize: 15; color: "#a0a0a0"; Layout.preferredWidth: unitColW; verticalAlignment: Text.AlignVCenter }
-                        Text { text: linPreset7.currentIndex > 0 ? Calibration.getPresetMinVoltage(linPreset7.currentText).toFixed(1) : ""; font.pixelSize: 15; color: "#808080"; Layout.preferredWidth: vRangeColW; verticalAlignment: Text.AlignVCenter }
-                        Text { text: linPreset7.currentIndex > 0 ? Calibration.getPresetMaxVoltage(linPreset7.currentText).toFixed(1) : ""; font.pixelSize: 15; color: "#808080"; Layout.preferredWidth: vRangeColW; verticalAlignment: Text.AlignVCenter }
-                        Text { text: (Expander ? Expander.EXAnalogInput7 : 0).toFixed(3); font.pixelSize: 15; color: (Expander ? Expander.EXAnalogInput7 : 0) > 0.001 ? "#4CAF50" : "#606060"; Layout.preferredWidth: liveVColW; verticalAlignment: Text.AlignVCenter }
-                        Text { text: (parseFloat(ex70.text) + ((Expander ? Expander.EXAnalogInput7 : 0) / 5.0) * (parseFloat(ex75.text) - parseFloat(ex70.text))).toFixed(2); font.pixelSize: 15; color: "#e0e0e0"; Layout.preferredWidth: calibColW; verticalAlignment: Text.AlignVCenter }
-                        Item { Layout.preferredWidth: statusColW; Layout.preferredHeight: 36; Rectangle { anchors.centerIn: parent; width: 10; height: 10; radius: 5; color: (Expander ? Expander.EXAnalogInput7 : 0) > 0.001 ? "#4CAF50" : "#555555" } }
+        ColumnLayout {
+            Layout.fillWidth: true
+            spacing: SettingsTheme.contentSpacing
+
+            RowLayout {
+                Layout.fillWidth: true
+                Layout.preferredHeight: 28
+                Layout.leftMargin: SettingsTheme.sectionPadding
+                Layout.rightMargin: SettingsTheme.sectionPadding
+                spacing: 2
+                Text { text: "NTC"; font.pixelSize: SettingsTheme.fontStatus; font.bold: true; font.family: SettingsTheme.fontFamily; color: SettingsTheme.textSecondary; Layout.preferredWidth: ntcCheckColW; horizontalAlignment: Text.AlignHCenter }
+                Text { text: "Preset"; font.pixelSize: SettingsTheme.fontStatus; font.bold: true; font.family: SettingsTheme.fontFamily; color: SettingsTheme.textSecondary; Layout.preferredWidth: ntcPresetColW }
+                Text { text: "T1 (C)"; font.pixelSize: SettingsTheme.fontStatus; font.bold: true; font.family: SettingsTheme.fontFamily; color: SettingsTheme.textSecondary; Layout.preferredWidth: shFieldW }
+                Text { text: "R1 (O)"; font.pixelSize: SettingsTheme.fontStatus; font.bold: true; font.family: SettingsTheme.fontFamily; color: SettingsTheme.textSecondary; Layout.preferredWidth: shFieldW }
+                Text { text: "T2 (C)"; font.pixelSize: SettingsTheme.fontStatus; font.bold: true; font.family: SettingsTheme.fontFamily; color: SettingsTheme.textSecondary; Layout.preferredWidth: shFieldW }
+                Text { text: "R2 (O)"; font.pixelSize: SettingsTheme.fontStatus; font.bold: true; font.family: SettingsTheme.fontFamily; color: SettingsTheme.textSecondary; Layout.preferredWidth: shFieldW }
+                Text { text: "T3 (C)"; font.pixelSize: SettingsTheme.fontStatus; font.bold: true; font.family: SettingsTheme.fontFamily; color: SettingsTheme.textSecondary; Layout.preferredWidth: shFieldW }
+                Text { text: "R3 (O)"; font.pixelSize: SettingsTheme.fontStatus; font.bold: true; font.family: SettingsTheme.fontFamily; color: SettingsTheme.textSecondary; Layout.preferredWidth: shFieldW }
+                Text { text: "100O"; font.pixelSize: SettingsTheme.fontCaption; font.bold: true; font.family: SettingsTheme.fontFamily; color: SettingsTheme.textSecondary; Layout.preferredWidth: divCheckColW; horizontalAlignment: Text.AlignHCenter }
+                Text { text: "1KO"; font.pixelSize: SettingsTheme.fontCaption; font.bold: true; font.family: SettingsTheme.fontFamily; color: SettingsTheme.textSecondary; Layout.preferredWidth: divCheckColW; horizontalAlignment: Text.AlignHCenter }
+            }
+
+            // AN 0 NTC row
+            RowLayout {
+                Layout.fillWidth: true; Layout.preferredHeight: SettingsTheme.controlHeight + 2; spacing: 2
+                Layout.leftMargin: SettingsTheme.sectionPadding; Layout.rightMargin: SettingsTheme.sectionPadding
+                StyledCheckBox {
+                    id: checkan0ntc; Layout.preferredWidth: ntcCheckColW; Layout.preferredHeight: SettingsTheme.controlHeight
+                    onCheckStateChanged: inputs.setInputs()
+                }
+                StyledComboBox {
+                    id: ntcPreset0; model: ntcPresetNames
+                    Layout.preferredWidth: ntcPresetColW; Layout.preferredHeight: SettingsTheme.controlHeight; font.pixelSize: SettingsTheme.fontStatus
+                    enabled: checkan0ntc.checked
+                    onActivated: applyNtcPreset(currentText, t10, r10, t20, r20, t30, r30)
+                }
+                StyledTextField {
+                    id: t10; Layout.preferredWidth: shFieldW; Layout.preferredHeight: SettingsTheme.controlHeight; font.pixelSize: SettingsTheme.fontStatus
+                    enabled: checkan0ntc.checked; inputMethodHints: Qt.ImhFormattedNumbersOnly; onEditingFinished: inputs.setInputs()
+                }
+                StyledTextField {
+                    id: r10; Layout.preferredWidth: shFieldW; Layout.preferredHeight: SettingsTheme.controlHeight; font.pixelSize: SettingsTheme.fontStatus
+                    enabled: checkan0ntc.checked; inputMethodHints: Qt.ImhFormattedNumbersOnly; onEditingFinished: inputs.setInputs()
+                }
+                StyledTextField {
+                    id: t20; Layout.preferredWidth: shFieldW; Layout.preferredHeight: SettingsTheme.controlHeight; font.pixelSize: SettingsTheme.fontStatus
+                    enabled: checkan0ntc.checked; inputMethodHints: Qt.ImhFormattedNumbersOnly; onEditingFinished: inputs.setInputs()
+                }
+                StyledTextField {
+                    id: r20; Layout.preferredWidth: shFieldW; Layout.preferredHeight: SettingsTheme.controlHeight; font.pixelSize: SettingsTheme.fontStatus
+                    enabled: checkan0ntc.checked; inputMethodHints: Qt.ImhFormattedNumbersOnly; onEditingFinished: inputs.setInputs()
+                }
+                StyledTextField {
+                    id: t30; Layout.preferredWidth: shFieldW; Layout.preferredHeight: SettingsTheme.controlHeight; font.pixelSize: SettingsTheme.fontStatus
+                    enabled: checkan0ntc.checked; inputMethodHints: Qt.ImhFormattedNumbersOnly; onEditingFinished: inputs.setInputs()
+                }
+                StyledTextField {
+                    id: r30; Layout.preferredWidth: shFieldW; Layout.preferredHeight: SettingsTheme.controlHeight; font.pixelSize: SettingsTheme.fontStatus
+                    enabled: checkan0ntc.checked; inputMethodHints: Qt.ImhFormattedNumbersOnly; onEditingFinished: inputs.setInputs()
+                }
+                StyledCheckBox {
+                    id: checkan0100; Layout.preferredWidth: divCheckColW; Layout.preferredHeight: SettingsTheme.controlHeight
+                    onCheckStateChanged: inputs.setInputs()
+                }
+                StyledCheckBox {
+                    id: checkan01k; Layout.preferredWidth: divCheckColW; Layout.preferredHeight: SettingsTheme.controlHeight
+                    onCheckStateChanged: inputs.setInputs()
+                }
+            }
+
+            // AN 1 NTC row
+            RowLayout {
+                Layout.fillWidth: true; Layout.preferredHeight: SettingsTheme.controlHeight + 2; spacing: 2
+                Layout.leftMargin: SettingsTheme.sectionPadding; Layout.rightMargin: SettingsTheme.sectionPadding
+                StyledCheckBox {
+                    id: checkan1ntc; Layout.preferredWidth: ntcCheckColW; Layout.preferredHeight: SettingsTheme.controlHeight
+                    onCheckStateChanged: inputs.setInputs()
+                }
+                StyledComboBox {
+                    id: ntcPreset1; model: ntcPresetNames
+                    Layout.preferredWidth: ntcPresetColW; Layout.preferredHeight: SettingsTheme.controlHeight; font.pixelSize: SettingsTheme.fontStatus
+                    enabled: checkan1ntc.checked
+                    onActivated: applyNtcPreset(currentText, t11, r11, t21, r21, t31, r31)
+                }
+                StyledTextField {
+                    id: t11; Layout.preferredWidth: shFieldW; Layout.preferredHeight: SettingsTheme.controlHeight; font.pixelSize: SettingsTheme.fontStatus
+                    enabled: checkan1ntc.checked; inputMethodHints: Qt.ImhFormattedNumbersOnly; onEditingFinished: inputs.setInputs()
+                }
+                StyledTextField {
+                    id: r11; Layout.preferredWidth: shFieldW; Layout.preferredHeight: SettingsTheme.controlHeight; font.pixelSize: SettingsTheme.fontStatus
+                    enabled: checkan1ntc.checked; inputMethodHints: Qt.ImhFormattedNumbersOnly; onEditingFinished: inputs.setInputs()
+                }
+                StyledTextField {
+                    id: t21; Layout.preferredWidth: shFieldW; Layout.preferredHeight: SettingsTheme.controlHeight; font.pixelSize: SettingsTheme.fontStatus
+                    enabled: checkan1ntc.checked; inputMethodHints: Qt.ImhFormattedNumbersOnly; onEditingFinished: inputs.setInputs()
+                }
+                StyledTextField {
+                    id: r21; Layout.preferredWidth: shFieldW; Layout.preferredHeight: SettingsTheme.controlHeight; font.pixelSize: SettingsTheme.fontStatus
+                    enabled: checkan1ntc.checked; inputMethodHints: Qt.ImhFormattedNumbersOnly; onEditingFinished: inputs.setInputs()
+                }
+                StyledTextField {
+                    id: t31; Layout.preferredWidth: shFieldW; Layout.preferredHeight: SettingsTheme.controlHeight; font.pixelSize: SettingsTheme.fontStatus
+                    enabled: checkan1ntc.checked; inputMethodHints: Qt.ImhFormattedNumbersOnly; onEditingFinished: inputs.setInputs()
+                }
+                StyledTextField {
+                    id: r31; Layout.preferredWidth: shFieldW; Layout.preferredHeight: SettingsTheme.controlHeight; font.pixelSize: SettingsTheme.fontStatus
+                    enabled: checkan1ntc.checked; inputMethodHints: Qt.ImhFormattedNumbersOnly; onEditingFinished: inputs.setInputs()
+                }
+                StyledCheckBox {
+                    id: checkan1100; Layout.preferredWidth: divCheckColW; Layout.preferredHeight: SettingsTheme.controlHeight
+                    onCheckStateChanged: inputs.setInputs()
+                }
+                StyledCheckBox {
+                    id: checkan11k; Layout.preferredWidth: divCheckColW; Layout.preferredHeight: SettingsTheme.controlHeight
+                    onCheckStateChanged: inputs.setInputs()
+                }
+            }
+
+            // AN 2 NTC row
+            RowLayout {
+                Layout.fillWidth: true; Layout.preferredHeight: SettingsTheme.controlHeight + 2; spacing: 2
+                Layout.leftMargin: SettingsTheme.sectionPadding; Layout.rightMargin: SettingsTheme.sectionPadding
+                StyledCheckBox {
+                    id: checkan2ntc; Layout.preferredWidth: ntcCheckColW; Layout.preferredHeight: SettingsTheme.controlHeight
+                    onCheckStateChanged: inputs.setInputs()
+                }
+                StyledComboBox {
+                    id: ntcPreset2; model: ntcPresetNames
+                    Layout.preferredWidth: ntcPresetColW; Layout.preferredHeight: SettingsTheme.controlHeight; font.pixelSize: SettingsTheme.fontStatus
+                    enabled: checkan2ntc.checked
+                    onActivated: applyNtcPreset(currentText, t12, r12, t22, r22, t32, r32)
+                }
+                StyledTextField {
+                    id: t12; Layout.preferredWidth: shFieldW; Layout.preferredHeight: SettingsTheme.controlHeight; font.pixelSize: SettingsTheme.fontStatus
+                    enabled: checkan2ntc.checked; inputMethodHints: Qt.ImhFormattedNumbersOnly; onEditingFinished: inputs.setInputs()
+                }
+                StyledTextField {
+                    id: r12; Layout.preferredWidth: shFieldW; Layout.preferredHeight: SettingsTheme.controlHeight; font.pixelSize: SettingsTheme.fontStatus
+                    enabled: checkan2ntc.checked; inputMethodHints: Qt.ImhFormattedNumbersOnly; onEditingFinished: inputs.setInputs()
+                }
+                StyledTextField {
+                    id: t22; Layout.preferredWidth: shFieldW; Layout.preferredHeight: SettingsTheme.controlHeight; font.pixelSize: SettingsTheme.fontStatus
+                    enabled: checkan2ntc.checked; inputMethodHints: Qt.ImhFormattedNumbersOnly; onEditingFinished: inputs.setInputs()
+                }
+                StyledTextField {
+                    id: r22; Layout.preferredWidth: shFieldW; Layout.preferredHeight: SettingsTheme.controlHeight; font.pixelSize: SettingsTheme.fontStatus
+                    enabled: checkan2ntc.checked; inputMethodHints: Qt.ImhFormattedNumbersOnly; onEditingFinished: inputs.setInputs()
+                }
+                StyledTextField {
+                    id: t32; Layout.preferredWidth: shFieldW; Layout.preferredHeight: SettingsTheme.controlHeight; font.pixelSize: SettingsTheme.fontStatus
+                    enabled: checkan2ntc.checked; inputMethodHints: Qt.ImhFormattedNumbersOnly; onEditingFinished: inputs.setInputs()
+                }
+                StyledTextField {
+                    id: r32; Layout.preferredWidth: shFieldW; Layout.preferredHeight: SettingsTheme.controlHeight; font.pixelSize: SettingsTheme.fontStatus
+                    enabled: checkan2ntc.checked; inputMethodHints: Qt.ImhFormattedNumbersOnly; onEditingFinished: inputs.setInputs()
+                }
+                StyledCheckBox {
+                    id: checkan2100; Layout.preferredWidth: divCheckColW; Layout.preferredHeight: SettingsTheme.controlHeight
+                    onCheckStateChanged: inputs.setInputs()
+                }
+                StyledCheckBox {
+                    id: checkan21k; Layout.preferredWidth: divCheckColW; Layout.preferredHeight: SettingsTheme.controlHeight
+                    onCheckStateChanged: inputs.setInputs()
+                }
+            }
+
+            // AN 3 NTC row
+            RowLayout {
+                Layout.fillWidth: true; Layout.preferredHeight: SettingsTheme.controlHeight + 2; spacing: 2
+                Layout.leftMargin: SettingsTheme.sectionPadding; Layout.rightMargin: SettingsTheme.sectionPadding
+                StyledCheckBox {
+                    id: checkan3ntc; Layout.preferredWidth: ntcCheckColW; Layout.preferredHeight: SettingsTheme.controlHeight
+                    onCheckStateChanged: inputs.setInputs()
+                }
+                StyledComboBox {
+                    id: ntcPreset3; model: ntcPresetNames
+                    Layout.preferredWidth: ntcPresetColW; Layout.preferredHeight: SettingsTheme.controlHeight; font.pixelSize: SettingsTheme.fontStatus
+                    enabled: checkan3ntc.checked
+                    onActivated: applyNtcPreset(currentText, t13, r13, t23, r23, t33, r33)
+                }
+                StyledTextField {
+                    id: t13; Layout.preferredWidth: shFieldW; Layout.preferredHeight: SettingsTheme.controlHeight; font.pixelSize: SettingsTheme.fontStatus
+                    enabled: checkan3ntc.checked; inputMethodHints: Qt.ImhFormattedNumbersOnly; onEditingFinished: inputs.setInputs()
+                }
+                StyledTextField {
+                    id: r13; Layout.preferredWidth: shFieldW; Layout.preferredHeight: SettingsTheme.controlHeight; font.pixelSize: SettingsTheme.fontStatus
+                    enabled: checkan3ntc.checked; inputMethodHints: Qt.ImhFormattedNumbersOnly; onEditingFinished: inputs.setInputs()
+                }
+                StyledTextField {
+                    id: t23; Layout.preferredWidth: shFieldW; Layout.preferredHeight: SettingsTheme.controlHeight; font.pixelSize: SettingsTheme.fontStatus
+                    enabled: checkan3ntc.checked; inputMethodHints: Qt.ImhFormattedNumbersOnly; onEditingFinished: inputs.setInputs()
+                }
+                StyledTextField {
+                    id: r23; Layout.preferredWidth: shFieldW; Layout.preferredHeight: SettingsTheme.controlHeight; font.pixelSize: SettingsTheme.fontStatus
+                    enabled: checkan3ntc.checked; inputMethodHints: Qt.ImhFormattedNumbersOnly; onEditingFinished: inputs.setInputs()
+                }
+                StyledTextField {
+                    id: t33; Layout.preferredWidth: shFieldW; Layout.preferredHeight: SettingsTheme.controlHeight; font.pixelSize: SettingsTheme.fontStatus
+                    enabled: checkan3ntc.checked; inputMethodHints: Qt.ImhFormattedNumbersOnly; onEditingFinished: inputs.setInputs()
+                }
+                StyledTextField {
+                    id: r33; Layout.preferredWidth: shFieldW; Layout.preferredHeight: SettingsTheme.controlHeight; font.pixelSize: SettingsTheme.fontStatus
+                    enabled: checkan3ntc.checked; inputMethodHints: Qt.ImhFormattedNumbersOnly; onEditingFinished: inputs.setInputs()
+                }
+                StyledCheckBox {
+                    id: checkan3100; Layout.preferredWidth: divCheckColW; Layout.preferredHeight: SettingsTheme.controlHeight
+                    onCheckStateChanged: inputs.setInputs()
+                }
+                StyledCheckBox {
+                    id: checkan31k; Layout.preferredWidth: divCheckColW; Layout.preferredHeight: SettingsTheme.controlHeight
+                    onCheckStateChanged: inputs.setInputs()
+                }
+            }
+
+            // AN 4 NTC row
+            RowLayout {
+                Layout.fillWidth: true; Layout.preferredHeight: SettingsTheme.controlHeight + 2; spacing: 2
+                Layout.leftMargin: SettingsTheme.sectionPadding; Layout.rightMargin: SettingsTheme.sectionPadding
+                StyledCheckBox {
+                    id: checkan4ntc; Layout.preferredWidth: ntcCheckColW; Layout.preferredHeight: SettingsTheme.controlHeight
+                    onCheckStateChanged: inputs.setInputs()
+                }
+                StyledComboBox {
+                    id: ntcPreset4; model: ntcPresetNames
+                    Layout.preferredWidth: ntcPresetColW; Layout.preferredHeight: SettingsTheme.controlHeight; font.pixelSize: SettingsTheme.fontStatus
+                    enabled: checkan4ntc.checked
+                    onActivated: applyNtcPreset(currentText, t14, r14, t24, r24, t34, r34)
+                }
+                StyledTextField {
+                    id: t14; Layout.preferredWidth: shFieldW; Layout.preferredHeight: SettingsTheme.controlHeight; font.pixelSize: SettingsTheme.fontStatus
+                    enabled: checkan4ntc.checked; inputMethodHints: Qt.ImhFormattedNumbersOnly; onEditingFinished: inputs.setInputs()
+                }
+                StyledTextField {
+                    id: r14; Layout.preferredWidth: shFieldW; Layout.preferredHeight: SettingsTheme.controlHeight; font.pixelSize: SettingsTheme.fontStatus
+                    enabled: checkan4ntc.checked; inputMethodHints: Qt.ImhFormattedNumbersOnly; onEditingFinished: inputs.setInputs()
+                }
+                StyledTextField {
+                    id: t24; Layout.preferredWidth: shFieldW; Layout.preferredHeight: SettingsTheme.controlHeight; font.pixelSize: SettingsTheme.fontStatus
+                    enabled: checkan4ntc.checked; inputMethodHints: Qt.ImhFormattedNumbersOnly; onEditingFinished: inputs.setInputs()
+                }
+                StyledTextField {
+                    id: r24; Layout.preferredWidth: shFieldW; Layout.preferredHeight: SettingsTheme.controlHeight; font.pixelSize: SettingsTheme.fontStatus
+                    enabled: checkan4ntc.checked; inputMethodHints: Qt.ImhFormattedNumbersOnly; onEditingFinished: inputs.setInputs()
+                }
+                StyledTextField {
+                    id: t34; Layout.preferredWidth: shFieldW; Layout.preferredHeight: SettingsTheme.controlHeight; font.pixelSize: SettingsTheme.fontStatus
+                    enabled: checkan4ntc.checked; inputMethodHints: Qt.ImhFormattedNumbersOnly; onEditingFinished: inputs.setInputs()
+                }
+                StyledTextField {
+                    id: r34; Layout.preferredWidth: shFieldW; Layout.preferredHeight: SettingsTheme.controlHeight; font.pixelSize: SettingsTheme.fontStatus
+                    enabled: checkan4ntc.checked; inputMethodHints: Qt.ImhFormattedNumbersOnly; onEditingFinished: inputs.setInputs()
+                }
+                StyledCheckBox {
+                    id: checkan4100; Layout.preferredWidth: divCheckColW; Layout.preferredHeight: SettingsTheme.controlHeight
+                    onCheckStateChanged: inputs.setInputs()
+                }
+                StyledCheckBox {
+                    id: checkan41k; Layout.preferredWidth: divCheckColW; Layout.preferredHeight: SettingsTheme.controlHeight
+                    onCheckStateChanged: inputs.setInputs()
+                }
+            }
+
+            // AN 5 NTC row
+            RowLayout {
+                Layout.fillWidth: true; Layout.preferredHeight: SettingsTheme.controlHeight + 2; spacing: 2
+                Layout.leftMargin: SettingsTheme.sectionPadding; Layout.rightMargin: SettingsTheme.sectionPadding
+                StyledCheckBox {
+                    id: checkan5ntc; Layout.preferredWidth: ntcCheckColW; Layout.preferredHeight: SettingsTheme.controlHeight
+                    onCheckStateChanged: inputs.setInputs()
+                }
+                StyledComboBox {
+                    id: ntcPreset5; model: ntcPresetNames
+                    Layout.preferredWidth: ntcPresetColW; Layout.preferredHeight: SettingsTheme.controlHeight; font.pixelSize: SettingsTheme.fontStatus
+                    enabled: checkan5ntc.checked
+                    onActivated: applyNtcPreset(currentText, t15, r15, t25, r25, t35, r35)
+                }
+                StyledTextField {
+                    id: t15; Layout.preferredWidth: shFieldW; Layout.preferredHeight: SettingsTheme.controlHeight; font.pixelSize: SettingsTheme.fontStatus
+                    enabled: checkan5ntc.checked; inputMethodHints: Qt.ImhFormattedNumbersOnly; onEditingFinished: inputs.setInputs()
+                }
+                StyledTextField {
+                    id: r15; Layout.preferredWidth: shFieldW; Layout.preferredHeight: SettingsTheme.controlHeight; font.pixelSize: SettingsTheme.fontStatus
+                    enabled: checkan5ntc.checked; inputMethodHints: Qt.ImhFormattedNumbersOnly; onEditingFinished: inputs.setInputs()
+                }
+                StyledTextField {
+                    id: t25; Layout.preferredWidth: shFieldW; Layout.preferredHeight: SettingsTheme.controlHeight; font.pixelSize: SettingsTheme.fontStatus
+                    enabled: checkan5ntc.checked; inputMethodHints: Qt.ImhFormattedNumbersOnly; onEditingFinished: inputs.setInputs()
+                }
+                StyledTextField {
+                    id: r25; Layout.preferredWidth: shFieldW; Layout.preferredHeight: SettingsTheme.controlHeight; font.pixelSize: SettingsTheme.fontStatus
+                    enabled: checkan5ntc.checked; inputMethodHints: Qt.ImhFormattedNumbersOnly; onEditingFinished: inputs.setInputs()
+                }
+                StyledTextField {
+                    id: t35; Layout.preferredWidth: shFieldW; Layout.preferredHeight: SettingsTheme.controlHeight; font.pixelSize: SettingsTheme.fontStatus
+                    enabled: checkan5ntc.checked; inputMethodHints: Qt.ImhFormattedNumbersOnly; onEditingFinished: inputs.setInputs()
+                }
+                StyledTextField {
+                    id: r35; Layout.preferredWidth: shFieldW; Layout.preferredHeight: SettingsTheme.controlHeight; font.pixelSize: SettingsTheme.fontStatus
+                    enabled: checkan5ntc.checked; inputMethodHints: Qt.ImhFormattedNumbersOnly; onEditingFinished: inputs.setInputs()
+                }
+                StyledCheckBox {
+                    id: checkan5100; Layout.preferredWidth: divCheckColW; Layout.preferredHeight: SettingsTheme.controlHeight
+                    onCheckStateChanged: inputs.setInputs()
+                }
+                StyledCheckBox {
+                    id: checkan51k; Layout.preferredWidth: divCheckColW; Layout.preferredHeight: SettingsTheme.controlHeight
+                    onCheckStateChanged: inputs.setInputs()
+                }
+            }
+
+            Text {
+                text: "AN 6-7: No NTC"
+                font.pixelSize: SettingsTheme.fontCaption; font.italic: true; font.family: SettingsTheme.fontFamily
+                color: SettingsTheme.textPlaceholder
+                Layout.fillWidth: true
+                Layout.preferredHeight: 28
+                verticalAlignment: Text.AlignVCenter
+            }
+        }
+    }
+
+    // =============================================================
+    // SECTION 3: Board Configuration
+    // =============================================================
+    SettingsSection {
+        title: "Board Configuration"
+        Layout.fillWidth: true
+
+        ColumnLayout {
+            Layout.fillWidth: true
+            spacing: SettingsTheme.sectionPadding
+
+            SettingsRow {
+                label: "AN7 Damping"
+
+                StyledTextField {
+                    id: an7dampingfactor
+                    text: "0"
+                    Layout.preferredWidth: 80; Layout.preferredHeight: SettingsTheme.controlHeight
+                    inputMethodHints: Qt.ImhFormattedNumbersOnly
+                    validator: RegularExpressionValidator { regularExpression: /^(?:[1-9]\d{0,2}|1000)$/ }
+                    onEditingFinished: inputs.setInputs()
+                }
+            }
+
+            SettingsRow {
+                label: "RPM Source"
+
+                StyledComboBox {
+                    id: rpmsourceselector
+                    Layout.preferredHeight: SettingsTheme.controlHeight
+                    model: ["None", "CAN RPM", "EX Digital 1 Tach"]
+                    onActivated: inputs.setInputs()
+                }
+            }
+
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: SettingsTheme.sectionPadding
+                visible: rpmsourceselector.currentIndex === 1
+                Text {
+                    text: Translator.translate("Version", Settings.language) + ":"
+                    font.pixelSize: SettingsTheme.fontLabel; font.family: SettingsTheme.fontFamily; color: SettingsTheme.textPrimary
+                    verticalAlignment: Text.AlignVCenter
+                }
+                StyledComboBox {
+                    id: rpmcanversionselector
+                    Layout.preferredWidth: 80; Layout.preferredHeight: SettingsTheme.controlHeight
+                    font.pixelSize: SettingsTheme.fontStatus
+                    model: ["V1", "V2"]
+                    onActivated: inputs.setInputs()
+                }
+                Text {
+                    text: Translator.translate("Cylinders", Settings.language) + ":"
+                    font.pixelSize: SettingsTheme.fontLabel; font.family: SettingsTheme.fontFamily; color: SettingsTheme.textPrimary
+                    verticalAlignment: Text.AlignVCenter
+                }
+                StyledComboBox {
+                    id: cylindercombobox
+                    visible: rpmcanversionselector.currentIndex == 0
+                    Layout.preferredWidth: 90; Layout.preferredHeight: SettingsTheme.controlHeight
+                    font.pixelSize: SettingsTheme.fontStatus
+                    model: ["0.5", "0.6", "0.7", "0.8", "0.9", "1", "1.1", "1.2", "1.3", "1.4", "1.5", "1.6", "1.7", "1.8", "1.9", "2", "2.1", "2.2", "2.3", "2.4", "2.5", "2.6", "2.7", "2.8", "2.9", "3", "3.1", "3.2", "3.3", "3.4", "3.5", "3.6", "3.7", "3.8", "3.9", "4", "4.1", "4.2", "4.3", "4.4", "4.5", "4.6", "4.7", "4.8", "4.9", "5", "5.1", "5.2", "5.3", "5.4", "5.5", "5.6", "5.7", "5.8", "5.9", "6", "6.1", "6.2", "6.3", "6.4", "6.5", "6.6", "6.7", "6.8", "6.9", "7", "7.1", "7.2", "7.3", "7.4", "7.5", "7.6", "7.7", "7.8", "7.9", "8", "8.1", "8.2", "8.3", "8.4", "8.5", "8.6", "8.7", "8.8", "8.9", "9", "9.1", "9.2", "9.3", "9.4", "9.5", "9.6", "9.7", "9.8", "9.9", "10", "10.1", "10.2", "10.3", "10.4", "10.5", "10.6", "10.7", "10.8", "10.9", "11", "11.1", "11.2", "11.3", "11.4", "11.5", "11.6", "11.7", "11.8", "11.9", "12", "12.1", "12.2", "12.3", "12.4", "12.5", "12.6", "12.7", "12.8", "12.9"]
+                    onActivated: inputs.setInputs()
+                }
+                StyledComboBox {
+                    id: cylindercomboboxv2
+                    visible: rpmcanversionselector.currentIndex == 1
+                    Layout.preferredWidth: 90; Layout.preferredHeight: SettingsTheme.controlHeight
+                    font.pixelSize: SettingsTheme.fontStatus
+                    model: ["1", "2", "3", "4", "5", "6", "8", "12"]
+                    onActivated: inputs.setInputs()
+                }
+                Item { Layout.fillWidth: true }
+            }
+
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: SettingsTheme.sectionPadding
+                visible: rpmsourceselector.currentIndex === 2
+                Text {
+                    text: Translator.translate("Cylinders", Settings.language) + ":"
+                    font.pixelSize: SettingsTheme.fontLabel; font.family: SettingsTheme.fontFamily; color: SettingsTheme.textPrimary
+                    verticalAlignment: Text.AlignVCenter
+                }
+                StyledComboBox {
+                    id: cylindercomboboxDi1
+                    Layout.preferredWidth: 90; Layout.preferredHeight: SettingsTheme.controlHeight
+                    font.pixelSize: SettingsTheme.fontStatus
+                    model: ["1", "2", "3", "4", "5", "6", "8", "12"]
+                    onActivated: cylindercalcrpmdi1.cylindercalcrpmdi1()
+                }
+                Item { Layout.fillWidth: true }
+            }
+
+            SettingsRow {
+                label: "Headlight Channel"
+
+                StyledComboBox {
+                    id: digitalExtender
+                    model: comboBoxModel
+                    textRole: "text"
+                    Layout.preferredWidth: 200; Layout.preferredHeight: SettingsTheme.controlHeight
+                    onCurrentIndexChanged: {
+                        digiValue = currentIndex;
+                        digiStringValue = "Ex Digital Input " + (currentIndex + 1);
                     }
                 }
             }
 
-            // =============================================================
-            // SECTION 2: NTC Temperature / Voltage Divider
-            // =============================================================
-            SettingsSection {
-                title: Translator.translate("NTC Temperature / Voltage Divider", Settings.language)
-                Layout.fillWidth: true
+            SettingsRow {
+                label: "CAN/IO Brightness"
 
-                ColumnLayout {
-                    Layout.fillWidth: true
-                    spacing: 6
-
-                    RowLayout {
-                        Layout.fillWidth: true
-                        Layout.preferredHeight: 28
-                        Layout.leftMargin: 12
-                        Layout.rightMargin: 12
-                        spacing: 2
-                        Text { text: "NTC"; font.pixelSize: 15; font.bold: true; color: "#a0a0a0"; Layout.preferredWidth: ntcCheckColW; horizontalAlignment: Text.AlignHCenter }
-                        Text { text: "Preset"; font.pixelSize: 15; font.bold: true; color: "#a0a0a0"; Layout.preferredWidth: ntcPresetColW }
-                        Text { text: "T1 (C)"; font.pixelSize: 15; font.bold: true; color: "#a0a0a0"; Layout.preferredWidth: shFieldW }
-                        Text { text: "R1 (O)"; font.pixelSize: 15; font.bold: true; color: "#a0a0a0"; Layout.preferredWidth: shFieldW }
-                        Text { text: "T2 (C)"; font.pixelSize: 15; font.bold: true; color: "#a0a0a0"; Layout.preferredWidth: shFieldW }
-                        Text { text: "R2 (O)"; font.pixelSize: 15; font.bold: true; color: "#a0a0a0"; Layout.preferredWidth: shFieldW }
-                        Text { text: "T3 (C)"; font.pixelSize: 15; font.bold: true; color: "#a0a0a0"; Layout.preferredWidth: shFieldW }
-                        Text { text: "R3 (O)"; font.pixelSize: 15; font.bold: true; color: "#a0a0a0"; Layout.preferredWidth: shFieldW }
-                        Text { text: "100O"; font.pixelSize: 12; font.bold: true; color: "#a0a0a0"; Layout.preferredWidth: divCheckColW; horizontalAlignment: Text.AlignHCenter }
-                        Text { text: "1KO"; font.pixelSize: 12; font.bold: true; color: "#a0a0a0"; Layout.preferredWidth: divCheckColW; horizontalAlignment: Text.AlignHCenter }
-                    }
-
-                    // AN 0 NTC row
-                    RowLayout {
-                        Layout.fillWidth: true; Layout.preferredHeight: 38; spacing: 2
-                        Layout.leftMargin: 12; Layout.rightMargin: 12
-                        StyledCheckBox {
-                            id: checkan0ntc; Layout.preferredWidth: ntcCheckColW; Layout.preferredHeight: 36
-                            onCheckStateChanged: inputs.setInputs()
-                        }
-                        StyledComboBox {
-                            id: ntcPreset0; model: ntcPresetNames
-                            Layout.preferredWidth: ntcPresetColW; Layout.preferredHeight: 36; font.pixelSize: 15
-                            enabled: checkan0ntc.checked
-                            onActivated: applyNtcPreset(currentText, t10, r10, t20, r20, t30, r30)
-                        }
-                        StyledTextField {
-                            id: t10; Layout.preferredWidth: shFieldW; Layout.preferredHeight: 36; font.pixelSize: 15
-                            enabled: checkan0ntc.checked; inputMethodHints: Qt.ImhFormattedNumbersOnly; onEditingFinished: inputs.setInputs()
-                        }
-                        StyledTextField {
-                            id: r10; Layout.preferredWidth: shFieldW; Layout.preferredHeight: 36; font.pixelSize: 15
-                            enabled: checkan0ntc.checked; inputMethodHints: Qt.ImhFormattedNumbersOnly; onEditingFinished: inputs.setInputs()
-                        }
-                        StyledTextField {
-                            id: t20; Layout.preferredWidth: shFieldW; Layout.preferredHeight: 36; font.pixelSize: 15
-                            enabled: checkan0ntc.checked; inputMethodHints: Qt.ImhFormattedNumbersOnly; onEditingFinished: inputs.setInputs()
-                        }
-                        StyledTextField {
-                            id: r20; Layout.preferredWidth: shFieldW; Layout.preferredHeight: 36; font.pixelSize: 15
-                            enabled: checkan0ntc.checked; inputMethodHints: Qt.ImhFormattedNumbersOnly; onEditingFinished: inputs.setInputs()
-                        }
-                        StyledTextField {
-                            id: t30; Layout.preferredWidth: shFieldW; Layout.preferredHeight: 36; font.pixelSize: 15
-                            enabled: checkan0ntc.checked; inputMethodHints: Qt.ImhFormattedNumbersOnly; onEditingFinished: inputs.setInputs()
-                        }
-                        StyledTextField {
-                            id: r30; Layout.preferredWidth: shFieldW; Layout.preferredHeight: 36; font.pixelSize: 15
-                            enabled: checkan0ntc.checked; inputMethodHints: Qt.ImhFormattedNumbersOnly; onEditingFinished: inputs.setInputs()
-                        }
-                        StyledCheckBox {
-                            id: checkan0100; Layout.preferredWidth: divCheckColW; Layout.preferredHeight: 36
-                            onCheckStateChanged: inputs.setInputs()
-                        }
-                        StyledCheckBox {
-                            id: checkan01k; Layout.preferredWidth: divCheckColW; Layout.preferredHeight: 36
-                            onCheckStateChanged: inputs.setInputs()
-                        }
-                    }
-
-                    // AN 1 NTC row
-                    RowLayout {
-                        Layout.fillWidth: true; Layout.preferredHeight: 38; spacing: 2
-                        Layout.leftMargin: 12; Layout.rightMargin: 12
-                        StyledCheckBox {
-                            id: checkan1ntc; Layout.preferredWidth: ntcCheckColW; Layout.preferredHeight: 36
-                            onCheckStateChanged: inputs.setInputs()
-                        }
-                        StyledComboBox {
-                            id: ntcPreset1; model: ntcPresetNames
-                            Layout.preferredWidth: ntcPresetColW; Layout.preferredHeight: 36; font.pixelSize: 15
-                            enabled: checkan1ntc.checked
-                            onActivated: applyNtcPreset(currentText, t11, r11, t21, r21, t31, r31)
-                        }
-                        StyledTextField {
-                            id: t11; Layout.preferredWidth: shFieldW; Layout.preferredHeight: 36; font.pixelSize: 15
-                            enabled: checkan1ntc.checked; inputMethodHints: Qt.ImhFormattedNumbersOnly; onEditingFinished: inputs.setInputs()
-                        }
-                        StyledTextField {
-                            id: r11; Layout.preferredWidth: shFieldW; Layout.preferredHeight: 36; font.pixelSize: 15
-                            enabled: checkan1ntc.checked; inputMethodHints: Qt.ImhFormattedNumbersOnly; onEditingFinished: inputs.setInputs()
-                        }
-                        StyledTextField {
-                            id: t21; Layout.preferredWidth: shFieldW; Layout.preferredHeight: 36; font.pixelSize: 15
-                            enabled: checkan1ntc.checked; inputMethodHints: Qt.ImhFormattedNumbersOnly; onEditingFinished: inputs.setInputs()
-                        }
-                        StyledTextField {
-                            id: r21; Layout.preferredWidth: shFieldW; Layout.preferredHeight: 36; font.pixelSize: 15
-                            enabled: checkan1ntc.checked; inputMethodHints: Qt.ImhFormattedNumbersOnly; onEditingFinished: inputs.setInputs()
-                        }
-                        StyledTextField {
-                            id: t31; Layout.preferredWidth: shFieldW; Layout.preferredHeight: 36; font.pixelSize: 15
-                            enabled: checkan1ntc.checked; inputMethodHints: Qt.ImhFormattedNumbersOnly; onEditingFinished: inputs.setInputs()
-                        }
-                        StyledTextField {
-                            id: r31; Layout.preferredWidth: shFieldW; Layout.preferredHeight: 36; font.pixelSize: 15
-                            enabled: checkan1ntc.checked; inputMethodHints: Qt.ImhFormattedNumbersOnly; onEditingFinished: inputs.setInputs()
-                        }
-                        StyledCheckBox {
-                            id: checkan1100; Layout.preferredWidth: divCheckColW; Layout.preferredHeight: 36
-                            onCheckStateChanged: inputs.setInputs()
-                        }
-                        StyledCheckBox {
-                            id: checkan11k; Layout.preferredWidth: divCheckColW; Layout.preferredHeight: 36
-                            onCheckStateChanged: inputs.setInputs()
-                        }
-                    }
-
-                    // AN 2 NTC row
-                    RowLayout {
-                        Layout.fillWidth: true; Layout.preferredHeight: 38; spacing: 2
-                        Layout.leftMargin: 12; Layout.rightMargin: 12
-                        StyledCheckBox {
-                            id: checkan2ntc; Layout.preferredWidth: ntcCheckColW; Layout.preferredHeight: 36
-                            onCheckStateChanged: inputs.setInputs()
-                        }
-                        StyledComboBox {
-                            id: ntcPreset2; model: ntcPresetNames
-                            Layout.preferredWidth: ntcPresetColW; Layout.preferredHeight: 36; font.pixelSize: 15
-                            enabled: checkan2ntc.checked
-                            onActivated: applyNtcPreset(currentText, t12, r12, t22, r22, t32, r32)
-                        }
-                        StyledTextField {
-                            id: t12; Layout.preferredWidth: shFieldW; Layout.preferredHeight: 36; font.pixelSize: 15
-                            enabled: checkan2ntc.checked; inputMethodHints: Qt.ImhFormattedNumbersOnly; onEditingFinished: inputs.setInputs()
-                        }
-                        StyledTextField {
-                            id: r12; Layout.preferredWidth: shFieldW; Layout.preferredHeight: 36; font.pixelSize: 15
-                            enabled: checkan2ntc.checked; inputMethodHints: Qt.ImhFormattedNumbersOnly; onEditingFinished: inputs.setInputs()
-                        }
-                        StyledTextField {
-                            id: t22; Layout.preferredWidth: shFieldW; Layout.preferredHeight: 36; font.pixelSize: 15
-                            enabled: checkan2ntc.checked; inputMethodHints: Qt.ImhFormattedNumbersOnly; onEditingFinished: inputs.setInputs()
-                        }
-                        StyledTextField {
-                            id: r22; Layout.preferredWidth: shFieldW; Layout.preferredHeight: 36; font.pixelSize: 15
-                            enabled: checkan2ntc.checked; inputMethodHints: Qt.ImhFormattedNumbersOnly; onEditingFinished: inputs.setInputs()
-                        }
-                        StyledTextField {
-                            id: t32; Layout.preferredWidth: shFieldW; Layout.preferredHeight: 36; font.pixelSize: 15
-                            enabled: checkan2ntc.checked; inputMethodHints: Qt.ImhFormattedNumbersOnly; onEditingFinished: inputs.setInputs()
-                        }
-                        StyledTextField {
-                            id: r32; Layout.preferredWidth: shFieldW; Layout.preferredHeight: 36; font.pixelSize: 15
-                            enabled: checkan2ntc.checked; inputMethodHints: Qt.ImhFormattedNumbersOnly; onEditingFinished: inputs.setInputs()
-                        }
-                        StyledCheckBox {
-                            id: checkan2100; Layout.preferredWidth: divCheckColW; Layout.preferredHeight: 36
-                            onCheckStateChanged: inputs.setInputs()
-                        }
-                        StyledCheckBox {
-                            id: checkan21k; Layout.preferredWidth: divCheckColW; Layout.preferredHeight: 36
-                            onCheckStateChanged: inputs.setInputs()
-                        }
-                    }
-
-                    // AN 3 NTC row
-                    RowLayout {
-                        Layout.fillWidth: true; Layout.preferredHeight: 38; spacing: 2
-                        Layout.leftMargin: 12; Layout.rightMargin: 12
-                        StyledCheckBox {
-                            id: checkan3ntc; Layout.preferredWidth: ntcCheckColW; Layout.preferredHeight: 36
-                            onCheckStateChanged: inputs.setInputs()
-                        }
-                        StyledComboBox {
-                            id: ntcPreset3; model: ntcPresetNames
-                            Layout.preferredWidth: ntcPresetColW; Layout.preferredHeight: 36; font.pixelSize: 15
-                            enabled: checkan3ntc.checked
-                            onActivated: applyNtcPreset(currentText, t13, r13, t23, r23, t33, r33)
-                        }
-                        StyledTextField {
-                            id: t13; Layout.preferredWidth: shFieldW; Layout.preferredHeight: 36; font.pixelSize: 15
-                            enabled: checkan3ntc.checked; inputMethodHints: Qt.ImhFormattedNumbersOnly; onEditingFinished: inputs.setInputs()
-                        }
-                        StyledTextField {
-                            id: r13; Layout.preferredWidth: shFieldW; Layout.preferredHeight: 36; font.pixelSize: 15
-                            enabled: checkan3ntc.checked; inputMethodHints: Qt.ImhFormattedNumbersOnly; onEditingFinished: inputs.setInputs()
-                        }
-                        StyledTextField {
-                            id: t23; Layout.preferredWidth: shFieldW; Layout.preferredHeight: 36; font.pixelSize: 15
-                            enabled: checkan3ntc.checked; inputMethodHints: Qt.ImhFormattedNumbersOnly; onEditingFinished: inputs.setInputs()
-                        }
-                        StyledTextField {
-                            id: r23; Layout.preferredWidth: shFieldW; Layout.preferredHeight: 36; font.pixelSize: 15
-                            enabled: checkan3ntc.checked; inputMethodHints: Qt.ImhFormattedNumbersOnly; onEditingFinished: inputs.setInputs()
-                        }
-                        StyledTextField {
-                            id: t33; Layout.preferredWidth: shFieldW; Layout.preferredHeight: 36; font.pixelSize: 15
-                            enabled: checkan3ntc.checked; inputMethodHints: Qt.ImhFormattedNumbersOnly; onEditingFinished: inputs.setInputs()
-                        }
-                        StyledTextField {
-                            id: r33; Layout.preferredWidth: shFieldW; Layout.preferredHeight: 36; font.pixelSize: 15
-                            enabled: checkan3ntc.checked; inputMethodHints: Qt.ImhFormattedNumbersOnly; onEditingFinished: inputs.setInputs()
-                        }
-                        StyledCheckBox {
-                            id: checkan3100; Layout.preferredWidth: divCheckColW; Layout.preferredHeight: 36
-                            onCheckStateChanged: inputs.setInputs()
-                        }
-                        StyledCheckBox {
-                            id: checkan31k; Layout.preferredWidth: divCheckColW; Layout.preferredHeight: 36
-                            onCheckStateChanged: inputs.setInputs()
-                        }
-                    }
-
-                    // AN 4 NTC row
-                    RowLayout {
-                        Layout.fillWidth: true; Layout.preferredHeight: 38; spacing: 2
-                        Layout.leftMargin: 12; Layout.rightMargin: 12
-                        StyledCheckBox {
-                            id: checkan4ntc; Layout.preferredWidth: ntcCheckColW; Layout.preferredHeight: 36
-                            onCheckStateChanged: inputs.setInputs()
-                        }
-                        StyledComboBox {
-                            id: ntcPreset4; model: ntcPresetNames
-                            Layout.preferredWidth: ntcPresetColW; Layout.preferredHeight: 36; font.pixelSize: 15
-                            enabled: checkan4ntc.checked
-                            onActivated: applyNtcPreset(currentText, t14, r14, t24, r24, t34, r34)
-                        }
-                        StyledTextField {
-                            id: t14; Layout.preferredWidth: shFieldW; Layout.preferredHeight: 36; font.pixelSize: 15
-                            enabled: checkan4ntc.checked; inputMethodHints: Qt.ImhFormattedNumbersOnly; onEditingFinished: inputs.setInputs()
-                        }
-                        StyledTextField {
-                            id: r14; Layout.preferredWidth: shFieldW; Layout.preferredHeight: 36; font.pixelSize: 15
-                            enabled: checkan4ntc.checked; inputMethodHints: Qt.ImhFormattedNumbersOnly; onEditingFinished: inputs.setInputs()
-                        }
-                        StyledTextField {
-                            id: t24; Layout.preferredWidth: shFieldW; Layout.preferredHeight: 36; font.pixelSize: 15
-                            enabled: checkan4ntc.checked; inputMethodHints: Qt.ImhFormattedNumbersOnly; onEditingFinished: inputs.setInputs()
-                        }
-                        StyledTextField {
-                            id: r24; Layout.preferredWidth: shFieldW; Layout.preferredHeight: 36; font.pixelSize: 15
-                            enabled: checkan4ntc.checked; inputMethodHints: Qt.ImhFormattedNumbersOnly; onEditingFinished: inputs.setInputs()
-                        }
-                        StyledTextField {
-                            id: t34; Layout.preferredWidth: shFieldW; Layout.preferredHeight: 36; font.pixelSize: 15
-                            enabled: checkan4ntc.checked; inputMethodHints: Qt.ImhFormattedNumbersOnly; onEditingFinished: inputs.setInputs()
-                        }
-                        StyledTextField {
-                            id: r34; Layout.preferredWidth: shFieldW; Layout.preferredHeight: 36; font.pixelSize: 15
-                            enabled: checkan4ntc.checked; inputMethodHints: Qt.ImhFormattedNumbersOnly; onEditingFinished: inputs.setInputs()
-                        }
-                        StyledCheckBox {
-                            id: checkan4100; Layout.preferredWidth: divCheckColW; Layout.preferredHeight: 36
-                            onCheckStateChanged: inputs.setInputs()
-                        }
-                        StyledCheckBox {
-                            id: checkan41k; Layout.preferredWidth: divCheckColW; Layout.preferredHeight: 36
-                            onCheckStateChanged: inputs.setInputs()
-                        }
-                    }
-
-                    // AN 5 NTC row
-                    RowLayout {
-                        Layout.fillWidth: true; Layout.preferredHeight: 38; spacing: 2
-                        Layout.leftMargin: 12; Layout.rightMargin: 12
-                        StyledCheckBox {
-                            id: checkan5ntc; Layout.preferredWidth: ntcCheckColW; Layout.preferredHeight: 36
-                            onCheckStateChanged: inputs.setInputs()
-                        }
-                        StyledComboBox {
-                            id: ntcPreset5; model: ntcPresetNames
-                            Layout.preferredWidth: ntcPresetColW; Layout.preferredHeight: 36; font.pixelSize: 15
-                            enabled: checkan5ntc.checked
-                            onActivated: applyNtcPreset(currentText, t15, r15, t25, r25, t35, r35)
-                        }
-                        StyledTextField {
-                            id: t15; Layout.preferredWidth: shFieldW; Layout.preferredHeight: 36; font.pixelSize: 15
-                            enabled: checkan5ntc.checked; inputMethodHints: Qt.ImhFormattedNumbersOnly; onEditingFinished: inputs.setInputs()
-                        }
-                        StyledTextField {
-                            id: r15; Layout.preferredWidth: shFieldW; Layout.preferredHeight: 36; font.pixelSize: 15
-                            enabled: checkan5ntc.checked; inputMethodHints: Qt.ImhFormattedNumbersOnly; onEditingFinished: inputs.setInputs()
-                        }
-                        StyledTextField {
-                            id: t25; Layout.preferredWidth: shFieldW; Layout.preferredHeight: 36; font.pixelSize: 15
-                            enabled: checkan5ntc.checked; inputMethodHints: Qt.ImhFormattedNumbersOnly; onEditingFinished: inputs.setInputs()
-                        }
-                        StyledTextField {
-                            id: r25; Layout.preferredWidth: shFieldW; Layout.preferredHeight: 36; font.pixelSize: 15
-                            enabled: checkan5ntc.checked; inputMethodHints: Qt.ImhFormattedNumbersOnly; onEditingFinished: inputs.setInputs()
-                        }
-                        StyledTextField {
-                            id: t35; Layout.preferredWidth: shFieldW; Layout.preferredHeight: 36; font.pixelSize: 15
-                            enabled: checkan5ntc.checked; inputMethodHints: Qt.ImhFormattedNumbersOnly; onEditingFinished: inputs.setInputs()
-                        }
-                        StyledTextField {
-                            id: r35; Layout.preferredWidth: shFieldW; Layout.preferredHeight: 36; font.pixelSize: 15
-                            enabled: checkan5ntc.checked; inputMethodHints: Qt.ImhFormattedNumbersOnly; onEditingFinished: inputs.setInputs()
-                        }
-                        StyledCheckBox {
-                            id: checkan5100; Layout.preferredWidth: divCheckColW; Layout.preferredHeight: 36
-                            onCheckStateChanged: inputs.setInputs()
-                        }
-                        StyledCheckBox {
-                            id: checkan51k; Layout.preferredWidth: divCheckColW; Layout.preferredHeight: 36
-                            onCheckStateChanged: inputs.setInputs()
-                        }
-                    }
-
-                    Text {
-                        text: "AN 6-7: No NTC"
-                        font.pixelSize: 12; font.italic: true; color: "#606080"
-                        Layout.fillWidth: true
-                        Layout.preferredHeight: 28
-                        verticalAlignment: Text.AlignVCenter
-                    }
+                StyledSwitch {
+                    id: maxBrightnessBoot
+                    text: checked ? "On" : "Off"
+                    Layout.preferredWidth: 100
+                    onCheckedChanged: inputs.setInputs()
                 }
             }
+        }
+    }
 
-            // =============================================================
-            // SECTION 3: Board Configuration
-            // =============================================================
-            SettingsSection {
-                title: "Board Configuration"
+    // =============================================================
+    // SECTION 4: Sensor Mapping
+    // =============================================================
+    SettingsSection {
+        title: "Sensor Mapping"
+        Layout.fillWidth: true
+
+        RowLayout {
+            Layout.fillWidth: true
+            spacing: SettingsTheme.controlGap + 8
+
+            ColumnLayout {
                 Layout.fillWidth: true
+                spacing: SettingsTheme.contentSpacing
 
-                ColumnLayout {
-                    Layout.fillWidth: true
-                    spacing: 12
+                Text {
+                    text: "Analog Channels"
+                    font.pixelSize: SettingsTheme.fontStatus; font.weight: Font.DemiBold; font.family: SettingsTheme.fontFamily
+                    color: SettingsTheme.accent
+                }
 
+                Repeater {
+                    model: 8
                     RowLayout {
-                        Layout.fillWidth: true
-                        spacing: 12
+                        spacing: SettingsTheme.contentSpacing
                         Text {
-                            text: "AN7 Damping"
-                            font.pixelSize: 18; color: "#FFFFFF"
-                            verticalAlignment: Text.AlignVCenter
+                            text: "EX AN " + index
+                            font.pixelSize: SettingsTheme.fontStatus; font.family: SettingsTheme.fontFamily; color: SettingsTheme.textPrimary
+                            Layout.preferredWidth: 80
                         }
                         StyledTextField {
-                            id: an7dampingfactor
-                            text: "0"
-                            Layout.preferredWidth: 80; Layout.preferredHeight: 36
-                            font.pixelSize: 15
-                            inputMethodHints: Qt.ImhFormattedNumbersOnly
-                            validator: RegularExpressionValidator { regularExpression: /^(?:[1-9]\d{0,2}|1000)$/ }
-                            onEditingFinished: inputs.setInputs()
-                        }
-                        Item { Layout.fillWidth: true }
-                    }
-
-                    RowLayout {
-                        Layout.fillWidth: true
-                        spacing: 12
-                        Text {
-                            text: "RPM Source"
-                            font.pixelSize: 18; color: "#FFFFFF"
-                            Layout.preferredWidth: 160
-                        }
-                        StyledComboBox {
-                            id: rpmsourceselector
-                            Layout.preferredHeight: 36
-                            font.pixelSize: 15
-                            model: ["None", "CAN RPM", "EX Digital 1 Tach"]
-                            onActivated: inputs.setInputs()
-                        }
-                        Item { Layout.fillWidth: true }
-                    }
-
-                    RowLayout {
-                        Layout.fillWidth: true
-                        spacing: 12
-                        visible: rpmsourceselector.currentIndex === 1
-                        Text {
-                            text: Translator.translate("Version", Settings.language) + ":"
-                            font.pixelSize: 15; color: "#FFFFFF"
-                            verticalAlignment: Text.AlignVCenter
-                        }
-                        StyledComboBox {
-                            id: rpmcanversionselector
-                            Layout.preferredWidth: 80; Layout.preferredHeight: 36
-                            font.pixelSize: 15
-                            model: ["V1", "V2"]
-                            onActivated: inputs.setInputs()
-                        }
-                        Text {
-                            text: Translator.translate("Cylinders", Settings.language) + ":"
-                            font.pixelSize: 15; color: "#FFFFFF"
-                            verticalAlignment: Text.AlignVCenter
-                        }
-                        StyledComboBox {
-                            id: cylindercombobox
-                            visible: rpmcanversionselector.currentIndex == 0
-                            Layout.preferredWidth: 90; Layout.preferredHeight: 36
-                            font.pixelSize: 15
-                            model: ["0.5", "0.6", "0.7", "0.8", "0.9", "1", "1.1", "1.2", "1.3", "1.4", "1.5", "1.6", "1.7", "1.8", "1.9", "2", "2.1", "2.2", "2.3", "2.4", "2.5", "2.6", "2.7", "2.8", "2.9", "3", "3.1", "3.2", "3.3", "3.4", "3.5", "3.6", "3.7", "3.8", "3.9", "4", "4.1", "4.2", "4.3", "4.4", "4.5", "4.6", "4.7", "4.8", "4.9", "5", "5.1", "5.2", "5.3", "5.4", "5.5", "5.6", "5.7", "5.8", "5.9", "6", "6.1", "6.2", "6.3", "6.4", "6.5", "6.6", "6.7", "6.8", "6.9", "7", "7.1", "7.2", "7.3", "7.4", "7.5", "7.6", "7.7", "7.8", "7.9", "8", "8.1", "8.2", "8.3", "8.4", "8.5", "8.6", "8.7", "8.8", "8.9", "9", "9.1", "9.2", "9.3", "9.4", "9.5", "9.6", "9.7", "9.8", "9.9", "10", "10.1", "10.2", "10.3", "10.4", "10.5", "10.6", "10.7", "10.8", "10.9", "11", "11.1", "11.2", "11.3", "11.4", "11.5", "11.6", "11.7", "11.8", "11.9", "12", "12.1", "12.2", "12.3", "12.4", "12.5", "12.6", "12.7", "12.8", "12.9"]
-                            onActivated: inputs.setInputs()
-                        }
-                        StyledComboBox {
-                            id: cylindercomboboxv2
-                            visible: rpmcanversionselector.currentIndex == 1
-                            Layout.preferredWidth: 90; Layout.preferredHeight: 36
-                            font.pixelSize: 15
-                            model: ["1", "2", "3", "4", "5", "6", "8", "12"]
-                            onActivated: inputs.setInputs()
-                        }
-                        Item { Layout.fillWidth: true }
-                    }
-
-                    RowLayout {
-                        Layout.fillWidth: true
-                        spacing: 12
-                        visible: rpmsourceselector.currentIndex === 2
-                        Text {
-                            text: Translator.translate("Cylinders", Settings.language) + ":"
-                            font.pixelSize: 15; color: "#FFFFFF"
-                            verticalAlignment: Text.AlignVCenter
-                        }
-                        StyledComboBox {
-                            id: cylindercomboboxDi1
-                            Layout.preferredWidth: 90; Layout.preferredHeight: 36
-                            font.pixelSize: 15
-                            model: ["1", "2", "3", "4", "5", "6", "8", "12"]
-                            onActivated: cylindercalcrpmdi1.cylindercalcrpmdi1()
-                        }
-                        Item { Layout.fillWidth: true }
-                    }
-
-                    RowLayout {
-                        Layout.fillWidth: true
-                        spacing: 12
-                        Text {
-                            text: "Headlight Channel"
-                            font.pixelSize: 18; color: "#FFFFFF"
-                            verticalAlignment: Text.AlignVCenter
-                        }
-                        StyledComboBox {
-                            id: digitalExtender
-                            model: comboBoxModel
-                            textRole: "text"
-                            Layout.preferredWidth: 200; Layout.preferredHeight: 36
-                            font.pixelSize: 15
-                            onCurrentIndexChanged: {
-                                digiValue = currentIndex;
-                                digiStringValue = "Ex Digital Input " + (currentIndex + 1);
-                            }
-                        }
-                        Item { Layout.fillWidth: true }
-                    }
-
-                    RowLayout {
-                        Layout.fillWidth: true
-                        spacing: 12
-                        Text {
-                            text: "CAN/IO Brightness"
-                            font.pixelSize: 18; color: "#FFFFFF"
-                            verticalAlignment: Text.AlignVCenter
-                        }
-                        StyledSwitch {
-                            id: maxBrightnessBoot
-                            text: checked ? "On" : "Off"
-                            Layout.preferredWidth: 100
-                            onCheckedChanged: inputs.setInputs()
-                        }
-                        Item { Layout.fillWidth: true }
-                    }
-                }
-            }
-
-            // =============================================================
-            // SECTION 4: Sensor Mapping
-            // =============================================================
-            SettingsSection {
-                title: "Sensor Mapping"
-                Layout.fillWidth: true
-
-                RowLayout {
-                    Layout.fillWidth: true
-                    spacing: 24
-
-                    ColumnLayout {
-                        Layout.fillWidth: true
-                        spacing: 6
-
-                        Text {
-                            text: "Analog Channels"
-                            font.pixelSize: 16; font.weight: Font.DemiBold; color: "#009688"
-                        }
-
-                        Repeater {
-                            model: 8
-                            RowLayout {
-                                spacing: 8
-                                Text {
-                                    text: "EX AN " + index
-                                    font.pixelSize: 15; color: "#FFFFFF"
-                                    Layout.preferredWidth: 80
-                                }
-                                StyledTextField {
-                                    id: anNameField
-                                    Layout.fillWidth: true
-                                    Layout.preferredHeight: 36
-                                    font.pixelSize: 15
-                                    placeholderText: "Custom name..."
-                                    Component.onCompleted: {
-                                        if (index === 0) mainWindow.exan0nameRef = anNameField
-                                        else if (index === 1) mainWindow.exan1nameRef = anNameField
-                                        else if (index === 2) mainWindow.exan2nameRef = anNameField
-                                        else if (index === 3) mainWindow.exan3nameRef = anNameField
-                                        else if (index === 4) mainWindow.exan4nameRef = anNameField
-                                        else if (index === 5) mainWindow.exan5nameRef = anNameField
-                                        else if (index === 6) mainWindow.exan6nameRef = anNameField
-                                        else if (index === 7) mainWindow.exan7nameRef = anNameField
-                                    }
-                                }
+                            id: anNameField
+                            Layout.fillWidth: true
+                            Layout.preferredHeight: SettingsTheme.controlHeight
+                            font.pixelSize: SettingsTheme.fontStatus
+                            placeholderText: "Custom name..."
+                            Component.onCompleted: {
+                                if (index === 0) mainWindow.exan0nameRef = anNameField
+                                else if (index === 1) mainWindow.exan1nameRef = anNameField
+                                else if (index === 2) mainWindow.exan2nameRef = anNameField
+                                else if (index === 3) mainWindow.exan3nameRef = anNameField
+                                else if (index === 4) mainWindow.exan4nameRef = anNameField
+                                else if (index === 5) mainWindow.exan5nameRef = anNameField
+                                else if (index === 6) mainWindow.exan6nameRef = anNameField
+                                else if (index === 7) mainWindow.exan7nameRef = anNameField
                             }
                         }
                     }
+                }
+            }
 
-                    ColumnLayout {
-                        Layout.fillWidth: true
-                        spacing: 6
+            ColumnLayout {
+                Layout.fillWidth: true
+                spacing: SettingsTheme.contentSpacing
 
+                Text {
+                    text: "Digital Channels"
+                    font.pixelSize: SettingsTheme.fontStatus; font.weight: Font.DemiBold; font.family: SettingsTheme.fontFamily
+                    color: SettingsTheme.accent
+                }
+
+                Repeater {
+                    model: 8
+                    RowLayout {
+                        spacing: SettingsTheme.contentSpacing
                         Text {
-                            text: "Digital Channels"
-                            font.pixelSize: 16; font.weight: Font.DemiBold; color: "#009688"
+                            text: "EX Digi " + (index + 1)
+                            font.pixelSize: SettingsTheme.fontStatus; font.family: SettingsTheme.fontFamily; color: SettingsTheme.textPrimary
+                            Layout.preferredWidth: 80
                         }
-
-                        Repeater {
-                            model: 8
-                            RowLayout {
-                                spacing: 8
-                                Text {
-                                    text: "EX Digi " + (index + 1)
-                                    font.pixelSize: 15; color: "#FFFFFF"
-                                    Layout.preferredWidth: 80
-                                }
-                                StyledTextField {
-                                    id: digiNameField
-                                    Layout.fillWidth: true
-                                    Layout.preferredHeight: 36
-                                    font.pixelSize: 15
-                                    placeholderText: "Custom name..."
-                                    Component.onCompleted: {
-                                        if (index === 0) mainWindow.exdigi1nameRef = digiNameField
-                                        else if (index === 1) mainWindow.exdigi2nameRef = digiNameField
-                                        else if (index === 2) mainWindow.exdigi3nameRef = digiNameField
-                                        else if (index === 3) mainWindow.exdigi4nameRef = digiNameField
-                                        else if (index === 4) mainWindow.exdigi5nameRef = digiNameField
-                                        else if (index === 5) mainWindow.exdigi6nameRef = digiNameField
-                                        else if (index === 6) mainWindow.exdigi7nameRef = digiNameField
-                                        else if (index === 7) mainWindow.exdigi8nameRef = digiNameField
-                                    }
-                                }
+                        StyledTextField {
+                            id: digiNameField
+                            Layout.fillWidth: true
+                            Layout.preferredHeight: SettingsTheme.controlHeight
+                            font.pixelSize: SettingsTheme.fontStatus
+                            placeholderText: "Custom name..."
+                            Component.onCompleted: {
+                                if (index === 0) mainWindow.exdigi1nameRef = digiNameField
+                                else if (index === 1) mainWindow.exdigi2nameRef = digiNameField
+                                else if (index === 2) mainWindow.exdigi3nameRef = digiNameField
+                                else if (index === 3) mainWindow.exdigi4nameRef = digiNameField
+                                else if (index === 4) mainWindow.exdigi5nameRef = digiNameField
+                                else if (index === 5) mainWindow.exdigi6nameRef = digiNameField
+                                else if (index === 6) mainWindow.exdigi7nameRef = digiNameField
+                                else if (index === 7) mainWindow.exdigi8nameRef = digiNameField
                             }
                         }
                     }
