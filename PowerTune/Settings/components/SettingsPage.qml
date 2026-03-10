@@ -7,7 +7,8 @@ import QtQuick.Layouts 1.15
 
 Rectangle {
     id: root
-    anchors.fill: parent
+    Layout.fillWidth: true
+    Layout.fillHeight: true
     color: SettingsTheme.background
 
     default property alias content: contentColumn.data

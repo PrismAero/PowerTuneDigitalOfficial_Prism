@@ -9,7 +9,6 @@ RowLayout {
 
     property string label: ""
     property string description: ""
-    property bool visible: true
     default property alias control: controlContainer.data
 
     Layout.fillWidth: true
