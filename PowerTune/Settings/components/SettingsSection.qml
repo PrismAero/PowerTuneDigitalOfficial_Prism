@@ -14,7 +14,8 @@ Rectangle {
 
     Layout.fillWidth: true
     implicitHeight: collapsed ? headerRow.height + (SettingsTheme.sectionPadding * 2)
-                              : headerRow.height + contentColumn.height + (SettingsTheme.sectionPadding * 2) + SettingsTheme.sectionPadding
+                              : headerRow.height + contentColumn.height + (SettingsTheme.sectionPadding * 2)
+                                + (SettingsTheme.contentSpacing * 2) + SettingsTheme.borderWidth
     color: SettingsTheme.surface
     radius: SettingsTheme.radiusLarge
     border.color: SettingsTheme.border

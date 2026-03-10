@@ -29,7 +29,10 @@ Rectangle {
 
     RowLayout {
         anchors.fill: parent
-        anchors.margins: 12
+        anchors.leftMargin: 12
+        anchors.rightMargin: 12
+        anchors.topMargin: 0
+        anchors.bottomMargin: 0
         spacing: 8
 
         // * Status indicator dot

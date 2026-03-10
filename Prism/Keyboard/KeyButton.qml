@@ -46,7 +46,7 @@ Rectangle {
         visible: root.iconName === ""
         text: root.text
         color: pressArea.pressed || root.isAccent || root.isDestructive
-               ? "#ffffff" : KeyboardTheme.textPrimary
+               ? KeyboardTheme.textOnAccent : KeyboardTheme.textPrimary
         font.pixelSize: root.fontSize
         font.family: KeyboardTheme.fontFamily
     }
@@ -58,7 +58,7 @@ Rectangle {
         icon: root.iconName
         iconSize: root.iconSize
         iconColor: pressArea.pressed || root.isAccent || root.isDestructive
-                   ? "#ffffff" : KeyboardTheme.textPrimary
+                   ? KeyboardTheme.textOnAccent : KeyboardTheme.textPrimary
     }
 
     MouseArea {

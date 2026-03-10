@@ -7,11 +7,14 @@ Button {
     property bool primary: true
     property bool danger: false
 
-    implicitWidth: Math.max(SettingsTheme.buttonMinWidth, contentItem.implicitWidth + 40)
-    implicitHeight: Math.max(SettingsTheme.controlHeight, contentItem.implicitHeight + 20)
+    implicitWidth: Math.max(SettingsTheme.buttonMinWidth, contentItem.implicitWidth + 24)
+    implicitHeight: SettingsTheme.controlHeight
     font.pixelSize: SettingsTheme.fontControl
     font.family: SettingsTheme.fontFamily
     font.weight: Font.DemiBold
+    topPadding: 0
+    bottomPadding: 0
+    padding: 0
 
     contentItem: Text {
         text: root.text

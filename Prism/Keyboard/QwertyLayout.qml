@@ -123,9 +123,9 @@ Item {
             }
 
             KeyButton {
-                iconName: "keyboard_return"
+                iconName: "check"
                 keyValue: "enter"
-                iconSize: 18
+                iconSize: 20
                 isAccent: true
                 width: qwertyLayout.standardKeyWidth * 1.5
                 height: qwertyLayout.rowHeight

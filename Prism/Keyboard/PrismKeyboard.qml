@@ -117,12 +117,39 @@ Item {
                 horizontalAlignment: Text.AlignHCenter
             }
 
+            // Close/hide keyboard button
+            Rectangle {
+                id: closeButton
+                anchors.right: parent.right
+                anchors.verticalCenter: parent.verticalCenter
+                anchors.rightMargin: KeyboardTheme.keySpacing
+                width: KeyboardTheme.controlHeight
+                height: Math.max(parent.height - 4, 28)
+                radius: KeyboardTheme.radiusSmall - 2
+                color: closeArea.pressed ? KeyboardTheme.accentPressed : KeyboardTheme.accent
+                border.width: KeyboardTheme.borderWidth
+                border.color: KeyboardTheme.accentPressed
+
+                KeyIcon {
+                    anchors.centerIn: parent
+                    icon: "keyboard_hide"
+                    iconSize: 18
+                    iconColor: KeyboardTheme.textOnAccent
+                }
+
+                MouseArea {
+                    id: closeArea
+                    anchors.fill: parent
+                    onClicked: keyboard.hide()
+                }
+            }
+
             // Popout/dock toggle button
             Rectangle {
                 id: popoutButton
-                anchors.right: parent.right
+                anchors.right: closeButton.left
                 anchors.verticalCenter: parent.verticalCenter
-                anchors.rightMargin: 6
+                anchors.rightMargin: 4
                 width: 28
                 height: 22
                 radius: KeyboardTheme.radiusSmall - 2

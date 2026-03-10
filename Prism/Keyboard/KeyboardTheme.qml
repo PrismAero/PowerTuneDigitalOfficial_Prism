@@ -26,6 +26,7 @@ QtObject {
     // -- Accent --
     readonly property color accent: "#009688"
     readonly property color accentPressed: "#00796B"
+    readonly property color textOnAccent: "#FFFFFF"
 
     // -- Destructive / error --
     readonly property color error: "#F44336"

@@ -35,7 +35,7 @@ QtObject {
     // -- Spacing --
     readonly property int pageMargin: 16
     readonly property int sectionSpacing: 16
-    readonly property int sectionPadding: 12
+    readonly property int sectionPadding: 16
     readonly property int contentSpacing: 10
     readonly property int controlGap: 16
     readonly property int labelWidth: 180
@@ -53,14 +53,14 @@ QtObject {
     readonly property int fontCaption: 14
 
     // -- Control sizes --
-    readonly property int controlHeight: 48
+    readonly property int controlHeight: 36
     readonly property int buttonMinWidth: 100
     readonly property int textFieldMinWidth: 120
     readonly property int comboBoxMinWidth: 100
     readonly property int switchTrackWidth: 52
     readonly property int switchTrackHeight: 28
     readonly property int switchKnobSize: 22
-    readonly property int checkBoxSize: 28
+    readonly property int checkBoxSize: 36
     readonly property int statusDotSize: 12
 
     // -- Border and radius --
