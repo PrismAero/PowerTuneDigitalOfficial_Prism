@@ -69,6 +69,7 @@ set(CORE_SOURCES
     Core/Models/SensorData.cpp
     Core/Models/ConnectionData.cpp
     Core/Models/SettingsData.cpp
+    Core/Models/CanFrameModel.cpp
 )
 
 set(CORE_HEADERS
@@ -92,6 +93,7 @@ set(CORE_HEADERS
     Core/Models/SensorData.h
     Core/Models/ConnectionData.h
     Core/Models/SettingsData.h
+    Core/Models/CanFrameModel.h
 )
 
 # * Source files - Hardware interfaces
@@ -208,6 +210,9 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     set_source_files_properties(PowerTune/Dashboard/DashboardTheme.qml PROPERTIES
         QT_QML_SINGLETON_TYPE TRUE
     )
+    set_source_files_properties(PowerTune/Settings/components/SettingsTheme.qml PROPERTIES
+        QT_QML_SINGLETON_TYPE TRUE
+    )
     
     # * Create backing library targets for QML modules
     qt_add_library(PowerTuneUtilsLib STATIC)
@@ -239,7 +244,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         QML_FILES
             PowerTune/Core/Main.qml
             PowerTune/Core/Intro.qml
-            PowerTune/Core/SerialSettings.qml
+            PowerTune/Core/SettingsManager.qml
             PowerTune/Core/ExBoardAnalog.qml
             PowerTune/Core/AnalogInputs.qml
             PowerTune/Core/BrightnessPopUp.qml
@@ -252,6 +257,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         URI PowerTune.UI
         VERSION 1.0
         QML_FILES
+            PowerTune/Settings/components/SettingsTheme.qml
             PowerTune/Settings/components/SettingsPage.qml
             PowerTune/Settings/components/SettingsSection.qml
             PowerTune/Settings/components/SettingsRow.qml

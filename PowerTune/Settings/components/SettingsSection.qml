@@ -13,11 +13,12 @@ Rectangle {
     default property alias content: contentColumn.data
 
     Layout.fillWidth: true
-    implicitHeight: collapsed ? headerRow.height + 24 : headerRow.height + contentColumn.height + 36
-    color: "#1E1E2E"
-    radius: 8
-    border.color: "#2D2D4E"
-    border.width: 1
+    implicitHeight: collapsed ? headerRow.height + (SettingsTheme.sectionPadding * 2)
+                              : headerRow.height + contentColumn.height + (SettingsTheme.sectionPadding * 2) + SettingsTheme.sectionPadding
+    color: SettingsTheme.surface
+    radius: SettingsTheme.radiusLarge
+    border.color: SettingsTheme.border
+    border.width: SettingsTheme.borderWidth
 
     Behavior on implicitHeight {
         NumberAnimation { duration: 200; easing.type: Easing.OutQuad }
@@ -25,8 +26,8 @@ Rectangle {
 
     ColumnLayout {
         anchors.fill: parent
-        anchors.margins: 12
-        spacing: 8
+        anchors.margins: SettingsTheme.sectionPadding
+        spacing: SettingsTheme.contentSpacing
 
         RowLayout {
             id: headerRow
@@ -35,10 +36,10 @@ Rectangle {
 
             Text {
                 text: root.title
-                font.pixelSize: 20
+                font.pixelSize: SettingsTheme.fontSectionTitle
                 font.weight: Font.Bold
-                font.family: "Lato"
-                color: "#009688"
+                font.family: SettingsTheme.fontFamily
+                color: SettingsTheme.accent
                 Layout.fillWidth: true
             }
 
@@ -48,13 +49,13 @@ Rectangle {
                 width: 32
                 height: 32
                 radius: 16
-                color: collapseArea.pressed ? "#3D3D3D" : "transparent"
+                color: collapseArea.pressed ? SettingsTheme.surfacePressed : "transparent"
 
                 Text {
                     anchors.centerIn: parent
-                    text: root.collapsed ? "▼" : "▲"
+                    text: root.collapsed ? "v" : "^"
                     font.pixelSize: 14
-                    color: "#B0B0B0"
+                    color: SettingsTheme.textSecondary
                 }
 
                 MouseArea {
@@ -68,15 +69,15 @@ Rectangle {
         // * Divider line
         Rectangle {
             Layout.fillWidth: true
-            height: 1
-            color: "#3D3D3D"
+            height: SettingsTheme.borderWidth
+            color: SettingsTheme.border
             visible: !root.collapsed
         }
 
         ColumnLayout {
             id: contentColumn
             Layout.fillWidth: true
-            spacing: 8
+            spacing: SettingsTheme.contentSpacing
             visible: !root.collapsed
             opacity: root.collapsed ? 0 : 1
 

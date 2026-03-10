@@ -5,9 +5,9 @@ ComboBox {
     id: root
 
     implicitWidth: internal.computedWidth
-    implicitHeight: Math.max(48, fontMetrics.height + 24)
-    font.pixelSize: 22
-    font.family: "Lato"
+    implicitHeight: Math.max(SettingsTheme.controlHeight, fontMetrics.height + 24)
+    font.pixelSize: SettingsTheme.fontControl
+    font.family: SettingsTheme.fontFamily
 
     FontMetrics {
         id: fontMetrics
@@ -31,15 +31,15 @@ ComboBox {
                     if (w > maxW) maxW = w;
                 }
             }
-            return Math.max(100, maxW + 16 + 12 + 14 + 24);
+            return Math.max(SettingsTheme.comboBoxMinWidth, maxW + 16 + 12 + 14 + 24);
         }
     }
 
     background: Rectangle {
-        color: root.pressed ? "#3D3D3D" : "#2D2D2D"
-        radius: 8
-        border.color: root.activeFocus ? "#009688" : "#3D3D3D"
-        border.width: root.activeFocus ? 2 : 1
+        color: root.pressed ? SettingsTheme.surfacePressed : SettingsTheme.controlBg
+        radius: SettingsTheme.radiusSmall
+        border.color: root.activeFocus ? SettingsTheme.accent : SettingsTheme.border
+        border.width: root.activeFocus ? 2 : SettingsTheme.borderWidth
 
         Behavior on border.color { ColorAnimation { duration: 150 } }
     }
@@ -51,7 +51,7 @@ ComboBox {
         bottomPadding: 10
         text: root.displayText
         font: root.font
-        color: "#FFFFFF"
+        color: SettingsTheme.textPrimary
         verticalAlignment: Text.AlignVCenter
         elide: Text.ElideRight
     }
@@ -76,7 +76,7 @@ ComboBox {
             ctx.lineTo(width, 0)
             ctx.lineTo(width / 2, height)
             ctx.closePath()
-            ctx.fillStyle = root.pressed ? "#009688" : "#B0B0B0"
+            ctx.fillStyle = root.pressed ? SettingsTheme.accent : SettingsTheme.textSecondary
             ctx.fill()
         }
     }
@@ -88,9 +88,9 @@ ComboBox {
         contentItem: Text {
             id: delegateText
             text: root.textRole ? (Array.isArray(root.model) ? modelData[root.textRole] : model[root.textRole]) : modelData
-            color: highlighted ? "#FFFFFF" : "#B0B0B0"
-            font.pixelSize: 22
-            font.family: "Lato"
+            color: highlighted ? SettingsTheme.textPrimary : SettingsTheme.textSecondary
+            font.pixelSize: SettingsTheme.fontControl
+            font.family: SettingsTheme.fontFamily
             font.weight: root.currentIndex === index ? Font.DemiBold : Font.Normal
             elide: Text.ElideRight
             verticalAlignment: Text.AlignVCenter
@@ -100,7 +100,7 @@ ComboBox {
         }
 
         background: Rectangle {
-            color: highlighted ? "#009688" : (index % 2 === 0 ? "#2D2D2D" : "#252525")
+            color: highlighted ? SettingsTheme.accent : (index % 2 === 0 ? SettingsTheme.controlBg : SettingsTheme.surfaceElevated)
         }
 
         highlighted: root.highlightedIndex === index
@@ -121,10 +121,10 @@ ComboBox {
         }
 
         background: Rectangle {
-            color: "#1E1E1E"
-            radius: 8
-            border.color: "#3D3D3D"
-            border.width: 1
+            color: SettingsTheme.surfaceElevated
+            radius: SettingsTheme.radiusLarge
+            border.color: SettingsTheme.border
+            border.width: SettingsTheme.borderWidth
         }
     }
 }
