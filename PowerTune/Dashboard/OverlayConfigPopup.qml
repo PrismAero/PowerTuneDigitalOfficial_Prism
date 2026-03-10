@@ -357,7 +357,7 @@ Popup {
                             Layout.fillWidth: true
                             Layout.preferredHeight: SettingsTheme.controlHeight
                             colorValue: popup.arcColorStart
-                            onColorEdited: popup.arcColorStart = newColor
+                            onColorEdited: function(newColor) { popup.arcColorStart = newColor }
                         }
                     }
                     ColumnLayout {
@@ -373,7 +373,7 @@ Popup {
                             Layout.fillWidth: true
                             Layout.preferredHeight: SettingsTheme.controlHeight
                             colorValue: popup.arcColorEnd
-                            onColorEdited: popup.arcColorEnd = newColor
+                            onColorEdited: function(newColor) { popup.arcColorEnd = newColor }
                         }
                     }
                 }

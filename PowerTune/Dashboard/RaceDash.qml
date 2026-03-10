@@ -116,7 +116,9 @@ Item {
         y: 30
         width: shiftLights.width
         height: shiftLights.height
-        onConfigRequested: configPopup.openFor(overlayId, configType)
+        onConfigRequested: function(overlayId, configType) {
+            configPopup.openFor(overlayId, configType)
+        }
 
         ShiftIndicator {
             id: shiftLights
@@ -140,7 +142,9 @@ Item {
         y: 60
         width: 250
         height: 113
-        onConfigRequested: configPopup.openFor(overlayId, configType)
+        onConfigRequested: function(overlayId, configType) {
+            configPopup.openFor(overlayId, configType)
+        }
 
         Item {
             anchors.fill: parent
@@ -197,7 +201,9 @@ Item {
         y: 201
         width: 250
         height: 113
-        onConfigRequested: configPopup.openFor(overlayId, configType)
+        onConfigRequested: function(overlayId, configType) {
+            configPopup.openFor(overlayId, configType)
+        }
 
         Item {
             anchors.fill: parent
@@ -265,7 +271,9 @@ Item {
                 configType: "statusRow"
                 width: 250
                 height: 32
-                onConfigRequested: configPopup.openFor(overlayId, configType)
+                onConfigRequested: function(overlayId, configType) {
+            configPopup.openFor(overlayId, configType)
+        }
 
                 Row {
                     spacing: 0
@@ -303,7 +311,9 @@ Item {
                 configType: "statusRow"
                 width: 250
                 height: 32
-                onConfigRequested: configPopup.openFor(overlayId, configType)
+                onConfigRequested: function(overlayId, configType) {
+            configPopup.openFor(overlayId, configType)
+        }
 
                 Row {
                     spacing: 0
@@ -376,7 +386,9 @@ Item {
         y: 80
         width: 595
         height: 595
-        onConfigRequested: configPopup.openFor(overlayId, configType)
+        onConfigRequested: function(overlayId, configType) {
+            configPopup.openFor(overlayId, configType)
+        }
 
         ArcFillOverlay {
             anchors.fill: parent
@@ -405,7 +417,9 @@ Item {
         y: 238
         width: tachContent.width
         height: tachContent.height
-        onConfigRequested: configPopup.openFor(overlayId, configType)
+        onConfigRequested: function(overlayId, configType) {
+            configPopup.openFor(overlayId, configType)
+        }
 
         Column {
             id: tachContent
@@ -454,7 +468,9 @@ Item {
         y: 154
         width: 521
         height: 521
-        onConfigRequested: configPopup.openFor(overlayId, configType)
+        onConfigRequested: function(overlayId, configType) {
+            configPopup.openFor(overlayId, configType)
+        }
 
         ArcFillOverlay {
             anchors.fill: parent
@@ -483,7 +499,9 @@ Item {
         y: 374
         width: speedContent.width
         height: speedContent.height
-        onConfigRequested: configPopup.openFor(overlayId, configType)
+        onConfigRequested: function(overlayId, configType) {
+            configPopup.openFor(overlayId, configType)
+        }
 
         Column {
             id: speedContent
@@ -522,7 +540,9 @@ Item {
         y: 680
         width: 1600
         height: 40
-        onConfigRequested: configPopup.openFor(overlayId, configType)
+        onConfigRequested: function(overlayId, configType) {
+            configPopup.openFor(overlayId, configType)
+        }
 
         BottomStatusBar {
             anchors.fill: parent
