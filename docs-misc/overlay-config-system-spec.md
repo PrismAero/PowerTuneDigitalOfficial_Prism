@@ -73,6 +73,50 @@ graph TD
   rings, labels, divider lines. Dynamic overlays only draw fills, values, and
   interactive elements.
 
+### 1.4 Global Unit Configuration
+
+[`SettingsData`](../Core/Models/SettingsData.h:28) provides three global unit
+properties accessible via `PropertyRouter`:
+
+| Property | PropertyRouter Key | Values | Description |
+|----------|-------------------|--------|-------------|
+| `units` | `"units"` | `"Celsius"` / `"Fahrenheit"` | Temperature display unit |
+| `speedunits` | `"speedunits"` | `"MPH"` / `"KPH"` | Speed display unit |
+| `pressureunits` | `"pressureunits"` | `"PSI"` / `"Bar"` | Pressure display unit |
+
+These are set globally in the main settings page and apply across all dashboards.
+Overlays should use these global units as their initial/default unit labels rather
+than hardcoding unit strings. The per-overlay `unit` property in the config popup
+should default to the global unit setting but can be overridden per-widget.
+
+**Access pattern in QML:**
+
+```qml
+// Read global speed unit
+var globalSpeedUnit = PropertyRouter.getValue("speedunits");
+// Use as default when no per-overlay unit is configured
+```
+
+[`SettingsData`](../Core/Models/SettingsData.h) also provides related
+configuration that overlays may reference:
+
+| Property | Key | Type | Description |
+|----------|-----|------|-------------|
+| `maxRPM` | `"maxRPM"` | `int` | Global max RPM setting |
+| `rpmStage1-4` | `"rpmStage1"` etc. | `int` | RPM shift light stages |
+| `waterwarn` | `"waterwarn"` | `int` | Water temp warning threshold |
+| `rpmwarn` | `"rpmwarn"` | `int` | RPM warning threshold |
+| `knockwarn` | `"knockwarn"` | `int` | Knock warning threshold |
+| `boostwarn` | `"boostwarn"` | `qreal` | Boost warning threshold |
+| `pulsespermile` | `"pulsespermile"` | `qreal` | Speed sensor pulses per mile |
+| `gearcalc1-6` | `"gearcalc1"` etc. | `int` | Gear calculation RPM/speed ratios |
+
+The overlay config system should use `maxRPM` as the default for tach `maxValue`
+(already done in [`OverlayConfigManager`](../Utils/OverlayConfigManager.cpp:135))
+and should use the global warning thresholds (`waterwarn`, `rpmwarn`, etc.) as
+sensible defaults for per-overlay warning thresholds when the user first enables
+warnings.
+
 ---
 
 ## 2. Per-Overlay Property Tables
