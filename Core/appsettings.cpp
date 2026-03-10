@@ -563,6 +563,69 @@ void AppSettings::removeOverlayConfig(const QString &dashboardId, const QString 
     settings.endGroup();
 }
 
+// * Expander board sensor config persistence
+
+void AppSettings::writeGearSensorConfig(const QVariantMap &config)
+{
+    static const char *prefix = "ui/exboard/gearSensor/";
+    const QStringList keys = {"enabled", "port", "tolerance", "voltageN", "voltageR",
+                              "voltage1", "voltage2", "voltage3", "voltage4", "voltage5", "voltage6"};
+    for (const QString &key : keys) {
+        if (config.contains(key))
+            setValue(QString(prefix) + key, config.value(key));
+    }
+    if (m_extender)
+        m_extender->setGearVoltageConfig(config);
+}
+
+QVariantMap AppSettings::readGearSensorConfig()
+{
+    static const char *prefix = "ui/exboard/gearSensor/";
+    QVariantMap config;
+    config["enabled"] = getValue(QString(prefix) + "enabled", false);
+    config["port"] = getValue(QString(prefix) + "port", 0);
+    config["tolerance"] = getValue(QString(prefix) + "tolerance", 0.2);
+    config["voltageN"] = getValue(QString(prefix) + "voltageN", 0.0);
+    config["voltageR"] = getValue(QString(prefix) + "voltageR", 0.5);
+    config["voltage1"] = getValue(QString(prefix) + "voltage1", 1.0);
+    config["voltage2"] = getValue(QString(prefix) + "voltage2", 1.5);
+    config["voltage3"] = getValue(QString(prefix) + "voltage3", 2.0);
+    config["voltage4"] = getValue(QString(prefix) + "voltage4", 2.5);
+    config["voltage5"] = getValue(QString(prefix) + "voltage5", 3.0);
+    config["voltage6"] = getValue(QString(prefix) + "voltage6", 3.5);
+    return config;
+}
+
+void AppSettings::writeSpeedSensorConfig(const QVariantMap &config)
+{
+    static const char *prefix = "ui/exboard/speedSensor/";
+    const QStringList keys = {"enabled", "sourceType", "analogPort", "digitalPort",
+                              "pulsesPerRev", "voltageMultiplier", "tireCircumference",
+                              "finalDriveRatio", "unit"};
+    for (const QString &key : keys) {
+        if (config.contains(key))
+            setValue(QString(prefix) + key, config.value(key));
+    }
+    if (m_extender)
+        m_extender->setSpeedSensorConfig(config);
+}
+
+QVariantMap AppSettings::readSpeedSensorConfig()
+{
+    static const char *prefix = "ui/exboard/speedSensor/";
+    QVariantMap config;
+    config["enabled"] = getValue(QString(prefix) + "enabled", false);
+    config["sourceType"] = getValue(QString(prefix) + "sourceType", "analog");
+    config["analogPort"] = getValue(QString(prefix) + "analogPort", 0);
+    config["digitalPort"] = getValue(QString(prefix) + "digitalPort", 0);
+    config["pulsesPerRev"] = getValue(QString(prefix) + "pulsesPerRev", 4.0);
+    config["voltageMultiplier"] = getValue(QString(prefix) + "voltageMultiplier", 1.0);
+    config["tireCircumference"] = getValue(QString(prefix) + "tireCircumference", 2.06);
+    config["finalDriveRatio"] = getValue(QString(prefix) + "finalDriveRatio", 1.0);
+    config["unit"] = getValue(QString(prefix) + "unit", "MPH");
+    return config;
+}
+
 void AppSettings::setExtender(Extender *extender)
 {
     m_extender = extender;
@@ -710,5 +773,14 @@ void AppSettings::readandApplySettings()
             qreal r4Val = (r4Jumper != 0) ? 1000.0 : 0.0;
             m_steinhartCalc->setVoltageDividerParams(ch, r3Val, r4Val);
         }
+    }
+
+    // Restore expander board gear and speed sensor configs into the Extender
+    if (m_extender) {
+        QVariantMap gearConfig = readGearSensorConfig();
+        m_extender->setGearVoltageConfig(gearConfig);
+
+        QVariantMap speedConfig = readSpeedSensorConfig();
+        m_extender->setSpeedSensorConfig(speedConfig);
     }
 }

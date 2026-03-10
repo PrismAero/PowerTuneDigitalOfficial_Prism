@@ -124,3 +124,19 @@ void ExpanderBoardData::setEXAnalogCalc7(qreal EXAnalogCalc7)
         emit EXAnalogCalc7Changed(EXAnalogCalc7);
     }
 }
+
+// * Setters - Derived
+void ExpanderBoardData::setEXGear(int EXGear)
+{
+    if (m_EXGear != EXGear) {
+        m_EXGear = EXGear;
+        emit EXGearChanged(EXGear);
+    }
+}
+void ExpanderBoardData::setEXSpeed(qreal EXSpeed)
+{
+    if (m_EXSpeed != EXSpeed) {
+        m_EXSpeed = EXSpeed;
+        emit EXSpeedChanged(EXSpeed);
+    }
+}

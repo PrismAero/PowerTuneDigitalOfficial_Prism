@@ -46,16 +46,16 @@ graph TD
 
 ### 1.2 Current Overlay Types
 
-| Type | `configType` Value | Current File | Status |
-|------|-------------------|--------------|--------|
-| Arc Gauge | `tachGroup` / `speedGroup` | [`ArcFillOverlay.qml`](../PowerTune/Dashboard/ArcFillOverlay.qml) | Active -- Canvas-based |
-| Arc Gauge -- shader | N/A | [`ArcGauge.qml`](../PowerTune/Dashboard/ArcGauge.qml) | Unused -- ShaderEffect-based |
-| Gear Indicator | part of `tachGroup` | [`GearIndicator.qml`](../PowerTune/Dashboard/GearIndicator.qml) | Active |
-| Sensor Card | `sensorCard` | inline in [`RaceDash.qml`](../PowerTune/Dashboard/RaceDash.qml:148) | Active -- inline |
-| Status Row | `statusRow` | inline in [`RaceDash.qml`](../PowerTune/Dashboard/RaceDash.qml:263) | Active -- inline |
-| Brake Bias | none | [`BrakeBiasBar.qml`](../PowerTune/Dashboard/BrakeBiasBar.qml) | Unused -- needle only |
-| Bottom Bar | `staticText` | [`BottomStatusBar.qml`](../PowerTune/Dashboard/BottomStatusBar.qml) | Active |
-| Shift Lights | part of `tachGroup` | [`ShiftIndicator.qml`](../PowerTune/Dashboard/ShiftIndicator.qml) | Active |
+| Type                | `configType` Value         | Current File                                                        | Status                       |
+| ------------------- | -------------------------- | ------------------------------------------------------------------- | ---------------------------- |
+| Arc Gauge           | `tachGroup` / `speedGroup` | [`ArcFillOverlay.qml`](../PowerTune/Dashboard/ArcFillOverlay.qml)   | Active -- Canvas-based       |
+| Arc Gauge -- shader | N/A                        | [`ArcGauge.qml`](../PowerTune/Dashboard/ArcGauge.qml)               | Unused -- ShaderEffect-based |
+| Gear Indicator      | part of `tachGroup`        | [`GearIndicator.qml`](../PowerTune/Dashboard/GearIndicator.qml)     | Active                       |
+| Sensor Card         | `sensorCard`               | inline in [`RaceDash.qml`](../PowerTune/Dashboard/RaceDash.qml:148) | Active -- inline             |
+| Status Row          | `statusRow`                | inline in [`RaceDash.qml`](../PowerTune/Dashboard/RaceDash.qml:263) | Active -- inline             |
+| Brake Bias          | none                       | [`BrakeBiasBar.qml`](../PowerTune/Dashboard/BrakeBiasBar.qml)       | Unused -- needle only        |
+| Bottom Bar          | `staticText`               | [`BottomStatusBar.qml`](../PowerTune/Dashboard/BottomStatusBar.qml) | Active                       |
+| Shift Lights        | part of `tachGroup`        | [`ShiftIndicator.qml`](../PowerTune/Dashboard/ShiftIndicator.qml)   | Active                       |
 
 ### 1.3 Design Principles
 
@@ -78,11 +78,11 @@ graph TD
 [`SettingsData`](../Core/Models/SettingsData.h:28) provides three global unit
 properties accessible via `PropertyRouter`:
 
-| Property | PropertyRouter Key | Values | Description |
-|----------|-------------------|--------|-------------|
-| `units` | `"units"` | `"Celsius"` / `"Fahrenheit"` | Temperature display unit |
-| `speedunits` | `"speedunits"` | `"MPH"` / `"KPH"` | Speed display unit |
-| `pressureunits` | `"pressureunits"` | `"PSI"` / `"Bar"` | Pressure display unit |
+| Property        | PropertyRouter Key | Values                       | Description              |
+| --------------- | ------------------ | ---------------------------- | ------------------------ |
+| `units`         | `"units"`          | `"Celsius"` / `"Fahrenheit"` | Temperature display unit |
+| `speedunits`    | `"speedunits"`     | `"MPH"` / `"KPH"`            | Speed display unit       |
+| `pressureunits` | `"pressureunits"`  | `"PSI"` / `"Bar"`            | Pressure display unit    |
 
 These are set globally in the main settings page and apply across all dashboards.
 Overlays should use these global units as their initial/default unit labels rather
@@ -100,16 +100,16 @@ var globalSpeedUnit = PropertyRouter.getValue("speedunits");
 [`SettingsData`](../Core/Models/SettingsData.h) also provides related
 configuration that overlays may reference:
 
-| Property | Key | Type | Description |
-|----------|-----|------|-------------|
-| `maxRPM` | `"maxRPM"` | `int` | Global max RPM setting |
-| `rpmStage1-4` | `"rpmStage1"` etc. | `int` | RPM shift light stages |
-| `waterwarn` | `"waterwarn"` | `int` | Water temp warning threshold |
-| `rpmwarn` | `"rpmwarn"` | `int` | RPM warning threshold |
-| `knockwarn` | `"knockwarn"` | `int` | Knock warning threshold |
-| `boostwarn` | `"boostwarn"` | `qreal` | Boost warning threshold |
-| `pulsespermile` | `"pulsespermile"` | `qreal` | Speed sensor pulses per mile |
-| `gearcalc1-6` | `"gearcalc1"` etc. | `int` | Gear calculation RPM/speed ratios |
+| Property        | Key                | Type    | Description                       |
+| --------------- | ------------------ | ------- | --------------------------------- |
+| `maxRPM`        | `"maxRPM"`         | `int`   | Global max RPM setting            |
+| `rpmStage1-4`   | `"rpmStage1"` etc. | `int`   | RPM shift light stages            |
+| `waterwarn`     | `"waterwarn"`      | `int`   | Water temp warning threshold      |
+| `rpmwarn`       | `"rpmwarn"`        | `int`   | RPM warning threshold             |
+| `knockwarn`     | `"knockwarn"`      | `int`   | Knock warning threshold           |
+| `boostwarn`     | `"boostwarn"`      | `qreal` | Boost warning threshold           |
+| `pulsespermile` | `"pulsespermile"`  | `qreal` | Speed sensor pulses per mile      |
+| `gearcalc1-6`   | `"gearcalc1"` etc. | `int`   | Gear calculation RPM/speed ratios |
 
 The overlay config system should use `maxRPM` as the default for tach `maxValue`
 (already done in [`OverlayConfigManager`](../Utils/OverlayConfigManager.cpp:135))
@@ -125,26 +125,26 @@ warnings.
 
 Used for RPM (tach), speed, or any parameter mapped to a swept arc fill.
 
-| Property | Type | Persistence Key | Initial Value | Description |
-|----------|------|----------------|---------------|-------------|
-| `sensorKey` | `string` | `sensorKey` | `"rpm"` / `"speed"` | PropertyRouter parameter name |
-| `minValue` | `real` | `minValue` | `0` | Minimum value for arc sweep mapping |
-| `maxValue` | `real` | `maxValue` | `10000` / `200` | Maximum value for arc sweep mapping |
-| `unit` | `string` | `unit` | `"RPM"` / `"MPH"` | Display unit label |
-| `decimals` | `int` | `decimals` | `0` | Decimal places for text display |
-| `startAngle` | `real` | `startAngle` | `135` | Arc start angle in degrees (from 3-o'clock, CW) |
-| `sweepAngle` | `real` | `sweepAngle` | `270` | Total arc sweep in degrees |
-| `arcWidth` | `real` | `arcWidth` | `0.209` | Arc thickness as fraction of container (outer - inner radius) |
-| `arcColorStart` | `color` | `arcColorStart` | `"#E88A1A"` / `"#AA1111"` | Gradient start color (at 0% sweep) |
-| `arcColorEnd` | `color` | `arcColorEnd` | `"#C45A00"` / `"#880000"` | Gradient end color (at 100% sweep) |
-| `arcColorMid` | `color` | `arcColorMid` | `""` (empty = disabled) | Optional mid gradient stop color |
-| `arcColorMidPos` | `real` | `arcColorMidPos` | `0.5` | Position of mid color stop (0.0-1.0) |
-| `arcBgColor` | `color` | `arcBgColor` | `"#151518"` | Background arc color (unfilled region) |
-| `warningEnabled` | `bool` | `warningEnabled` | `false` | Enable warning threshold system |
-| `warningThreshold` | `real` | `warningThreshold` | `8000` | Value at which warning activates |
-| `warningColor` | `color` | `warningColor` | `"#FF0000"` | Color when warning is active |
-| `warningFlash` | `bool` | `warningFlash` | `true` | Flash the entire arc when warning active |
-| `warningFlashRate` | `int` | `warningFlashRate` | `200` | Flash interval in ms (on/off cycle) |
+| Property           | Type     | Persistence Key    | Initial Value             | Description                                                   |
+| ------------------ | -------- | ------------------ | ------------------------- | ------------------------------------------------------------- |
+| `sensorKey`        | `string` | `sensorKey`        | `"rpm"` / `"speed"`       | PropertyRouter parameter name                                 |
+| `minValue`         | `real`   | `minValue`         | `0`                       | Minimum value for arc sweep mapping                           |
+| `maxValue`         | `real`   | `maxValue`         | `10000` / `200`           | Maximum value for arc sweep mapping                           |
+| `unit`             | `string` | `unit`             | `"RPM"` / `"MPH"`         | Display unit label                                            |
+| `decimals`         | `int`    | `decimals`         | `0`                       | Decimal places for text display                               |
+| `startAngle`       | `real`   | `startAngle`       | `135`                     | Arc start angle in degrees (from 3-o'clock, CW)               |
+| `sweepAngle`       | `real`   | `sweepAngle`       | `270`                     | Total arc sweep in degrees                                    |
+| `arcWidth`         | `real`   | `arcWidth`         | `0.209`                   | Arc thickness as fraction of container (outer - inner radius) |
+| `arcColorStart`    | `color`  | `arcColorStart`    | `"#E88A1A"` / `"#AA1111"` | Gradient start color (at 0% sweep)                            |
+| `arcColorEnd`      | `color`  | `arcColorEnd`      | `"#C45A00"` / `"#880000"` | Gradient end color (at 100% sweep)                            |
+| `arcColorMid`      | `color`  | `arcColorMid`      | `""` (empty = disabled)   | Optional mid gradient stop color                              |
+| `arcColorMidPos`   | `real`   | `arcColorMidPos`   | `0.5`                     | Position of mid color stop (0.0-1.0)                          |
+| `arcBgColor`       | `color`  | `arcBgColor`       | `"#151518"`               | Background arc color (unfilled region)                        |
+| `warningEnabled`   | `bool`   | `warningEnabled`   | `false`                   | Enable warning threshold system                               |
+| `warningThreshold` | `real`   | `warningThreshold` | `8000`                    | Value at which warning activates                              |
+| `warningColor`     | `color`  | `warningColor`     | `"#FF0000"`               | Color when warning is active                                  |
+| `warningFlash`     | `bool`   | `warningFlash`     | `true`                    | Flash the entire arc when warning active                      |
+| `warningFlashRate` | `int`    | `warningFlashRate` | `200`                     | Flash interval in ms (on/off cycle)                           |
 
 **Gradient system:** The arc supports a minimum 2-color gradient (start + end)
 with an optional mid-point for 3-stop gradients. For N-stop gradients, extend to
@@ -162,11 +162,11 @@ The gear indicator is independently bindable -- the user selects its
 PropertyRouter parameter separately from the tach arc's parameter via a full
 Category + Sensor ComboBox in the config popup.
 
-| Property | Type | Persistence Key | Initial Value | Description |
-|----------|------|----------------|---------------|-------------|
-| `sensorKey` | `string` | `gearKey` | `"Gear"` | PropertyRouter parameter for gear value (full sensor picker) |
-| `textColor` | `color` | `gearTextColor` | `"#FFFFFF"` | Gear number text color |
-| `fontSize` | `int` | `gearFontSize` | `140` | Font pixel size for gear number |
+| Property    | Type     | Persistence Key | Initial Value | Description                                                  |
+| ----------- | -------- | --------------- | ------------- | ------------------------------------------------------------ |
+| `sensorKey` | `string` | `gearKey`       | `"Gear"`      | PropertyRouter parameter for gear value (full sensor picker) |
+| `textColor` | `color`  | `gearTextColor` | `"#FFFFFF"`   | Gear number text color                                       |
+| `fontSize`  | `int`    | `gearFontSize`  | `140`         | Font pixel size for gear number                              |
 
 **Note:** Although the gear indicator is visually part of the `tachGroup`
 compound widget in the layout, its data binding is completely independent. The
@@ -179,11 +179,11 @@ arc's `sensorKey`.
 
 Part of `tachGroup` compound widget.
 
-| Property | Type | Persistence Key | Initial Value | Description |
-|----------|------|----------------|---------------|-------------|
-| `shiftPoint` | `real` | `shiftPoint` | `0.75` | Activation threshold as fraction of maxValue (0.0-1.0) |
-| `shiftCount` | `int` | `shiftCount` | `11` | Number of shift light pills |
-| `shiftPattern` | `string` | `shiftPattern` | `"center-out"` | Activation pattern: `center-out`, `left-to-right`, `right-to-left`, `alternating` |
+| Property       | Type     | Persistence Key | Initial Value  | Description                                                                       |
+| -------------- | -------- | --------------- | -------------- | --------------------------------------------------------------------------------- |
+| `shiftPoint`   | `real`   | `shiftPoint`    | `0.75`         | Activation threshold as fraction of maxValue (0.0-1.0)                            |
+| `shiftCount`   | `int`    | `shiftCount`    | `11`           | Number of shift light pills                                                       |
+| `shiftPattern` | `string` | `shiftPattern`  | `"center-out"` | Activation pattern: `center-out`, `left-to-right`, `right-to-left`, `alternating` |
 
 **Note:** Shift lights derive their RPM value from the parent tachGroup's
 `sensorKey` and `maxValue`. The shift point is relative: `shiftPoint * maxValue`
@@ -193,42 +193,42 @@ gives the RPM at which the first light activates.
 
 Text display showing a live parameter value with label and unit.
 
-| Property | Type | Persistence Key | Initial Value | Description |
-|----------|------|----------------|---------------|-------------|
-| `sensorKey` | `string` | `sensorKey` | `"Watertemp"` / `"oilpres"` | PropertyRouter parameter |
-| `label` | `string` | `label` | `"Water Temp"` / `"Oil Pressure"` | Display label text |
-| `unit` | `string` | `unit` | `"F deg"` / `"PSI"` | Unit label |
-| `decimals` | `int` | `decimals` | `2` | Decimal places for value display |
-| `warningEnabled` | `bool` | `warningEnabled` | `false` | Enable warning threshold |
-| `warningThreshold` | `real` | `warningThreshold` | `0` | Value at which warning activates |
-| `warningDirection` | `string` | `warningDirection` | `"above"` | `"above"` or `"below"` -- which side triggers warning |
-| `warningColor` | `color` | `warningColor` | `"#FF0000"` | Text color when warning active |
-| `normalColor` | `color` | `normalColor` | `"#FFFFFF"` | Text color in normal state |
+| Property           | Type     | Persistence Key    | Initial Value                     | Description                                           |
+| ------------------ | -------- | ------------------ | --------------------------------- | ----------------------------------------------------- |
+| `sensorKey`        | `string` | `sensorKey`        | `"Watertemp"` / `"oilpres"`       | PropertyRouter parameter                              |
+| `label`            | `string` | `label`            | `"Water Temp"` / `"Oil Pressure"` | Display label text                                    |
+| `unit`             | `string` | `unit`             | `"F deg"` / `"PSI"`               | Unit label                                            |
+| `decimals`         | `int`    | `decimals`         | `2`                               | Decimal places for value display                      |
+| `warningEnabled`   | `bool`   | `warningEnabled`   | `false`                           | Enable warning threshold                              |
+| `warningThreshold` | `real`   | `warningThreshold` | `0`                               | Value at which warning activates                      |
+| `warningDirection` | `string` | `warningDirection` | `"above"`                         | `"above"` or `"below"` -- which side triggers warning |
+| `warningColor`     | `color`  | `warningColor`     | `"#FF0000"`                       | Text color when warning active                        |
+| `normalColor`      | `color`  | `normalColor`      | `"#FFFFFF"`                       | Text color in normal state                            |
 
 ### 2.5 Status Row (LED Indicator)
 
 ON/OFF indicator driven by a threshold comparison.
 
-| Property | Type | Persistence Key | Initial Value | Description |
-|----------|------|----------------|---------------|-------------|
-| `sensorKey` | `string` | `sensorKey` | `"DigitalInput1"` | PropertyRouter parameter |
-| `label` | `string` | `label` | `"Digital 1:"` | Label text |
-| `threshold` | `real` | `threshold` | `0.5` | Trip point: value > threshold = ON |
-| `onColor` | `color` | `onColor` | `"#1ED033"` | Color when ON |
-| `offColor` | `color` | `offColor` | `"#FF0909"` | Color when OFF |
-| `invertLogic` | `bool` | `invertLogic` | `false` | If true, value < threshold = ON |
+| Property      | Type     | Persistence Key | Initial Value     | Description                        |
+| ------------- | -------- | --------------- | ----------------- | ---------------------------------- |
+| `sensorKey`   | `string` | `sensorKey`     | `"DigitalInput1"` | PropertyRouter parameter           |
+| `label`       | `string` | `label`         | `"Digital 1:"`    | Label text                         |
+| `threshold`   | `real`   | `threshold`     | `0.5`             | Trip point: value > threshold = ON |
+| `onColor`     | `color`  | `onColor`       | `"#1ED033"`       | Color when ON                      |
+| `offColor`    | `color`  | `offColor`      | `"#FF0909"`       | Color when OFF                     |
+| `invertLogic` | `bool`   | `invertLogic`   | `false`           | If true, value < threshold = ON    |
 
 ### 2.6 Brake Bias Bar
 
 Horizontal slider indicating front/rear brake bias percentage.
 
-| Property | Type | Persistence Key | Initial Value | Description |
-|----------|------|----------------|---------------|-------------|
-| `sensorKey` | `string` | `sensorKey` | `""` | PropertyRouter parameter for bias value |
-| `minValue` | `real` | `minValue` | `0` | Minimum slider extent (maps to left edge) |
-| `maxValue` | `real` | `maxValue` | `100` | Maximum slider extent (maps to right edge) |
-| `leftLabel` | `string` | `leftLabel` | `"RWD"` | Left endpoint label |
-| `rightLabel` | `string` | `rightLabel` | `"FWD"` | Right endpoint label |
+| Property     | Type     | Persistence Key | Initial Value | Description                                |
+| ------------ | -------- | --------------- | ------------- | ------------------------------------------ |
+| `sensorKey`  | `string` | `sensorKey`     | `""`          | PropertyRouter parameter for bias value    |
+| `minValue`   | `real`   | `minValue`      | `0`           | Minimum slider extent (maps to left edge)  |
+| `maxValue`   | `real`   | `maxValue`      | `100`         | Maximum slider extent (maps to right edge) |
+| `leftLabel`  | `string` | `leftLabel`     | `"RWD"`       | Left endpoint label                        |
+| `rightLabel` | `string` | `rightLabel`    | `"FWD"`       | Right endpoint label                       |
 
 **Note:** The brake bias bar is currently not instantiated in RaceDash.qml. The
 background image contains the gradient bar and labels. Only the needle overlay
@@ -237,25 +237,25 @@ needs to be data-bound and positioned. The needle's x-position is computed as:
 
 ### 2.7 Bottom Status Bar
 
-| Property | Type | Persistence Key | Initial Value | Description |
-|----------|------|----------------|---------------|-------------|
-| `text` | `string` | `text` | `"Cardinal Racing"` | Team name / center text |
+| Property | Type     | Persistence Key | Initial Value       | Description             |
+| -------- | -------- | --------------- | ------------------- | ----------------------- |
+| `text`   | `string` | `text`          | `"Cardinal Racing"` | Team name / center text |
 
 ### 2.8 Needle Gauge (Future)
 
 For dashboards with a physical needle rotating over a printed scale.
 
-| Property | Type | Persistence Key | Initial Value | Description |
-|----------|------|----------------|---------------|-------------|
-| `sensorKey` | `string` | `sensorKey` | `""` | PropertyRouter parameter |
-| `minValue` | `real` | `minValue` | `0` | Value at start angle |
-| `maxValue` | `real` | `maxValue` | `10000` | Value at end angle |
-| `startAngle` | `real` | `startAngle` | `135` | Needle rotation start (degrees) |
-| `endAngle` | `real` | `endAngle` | `405` | Needle rotation end (degrees) |
-| `warningEnabled` | `bool` | `warningEnabled` | `false` | Enable redline warning |
-| `warningThreshold` | `real` | `warningThreshold` | `8000` | Redline value |
-| `warningColor` | `color` | `warningColor` | `"#FF0000"` | Needle color in warning zone |
-| `needleColor` | `color` | `needleColor` | `"#FFFFFF"` | Normal needle color |
+| Property           | Type     | Persistence Key    | Initial Value | Description                     |
+| ------------------ | -------- | ------------------ | ------------- | ------------------------------- |
+| `sensorKey`        | `string` | `sensorKey`        | `""`          | PropertyRouter parameter        |
+| `minValue`         | `real`   | `minValue`         | `0`           | Value at start angle            |
+| `maxValue`         | `real`   | `maxValue`         | `10000`       | Value at end angle              |
+| `startAngle`       | `real`   | `startAngle`       | `135`         | Needle rotation start (degrees) |
+| `endAngle`         | `real`   | `endAngle`         | `405`         | Needle rotation end (degrees)   |
+| `warningEnabled`   | `bool`   | `warningEnabled`   | `false`       | Enable redline warning          |
+| `warningThreshold` | `real`   | `warningThreshold` | `8000`        | Redline value                   |
+| `warningColor`     | `color`  | `warningColor`     | `"#FF0000"`   | Needle color in warning zone    |
+| `needleColor`      | `color`  | `needleColor`      | `"#FFFFFF"`   | Normal needle color             |
 
 ---
 
@@ -292,16 +292,16 @@ unprefixed keys for backward compatibility with existing persisted settings.
 
 Complete mapping of all persistence keys per overlay type:
 
-| Overlay ID | Config Type | Keys Stored |
-|------------|-------------|-------------|
-| `tachGroup` | `tachGroup` | `sensorKey`, `minValue`, `maxValue`, `unit`, `decimals`, `startAngle`, `sweepAngle`, `arcWidth`, `arcColorStart`, `arcColorEnd`, `arcColorMid`, `arcColorMidPos`, `arcBgColor`, `warningEnabled`, `warningThreshold`, `warningColor`, `warningFlash`, `warningFlashRate`, `gearKey`, `gearTextColor`, `gearFontSize`, `shiftPoint`, `shiftCount`, `shiftPattern` |
-| `speedGroup` | `speedGroup` | `sensorKey`, `minValue`, `maxValue`, `unit`, `decimals`, `startAngle`, `sweepAngle`, `arcWidth`, `arcColorStart`, `arcColorEnd`, `arcColorMid`, `arcColorMidPos`, `arcBgColor`, `warningEnabled`, `warningThreshold`, `warningColor`, `warningFlash`, `warningFlashRate` |
-| `waterTemp` | `sensorCard` | `sensorKey`, `label`, `unit`, `decimals`, `warningEnabled`, `warningThreshold`, `warningDirection`, `warningColor`, `normalColor` |
-| `oilPressure` | `sensorCard` | (same as above) |
-| `statusRow0` | `statusRow` | `sensorKey`, `label`, `threshold`, `onColor`, `offColor`, `invertLogic` |
-| `statusRow1` | `statusRow` | (same as above) |
-| `biasNeedle` | `brakeBias` | `sensorKey`, `minValue`, `maxValue`, `leftLabel`, `rightLabel` |
-| `bottomBar` | `staticText` | `text` |
+| Overlay ID    | Config Type  | Keys Stored                                                                                                                                                                                                                                                                                                                                                      |
+| ------------- | ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `tachGroup`   | `tachGroup`  | `sensorKey`, `minValue`, `maxValue`, `unit`, `decimals`, `startAngle`, `sweepAngle`, `arcWidth`, `arcColorStart`, `arcColorEnd`, `arcColorMid`, `arcColorMidPos`, `arcBgColor`, `warningEnabled`, `warningThreshold`, `warningColor`, `warningFlash`, `warningFlashRate`, `gearKey`, `gearTextColor`, `gearFontSize`, `shiftPoint`, `shiftCount`, `shiftPattern` |
+| `speedGroup`  | `speedGroup` | `sensorKey`, `minValue`, `maxValue`, `unit`, `decimals`, `startAngle`, `sweepAngle`, `arcWidth`, `arcColorStart`, `arcColorEnd`, `arcColorMid`, `arcColorMidPos`, `arcBgColor`, `warningEnabled`, `warningThreshold`, `warningColor`, `warningFlash`, `warningFlashRate`                                                                                         |
+| `waterTemp`   | `sensorCard` | `sensorKey`, `label`, `unit`, `decimals`, `warningEnabled`, `warningThreshold`, `warningDirection`, `warningColor`, `normalColor`                                                                                                                                                                                                                                |
+| `oilPressure` | `sensorCard` | (same as above)                                                                                                                                                                                                                                                                                                                                                  |
+| `statusRow0`  | `statusRow`  | `sensorKey`, `label`, `threshold`, `onColor`, `offColor`, `invertLogic`                                                                                                                                                                                                                                                                                          |
+| `statusRow1`  | `statusRow`  | (same as above)                                                                                                                                                                                                                                                                                                                                                  |
+| `biasNeedle`  | `brakeBias`  | `sensorKey`, `minValue`, `maxValue`, `leftLabel`, `rightLabel`                                                                                                                                                                                                                                                                                                   |
+| `bottomBar`   | `staticText` | `text`                                                                                                                                                                                                                                                                                                                                                           |
 
 ### 3.4 OverlayConfigManager Changes Required
 
@@ -332,18 +332,18 @@ section map:
 
 #### Sections for `tachGroup`
 
-| Section | Controls | Visibility |
-|---------|----------|------------|
-| Data Binding | Category ComboBox + Sensor ComboBox | Always |
-| Value Range | Min text field + Max text field | Always |
-| Unit + Decimals | Unit text field + Decimals spinbox | Always |
-| Arc Geometry | Start Angle, Sweep Angle, Arc Width -- all numeric text fields | Always |
-| Arc Colors | Color Start picker + Color End picker | Always |
-| Arc Mid Color | Enable toggle + Color picker + Position slider | Collapsible |
-| Arc Background | Background color picker | Always |
-| Warning | Enable toggle + Threshold text field + Color picker + Flash toggle + Flash rate spinbox | Collapsible |
-| Gear Binding | Gear Category ComboBox + Gear Sensor ComboBox + gear text color picker + font size spinbox | Always |
-| Shift Lights | Shift point text field + light count spinbox + pattern combobox | Always |
+| Section         | Controls                                                                                   | Visibility  |
+| --------------- | ------------------------------------------------------------------------------------------ | ----------- |
+| Data Binding    | Category ComboBox + Sensor ComboBox                                                        | Always      |
+| Value Range     | Min text field + Max text field                                                            | Always      |
+| Unit + Decimals | Unit text field + Decimals spinbox                                                         | Always      |
+| Arc Geometry    | Start Angle, Sweep Angle, Arc Width -- all numeric text fields                             | Always      |
+| Arc Colors      | Color Start picker + Color End picker                                                      | Always      |
+| Arc Mid Color   | Enable toggle + Color picker + Position slider                                             | Collapsible |
+| Arc Background  | Background color picker                                                                    | Always      |
+| Warning         | Enable toggle + Threshold text field + Color picker + Flash toggle + Flash rate spinbox    | Collapsible |
+| Gear Binding    | Gear Category ComboBox + Gear Sensor ComboBox + gear text color picker + font size spinbox | Always      |
+| Shift Lights    | Shift point text field + light count spinbox + pattern combobox                            | Always      |
 
 #### Sections for `speedGroup`
 
@@ -351,35 +351,35 @@ Same as `tachGroup` minus Gear Binding and Shift Lights sections.
 
 #### Sections for `sensorCard`
 
-| Section | Controls | Visibility |
-|---------|----------|------------|
-| Data Binding | Category ComboBox + Sensor ComboBox | Always |
-| Label | Label text field | Always |
-| Unit + Decimals | Unit text field + Decimals spinbox | Always |
-| Warning | Enable toggle + Threshold text field + Direction combobox + Warning color picker + Normal color picker | Collapsible |
+| Section         | Controls                                                                                               | Visibility  |
+| --------------- | ------------------------------------------------------------------------------------------------------ | ----------- |
+| Data Binding    | Category ComboBox + Sensor ComboBox                                                                    | Always      |
+| Label           | Label text field                                                                                       | Always      |
+| Unit + Decimals | Unit text field + Decimals spinbox                                                                     | Always      |
+| Warning         | Enable toggle + Threshold text field + Direction combobox + Warning color picker + Normal color picker | Collapsible |
 
 #### Sections for `statusRow`
 
-| Section | Controls | Visibility |
-|---------|----------|------------|
-| Data Binding | Category ComboBox + Sensor ComboBox | Always |
-| Label | Label text field | Always |
-| Threshold | Threshold text field + Invert logic toggle | Always |
-| Colors | ON color picker + OFF color picker | Always |
+| Section      | Controls                                   | Visibility |
+| ------------ | ------------------------------------------ | ---------- |
+| Data Binding | Category ComboBox + Sensor ComboBox        | Always     |
+| Label        | Label text field                           | Always     |
+| Threshold    | Threshold text field + Invert logic toggle | Always     |
+| Colors       | ON color picker + OFF color picker         | Always     |
 
 #### Sections for `brakeBias`
 
-| Section | Controls | Visibility |
-|---------|----------|------------|
-| Data Binding | Category ComboBox + Sensor ComboBox | Always |
-| Range | Min text field + Max text field | Always |
-| Labels | Left label text field + Right label text field | Always |
+| Section      | Controls                                       | Visibility |
+| ------------ | ---------------------------------------------- | ---------- |
+| Data Binding | Category ComboBox + Sensor ComboBox            | Always     |
+| Range        | Min text field + Max text field                | Always     |
+| Labels       | Left label text field + Right label text field | Always     |
 
 #### Sections for `staticText`
 
-| Section | Controls | Visibility |
-|---------|----------|------------|
-| Text | Text field | Always |
+| Section | Controls   | Visibility |
+| ------- | ---------- | ---------- |
+| Text    | Text field | Always     |
 
 ### 4.2 UI Layout Additions
 
@@ -855,6 +855,7 @@ readonly property bool _warningActive: warningEnabled &&
 ```
 
 When `_warningActive` is true:
+
 - If `warningFlash` is true: entire arc fill alternates between `warningColor`
   and a dimmed version at `warningFlashRate` ms intervals
 - If `warningFlash` is false: entire arc fill switches to `warningColor`
@@ -1016,19 +1017,19 @@ graph LR
 
 #### Configuration Settings
 
-| Setting | Type | Persistence Key | Default | Description |
-|---------|------|----------------|---------|-------------|
-| `gearSensorEnabled` | `bool` | `ui/exboard/gearSensor/enabled` | `false` | Enable voltage-to-gear conversion |
-| `gearSensorPort` | `int` | `ui/exboard/gearSensor/port` | `0` | Which EXAnalog port (0-7) is the gear sensor |
-| `gearTolerance` | `real` | `ui/exboard/gearSensor/tolerance` | `0.2` | Global voltage tolerance in volts (+/- from target) |
-| `gearVoltageN` | `real` | `ui/exboard/gearSensor/voltageN` | `0.0` | Voltage for Neutral |
-| `gearVoltageR` | `real` | `ui/exboard/gearSensor/voltageR` | `0.5` | Voltage for Reverse |
-| `gearVoltage1` | `real` | `ui/exboard/gearSensor/voltage1` | `1.0` | Voltage for 1st gear |
-| `gearVoltage2` | `real` | `ui/exboard/gearSensor/voltage2` | `1.5` | Voltage for 2nd gear |
-| `gearVoltage3` | `real` | `ui/exboard/gearSensor/voltage3` | `2.0` | Voltage for 3rd gear |
-| `gearVoltage4` | `real` | `ui/exboard/gearSensor/voltage4` | `2.5` | Voltage for 4th gear |
-| `gearVoltage5` | `real` | `ui/exboard/gearSensor/voltage5` | `3.0` | Voltage for 5th gear |
-| `gearVoltage6` | `real` | `ui/exboard/gearSensor/voltage6` | `3.5` | Voltage for 6th gear |
+| Setting             | Type   | Persistence Key                   | Default | Description                                         |
+| ------------------- | ------ | --------------------------------- | ------- | --------------------------------------------------- |
+| `gearSensorEnabled` | `bool` | `ui/exboard/gearSensor/enabled`   | `false` | Enable voltage-to-gear conversion                   |
+| `gearSensorPort`    | `int`  | `ui/exboard/gearSensor/port`      | `0`     | Which EXAnalog port (0-7) is the gear sensor        |
+| `gearTolerance`     | `real` | `ui/exboard/gearSensor/tolerance` | `0.2`   | Global voltage tolerance in volts (+/- from target) |
+| `gearVoltageN`      | `real` | `ui/exboard/gearSensor/voltageN`  | `0.0`   | Voltage for Neutral                                 |
+| `gearVoltageR`      | `real` | `ui/exboard/gearSensor/voltageR`  | `0.5`   | Voltage for Reverse                                 |
+| `gearVoltage1`      | `real` | `ui/exboard/gearSensor/voltage1`  | `1.0`   | Voltage for 1st gear                                |
+| `gearVoltage2`      | `real` | `ui/exboard/gearSensor/voltage2`  | `1.5`   | Voltage for 2nd gear                                |
+| `gearVoltage3`      | `real` | `ui/exboard/gearSensor/voltage3`  | `2.0`   | Voltage for 3rd gear                                |
+| `gearVoltage4`      | `real` | `ui/exboard/gearSensor/voltage4`  | `2.5`   | Voltage for 4th gear                                |
+| `gearVoltage5`      | `real` | `ui/exboard/gearSensor/voltage5`  | `3.0`   | Voltage for 5th gear                                |
+| `gearVoltage6`      | `real` | `ui/exboard/gearSensor/voltage6`  | `3.5`   | Voltage for 6th gear                                |
 
 #### Conversion Logic (C++ in Calibration or ExpanderBoardData)
 
@@ -1069,13 +1070,13 @@ a dedicated property on a new `GearSensorData` model, making it available via
 
 A new collapsible section "Gear Position Sensor" in the ExBoard settings:
 
-| Control | Type | Description |
-|---------|------|-------------|
-| Enable toggle | Switch | Enables/disables gear voltage mode |
-| Port selector | ComboBox | Select EXAnalog0-7 |
-| Tolerance | TextField | Global tolerance in V (0.05 - 0.5) |
-| Gear voltage table | 8 rows | N, R, 1st-6th -- each row has a label + voltage TextField |
-| Live preview | Text | Shows current raw voltage + detected gear |
+| Control            | Type      | Description                                               |
+| ------------------ | --------- | --------------------------------------------------------- |
+| Enable toggle      | Switch    | Enables/disables gear voltage mode                        |
+| Port selector      | ComboBox  | Select EXAnalog0-7                                        |
+| Tolerance          | TextField | Global tolerance in V (0.05 - 0.5)                        |
+| Gear voltage table | 8 rows    | N, R, 1st-6th -- each row has a label + voltage TextField |
+| Live preview       | Text      | Shows current raw voltage + detected gear                 |
 
 ### 9.2 Speed Sensor with Gear Ratio / Tire Size
 
@@ -1104,17 +1105,17 @@ graph LR
 
 #### Configuration Settings
 
-| Setting | Type | Persistence Key | Default | Description |
-|---------|------|----------------|---------|-------------|
-| `speedSensorEnabled` | `bool` | `ui/exboard/speedSensor/enabled` | `false` | Enable speed sensor processing |
-| `speedSourceType` | `string` | `ui/exboard/speedSensor/sourceType` | `"analog"` | `"analog"` or `"digital"` |
-| `speedAnalogPort` | `int` | `ui/exboard/speedSensor/analogPort` | `0` | Which EXAnalog port (0-7) if analog source |
-| `speedDigitalPort` | `int` | `ui/exboard/speedSensor/digitalPort` | `0` | Which EXDigital port (1-8) if digital source |
-| `speedPulsesPerRev` | `real` | `ui/exboard/speedSensor/pulsesPerRev` | `4.0` | Pulses per wheel revolution (digital mode) |
-| `speedVoltageMultiplier` | `real` | `ui/exboard/speedSensor/voltageMultiplier` | `1.0` | Voltage-to-speed multiplier (analog mode) |
-| `speedTireCircumference` | `real` | `ui/exboard/speedSensor/tireCircumference` | `2.06` | Tire circumference in meters |
-| `speedFinalDriveRatio` | `real` | `ui/exboard/speedSensor/finalDriveRatio` | `1.0` | Final drive ratio (set to 1.0 if measuring at wheel) |
-| `speedUnit` | `string` | `ui/exboard/speedSensor/unit` | `"MPH"` | Display unit: `"MPH"` or `"KPH"` |
+| Setting                  | Type     | Persistence Key                            | Default    | Description                                          |
+| ------------------------ | -------- | ------------------------------------------ | ---------- | ---------------------------------------------------- |
+| `speedSensorEnabled`     | `bool`   | `ui/exboard/speedSensor/enabled`           | `false`    | Enable speed sensor processing                       |
+| `speedSourceType`        | `string` | `ui/exboard/speedSensor/sourceType`        | `"analog"` | `"analog"` or `"digital"`                            |
+| `speedAnalogPort`        | `int`    | `ui/exboard/speedSensor/analogPort`        | `0`        | Which EXAnalog port (0-7) if analog source           |
+| `speedDigitalPort`       | `int`    | `ui/exboard/speedSensor/digitalPort`       | `0`        | Which EXDigital port (1-8) if digital source         |
+| `speedPulsesPerRev`      | `real`   | `ui/exboard/speedSensor/pulsesPerRev`      | `4.0`      | Pulses per wheel revolution (digital mode)           |
+| `speedVoltageMultiplier` | `real`   | `ui/exboard/speedSensor/voltageMultiplier` | `1.0`      | Voltage-to-speed multiplier (analog mode)            |
+| `speedTireCircumference` | `real`   | `ui/exboard/speedSensor/tireCircumference` | `2.06`     | Tire circumference in meters                         |
+| `speedFinalDriveRatio`   | `real`   | `ui/exboard/speedSensor/finalDriveRatio`   | `1.0`      | Final drive ratio (set to 1.0 if measuring at wheel) |
+| `speedUnit`              | `string` | `ui/exboard/speedSensor/unit`              | `"MPH"`    | Display unit: `"MPH"` or `"KPH"`                     |
 
 #### Calculation
 
@@ -1143,27 +1144,27 @@ The processed speed is written to a new virtual property `EXSpeed` on
 
 A new collapsible section "Speed Sensor" in the ExBoard settings:
 
-| Control | Type | Description |
-|---------|------|-------------|
-| Enable toggle | Switch | Enables/disables speed sensor |
-| Source type | ComboBox | "Analog" / "Digital" |
-| Port selector | ComboBox | EXAnalog0-7 or EXDigital1-8 depending on source type |
-| Pulses per rev | TextField | Only visible when source = digital |
-| Voltage multiplier | TextField | Only visible when source = analog |
-| Tire circumference | TextField | Always visible, in meters |
-| Final drive ratio | TextField | Always visible (1.0 = wheel-mounted sensor) |
-| Speed unit | ComboBox | "MPH" / "KPH" |
-| Live preview | Text | Shows raw input + calculated speed |
+| Control            | Type      | Description                                          |
+| ------------------ | --------- | ---------------------------------------------------- |
+| Enable toggle      | Switch    | Enables/disables speed sensor                        |
+| Source type        | ComboBox  | "Analog" / "Digital"                                 |
+| Port selector      | ComboBox  | EXAnalog0-7 or EXDigital1-8 depending on source type |
+| Pulses per rev     | TextField | Only visible when source = digital                   |
+| Voltage multiplier | TextField | Only visible when source = analog                    |
+| Tire circumference | TextField | Always visible, in meters                            |
+| Final drive ratio  | TextField | Always visible (1.0 = wheel-mounted sensor)          |
+| Speed unit         | ComboBox  | "MPH" / "KPH"                                        |
+| Live preview       | Text      | Shows raw input + calculated speed                   |
 
 ### 9.3 Integration with PropertyRouter
 
 Both new sensor types produce virtual/calculated properties that must be
 registered with `PropertyRouter`:
 
-| Virtual Property | Source | Description |
-|-----------------|--------|-------------|
-| `EXGear` | Gear voltage converter | Integer gear position (0=N, -1=R, 1-6) |
-| `EXSpeed` | Speed sensor processor | Calculated vehicle speed in configured unit |
+| Virtual Property | Source                 | Description                                 |
+| ---------------- | ---------------------- | ------------------------------------------- |
+| `EXGear`         | Gear voltage converter | Integer gear position (0=N, -1=R, 1-6)      |
+| `EXSpeed`        | Speed sensor processor | Calculated vehicle speed in configured unit |
 
 These need to be added as `Q_PROPERTY` members on `ExpanderBoardData` (or a new
 dedicated model) with NOTIFY signals so that the reactive PropertyRouter binding
@@ -1198,23 +1199,23 @@ from Section 6 propagates changes to QML overlays automatically.
 
 ## Appendix A: Config Type to Section Visibility Matrix
 
-| Section | `tachGroup` | `speedGroup` | `sensorCard` | `statusRow` | `brakeBias` | `staticText` |
-|---------|:-----------:|:------------:|:------------:|:-----------:|:-----------:|:------------:|
-| Sensor Picker | x | x | x | x | x | |
-| Label | | | x | x | | |
-| Unit + Decimals | x | x | x | | | |
-| Value Range | x | x | | | x | |
-| Arc Geometry | x | x | | | | |
-| Arc Colors | x | x | | | | |
-| Arc Mid Color | x | x | | | | |
-| Arc Background | x | x | | | | |
-| Warning | x | x | x | | | |
-| Threshold | | | | x | | |
-| Status Colors | | | | x | | |
-| Gear Binding | x | | | | | |
-| Shift Lights | x | | | | | |
-| Bias Labels | | | | | x | |
-| Static Text | | | | | | x |
+| Section         | `tachGroup` | `speedGroup` | `sensorCard` | `statusRow` | `brakeBias` | `staticText` |
+| --------------- | :---------: | :----------: | :----------: | :---------: | :---------: | :----------: |
+| Sensor Picker   |      x      |      x       |      x       |      x      |      x      |              |
+| Label           |             |              |      x       |      x      |             |              |
+| Unit + Decimals |      x      |      x       |      x       |             |             |              |
+| Value Range     |      x      |      x       |              |             |      x      |              |
+| Arc Geometry    |      x      |      x       |              |             |             |              |
+| Arc Colors      |      x      |      x       |              |             |             |              |
+| Arc Mid Color   |      x      |      x       |              |             |             |              |
+| Arc Background  |      x      |      x       |              |             |             |              |
+| Warning         |      x      |      x       |      x       |             |             |              |
+| Threshold       |             |              |              |      x      |             |              |
+| Status Colors   |             |              |              |      x      |             |              |
+| Gear Binding    |      x      |              |              |             |             |              |
+| Shift Lights    |      x      |              |              |             |             |              |
+| Bias Labels     |             |              |              |             |      x      |              |
+| Static Text     |             |              |              |             |             |      x       |
 
 ## Appendix B: Shader Uniform Memory Layout (std140)
 
@@ -1253,19 +1254,19 @@ correct alignment. The exact layout should be verified against Qt's
 
 ## Appendix C: File Change Summary
 
-| File | Action | Description |
-|------|--------|-------------|
-| [`Core/PropertyRouter.h`](../Core/PropertyRouter.h) | Modify | Add `valueChanged` signal, `connectModelSignals()` |
-| [`Core/PropertyRouter.cpp`](../Core/PropertyRouter.cpp) | Modify | Implement signal forwarding from model NOTIFY signals |
-| `Shaders/arcoverlay.frag` | Create | New SDF-based arc fill shader with gradient + warning |
-| `Shaders/arcoverlay.vert` | Create | Pass-through vertex shader |
-| `CMakeLists.txt` | Modify | Add new shader files to compilation |
-| [`PowerTune/Dashboard/ArcFillOverlay.qml`](../PowerTune/Dashboard/ArcFillOverlay.qml) | Modify | Replace Canvas with ShaderEffect, add warning properties |
-| [`PowerTune/Dashboard/OverlayConfigPopup.qml`](../PowerTune/Dashboard/OverlayConfigPopup.qml) | Modify | Add arc geometry, warning, status colors, brake bias sections |
-| [`Utils/OverlayConfigManager.h`](../Utils/OverlayConfigManager.h) | Modify | Add new config type handling |
-| [`Utils/OverlayConfigManager.cpp`](../Utils/OverlayConfigManager.cpp) | Modify | Add brakeBias, warning, arc geometry persistence |
-| [`PowerTune/Dashboard/RaceDash.qml`](../PowerTune/Dashboard/RaceDash.qml) | Modify | Add brake bias binding, migrate to reactive PropertyRouter |
-| `PowerTune/Dashboard/WarningFlashTimer.qml` | Create | Reusable flash timer component |
-| [`Core/Models/ExpanderBoardData.h`](../Core/Models/ExpanderBoardData.h) | Modify | Add `EXGear` (int) and `EXSpeed` (qreal) Q_PROPERTY with NOTIFY |
-| [`Core/Models/ExpanderBoardData.cpp`](../Core/Models/ExpanderBoardData.cpp) | Modify | Implement EXGear/EXSpeed setters |
-| [`PowerTune/Core/ExBoardAnalog.qml`](../PowerTune/Core/ExBoardAnalog.qml) | Modify | Add Gear Position Sensor and Speed Sensor settings sections |
+| File                                                                                          | Action | Description                                                     |
+| --------------------------------------------------------------------------------------------- | ------ | --------------------------------------------------------------- |
+| [`Core/PropertyRouter.h`](../Core/PropertyRouter.h)                                           | Modify | Add `valueChanged` signal, `connectModelSignals()`              |
+| [`Core/PropertyRouter.cpp`](../Core/PropertyRouter.cpp)                                       | Modify | Implement signal forwarding from model NOTIFY signals           |
+| `Shaders/arcoverlay.frag`                                                                     | Create | New SDF-based arc fill shader with gradient + warning           |
+| `Shaders/arcoverlay.vert`                                                                     | Create | Pass-through vertex shader                                      |
+| `CMakeLists.txt`                                                                              | Modify | Add new shader files to compilation                             |
+| [`PowerTune/Dashboard/ArcFillOverlay.qml`](../PowerTune/Dashboard/ArcFillOverlay.qml)         | Modify | Replace Canvas with ShaderEffect, add warning properties        |
+| [`PowerTune/Dashboard/OverlayConfigPopup.qml`](../PowerTune/Dashboard/OverlayConfigPopup.qml) | Modify | Add arc geometry, warning, status colors, brake bias sections   |
+| [`Utils/OverlayConfigManager.h`](../Utils/OverlayConfigManager.h)                             | Modify | Add new config type handling                                    |
+| [`Utils/OverlayConfigManager.cpp`](../Utils/OverlayConfigManager.cpp)                         | Modify | Add brakeBias, warning, arc geometry persistence                |
+| [`PowerTune/Dashboard/RaceDash.qml`](../PowerTune/Dashboard/RaceDash.qml)                     | Modify | Add brake bias binding, migrate to reactive PropertyRouter      |
+| `PowerTune/Dashboard/WarningFlashTimer.qml`                                                   | Create | Reusable flash timer component                                  |
+| [`Core/Models/ExpanderBoardData.h`](../Core/Models/ExpanderBoardData.h)                       | Modify | Add `EXGear` (int) and `EXSpeed` (qreal) Q_PROPERTY with NOTIFY |
+| [`Core/Models/ExpanderBoardData.cpp`](../Core/Models/ExpanderBoardData.cpp)                   | Modify | Implement EXGear/EXSpeed setters                                |
+| [`PowerTune/Core/ExBoardAnalog.qml`](../PowerTune/Core/ExBoardAnalog.qml)                     | Modify | Add Gear Position Sensor and Speed Sensor settings sections     |

@@ -127,6 +127,179 @@ void Extender::applyCalibration(int channel, qreal voltage)
     }
 }
 
+// * Gear voltage sensor methods
+
+void Extender::setGearVoltageConfig(const QVariantMap &config)
+{
+    m_gearConfig.enabled = config.value("enabled", false).toBool();
+    m_gearConfig.port = config.value("port", 0).toInt();
+    m_gearConfig.tolerance = config.value("tolerance", 0.2).toDouble();
+    m_gearConfig.voltageN = config.value("voltageN", 0.0).toDouble();
+    m_gearConfig.voltageR = config.value("voltageR", 0.5).toDouble();
+    m_gearConfig.voltage1 = config.value("voltage1", 1.0).toDouble();
+    m_gearConfig.voltage2 = config.value("voltage2", 1.5).toDouble();
+    m_gearConfig.voltage3 = config.value("voltage3", 2.0).toDouble();
+    m_gearConfig.voltage4 = config.value("voltage4", 2.5).toDouble();
+    m_gearConfig.voltage5 = config.value("voltage5", 3.0).toDouble();
+    m_gearConfig.voltage6 = config.value("voltage6", 3.5).toDouble();
+
+    // Disconnect previous connection and reconnect to the configured port
+    if (m_gearConnection)
+        disconnect(m_gearConnection);
+
+    if (m_gearConfig.enabled && m_expanderBoardData) {
+        int port = m_gearConfig.port;
+        auto connectGearSignal = [this, port]() {
+            switch (port) {
+            case 0: return connect(m_expanderBoardData, &ExpanderBoardData::EXAnalogInput0Changed, this, &Extender::onGearPortVoltageChanged);
+            case 1: return connect(m_expanderBoardData, &ExpanderBoardData::EXAnalogInput1Changed, this, &Extender::onGearPortVoltageChanged);
+            case 2: return connect(m_expanderBoardData, &ExpanderBoardData::EXAnalogInput2Changed, this, &Extender::onGearPortVoltageChanged);
+            case 3: return connect(m_expanderBoardData, &ExpanderBoardData::EXAnalogInput3Changed, this, &Extender::onGearPortVoltageChanged);
+            case 4: return connect(m_expanderBoardData, &ExpanderBoardData::EXAnalogInput4Changed, this, &Extender::onGearPortVoltageChanged);
+            case 5: return connect(m_expanderBoardData, &ExpanderBoardData::EXAnalogInput5Changed, this, &Extender::onGearPortVoltageChanged);
+            case 6: return connect(m_expanderBoardData, &ExpanderBoardData::EXAnalogInput6Changed, this, &Extender::onGearPortVoltageChanged);
+            case 7: return connect(m_expanderBoardData, &ExpanderBoardData::EXAnalogInput7Changed, this, &Extender::onGearPortVoltageChanged);
+            default: return QMetaObject::Connection();
+            }
+        };
+        m_gearConnection = connectGearSignal();
+    }
+}
+
+int Extender::voltageToGear(double voltage) const
+{
+    if (!m_gearConfig.enabled) return -2;
+
+    struct GearEntry { int gear; double targetV; };
+    GearEntry entries[] = {
+        { 0, m_gearConfig.voltageN },
+        {-1, m_gearConfig.voltageR },
+        { 1, m_gearConfig.voltage1 },
+        { 2, m_gearConfig.voltage2 },
+        { 3, m_gearConfig.voltage3 },
+        { 4, m_gearConfig.voltage4 },
+        { 5, m_gearConfig.voltage5 },
+        { 6, m_gearConfig.voltage6 }
+    };
+
+    double bestDelta = m_gearConfig.tolerance + 1.0;
+    int bestGear = -2;
+
+    for (const auto &e : entries) {
+        double delta = std::abs(voltage - e.targetV);
+        if (delta <= m_gearConfig.tolerance && delta < bestDelta) {
+            bestDelta = delta;
+            bestGear = e.gear;
+        }
+    }
+    return bestGear;
+}
+
+void Extender::onGearPortVoltageChanged()
+{
+    if (!m_gearConfig.enabled || !m_expanderBoardData) return;
+
+    double voltage = 0.0;
+    switch (m_gearConfig.port) {
+    case 0: voltage = m_expanderBoardData->EXAnalogInput0(); break;
+    case 1: voltage = m_expanderBoardData->EXAnalogInput1(); break;
+    case 2: voltage = m_expanderBoardData->EXAnalogInput2(); break;
+    case 3: voltage = m_expanderBoardData->EXAnalogInput3(); break;
+    case 4: voltage = m_expanderBoardData->EXAnalogInput4(); break;
+    case 5: voltage = m_expanderBoardData->EXAnalogInput5(); break;
+    case 6: voltage = m_expanderBoardData->EXAnalogInput6(); break;
+    case 7: voltage = m_expanderBoardData->EXAnalogInput7(); break;
+    default: return;
+    }
+
+    int gear = voltageToGear(voltage);
+    m_expanderBoardData->setEXGear(gear);
+}
+
+// * Speed sensor methods
+
+void Extender::setSpeedSensorConfig(const QVariantMap &config)
+{
+    m_speedConfig.enabled = config.value("enabled", false).toBool();
+    m_speedConfig.sourceType = config.value("sourceType", "analog").toString();
+    m_speedConfig.analogPort = config.value("analogPort", 0).toInt();
+    m_speedConfig.digitalPort = config.value("digitalPort", 0).toInt();
+    m_speedConfig.pulsesPerRev = config.value("pulsesPerRev", 4.0).toDouble();
+    m_speedConfig.voltageMultiplier = config.value("voltageMultiplier", 1.0).toDouble();
+    m_speedConfig.tireCircumference = config.value("tireCircumference", 2.06).toDouble();
+    m_speedConfig.finalDriveRatio = config.value("finalDriveRatio", 1.0).toDouble();
+    m_speedConfig.unit = config.value("unit", "MPH").toString();
+
+    // Disconnect previous connection and reconnect to the configured source
+    if (m_speedConnection)
+        disconnect(m_speedConnection);
+
+    if (m_speedConfig.enabled && m_expanderBoardData) {
+        if (m_speedConfig.sourceType == "analog") {
+            int port = m_speedConfig.analogPort;
+            auto connectSpeedSignal = [this, port]() {
+                switch (port) {
+                case 0: return connect(m_expanderBoardData, &ExpanderBoardData::EXAnalogInput0Changed, this, &Extender::onSpeedSourceChanged);
+                case 1: return connect(m_expanderBoardData, &ExpanderBoardData::EXAnalogInput1Changed, this, &Extender::onSpeedSourceChanged);
+                case 2: return connect(m_expanderBoardData, &ExpanderBoardData::EXAnalogInput2Changed, this, &Extender::onSpeedSourceChanged);
+                case 3: return connect(m_expanderBoardData, &ExpanderBoardData::EXAnalogInput3Changed, this, &Extender::onSpeedSourceChanged);
+                case 4: return connect(m_expanderBoardData, &ExpanderBoardData::EXAnalogInput4Changed, this, &Extender::onSpeedSourceChanged);
+                case 5: return connect(m_expanderBoardData, &ExpanderBoardData::EXAnalogInput5Changed, this, &Extender::onSpeedSourceChanged);
+                case 6: return connect(m_expanderBoardData, &ExpanderBoardData::EXAnalogInput6Changed, this, &Extender::onSpeedSourceChanged);
+                case 7: return connect(m_expanderBoardData, &ExpanderBoardData::EXAnalogInput7Changed, this, &Extender::onSpeedSourceChanged);
+                default: return QMetaObject::Connection();
+                }
+            };
+            m_speedConnection = connectSpeedSignal();
+        } else if (m_digitalInputs) {
+            // Digital mode: connect to frequencyDIEX1Changed (currently only DI1 has frequency)
+            m_speedConnection = connect(m_digitalInputs, &DigitalInputs::frequencyDIEX1Changed,
+                                        this, &Extender::onSpeedSourceChanged);
+        }
+    }
+}
+
+void Extender::onSpeedSourceChanged()
+{
+    if (!m_speedConfig.enabled || !m_expanderBoardData) return;
+
+    double speed = 0.0;
+
+    if (m_speedConfig.sourceType == "analog") {
+        // Get raw voltage from the configured analog port
+        double voltage = 0.0;
+        switch (m_speedConfig.analogPort) {
+        case 0: voltage = m_expanderBoardData->EXAnalogInput0(); break;
+        case 1: voltage = m_expanderBoardData->EXAnalogInput1(); break;
+        case 2: voltage = m_expanderBoardData->EXAnalogInput2(); break;
+        case 3: voltage = m_expanderBoardData->EXAnalogInput3(); break;
+        case 4: voltage = m_expanderBoardData->EXAnalogInput4(); break;
+        case 5: voltage = m_expanderBoardData->EXAnalogInput5(); break;
+        case 6: voltage = m_expanderBoardData->EXAnalogInput6(); break;
+        case 7: voltage = m_expanderBoardData->EXAnalogInput7(); break;
+        default: break;
+        }
+        speed = voltage * m_speedConfig.voltageMultiplier;
+    } else {
+        // Digital mode: frequency from EXDigitalInput (DI1 frequency counter)
+        double frequency = m_digitalInputs ? m_digitalInputs->frequencyDIEX1() : 0.0;
+        if (m_speedConfig.pulsesPerRev > 0.0) {
+            double wheelRPM = frequency / m_speedConfig.pulsesPerRev;
+            double wheelSpeedMPS = wheelRPM * m_speedConfig.tireCircumference / 60.0;
+            double corrected = (m_speedConfig.finalDriveRatio > 0.0)
+                                   ? wheelSpeedMPS / m_speedConfig.finalDriveRatio
+                                   : wheelSpeedMPS;
+
+            if (m_speedConfig.unit == "MPH")
+                speed = corrected * 2.23694;
+            else
+                speed = corrected * 3.6;
+        }
+    }
+
+    m_expanderBoardData->setEXSpeed(speed);
+}
+
 void Extender::openCAN(const int &ExtenderBaseID, const int &RPMCANBaseID)
 {
     m_canBaseAddress = ExtenderBaseID;

@@ -33,6 +33,14 @@ Item {
     property real warningThreshold: -1       // normalized 0-1 threshold; -1 = disabled
     property color warningColor: "#FF0000"
     property bool warningEnabled: false
+    property bool warningFlash: true         // Toggle to enable/disable flashing (vs solid warning color)
+    property int warningFlashRate: 200       // Flash interval in ms
+
+    // -- Gradient midpoint position (0-1 along arc sweep) --
+    // NOTE: The arcoverlay.frag shader uses a fixed 0.5 midpoint for the 3-stop
+    // gradient. This property is exposed for config completeness but cannot be
+    // passed to the shader until a midPos uniform is added to the GLSL source.
+    property real arcColorMidPos: 0.5
 
     // -- Startup animation --
     property bool startupAnimation: false
@@ -57,6 +65,9 @@ Item {
         if (config.warningEnabled !== undefined) warningEnabled = config.warningEnabled === true || config.warningEnabled === "true"
         if (config.warningThreshold !== undefined) warningThreshold = Number(config.warningThreshold)
         if (config.warningColor) warningColor = config.warningColor
+        if (config.warningFlash !== undefined) warningFlash = config.warningFlash === true || config.warningFlash === "true"
+        if (config.warningFlashRate !== undefined) warningFlashRate = Number(config.warningFlashRate)
+        if (config.arcColorMidPos !== undefined) arcColorMidPos = Number(config.arcColorMidPos)
     }
 
     // -- Default content area for child items (e.g. labels) --
@@ -121,16 +132,12 @@ Item {
 
     // -- Warning flash timer --
     // Runs when warning is enabled and currentValue exceeds threshold.
-    // Drives flashPhase from 0.0 to 1.0 in cyclic increments for shader pulse.
-    Timer {
+    // Drives phase boolean for shader warning pulse via WarningFlashTimer.
+    WarningFlashTimer {
         id: flashTimer
-        interval: 100
-        running: root.warningEnabled
-                 && root.warningThreshold >= 0
-                 && root.normalizedValue >= root.warningThreshold
-        repeat: true
-        property real phase: 0.0
-        onTriggered: phase = (phase + 0.2) % 1.0
+        active: root.warningEnabled && root.normalizedValue >= root.warningThreshold && root.warningThreshold >= 0
+        flashEnabled: root.warningFlash
+        flashRate: root.warningFlashRate
     }
 
     // -- GPU-accelerated arc shader --
@@ -156,8 +163,15 @@ Item {
 
         // Warning state
         property color warningColor: root.warningColor
-        property real warningActive: flashTimer.running ? 1.0 : 0.0
-        property real flashPhase: flashTimer.phase
+        // warningActive driven by the threshold condition (active), not the timer running state,
+        // so solid warning mode (flashEnabled=false) still shows the warning color.
+        property real warningActive: flashTimer.active ? 1.0 : 0.0
+        // Map boolean phase to float values that produce maximum contrast in the
+        // shader's sin(flashPhase * TWO_PI) pulse:
+        //   phase=true  -> 0.25 -> sin(pi/2)=1  -> flash=1.0 (30% gradient bleed)
+        //   phase=false -> 0.75 -> sin(3pi/2)=-1 -> flash=0.0 (100% warning color)
+        // When flashEnabled=false, timer doesn't run so phase stays false = solid warning.
+        property real flashPhase: flashTimer.phase ? 0.25 : 0.75
         property real useMidColor: root.useMidColor ? 1.0 : 0.0
     }
 

@@ -2368,6 +2368,311 @@ SettingsPage {
         }
     }
 
+    // =============================================================
+    // SECTION 4: Gear Position Sensor
+    // =============================================================
+    SettingsSection {
+        title: "Gear Position Sensor"
+        Layout.fillWidth: true
+
+        SettingsRow {
+            label: "Enable"
+            StyledSwitch {
+                id: gearSensorEnabled
+                checked: false
+            }
+        }
+
+        SettingsRow {
+            visible: gearSensorEnabled.checked
+            label: "Analog Port"
+            StyledComboBox {
+                id: gearSensorPort
+                model: ["EX Analog 0", "EX Analog 1", "EX Analog 2", "EX Analog 3",
+                        "EX Analog 4", "EX Analog 5", "EX Analog 6", "EX Analog 7"]
+            }
+        }
+
+        SettingsRow {
+            visible: gearSensorEnabled.checked
+            label: "Tolerance (V)"
+            StyledTextField {
+                id: gearTolerance
+                text: "0.2"
+                inputMethodHints: Qt.ImhFormattedNumbersOnly
+                Layout.preferredWidth: 100
+            }
+        }
+
+        SettingsRow {
+            visible: gearSensorEnabled.checked
+            label: "Neutral"
+            StyledTextField {
+                id: gearVoltageN
+                text: "0.0"
+                inputMethodHints: Qt.ImhFormattedNumbersOnly
+                Layout.preferredWidth: 100
+            }
+        }
+
+        SettingsRow {
+            visible: gearSensorEnabled.checked
+            label: "Reverse"
+            StyledTextField {
+                id: gearVoltageR
+                text: "0.5"
+                inputMethodHints: Qt.ImhFormattedNumbersOnly
+                Layout.preferredWidth: 100
+            }
+        }
+
+        SettingsRow {
+            visible: gearSensorEnabled.checked
+            label: "1st Gear"
+            StyledTextField {
+                id: gearVoltage1
+                text: "1.0"
+                inputMethodHints: Qt.ImhFormattedNumbersOnly
+                Layout.preferredWidth: 100
+            }
+        }
+
+        SettingsRow {
+            visible: gearSensorEnabled.checked
+            label: "2nd Gear"
+            StyledTextField {
+                id: gearVoltage2
+                text: "1.5"
+                inputMethodHints: Qt.ImhFormattedNumbersOnly
+                Layout.preferredWidth: 100
+            }
+        }
+
+        SettingsRow {
+            visible: gearSensorEnabled.checked
+            label: "3rd Gear"
+            StyledTextField {
+                id: gearVoltage3
+                text: "2.0"
+                inputMethodHints: Qt.ImhFormattedNumbersOnly
+                Layout.preferredWidth: 100
+            }
+        }
+
+        SettingsRow {
+            visible: gearSensorEnabled.checked
+            label: "4th Gear"
+            StyledTextField {
+                id: gearVoltage4
+                text: "2.5"
+                inputMethodHints: Qt.ImhFormattedNumbersOnly
+                Layout.preferredWidth: 100
+            }
+        }
+
+        SettingsRow {
+            visible: gearSensorEnabled.checked
+            label: "5th Gear"
+            StyledTextField {
+                id: gearVoltage5
+                text: "3.0"
+                inputMethodHints: Qt.ImhFormattedNumbersOnly
+                Layout.preferredWidth: 100
+            }
+        }
+
+        SettingsRow {
+            visible: gearSensorEnabled.checked
+            label: "6th Gear"
+            StyledTextField {
+                id: gearVoltage6
+                text: "3.5"
+                inputMethodHints: Qt.ImhFormattedNumbersOnly
+                Layout.preferredWidth: 100
+            }
+        }
+
+        SettingsRow {
+            visible: gearSensorEnabled.checked
+            label: "Current"
+            Text {
+                text: {
+                    var idx = gearSensorPort.currentIndex;
+                    var raw = 0;
+                    if (Expander) {
+                        if (idx === 0) raw = Expander.EXAnalogInput0;
+                        else if (idx === 1) raw = Expander.EXAnalogInput1;
+                        else if (idx === 2) raw = Expander.EXAnalogInput2;
+                        else if (idx === 3) raw = Expander.EXAnalogInput3;
+                        else if (idx === 4) raw = Expander.EXAnalogInput4;
+                        else if (idx === 5) raw = Expander.EXAnalogInput5;
+                        else if (idx === 6) raw = Expander.EXAnalogInput6;
+                        else if (idx === 7) raw = Expander.EXAnalogInput7;
+                    }
+                    var gear = Expander ? Expander.EXGear : -2;
+                    var gearStr = gear === -2 ? "?" : gear === -1 ? "R" : gear === 0 ? "N" : String(gear);
+                    return raw.toFixed(3) + " V -> Gear " + gearStr;
+                }
+                color: SettingsTheme.textPrimary
+                font.family: SettingsTheme.fontFamilyMono
+                font.pixelSize: SettingsTheme.fontControl
+            }
+        }
+
+        StyledButton {
+            visible: gearSensorEnabled.checked
+            text: "Save Gear Config"
+            Layout.alignment: Qt.AlignRight
+            onClicked: {
+                var config = {
+                    enabled: gearSensorEnabled.checked,
+                    port: gearSensorPort.currentIndex,
+                    tolerance: parseFloat(gearTolerance.text),
+                    voltageN: parseFloat(gearVoltageN.text),
+                    voltageR: parseFloat(gearVoltageR.text),
+                    voltage1: parseFloat(gearVoltage1.text),
+                    voltage2: parseFloat(gearVoltage2.text),
+                    voltage3: parseFloat(gearVoltage3.text),
+                    voltage4: parseFloat(gearVoltage4.text),
+                    voltage5: parseFloat(gearVoltage5.text),
+                    voltage6: parseFloat(gearVoltage6.text)
+                };
+                AppSettings.writeGearSensorConfig(config);
+                Extender2.setGearVoltageConfig(config);
+            }
+        }
+    }
+
+    // =============================================================
+    // SECTION 5: Speed Sensor
+    // =============================================================
+    SettingsSection {
+        title: "Speed Sensor"
+        Layout.fillWidth: true
+
+        SettingsRow {
+            label: "Enable"
+            StyledSwitch {
+                id: speedSensorEnabled
+                checked: false
+            }
+        }
+
+        SettingsRow {
+            visible: speedSensorEnabled.checked
+            label: "Source Type"
+            StyledComboBox {
+                id: speedSourceType
+                model: ["Analog", "Digital"]
+            }
+        }
+
+        SettingsRow {
+            visible: speedSensorEnabled.checked && speedSourceType.currentIndex === 0
+            label: "Analog Port"
+            StyledComboBox {
+                id: speedAnalogPort
+                model: ["EX Analog 0", "EX Analog 1", "EX Analog 2", "EX Analog 3",
+                        "EX Analog 4", "EX Analog 5", "EX Analog 6", "EX Analog 7"]
+            }
+        }
+
+        SettingsRow {
+            visible: speedSensorEnabled.checked && speedSourceType.currentIndex === 1
+            label: "Digital Port"
+            StyledComboBox {
+                id: speedDigitalPort
+                model: ["EX Digital 1", "EX Digital 2", "EX Digital 3", "EX Digital 4",
+                        "EX Digital 5", "EX Digital 6", "EX Digital 7", "EX Digital 8"]
+            }
+        }
+
+        SettingsRow {
+            visible: speedSensorEnabled.checked && speedSourceType.currentIndex === 1
+            label: "Pulses/Rev"
+            StyledTextField {
+                id: speedPulsesPerRev
+                text: "4.0"
+                inputMethodHints: Qt.ImhFormattedNumbersOnly
+                Layout.preferredWidth: 100
+            }
+        }
+
+        SettingsRow {
+            visible: speedSensorEnabled.checked && speedSourceType.currentIndex === 0
+            label: "Voltage Multiplier"
+            StyledTextField {
+                id: speedVoltageMultiplier
+                text: "1.0"
+                inputMethodHints: Qt.ImhFormattedNumbersOnly
+                Layout.preferredWidth: 100
+            }
+        }
+
+        SettingsRow {
+            visible: speedSensorEnabled.checked
+            label: "Tire Circumference (m)"
+            StyledTextField {
+                id: speedTireCircumference
+                text: "2.06"
+                inputMethodHints: Qt.ImhFormattedNumbersOnly
+                Layout.preferredWidth: 100
+            }
+        }
+
+        SettingsRow {
+            visible: speedSensorEnabled.checked
+            label: "Final Drive Ratio"
+            StyledTextField {
+                id: speedFinalDriveRatio
+                text: "1.0"
+                inputMethodHints: Qt.ImhFormattedNumbersOnly
+                Layout.preferredWidth: 100
+            }
+        }
+
+        SettingsRow {
+            visible: speedSensorEnabled.checked
+            label: "Unit"
+            StyledComboBox {
+                id: speedUnit
+                model: ["MPH", "KPH"]
+            }
+        }
+
+        SettingsRow {
+            visible: speedSensorEnabled.checked
+            label: "Current Speed"
+            Text {
+                text: (Expander ? Expander.EXSpeed : 0).toFixed(1) + " " + (speedUnit.currentIndex === 0 ? "MPH" : "KPH")
+                color: SettingsTheme.textPrimary
+                font.family: SettingsTheme.fontFamilyMono
+                font.pixelSize: SettingsTheme.fontControl
+            }
+        }
+
+        StyledButton {
+            visible: speedSensorEnabled.checked
+            text: "Save Speed Config"
+            Layout.alignment: Qt.AlignRight
+            onClicked: {
+                var config = {
+                    enabled: speedSensorEnabled.checked,
+                    sourceType: speedSourceType.currentIndex === 0 ? "analog" : "digital",
+                    analogPort: speedAnalogPort.currentIndex,
+                    digitalPort: speedDigitalPort.currentIndex,
+                    pulsesPerRev: parseFloat(speedPulsesPerRev.text),
+                    voltageMultiplier: parseFloat(speedVoltageMultiplier.text),
+                    tireCircumference: parseFloat(speedTireCircumference.text),
+                    finalDriveRatio: parseFloat(speedFinalDriveRatio.text),
+                    unit: speedUnit.currentIndex === 0 ? "MPH" : "KPH"
+                };
+                AppSettings.writeSpeedSensorConfig(config);
+                Extender2.setSpeedSensorConfig(config);
+            }
+        }
+    }
+
     Component.onCompleted: {
         // Load linear calibration values
         ex00.text = AppSettings.getValue("EXA00", "0");
@@ -2496,6 +2801,42 @@ SettingsPage {
         modeCombo3.currentIndex = checkan3ntc.checked ? 1 : 0;
         modeCombo4.currentIndex = checkan4ntc.checked ? 1 : 0;
         modeCombo5.currentIndex = checkan5ntc.checked ? 1 : 0;
+
+        // Load gear sensor config
+        var gearConfig = AppSettings.readGearSensorConfig();
+        if (gearConfig.enabled !== undefined) {
+            gearSensorEnabled.checked = gearConfig.enabled === true || gearConfig.enabled === "true";
+            gearSensorPort.currentIndex = Number(gearConfig.port) || 0;
+            gearTolerance.text = String(gearConfig.tolerance || "0.2");
+            gearVoltageN.text = String(gearConfig.voltageN || "0.0");
+            gearVoltageR.text = String(gearConfig.voltageR || "0.5");
+            gearVoltage1.text = String(gearConfig.voltage1 || "1.0");
+            gearVoltage2.text = String(gearConfig.voltage2 || "1.5");
+            gearVoltage3.text = String(gearConfig.voltage3 || "2.0");
+            gearVoltage4.text = String(gearConfig.voltage4 || "2.5");
+            gearVoltage5.text = String(gearConfig.voltage5 || "3.0");
+            gearVoltage6.text = String(gearConfig.voltage6 || "3.5");
+            if (gearSensorEnabled.checked) {
+                Extender2.setGearVoltageConfig(gearConfig);
+            }
+        }
+
+        // Load speed sensor config
+        var speedConfig = AppSettings.readSpeedSensorConfig();
+        if (speedConfig.enabled !== undefined) {
+            speedSensorEnabled.checked = speedConfig.enabled === true || speedConfig.enabled === "true";
+            speedSourceType.currentIndex = speedConfig.sourceType === "digital" ? 1 : 0;
+            speedAnalogPort.currentIndex = Number(speedConfig.analogPort) || 0;
+            speedDigitalPort.currentIndex = Number(speedConfig.digitalPort) || 0;
+            speedPulsesPerRev.text = String(speedConfig.pulsesPerRev || "4.0");
+            speedVoltageMultiplier.text = String(speedConfig.voltageMultiplier || "1.0");
+            speedTireCircumference.text = String(speedConfig.tireCircumference || "2.06");
+            speedFinalDriveRatio.text = String(speedConfig.finalDriveRatio || "1.0");
+            speedUnit.currentIndex = speedConfig.unit === "KPH" ? 1 : 0;
+            if (speedSensorEnabled.checked) {
+                Extender2.setSpeedSensorConfig(speedConfig);
+            }
+        }
 
         inputs.setInputs();
     }

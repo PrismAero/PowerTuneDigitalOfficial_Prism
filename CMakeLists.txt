@@ -327,6 +327,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
             PowerTune/Dashboard/ArcFillOverlay.qml
             PowerTune/Dashboard/DraggableOverlay.qml
             PowerTune/Dashboard/OverlayConfigPopup.qml
+            PowerTune/Dashboard/WarningFlashTimer.qml
         RESOURCE_PREFIX /qt/qml
         OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/qt/qml/PrismPT/Dashboard
     )

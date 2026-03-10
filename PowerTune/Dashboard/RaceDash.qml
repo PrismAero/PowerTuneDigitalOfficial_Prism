@@ -56,6 +56,21 @@ Item {
     property string sr1Label: "Digital 2:"
     property real sr1Threshold: 0.5
 
+    // -- Status row colors (configurable via overlay config) --
+    property string sr0OnColor: "#1ED033"
+    property string sr0OffColor: "#FF0909"
+    property string sr1OnColor: "#1ED033"
+    property string sr1OffColor: "#FF0909"
+
+    // -- Reactive sensor values (driven by Connections, not getValue()) --
+    property real _rpmValue: 0
+    property real _gearValue: 0
+    property real _speedValue: 0
+    property real _wtValue: 0
+    property real _opValue: 0
+    property real _sr0Value: 0
+    property real _sr1Value: 0
+
     // -- Bottom bar --
     property string bbTeamName: "Cardinal Racing"
 
@@ -122,12 +137,16 @@ Item {
             if (config.sensorKey) sr0SensorKey = config.sensorKey
             if (config.label) sr0Label = config.label
             if (config.threshold !== undefined) sr0Threshold = Number(config.threshold)
+            if (config.onColor) sr0OnColor = config.onColor
+            if (config.offColor) sr0OffColor = config.offColor
             break
 
         case "statusRow1":
             if (config.sensorKey) sr1SensorKey = config.sensorKey
             if (config.label) sr1Label = config.label
             if (config.threshold !== undefined) sr1Threshold = Number(config.threshold)
+            if (config.onColor) sr1OnColor = config.onColor
+            if (config.offColor) sr1OffColor = config.offColor
             break
 
         case "brakeBias":
@@ -171,6 +190,29 @@ Item {
         id: configPopup
     }
 
+    // -- Reactive PropertyRouter bindings for all inline overlay values --
+    // Replaces expression-based PropertyRouter.getValue() calls with event-driven
+    // updates to avoid re-evaluation polling and ensure consistent reactivity.
+    Connections {
+        target: typeof PropertyRouter !== "undefined" ? PropertyRouter : null
+        function onValueChanged(propertyName, value) {
+            if (propertyName === raceDash.tachSensorKey)
+                raceDash._rpmValue = Number(value)
+            else if (propertyName === raceDash.tachGearKey)
+                raceDash._gearValue = Number(value)
+            else if (propertyName === raceDash.speedSensorKey)
+                raceDash._speedValue = Number(value)
+            else if (propertyName === raceDash.wtSensorKey)
+                raceDash._wtValue = Number(value)
+            else if (propertyName === raceDash.opSensorKey)
+                raceDash._opValue = Number(value)
+            else if (propertyName === raceDash.sr0SensorKey)
+                raceDash._sr0Value = Number(value)
+            else if (propertyName === raceDash.sr1SensorKey)
+                raceDash._sr1Value = Number(value)
+        }
+    }
+
     Image {
         id: staticBackground
         anchors.fill: parent
@@ -194,10 +236,7 @@ Item {
 
         ShiftIndicator {
             id: shiftLights
-            rpmValue: {
-                var v = PropertyRouter.getValue(raceDash.tachSensorKey);
-                return v !== undefined ? Number(v) : 0;
-            }
+            rpmValue: raceDash._rpmValue
             rpmMax: raceDash.tachMax
             shiftPoint: raceDash.tachShiftPoint
             pillCount: raceDash.tachShiftCount
@@ -226,10 +265,7 @@ Item {
             decimals: raceDash.wtDecimals
             fontFamily: hyperspaceFont.name
             datasource: raceDash.wtSensorKey
-            value: {
-                var v = PropertyRouter.getValue(raceDash.wtSensorKey);
-                return v !== undefined ? Number(v) : 0;
-            }
+            value: raceDash._wtValue
         }
     }
 
@@ -254,10 +290,7 @@ Item {
             decimals: raceDash.opDecimals
             fontFamily: hyperspaceFont.name
             datasource: raceDash.opSensorKey
-            value: {
-                var v = PropertyRouter.getValue(raceDash.opSensorKey);
-                return v !== undefined ? Number(v) : 0;
-            }
+            value: raceDash._opValue
         }
     }
 
@@ -297,18 +330,12 @@ Item {
                         width: 190
                     }
                     Text {
-                        text: {
-                            var v = PropertyRouter.getValue(raceDash.sr0SensorKey);
-                            return (v !== undefined && Number(v) > raceDash.sr0Threshold) ? "ON" : "OFF";
-                        }
+                        text: raceDash._sr0Value > raceDash.sr0Threshold ? "ON" : "OFF"
                         font.family: hyperspaceFont.name
                         font.pixelSize: 32
                         font.weight: Font.Normal
                         font.italic: true
-                        color: {
-                            var v = PropertyRouter.getValue(raceDash.sr0SensorKey);
-                            return (v !== undefined && Number(v) > raceDash.sr0Threshold) ? "#1ED033" : "#FF0909";
-                        }
+                        color: raceDash._sr0Value > raceDash.sr0Threshold ? raceDash.sr0OnColor : raceDash.sr0OffColor
                         width: 60
                         horizontalAlignment: Text.AlignRight
                     }
@@ -337,18 +364,12 @@ Item {
                         width: 190
                     }
                     Text {
-                        text: {
-                            var v = PropertyRouter.getValue(raceDash.sr1SensorKey);
-                            return (v !== undefined && Number(v) > raceDash.sr1Threshold) ? "ON" : "OFF";
-                        }
+                        text: raceDash._sr1Value > raceDash.sr1Threshold ? "ON" : "OFF"
                         font.family: hyperspaceFont.name
                         font.pixelSize: 32
                         font.weight: Font.Normal
                         font.italic: true
-                        color: {
-                            var v = PropertyRouter.getValue(raceDash.sr1SensorKey);
-                            return (v !== undefined && Number(v) > raceDash.sr1Threshold) ? "#1ED033" : "#FF0909";
-                        }
+                        color: raceDash._sr1Value > raceDash.sr1Threshold ? raceDash.sr1OnColor : raceDash.sr1OffColor
                         width: 60
                         horizontalAlignment: Text.AlignRight
                     }
@@ -425,19 +446,13 @@ Item {
 
             GearIndicator {
                 id: gearDisplay
-                gear: {
-                    var v = PropertyRouter.getValue(raceDash.tachGearKey);
-                    return v !== undefined ? Number(v) : 0;
-                }
+                gear: raceDash._gearValue
                 fontFamily: hyperspaceFont.name
                 anchors.horizontalCenter: parent.horizontalCenter
             }
 
             Text {
-                text: {
-                    var v = PropertyRouter.getValue(raceDash.tachSensorKey);
-                    return v !== undefined ? Number(v).toFixed(raceDash.tachDecimals) : "0";
-                }
+                text: raceDash._rpmValue.toFixed(raceDash.tachDecimals)
                 font.family: hyperspaceFont.name
                 font.pixelSize: 122
                 font.weight: Font.Normal
@@ -504,10 +519,7 @@ Item {
             spacing: 2
 
             Text {
-                text: {
-                    var v = PropertyRouter.getValue(raceDash.speedSensorKey);
-                    return v !== undefined ? Number(v).toFixed(raceDash.speedDecimals) : "0";
-                }
+                text: raceDash._speedValue.toFixed(raceDash.speedDecimals)
                 font.family: hyperspaceFont.name
                 font.pixelSize: 122
                 font.weight: Font.Normal

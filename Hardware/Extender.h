@@ -21,6 +21,8 @@
 #include <QCanBusDevice>
 #include <QCanBusFrame>
 #include <QObject>
+#include <QString>
+#include <QVariantMap>
 #include <QVector>
 
 class DigitalInputs;
@@ -37,6 +39,32 @@ struct ChannelCalibration {
     qreal val0v = 0.0;
     qreal val5v = 5.0;
     bool ntcEnabled = false;
+};
+
+struct GearVoltageConfig {
+    bool enabled = false;
+    int port = 0;           // Which EXAnalog port (0-7)
+    double tolerance = 0.2; // Voltage tolerance +/-
+    double voltageN = 0.0;  // Neutral
+    double voltageR = 0.5;  // Reverse
+    double voltage1 = 1.0;  // 1st gear
+    double voltage2 = 1.5;  // 2nd
+    double voltage3 = 2.0;  // 3rd
+    double voltage4 = 2.5;  // 4th
+    double voltage5 = 3.0;  // 5th
+    double voltage6 = 3.5;  // 6th
+};
+
+struct SpeedSensorConfig {
+    bool enabled = false;
+    QString sourceType = "analog";  // "analog" or "digital"
+    int analogPort = 0;
+    int digitalPort = 0;
+    double pulsesPerRev = 4.0;
+    double voltageMultiplier = 1.0;
+    double tireCircumference = 2.06;  // meters
+    double finalDriveRatio = 1.0;
+    QString unit = "MPH";
 };
 
 class Extender : public QObject
@@ -56,6 +84,12 @@ public:
 
     void setSteinhartCalculator(SteinhartCalculator *calc);
     void connectCalibrationSignals();
+
+    Q_INVOKABLE void setGearVoltageConfig(const QVariantMap &config);
+    GearVoltageConfig gearVoltageConfig() const { return m_gearConfig; }
+
+    Q_INVOKABLE void setSpeedSensorConfig(const QVariantMap &config);
+    SpeedSensorConfig speedSensorConfig() const { return m_speedConfig; }
 
 public slots:
     void openCAN(const int &ExtenderBaseID, const int &RPMCANBaseID);
@@ -115,6 +149,17 @@ private:
     qreal m_avgHz = 0;
 
     ChannelCalibration m_calibration[EX_ANALOG_CHANNELS];
+
+    // * Gear voltage sensor
+    GearVoltageConfig m_gearConfig;
+    int voltageToGear(double voltage) const;
+    void onGearPortVoltageChanged();
+    QMetaObject::Connection m_gearConnection;
+
+    // * Speed sensor
+    SpeedSensorConfig m_speedConfig;
+    void onSpeedSourceChanged();
+    QMetaObject::Connection m_speedConnection;
 };
 
 #endif  // Extender_H

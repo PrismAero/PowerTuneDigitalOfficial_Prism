@@ -100,6 +100,12 @@ public:
     void setSteinhartCalculator(SteinhartCalculator *calc);
     Q_INVOKABLE void readandApplySettings();
 
+    // * Expander board sensor configs (gear position, speed)
+    Q_INVOKABLE void writeGearSensorConfig(const QVariantMap &config);
+    Q_INVOKABLE QVariantMap readGearSensorConfig();
+    Q_INVOKABLE void writeSpeedSensorConfig(const QVariantMap &config);
+    Q_INVOKABLE QVariantMap readSpeedSensorConfig();
+
     Q_INVOKABLE void writeDashboardConfig(int index, const QString &bgPicture, const QString &bgColor);
     Q_INVOKABLE QVariantMap loadDashboardConfig(int index) const;
 

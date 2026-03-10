@@ -38,6 +38,10 @@ class ExpanderBoardData : public QObject
     Q_PROPERTY(qreal EXAnalogCalc6 READ EXAnalogCalc6 WRITE setEXAnalogCalc6 NOTIFY EXAnalogCalc6Changed)
     Q_PROPERTY(qreal EXAnalogCalc7 READ EXAnalogCalc7 WRITE setEXAnalogCalc7 NOTIFY EXAnalogCalc7Changed)
 
+    // * Derived sensor values (gear position, speed from expander board inputs)
+    Q_PROPERTY(int EXGear READ EXGear WRITE setEXGear NOTIFY EXGearChanged)
+    Q_PROPERTY(qreal EXSpeed READ EXSpeed WRITE setEXSpeed NOTIFY EXSpeedChanged)
+
 public:
     explicit ExpanderBoardData(QObject *parent = nullptr);
 
@@ -50,6 +54,10 @@ public:
     qreal EXAnalogInput5() const { return m_EXAnalogInput5; }
     qreal EXAnalogInput6() const { return m_EXAnalogInput6; }
     qreal EXAnalogInput7() const { return m_EXAnalogInput7; }
+
+    // * Getters - Derived
+    int EXGear() const { return m_EXGear; }
+    qreal EXSpeed() const { return m_EXSpeed; }
 
     // * Getters - Calculated
     qreal EXAnalogCalc0() const { return m_EXAnalogCalc0; }
@@ -82,6 +90,10 @@ public slots:
     void setEXAnalogCalc6(qreal EXAnalogCalc6);
     void setEXAnalogCalc7(qreal EXAnalogCalc7);
 
+    // * Setters - Derived
+    void setEXGear(int EXGear);
+    void setEXSpeed(qreal EXSpeed);
+
 signals:
     // * Signals - Raw
     void EXAnalogInput0Changed(qreal EXAnalogInput0);
@@ -103,6 +115,10 @@ signals:
     void EXAnalogCalc6Changed(qreal EXAnalogCalc6);
     void EXAnalogCalc7Changed(qreal EXAnalogCalc7);
 
+    // * Signals - Derived
+    void EXGearChanged(int EXGear);
+    void EXSpeedChanged(qreal EXSpeed);
+
 private:
     // * Raw
     qreal m_EXAnalogInput0 = 0;
@@ -123,6 +139,10 @@ private:
     qreal m_EXAnalogCalc5 = 0;
     qreal m_EXAnalogCalc6 = 0;
     qreal m_EXAnalogCalc7 = 0;
+
+    // * Derived
+    int m_EXGear = -2;      // -2 = unknown, -1 = reverse, 0 = neutral, 1-6 = gears
+    qreal m_EXSpeed = 0.0;  // Calculated speed in configured unit
 };
 
 #endif  // EXPANDERBOARDDATA_H
