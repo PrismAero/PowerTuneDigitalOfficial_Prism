@@ -12,9 +12,9 @@ Item {
     signal switchLayout()
 
     // Calculate key dimensions based on available width
-    property real keySpacing: 4
+    property real keySpacing: KeyboardTheme.keySpacing
     property real standardKeyWidth: (width - keySpacing * 9) / 10
-    property real rowHeight: (height - keySpacing * 3) / 4
+    property real rowHeight: Math.max((height - keySpacing * 3) / 4, KeyboardTheme.controlHeight)
 
     Column {
         anchors.fill: parent
@@ -60,9 +60,9 @@ Item {
             anchors.horizontalCenter: parent.horizontalCenter
 
             KeyButton {
-                text: "Shift"
+                iconName: qwertyLayout.shiftActive ? "keyboard_capslock" : "shift"
                 keyValue: "shift"
-                fontSize: 12
+                iconSize: 18
                 width: qwertyLayout.standardKeyWidth
                 height: qwertyLayout.rowHeight
                 isAccent: qwertyLayout.shiftActive
@@ -81,11 +81,11 @@ Item {
             }
 
             KeyButton {
-                text: "<--"
+                iconName: "backspace"
                 keyValue: "backspace"
+                iconSize: 18
                 isDestructive: true
                 repeatEnabled: true
-                fontSize: 12
                 width: qwertyLayout.standardKeyWidth
                 height: qwertyLayout.rowHeight
                 onKeyPressed: qwertyLayout.backspacePressed()
@@ -98,9 +98,9 @@ Item {
             anchors.horizontalCenter: parent.horizontalCenter
 
             KeyButton {
-                text: "123"
+                iconName: "pin"
                 keyValue: "switchLayout"
-                fontSize: 14
+                iconSize: 18
                 width: qwertyLayout.standardKeyWidth * 1.5
                 height: qwertyLayout.rowHeight
                 onKeyPressed: qwertyLayout.switchLayout()
@@ -123,10 +123,10 @@ Item {
             }
 
             KeyButton {
-                text: "Done"
+                iconName: "keyboard_return"
                 keyValue: "enter"
+                iconSize: 18
                 isAccent: true
-                fontSize: 14
                 width: qwertyLayout.standardKeyWidth * 1.5
                 height: qwertyLayout.rowHeight
                 onKeyPressed: qwertyLayout.enterPressed()

@@ -18,11 +18,11 @@ Item {
 
     // Calculate key dimensions based on available width/height
     // Number columns are wider, action column is slightly narrower
-    property real keySpacing: 4
+    property real keySpacing: KeyboardTheme.keySpacing
     property real actionColumnRatio: 0.85
     property real numColumnWidth: (width - keySpacing * 3 - actionColumnWidth) / 3
     property real actionColumnWidth: (width - keySpacing * 3) / (3 + actionColumnRatio) * actionColumnRatio
-    property real cellHeight: (height - keySpacing * 3) / 4
+    property real cellHeight: Math.max((height - keySpacing * 3) / 4, KeyboardTheme.controlHeight)
 
     Row {
         anchors.fill: parent
@@ -121,7 +121,7 @@ Item {
         Rectangle {
             width: 1
             height: parent.height
-            color: "#2a3a5e"
+            color: KeyboardTheme.borderStrong
             anchors.verticalCenter: parent.verticalCenter
         }
 
@@ -138,8 +138,9 @@ Item {
             spacing: numericPad.keySpacing
 
             KeyButton {
-                text: "<--"
+                iconName: "backspace"
                 keyValue: "backspace"
+                iconSize: 20
                 isDestructive: true
                 repeatEnabled: true
                 width: numericPad.actionColumnWidth
@@ -147,10 +148,10 @@ Item {
                 onKeyPressed: numericPad.backspacePressed()
             }
             KeyButton {
-                text: "Clear"
+                iconName: "clear_all"
                 keyValue: "clear"
+                iconSize: 20
                 isDestructive: true
-                fontSize: 14
                 width: numericPad.actionColumnWidth
                 height: numericPad.cellHeight
                 onKeyPressed: numericPad.clearPressed()
@@ -158,16 +159,16 @@ Item {
             KeyButton {
                 text: "ABC"
                 keyValue: "switchLayout"
-                fontSize: 14
+                fontSize: KeyboardTheme.fontAction
                 width: numericPad.actionColumnWidth
                 height: numericPad.cellHeight
                 onKeyPressed: numericPad.switchLayout()
             }
             KeyButton {
-                text: "Done"
+                iconName: "keyboard_return"
                 keyValue: "enter"
+                iconSize: 20
                 isAccent: true
-                fontSize: 14
                 width: numericPad.actionColumnWidth
                 height: numericPad.cellHeight
                 onKeyPressed: numericPad.enterPressed()
