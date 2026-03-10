@@ -208,7 +208,7 @@ SettingsPage {
                         readOnly: true
                         color: SettingsTheme.consoleText
                         font.pixelSize: SettingsTheme.fontCaption
-                        font.family: "monospace"
+                        font.family: SettingsTheme.fontFamilyMono
                         background: Rectangle { color: "transparent" }
                     }
 

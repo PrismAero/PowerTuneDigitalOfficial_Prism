@@ -470,7 +470,7 @@ SettingsPage {
                         width: logListView.width
                         text: modelData
                         font.pixelSize: SettingsTheme.fontCaption
-                        font.family: "monospace"
+                        font.family: SettingsTheme.fontFamilyMono
                         color: {
                             if (modelData.indexOf("[ERROR]") !== -1 || modelData.indexOf("[FATAL]") !== -1)
                                 return SettingsTheme.error;

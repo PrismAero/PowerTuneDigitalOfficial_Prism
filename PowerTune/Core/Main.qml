@@ -3,6 +3,7 @@ import QtQuick.Controls 2.15
 import QtQuick.Window 2.15
 import com.powertune 1.0
 import PowerTune.Core 1.0
+import PowerTune.UI 1.0
 import PowerTune.Utils 1.0
 import Prism.Keyboard 1.0
 
@@ -169,7 +170,7 @@ ApplicationWindow {
             Button {
                 id: btntripreset
                 text: "Trip Reset"
-                font.family: "Lato"
+                font.family: SettingsTheme.fontFamily
                 font.bold: true
                 width: window.width / 13
                 height: window.width / 13
@@ -187,7 +188,7 @@ ApplicationWindow {
             Button {
                 id: btnshutdown
                 text: "Shutdown"
-                font.family: "Lato"
+                font.family: SettingsTheme.fontFamily
                 font.bold: true
                 width: window.width / 13
                 height: window.width / 13
@@ -215,7 +216,7 @@ ApplicationWindow {
             Row {
                 Button {
                     id: plusBrightness
-                    font.family: "Lato"
+                    font.family: SettingsTheme.fontFamily
                     font.bold: true
                     width: window.width / 13
                     height: window.width / 13
@@ -240,7 +241,7 @@ ApplicationWindow {
             Row {
                 Button {
                     id: minusBrightness
-                    font.family: "Lato"
+                    font.family: SettingsTheme.fontFamily
                     font.bold: true
                     width: window.width / 13
                     height: window.width / 13
@@ -304,7 +305,7 @@ ApplicationWindow {
                         text: "Brightness Pop Up at Boot"
                         anchors.centerIn: parent
                         color: "black"
-                        font.family: "Lato"
+                        font.family: SettingsTheme.fontFamily
                         font.bold: true
                         font.pixelSize: window.width / 70
                     }
@@ -313,7 +314,7 @@ ApplicationWindow {
                 Switch {
                     id: disablePopUp
                     checked: popUpLoader.enabled
-                    font.family: "Lato"
+                    font.family: SettingsTheme.fontFamily
                     font.bold: true
                     width: window.width / 7
                     height: window.width / 15

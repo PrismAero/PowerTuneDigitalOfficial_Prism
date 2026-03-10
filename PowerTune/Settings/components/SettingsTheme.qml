@@ -44,6 +44,7 @@ QtObject {
 
     // -- Typography --
     readonly property string fontFamily: "Lato"
+    readonly property string fontFamilyMono: "JetBrains Mono"
     readonly property int fontSectionTitle: 20
     readonly property int fontLabel: 18
     readonly property int fontControl: 18

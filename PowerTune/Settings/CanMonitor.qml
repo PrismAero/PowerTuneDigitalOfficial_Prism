@@ -1,6 +1,7 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
+import PowerTune.UI 1.0
 
 Rectangle {
     id: root
@@ -29,7 +30,7 @@ Rectangle {
                     text: "CAN Bus Monitor"
                     font.pixelSize: 24
                     font.weight: Font.DemiBold
-                    font.family: "Lato"
+                    font.family: SettingsTheme.fontFamily
                     color: "#FFFFFF"
                 }
 
@@ -40,7 +41,7 @@ Rectangle {
                     Text {
                         text: "Extender Only"
                         font.pixelSize: 16
-                        font.family: "Lato"
+                        font.family: SettingsTheme.fontFamily
                         color: CanMonitorModel.showAllFrames ? "#707070" : "#009688"
                     }
                     Switch {
@@ -51,7 +52,7 @@ Rectangle {
                     Text {
                         text: "All Frames"
                         font.pixelSize: 16
-                        font.family: "Lato"
+                        font.family: SettingsTheme.fontFamily
                         color: CanMonitorModel.showAllFrames ? "#009688" : "#707070"
                     }
                 }
@@ -75,7 +76,7 @@ Rectangle {
                 Text {
                     text: CanMonitorModel.messageCount + " messages"
                     font.pixelSize: 18
-                    font.family: "Lato"
+                    font.family: SettingsTheme.fontFamily
                     color: "#B0B0B0"
                 }
             }
@@ -96,7 +97,7 @@ Rectangle {
                     text: "CAN ID"
                     font.pixelSize: 18
                     font.weight: Font.DemiBold
-                    font.family: "Lato"
+                    font.family: SettingsTheme.fontFamily
                     color: "#009688"
                     Layout.preferredWidth: 150
                 }
@@ -105,7 +106,7 @@ Rectangle {
                     text: "Payload (Hex)"
                     font.pixelSize: 18
                     font.weight: Font.DemiBold
-                    font.family: "Lato"
+                    font.family: SettingsTheme.fontFamily
                     color: "#009688"
                     Layout.fillWidth: true
                 }
@@ -151,7 +152,7 @@ Rectangle {
                                 text: model.canId
                                 font.pixelSize: 14
                                 font.weight: Font.DemiBold
-                                font.family: "Courier New"
+                                font.family: SettingsTheme.fontFamilyMono
                                 color: "#FFFFFF"
                             }
                         }
@@ -159,7 +160,7 @@ Rectangle {
                         Text {
                             text: model.payload
                             font.pixelSize: 14
-                            font.family: "Courier New"
+                            font.family: SettingsTheme.fontFamilyMono
                             color: "#FFFFFF"
                             Layout.fillWidth: true
                         }
@@ -175,7 +176,7 @@ Rectangle {
                 anchors.centerIn: parent
                 text: "No CAN messages received"
                 font.pixelSize: 18
-                font.family: "Lato"
+                font.family: SettingsTheme.fontFamily
                 color: "#707070"
                 visible: CanMonitorModel.messageCount === 0
             }

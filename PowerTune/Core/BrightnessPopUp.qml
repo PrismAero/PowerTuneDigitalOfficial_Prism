@@ -1,6 +1,7 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 import com.powertune 1.0
+import PowerTune.UI 1.0
 import PowerTune.Utils 1.0
 
 Rectangle {
@@ -32,7 +33,7 @@ Rectangle {
         Button {
             id: brightnessLow
             text: "Night"
-            font.family: "Lato"
+            font.family: SettingsTheme.fontFamily
             font.bold: true
             width: popUp1.width / 1.2
             height: popUp1.width / 1.2
@@ -55,7 +56,7 @@ Rectangle {
         Button {
             id: brightnessHigh
             text: "Day"
-            font.family: "Lato"
+            font.family: SettingsTheme.fontFamily
             font.bold: true
             width: popUp1.width / 1.2
             height: popUp1.width / 1.2

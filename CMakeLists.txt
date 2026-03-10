@@ -354,6 +354,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
             Resources/fonts/Lato-ThinItalic.ttf
             Resources/fonts/Lato-Black.ttf
             Resources/fonts/Lato-BlackItalic.ttf
+            Resources/fonts/JetBrainsMono-Regular.ttf
             Resources/graphics/Logo.png
             Resources/graphics/brightness.png
             Resources/graphics/brightnessIncrease.png
