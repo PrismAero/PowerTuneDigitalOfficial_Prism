@@ -26,6 +26,7 @@
 #include <QDateTime>
 
 class SensorRegistry;
+class PropertyRouter;
 
 class DiagnosticsProvider : public QObject
 {
@@ -99,10 +100,29 @@ class DiagnosticsProvider : public QObject
     /// Total number of registered sensors
     Q_PROPERTY(int totalSensorCount READ totalSensorCount NOTIFY sensorDataChanged)
 
+    // -- Live Sensor Table (replaces QML JS refreshLiveData) --
+
+    /// Pre-built list of {name, source, value, unit} maps for the diagnostics live table
+    Q_PROPERTY(QVariantList liveSensorEntries READ liveSensorEntries NOTIFY liveSensorEntriesChanged)
+
+    /// Filter toggle: true shows all sensors, false shows only those with non-zero values
+    Q_PROPERTY(bool showAllSensors READ showAllSensors WRITE setShowAllSensors NOTIFY showAllSensorsChanged)
+
+    // -- Display Time (12h format for bottom status bar clock) --
+
+    /// Current time formatted as "h:mm AM/PM"
+    Q_PROPERTY(QString displayTime READ displayTime NOTIFY systemInfoChanged)
+
     // -- Log --
 
-    /// Circular log buffer (newest first, max 200 entries)
+    /// Circular log buffer (newest first, max 500 entries)
     Q_PROPERTY(QStringList logMessages READ logMessages NOTIFY logChanged)
+
+    /// Filtered log based on current minimum level
+    Q_PROPERTY(QStringList filteredLogMessages READ filteredLogMessages NOTIFY logChanged)
+
+    /// Current minimum log level: 0=DEBUG, 1=INFO, 2=WARN, 3=ERROR
+    Q_PROPERTY(int logLevel READ logLevel WRITE setLogLevel NOTIFY logLevelChanged)
 
 public:
     /**
@@ -110,14 +130,23 @@ public:
      * @param parent Parent QObject (typically the Connect instance)
      *
      * Starts uptime timer, system info polling (2s), and CAN rate tracking (1s).
+     * Installs a Qt message handler to capture qDebug/qWarning/qCritical/qFatal.
      */
     explicit DiagnosticsProvider(QObject *parent = nullptr);
+
+    static DiagnosticsProvider *instance();
 
     /**
      * @brief Set the SensorRegistry reference for querying sensor status.
      * @param registry Pointer to the SensorRegistry instance
      */
     void setSensorRegistry(SensorRegistry *registry);
+
+    /**
+     * @brief Set the PropertyRouter reference for reading live sensor values.
+     * @param router Pointer to the PropertyRouter instance
+     */
+    void setPropertyRouter(class PropertyRouter *router);
 
     // -- System Info accessors --
 
@@ -229,6 +258,16 @@ public:
      */
     int totalSensorCount() const;
 
+    // -- Live Sensor Table accessors --
+
+    QVariantList liveSensorEntries() const;
+    bool showAllSensors() const;
+    void setShowAllSensors(bool showAll);
+
+    // -- Display Time accessor --
+
+    QString displayTime() const;
+
     // -- Log accessors --
 
     /**
@@ -236,6 +275,15 @@ public:
      * @return List of log strings, newest first
      */
     QStringList logMessages() const;
+
+    /**
+     * @brief Get log messages filtered by the current minimum log level.
+     * @return Filtered list of log strings, newest first
+     */
+    QStringList filteredLogMessages() const;
+
+    int logLevel() const;
+    void setLogLevel(int level);
 
     // -- Q_INVOKABLE for QML --
 
@@ -342,8 +390,17 @@ signals:
     /// Emitted when sensor summary counts change
     void sensorDataChanged();
 
+    /// Emitted when the pre-built live sensor entries list is updated
+    void liveSensorEntriesChanged();
+
+    /// Emitted when showAllSensors filter changes
+    void showAllSensorsChanged();
+
     /// Emitted when log buffer is modified
     void logChanged();
+
+    /// Emitted when log level filter changes
+    void logLevelChanged();
 
 private slots:
     /**
@@ -360,6 +417,14 @@ private slots:
      * Sets m_canMessageRate = m_canMessagesThisSecond, then resets counter.
      */
     void updateCanRate();
+
+    /**
+     * @brief Periodic callback to rebuild the live sensor entries list.
+     *
+     * Connected to m_liveSensorTimer (1-second interval).
+     * Reads all known sensors via PropertyRouter and rebuilds m_liveSensorEntries.
+     */
+    void refreshLiveSensorEntries();
 
 private:
     // System info
@@ -387,16 +452,30 @@ private:
     QString m_serialPort;
     int m_serialBaudRate = 0;
 
-    // Sensor registry reference
+    // Sensor registry and property router references
     SensorRegistry *m_sensorRegistry = nullptr;
+    PropertyRouter *m_propertyRouter = nullptr;
 
-    // Log buffer (circular, max 200 entries)
-    QStringList m_logMessages;
-    static constexpr int MAX_LOG_ENTRIES = 200;
+    struct LogEntry {
+        int level;       // 0=DEBUG, 1=INFO, 2=WARN, 3=ERROR
+        QString text;    // Formatted "[HH:mm:ss] [LEVEL] message"
+    };
+
+    QList<LogEntry> m_logEntries;
+    QStringList m_logMessages;   // cached formatted strings for QML
+    int m_logLevel = 0;          // minimum level to display (0=all)
+    static constexpr int MAX_LOG_ENTRIES = 500;
+
+    void rebuildLogCache();
+
+    // Live sensor table
+    QVariantList m_liveSensorEntries;
+    bool m_showAllSensors = true;
 
     // Timers
     QTimer m_systemInfoTimer;  // 2-second interval for system info
     QTimer m_canRateTimer;     // 1-second interval for CAN message rate
+    QTimer m_liveSensorTimer;  // 1-second interval for live sensor table
 
     /**
      * @brief Read CPU temperature from system.
@@ -420,6 +499,10 @@ private:
     double readCpuLoadAverage() const;
     double readDiskUsage() const;
     void readMemoryAbsolute(double &usedMB, double &totalMB) const;
+
+    static DiagnosticsProvider *s_instance;
+    static QtMessageHandler s_previousHandler;
+    static void qtMessageHandler(QtMsgType type, const QMessageLogContext &context, const QString &msg);
 };
 
 #endif // DIAGNOSTICSPROVIDER_H

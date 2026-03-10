@@ -103,6 +103,9 @@ QVariantList CalibrationHelper::linearPresets() const
  */
 QVariantMap CalibrationHelper::getLinearPreset(const QString &name) const
 {
+    if (name.isEmpty())
+        return {};
+
     for (const auto &p : m_linearPresets) {
         if (p.name == name) {
             QVariantMap map;
@@ -148,6 +151,9 @@ qreal CalibrationHelper::calculateLinearValue(qreal voltage, qreal val0v, qreal 
  */
 double CalibrationHelper::calculateLinearValueScaled(const QString &presetName, double rawVoltage)
 {
+    if (presetName.isEmpty())
+        return 0.0;
+
     for (const auto &p : m_linearPresets) {
         if (p.name == presetName) {
             double normalized = normalizeVoltage(rawVoltage, p.minVoltage, p.maxVoltage);
@@ -189,6 +195,9 @@ double CalibrationHelper::normalizeVoltage(double rawVoltage, double sensorMin, 
  */
 double CalibrationHelper::getPresetMinVoltage(const QString &presetName)
 {
+    if (presetName.isEmpty())
+        return 0.0;
+
     for (const auto &p : m_linearPresets) {
         if (p.name == presetName) {
             return p.minVoltage;
@@ -213,6 +222,9 @@ double CalibrationHelper::getPresetMinVoltage(const QString &presetName)
  */
 double CalibrationHelper::getPresetMaxVoltage(const QString &presetName)
 {
+    if (presetName.isEmpty())
+        return 5.0;
+
     for (const auto &p : m_linearPresets) {
         if (p.name == presetName) {
             return p.maxVoltage;
@@ -242,6 +254,9 @@ double CalibrationHelper::getPresetMaxVoltage(const QString &presetName)
  */
 double CalibrationHelper::getLinearPresetValueAt0V(const QString &presetName) const
 {
+    if (presetName.isEmpty())
+        return 0.0;
+
     for (const auto &p : m_linearPresets) {
         if (p.name == presetName) {
             return p.val0v;
@@ -262,6 +277,9 @@ double CalibrationHelper::getLinearPresetValueAt0V(const QString &presetName) co
  */
 double CalibrationHelper::getLinearPresetValueAt5V(const QString &presetName) const
 {
+    if (presetName.isEmpty())
+        return 0.0;
+
     for (const auto &p : m_linearPresets) {
         if (p.name == presetName) {
             return p.val5v;
@@ -282,6 +300,9 @@ double CalibrationHelper::getLinearPresetValueAt5V(const QString &presetName) co
  */
 QString CalibrationHelper::getLinearPresetUnit(const QString &presetName) const
 {
+    if (presetName.isEmpty())
+        return {};
+
     for (const auto &p : m_linearPresets) {
         if (p.name == presetName) {
             return p.unit;
@@ -370,6 +391,9 @@ QVariantList CalibrationHelper::ntcPresets() const
  */
 QVariantMap CalibrationHelper::getNtcPreset(const QString &name) const
 {
+    if (name.isEmpty())
+        return {};
+
     for (const auto &p : m_ntcPresets) {
         if (p.name == name) {
             QVariantMap map;

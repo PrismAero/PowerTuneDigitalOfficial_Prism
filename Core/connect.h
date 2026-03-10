@@ -60,13 +60,24 @@ class CalibrationHelper;
 class SensorRegistry;
 // * Phase 8: Diagnostics provider
 class DiagnosticsProvider;
+// * Dashboard test simulator
+class UdpTestSimulator;
+// * Overlay configuration persistence
+class OverlayConfigManager;
+class ShiftIndicatorHelper;
+class CanFrameModel;
 
 class Connect : public QObject
 {
     Q_OBJECT
     Q_PROPERTY(QStringList portsNames READ portsNames WRITE setPortsNames NOTIFY sig_portsNamesChanged)
+    Q_PROPERTY(bool hasDdcBrightness READ hasDdcBrightness CONSTANT)
 
 public:
+    enum class BrightnessMethod { None, Sysfs, DdcUtil };
+
+    bool hasDdcBrightness() const { return m_brightnessMethod == BrightnessMethod::DdcUtil; }
+
     ~Connect() override;
     explicit Connect(QObject *parent = nullptr);
     Q_INVOKABLE void saveDashtoFile(const QString &filename, const QString &dashstring);
@@ -165,6 +176,13 @@ private:
     SensorRegistry *m_sensorRegistry;
     // * Phase 8: Diagnostics provider
     DiagnosticsProvider *m_diagnosticsProvider;
+    // * Dashboard test simulator
+    UdpTestSimulator *m_testSimulator;
+    // * Overlay configuration persistence
+    OverlayConfigManager *m_overlayConfigManager;
+    ShiftIndicatorHelper *m_shiftIndicatorHelper;
+    CanFrameModel *m_canFrameModel;
+    BrightnessMethod m_brightnessMethod = BrightnessMethod::None;
 
 
 signals:

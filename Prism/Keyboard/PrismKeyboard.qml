@@ -165,7 +165,7 @@ Item {
                 drag.minimumY: 0
                 drag.maximumX: keyboard.parent ? keyboard.parent.width - keyboard.width : 0
                 drag.maximumY: keyboard.parent ? keyboard.parent.height - keyboard.height : 0
-                cursorShape: keyboard.docked ? Qt.ArrowCursor : Qt.OpenHandCursor
+                cursorShape: Qt.BlankCursor
             }
         }
 

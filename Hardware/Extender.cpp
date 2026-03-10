@@ -15,25 +15,17 @@
 #include "../Core/Models/SettingsData.h"
 #include "../Core/Models/VehicleData.h"
 #include "../Core/Models/ConnectionData.h"
-#include "math.h"
+#include "../Utils/SteinhartCalculator.h"
 
 #include <QDebug>
 #include <QVector>
 #include <QtEndian>
+#include <cmath>
 
 
-QVector<int> averagehz1(0);
-qreal avghz1;
-qreal test1;
-quint32 canstartadress;
-quint32 canstartadressrpm;
-quint32 adress1;
-quint32 adress2;
-quint32 adress3;
-quint32 adress4;
-quint32 adress5;
-int statusmask = 128;
-int frequencymask = 127;
+static constexpr int STATUS_MASK = 128;
+static constexpr int FREQUENCY_MASK = 127;
+static constexpr int HZ_AVERAGE_WINDOW = 10;
 
 
 Extender::Extender(QObject *parent)
@@ -44,6 +36,7 @@ Extender::Extender(QObject *parent)
     , m_settingsData(nullptr)
     , m_vehicleData(nullptr)
     , m_connectionData(nullptr)
+    , m_hzAverage(HZ_AVERAGE_WINDOW, 0)
 {
 }
 
@@ -61,18 +54,87 @@ Extender::Extender(DigitalInputs *digitalInputs,
     , m_settingsData(settingsData)
     , m_vehicleData(vehicleData)
     , m_connectionData(connectionData)
+    , m_hzAverage(HZ_AVERAGE_WINDOW, 0)
 {
 }
 
 Extender::~Extender() {}
 
+void Extender::setSteinhartCalculator(SteinhartCalculator *calc)
+{
+    m_steinhartCalc = calc;
+}
+
+void Extender::connectCalibrationSignals()
+{
+    if (!m_expanderBoardData)
+        return;
+
+    connect(m_expanderBoardData, &ExpanderBoardData::EXAnalogInput0Changed,
+            this, [this](qreal v) { applyCalibration(0, v); });
+    connect(m_expanderBoardData, &ExpanderBoardData::EXAnalogInput1Changed,
+            this, [this](qreal v) { applyCalibration(1, v); });
+    connect(m_expanderBoardData, &ExpanderBoardData::EXAnalogInput2Changed,
+            this, [this](qreal v) { applyCalibration(2, v); });
+    connect(m_expanderBoardData, &ExpanderBoardData::EXAnalogInput3Changed,
+            this, [this](qreal v) { applyCalibration(3, v); });
+    connect(m_expanderBoardData, &ExpanderBoardData::EXAnalogInput4Changed,
+            this, [this](qreal v) { applyCalibration(4, v); });
+    connect(m_expanderBoardData, &ExpanderBoardData::EXAnalogInput5Changed,
+            this, [this](qreal v) { applyCalibration(5, v); });
+    connect(m_expanderBoardData, &ExpanderBoardData::EXAnalogInput6Changed,
+            this, [this](qreal v) { applyCalibration(6, v); });
+    connect(m_expanderBoardData, &ExpanderBoardData::EXAnalogInput7Changed,
+            this, [this](qreal v) { applyCalibration(7, v); });
+}
+
+void Extender::setChannelCalibration(int channel, qreal val0v, qreal val5v, bool ntcEnabled)
+{
+    if (channel < 0 || channel >= EX_ANALOG_CHANNELS)
+        return;
+    m_calibration[channel].val0v = val0v;
+    m_calibration[channel].val5v = val5v;
+    m_calibration[channel].ntcEnabled = ntcEnabled;
+}
+
+void Extender::applyCalibration(int channel, qreal voltage)
+{
+    if (!m_expanderBoardData || channel < 0 || channel >= EX_ANALOG_CHANNELS)
+        return;
+
+    qreal calibrated = 0.0;
+    const auto &cal = m_calibration[channel];
+
+    if (cal.ntcEnabled && m_steinhartCalc && channel < SteinhartCalculator::MAX_CHANNELS) {
+        if (m_steinhartCalc->isChannelEnabled(channel) && m_steinhartCalc->isChannelCalibrated(channel)) {
+            calibrated = m_steinhartCalc->voltageToTemperature(channel, voltage);
+            if (std::isnan(calibrated))
+                calibrated = 0.0;
+        }
+    } else {
+        calibrated = cal.val0v + (voltage / 5.0) * (cal.val5v - cal.val0v);
+    }
+
+    switch (channel) {
+    case 0: m_expanderBoardData->setEXAnalogCalc0(calibrated); break;
+    case 1: m_expanderBoardData->setEXAnalogCalc1(calibrated); break;
+    case 2: m_expanderBoardData->setEXAnalogCalc2(calibrated); break;
+    case 3: m_expanderBoardData->setEXAnalogCalc3(calibrated); break;
+    case 4: m_expanderBoardData->setEXAnalogCalc4(calibrated); break;
+    case 5: m_expanderBoardData->setEXAnalogCalc5(calibrated); break;
+    case 6: m_expanderBoardData->setEXAnalogCalc6(calibrated); break;
+    case 7: m_expanderBoardData->setEXAnalogCalc7(calibrated); break;
+    }
+}
+
 void Extender::openCAN(const int &ExtenderBaseID, const int &RPMCANBaseID)
 {
-    canstartadress = ExtenderBaseID;
-    adress1 = canstartadress + 1;
-    adress2 = canstartadress + 2;
-    adress3 = canstartadress + 3;
-    adress5 = RPMCANBaseID + 1;
+    m_canBaseAddress = ExtenderBaseID;
+    m_address1 = m_canBaseAddress + 1;
+    m_address2 = m_canBaseAddress + 2;
+    m_address3 = m_canBaseAddress + 3;
+    m_address5 = RPMCANBaseID + 1;
+    emit baseIdsChanged();
     if (QCanBus::instance()->plugins().contains(QStringLiteral("socketcan"))) {
         QString errorString;
         m_canDevice =
@@ -96,9 +158,10 @@ void Extender::openCAN(const int &ExtenderBaseID, const int &RPMCANBaseID)
 
 void Extender::closeConnection()
 {
-    disconnect(m_canDevice, SIGNAL(framesReceived()), this, SLOT(readyToRead()));
-    if (m_canDevice)
-        m_canDevice->disconnectDevice();
+    if (!m_canDevice)
+        return;
+    disconnect(m_canDevice, &QCanBusDevice::framesReceived, this, &Extender::readyToRead);
+    m_canDevice->disconnectDevice();
 }
 
 
@@ -128,7 +191,7 @@ void Extender::readyToRead()
         if (m_connectionData) {
             m_connectionData->setcan(list);
         }
-        qDebug() << "Received message" << list;
+        // CAN frame forwarded to ConnectionData for CanMonitor
         // Can Monitor end
         // Just for testing  start
         QString view;
@@ -259,52 +322,50 @@ void Extender::readyToRead()
             }
         }
         */
-        if (frame.frameId() == adress1) {
-            // ON / Off Status :
+        if (frame.frameId() == m_address1) {
             if (m_digitalInputs) {
-                m_digitalInputs->setEXDigitalInput1((byte0 & statusmask) > 0);  // Digital Input 0
-                m_digitalInputs->setEXDigitalInput2((byte1 & statusmask) > 0);  // Digital Input 1
-                m_digitalInputs->setEXDigitalInput3((byte2 & statusmask) > 0);  // Digital Input 2
-                m_digitalInputs->setEXDigitalInput4((byte3 & statusmask) > 0);  // Digital Input 3
-                m_digitalInputs->setEXDigitalInput5((byte4 & statusmask) > 0);  // Digital Input 4
-                m_digitalInputs->setEXDigitalInput6((byte5 & statusmask) > 0);  // Digital Input 5
-                m_digitalInputs->setEXDigitalInput7((byte6 & statusmask) > 0);  // Digital Input 6
-                m_digitalInputs->setEXDigitalInput8((byte7 & statusmask) > 0);  // Digital Input 7
-                // Frequency Counter :
+                m_digitalInputs->setEXDigitalInput1((byte0 & STATUS_MASK) > 0);
+                m_digitalInputs->setEXDigitalInput2((byte1 & STATUS_MASK) > 0);
+                m_digitalInputs->setEXDigitalInput3((byte2 & STATUS_MASK) > 0);
+                m_digitalInputs->setEXDigitalInput4((byte3 & STATUS_MASK) > 0);
+                m_digitalInputs->setEXDigitalInput5((byte4 & STATUS_MASK) > 0);
+                m_digitalInputs->setEXDigitalInput6((byte5 & STATUS_MASK) > 0);
+                m_digitalInputs->setEXDigitalInput7((byte6 & STATUS_MASK) > 0);
+                m_digitalInputs->setEXDigitalInput8((byte7 & STATUS_MASK) > 0);
+
                 if (m_digitalInputs->RPMFrequencyDividerDi1() > 0) {
-                    averagehz1.removeFirst();
-                    averagehz1.append((byte0 & frequencymask));
-                    avghz1 = 0;
-                    for (int i = 0; i <= 10 - 1; i++) {
-                        avghz1 += averagehz1[i];
+                    m_hzAverage.removeFirst();
+                    m_hzAverage.append(byte0 & FREQUENCY_MASK);
+                    m_avgHz = 0;
+                    for (int i = 0; i < HZ_AVERAGE_WINDOW; i++) {
+                        m_avgHz += m_hzAverage[i];
                     }
-                    test1 = avghz1 / 10;
-                    averagehz1.resize(10);
-                    m_digitalInputs->setfrequencyDIEX1(qRound((avghz1 / 10) * 16.6 * 60) /
-                                                       m_digitalInputs->RPMFrequencyDividerDi1());
+                    m_digitalInputs->setfrequencyDIEX1(
+                        qRound((m_avgHz / HZ_AVERAGE_WINDOW) * 16.6 * 60) /
+                        m_digitalInputs->RPMFrequencyDividerDi1());
                 }
             }
         }
 
-        if (frame.frameId() == adress2) {
+        if (frame.frameId() == m_address2) {
             if (m_expanderBoardData) {
-                m_expanderBoardData->setEXAnalogInput0(pkgpayload[0] * 0.001);  // Analog 0
-                m_expanderBoardData->setEXAnalogInput1(pkgpayload[1] * 0.001);  // Analog 1
-                m_expanderBoardData->setEXAnalogInput2(pkgpayload[2] * 0.001);  // Analog 2
-                m_expanderBoardData->setEXAnalogInput3(pkgpayload[3] * 0.001);  // Analog 3
+                m_expanderBoardData->setEXAnalogInput0(pkgpayload[0] * 0.001);
+                m_expanderBoardData->setEXAnalogInput1(pkgpayload[1] * 0.001);
+                m_expanderBoardData->setEXAnalogInput2(pkgpayload[2] * 0.001);
+                m_expanderBoardData->setEXAnalogInput3(pkgpayload[3] * 0.001);
             }
         }
-        if (frame.frameId() == adress3) {
+        if (frame.frameId() == m_address3) {
             if (m_expanderBoardData) {
-                m_expanderBoardData->setEXAnalogInput4(pkgpayload[0] * 0.001);  // Analog 4
-                m_expanderBoardData->setEXAnalogInput5(pkgpayload[1] * 0.001);  // Analog 5
-                m_expanderBoardData->setEXAnalogInput6(pkgpayload[2] * 0.001);  // Analog 6
-                m_expanderBoardData->setEXAnalogInput7(pkgpayload[3] * 0.001);  // Analog 7
+                m_expanderBoardData->setEXAnalogInput4(pkgpayload[0] * 0.001);
+                m_expanderBoardData->setEXAnalogInput5(pkgpayload[1] * 0.001);
+                m_expanderBoardData->setEXAnalogInput6(pkgpayload[2] * 0.001);
+                m_expanderBoardData->setEXAnalogInput7(pkgpayload[3] * 0.001);
             }
         }
-        if (frame.frameId() == adress5 && m_engineData && m_settingsData &&
+        if (frame.frameId() == m_address5 && m_engineData && m_settingsData &&
             (m_engineData->Cylinders() / 2) != 0 && m_settingsData->Externalrpm() == 1) {
-            m_engineData->setrpm(qRound((pkgpayload[0] * 4) / (m_engineData->Cylinders() / 2)));  // RPM
+            m_engineData->setrpm(qRound((pkgpayload[0] * 4) / (m_engineData->Cylinders() / 2)));
         }
     }
 }

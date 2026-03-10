@@ -44,7 +44,7 @@ Item {
         for (var k = 0; k < _keys.length; k++) {
             var key = _keys[k];
             var val = src[key];
-            obj[key] = (val !== undefined) ? val : _defaultFor(key);
+            obj[key] = (val !== undefined && val !== null) ? val : _defaultFor(key);
         }
         return obj;
     }

@@ -2,134 +2,115 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
-import Qt.labs.settings 1.0
 import PowerTune.Settings 1.0
 import PowerTune.UI 1.0
 import PowerTune.Utils 1.0
 
-Rectangle {
+SettingsPage {
     id: root
-    anchors.fill: parent
-    color: "#1a1a2e"
 
     property int gercalactive: 0
 
-    Item {
-        id: warnSettings
-        Settings {
-            property alias watertempwarning: watertempwarn.text
-            property alias boostwarning: boostwarn.text
-            property alias rpmwarning: rpmwarn.text
-            property alias knockwarning: knockwarn.text
-            property alias lambdamultiplier: lambdamultiply.text
-            property alias gearcalcselectswitch: gearcalcselect.checked
-            property alias gearval1: valgear1.text
-            property alias gearval2: valgear2.text
-            property alias gearval3: valgear3.text
-            property alias gearval4: valgear4.text
-            property alias gearval5: valgear5.text
-            property alias gearval6: valgear6.text
-        }
+    ListModel {
+        id: shiftStageModel
+        ListElement { label: "1"; stageColor: "#4CAF50"; fieldId: "stage1" }
+        ListElement { label: "2"; stageColor: "#FFEB3B"; fieldId: "stage2" }
+        ListElement { label: "3"; stageColor: "#FF9800"; fieldId: "stage3" }
+        ListElement { label: "4"; stageColor: "#F44336"; fieldId: "stage4" }
     }
 
-    Item {
-        Settings {
-            property alias maxrpm: maxRPM.text
-            property alias shift1: stage1.text
-            property alias shift2: stage2.text
-            property alias shift3: stage3.text
-            property alias shift4: stage4.text
-        }
-    }
-
-    Item {
-        id: speedSettings
-        Settings {
-            property alias speedpercentsetting: speedpercent.text
-        }
+    Component.onCompleted: {
+        watertempwarn.text = AppSettings.getValue("waterwarn", "110")
+        boostwarn.text = AppSettings.getValue("boostwarn", "0.9")
+        rpmwarn.text = AppSettings.getValue("rpmwarn", "10000")
+        knockwarn.text = AppSettings.getValue("knockwarn", "80")
+        lambdamultiply.text = AppSettings.getValue("lambdamultiply", "14.7")
+        gearcalcselect.checked = AppSettings.getValue("gercalactive", 0) > 0
+        maxRPM.text = AppSettings.getValue("Max RPM", "10000")
+        stage1.text = AppSettings.getValue("Shift Light1", "3000")
+        stage2.text = AppSettings.getValue("Shift Light2", "5500")
+        stage3.text = AppSettings.getValue("Shift Light3", "5500")
+        stage4.text = AppSettings.getValue("Shift Light4", "7500")
+        valgear1.text = AppSettings.getValue("valgear1", "120")
+        valgear2.text = AppSettings.getValue("valgear2", "74")
+        valgear3.text = AppSettings.getValue("valgear3", "54")
+        valgear4.text = AppSettings.getValue("valgear4", "37")
+        valgear5.text = AppSettings.getValue("valgear5", "28")
+        valgear6.text = AppSettings.getValue("valgear6", "")
+        var sp = AppSettings.getValue("Speedcorrection", 1)
+        speedpercent.text = String(Math.round(sp * 100))
     }
 
     RowLayout {
-        anchors.fill: parent
-        anchors.margins: 16
-        spacing: 16
+        Layout.fillWidth: true
+        spacing: SettingsTheme.sectionSpacing
 
         // * LEFT COLUMN: Warnings + Speed
         ColumnLayout {
-            Layout.preferredWidth: (root.width - 48) / 2
+            Layout.fillWidth: true
             Layout.fillHeight: true
             Layout.alignment: Qt.AlignTop
-            spacing: 12
+            spacing: SettingsTheme.sectionPadding
 
             SettingsSection {
                 title: Translator.translate("Warning Thresholds", Settings.language)
                 Layout.fillWidth: true
 
-                RowLayout {
-                    spacing: 12
-                    Text {
-                        text: Translator.translate("WaterTemp", Settings.language)
-                        font.pixelSize: 18; font.family: "Lato"; color: "#FFFFFF"
-                        Layout.preferredWidth: 160
-                    }
+                SettingsRow {
+                    label: Translator.translate("WaterTemp", Settings.language)
                     StyledTextField {
-                        id: watertempwarn; Layout.fillWidth: true; text: "110"
+                        id: watertempwarn
+                        width: parent.width
+                        height: parent.height
+                        text: "110"
                         inputMethodHints: Qt.ImhFormattedNumbersOnly
                         onEditingFinished: applyWarnGear.start()
                     }
                 }
 
-                RowLayout {
-                    spacing: 12
-                    Text {
-                        text: Translator.translate("Boost", Settings.language)
-                        font.pixelSize: 18; font.family: "Lato"; color: "#FFFFFF"
-                        Layout.preferredWidth: 160
-                    }
+                SettingsRow {
+                    label: Translator.translate("Boost", Settings.language)
                     StyledTextField {
-                        id: boostwarn; Layout.fillWidth: true; text: "0.9"
+                        id: boostwarn
+                        width: parent.width
+                        height: parent.height
+                        text: "0.9"
                         inputMethodHints: Qt.ImhFormattedNumbersOnly
                         onEditingFinished: applyWarnGear.start()
                     }
                 }
 
-                RowLayout {
-                    spacing: 12
-                    Text {
-                        text: Translator.translate("Revs", Settings.language)
-                        font.pixelSize: 18; font.family: "Lato"; color: "#FFFFFF"
-                        Layout.preferredWidth: 160
-                    }
+                SettingsRow {
+                    label: Translator.translate("Revs", Settings.language)
                     StyledTextField {
-                        id: rpmwarn; Layout.fillWidth: true; text: "10000"
+                        id: rpmwarn
+                        width: parent.width
+                        height: parent.height
+                        text: "10000"
                         inputMethodHints: Qt.ImhFormattedNumbersOnly
                         onEditingFinished: applyWarnGear.start()
                     }
                 }
 
-                RowLayout {
-                    spacing: 12
-                    Text {
-                        text: Translator.translate("Knock", Settings.language)
-                        font.pixelSize: 18; font.family: "Lato"; color: "#FFFFFF"
-                        Layout.preferredWidth: 160
-                    }
+                SettingsRow {
+                    label: Translator.translate("Knock", Settings.language)
                     StyledTextField {
-                        id: knockwarn; Layout.fillWidth: true; text: "80"
+                        id: knockwarn
+                        width: parent.width
+                        height: parent.height
+                        text: "80"
                         inputMethodHints: Qt.ImhFormattedNumbersOnly
                         onEditingFinished: applyWarnGear.start()
                     }
                 }
 
-                RowLayout {
-                    spacing: 12
-                    Text {
-                        text: Translator.translate("Lamdamultiply", Settings.language)
-                        font.pixelSize: 18; font.family: "Lato"; color: "#FFFFFF"
-                        Layout.preferredWidth: 160
-                    }
+                SettingsRow {
+                    label: Translator.translate("Lamdamultiply", Settings.language)
                     StyledTextField {
-                        id: lambdamultiply; Layout.fillWidth: true; text: "14.7"
+                        id: lambdamultiply
+                        width: parent.width
+                        height: parent.height
+                        text: "14.7"
                         inputMethodHints: Qt.ImhFormattedNumbersOnly
                         onEditingFinished: applyWarnGear.start()
                     }
@@ -141,17 +122,21 @@ Rectangle {
                 Layout.fillWidth: true
 
                 RowLayout {
-                    spacing: 12
+                    spacing: SettingsTheme.controlGap
                     Layout.fillWidth: true
 
                     Text {
                         text: Translator.translate("SpeedCorrection", Settings.language) + " %"
-                        font.pixelSize: 18; font.family: "Lato"; color: "#FFFFFF"
-                        Layout.preferredWidth: 200
+                        font.pixelSize: SettingsTheme.fontLabel
+                        font.family: SettingsTheme.fontFamily
+                        color: SettingsTheme.textPrimary
+                        Layout.preferredWidth: SettingsTheme.labelWidth
                     }
 
                     StyledTextField {
-                        id: speedpercent; Layout.fillWidth: true; text: "100"
+                        id: speedpercent
+                        Layout.fillWidth: true
+                        text: "100"
                         inputMethodHints: Qt.ImhFormattedNumbersOnly
                         Component.onCompleted: AppSettings.writeSpeedSettings(speedpercent.text / 100, 100000)
                         onEditingFinished: AppSettings.writeSpeedSettings(speedpercent.text / 100, 100000)
@@ -159,7 +144,9 @@ Rectangle {
 
                     Text {
                         text: "(100 = no correction)"
-                        font.pixelSize: 16; font.family: "Lato"; color: "#707070"
+                        font.pixelSize: SettingsTheme.fontCaption
+                        font.family: SettingsTheme.fontFamily
+                        color: SettingsTheme.textPlaceholder
                         font.italic: true
                     }
                 }
@@ -168,83 +155,76 @@ Rectangle {
 
         // * RIGHT COLUMN: RPM/Shift Lights + Gear Calc
         ColumnLayout {
-            Layout.preferredWidth: (root.width - 48) / 2
+            Layout.fillWidth: true
             Layout.fillHeight: true
             Layout.alignment: Qt.AlignTop
-            spacing: 12
+            spacing: SettingsTheme.sectionPadding
 
             SettingsSection {
                 title: "RPM / Shift Lights"
                 Layout.fillWidth: true
 
-                RowLayout {
-                    spacing: 16
-                    Layout.fillWidth: true
-
-                    Text {
-                        text: "MAX RPM"
-                        font.pixelSize: 18; font.weight: Font.DemiBold
-                        font.family: "Lato"; color: "#FFFFFF"
-                        Layout.preferredWidth: 120
-                    }
-
+                SettingsRow {
+                    label: "MAX RPM"
                     StyledTextField {
-                        id: maxRPM; Layout.fillWidth: true; text: "10000"
+                        id: maxRPM
+                        width: parent.width
+                        height: parent.height
+                        text: "10000"
                         inputMethodHints: Qt.ImhFormattedNumbersOnly
                         onEditingFinished: applyRPM.start()
                     }
                 }
 
                 RowLayout {
-                    spacing: 12
+                    spacing: SettingsTheme.sectionPadding
                     Layout.fillWidth: true
 
                     Repeater {
-                        model: [
-                            { label: "1", color: "#4CAF50", fieldId: "stage1" },
-                            { label: "2", color: "#FFEB3B", fieldId: "stage2" },
-                            { label: "3", color: "#FF9800", fieldId: "stage3" },
-                            { label: "4", color: "#F44336", fieldId: "stage4" }
-                        ]
+                        model: shiftStageModel
                         delegate: Rectangle {
                             Layout.fillWidth: true
-                            Layout.preferredHeight: 100
-                            color: "#2D2D2D"
-                            radius: 8
-                            border.color: modelData.color
+                            Layout.preferredHeight: 116
+                            color: SettingsTheme.controlBg
+                            radius: SettingsTheme.radiusLarge
+                            border.color: model.stageColor
                             border.width: 2
 
                             ColumnLayout {
                                 anchors.fill: parent
-                                anchors.margins: 8
+                                anchors.margins: SettingsTheme.sectionPadding
                                 spacing: 4
 
                                 Text {
-                                    text: Translator.translate("Stage", Settings.language) + " " + modelData.label
-                                    font.pixelSize: 16; font.weight: Font.DemiBold
-                                    font.family: "Lato"; color: modelData.color
+                                    text: Translator.translate("Stage", Settings.language) + " " + model.label
+                                    font.pixelSize: SettingsTheme.fontStatus
+                                    font.weight: Font.DemiBold
+                                    font.family: SettingsTheme.fontFamily
+                                    color: model.stageColor
                                     Layout.alignment: Qt.AlignHCenter
                                 }
 
                                 StyledTextField {
                                     id: stageField
                                     Layout.fillWidth: true
-                                    Layout.preferredHeight: 36
-                                    font.pixelSize: 16
+                                    Layout.preferredHeight: SettingsTheme.controlHeight
+                                    font.pixelSize: SettingsTheme.fontControl
                                     inputMethodHints: Qt.ImhFormattedNumbersOnly
                                     horizontalAlignment: Text.AlignHCenter
                                     onEditingFinished: applyRPM.start()
                                     Component.onCompleted: {
-                                        if (modelData.fieldId === "stage1") root.stage1Ref = stageField
-                                        else if (modelData.fieldId === "stage2") root.stage2Ref = stageField
-                                        else if (modelData.fieldId === "stage3") root.stage3Ref = stageField
-                                        else if (modelData.fieldId === "stage4") root.stage4Ref = stageField
+                                        if (model.fieldId === "stage1") root.stage1Ref = stageField
+                                        else if (model.fieldId === "stage2") root.stage2Ref = stageField
+                                        else if (model.fieldId === "stage3") root.stage3Ref = stageField
+                                        else if (model.fieldId === "stage4") root.stage4Ref = stageField
                                     }
                                 }
 
                                 Text {
                                     text: "RPM"
-                                    font.pixelSize: 14; font.family: "Lato"; color: "#B0B0B0"
+                                    font.pixelSize: SettingsTheme.fontCaption
+                                    font.family: SettingsTheme.fontFamily
+                                    color: SettingsTheme.textSecondary
                                     Layout.alignment: Qt.AlignHCenter
                                 }
                             }
@@ -274,8 +254,8 @@ Rectangle {
 
                 GridLayout {
                     columns: 6
-                    columnSpacing: 8
-                    rowSpacing: 8
+                    columnSpacing: SettingsTheme.contentSpacing
+                    rowSpacing: SettingsTheme.contentSpacing
                     Layout.fillWidth: true
 
                     Repeater {
@@ -284,14 +264,16 @@ Rectangle {
                             spacing: 4
                             Text {
                                 text: Translator.translate("Gear", Settings.language) + " " + (index + 1)
-                                font.pixelSize: 16; font.family: "Lato"; color: "#B0B0B0"
+                                font.pixelSize: SettingsTheme.fontStatus
+                                font.family: SettingsTheme.fontFamily
+                                color: SettingsTheme.textSecondary
                                 Layout.alignment: Qt.AlignHCenter
                             }
                             StyledTextField {
                                 id: gearField
                                 Layout.preferredWidth: 90
-                                Layout.preferredHeight: 40
-                                font.pixelSize: 16
+                                Layout.preferredHeight: SettingsTheme.controlHeight
+                                font.pixelSize: SettingsTheme.fontControl
                                 horizontalAlignment: Text.AlignHCenter
                                 inputMethodHints: Qt.ImhFormattedNumbersOnly
                                 onEditingFinished: applyWarnGear.start()
@@ -310,14 +292,16 @@ Rectangle {
 
                 Text {
                     text: "Enter RPM/Speed ratio values for each gear"
-                    font.pixelSize: 16; font.family: "Lato"; color: "#707070"
+                    font.pixelSize: SettingsTheme.fontCaption
+                    font.family: SettingsTheme.fontFamily
+                    color: SettingsTheme.textPlaceholder
                     font.italic: true
                 }
             }
         }
     }
 
-    // Alias bridge properties for Settings persistence (Repeater delegates)
+    // * Alias bridge properties for Settings persistence (Repeater delegates)
     property var stage1Ref: null
     property var stage2Ref: null
     property var stage3Ref: null
@@ -329,7 +313,7 @@ Rectangle {
     property var valgear5Ref: null
     property var valgear6Ref: null
 
-    // Hidden fields for Settings alias binding (aliases need real ids, not dynamic refs)
+    // * Hidden fields for Settings alias binding (aliases need real ids, not dynamic refs)
     StyledTextField { id: stage1; visible: false; text: stage1Ref ? stage1Ref.text : "3000"; onTextChanged: if (stage1Ref && stage1Ref.text !== text) stage1Ref.text = text }
     StyledTextField { id: stage2; visible: false; text: stage2Ref ? stage2Ref.text : "5500"; onTextChanged: if (stage2Ref && stage2Ref.text !== text) stage2Ref.text = text }
     StyledTextField { id: stage3; visible: false; text: stage3Ref ? stage3Ref.text : "5500"; onTextChanged: if (stage3Ref && stage3Ref.text !== text) stage3Ref.text = text }
@@ -383,6 +367,7 @@ Rectangle {
     }
 
     Item {
+        visible: false
         id: applyWarnGear
         function start() {
             AppSettings.writeWarnGearSettings(
@@ -395,6 +380,7 @@ Rectangle {
     }
 
     Item {
+        visible: false
         id: applyRPM
         function start() {
             AppSettings.writeRPMSettings(maxRPM.text, stage1.text, stage2.text, stage3.text, stage4.text)

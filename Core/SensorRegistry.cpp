@@ -10,6 +10,7 @@
 #include <QDateTime>
 #include <QDebug>
 #include <QMetaEnum>
+#include <QSettings>
 
 /// DaemonUDP sensor timeout threshold in milliseconds (10 seconds)
 static constexpr qint64 kCanTimeoutMs = 10000;
@@ -24,8 +25,7 @@ static constexpr int kCanCheckIntervalMs = 5000;
  *
  * @param parent QObject parent
  */
-SensorRegistry::SensorRegistry(QObject *parent)
-    : QObject(parent)
+SensorRegistry::SensorRegistry(QObject *parent) : QObject(parent)
 {
     registerBuiltinSensors();
     registerCommonCanSensors();
@@ -47,9 +47,8 @@ SensorRegistry::SensorRegistry(QObject *parent)
  * @param unit Unit string (e.g., "rpm", "psi", "V")
  * @param source Where this sensor data comes from
  */
-void SensorRegistry::registerSensor(const QString &key, const QString &displayName,
-                                    const QString &category, const QString &unit,
-                                    SensorSource source)
+void SensorRegistry::registerSensor(const QString &key, const QString &displayName, const QString &category,
+                                    const QString &unit, SensorSource source)
 {
     const bool isNew = !m_sensors.contains(key);
 
@@ -59,9 +58,8 @@ void SensorRegistry::registerSensor(const QString &key, const QString &displayNa
     entry.category = category;
     entry.unit = unit;
     entry.source = source;
-    entry.active = (source != SensorSource::DaemonUDP
-                 && source != SensorSource::ExtenderAnalog
-                 && source != SensorSource::ExtenderDigital);
+    entry.active = (source != SensorSource::DaemonUDP && source != SensorSource::ExtenderAnalog &&
+                    source != SensorSource::ExtenderDigital);
     entry.lastActiveTimestamp = 0;
 
     m_sensors.insert(key, entry);
@@ -134,11 +132,29 @@ QVariantList SensorRegistry::getSensorsByCategory(const QString &category) const
     return result;
 }
 
-/**
- * @brief Check from QML if a sensor key is available.
- * @param key Sensor property key
- * @return true if available
- */
+QStringList SensorRegistry::sensorDisplayNames(const QString &category) const
+{
+    QStringList names;
+    for (auto it = m_sensors.constBegin(); it != m_sensors.constEnd(); ++it) {
+        if (category.isEmpty() || it->category == category)
+            names.append(it->displayName + QStringLiteral(" (") + it->key + QStringLiteral(")"));
+    }
+    return names;
+}
+
+int SensorRegistry::indexOfSensorKey(const QString &key, const QString &category) const
+{
+    int idx = 0;
+    for (auto it = m_sensors.constBegin(); it != m_sensors.constEnd(); ++it) {
+        if (!category.isEmpty() && it->category != category)
+            continue;
+        if (it->key == key)
+            return idx;
+        ++idx;
+    }
+    return -1;
+}
+
 bool SensorRegistry::isAvailable(const QString &key) const
 {
     return isSensorAvailable(key);
@@ -254,10 +270,14 @@ void SensorRegistry::refreshExtenderAnalogInputs()
         m_sensors.remove(key);
     }
 
+    QSettings settings(QStringLiteral("PowerTune"), QStringLiteral("PowerTune"));
+
     // Register EXAnalogInput0 through EXAnalogInput7
     for (int i = 0; i <= 7; ++i) {
         const QString key = QStringLiteral("EXAnalogInput%1").arg(i);
-        const QString displayName = QStringLiteral("Extender Analog Input %1").arg(i);
+        const QString customName = settings.value(QStringLiteral("ui/exboard/exan%1name").arg(i)).toString();
+        const QString displayName = customName.isEmpty() ? QStringLiteral("EX Analog %1").arg(i)
+                                                         : QStringLiteral("EX AN %1: %2").arg(i).arg(customName);
 
         SensorEntry entry;
         entry.key = key;
@@ -273,7 +293,9 @@ void SensorRegistry::refreshExtenderAnalogInputs()
     // Register calibrated/calculated extender analog channels
     for (int i = 0; i <= 7; ++i) {
         const QString key = QStringLiteral("EXAnalogCalc%1").arg(i);
-        const QString displayName = QStringLiteral("Extender Analog Calc %1").arg(i);
+        const QString customName = settings.value(QStringLiteral("ui/exboard/exan%1name").arg(i)).toString();
+        const QString displayName = customName.isEmpty() ? QStringLiteral("EX Analog Calc %1").arg(i)
+                                                         : QStringLiteral("EX AN Calc %1: %2").arg(i).arg(customName);
 
         SensorEntry entry;
         entry.key = key;
@@ -349,10 +371,14 @@ void SensorRegistry::refreshExtenderDigitalInputs()
         m_sensors.remove(key);
     }
 
+    QSettings settings(QStringLiteral("PowerTune"), QStringLiteral("PowerTune"));
+
     // Register EXDigitalInput1 through EXDigitalInput8 (1-indexed per reference)
     for (int i = 1; i <= 8; ++i) {
         const QString key = QStringLiteral("EXDigitalInput%1").arg(i);
-        const QString displayName = QStringLiteral("Extender Digital Input %1").arg(i);
+        const QString customName = settings.value(QStringLiteral("ui/exboard/exdigi%1name").arg(i)).toString();
+        const QString displayName = customName.isEmpty() ? QStringLiteral("EX Digital %1").arg(i)
+                                                         : QStringLiteral("EX Digi %1: %2").arg(i).arg(customName);
 
         SensorEntry entry;
         entry.key = key;
@@ -411,60 +437,45 @@ QStringList SensorRegistry::availableCategories() const
 void SensorRegistry::registerBuiltinSensors()
 {
     // GPS sensors - always available when GPS hardware is present
-    registerSensor(QStringLiteral("gpsLatitude"),
-                   QStringLiteral("Latitude"), QStringLiteral("GPS"),
+    registerSensor(QStringLiteral("gpsLatitude"), QStringLiteral("Latitude"), QStringLiteral("GPS"),
                    QStringLiteral("deg"), SensorSource::GPS);
-    registerSensor(QStringLiteral("gpsLongitude"),
-                   QStringLiteral("Longitude"), QStringLiteral("GPS"),
+    registerSensor(QStringLiteral("gpsLongitude"), QStringLiteral("Longitude"), QStringLiteral("GPS"),
                    QStringLiteral("deg"), SensorSource::GPS);
-    registerSensor(QStringLiteral("gpsAltitude"),
-                   QStringLiteral("Altitude"), QStringLiteral("GPS"),
+    registerSensor(QStringLiteral("gpsAltitude"), QStringLiteral("Altitude"), QStringLiteral("GPS"),
                    QStringLiteral("m"), SensorSource::GPS);
-    registerSensor(QStringLiteral("gpsSpeed"),
-                   QStringLiteral("GPS Speed"), QStringLiteral("GPS"),
+    registerSensor(QStringLiteral("gpsSpeed"), QStringLiteral("GPS Speed"), QStringLiteral("GPS"),
                    QStringLiteral("km/h"), SensorSource::GPS);
-    registerSensor(QStringLiteral("gpsbearing"),
-                   QStringLiteral("Heading"), QStringLiteral("GPS"),
+    registerSensor(QStringLiteral("gpsbearing"), QStringLiteral("Heading"), QStringLiteral("GPS"),
                    QStringLiteral("deg"), SensorSource::GPS);
-    registerSensor(QStringLiteral("gpsVisibleSatelites"),
-                   QStringLiteral("Satellites"), QStringLiteral("GPS"),
+    registerSensor(QStringLiteral("gpsVisibleSatelites"), QStringLiteral("Satellites"), QStringLiteral("GPS"),
                    QString(), SensorSource::GPS);
 
     // SenseHat accelerometer sensors
-    registerSensor(QStringLiteral("accelx"),
-                   QStringLiteral("Accelerometer X"), QStringLiteral("Accelerometer"),
+    registerSensor(QStringLiteral("accelx"), QStringLiteral("Accelerometer X"), QStringLiteral("Accelerometer"),
                    QStringLiteral("g"), SensorSource::SenseHat);
-    registerSensor(QStringLiteral("accely"),
-                   QStringLiteral("Accelerometer Y"), QStringLiteral("Accelerometer"),
+    registerSensor(QStringLiteral("accely"), QStringLiteral("Accelerometer Y"), QStringLiteral("Accelerometer"),
                    QStringLiteral("g"), SensorSource::SenseHat);
-    registerSensor(QStringLiteral("accelz"),
-                   QStringLiteral("Accelerometer Z"), QStringLiteral("Accelerometer"),
+    registerSensor(QStringLiteral("accelz"), QStringLiteral("Accelerometer Z"), QStringLiteral("Accelerometer"),
                    QStringLiteral("g"), SensorSource::SenseHat);
 
     // SenseHat gyroscope sensors
-    registerSensor(QStringLiteral("gyrox"),
-                   QStringLiteral("Gyroscope X"), QStringLiteral("Gyroscope"),
+    registerSensor(QStringLiteral("gyrox"), QStringLiteral("Gyroscope X"), QStringLiteral("Gyroscope"),
                    QStringLiteral("deg/s"), SensorSource::SenseHat);
-    registerSensor(QStringLiteral("gyroy"),
-                   QStringLiteral("Gyroscope Y"), QStringLiteral("Gyroscope"),
+    registerSensor(QStringLiteral("gyroy"), QStringLiteral("Gyroscope Y"), QStringLiteral("Gyroscope"),
                    QStringLiteral("deg/s"), SensorSource::SenseHat);
-    registerSensor(QStringLiteral("gyroz"),
-                   QStringLiteral("Gyroscope Z"), QStringLiteral("Gyroscope"),
+    registerSensor(QStringLiteral("gyroz"), QStringLiteral("Gyroscope Z"), QStringLiteral("Gyroscope"),
                    QStringLiteral("deg/s"), SensorSource::SenseHat);
 
     // SenseHat compass
-    registerSensor(QStringLiteral("compass"),
-                   QStringLiteral("Compass Heading"), QStringLiteral("Compass"),
+    registerSensor(QStringLiteral("compass"), QStringLiteral("Compass Heading"), QStringLiteral("Compass"),
                    QStringLiteral("deg"), SensorSource::SenseHat);
 
     // SenseHat ambient temperature
-    registerSensor(QStringLiteral("ambitemp"),
-                   QStringLiteral("Ambient Temperature"), QStringLiteral("Environment"),
+    registerSensor(QStringLiteral("ambitemp"), QStringLiteral("Ambient Temperature"), QStringLiteral("Environment"),
                    QStringLiteral("C"), SensorSource::SenseHat);
 
     // SenseHat ambient pressure
-    registerSensor(QStringLiteral("ambipress"),
-                   QStringLiteral("Ambient Pressure"), QStringLiteral("Environment"),
+    registerSensor(QStringLiteral("ambipress"), QStringLiteral("Ambient Pressure"), QStringLiteral("Environment"),
                    QStringLiteral("Pa"), SensorSource::SenseHat);
 }
 
@@ -478,8 +489,7 @@ void SensorRegistry::registerBuiltinSensors()
 void SensorRegistry::registerCommonCanSensors()
 {
     // Helper lambda to reduce boilerplate for DaemonUDP sensor registration
-    auto reg = [this](const QString &key, const QString &name,
-                      const QString &category, const QString &unit) {
+    auto reg = [this](const QString &key, const QString &name, const QString &category, const QString &unit) {
         SensorEntry entry;
         entry.key = key;
         entry.displayName = name;
@@ -492,57 +502,94 @@ void SensorRegistry::registerCommonCanSensors()
     };
 
     // -- Engine category --
-    reg(QStringLiteral("rpm"),            QStringLiteral("RPM"),                QStringLiteral("Engine"), QStringLiteral("rpm"));
-    reg(QStringLiteral("BoostPres"),      QStringLiteral("Boost Pressure"),     QStringLiteral("Engine"), QStringLiteral("psi"));
-    reg(QStringLiteral("BoostPreskpa"),   QStringLiteral("Boost Pressure kPa"), QStringLiteral("Engine"), QStringLiteral("kPa"));
-    reg(QStringLiteral("MAP"),            QStringLiteral("Manifold Pressure"),  QStringLiteral("Engine"), QStringLiteral("kPa"));
-    reg(QStringLiteral("TPS"),            QStringLiteral("Throttle Position"),  QStringLiteral("Engine"), QStringLiteral("%"));
-    reg(QStringLiteral("Intaketemp"),     QStringLiteral("Intake Air Temp"),    QStringLiteral("Engine"), QStringLiteral("C"));
-    reg(QStringLiteral("Watertemp"),      QStringLiteral("Coolant Temp"),       QStringLiteral("Engine"), QStringLiteral("C"));
-    reg(QStringLiteral("AFR"),            QStringLiteral("Air Fuel Ratio"),     QStringLiteral("Engine"), QStringLiteral("AFR"));
-    reg(QStringLiteral("LAMBDA"),         QStringLiteral("Lambda"),             QStringLiteral("Engine"), QStringLiteral("lambda"));
-    reg(QStringLiteral("InjDuty"),        QStringLiteral("Injector Duty"),      QStringLiteral("Engine"), QStringLiteral("%"));
-    reg(QStringLiteral("Ign"),            QStringLiteral("Ignition Timing"),    QStringLiteral("Engine"), QStringLiteral("deg"));
-    reg(QStringLiteral("EngLoad"),        QStringLiteral("Engine Load"),        QStringLiteral("Engine"), QStringLiteral("%"));
-    reg(QStringLiteral("Knock"),          QStringLiteral("Knock Level"),        QStringLiteral("Engine"), QString());
-    reg(QStringLiteral("Dwell"),          QStringLiteral("Dwell"),              QStringLiteral("Engine"), QStringLiteral("ms"));
-    reg(QStringLiteral("BoostDuty"),      QStringLiteral("Boost Duty"),         QStringLiteral("Engine"), QStringLiteral("%"));
-    reg(QStringLiteral("Intakepress"),    QStringLiteral("Intake Pressure"),    QStringLiteral("Engine"), QStringLiteral("kPa"));
-    reg(QStringLiteral("Power"),          QStringLiteral("Power"),              QStringLiteral("Engine"), QStringLiteral("kW"));
-    reg(QStringLiteral("Torque"),         QStringLiteral("Torque"),             QStringLiteral("Engine"), QStringLiteral("Nm"));
+    reg(QStringLiteral("rpm"), QStringLiteral("RPM"), QStringLiteral("Engine"), QStringLiteral("rpm"));
+    reg(QStringLiteral("BoostPres"), QStringLiteral("Boost Pressure"), QStringLiteral("Engine"), QStringLiteral("psi"));
+    reg(QStringLiteral("BoostPreskpa"), QStringLiteral("Boost Pressure kPa"), QStringLiteral("Engine"),
+        QStringLiteral("kPa"));
+    reg(QStringLiteral("MAP"), QStringLiteral("Manifold Pressure"), QStringLiteral("Engine"), QStringLiteral("kPa"));
+    reg(QStringLiteral("TPS"), QStringLiteral("Throttle Position"), QStringLiteral("Engine"), QStringLiteral("%"));
+    reg(QStringLiteral("Intaketemp"), QStringLiteral("Intake Air Temp"), QStringLiteral("Engine"), QStringLiteral("C"));
+    reg(QStringLiteral("Watertemp"), QStringLiteral("Coolant Temp"), QStringLiteral("Engine"), QStringLiteral("C"));
+    reg(QStringLiteral("AFR"), QStringLiteral("Air Fuel Ratio"), QStringLiteral("Engine"), QStringLiteral("AFR"));
+    reg(QStringLiteral("LAMBDA"), QStringLiteral("Lambda"), QStringLiteral("Engine"), QStringLiteral("lambda"));
+    reg(QStringLiteral("InjDuty"), QStringLiteral("Injector Duty"), QStringLiteral("Engine"), QStringLiteral("%"));
+    reg(QStringLiteral("Ign"), QStringLiteral("Ignition Timing"), QStringLiteral("Engine"), QStringLiteral("deg"));
+    reg(QStringLiteral("EngLoad"), QStringLiteral("Engine Load"), QStringLiteral("Engine"), QStringLiteral("%"));
+    reg(QStringLiteral("Knock"), QStringLiteral("Knock Level"), QStringLiteral("Engine"), QString());
+    reg(QStringLiteral("Dwell"), QStringLiteral("Dwell"), QStringLiteral("Engine"), QStringLiteral("ms"));
+    reg(QStringLiteral("BoostDuty"), QStringLiteral("Boost Duty"), QStringLiteral("Engine"), QStringLiteral("%"));
+    reg(QStringLiteral("Intakepress"), QStringLiteral("Intake Pressure"), QStringLiteral("Engine"),
+        QStringLiteral("kPa"));
+    reg(QStringLiteral("Power"), QStringLiteral("Power"), QStringLiteral("Engine"), QStringLiteral("kW"));
+    reg(QStringLiteral("Torque"), QStringLiteral("Torque"), QStringLiteral("Engine"), QStringLiteral("Nm"));
+
+    reg(QStringLiteral("brakepress"), QStringLiteral("Brake Pressure"), QStringLiteral("Engine"),
+        QStringLiteral("psi"));
+    reg(QStringLiteral("coolantpress"), QStringLiteral("Coolant Pressure"), QStringLiteral("Engine"),
+        QStringLiteral("psi"));
+    reg(QStringLiteral("MAP2"), QStringLiteral("Manifold Pressure 2"), QStringLiteral("Engine"), QStringLiteral("kPa"));
+    reg(QStringLiteral("turborpm"), QStringLiteral("Turbo RPM"), QStringLiteral("Engine"), QStringLiteral("rpm"));
+    reg(QStringLiteral("wastegatepress"), QStringLiteral("Wastegate Pressure"), QStringLiteral("Engine"),
+        QStringLiteral("psi"));
+    reg(QStringLiteral("accelpedpos"), QStringLiteral("Accel Pedal Pos"), QStringLiteral("Engine"),
+        QStringLiteral("%"));
 
     // -- Vehicle category --
-    reg(QStringLiteral("speed"),          QStringLiteral("Vehicle Speed"),      QStringLiteral("Vehicle"), QStringLiteral("km/h"));
-    reg(QStringLiteral("Gear"),           QStringLiteral("Gear"),               QStringLiteral("Vehicle"), QString());
-    reg(QStringLiteral("Odo"),            QStringLiteral("Odometer"),           QStringLiteral("Vehicle"), QStringLiteral("km"));
-    reg(QStringLiteral("batteryVoltage"), QStringLiteral("Battery Voltage"),    QStringLiteral("Vehicle"), QStringLiteral("V"));
+    reg(QStringLiteral("speed"), QStringLiteral("Vehicle Speed"), QStringLiteral("Vehicle"), QStringLiteral("km/h"));
+    reg(QStringLiteral("Gear"), QStringLiteral("Gear"), QStringLiteral("Vehicle"), QString());
+    reg(QStringLiteral("Odo"), QStringLiteral("Odometer"), QStringLiteral("Vehicle"), QStringLiteral("km"));
+    reg(QStringLiteral("BatteryV"), QStringLiteral("Battery Voltage"), QStringLiteral("Vehicle"), QStringLiteral("V"));
+    reg(QStringLiteral("FuelLevel"), QStringLiteral("Fuel Level (Vehicle)"), QStringLiteral("Vehicle"),
+        QStringLiteral("%"));
+    reg(QStringLiteral("SteeringWheelAngle"), QStringLiteral("Steering Angle"), QStringLiteral("Vehicle"),
+        QStringLiteral("deg"));
+    reg(QStringLiteral("wheelspdftleft"), QStringLiteral("Wheel Speed FL"), QStringLiteral("Vehicle"),
+        QStringLiteral("km/h"));
+    reg(QStringLiteral("wheelspdftright"), QStringLiteral("Wheel Speed FR"), QStringLiteral("Vehicle"),
+        QStringLiteral("km/h"));
+    reg(QStringLiteral("wheelspdrearleft"), QStringLiteral("Wheel Speed RL"), QStringLiteral("Vehicle"),
+        QStringLiteral("km/h"));
+    reg(QStringLiteral("wheelspdrearright"), QStringLiteral("Wheel Speed RR"), QStringLiteral("Vehicle"),
+        QStringLiteral("km/h"));
 
     // -- Fuel category --
-    reg(QStringLiteral("FuelPress"),      QStringLiteral("Fuel Pressure"),      QStringLiteral("Fuel"), QStringLiteral("psi"));
-    reg(QStringLiteral("Fueltemp"),       QStringLiteral("Fuel Temperature"),   QStringLiteral("Fuel"), QStringLiteral("C"));
-    reg(QStringLiteral("fuelclevel"),     QStringLiteral("Fuel Level"),         QStringLiteral("Fuel"), QStringLiteral("%"));
-    reg(QStringLiteral("fuelflow"),       QStringLiteral("Fuel Flow"),          QStringLiteral("Fuel"), QStringLiteral("cc/min"));
-    reg(QStringLiteral("fuelconsrate"),   QStringLiteral("Fuel Consumption"),   QStringLiteral("Fuel"), QStringLiteral("L/100km"));
+    reg(QStringLiteral("FuelPress"), QStringLiteral("Fuel Pressure"), QStringLiteral("Fuel"), QStringLiteral("psi"));
+    reg(QStringLiteral("Fueltemp"), QStringLiteral("Fuel Temperature"), QStringLiteral("Fuel"), QStringLiteral("C"));
+    reg(QStringLiteral("fuelclevel"), QStringLiteral("Fuel Level"), QStringLiteral("Fuel"), QStringLiteral("%"));
+    reg(QStringLiteral("fuelflow"), QStringLiteral("Fuel Flow"), QStringLiteral("Fuel"), QStringLiteral("cc/min"));
+    reg(QStringLiteral("fuelconsrate"), QStringLiteral("Fuel Consumption"), QStringLiteral("Fuel"),
+        QStringLiteral("L/100km"));
 
     // -- Oil category --
-    reg(QStringLiteral("oilpres"),        QStringLiteral("Oil Pressure"),       QStringLiteral("Oil"), QStringLiteral("psi"));
-    reg(QStringLiteral("oiltemp"),        QStringLiteral("Oil Temperature"),    QStringLiteral("Oil"), QStringLiteral("C"));
-    reg(QStringLiteral("transoiltemp"),   QStringLiteral("Trans Oil Temp"),     QStringLiteral("Oil"), QStringLiteral("C"));
-    reg(QStringLiteral("diffoiltemp"),    QStringLiteral("Diff Oil Temp"),      QStringLiteral("Oil"), QStringLiteral("C"));
+    reg(QStringLiteral("oilpres"), QStringLiteral("Oil Pressure"), QStringLiteral("Oil"), QStringLiteral("psi"));
+    reg(QStringLiteral("oiltemp"), QStringLiteral("Oil Temperature"), QStringLiteral("Oil"), QStringLiteral("C"));
+    reg(QStringLiteral("transoiltemp"), QStringLiteral("Trans Oil Temp"), QStringLiteral("Oil"), QStringLiteral("C"));
+    reg(QStringLiteral("diffoiltemp"), QStringLiteral("Diff Oil Temp"), QStringLiteral("Oil"), QStringLiteral("C"));
+    reg(QStringLiteral("GearOilPress"), QStringLiteral("Gear Oil Pressure"), QStringLiteral("Oil"),
+        QStringLiteral("psi"));
+    reg(QStringLiteral("Moilp"), QStringLiteral("Oil Pressure 2"), QStringLiteral("Oil"), QStringLiteral("psi"));
 
     // -- Exhaust category (EGT 1-12) --
     for (int i = 1; i <= 12; ++i) {
-        reg(QStringLiteral("egt%1").arg(i),
-            QStringLiteral("EGT %1").arg(i),
-            QStringLiteral("Exhaust"),
+        reg(QStringLiteral("egt%1").arg(i), QStringLiteral("EGT %1").arg(i), QStringLiteral("Exhaust"),
             QStringLiteral("C"));
     }
 
+    reg(QStringLiteral("egthighest"), QStringLiteral("EGT Highest"), QStringLiteral("Exhaust"), QStringLiteral("C"));
+
+    // -- Tires category --
+    reg(QStringLiteral("TiretempLF"), QStringLiteral("Tire Temp LF"), QStringLiteral("Tires"), QStringLiteral("C"));
+    reg(QStringLiteral("TiretempRF"), QStringLiteral("Tire Temp RF"), QStringLiteral("Tires"), QStringLiteral("C"));
+    reg(QStringLiteral("TiretempLR"), QStringLiteral("Tire Temp LR"), QStringLiteral("Tires"), QStringLiteral("C"));
+    reg(QStringLiteral("TiretempRR"), QStringLiteral("Tire Temp RR"), QStringLiteral("Tires"), QStringLiteral("C"));
+    reg(QStringLiteral("TirepresLF"), QStringLiteral("Tire Press LF"), QStringLiteral("Tires"), QStringLiteral("psi"));
+    reg(QStringLiteral("TirepresRF"), QStringLiteral("Tire Press RF"), QStringLiteral("Tires"), QStringLiteral("psi"));
+    reg(QStringLiteral("TirepresLR"), QStringLiteral("Tire Press LR"), QStringLiteral("Tires"), QStringLiteral("psi"));
+    reg(QStringLiteral("TirepresRR"), QStringLiteral("Tire Press RR"), QStringLiteral("Tires"), QStringLiteral("psi"));
+
     // -- Electrical category --
-    // batteryVoltage already registered under Vehicle
-    // Sensors for SensorData model
-    reg(QStringLiteral("O2volt"),         QStringLiteral("O2 Voltage"),         QStringLiteral("Electrical"), QStringLiteral("V"));
-    reg(QStringLiteral("O2volt_2"),       QStringLiteral("O2 Voltage 2"),       QStringLiteral("Electrical"), QStringLiteral("V"));
+    reg(QStringLiteral("O2volt"), QStringLiteral("O2 Voltage"), QStringLiteral("Electrical"), QStringLiteral("V"));
+    reg(QStringLiteral("O2volt_2"), QStringLiteral("O2 Voltage 2"), QStringLiteral("Electrical"), QStringLiteral("V"));
 }
 
 /**

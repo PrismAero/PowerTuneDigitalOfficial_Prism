@@ -5,7 +5,6 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
-import Qt.labs.settings 1.0
 import PowerTune.Utils 1.0
 import PowerTune.Settings 1.0
 import PowerTune.UI 1.0
@@ -14,6 +13,7 @@ Rectangle {
     anchors.fill: parent
     color: "#1a1a2e"
     id: main
+    property bool settingsLoaded: false
 
     // * Dense layout constants for 1600x684 content area
     readonly property int rowHeight: 32
@@ -54,46 +54,42 @@ Rectangle {
         return (preset && preset.unit) ? preset.unit : ""
     }
 
-    Item {
-        id: dashSettings
-        Settings {
-            // * Analog input value aliases (used by appsettings.cpp)
-            property alias an00save : an00.text
-            property alias an05save : an05.text
-            property alias an10save : an10.text
-            property alias an15save : an15.text
-            property alias an20save : an20.text
-            property alias an25save : an25.text
-            property alias an30save : an30.text
-            property alias an35save : an35.text
-            property alias an40save : an40.text
-            property alias an45save : an45.text
-            property alias an50save : an50.text
-            property alias an55save : an55.text
-            property alias an60save : an60.text
-            property alias an65save : an65.text
-            property alias an70save : an70.text
-            property alias an75save : an75.text
-            property alias an80save : an80.text
-            property alias an85save : an85.text
-            property alias an90save : an90.text
-            property alias an95save : an95.text
-            property alias an100save : an100.text
-            property alias an105save : an105.text
-
-            // * Preset selector persistence
-            property alias preset0save : preset0.currentIndex
-            property alias preset1save : preset1.currentIndex
-            property alias preset2save : preset2.currentIndex
-            property alias preset3save : preset3.currentIndex
-            property alias preset4save : preset4.currentIndex
-            property alias preset5save : preset5.currentIndex
-            property alias preset6save : preset6.currentIndex
-            property alias preset7save : preset7.currentIndex
-            property alias preset8save : preset8.currentIndex
-            property alias preset9save : preset9.currentIndex
-            property alias preset10save : preset10.currentIndex
-        }
+    Component.onCompleted: {
+        an00.text = AppSettings.getValue("AN00", "0")
+        an05.text = AppSettings.getValue("AN05", "5")
+        an10.text = AppSettings.getValue("AN10", "0")
+        an15.text = AppSettings.getValue("AN15", "5")
+        an20.text = AppSettings.getValue("AN20", "0")
+        an25.text = AppSettings.getValue("AN25", "5")
+        an30.text = AppSettings.getValue("AN30", "0")
+        an35.text = AppSettings.getValue("AN35", "5")
+        an40.text = AppSettings.getValue("AN40", "0")
+        an45.text = AppSettings.getValue("AN45", "5")
+        an50.text = AppSettings.getValue("AN50", "0")
+        an55.text = AppSettings.getValue("AN55", "5")
+        an60.text = AppSettings.getValue("AN60", "0")
+        an65.text = AppSettings.getValue("AN65", "5")
+        an70.text = AppSettings.getValue("AN70", "0")
+        an75.text = AppSettings.getValue("AN75", "5")
+        an80.text = AppSettings.getValue("AN80", "0")
+        an85.text = AppSettings.getValue("AN85", "5")
+        an90.text = AppSettings.getValue("AN90", "0")
+        an95.text = AppSettings.getValue("AN95", "5")
+        an100.text = AppSettings.getValue("AN100", "0")
+        an105.text = AppSettings.getValue("AN105", "5")
+        preset0.currentIndex = AppSettings.getValue("ui/analogPreset0", 0)
+        preset1.currentIndex = AppSettings.getValue("ui/analogPreset1", 0)
+        preset2.currentIndex = AppSettings.getValue("ui/analogPreset2", 0)
+        preset3.currentIndex = AppSettings.getValue("ui/analogPreset3", 0)
+        preset4.currentIndex = AppSettings.getValue("ui/analogPreset4", 0)
+        preset5.currentIndex = AppSettings.getValue("ui/analogPreset5", 0)
+        preset6.currentIndex = AppSettings.getValue("ui/analogPreset6", 0)
+        preset7.currentIndex = AppSettings.getValue("ui/analogPreset7", 0)
+        preset8.currentIndex = AppSettings.getValue("ui/analogPreset8", 0)
+        preset9.currentIndex = AppSettings.getValue("ui/analogPreset9", 0)
+        preset10.currentIndex = AppSettings.getValue("ui/analogPreset10", 0)
+        inputs.setInputs()
+        settingsLoaded = true
     }
 
     Item {
@@ -209,6 +205,7 @@ Rectangle {
                 model: presetNames
                 onCurrentIndexChanged: {
                     if (currentIndex > 0) applyPreset(currentText, an00, an05)
+                    if (settingsLoaded) AppSettings.setValue("ui/analogPreset0", currentIndex)
                 }
             }
             StyledTextField {
@@ -276,6 +273,7 @@ Rectangle {
                 model: presetNames
                 onCurrentIndexChanged: {
                     if (currentIndex > 0) applyPreset(currentText, an10, an15)
+                    if (settingsLoaded) AppSettings.setValue("ui/analogPreset1", currentIndex)
                 }
             }
             StyledTextField {
@@ -343,6 +341,7 @@ Rectangle {
                 model: presetNames
                 onCurrentIndexChanged: {
                     if (currentIndex > 0) applyPreset(currentText, an20, an25)
+                    if (settingsLoaded) AppSettings.setValue("ui/analogPreset2", currentIndex)
                 }
             }
             StyledTextField {
@@ -410,6 +409,7 @@ Rectangle {
                 model: presetNames
                 onCurrentIndexChanged: {
                     if (currentIndex > 0) applyPreset(currentText, an30, an35)
+                    if (settingsLoaded) AppSettings.setValue("ui/analogPreset3", currentIndex)
                 }
             }
             StyledTextField {
@@ -477,6 +477,7 @@ Rectangle {
                 model: presetNames
                 onCurrentIndexChanged: {
                     if (currentIndex > 0) applyPreset(currentText, an40, an45)
+                    if (settingsLoaded) AppSettings.setValue("ui/analogPreset4", currentIndex)
                 }
             }
             StyledTextField {
@@ -544,6 +545,7 @@ Rectangle {
                 model: presetNames
                 onCurrentIndexChanged: {
                     if (currentIndex > 0) applyPreset(currentText, an50, an55)
+                    if (settingsLoaded) AppSettings.setValue("ui/analogPreset5", currentIndex)
                 }
             }
             StyledTextField {
@@ -611,6 +613,7 @@ Rectangle {
                 model: presetNames
                 onCurrentIndexChanged: {
                     if (currentIndex > 0) applyPreset(currentText, an60, an65)
+                    if (settingsLoaded) AppSettings.setValue("ui/analogPreset6", currentIndex)
                 }
             }
             StyledTextField {
@@ -678,6 +681,7 @@ Rectangle {
                 model: presetNames
                 onCurrentIndexChanged: {
                     if (currentIndex > 0) applyPreset(currentText, an70, an75)
+                    if (settingsLoaded) AppSettings.setValue("ui/analogPreset7", currentIndex)
                 }
             }
             StyledTextField {
@@ -745,6 +749,7 @@ Rectangle {
                 model: presetNames
                 onCurrentIndexChanged: {
                     if (currentIndex > 0) applyPreset(currentText, an80, an85)
+                    if (settingsLoaded) AppSettings.setValue("ui/analogPreset8", currentIndex)
                 }
             }
             StyledTextField {
@@ -812,6 +817,7 @@ Rectangle {
                 model: presetNames
                 onCurrentIndexChanged: {
                     if (currentIndex > 0) applyPreset(currentText, an90, an95)
+                    if (settingsLoaded) AppSettings.setValue("ui/analogPreset9", currentIndex)
                 }
             }
             StyledTextField {
@@ -879,6 +885,7 @@ Rectangle {
                 model: presetNames
                 onCurrentIndexChanged: {
                     if (currentIndex > 0) applyPreset(currentText, an100, an105)
+                    if (settingsLoaded) AppSettings.setValue("ui/analogPreset10", currentIndex)
                 }
             }
             StyledTextField {
@@ -900,7 +907,6 @@ Rectangle {
                 enabled: preset10.currentIndex === 0
                 inputMethodHints: Qt.ImhFormattedNumbersOnly
                 onEditingFinished: inputs.setInputs()
-                Component.onCompleted: inputs.setInputs()
             }
             Text {
                 Layout.preferredWidth: unitWidth

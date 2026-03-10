@@ -2,6 +2,8 @@
 #include "Hardware/Extender.h"
 #include "Utils/downloadmanager.h"
 
+#include <QDir>
+#include <QFontDatabase>
 #include <QGuiApplication>
 #include <QDateTime>
 #include <QDebug>
@@ -21,9 +23,15 @@ int main(int argc, char *argv[])
     // * This suppresses native style customization warnings on macOS
     QQuickStyle::setStyle("Basic");
     QGuiApplication app(argc, argv);
-    app.setOrganizationName("Power-Tune");
+    app.setOrganizationName("PowerTune");
     app.setOrganizationDomain("power-tune.org");
     app.setApplicationName("PowerTune");
+
+    const QDir fontDir(QStringLiteral(":/Resources/fonts"));
+    const QStringList fontFiles = fontDir.entryList({QStringLiteral("*.ttf"), QStringLiteral("*.otf")});
+    for (const QString &f : fontFiles)
+        QFontDatabase::addApplicationFont(fontDir.absoluteFilePath(f));
+
     QQmlApplicationEngine engine;
     
     // * Add QML module import paths for PowerTune modules
@@ -34,11 +42,6 @@ int main(int argc, char *argv[])
     engine.rootContext()->setContextProperty("DLM", new DownloadManager(&engine));
     engine.rootContext()->setContextProperty("Connect", new Connect(&engine));
     engine.rootContext()->setContextProperty("Extender2", new Extender(&engine));
-#ifdef HAVE_DDCUTIL
-    engine.rootContext()->setContextProperty("HAVE_DDCUTIL", true);
-#else
-    engine.rootContext()->setContextProperty("HAVE_DDCUTIL", false);
-#endif
     // * Load main QML from PowerTune.Core module
     // ! Resource path includes both prefix and source path due to qt_add_qml_module behavior
     engine.load(QUrl(QStringLiteral("qrc:/qt/qml/PowerTune/Core/PowerTune/Core/Main.qml")));

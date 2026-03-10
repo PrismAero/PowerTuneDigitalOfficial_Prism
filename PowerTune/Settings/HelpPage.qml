@@ -1,7 +1,8 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
-import Qt.labs.settings 1.0
+
 import PowerTune.Settings 1.0
+import PowerTune.UI 1.0
 import PowerTune.Utils 1.0
 Rectangle {
     id: helpBackground
@@ -23,7 +24,7 @@ Rectangle {
         Text {
             id: contactText
             text: "Contact Page"
-            font.family: "Eurostile"
+            font.family: SettingsTheme.fontFamily
             bottomPadding: 10
             font.bold: true
             x: 30
@@ -39,7 +40,7 @@ Rectangle {
         Text {
             id: facebookText
             text: "Facebook"
-            font.family: "Eurostile"
+            font.family: SettingsTheme.fontFamily
             bottomPadding: 10
             font.bold: true
             x: 390
@@ -55,7 +56,7 @@ Rectangle {
         Text {
             id: instagramText
             text: "Instagram"
-            font.family: "Eurostile"
+            font.family: SettingsTheme.fontFamily
             bottomPadding: 10
             font.bold: true
             x: 720
@@ -71,7 +72,7 @@ Rectangle {
         Text {
             id: manualText
             text: "Manual"
-            font.family: "Eurostile"
+            font.family: SettingsTheme.fontFamily
             bottomPadding: 10
             font.bold: true
             x: 1080
@@ -87,7 +88,7 @@ Rectangle {
         Text {
             id: warrantyText
             text: "Warranty"
-            font.family: "Eurostile"
+            font.family: SettingsTheme.fontFamily
             bottomPadding: 10
             font.bold: true
             x: 1400
