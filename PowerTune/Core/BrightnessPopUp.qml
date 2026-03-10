@@ -12,12 +12,12 @@ Rectangle {
 
     function dismiss() {
         if (popUp1.parent)
-            popUp1.parent.visible = false
+            popUp1.parent.visible = false;
     }
 
     onVisibleChanged: {
         if (visible)
-            dismissTimer.restart()
+            dismissTimer.restart();
     }
 
     Grid {
@@ -39,10 +39,10 @@ Rectangle {
             height: popUp1.width / 1.2
             font.pixelSize: popUp1.width / 7.5
             onClicked: {
-                var val = Connect.hasDdcBrightness ? 10 : 25
-                Connect.setSreenbrightness(val)
-                AppSettings.writebrightnessettings(val)
-                dismiss()
+                var val = Connect.hasDdcBrightness ? 10 : 25;
+                Connect.setSreenbrightness(val);
+                AppSettings.writebrightnessettings(val);
+                dismiss();
             }
             background: Rectangle {
                 radius: popUp1.width / 1.2
@@ -62,10 +62,10 @@ Rectangle {
             height: popUp1.width / 1.2
             font.pixelSize: popUp1.width / 7.5
             onClicked: {
-                var val = Connect.hasDdcBrightness ? 75 : 255
-                Connect.setSreenbrightness(val)
-                AppSettings.writebrightnessettings(val)
-                dismiss()
+                var val = Connect.hasDdcBrightness ? 75 : 255;
+                Connect.setSreenbrightness(val);
+                AppSettings.writebrightnessettings(val);
+                dismiss();
             }
             background: Rectangle {
                 radius: popUp1.width / 1.2

@@ -19,7 +19,6 @@
 #include <QDebug>
 
 #ifdef Q_OS_MACOS
-#include <QProcess>
 #include <mach/mach.h>
 #include <mach/mach_host.h>
 #endif
@@ -113,11 +112,16 @@ void DiagnosticsProvider::setPropertyRouter(PropertyRouter *router)
 
 /**
  * @brief Get the current CPU temperature.
- * @return Temperature in Celsius, or 0.0 if unavailable
+ * @return Temperature in Celsius; only meaningful when cpuTemperatureAvailable() is true
  */
 double DiagnosticsProvider::cpuTemperature() const
 {
     return m_cpuTemp;
+}
+
+bool DiagnosticsProvider::cpuTemperatureAvailable() const
+{
+    return m_cpuTempAvailable;
 }
 
 /**
@@ -775,7 +779,9 @@ void DiagnosticsProvider::setConnectionInfo(bool connected, const QString &port,
  */
 void DiagnosticsProvider::updateSystemInfo()
 {
-    m_cpuTemp = readCpuTemperature();
+    bool tempAvail = false;
+    m_cpuTemp = readCpuTemperature(tempAvail);
+    m_cpuTempAvailable = tempAvail;
     m_memoryUsage = readMemoryUsage();
     m_cpuLoadAvg = readCpuLoadAverage();
     m_diskUsage = readDiskUsage();
@@ -807,13 +813,15 @@ void DiagnosticsProvider::updateCanRate()
  *
  * On Linux (Raspberry Pi): reads /sys/class/thermal/thermal_zone0/temp
  * and divides by 1000 to get Celsius.
- * On macOS: attempts sysctl but typically returns 0.0 as macOS does not
- * expose CPU temperature through standard APIs.
+ * On all other platforms: no reliable thermal API exists; returns 0.0
+ * and sets available=false.
  *
+ * @param[out] available Set to true only when a real Celsius reading was obtained
  * @return Temperature in Celsius, or 0.0 if unavailable
  */
-double DiagnosticsProvider::readCpuTemperature() const
+double DiagnosticsProvider::readCpuTemperature(bool &available) const
 {
+    available = false;
 #ifdef Q_OS_LINUX
     QFile tempFile(QStringLiteral("/sys/class/thermal/thermal_zone0/temp"));
     if (tempFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
@@ -824,25 +832,8 @@ double DiagnosticsProvider::readCpuTemperature() const
         bool ok = false;
         double milliCelsius = line.toDouble(&ok);
         if (ok) {
+            available = true;
             return milliCelsius / 1000.0;
-        }
-    }
-    return 0.0;
-#elif defined(Q_OS_MACOS)
-    // macOS does not expose CPU temperature via standard APIs.
-    // sysctl machdep.xcpm.cpu_thermal_level returns a level, not temperature.
-    // Return 0.0 as a placeholder.
-    QProcess proc;
-    proc.start(QStringLiteral("sysctl"), QStringList() << QStringLiteral("-n") << QStringLiteral("machdep.xcpm.cpu_thermal_level"));
-    proc.waitForFinished(500);
-    if (proc.exitCode() == 0) {
-        QString output = QString::fromUtf8(proc.readAllStandardOutput()).trimmed();
-        bool ok = false;
-        double level = output.toDouble(&ok);
-        if (ok) {
-            // This is a thermal level (0-100), not actual temperature
-            // Return as-is for diagnostic display
-            return level;
         }
     }
     return 0.0;

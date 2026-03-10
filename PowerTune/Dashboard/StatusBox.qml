@@ -9,8 +9,39 @@ Item {
     property bool value2: false
     property string fontFamily: ""
 
+    // -- Configurable properties for overlay config system --
+    property string datasource: ""
+    property real currentValue: 0.0
+    property real threshold: 0.5
+    property bool invertLogic: false
+    property color onColor: "#1ED033"
+    property color offColor: "#FF0909"
+
+    // -- Computed active state --
+    readonly property bool isActive: invertLogic ? currentValue < threshold : currentValue >= threshold
+
     width: 405
     height: 183
+
+    // -- PropertyRouter reactive binding --
+    Connections {
+        target: typeof PropertyRouter !== "undefined" ? PropertyRouter : null
+        function onValueChanged(propertyName, value) {
+            if (propertyName === root.datasource && root.datasource !== "") {
+                root.currentValue = Number(value)
+            }
+        }
+    }
+
+    // -- Config application from OverlayConfigPopup --
+    function applyConfig(config) {
+        if (config.sensorKey) datasource = config.sensorKey
+        if (config.label) label1 = config.label
+        if (config.threshold !== undefined) threshold = Number(config.threshold)
+        if (config.invertLogic !== undefined) invertLogic = config.invertLogic === true || config.invertLogic === "true"
+        if (config.onColor) onColor = config.onColor
+        if (config.offColor) offColor = config.offColor
+    }
 
     Canvas {
         id: borderChrome
@@ -59,7 +90,7 @@ Item {
             font.pixelSize: 32
             font.weight: Font.Normal
             font.italic: true
-            color: root.value1 ? "#1ED033" : "#FF0909"
+            color: root.value1 ? root.onColor : root.offColor
             width: 60
             horizontalAlignment: Text.AlignRight
         }
@@ -112,7 +143,7 @@ Item {
             font.pixelSize: 32
             font.weight: Font.Normal
             font.italic: true
-            color: root.value2 ? "#1ED033" : "#FF0909"
+            color: root.value2 ? root.onColor : root.offColor
             width: 60
             horizontalAlignment: Text.AlignRight
         }

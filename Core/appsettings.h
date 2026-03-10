@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QVariant>
+#include <QVariantMap>
 
 class DashBoard;
 class SettingsData;
@@ -25,9 +26,8 @@ public:
     explicit AppSettings(QObject *parent = nullptr);
     explicit AppSettings(DashBoard *dashboard, QObject *parent = nullptr);
     explicit AppSettings(DashBoard *dashboard, SettingsData *settingsData, UIState *uiState, VehicleData *vehicleData,
-                         AnalogInputs *analogInputs, ExpanderBoardData *expanderBoardData,
-                         EngineData *engineData, ConnectionData *connectionData,
-                         DigitalInputs *digitalInputs, QObject *parent = nullptr);
+                         AnalogInputs *analogInputs, ExpanderBoardData *expanderBoardData, EngineData *engineData,
+                         ConnectionData *connectionData, DigitalInputs *digitalInputs, QObject *parent = nullptr);
 
     Q_INVOKABLE void setValue(const QString &key, const QVariant &value);
     Q_INVOKABLE QVariant getValue(const QString &key, const QVariant &defaultValue = QVariant()) const;
@@ -49,7 +49,6 @@ public:
     Q_INVOKABLE void setInterface(const int &arg);
     Q_INVOKABLE int getLogging();
     Q_INVOKABLE void setLogging(const int &arg);
-    Q_INVOKABLE void writeMainSettings();
     Q_INVOKABLE void writeSelectedDashSettings(int numberofdashes);
     Q_INVOKABLE void externalspeedconnectionstatus(int connected);
     Q_INVOKABLE void externalspeedport(const QString &port);
@@ -103,6 +102,11 @@ public:
 
     Q_INVOKABLE void writeDashboardConfig(int index, const QString &bgPicture, const QString &bgColor);
     Q_INVOKABLE QVariantMap loadDashboardConfig(int index) const;
+
+    // Overlay config persistence (per-dashboard, per-overlay instance)
+    Q_INVOKABLE void saveOverlayConfig(const QString &dashboardId, const QString &overlayId, const QVariantMap &config);
+    Q_INVOKABLE QVariantMap loadOverlayConfig(const QString &dashboardId, const QString &overlayId);
+    Q_INVOKABLE void removeOverlayConfig(const QString &dashboardId, const QString &overlayId);
 
 private:
     DashBoard *m_dashboard;

@@ -34,8 +34,11 @@ class DiagnosticsProvider : public QObject
 
     // -- System Info --
 
-    /// CPU temperature in Celsius (Linux: thermal_zone, macOS: best-effort)
+    /// CPU temperature in Celsius (Linux: thermal_zone; other platforms: unavailable)
     Q_PROPERTY(double cpuTemperature READ cpuTemperature NOTIFY systemInfoChanged)
+
+    /// Whether cpuTemperature holds a valid Celsius reading from a real thermal source
+    Q_PROPERTY(bool cpuTemperatureAvailable READ cpuTemperatureAvailable NOTIFY systemInfoChanged)
 
     /// Memory usage as percentage 0-100
     Q_PROPERTY(double memoryUsagePercent READ memoryUsagePercent NOTIFY systemInfoChanged)
@@ -152,9 +155,15 @@ public:
 
     /**
      * @brief Get the current CPU temperature.
-     * @return Temperature in Celsius, or 0.0 if unavailable
+     * @return Temperature in Celsius; only meaningful when cpuTemperatureAvailable() is true
      */
     double cpuTemperature() const;
+
+    /**
+     * @brief Whether the CPU temperature reading is valid.
+     * @return true if the platform provides a real thermal sensor reading
+     */
+    bool cpuTemperatureAvailable() const;
 
     /**
      * @brief Get the current memory usage percentage.
@@ -429,6 +438,7 @@ private slots:
 private:
     // System info
     double m_cpuTemp = 0.0;
+    bool m_cpuTempAvailable = false;
     double m_memoryUsage = 0.0;
     double m_cpuLoadAvg = 0.0;
     double m_diskUsage = 0.0;
@@ -481,11 +491,12 @@ private:
      * @brief Read CPU temperature from system.
      *
      * On Linux: reads /sys/class/thermal/thermal_zone0/temp (divided by 1000).
-     * On macOS: returns 0.0 (no standard thermal API).
+     * On unsupported platforms: sets available=false and returns 0.0.
      *
+     * @param[out] available Set to true only when a real Celsius reading was obtained
      * @return Temperature in Celsius, or 0.0 if unavailable
      */
-    double readCpuTemperature() const;
+    double readCpuTemperature(bool &available) const;
 
     /**
      * @brief Read memory usage percentage from system.

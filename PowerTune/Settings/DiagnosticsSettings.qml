@@ -51,10 +51,14 @@ SettingsPage {
                         Layout.preferredWidth: root._statusLabelWidth
                     }
                     Text {
-                        text: Diagnostics.cpuTemperature.toFixed(1) + " C"
+                        text: Diagnostics.cpuTemperatureAvailable
+                              ? Diagnostics.cpuTemperature.toFixed(1) + " C"
+                              : "N/A"
                         font.pixelSize: SettingsTheme.fontStatus
                         font.family: SettingsTheme.fontFamily
-                        color: SettingsTheme.textPrimary
+                        color: Diagnostics.cpuTemperatureAvailable
+                               ? SettingsTheme.textPrimary
+                               : SettingsTheme.textDisabled
                         Layout.fillWidth: true
                     }
                 }

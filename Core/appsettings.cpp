@@ -1,9 +1,9 @@
 #include "appsettings.h"
 
-#include "dashboard.h"
-#include "Models/DataModels.h"
 #include "../Hardware/Extender.h"
 #include "../Utils/SteinhartCalculator.h"
+#include "Models/DataModels.h"
+#include "dashboard.h"
 
 #include <QDebug>
 #include <QNetworkInterface>
@@ -13,49 +13,45 @@ static const char *ORG_NAME = "PowerTune";
 static const char *APP_NAME = "PowerTune";
 
 AppSettings::AppSettings(QObject *parent)
-    : QObject(parent)
-    , m_dashboard(nullptr)
-    , m_settingsData(nullptr)
-    , m_uiState(nullptr)
-    , m_vehicleData(nullptr)
-    , m_analogInputs(nullptr)
-    , m_expanderBoardData(nullptr)
-    , m_engineData(nullptr)
-    , m_connectionData(nullptr)
-    , m_digitalInputs(nullptr)
-{
-}
+    : QObject(parent),
+      m_dashboard(nullptr),
+      m_settingsData(nullptr),
+      m_uiState(nullptr),
+      m_vehicleData(nullptr),
+      m_analogInputs(nullptr),
+      m_expanderBoardData(nullptr),
+      m_engineData(nullptr),
+      m_connectionData(nullptr),
+      m_digitalInputs(nullptr)
+{}
 
 AppSettings::AppSettings(DashBoard *dashboard, QObject *parent)
-    : QObject(parent)
-    , m_dashboard(dashboard)
-    , m_settingsData(nullptr)
-    , m_uiState(nullptr)
-    , m_vehicleData(nullptr)
-    , m_analogInputs(nullptr)
-    , m_expanderBoardData(nullptr)
-    , m_engineData(nullptr)
-    , m_connectionData(nullptr)
-    , m_digitalInputs(nullptr)
-{
-}
+    : QObject(parent),
+      m_dashboard(dashboard),
+      m_settingsData(nullptr),
+      m_uiState(nullptr),
+      m_vehicleData(nullptr),
+      m_analogInputs(nullptr),
+      m_expanderBoardData(nullptr),
+      m_engineData(nullptr),
+      m_connectionData(nullptr),
+      m_digitalInputs(nullptr)
+{}
 
 AppSettings::AppSettings(DashBoard *dashboard, SettingsData *settingsData, UIState *uiState, VehicleData *vehicleData,
-                         AnalogInputs *analogInputs, ExpanderBoardData *expanderBoardData,
-                         EngineData *engineData, ConnectionData *connectionData,
-                         DigitalInputs *digitalInputs, QObject *parent)
-    : QObject(parent)
-    , m_dashboard(dashboard)
-    , m_settingsData(settingsData)
-    , m_uiState(uiState)
-    , m_vehicleData(vehicleData)
-    , m_analogInputs(analogInputs)
-    , m_expanderBoardData(expanderBoardData)
-    , m_engineData(engineData)
-    , m_connectionData(connectionData)
-    , m_digitalInputs(digitalInputs)
-{
-}
+                         AnalogInputs *analogInputs, ExpanderBoardData *expanderBoardData, EngineData *engineData,
+                         ConnectionData *connectionData, DigitalInputs *digitalInputs, QObject *parent)
+    : QObject(parent),
+      m_dashboard(dashboard),
+      m_settingsData(settingsData),
+      m_uiState(uiState),
+      m_vehicleData(vehicleData),
+      m_analogInputs(analogInputs),
+      m_expanderBoardData(expanderBoardData),
+      m_engineData(engineData),
+      m_connectionData(connectionData),
+      m_digitalInputs(digitalInputs)
+{}
 
 AppSettings::~AppSettings() = default;
 
@@ -155,10 +151,6 @@ int AppSettings::getLogging()
 void AppSettings::setLogging(const int &arg)
 {
     setValue("serial/Logging", arg);
-}
-
-void AppSettings::writeMainSettings()
-{
 }
 
 void AppSettings::writeSelectedDashSettings(int numberofdashes)
@@ -326,8 +318,14 @@ void AppSettings::writeEXBoardSettings(const qreal &EXA00, const qreal &EXA05, c
     if (m_extender) {
         const qreal v0v[] = {EXA00, EXA10, EXA20, EXA30, EXA40, EXA50, EXA60, EXA70};
         const qreal v5v[] = {EXA05, EXA15, EXA25, EXA35, EXA45, EXA55, EXA65, EXA75};
-        const int ntcFlags[] = {steinhartcalc0on, steinhartcalc1on, steinhartcalc2on,
-                                steinhartcalc3on, steinhartcalc4on, steinhartcalc5on, 0, 0};
+        const int ntcFlags[] = {steinhartcalc0on,
+                                steinhartcalc1on,
+                                steinhartcalc2on,
+                                steinhartcalc3on,
+                                steinhartcalc4on,
+                                steinhartcalc5on,
+                                0,
+                                0};
         for (int ch = 0; ch < EX_ANALOG_CHANNELS; ++ch) {
             m_extender->setChannelCalibration(ch, v0v[ch], v5v[ch], ntcFlags[ch] != 0);
         }
@@ -403,14 +401,13 @@ void AppSettings::writeSteinhartSettings(const qreal &T01, const qreal &T02, con
     setValue("R53", R53);
 
     if (m_steinhartCalc) {
-        const qreal T[][3] = {{T01,T02,T03},{T11,T12,T13},{T21,T22,T23},
-                              {T31,T32,T33},{T41,T42,T43},{T51,T52,T53}};
-        const qreal R[][3] = {{R01,R02,R03},{R11,R12,R13},{R21,R22,R23},
-                              {R31,R32,R33},{R41,R42,R43},{R51,R52,R53}};
+        const qreal T[][3] = {{T01, T02, T03}, {T11, T12, T13}, {T21, T22, T23},
+                              {T31, T32, T33}, {T41, T42, T43}, {T51, T52, T53}};
+        const qreal R[][3] = {{R01, R02, R03}, {R11, R12, R13}, {R21, R22, R23},
+                              {R31, R32, R33}, {R41, R42, R43}, {R51, R52, R53}};
         for (int ch = 0; ch < SteinhartCalculator::MAX_CHANNELS; ++ch) {
             if (R[ch][0] > 0 && R[ch][1] > 0 && R[ch][2] > 0) {
-                m_steinhartCalc->calibrateChannel(ch, T[ch][0], T[ch][1], T[ch][2],
-                                                  R[ch][0], R[ch][1], R[ch][2]);
+                m_steinhartCalc->calibrateChannel(ch, T[ch][0], T[ch][1], T[ch][2], R[ch][0], R[ch][1], R[ch][2]);
             }
         }
     }
@@ -536,6 +533,36 @@ QVariantMap AppSettings::loadDashboardConfig(int index) const
     return config;
 }
 
+void AppSettings::saveOverlayConfig(const QString &dashboardId, const QString &overlayId, const QVariantMap &config)
+{
+    QSettings settings(ORG_NAME, APP_NAME);
+    const QString prefix = QStringLiteral("overlay/%1/%2/").arg(dashboardId, overlayId);
+    for (auto it = config.constBegin(); it != config.constEnd(); ++it) {
+        settings.setValue(prefix + it.key(), it.value());
+    }
+}
+
+QVariantMap AppSettings::loadOverlayConfig(const QString &dashboardId, const QString &overlayId)
+{
+    QSettings settings(ORG_NAME, APP_NAME);
+    QVariantMap config;
+    settings.beginGroup(QStringLiteral("overlay/%1/%2").arg(dashboardId, overlayId));
+    const QStringList keys = settings.childKeys();
+    for (const QString &key : keys) {
+        config.insert(key, settings.value(key));
+    }
+    settings.endGroup();
+    return config;
+}
+
+void AppSettings::removeOverlayConfig(const QString &dashboardId, const QString &overlayId)
+{
+    QSettings settings(ORG_NAME, APP_NAME);
+    settings.beginGroup(QStringLiteral("overlay/%1/%2").arg(dashboardId, overlayId));
+    settings.remove(QString());
+    settings.endGroup();
+}
+
 void AppSettings::setExtender(Extender *extender)
 {
     m_extender = extender;
@@ -634,9 +661,14 @@ void AppSettings::readandApplySettings()
     if (m_extender) {
         const QString val0vKeys[] = {"EXA00", "EXA10", "EXA20", "EXA30", "EXA40", "EXA50", "EXA60", "EXA70"};
         const QString val5vKeys[] = {"EXA05", "EXA15", "EXA25", "EXA35", "EXA45", "EXA55", "EXA65", "EXA75"};
-        const QString ntcKeys[]   = {"steinhartcalc0on", "steinhartcalc1on", "steinhartcalc2on",
-                                     "steinhartcalc3on", "steinhartcalc4on", "steinhartcalc5on",
-                                     "", ""};
+        const QString ntcKeys[] = {"steinhartcalc0on",
+                                   "steinhartcalc1on",
+                                   "steinhartcalc2on",
+                                   "steinhartcalc3on",
+                                   "steinhartcalc4on",
+                                   "steinhartcalc5on",
+                                   "",
+                                   ""};
 
         for (int ch = 0; ch < EX_ANALOG_CHANNELS; ++ch) {
             qreal v0 = getValue(val0vKeys[ch], 0.0).toReal();
@@ -648,14 +680,10 @@ void AppSettings::readandApplySettings()
 
     // Restore Steinhart-Hart calibration coefficients and voltage divider jumper settings
     if (m_steinhartCalc) {
-        const QString tKeys[][3] = {
-            {"T01", "T02", "T03"}, {"T11", "T12", "T13"}, {"T21", "T22", "T23"},
-            {"T31", "T32", "T33"}, {"T41", "T42", "T43"}, {"T51", "T52", "T53"}
-        };
-        const QString rKeys[][3] = {
-            {"R01", "R02", "R03"}, {"R11", "R12", "R13"}, {"R21", "R22", "R23"},
-            {"R31", "R32", "R33"}, {"R41", "R42", "R43"}, {"R51", "R52", "R53"}
-        };
+        const QString tKeys[][3] = {{"T01", "T02", "T03"}, {"T11", "T12", "T13"}, {"T21", "T22", "T23"},
+                                    {"T31", "T32", "T33"}, {"T41", "T42", "T43"}, {"T51", "T52", "T53"}};
+        const QString rKeys[][3] = {{"R01", "R02", "R03"}, {"R11", "R12", "R13"}, {"R21", "R22", "R23"},
+                                    {"R31", "R32", "R33"}, {"R41", "R42", "R43"}, {"R51", "R52", "R53"}};
         const QString r3Keys[] = {"AN0R3VAL", "AN1R3VAL", "AN2R3VAL", "AN3R3VAL", "AN4R3VAL", "AN5R3VAL"};
         const QString r4Keys[] = {"AN0R4VAL", "AN1R4VAL", "AN2R4VAL", "AN3R4VAL", "AN4R4VAL", "AN5R4VAL"};
         const QString ntcOnKeys[] = {"steinhartcalc0on", "steinhartcalc1on", "steinhartcalc2on",

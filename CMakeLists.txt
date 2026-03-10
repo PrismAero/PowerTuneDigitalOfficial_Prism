@@ -430,6 +430,20 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         message(WARNING "Qt6 ShaderTools not found - RaceDash arc gauge shaders will not be compiled")
     endif()
 
+    # * Compile arc overlay shader to .qsb for PrismPT.Dashboard ArcGauge
+    if(Qt6ShaderTools_FOUND)
+        qt_add_shaders(PrismPTDashboardLib "dashboard_shaders"
+            BATCHABLE
+            PRECOMPILE
+            OPTIMIZED
+            PREFIX "/qt/qml/PrismPT/Dashboard"
+            FILES
+                PowerTune/Dashboard/shaders/arcoverlay.frag
+        )
+    else()
+        message(WARNING "Qt6 ShaderTools not found - Dashboard arc overlay shader will not be compiled")
+    endif()
+
     # * Link all QML modules to main executable
     target_link_libraries(${PROJECT_NAME} PRIVATE
         PowerTuneUtilsLibplugin

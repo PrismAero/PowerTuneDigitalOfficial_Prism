@@ -59,40 +59,112 @@ Item {
     // -- Bottom bar --
     property string bbTeamName: "Cardinal Racing"
 
-    function applyOverlayProps(overlayId) {
-        var p = OverlayConfig.getOverlayProperties(overlayId)
-        if (overlayId === "waterTemp") {
-            wtSensorKey = p.sensorKey; wtLabel = p.label; wtUnit = p.unit; wtDecimals = p.decimals
-        } else if (overlayId === "oilPressure") {
-            opSensorKey = p.sensorKey; opLabel = p.label; opUnit = p.unit; opDecimals = p.decimals
-        } else if (overlayId === "statusRow0") {
-            sr0SensorKey = p.sensorKey; sr0Label = p.label; sr0Threshold = p.threshold
-        } else if (overlayId === "statusRow1") {
-            sr1SensorKey = p.sensorKey; sr1Label = p.label; sr1Threshold = p.threshold
-        } else if (overlayId === "tachGroup") {
-            tachSensorKey = p.sensorKey; tachMin = p.minValue; tachMax = p.maxValue
-            tachUnit = p.unit; tachArcColorStart = p.arcColorStart; tachArcColorEnd = p.arcColorEnd
-            tachGearKey = p.gearKey; tachShiftPoint = p.shiftPoint
-            tachShiftCount = p.shiftCount; tachShiftPattern = p.shiftPattern; tachDecimals = p.decimals
-        } else if (overlayId === "speedGroup") {
-            speedSensorKey = p.sensorKey; speedMin = p.minValue; speedMax = p.maxValue
-            speedUnit = p.unit; speedArcColorStart = p.arcColorStart; speedArcColorEnd = p.arcColorEnd
-            speedDecimals = p.decimals
-        } else if (overlayId === "bottomBar") {
-            bbTeamName = p.text
+    // ================================================================
+    // Config system: apply persisted overlay config to components
+    // ================================================================
+    function applyOverlayConfig(overlayId, config) {
+        // Map overlay IDs to their component references and apply config
+        switch (overlayId) {
+        case "rpmArc":
+            tachArcGauge.applyConfig(config)
+            // Also update tach group properties for text/gear/shift overlays
+            if (config.sensorKey) tachSensorKey = config.sensorKey
+            if (config.minValue !== undefined) tachMin = Number(config.minValue)
+            if (config.maxValue !== undefined) tachMax = Number(config.maxValue)
+            if (config.unit) tachUnit = config.unit
+            if (config.decimals !== undefined) tachDecimals = Number(config.decimals)
+            if (config.arcColorStart) tachArcColorStart = config.arcColorStart
+            if (config.arcColorEnd) tachArcColorEnd = config.arcColorEnd
+            break
+
+        case "speedArc":
+            speedArcGauge.applyConfig(config)
+            // Also update speed group properties for text overlay
+            if (config.sensorKey) speedSensorKey = config.sensorKey
+            if (config.minValue !== undefined) speedMin = Number(config.minValue)
+            if (config.maxValue !== undefined) speedMax = Number(config.maxValue)
+            if (config.unit) speedUnit = config.unit
+            if (config.decimals !== undefined) speedDecimals = Number(config.decimals)
+            if (config.arcColorStart) speedArcColorStart = config.arcColorStart
+            if (config.arcColorEnd) speedArcColorEnd = config.arcColorEnd
+            break
+
+        case "gearIndicator":
+            if (config.gearKey) tachGearKey = config.gearKey
+            if (config.gearTextColor) gearDisplay.textColor = config.gearTextColor
+            if (config.gearFontSize) gearDisplay.fontSize = Number(config.gearFontSize)
+            break
+
+        case "shiftLights":
+            if (config.sensorKey) tachSensorKey = config.sensorKey
+            if (config.shiftPoint !== undefined) tachShiftPoint = Number(config.shiftPoint)
+            if (config.shiftCount !== undefined) tachShiftCount = Number(config.shiftCount)
+            if (config.shiftPattern) tachShiftPattern = config.shiftPattern
+            break
+
+        case "waterTempCard":
+            waterTempCard.applyConfig(config)
+            if (config.sensorKey) wtSensorKey = config.sensorKey
+            if (config.label) wtLabel = config.label
+            if (config.unit) wtUnit = config.unit
+            if (config.decimals !== undefined) wtDecimals = Number(config.decimals)
+            break
+
+        case "oilPressCard":
+            oilPressCard.applyConfig(config)
+            if (config.sensorKey) opSensorKey = config.sensorKey
+            if (config.label) opLabel = config.label
+            if (config.unit) opUnit = config.unit
+            if (config.decimals !== undefined) opDecimals = Number(config.decimals)
+            break
+
+        case "statusRow0":
+            if (config.sensorKey) sr0SensorKey = config.sensorKey
+            if (config.label) sr0Label = config.label
+            if (config.threshold !== undefined) sr0Threshold = Number(config.threshold)
+            break
+
+        case "statusRow1":
+            if (config.sensorKey) sr1SensorKey = config.sensorKey
+            if (config.label) sr1Label = config.label
+            if (config.threshold !== undefined) sr1Threshold = Number(config.threshold)
+            break
+
+        case "brakeBias":
+            brakeBiasBar.applyConfig(config)
+            break
+
+        case "bottomBar":
+            if (config.text) bbTeamName = config.text
+            break
         }
     }
 
+    // -- Load all persisted overlay configs at startup --
     Component.onCompleted: {
-        applyOverlayProps("waterTemp"); applyOverlayProps("oilPressure")
-        applyOverlayProps("statusRow0"); applyOverlayProps("statusRow1")
-        applyOverlayProps("tachGroup"); applyOverlayProps("speedGroup")
-        applyOverlayProps("bottomBar")
+        var overlayIds = [
+            "rpmArc", "speedArc", "gearIndicator", "shiftLights",
+            "waterTempCard", "oilPressCard",
+            "statusRow0", "statusRow1",
+            "brakeBias", "bottomBar"
+        ]
+        for (var i = 0; i < overlayIds.length; i++) {
+            var config = AppSettings.loadOverlayConfig("racedash", overlayIds[i])
+            if (config && Object.keys(config).length > 0) {
+                applyOverlayConfig(overlayIds[i], config)
+            }
+        }
     }
 
+    // -- Listen to config popup save events --
     Connections {
-        target: OverlayConfig
-        function onConfigChanged(overlayId) { raceDash.applyOverlayProps(overlayId) }
+        target: configPopup
+        function onConfigChanged(overlayId) {
+            var config = AppSettings.loadOverlayConfig("racedash", overlayId)
+            if (config && Object.keys(config).length > 0) {
+                applyOverlayConfig(overlayId, config)
+            }
+        }
     }
 
     OverlayConfigPopup {
@@ -110,8 +182,8 @@ Item {
     // ==================== Shift Lights ====================
     DraggableOverlay {
         id: shiftOverlay
-        overlayId: "tachGroup"
-        configType: "tachGroup"
+        overlayId: "shiftLights"
+        configType: "shift"
         x: 337
         y: 30
         width: shiftLights.width
@@ -136,8 +208,8 @@ Item {
     // ==================== Water Temp Card ====================
     DraggableOverlay {
         id: waterTempOverlay
-        overlayId: "waterTemp"
-        configType: "sensorCard"
+        overlayId: "waterTempCard"
+        configType: "sensor"
         x: 58
         y: 60
         width: 250
@@ -146,48 +218,17 @@ Item {
             configPopup.openFor(overlayId, configType)
         }
 
-        Item {
+        SensorCard {
+            id: waterTempCard
             anchors.fill: parent
-
-            Text {
-                id: wtLabelText
-                text: raceDash.wtLabel
-                font.family: hyperspaceFont.name
-                font.pixelSize: 40
-                font.weight: Font.Light
-                font.italic: true
-                color: "#FFFFFF"
-                anchors.top: parent.top
-                anchors.right: parent.right
-            }
-
-            Text {
-                id: wtValueText
-                text: {
-                    var v = PropertyRouter.getValue(raceDash.wtSensorKey);
-                    return v !== undefined ? Number(v).toFixed(raceDash.wtDecimals) : "0";
-                }
-                font.family: hyperspaceFont.name
-                font.pixelSize: 68
-                font.weight: Font.Normal
-                font.italic: true
-                font.letterSpacing: -2.72
-                color: "#FFFFFF"
-                anchors.left: parent.left
-                anchors.top: wtLabelText.bottom
-                anchors.topMargin: 2
-            }
-
-            Text {
-                text: raceDash.wtUnit
-                font.family: hyperspaceFont.name
-                font.pixelSize: 32
-                font.weight: Font.Normal
-                font.italic: true
-                color: "#FFFFFF"
-                anchors.right: parent.right
-                anchors.bottom: wtValueText.bottom
-                anchors.bottomMargin: 4
+            label: raceDash.wtLabel
+            unit: raceDash.wtUnit
+            decimals: raceDash.wtDecimals
+            fontFamily: hyperspaceFont.name
+            datasource: raceDash.wtSensorKey
+            value: {
+                var v = PropertyRouter.getValue(raceDash.wtSensorKey);
+                return v !== undefined ? Number(v) : 0;
             }
         }
     }
@@ -195,8 +236,8 @@ Item {
     // ==================== Oil Pressure Card ====================
     DraggableOverlay {
         id: oilPressOverlay
-        overlayId: "oilPressure"
-        configType: "sensorCard"
+        overlayId: "oilPressCard"
+        configType: "sensor"
         x: 58
         y: 201
         width: 250
@@ -205,48 +246,17 @@ Item {
             configPopup.openFor(overlayId, configType)
         }
 
-        Item {
+        SensorCard {
+            id: oilPressCard
             anchors.fill: parent
-
-            Text {
-                id: opLabelText
-                text: raceDash.opLabel
-                font.family: hyperspaceFont.name
-                font.pixelSize: 40
-                font.weight: Font.Light
-                font.italic: true
-                color: "#FFFFFF"
-                anchors.top: parent.top
-                anchors.right: parent.right
-            }
-
-            Text {
-                id: opValueText
-                text: {
-                    var v = PropertyRouter.getValue(raceDash.opSensorKey);
-                    return v !== undefined ? Number(v).toFixed(raceDash.opDecimals) : "0";
-                }
-                font.family: hyperspaceFont.name
-                font.pixelSize: 68
-                font.weight: Font.Normal
-                font.italic: true
-                font.letterSpacing: -2.72
-                color: "#FFFFFF"
-                anchors.left: parent.left
-                anchors.top: opLabelText.bottom
-                anchors.topMargin: 2
-            }
-
-            Text {
-                text: raceDash.opUnit
-                font.family: hyperspaceFont.name
-                font.pixelSize: 32
-                font.weight: Font.Normal
-                font.italic: true
-                color: "#FFFFFF"
-                anchors.right: parent.right
-                anchors.bottom: opValueText.bottom
-                anchors.bottomMargin: 4
+            label: raceDash.opLabel
+            unit: raceDash.opUnit
+            decimals: raceDash.opDecimals
+            fontFamily: hyperspaceFont.name
+            datasource: raceDash.opSensorKey
+            value: {
+                var v = PropertyRouter.getValue(raceDash.opSensorKey);
+                return v !== undefined ? Number(v) : 0;
             }
         }
     }
@@ -268,12 +278,12 @@ Item {
             DraggableOverlay {
                 id: statusRow0Overlay
                 overlayId: "statusRow0"
-                configType: "statusRow"
+                configType: "status"
                 width: 250
                 height: 32
                 onConfigRequested: function(overlayId, configType) {
-            configPopup.openFor(overlayId, configType)
-        }
+                    configPopup.openFor(overlayId, configType)
+                }
 
                 Row {
                     spacing: 0
@@ -308,12 +318,12 @@ Item {
             DraggableOverlay {
                 id: statusRow1Overlay
                 overlayId: "statusRow1"
-                configType: "statusRow"
+                configType: "status"
                 width: 250
                 height: 32
                 onConfigRequested: function(overlayId, configType) {
-            configPopup.openFor(overlayId, configType)
-        }
+                    configPopup.openFor(overlayId, configType)
+                }
 
                 Row {
                     spacing: 0
@@ -347,41 +357,31 @@ Item {
         }
     }
 
-    // ==================== Brake Bias Needle ====================
+    // ==================== Brake Bias ====================
     DraggableOverlay {
-        id: biasNeedleOverlay
-        overlayId: "biasNeedle"
+        id: brakeBiasOverlay
+        overlayId: "brakeBias"
+        configType: "brakebias"
         x: 274
-        y: 603
-        width: 12
-        height: 28
+        y: 590
+        width: 457
+        height: 82
+        onConfigRequested: function(overlayId, configType) {
+            configPopup.openFor(overlayId, configType)
+        }
 
-        Canvas {
+        BrakeBiasBar {
+            id: brakeBiasBar
             anchors.fill: parent
-            onPaint: {
-                var ctx = getContext("2d");
-                ctx.reset();
-                ctx.fillStyle = "#FFFFFF";
-                var cx = width / 2;
-                ctx.beginPath();
-                ctx.moveTo(cx - 1.5, 0);
-                ctx.lineTo(cx + 1.5, 0);
-                ctx.lineTo(cx + 1.5, height - 10);
-                ctx.lineTo(cx + 6, height - 10);
-                ctx.lineTo(cx, height);
-                ctx.lineTo(cx - 6, height - 10);
-                ctx.lineTo(cx - 1.5, height - 10);
-                ctx.closePath();
-                ctx.fill();
-            }
+            fontFamily: hyperspaceFont.name
         }
     }
 
     // ==================== Tach Arc ====================
     DraggableOverlay {
         id: tachArcOverlay
-        overlayId: "tachGroup"
-        configType: "tachGroup"
+        overlayId: "rpmArc"
+        configType: "arc"
         x: 498
         y: 80
         width: 595
@@ -390,20 +390,18 @@ Item {
             configPopup.openFor(overlayId, configType)
         }
 
-        ArcFillOverlay {
+        ArcGauge {
+            id: tachArcGauge
             anchors.fill: parent
-            value: {
-                var v = PropertyRouter.getValue(raceDash.tachSensorKey);
-                return v !== undefined ? Number(v) : 0;
-            }
+            datasource: raceDash.tachSensorKey
             minValue: raceDash.tachMin
             maxValue: raceDash.tachMax
             startAngleDeg: 135
-            sweepAngleDeg: 270
-            arcOuterRadius: 0.434
-            arcInnerRadius: 0.225
-            arcColorStart: raceDash.tachArcColorStart
-            arcColorEnd: raceDash.tachArcColorEnd
+            endAngleDeg: 405
+            arcWidthFraction: 0.209
+            colorStart: raceDash.tachArcColorStart
+            colorEnd: raceDash.tachArcColorEnd
+            bgColor: "#151518"
             startupAnimation: true
         }
     }
@@ -411,8 +409,8 @@ Item {
     // ==================== Tach Text + Gear ====================
     DraggableOverlay {
         id: tachTextOverlay
-        overlayId: "tachGroup"
-        configType: "tachGroup"
+        overlayId: "gearIndicator"
+        configType: "gear"
         x: 660
         y: 238
         width: tachContent.width
@@ -462,8 +460,8 @@ Item {
     // ==================== Speed Arc ====================
     DraggableOverlay {
         id: speedArcOverlay
-        overlayId: "speedGroup"
-        configType: "speedGroup"
+        overlayId: "speedArc"
+        configType: "arc"
         x: 1058
         y: 154
         width: 521
@@ -472,20 +470,18 @@ Item {
             configPopup.openFor(overlayId, configType)
         }
 
-        ArcFillOverlay {
+        ArcGauge {
+            id: speedArcGauge
             anchors.fill: parent
-            value: {
-                var v = PropertyRouter.getValue(raceDash.speedSensorKey);
-                return v !== undefined ? Number(v) : 0;
-            }
+            datasource: raceDash.speedSensorKey
             minValue: raceDash.speedMin
             maxValue: raceDash.speedMax
             startAngleDeg: 135
-            sweepAngleDeg: 270
-            arcOuterRadius: 0.434
-            arcInnerRadius: 0.225
-            arcColorStart: raceDash.speedArcColorStart
-            arcColorEnd: raceDash.speedArcColorEnd
+            endAngleDeg: 405
+            arcWidthFraction: 0.209
+            colorStart: raceDash.speedArcColorStart
+            colorEnd: raceDash.speedArcColorEnd
+            bgColor: "#151518"
             startupAnimation: true
         }
     }
@@ -493,8 +489,8 @@ Item {
     // ==================== Speed Text ====================
     DraggableOverlay {
         id: speedTextOverlay
-        overlayId: "speedGroup"
-        configType: "speedGroup"
+        overlayId: "speedArc"
+        configType: "arc"
         x: 1229
         y: 374
         width: speedContent.width
@@ -535,7 +531,7 @@ Item {
     DraggableOverlay {
         id: bottomBarOverlay
         overlayId: "bottomBar"
-        configType: "staticText"
+        configType: "bottombar"
         x: 0
         y: 680
         width: 1600
@@ -566,7 +562,7 @@ Item {
         y: 8
         visible: shiftOverlay.editMode || waterTempOverlay.editMode ||
                  oilPressOverlay.editMode || statusOverlay.editMode ||
-                 biasNeedleOverlay.editMode || tachArcOverlay.editMode ||
+                 brakeBiasOverlay.editMode || tachArcOverlay.editMode ||
                  tachTextOverlay.editMode || speedArcOverlay.editMode ||
                  speedTextOverlay.editMode || bottomBarOverlay.editMode
 
@@ -618,7 +614,7 @@ Item {
                         waterTempOverlay.editMode = false;
                         oilPressOverlay.editMode = false;
                         statusOverlay.editMode = false;
-                        biasNeedleOverlay.editMode = false;
+                        brakeBiasOverlay.editMode = false;
                         tachArcOverlay.editMode = false;
                         tachTextOverlay.editMode = false;
                         speedArcOverlay.editMode = false;

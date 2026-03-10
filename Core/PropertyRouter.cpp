@@ -1,57 +1,54 @@
 /**
  * @file PropertyRouter.cpp
  * @brief Implementation of PropertyRouter for dynamic property access
+ *
+ * Provides both snapshot-style getValue() and reactive valueChanged() signal
+ * forwarding. At initialization, every Q_PROPERTY NOTIFY signal across all 13
+ * domain models is connected to the onModelPropertyChanged() relay slot, which
+ * uses senderSignalIndex() to identify the property and emits valueChanged().
  */
 
 #include "PropertyRouter.h"
 
 // * Include all data models
-#include "Models/EngineData.h"
-#include "Models/VehicleData.h"
-#include "Models/GPSData.h"
 #include "Models/AnalogInputs.h"
-#include "Models/DigitalInputs.h"
-#include "Models/ExpanderBoardData.h"
-#include "Models/ElectricMotorData.h"
-#include "Models/FlagsData.h"
-#include "Models/SensorData.h"
 #include "Models/ConnectionData.h"
+#include "Models/DigitalInputs.h"
+#include "Models/ElectricMotorData.h"
+#include "Models/EngineData.h"
+#include "Models/ExpanderBoardData.h"
+#include "Models/FlagsData.h"
+#include "Models/GPSData.h"
+#include "Models/SensorData.h"
 #include "Models/SettingsData.h"
 #include "Models/TimingData.h"
 #include "Models/UIState.h"
+#include "Models/VehicleData.h"
 
-#include <QMetaProperty>
 #include <QDebug>
+#include <QMetaMethod>
+#include <QMetaProperty>
 
-PropertyRouter::PropertyRouter(
-    EngineData *engine,
-    VehicleData *vehicle,
-    GPSData *gps,
-    AnalogInputs *analog,
-    DigitalInputs *digital,
-    ExpanderBoardData *expander,
-    ElectricMotorData *motor,
-    FlagsData *flags,
-    SensorData *sensor,
-    ConnectionData *connection,
-    SettingsData *settings,
-    TimingData *timing,
-    UIState *ui,
-    QObject *parent)
-    : QObject(parent)
-    , m_engine(engine)
-    , m_vehicle(vehicle)
-    , m_gps(gps)
-    , m_analog(analog)
-    , m_digital(digital)
-    , m_expander(expander)
-    , m_motor(motor)
-    , m_flags(flags)
-    , m_sensor(sensor)
-    , m_connection(connection)
-    , m_settings(settings)
-    , m_timing(timing)
-    , m_ui(ui)
+#include <algorithm>
+
+PropertyRouter::PropertyRouter(EngineData *engine, VehicleData *vehicle, GPSData *gps, AnalogInputs *analog,
+                               DigitalInputs *digital, ExpanderBoardData *expander, ElectricMotorData *motor,
+                               FlagsData *flags, SensorData *sensor, ConnectionData *connection, SettingsData *settings,
+                               TimingData *timing, UIState *ui, QObject *parent)
+    : QObject(parent),
+      m_engine(engine),
+      m_vehicle(vehicle),
+      m_gps(gps),
+      m_analog(analog),
+      m_digital(digital),
+      m_expander(expander),
+      m_motor(motor),
+      m_flags(flags),
+      m_sensor(sensor),
+      m_connection(connection),
+      m_settings(settings),
+      m_timing(timing),
+      m_ui(ui)
 {
     initializePropertyMappings();
 }
@@ -62,7 +59,8 @@ void PropertyRouter::initializePropertyMappings()
     // * This approach uses Qt's introspection to automatically map all properties
 
     auto mapModelProperties = [this](QObject *model, ModelType type) {
-        if (!model) return;
+        if (!model)
+            return;
 
         const QMetaObject *metaObj = model->metaObject();
         for (int i = metaObj->propertyOffset(); i < metaObj->propertyCount(); ++i) {
@@ -91,6 +89,81 @@ void PropertyRouter::initializePropertyMappings()
     mapModelProperties(m_ui, ModelType::UI);
 
     qDebug() << "PropertyRouter: Initialized with" << m_propertyModelMap.size() << "properties";
+
+    // * Connect all model NOTIFY signals to our relay slot for reactive binding
+    connectModelSignals(m_engine);
+    connectModelSignals(m_vehicle);
+    connectModelSignals(m_gps);
+    connectModelSignals(m_analog);
+    connectModelSignals(m_digital);
+    connectModelSignals(m_expander);
+    connectModelSignals(m_motor);
+    connectModelSignals(m_flags);
+    connectModelSignals(m_sensor);
+    connectModelSignals(m_connection);
+    connectModelSignals(m_settings);
+    connectModelSignals(m_timing);
+    connectModelSignals(m_ui);
+
+    int signalCount = 0;
+    for (auto it = m_signalToPropertyMap.constBegin(); it != m_signalToPropertyMap.constEnd(); ++it) {
+        signalCount += it.value().size();
+    }
+    qDebug() << "PropertyRouter: Connected" << signalCount << "NOTIFY signals for reactive binding";
+}
+
+void PropertyRouter::connectModelSignals(QObject *model)
+{
+    if (!model)
+        return;
+
+    const QMetaObject *meta = model->metaObject();
+
+    // * Resolve our relay slot once for all connections from this model
+    const QMetaMethod relaySlot = metaObject()->method(metaObject()->indexOfSlot("onModelPropertyChanged()"));
+
+    for (int i = meta->propertyOffset(); i < meta->propertyCount(); ++i) {
+        QMetaProperty prop = meta->property(i);
+        if (!prop.hasNotifySignal())
+            continue;
+
+        QString propName = QString::fromLatin1(prop.name());
+        // * Only connect properties that are in our property map (first-model-wins rule)
+        if (!m_propertyModelMap.contains(propName))
+            continue;
+
+        QMetaMethod notifySignal = prop.notifySignal();
+        int signalIndex = notifySignal.methodIndex();
+
+        // * Record the mapping: (model, signalIndex) -> (propertyName, propertyIndex)
+        m_signalToPropertyMap[model][signalIndex] = SignalPropertyInfo{propName, i};
+
+        // * Connect the model's NOTIFY signal to our relay slot
+        QObject::connect(model, notifySignal, this, relaySlot);
+    }
+}
+
+void PropertyRouter::onModelPropertyChanged()
+{
+    QObject *model = sender();
+    if (!model)
+        return;
+
+    int signalIdx = senderSignalIndex();
+    if (signalIdx < 0)
+        return;
+
+    auto modelIt = m_signalToPropertyMap.constFind(model);
+    if (modelIt == m_signalToPropertyMap.constEnd())
+        return;
+
+    auto propIt = modelIt->constFind(signalIdx);
+    if (propIt == modelIt->constEnd())
+        return;
+
+    const SignalPropertyInfo &info = propIt.value();
+    QVariant val = model->metaObject()->property(info.propertyIndex).read(model);
+    emit valueChanged(info.propertyName, val);
 }
 
 QVariant PropertyRouter::getValue(const QString &propertyName) const
@@ -202,4 +275,11 @@ QString PropertyRouter::getModelName(const QString &propertyName) const
 bool PropertyRouter::hasProperty(const QString &propertyName) const
 {
     return m_propertyModelMap.contains(propertyName);
+}
+
+QStringList PropertyRouter::availableProperties() const
+{
+    QStringList properties = m_propertyModelMap.keys();
+    properties.sort(Qt::CaseInsensitive);
+    return properties;
 }
