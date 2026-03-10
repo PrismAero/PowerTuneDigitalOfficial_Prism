@@ -5,16 +5,16 @@ TextField {
     id: root
 
     implicitWidth: Math.max(SettingsTheme.textFieldMinWidth, contentWidth + leftPadding + rightPadding + 20)
-    implicitHeight: Math.max(SettingsTheme.controlHeight, font.pixelSize + topPadding + bottomPadding)
+    implicitHeight: SettingsTheme.controlHeight
     font.pixelSize: SettingsTheme.fontControl
     font.family: SettingsTheme.fontFamily
     color: SettingsTheme.textPrimary
     placeholderTextColor: SettingsTheme.textPlaceholder
-    verticalAlignment: Text.AlignVCenter
-    leftPadding: 16
-    rightPadding: 16
-    topPadding: 12
-    bottomPadding: 12
+    verticalAlignment: TextInput.AlignVCenter
+    leftPadding: 12
+    rightPadding: 12
+    topPadding: 4
+    bottomPadding: 4
 
     background: Rectangle {
         color: SettingsTheme.controlBg

@@ -47,6 +47,10 @@ RowLayout {
     Item {
         id: controlContainer
         Layout.preferredWidth: 280
-        Layout.preferredHeight: SettingsTheme.controlHeight
+        Layout.preferredHeight: childrenRect.height > 0 ? childrenRect.height : SettingsTheme.controlHeight
+        Layout.minimumHeight: SettingsTheme.controlHeight
     }
+
+    // Trailing spacer absorbs excess width so label + control stay left-aligned
+    Item { Layout.fillWidth: true }
 }

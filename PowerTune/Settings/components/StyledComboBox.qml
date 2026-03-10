@@ -5,7 +5,7 @@ ComboBox {
     id: root
 
     implicitWidth: internal.computedWidth
-    implicitHeight: Math.max(SettingsTheme.controlHeight, fontMetrics.height + 24)
+    implicitHeight: SettingsTheme.controlHeight
     font.pixelSize: SettingsTheme.fontControl
     font.family: SettingsTheme.fontFamily
 
@@ -45,10 +45,10 @@ ComboBox {
     }
 
     contentItem: Text {
-        leftPadding: 16
-        rightPadding: root.indicator.width + 16
-        topPadding: 10
-        bottomPadding: 10
+        leftPadding: 12
+        rightPadding: root.indicator.width + 12
+        topPadding: 4
+        bottomPadding: 4
         text: root.displayText
         font: root.font
         color: SettingsTheme.textPrimary
@@ -83,7 +83,7 @@ ComboBox {
 
     delegate: ItemDelegate {
         width: root.width
-        implicitHeight: delegateText.implicitHeight + 16
+        implicitHeight: SettingsTheme.controlHeight
 
         contentItem: Text {
             id: delegateText
@@ -94,9 +94,9 @@ ComboBox {
             font.weight: root.currentIndex === index ? Font.DemiBold : Font.Normal
             elide: Text.ElideRight
             verticalAlignment: Text.AlignVCenter
-            leftPadding: 16
-            topPadding: 8
-            bottomPadding: 8
+            leftPadding: 12
+            topPadding: 4
+            bottomPadding: 4
         }
 
         background: Rectangle {

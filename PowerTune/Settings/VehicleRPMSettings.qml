@@ -121,33 +121,17 @@ SettingsPage {
                 title: Translator.translate("SpeedCorrection", Settings.language)
                 Layout.fillWidth: true
 
-                RowLayout {
-                    spacing: SettingsTheme.controlGap
-                    Layout.fillWidth: true
-
-                    Text {
-                        text: Translator.translate("SpeedCorrection", Settings.language) + " %"
-                        font.pixelSize: SettingsTheme.fontLabel
-                        font.family: SettingsTheme.fontFamily
-                        color: SettingsTheme.textPrimary
-                        Layout.preferredWidth: SettingsTheme.labelWidth
-                    }
-
+                SettingsRow {
+                    label: Translator.translate("SpeedCorrection", Settings.language) + " %"
+                    description: "(100 = no correction)"
                     StyledTextField {
                         id: speedpercent
-                        Layout.fillWidth: true
+                        width: parent.width
+                        height: parent.height
                         text: "100"
                         inputMethodHints: Qt.ImhFormattedNumbersOnly
                         Component.onCompleted: AppSettings.writeSpeedSettings(speedpercent.text / 100, 100000)
                         onEditingFinished: AppSettings.writeSpeedSettings(speedpercent.text / 100, 100000)
-                    }
-
-                    Text {
-                        text: "(100 = no correction)"
-                        font.pixelSize: SettingsTheme.fontCaption
-                        font.family: SettingsTheme.fontFamily
-                        color: SettingsTheme.textPlaceholder
-                        font.italic: true
                     }
                 }
             }
@@ -184,7 +168,7 @@ SettingsPage {
                         model: shiftStageModel
                         delegate: Rectangle {
                             Layout.fillWidth: true
-                            Layout.preferredHeight: 116
+                            Layout.preferredHeight: 104
                             color: SettingsTheme.controlBg
                             radius: SettingsTheme.radiusLarge
                             border.color: model.stageColor

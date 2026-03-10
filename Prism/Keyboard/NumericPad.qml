@@ -165,9 +165,9 @@ Item {
                 onKeyPressed: numericPad.switchLayout()
             }
             KeyButton {
-                iconName: "keyboard_return"
+                iconName: "check"
                 keyValue: "enter"
-                iconSize: 20
+                iconSize: 22
                 isAccent: true
                 width: numericPad.actionColumnWidth
                 height: numericPad.cellHeight

@@ -11,6 +11,11 @@ SettingsPage {
 
     property bool showAllSensors: Diagnostics.showAllSensors
 
+    // Compact status row height and spacing for the read-only top sections
+    readonly property int _statusRowHeight: 22
+    readonly property int _statusRowSpacing: 2
+    readonly property int _statusLabelWidth: 100
+
     ListModel {
         id: logLevelModel
         ListElement { label: "All";   level: 0 }
@@ -19,8 +24,9 @@ SettingsPage {
         ListElement { label: "Error"; level: 3 }
     }
 
-    // * TOP ROW: System Information + Connection Status
+    // * TOP ROW: System Information + Connection Status (compact)
     RowLayout {
+        id: topRow
         Layout.fillWidth: true
         spacing: SettingsTheme.sectionSpacing
 
@@ -28,88 +34,155 @@ SettingsPage {
             title: "System Information"
             Layout.fillWidth: true
 
-            SettingsRow {
-                label: "CPU Temp"
-                Text {
-                    width: parent.width
-                    height: parent.height
-                    text: Diagnostics.cpuTemperature.toFixed(1) + " C"
-                    font.pixelSize: SettingsTheme.fontControl
-                    font.family: SettingsTheme.fontFamily
-                    color: SettingsTheme.textPrimary
-                    verticalAlignment: Text.AlignVCenter
+            ColumnLayout {
+                Layout.fillWidth: true
+                spacing: root._statusRowSpacing
+
+                // CPU Temp
+                RowLayout {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: root._statusRowHeight
+                    spacing: SettingsTheme.contentSpacing
+                    Text {
+                        text: "CPU Temp"
+                        font.pixelSize: SettingsTheme.fontStatus
+                        font.family: SettingsTheme.fontFamily
+                        color: SettingsTheme.textSecondary
+                        Layout.preferredWidth: root._statusLabelWidth
+                    }
+                    Text {
+                        text: Diagnostics.cpuTemperature.toFixed(1) + " C"
+                        font.pixelSize: SettingsTheme.fontStatus
+                        font.family: SettingsTheme.fontFamily
+                        color: SettingsTheme.textPrimary
+                        Layout.fillWidth: true
+                    }
                 }
-            }
-            SettingsRow {
-                label: "CPU Load"
-                Text {
-                    width: parent.width
-                    height: parent.height
-                    text: Diagnostics.cpuLoadAverage.toFixed(2)
-                    font.pixelSize: SettingsTheme.fontControl
-                    font.family: SettingsTheme.fontFamily
-                    color: SettingsTheme.textPrimary
-                    verticalAlignment: Text.AlignVCenter
+
+                // CPU Load
+                RowLayout {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: root._statusRowHeight
+                    spacing: SettingsTheme.contentSpacing
+                    Text {
+                        text: "CPU Load"
+                        font.pixelSize: SettingsTheme.fontStatus
+                        font.family: SettingsTheme.fontFamily
+                        color: SettingsTheme.textSecondary
+                        Layout.preferredWidth: root._statusLabelWidth
+                    }
+                    Text {
+                        text: Diagnostics.cpuLoadAverage.toFixed(2)
+                        font.pixelSize: SettingsTheme.fontStatus
+                        font.family: SettingsTheme.fontFamily
+                        color: SettingsTheme.textPrimary
+                        Layout.fillWidth: true
+                    }
                 }
-            }
-            SettingsRow {
-                label: "RAM"
-                Text {
-                    width: parent.width
-                    height: parent.height
-                    text: Diagnostics.memoryUsedMB.toFixed(0) + " / " + Diagnostics.memoryTotalMB.toFixed(0) + " MB (" + Diagnostics.memoryUsagePercent.toFixed(1) + "%)"
-                    font.pixelSize: SettingsTheme.fontControl
-                    font.family: SettingsTheme.fontFamily
-                    color: SettingsTheme.textPrimary
-                    verticalAlignment: Text.AlignVCenter
+
+                // RAM
+                RowLayout {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: root._statusRowHeight
+                    spacing: SettingsTheme.contentSpacing
+                    Text {
+                        text: "RAM"
+                        font.pixelSize: SettingsTheme.fontStatus
+                        font.family: SettingsTheme.fontFamily
+                        color: SettingsTheme.textSecondary
+                        Layout.preferredWidth: root._statusLabelWidth
+                    }
+                    Text {
+                        text: Diagnostics.memoryUsedMB.toFixed(0) + " / " + Diagnostics.memoryTotalMB.toFixed(0) + " MB (" + Diagnostics.memoryUsagePercent.toFixed(1) + "%)"
+                        font.pixelSize: SettingsTheme.fontStatus
+                        font.family: SettingsTheme.fontFamily
+                        color: SettingsTheme.textPrimary
+                        Layout.fillWidth: true
+                    }
                 }
-            }
-            SettingsRow {
-                label: "Disk"
-                Text {
-                    width: parent.width
-                    height: parent.height
-                    text: Diagnostics.diskUsagePercent.toFixed(1) + "% used"
-                    font.pixelSize: SettingsTheme.fontControl
-                    font.family: SettingsTheme.fontFamily
-                    color: SettingsTheme.textPrimary
-                    verticalAlignment: Text.AlignVCenter
+
+                // Disk
+                RowLayout {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: root._statusRowHeight
+                    spacing: SettingsTheme.contentSpacing
+                    Text {
+                        text: "Disk"
+                        font.pixelSize: SettingsTheme.fontStatus
+                        font.family: SettingsTheme.fontFamily
+                        color: SettingsTheme.textSecondary
+                        Layout.preferredWidth: root._statusLabelWidth
+                    }
+                    Text {
+                        text: Diagnostics.diskUsagePercent.toFixed(1) + "% used"
+                        font.pixelSize: SettingsTheme.fontStatus
+                        font.family: SettingsTheme.fontFamily
+                        color: SettingsTheme.textPrimary
+                        Layout.fillWidth: true
+                    }
                 }
-            }
-            SettingsRow {
-                label: "Uptime"
-                Text {
-                    width: parent.width
-                    height: parent.height
-                    text: Diagnostics.uptime
-                    font.pixelSize: SettingsTheme.fontControl
-                    font.family: SettingsTheme.fontFamily
-                    color: SettingsTheme.textPrimary
-                    verticalAlignment: Text.AlignVCenter
+
+                // Uptime
+                RowLayout {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: root._statusRowHeight
+                    spacing: SettingsTheme.contentSpacing
+                    Text {
+                        text: "Uptime"
+                        font.pixelSize: SettingsTheme.fontStatus
+                        font.family: SettingsTheme.fontFamily
+                        color: SettingsTheme.textSecondary
+                        Layout.preferredWidth: root._statusLabelWidth
+                    }
+                    Text {
+                        text: Diagnostics.uptime
+                        font.pixelSize: SettingsTheme.fontStatus
+                        font.family: SettingsTheme.fontFamily
+                        color: SettingsTheme.textPrimary
+                        Layout.fillWidth: true
+                    }
                 }
-            }
-            SettingsRow {
-                label: "Platform"
-                Text {
-                    width: parent.width
-                    height: parent.height
-                    text: Connection ? Connection.Platform : "Unknown"
-                    font.pixelSize: SettingsTheme.fontControl
-                    font.family: SettingsTheme.fontFamily
-                    color: SettingsTheme.textPrimary
-                    verticalAlignment: Text.AlignVCenter
+
+                // Platform
+                RowLayout {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: root._statusRowHeight
+                    spacing: SettingsTheme.contentSpacing
+                    Text {
+                        text: "Platform"
+                        font.pixelSize: SettingsTheme.fontStatus
+                        font.family: SettingsTheme.fontFamily
+                        color: SettingsTheme.textSecondary
+                        Layout.preferredWidth: root._statusLabelWidth
+                    }
+                    Text {
+                        text: Connection ? Connection.Platform : "Unknown"
+                        font.pixelSize: SettingsTheme.fontStatus
+                        font.family: SettingsTheme.fontFamily
+                        color: SettingsTheme.textPrimary
+                        Layout.fillWidth: true
+                    }
                 }
-            }
-            SettingsRow {
-                label: "Sensors"
-                Text {
-                    width: parent.width
-                    height: parent.height
-                    text: Diagnostics.activeSensorCount + " / " + Diagnostics.totalSensorCount
-                    font.pixelSize: SettingsTheme.fontControl
-                    font.family: SettingsTheme.fontFamily
-                    color: SettingsTheme.textPrimary
-                    verticalAlignment: Text.AlignVCenter
+
+                // Sensors
+                RowLayout {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: root._statusRowHeight
+                    spacing: SettingsTheme.contentSpacing
+                    Text {
+                        text: "Sensors"
+                        font.pixelSize: SettingsTheme.fontStatus
+                        font.family: SettingsTheme.fontFamily
+                        color: SettingsTheme.textSecondary
+                        Layout.preferredWidth: root._statusLabelWidth
+                    }
+                    Text {
+                        text: Diagnostics.activeSensorCount + " / " + Diagnostics.totalSensorCount
+                        font.pixelSize: SettingsTheme.fontStatus
+                        font.family: SettingsTheme.fontFamily
+                        color: SettingsTheme.textPrimary
+                        Layout.fillWidth: true
+                    }
                 }
             }
         }
@@ -118,13 +191,22 @@ SettingsPage {
             title: "Connection"
             Layout.fillWidth: true
 
-            SettingsRow {
-                label: "CAN Status"
-                RowLayout {
-                    width: parent.width
-                    height: parent.height
-                    spacing: SettingsTheme.contentSpacing
+            ColumnLayout {
+                Layout.fillWidth: true
+                spacing: root._statusRowSpacing
 
+                // CAN Status
+                RowLayout {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: root._statusRowHeight
+                    spacing: SettingsTheme.contentSpacing
+                    Text {
+                        text: "CAN Status"
+                        font.pixelSize: SettingsTheme.fontStatus
+                        font.family: SettingsTheme.fontFamily
+                        color: SettingsTheme.textSecondary
+                        Layout.preferredWidth: root._statusLabelWidth
+                    }
                     Rectangle {
                         width: SettingsTheme.statusDotSize
                         height: SettingsTheme.statusDotSize
@@ -138,11 +220,9 @@ SettingsPage {
                     }
                     Text {
                         text: Diagnostics.canStatusText
-                        font.pixelSize: SettingsTheme.fontControl
+                        font.pixelSize: SettingsTheme.fontStatus
                         font.family: SettingsTheme.fontFamily
                         Layout.fillWidth: true
-                        verticalAlignment: Text.AlignVCenter
-                        Layout.fillHeight: true
                         color: {
                             if (Diagnostics.canStatusText === "Active") return SettingsTheme.success
                             if (Diagnostics.canStatusText === "Waiting") return SettingsTheme.warning
@@ -150,50 +230,82 @@ SettingsPage {
                         }
                     }
                 }
-            }
-            SettingsRow {
-                label: "Daemon"
-                Text {
-                    width: parent.width
-                    height: parent.height
-                    text: Diagnostics.daemonName
-                    font.pixelSize: SettingsTheme.fontControl
-                    font.family: SettingsTheme.fontFamily
-                    color: SettingsTheme.textPrimary
-                    verticalAlignment: Text.AlignVCenter
-                }
-            }
-            SettingsRow {
-                label: "CAN Rate"
-                Text {
-                    width: parent.width
-                    height: parent.height
-                    text: Diagnostics.canMessageRate + " msg/s"
-                    font.pixelSize: SettingsTheme.fontControl
-                    font.family: SettingsTheme.fontFamily
-                    color: SettingsTheme.textPrimary
-                    verticalAlignment: Text.AlignVCenter
-                }
-            }
-            SettingsRow {
-                label: "CAN Total"
-                Text {
-                    width: parent.width
-                    height: parent.height
-                    text: Diagnostics.canTotalMessages + " msgs | " + Diagnostics.canErrorCount + " errors"
-                    font.pixelSize: SettingsTheme.fontControl
-                    font.family: SettingsTheme.fontFamily
-                    color: Diagnostics.canErrorCount > 0 ? SettingsTheme.error : SettingsTheme.textPrimary
-                    verticalAlignment: Text.AlignVCenter
-                }
-            }
-            SettingsRow {
-                label: "Serial"
-                RowLayout {
-                    width: parent.width
-                    height: parent.height
-                    spacing: SettingsTheme.contentSpacing
 
+                // Daemon
+                RowLayout {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: root._statusRowHeight
+                    spacing: SettingsTheme.contentSpacing
+                    Text {
+                        text: "Daemon"
+                        font.pixelSize: SettingsTheme.fontStatus
+                        font.family: SettingsTheme.fontFamily
+                        color: SettingsTheme.textSecondary
+                        Layout.preferredWidth: root._statusLabelWidth
+                    }
+                    Text {
+                        text: Diagnostics.daemonName
+                        font.pixelSize: SettingsTheme.fontStatus
+                        font.family: SettingsTheme.fontFamily
+                        color: SettingsTheme.textPrimary
+                        Layout.fillWidth: true
+                    }
+                }
+
+                // CAN Rate
+                RowLayout {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: root._statusRowHeight
+                    spacing: SettingsTheme.contentSpacing
+                    Text {
+                        text: "CAN Rate"
+                        font.pixelSize: SettingsTheme.fontStatus
+                        font.family: SettingsTheme.fontFamily
+                        color: SettingsTheme.textSecondary
+                        Layout.preferredWidth: root._statusLabelWidth
+                    }
+                    Text {
+                        text: Diagnostics.canMessageRate + " msg/s"
+                        font.pixelSize: SettingsTheme.fontStatus
+                        font.family: SettingsTheme.fontFamily
+                        color: SettingsTheme.textPrimary
+                        Layout.fillWidth: true
+                    }
+                }
+
+                // CAN Total
+                RowLayout {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: root._statusRowHeight
+                    spacing: SettingsTheme.contentSpacing
+                    Text {
+                        text: "CAN Total"
+                        font.pixelSize: SettingsTheme.fontStatus
+                        font.family: SettingsTheme.fontFamily
+                        color: SettingsTheme.textSecondary
+                        Layout.preferredWidth: root._statusLabelWidth
+                    }
+                    Text {
+                        text: Diagnostics.canTotalMessages + " msgs | " + Diagnostics.canErrorCount + " errors"
+                        font.pixelSize: SettingsTheme.fontStatus
+                        font.family: SettingsTheme.fontFamily
+                        color: Diagnostics.canErrorCount > 0 ? SettingsTheme.error : SettingsTheme.textPrimary
+                        Layout.fillWidth: true
+                    }
+                }
+
+                // Serial
+                RowLayout {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: root._statusRowHeight
+                    spacing: SettingsTheme.contentSpacing
+                    Text {
+                        text: "Serial"
+                        font.pixelSize: SettingsTheme.fontStatus
+                        font.family: SettingsTheme.fontFamily
+                        color: SettingsTheme.textSecondary
+                        Layout.preferredWidth: root._statusLabelWidth
+                    }
                     Rectangle {
                         width: SettingsTheme.statusDotSize
                         height: SettingsTheme.statusDotSize
@@ -203,52 +315,73 @@ SettingsPage {
                     }
                     Text {
                         text: Diagnostics.serialPort + " @ " + Diagnostics.serialBaudRate
-                        font.pixelSize: SettingsTheme.fontControl
+                        font.pixelSize: SettingsTheme.fontStatus
                         font.family: SettingsTheme.fontFamily
                         color: SettingsTheme.textPrimary
                         Layout.fillWidth: true
-                        verticalAlignment: Text.AlignVCenter
-                        Layout.fillHeight: true
                     }
                 }
-            }
-            SettingsRow {
-                label: "Type"
-                Text {
-                    width: parent.width
-                    height: parent.height
-                    text: Diagnostics.connectionType
-                    font.pixelSize: SettingsTheme.fontControl
-                    font.family: SettingsTheme.fontFamily
-                    color: SettingsTheme.textPrimary
-                    verticalAlignment: Text.AlignVCenter
+
+                // Type
+                RowLayout {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: root._statusRowHeight
+                    spacing: SettingsTheme.contentSpacing
+                    Text {
+                        text: "Type"
+                        font.pixelSize: SettingsTheme.fontStatus
+                        font.family: SettingsTheme.fontFamily
+                        color: SettingsTheme.textSecondary
+                        Layout.preferredWidth: root._statusLabelWidth
+                    }
+                    Text {
+                        text: Diagnostics.connectionType
+                        font.pixelSize: SettingsTheme.fontStatus
+                        font.family: SettingsTheme.fontFamily
+                        color: SettingsTheme.textPrimary
+                        Layout.fillWidth: true
+                    }
                 }
-            }
-            SettingsRow {
-                label: "Time"
-                Text {
-                    width: parent.width
-                    height: parent.height
-                    text: Diagnostics.systemTime
-                    font.pixelSize: SettingsTheme.fontControl
-                    font.family: SettingsTheme.fontFamily
-                    color: SettingsTheme.textPrimary
-                    verticalAlignment: Text.AlignVCenter
+
+                // Time
+                RowLayout {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: root._statusRowHeight
+                    spacing: SettingsTheme.contentSpacing
+                    Text {
+                        text: "Time"
+                        font.pixelSize: SettingsTheme.fontStatus
+                        font.family: SettingsTheme.fontFamily
+                        color: SettingsTheme.textSecondary
+                        Layout.preferredWidth: root._statusLabelWidth
+                    }
+                    Text {
+                        text: Diagnostics.systemTime
+                        font.pixelSize: SettingsTheme.fontStatus
+                        font.family: SettingsTheme.fontFamily
+                        color: SettingsTheme.textPrimary
+                        Layout.fillWidth: true
+                    }
                 }
             }
         }
     }
 
     // * BOTTOM ROW: Live Sensor Data + System Log
+    // Height is calculated to fill remaining viewport space below the top row.
+    // root.height = SettingsPage Rectangle height (fills available area).
+    // Available content height = root.height - pageMargin*2 (ScrollView margins).
+    // Bottom row height = available - topRow height - sectionSpacing between rows.
     RowLayout {
         Layout.fillWidth: true
-        Layout.preferredHeight: 320
+        Layout.preferredHeight: root.height - (SettingsTheme.pageMargin * 2)
+                                - topRow.height - SettingsTheme.sectionSpacing
         spacing: SettingsTheme.sectionSpacing
 
         // * Live Sensor Data Table
         SettingsSection {
             title: "Live Sensor Data"
-            Layout.preferredWidth: 900
+            Layout.fillWidth: true
             Layout.fillHeight: true
 
             RowLayout {

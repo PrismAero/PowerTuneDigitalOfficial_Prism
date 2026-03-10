@@ -28,8 +28,8 @@ CheckBox {
         // * Checkmark icon drawn with two rotated rectangles
         Item {
             anchors.centerIn: parent
-            width: 16
-            height: 16
+            width: 20
+            height: 20
             opacity: root.checked ? 1.0 : 0.0
 
             Behavior on opacity { NumberAnimation { duration: 150 } }
@@ -37,9 +37,9 @@ CheckBox {
             // * Short leg of checkmark
             Rectangle {
                 x: 1
-                y: 8
-                width: 7
-                height: 2.5
+                y: 10
+                width: 9
+                height: 3
                 radius: 1
                 color: SettingsTheme.textPrimary
                 rotation: 45
@@ -48,10 +48,10 @@ CheckBox {
 
             // * Long leg of checkmark
             Rectangle {
-                x: 5
-                y: 11
-                width: 12
-                height: 2.5
+                x: 6
+                y: 14
+                width: 15
+                height: 3
                 radius: 1
                 color: SettingsTheme.textPrimary
                 rotation: -45

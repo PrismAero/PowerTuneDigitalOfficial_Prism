@@ -247,12 +247,14 @@ SettingsPage {
                     StyledTextField {
                         id: tripmeter
                         Layout.fillWidth: true
+                        Layout.preferredHeight: SettingsTheme.controlHeight
                         text: "0"
                         readOnly: true
                         onTextChanged: if (settingsLoaded) AppSettings.setValue("ui/tripmeter", text)
                     }
                     StyledButton {
                         text: Translator.translate("Trip Reset", Settings.language)
+                        Layout.preferredHeight: SettingsTheme.controlHeight
                         primary: false
                         onClicked: Calculations.resettrip()
                     }
