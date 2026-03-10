@@ -5,23 +5,16 @@ import QtQuick.Layouts 1.15
 import DLM 1.0
 import PowerTune.Core 1.0
 import PowerTune.Settings 1.0
+import PowerTune.UI 1.0
 import PowerTune.Utils 1.0
 
 Rectangle {
     id: tabView
     anchors.fill: parent
-    color: colorBackground
+    color: SettingsTheme.background
 
     property int lastdashamount
     property int currentIndex: tabBar.currentIndex
-
-    readonly property color colorBackground: "#121212"
-    readonly property color colorBackgroundSecondary: "#1E1E1E"
-    readonly property color colorBackgroundTertiary: "#2D2D2D"
-    readonly property color colorAccent: "#009688"
-    readonly property color colorTextPrimary: "#FFFFFF"
-    readonly property color colorTextSecondary: "#B0B0B0"
-    readonly property color colorDivider: "#3D3D3D"
 
     DLM {
         id: downloadManager
@@ -44,8 +37,8 @@ Rectangle {
 
         Rectangle {
             Layout.fillWidth: true
-            Layout.preferredHeight: 56
-            color: colorBackground
+            Layout.preferredHeight: SettingsTheme.tabBarHeight
+            color: SettingsTheme.background
 
             TabBar {
                 id: tabBar
@@ -57,24 +50,26 @@ Rectangle {
                     TabButton {
                         text: Translator.translate(model.title, Settings.language)
                         width: tabView.width / tabModel.count
-                        height: 56
+                        height: SettingsTheme.tabBarHeight
 
                         contentItem: Text {
                             text: parent.text
-                            font.pixelSize: 18
-                            font.family: "Lato"
+                            font.pixelSize: SettingsTheme.fontTab
+                            font.family: SettingsTheme.fontFamily
                             font.weight: parent.checked ? Font.DemiBold : Font.Normal
-                            color: parent.checked ? colorTextPrimary : colorTextSecondary
+                            color: parent.checked ? SettingsTheme.textPrimary : SettingsTheme.textSecondary
                             horizontalAlignment: Text.AlignHCenter
                             verticalAlignment: Text.AlignVCenter
                             elide: Text.ElideRight
                         }
 
                         background: Rectangle {
-                            color: parent.checked ? colorAccent : colorBackgroundTertiary
-                            border.color: parent.checked ? colorAccent : colorDivider
-                            border.width: 1
-                            radius: 4
+                            color: parent.checked ? SettingsTheme.accent
+                                 : parent.pressed ? SettingsTheme.surfacePressed
+                                 : SettingsTheme.surface
+                            border.color: parent.checked ? SettingsTheme.accent : SettingsTheme.border
+                            border.width: SettingsTheme.borderWidth
+                            radius: SettingsTheme.radiusSmall
                         }
                     }
                 }
