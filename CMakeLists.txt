@@ -223,6 +223,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_library(PowerTuneUiLib STATIC)
     qt_add_library(PowerTuneSettingsLib STATIC)
     qt_add_library(GaugesSharedLib STATIC)
+    qt_add_library(GaugesRaceDashLib STATIC)
     qt_add_library(PrismPTDashboardLib STATIC)
     qt_add_library(PrismKeyboardLib STATIC)
 
@@ -288,7 +289,6 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
             PowerTune/Settings/NetworkSettings.qml
             PowerTune/Settings/CanMonitor.qml
             PowerTune/Settings/DiagnosticsSettings.qml
-            PowerTune/Settings/DashboardTestSim.qml
             PowerTune/Settings/HelpPage.qml
             PowerTune/Settings/WifiCountryList.qml
         RESOURCE_PREFIX /qt/qml
@@ -304,29 +304,39 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
             PowerTune/Gauges/Shared/DatasourceService.qml
             PowerTune/Gauges/Shared/Warning.qml
             PowerTune/Gauges/Shared/WarningLoader.qml
+            PowerTune/Gauges/Shared/WarningFlashTimer.qml
         RESOURCE_PREFIX /qt/qml
         OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/qt/qml/PowerTune/Gauges/Shared
+    )
+
+    # * PowerTune.Gauges.RaceDash module - Race dash live widgets
+    qt_add_qml_module(GaugesRaceDashLib
+        URI PowerTune.Gauges.RaceDash
+        VERSION 1.0
+        IMPORTS PowerTune.UI PowerTune.Gauges.Shared
+        QML_FILES
+            PowerTune/Gauges/RaceDash/ArcGauge.qml
+            PowerTune/Gauges/RaceDash/ShiftIndicator.qml
+            PowerTune/Gauges/RaceDash/SensorCard.qml
+            PowerTune/Gauges/RaceDash/StatusBox.qml
+            PowerTune/Gauges/RaceDash/BrakeBiasBar.qml
+            PowerTune/Gauges/RaceDash/BottomStatusBar.qml
+            PowerTune/Gauges/RaceDash/GearIndicator.qml
+        RESOURCE_PREFIX /qt/qml
+        OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/qt/qml/PowerTune/Gauges/RaceDash
     )
     
     # * PrismPT.Dashboard module - User dashboard canvas and panels
     qt_add_qml_module(PrismPTDashboardLib
         URI PrismPT.Dashboard
         VERSION 1.0
-        IMPORTS PowerTuneUiLib
+        IMPORTS PowerTune.UI PowerTune.Gauges.Shared PowerTune.Gauges.RaceDash
         QML_FILES
             PowerTune/Dashboard/DashboardTheme.qml
             PowerTune/Dashboard/UserDashboard.qml
             PowerTune/Dashboard/RaceDash.qml
-            PowerTune/Dashboard/ArcGauge.qml
-            PowerTune/Dashboard/ShiftIndicator.qml
-            PowerTune/Dashboard/SensorCard.qml
-            PowerTune/Dashboard/StatusBox.qml
-            PowerTune/Dashboard/BrakeBiasBar.qml
-            PowerTune/Dashboard/BottomStatusBar.qml
-            PowerTune/Dashboard/GearIndicator.qml
             PowerTune/Dashboard/DraggableOverlay.qml
             PowerTune/Dashboard/OverlayConfigPopup.qml
-            PowerTune/Dashboard/WarningFlashTimer.qml
         RESOURCE_PREFIX /qt/qml
         OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/qt/qml/PrismPT/Dashboard
     )
@@ -423,7 +433,8 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
             OPTIMIZED
             PREFIX "/qt/qml/PrismPT/Dashboard"
             FILES
-                PowerTune/Dashboard/shaders/arcoverlay.frag
+                PowerTune/Dashboard/Shaders/arc_fill.vert
+                PowerTune/Dashboard/Shaders/arc_fill.frag
         )
     else()
         message(WARNING "Qt6 ShaderTools not found - Dashboard arc overlay shader will not be compiled")
@@ -436,6 +447,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         PowerTuneUiLibplugin
         PowerTuneSettingsLibplugin
         GaugesSharedLibplugin
+        GaugesRaceDashLibplugin
         PrismPTDashboardLibplugin
         PrismKeyboardLibplugin
     )

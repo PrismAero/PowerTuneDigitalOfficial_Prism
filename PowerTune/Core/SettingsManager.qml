@@ -28,7 +28,6 @@ Rectangle {
         ListElement { title: "EX Board" }
         ListElement { title: "Network" }
         ListElement { title: "Diagnostics" }
-        ListElement { title: "Dash Test" }
     }
 
     ColumnLayout {
@@ -99,9 +98,6 @@ Rectangle {
             }
             DiagnosticsSettings {
                 visible: stackLayout.currentIndex === 5
-            }
-            DashboardTestSim {
-                visible: stackLayout.currentIndex === 6
             }
         }
     }

@@ -32,6 +32,8 @@ Popup {
     property real startAngle: 135
     property real sweepAngle: 270
     property real arcWidth: 0.209
+    property bool alignmentOverrideEnabled: false
+    property real alignmentOverrideProgress: 1.0
 
     // Arc colors
     property string arcColorStart: "#E88A1A"
@@ -69,6 +71,9 @@ Popup {
     property string leftLabel: "RWD"
     property string rightLabel: "FWD"
 
+    // Bottom bar
+    property bool timeEnabled: true
+
     // -- Config type classification --
     // Support both old (tachGroup, speedGroup, sensorCard, statusRow, staticText)
     // and new (arc, gear, sensor, status, brakebias, shift, bottombar) config types
@@ -90,11 +95,12 @@ Popup {
 
     // Section visibility flags
     readonly property bool hasDatasource: isArc || isGear || isSensor
-                                          || isStatus || isBrakeBias || isBottomBar
+                                          || isStatus || isBrakeBias
     readonly property bool hasLabel: isSensor || isStatus
     readonly property bool hasUnitDecimals: isArc || isSensor
     readonly property bool hasValueRange: isArc || isBrakeBias
     readonly property bool hasArcGeometry: isArc
+    readonly property bool hasArcAlignment: isArc
     readonly property bool hasArcColors: isArc
     readonly property bool hasWarning: isArc || isSensor || isShift
     readonly property bool hasStatusConfig: isStatus
@@ -152,6 +158,8 @@ Popup {
         startAngle = cfg.startAngle !== undefined ? Number(cfg.startAngle) : 135
         sweepAngle = cfg.sweepAngle !== undefined ? Number(cfg.sweepAngle) : 270
         arcWidth = cfg.arcWidth !== undefined ? Number(cfg.arcWidth) : 0.209
+        alignmentOverrideEnabled = cfg.alignmentOverrideEnabled === true || cfg.alignmentOverrideEnabled === "true"
+        alignmentOverrideProgress = cfg.alignmentOverrideProgress !== undefined ? Number(cfg.alignmentOverrideProgress) : 1.0
 
         // Arc colors
         arcColorStart = cfg.arcColorStart || "#E88A1A"
@@ -188,6 +196,9 @@ Popup {
         // Brake bias labels
         leftLabel = cfg.leftLabel || "RWD"
         rightLabel = cfg.rightLabel || "FWD"
+
+        // Bottom bar
+        timeEnabled = cfg.timeEnabled !== undefined ? (cfg.timeEnabled === true || cfg.timeEnabled === "true") : true
 
         // Set datasource combo index
         updateDatasourceIndex()
@@ -243,6 +254,8 @@ Popup {
             config.startAngle = startAngle
             config.sweepAngle = sweepAngle
             config.arcWidth = arcWidth
+            config.alignmentOverrideEnabled = alignmentOverrideEnabled
+            config.alignmentOverrideProgress = alignmentOverrideProgress
         }
 
         if (hasArcColors) {
@@ -289,8 +302,10 @@ Popup {
             config.rightLabel = rightLabel
         }
 
-        if (hasStaticText)
+        if (hasStaticText) {
             config.text = staticText
+            config.timeEnabled = timeEnabled
+        }
 
         return config
     }
@@ -627,6 +642,51 @@ Popup {
                                 var v = parseFloat(text)
                                 if (!isNaN(v) && v >= 0.01 && v <= 0.5)
                                     popup.arcWidth = v
+                            }
+                        }
+                    }
+                }
+
+                // ============================================================
+                // ARC ALIGNMENT SECTION
+                // ============================================================
+                SettingsSection {
+                    title: "Arc Alignment"
+                    visible: popup.hasArcAlignment
+                    Layout.fillWidth: true
+
+                    ColumnLayout {
+                        Layout.fillWidth: true
+                        spacing: 6
+
+                        StyledSwitch {
+                            text: "Lock To Alignment Progress"
+                            checked: popup.alignmentOverrideEnabled
+                            onToggled: popup.alignmentOverrideEnabled = checked
+                        }
+
+                        ColumnLayout {
+                            Layout.fillWidth: true
+                            spacing: 4
+                            visible: popup.alignmentOverrideEnabled
+
+                            Text {
+                                text: "Progress (0.00 - 1.00)"
+                                font.pixelSize: SettingsTheme.fontCaption
+                                font.family: SettingsTheme.fontFamily
+                                color: SettingsTheme.textSecondary
+                            }
+
+                            StyledTextField {
+                                Layout.fillWidth: true
+                                Layout.preferredHeight: SettingsTheme.controlHeight
+                                text: popup.alignmentOverrideProgress.toFixed(2)
+                                inputMethodHints: Qt.ImhFormattedNumbersOnly
+                                onTextEdited: {
+                                    var v = parseFloat(text)
+                                    if (!isNaN(v) && v >= 0 && v <= 1)
+                                        popup.alignmentOverrideProgress = v
+                                }
                             }
                         }
                     }
@@ -1255,7 +1315,7 @@ Popup {
 
                     ColumnLayout {
                         Layout.fillWidth: true
-                        spacing: 4
+                        spacing: 8
 
                         Text {
                             text: "Text"
@@ -1269,6 +1329,12 @@ Popup {
                             Layout.preferredHeight: SettingsTheme.controlHeight
                             text: popup.staticText
                             onTextEdited: popup.staticText = text
+                        }
+
+                        StyledSwitch {
+                            text: "Show Time"
+                            checked: popup.timeEnabled
+                            onToggled: popup.timeEnabled = checked
                         }
                     }
                 }
