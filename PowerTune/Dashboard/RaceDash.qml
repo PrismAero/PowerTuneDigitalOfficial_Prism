@@ -12,6 +12,66 @@ Item {
     property string dashboardId: "racedash"
     property var overlayConfigs: ({})
 
+    function normalizeArcConfig(id, merged) {
+        var normalized = {}
+        for (var key in merged)
+            normalized[key] = merged[key]
+
+        if (id === "tachGroup") {
+            normalized.shapeMode = "tachSvg"
+            delete normalized.pathStart
+            delete normalized.pathEnd
+            delete normalized.rotationDeg
+            delete normalized.thicknessScale
+            delete normalized.startAngle
+            delete normalized.sweepAngle
+            delete normalized.arcWidth
+            delete normalized.arcColorStart
+            delete normalized.arcColorMid
+            delete normalized.arcColorMidPos
+            delete normalized.arcColorEnd
+            delete normalized.arcBgColor
+            delete normalized.warningColor
+            if (normalized.overlaySize === undefined)
+                normalized.overlaySize = DashboardTheme.defaultTachSize
+            if (normalized.referenceOverlaySize === undefined)
+                normalized.referenceOverlaySize = DashboardTheme.defaultTachSize
+            if (normalized.valueOffsetY === undefined)
+                normalized.valueOffsetY = 94
+            if (normalized.contentRightInsetRatio === undefined)
+                normalized.contentRightInsetRatio = 0.0583
+            if (normalized.contentBottomInsetRatio === undefined)
+                normalized.contentBottomInsetRatio = 0.151
+        } else if (id === "speedGroup") {
+            normalized.shapeMode = "speedSvg"
+            delete normalized.pathStart
+            delete normalized.pathEnd
+            delete normalized.rotationDeg
+            delete normalized.thicknessScale
+            delete normalized.startAngle
+            delete normalized.sweepAngle
+            delete normalized.arcWidth
+            delete normalized.arcColorStart
+            delete normalized.arcColorMid
+            delete normalized.arcColorMidPos
+            delete normalized.arcColorEnd
+            delete normalized.arcBgColor
+            delete normalized.warningColor
+            if (normalized.overlaySize === undefined)
+                normalized.overlaySize = DashboardTheme.defaultSpeedSize
+            if (normalized.referenceOverlaySize === undefined)
+                normalized.referenceOverlaySize = DashboardTheme.defaultSpeedSize
+            if (normalized.valueOffsetY === undefined)
+                normalized.valueOffsetY = 62
+            if (normalized.contentRightInsetRatio === undefined)
+                normalized.contentRightInsetRatio = 0.0583
+            if (normalized.contentBottomInsetRatio === undefined)
+                normalized.contentBottomInsetRatio = 0.151
+        }
+
+        return normalized
+    }
+
     function loadOverlayConfig(id, defaults) {
         var loaded = AppSettings.loadOverlayConfig(dashboardId, id)
         var merged = {}
@@ -19,23 +79,20 @@ Item {
             merged[key] = defaults[key]
         for (var loadedKey in loaded)
             merged[loadedKey] = loaded[loadedKey]
-        return merged
+        return normalizeArcConfig(id, merged)
     }
 
     function refreshConfigs() {
         overlayConfigs = {
             tachGroup: loadOverlayConfig("tachGroup", {
                 sensorKey: "rpm",
+                shapeMode: "tachSvg",
                 minValue: 0,
                 maxValue: AppSettings.getValue("Max RPM", 10000),
                 unit: "RPM",
                 decimals: 0,
-                startAngle: 226,
-                sweepAngle: 190,
-                arcWidth: 0.209,
-                arcColorStart: "#E88A1A",
-                arcColorEnd: "#C45A00",
-                arcBgColor: "#151518",
+                overlaySize: DashboardTheme.defaultTachSize,
+                referenceOverlaySize: DashboardTheme.defaultTachSize,
                 shiftPoint: AppSettings.getValue("Shift Light1", 3000) / Math.max(1, AppSettings.getValue("Max RPM", 10000)),
                 warningEnabled: false,
                 alignmentOverrideEnabled: false,
@@ -46,16 +103,13 @@ Item {
             }),
             speedGroup: loadOverlayConfig("speedGroup", {
                 sensorKey: "speed",
+                shapeMode: "speedSvg",
                 minValue: 0,
                 maxValue: 200,
                 unit: "MPH",
                 decimals: 0,
-                startAngle: 228,
-                sweepAngle: 186,
-                arcWidth: 0.209,
-                arcColorStart: "#AA1111",
-                arcColorEnd: "#880000",
-                arcBgColor: "#151518",
+                overlaySize: DashboardTheme.defaultSpeedSize,
+                referenceOverlaySize: DashboardTheme.defaultSpeedSize,
                 warningEnabled: false,
                 alignmentOverrideEnabled: false,
                 alignmentOverrideProgress: 1.0,
@@ -234,8 +288,10 @@ Item {
         configType: "tachGroup"
         x: DashboardTheme.defaultTachX
         y: DashboardTheme.defaultTachY
-        width: DashboardTheme.defaultTachSize
-        height: DashboardTheme.defaultTachSize
+        width: root.overlayConfigs.tachGroup && root.overlayConfigs.tachGroup.overlaySize !== undefined
+            ? Number(root.overlayConfigs.tachGroup.overlaySize)
+            : DashboardTheme.defaultTachSize
+        height: width
         onConfigRequested: function(requestedOverlayId, requestedConfigType) {
             overlayPopup.openFor(requestedOverlayId, requestedConfigType)
         }
@@ -268,8 +324,10 @@ Item {
         configType: "speedGroup"
         x: DashboardTheme.defaultSpeedX
         y: DashboardTheme.defaultSpeedY
-        width: DashboardTheme.defaultSpeedSize
-        height: DashboardTheme.defaultSpeedSize
+        width: root.overlayConfigs.speedGroup && root.overlayConfigs.speedGroup.overlaySize !== undefined
+            ? Number(root.overlayConfigs.speedGroup.overlaySize)
+            : DashboardTheme.defaultSpeedSize
+        height: width
         onConfigRequested: function(requestedOverlayId, requestedConfigType) {
             overlayPopup.openFor(requestedOverlayId, requestedConfigType)
         }

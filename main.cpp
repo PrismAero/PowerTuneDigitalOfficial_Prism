@@ -1,4 +1,5 @@
 #include "Core/connect.h"
+#include "Core/RaceArcItem.h"
 #include "Hardware/Extender.h"
 #include "Utils/downloadmanager.h"
 
@@ -12,8 +13,6 @@
 #include <QQmlContext>
 #include <QQuickStyle>
 #include <QtQml>
-
-#include <cstdio>
 
 // Modified by Kai Wyborny - 2026 (QGuiApplication migration, memory optimization)
 
@@ -39,6 +38,7 @@ int main(int argc, char *argv[])
     
     qmlRegisterType<DownloadManager>("DLM", 1, 0, "DLM");
     qmlRegisterType<Connect>("com.powertune", 1, 0, "ConnectObject");
+    qmlRegisterType<RaceArcItem>("PowerTune.Gauges.RaceDash", 1, 0, "RaceArcItem");
     engine.rootContext()->setContextProperty("DLM", new DownloadManager(&engine));
     engine.rootContext()->setContextProperty("Connect", new Connect(&engine));
     engine.rootContext()->setContextProperty("Extender2", new Extender(&engine));

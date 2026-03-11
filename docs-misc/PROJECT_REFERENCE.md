@@ -1,6 +1,6 @@
 # PowerTune Digital Dashboard -- Project Reference
 
-Version: 2026-03-09
+Version: 2026-03-11
 Maintainer: Kai Wyborny
 
 This document provides a complete technical reference for the PowerTune Digital
@@ -44,8 +44,8 @@ build system, deployment, file locations, and cross-check rules.
 | Name                | PowerTuneQMLGui                                          |
 | Description         | Automotive digital dashboard for ECU monitoring          |
 | Primary Language    | C++17 / QML (Qt Quick)                                   |
-| Qt Version (dev)    | Qt 6.x (CMake build)                                     |
-| Qt Version (device) | Qt 5.15.7 (qmake build on Yocto)                         |
+| Qt Version (active) | Qt 6.x (CMake build, supported implementation path)      |
+| Legacy Qt Notes     | Old device scripts may still mention Qt 5/qmake; treat as historical, not authoritative |
 | Target Hardware     | Raspberry Pi 4 (ARMv7, 32-bit Poky/Yocto)                |
 | Display             | EGLFS (no X11), touchscreen, 1600x720                    |
 | Repository          | PowerTuneDigitalOfficial/Prism                           |
@@ -114,8 +114,10 @@ PowerTuneDigitalOfficial_Prism/
 |   |-- dashboard.cpp/.h         Legacy coordination shell (thin wrapper, being phased out)
 |   |-- appsettings.cpp/.h       QSettings read/write for persistent app configuration
 |   |-- PropertyRouter.cpp/.h    Dynamic property lookup for configurable gauges
+|   |-- RaceArcItem.cpp/.h       Custom Qt Quick scene-graph arc renderer for the race dash
 |   |-- SensorRegistry.cpp/.h    Runtime sensor availability and liveness tracker
 |   |-- DiagnosticsProvider.cpp/.h  System health, CAN status, log buffer
+|   |-- Models/CanFrameModel.cpp/.h  Live CAN monitor model for diagnostics UI
 |   |-- Models/                  Domain data model classes (all QObject-based)
 |       |-- DataModels.h         Convenience header: includes every model
 |       |-- EngineData.h/.cpp    Engine metrics (~170 Q_PROPERTYs)
@@ -142,6 +144,8 @@ PowerTuneDigitalOfficial_Prism/
 |   |-- SteinhartCalculator.cpp/.h  NTC thermistor calibration (Steinhart-Hart)
 |   |-- SignalSmoother.cpp/.h    Signal damping/smoothing filter
 |   |-- DataLogger.cpp/.h        CSV data logging to file
+|   |-- OverlayConfigManager.cpp/.h  Overlay position lock/reset and legacy popup config helper
+|   |-- ShiftIndicatorHelper.cpp/.h  Shift-light pattern helper for race dash widgets
 |   |-- downloadmanager.cpp/.h   HTTP download manager (firmware updates)
 |   |-- ParseGithubData.cpp/.h   GitHub release JSON parser
 |   |-- wifiscanner.cpp/.h       WiFi network scanner
@@ -157,9 +161,12 @@ PowerTuneDigitalOfficial_Prism/
 |   |   |-- BrightnessPopUp.qml  Brightness control popup
 |   |   |-- AnalogInputs.qml     ECU analog input display
 |   |
-|   |-- Dashboard/               PrismPT.Dashboard -- user dashboard canvas
+|   |-- Dashboard/               PrismPT.Dashboard -- dashboard pages and composition shells
 |   |   |-- DashboardTheme.qml   Theme singleton (colors, fonts, spacing)
 |   |   |-- UserDashboard.qml    Main dashboard view
+|   |   |-- RaceDash.qml         AiM-inspired race dash page composed from draggable overlays
+|   |   |-- DraggableOverlay.qml Overlay drag/edit shell with saved positions
+|   |   |-- OverlayConfigPopup.qml Overlay editor for per-widget datasource/geometry/color settings
 |   |
 |   |-- Gauges/                  Shared gauge helpers
 |   |   |-- Shared/
@@ -167,6 +174,14 @@ PowerTuneDigitalOfficial_Prism/
 |   |       |-- DatasourcesList.qml    Static sensor list model (~400 entries)
 |   |       |-- Warning.qml            Warning popup logic
 |   |       |-- WarningLoader.qml      Warning trigger loader
+|   |   |-- RaceDash/            PowerTune.Gauges.RaceDash -- reusable race dash widgets
+|   |       |-- ArcGauge.qml          QML wrapper around the C++ RaceArcItem renderer
+|   |       |-- ShiftIndicator.qml    Shift-light strip
+|   |       |-- SensorCard.qml        Small numeric sensor card
+|   |       |-- StatusBox.qml         Digital on/off status row
+|   |       |-- BrakeBiasBar.qml      Brake bias bar/labels
+|   |       |-- BottomStatusBar.qml   Footer text/time strip
+|   |       |-- GearIndicator.qml     Gear readout
 |   |
 |   |-- Settings/                PowerTune.Settings -- settings pages
 |   |   |-- MainSettings.qml     ECU/CAN/connection/startup config
@@ -213,7 +228,7 @@ PowerTuneDigitalOfficial_Prism/
 |-- Scripts/                     Build, install, and platform scripts
 |   |-- build-macos.sh           Local macOS CMake build
 |   |-- run-macos.sh             Build + run on macOS
-|   |-- updatePowerTune.sh       On-device build and install (qmake path)
+|   |-- updatePowerTune.sh       Legacy on-device update script (still references qmake; stale for active Qt6 path)
 |   |-- updatedaemons.sh         Daemon update on Yocto
 |   |-- updatepi4.sh             Pi 4 system setup
 |   |-- updateUserDashboards.sh  Sync example dashboards to device
@@ -244,7 +259,7 @@ PowerTuneDigitalOfficial_Prism/
 
 - Project: `PowerTuneQMLGui`, version 1.0.0, C++17
 - Qt modules: Core, Gui, Qml, Quick, QuickControls2, Network, SerialBus
-- Qt6-only extras: Core5Compat (for GraphicalEffects), ShaderTools
+- Qt6-only extras: optional ShaderTools discovery only
 - Optional: ddcutil (DDC/CI brightness control, Linux only)
 - `CMAKE_EXPORT_COMPILE_COMMANDS ON` for clangd integration
 
@@ -254,15 +269,15 @@ CMake groups sources into three variable sets:
 
 | Variable           | Directory   | Files                                                                                                                                                 |
 | ------------------ | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `CORE_SOURCES`     | `Core/`     | connect, dashboard, appsettings, PropertyRouter, SensorRegistry, DiagnosticsProvider, all 13 Models                                                   |
+| `CORE_SOURCES`     | `Core/`     | connect, dashboard, appsettings, PropertyRouter, RaceArcItem, SensorRegistry, DiagnosticsProvider, CanFrameModel, all 13 Models                      |
 | `HARDWARE_SOURCES` | `Hardware/` | Extender only                                                                                                                                         |
-| `UTILS_SOURCES`    | `Utils/`    | UDPReceiver, Calculations, Steinhart, Calibration, SignalSmoother, DataLogger, downloadmanager, ParseGithubData, shcalc, textprogressbar, wifiscanner |
+| `UTILS_SOURCES`    | `Utils/`    | UDPReceiver, Calculations, Steinhart, Calibration, SignalSmoother, DataLogger, OverlayConfigManager, ShiftIndicatorHelper, downloadmanager, ParseGithubData, shcalc, textprogressbar, wifiscanner |
 
 These combine into `PROJECT_SOURCES` along with `main.cpp`.
 
 ### 4.3 QML Modules (Qt6 only)
 
-Seven QML modules are built as static libraries and linked to the executable:
+Eight QML modules are built as static libraries and linked to the executable:
 
 | Module URI              | Library Target       | Key Files                                                   |
 | ----------------------- | -------------------- | ----------------------------------------------------------- |
@@ -271,6 +286,7 @@ Seven QML modules are built as static libraries and linked to the executable:
 | PowerTune.UI            | PowerTuneUiLib       | Settings/components/\* (SettingsPage, StyledButton, etc.)   |
 | PowerTune.Settings      | PowerTuneSettingsLib | MainSettings.qml, DiagnosticsSettings.qml, DashSelector.qml |
 | PowerTune.Gauges.Shared | GaugesSharedLib      | DatasourcesList.qml, DatasourceService.qml (singleton)      |
+| PowerTune.Gauges.RaceDash | GaugesRaceDashLib  | ArcGauge.qml, ShiftIndicator.qml, SensorCard.qml, StatusBox.qml |
 | PrismPT.Dashboard       | PrismPTDashboardLib  | DashboardTheme.qml (singleton), UserDashboard.qml           |
 | Prism.Keyboard          | PrismKeyboardLib     | PrismKeyboard.qml, QwertyLayout.qml, NumericPad.qml         |
 
@@ -310,13 +326,12 @@ Scripts/build-macos.sh       # Output: build/macos-dev/PowerTuneQMLGui.app
 Scripts/run-macos.sh         # Build + run
 ```
 
-**On-device build (Yocto, qmake):**
+**Deployment note:**
 
 ```
-ssh root@<device>
-cd /home/pi/src && git pull
-qmake && make -j4
-make install                 # -> /opt/PowerTune/
+The active source of truth is the Qt 6 CMake build.
+Any remaining qmake / Qt 5 deployment notes or scripts are legacy artifacts
+and should not be treated as the supported implementation path.
 ```
 
 ### 4.6 Adding New Files
@@ -351,7 +366,8 @@ Startup sequence:
 5. Register C++ types:
    - `DownloadManager` as QML type `DLM 1.0`
    - `Connect` as QML type `com.powertune.ConnectObject 1.0`
-6. Set context properties: `DLM`, `Connect`, `Extender2`, `HAVE_DDCUTIL`
+   - `RaceArcItem` as QML type `PowerTune.Gauges.RaceDash/RaceArcItem 1.0`
+6. Set context properties: `DLM`, `Connect`, `Extender2`
 7. Load `qrc:/qt/qml/PowerTune/Core/PowerTune/Core/Main.qml`
 8. Enter event loop: `app.exec()`
 
@@ -374,6 +390,7 @@ graph TD
     CORE["PowerTune.Core"]
     UI["PowerTune.UI<br/>(shared styled components)"]
     SETTINGS["PowerTune.Settings"]
+    RACE["PowerTune.Gauges.RaceDash<br/>(ArcGauge, ShiftIndicator,<br/>SensorCard, StatusBox, ...)"]
     DASHBOARD["PrismPT.Dashboard"]
     GAUGES["PowerTune.Gauges.Shared<br/>(DatasourceService singleton)"]
     KEYBOARD["Prism.Keyboard<br/>(on-screen input)"]
@@ -382,16 +399,20 @@ graph TD
     UTILS --> CORE
     UTILS --> SETTINGS
     UTILS --> GAUGES
+    UI --> RACE
+    GAUGES --> RACE
     UI --> CORE
     UI --> SETTINGS
     CORE --> SETTINGS
+    RACE --> DASHBOARD
     SETTINGS -- "via Loader" --> DASHBOARD
-    GAUGES --> DASHBOARD
     KEYBOARD --> CORE
 ```
 
 Core imports Settings, Utils, and UI. Settings imports Utils and UI. The
-Dashboard module loads gauge components via `Loader.source` with `qrc:` paths.
+dashboard pages then compose reusable race-dash widgets from
+`PowerTune.Gauges.RaceDash`, while `RaceArcItem` is registered from C++ for the
+custom arc renderer used by `ArcGauge.qml`.
 
 ### 6.2 QML Resource Paths
 
@@ -405,6 +426,8 @@ For example:
 
 - `qrc:/qt/qml/PowerTune/Core/PowerTune/Core/Main.qml`
 - `qrc:/qt/qml/PowerTune/Settings/PowerTune/Settings/MainSettings.qml`
+- `qrc:/qt/qml/PowerTune/Gauges/RaceDash/PowerTune/Gauges/RaceDash/ArcGauge.qml`
+- `qrc:/qt/qml/PrismPT/Dashboard/PowerTune/Dashboard/RaceDash.qml`
 
 Static resources (graphics, fonts) use `qt_add_resources` with `PREFIX /`,
 giving clean paths:
@@ -443,8 +466,9 @@ application.
 9. Extender calibration signals connected (`connectCalibrationSignals()` --
    links `ExpanderBoardData::EXAnalogInputNChanged` to `Extender::applyCalibration`)
 10. CalibrationHelper, SensorRegistry, DiagnosticsProvider
-11. QFileSystemModel instances (file browser for dashboards)
-12. AppSettings receives Extender + SteinhartCalculator pointers, then
+11. OverlayConfigManager, ShiftIndicatorHelper, CanFrameModel
+12. QFileSystemModel instances (file browser for dashboards)
+13. AppSettings receives Extender + SteinhartCalculator pointers, then
     `readandApplySettings()` loads persisted calibration into both
 
 ### 7.2 QML Context Property Map
@@ -476,6 +500,9 @@ Every C++ object exposed to QML, listed by the name QML uses to access it:
 | Steinhart      | SteinhartCalculator | NTC thermistor calibration             |
 | SensorRegistry | SensorRegistry      | Runtime sensor availability            |
 | Diagnostics    | DiagnosticsProvider | CPU temp, CAN status, log buffer       |
+| OverlayConfig  | OverlayConfigManager | Overlay position lock/reset + saved positions |
+| ShiftHelper    | ShiftIndicatorHelper | Shift-light sequencing helpers         |
+| CanMonitorModel | CanFrameModel       | Live CAN monitor model for diagnostics |
 | Wifiscanner    | WifiScanner         | WiFi network scanning                  |
 | Dirmodel       | QFileSystemModel    | Directory listing (file browser)       |
 | Filemodel      | QFileSystemModel    | File listing (file browser)            |
@@ -821,6 +848,11 @@ blocks have been removed from QML.
 **SenseHat** (prefixed `sensehat/`): `sensehat/accel`, `sensehat/gyro`, etc.
 **Extender UI** (prefixed `ui/exboard/`): channel names, combo indices, etc.
 **Dashboard per-index** (prefixed `dashboard_N/`): `backgroundPicture`, `backgroundColor`
+**Race dash overlays** (prefixed `overlay/<dashboardId>/<overlayId>/`): arc geometry,
+colors, datasource keys, labels, warning settings, shift-light settings, and
+other per-widget config
+**Overlay positions**: `overlayPos/<overlayId>/x`, `overlayPos/<overlayId>/y`,
+plus `ui/overlayPositionsLocked`
 
 Loaded at startup by `AppSettings::readandApplySettings()` which:
 1. Applies C++ model properties (RPM, warnings, speed, gears, brightness, etc.)
@@ -855,14 +887,61 @@ instantiation. Most of these have been removed.
 
 The current dashboard architecture centers on:
 
-- `PowerTune/Dashboard/UserDashboard.qml` -- the main dashboard canvas
-- `PowerTune/Dashboard/DashboardTheme.qml` -- shared theme singleton (colors,
-  fonts, spacing constants)
+- `PowerTune/Dashboard/UserDashboard.qml` -- the configurable general dashboard canvas
+- `PowerTune/Dashboard/RaceDash.qml` -- the AiM-style race dash page that composes
+  the baked background with draggable live overlays
+- `PowerTune/Dashboard/DashboardTheme.qml` -- shared theme/default placement singleton
+- `PowerTune/Gauges/RaceDash/` -- reusable race dash widgets
 - `PowerTune/Gauges/Shared/DatasourceService.qml` -- datasource routing singleton
 - `PowerTune/Gauges/Shared/DatasourcesList.qml` -- static list of ~400 sensor
   entries (display name, property key, unit, max value, decimal points)
 
-### 14.2 How Gauges Get Their Data
+### 14.2 Race Dash Composition and Config Flow
+
+`RaceDash.qml` owns the active race-card layout. It loads per-overlay defaults,
+merges them with any persisted settings from `AppSettings.loadOverlayConfig()`,
+and instantiates each overlay through `DraggableOverlay.qml`.
+
+The current overlay set includes:
+
+- `tachGroup` -- `ArcGauge.qml`
+- `speedGroup` -- `ArcGauge.qml`
+- `gearIndicator` -- `GearIndicator.qml`
+- `shiftIndicator` -- `ShiftIndicator.qml`
+- `waterTemp` -- `SensorCard.qml`
+- `oilPressure` -- `SensorCard.qml`
+- `statusRow0` / `statusRow1` -- `StatusBox.qml`
+- `brakeBias` -- `BrakeBiasBar.qml`
+- `bottomBar` -- `BottomStatusBar.qml`
+
+Configuration is edited through `OverlayConfigPopup.qml`, saved by
+`AppSettings::saveOverlayConfig()`, and stored under
+`overlay/<dashboardId>/<overlayId>/...`.
+
+Overlay positions are handled separately by `Utils/OverlayConfigManager.*` and
+`DraggableOverlay.qml`. Dragging persists `overlayPos/<overlayId>/x|y`, and the
+layout tool toggle persists `ui/overlayPositionsLocked`.
+
+### 14.3 Arc Rendering Path
+
+The race dash no longer uses the deleted `arc_fill.frag` / `arc_fill.vert`
+shader experiment. Arc rendering now goes through `Core/RaceArcItem.*`, a
+custom `QQuickItem` that builds scene-graph geometry directly.
+
+`RaceArcItem` supports:
+
+- track fill and active fill
+- start/mid/end gradient colors
+- glow and highlight layers
+- warning tint blending
+- alignment override progress
+- thickness ratio and sweep control
+
+`PowerTune/Gauges/RaceDash/ArcGauge.qml` is the QML wrapper that reads live
+values from `PropertyRouter`, normalizes them, drives warning flash state, and
+passes geometry/color settings into the C++ renderer.
+
+### 14.4 How Gauges Get Their Data
 
 Gauges typically have a `datasource` property (a string like `"rpm"` or
 `"speed"`). They resolve this to a live value through one of:
@@ -872,7 +951,7 @@ Gauges typically have a `datasource` property (a string like `"rpm"` or
 3. **DatasourceService**: The shared singleton that provides metadata about
    available datasources (display name, unit, min/max) alongside the value
 
-### 14.3 Sensor Selection
+### 14.5 Sensor Selection
 
 `DatasourcesList.qml` provides a `ListModel` with ~400 entries. Each entry has:
 
@@ -964,11 +1043,15 @@ All settings pages use shared styled components from `Settings/components/`:
 | Board            | Raspberry Pi 4 Model B (BCM2711)              |
 | OS               | Poky (Yocto) 4.0.17, kernel 6.1.61-v7l        |
 | Init System      | SysVinit (NOT systemd)                        |
-| Qt on device     | Qt 5.15.7                                     |
+| Legacy device note | Older deployed images may still reference Qt 5.15.7 |
+| Active runtime baseline | Qt 6.x required by the supported build path |
 | Display          | EGLFS (QT_QPA_PLATFORM=eglfs), no X11         |
 | CAN              | MCP2515 via SPI (can0, 1Mbps)                 |
 | IP (dev default) | 192.168.15.129                                |
 | SSH              | root@192.168.15.129 (passwordless root login) |
+
+If a deployed image still references Qt 5 / qmake, treat that as legacy
+deployment drift rather than the current application architecture.
 
 ### 17.2 Device File Locations
 
@@ -1113,6 +1196,7 @@ making changes to avoid breaking the application.
 | `qt_add_resources` FILES list           | Files exist at listed paths; QML refs match      |
 | RESOURCE_PREFIX in CMake                | Main.qml load path in main.cpp                  |
 | New image/font resource                 | Added to `qt_add_resources` in CMakeLists.txt    |
+| Legacy Qt5/qmake deployment note        | Do not treat it as authoritative for active builds |
 
 ### 20.4 Deployment Changes
 
@@ -1134,9 +1218,10 @@ making changes to avoid breaking the application.
 2. **CAN ERROR-PASSIVE state**: Device CAN interface reports ERROR-PASSIVE,
    likely because no ECU is connected during development.
 
-3. **Qt version mismatch**: Development uses Qt6 (CMake), device runs Qt5.15.7
-   (qmake). Some Qt6-only features may not work on the device without updating
-   the Yocto Qt layer.
+3. **Legacy deployment drift**: Some scripts and older notes may still refer to
+   Qt 5 / qmake. The active application path is Qt 6 + CMake, and those older
+   references should be treated as stale until the deployment story is fully
+   migrated.
 
 4. *(Resolved)* Two config file locations have been unified into a single
    `PowerTune/PowerTune.conf` via the `AppSettings` C++ class.
@@ -1172,8 +1257,9 @@ For any new developer or AI agent joining this project:
 6. **Know where settings are persisted** (Section 13). Single config file
    (`PowerTune/PowerTune.conf`), managed exclusively through `AppSettings`.
 
-7. **Know the device** (Section 17). Raspberry Pi 4 running 32-bit Yocto with
-   SysVinit, EGLFS, and Qt 5.15.7. No X11. No systemd.
+7. **Know the deployment baseline** (Section 17). The active code path is Qt 6
+   + CMake on Raspberry Pi-class hardware with EGLFS. Legacy Qt 5 / qmake notes
+   still present elsewhere in the repo are historical, not the source of truth.
 
 8. **Key files to read for orientation:**
    - `Core/connect.cpp` -- how everything is wired together

@@ -25,13 +25,12 @@
 #include "../Utils/Calculations.h"
 #include "../Utils/CalibrationHelper.h"
 #include "../Utils/DataLogger.h"
+#include "../Utils/OverlayConfigManager.h"
+#include "../Utils/ShiftIndicatorHelper.h"
 #include "../Utils/SteinhartCalculator.h"
 #include "../Utils/UDPReceiver.h"
 #include "../Utils/wifiscanner.h"
 #include "DiagnosticsProvider.h"
-#include "../Utils/UdpTestSimulator.h"
-#include "../Utils/OverlayConfigManager.h"
-#include "../Utils/ShiftIndicatorHelper.h"
 #include "Models/CanFrameModel.h"
 #include "Models/DataModels.h"
 #include "Models/UIState.h"
@@ -54,6 +53,7 @@
 #include <QTime>
 #include <QTimer>
 #include <QVector>
+
 
 
 int ecu;      // 0=apex, 1=adaptronic;2= OBD; 3= Dicktator ECU
@@ -145,7 +145,6 @@ Connect::Connect(QObject *parent)
     m_diagnosticsProvider = new DiagnosticsProvider(this);
     m_diagnosticsProvider->setSensorRegistry(m_sensorRegistry);
     m_diagnosticsProvider->setPropertyRouter(m_propertyRouter);
-    m_testSimulator = new UdpTestSimulator(this);
     m_overlayConfigManager = new OverlayConfigManager(this);
     m_shiftIndicatorHelper = new ShiftIndicatorHelper(this);
     m_canFrameModel = new CanFrameModel(m_connectionData, m_extender, this);
@@ -200,7 +199,6 @@ Connect::Connect(QObject *parent)
     engine->rootContext()->setContextProperty("SensorRegistry", m_sensorRegistry);
     // * Phase 8: Expose DiagnosticsProvider to QML
     engine->rootContext()->setContextProperty("Diagnostics", m_diagnosticsProvider);
-    engine->rootContext()->setContextProperty("TestSim", m_testSimulator);
     engine->rootContext()->setContextProperty("OverlayConfig", m_overlayConfigManager);
     engine->rootContext()->setContextProperty("ShiftHelper", m_shiftIndicatorHelper);
     engine->rootContext()->setContextProperty("CanMonitorModel", m_canFrameModel);
@@ -365,11 +363,8 @@ void Connect::setSreenbrightness(const int &brightness)
     switch (m_brightnessMethod) {
     case BrightnessMethod::DdcUtil: {
         QString val = QString::number(brightness);
-        QProcess::execute(QStringLiteral("ddcutil"),
-                          {QStringLiteral("setvcp"),
-                           QStringLiteral("10"), val,
-                           QStringLiteral("12"), val,
-                           QStringLiteral("13"), val});
+        QProcess::execute(QStringLiteral("ddcutil"), {QStringLiteral("setvcp"), QStringLiteral("10"), val,
+                                                      QStringLiteral("12"), val, QStringLiteral("13"), val});
         break;
     }
     case BrightnessMethod::Sysfs: {

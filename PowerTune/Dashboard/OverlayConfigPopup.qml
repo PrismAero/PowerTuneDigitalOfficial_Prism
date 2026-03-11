@@ -32,6 +32,11 @@ Popup {
     property real startAngle: 135
     property real sweepAngle: 270
     property real arcWidth: 0.209
+    property real overlaySize: 0
+    property real pathStart: 0.0
+    property real pathEnd: 1.0
+    property real rotationDeg: 0.0
+    property real thicknessScale: 1.0
     property bool alignmentOverrideEnabled: false
     property real alignmentOverrideProgress: 1.0
 
@@ -92,6 +97,8 @@ Popup {
                                     || configType === "tachGroup"
     readonly property bool isBottomBar: configType === "bottombar"
                                         || configType === "staticText"
+    readonly property bool usesSvgDerivedShape: configType === "tachGroup"
+                                             || configType === "speedGroup"
 
     // Section visibility flags
     readonly property bool hasDatasource: isArc || isGear || isSensor
@@ -99,9 +106,12 @@ Popup {
     readonly property bool hasLabel: isSensor || isStatus
     readonly property bool hasUnitDecimals: isArc || isSensor
     readonly property bool hasValueRange: isArc || isBrakeBias
-    readonly property bool hasArcGeometry: isArc
+    readonly property bool hasArcGeometry: isArc && !usesSvgDerivedShape
+    readonly property bool hasArcOverlaySize: configType === "tachGroup"
+                                         || configType === "speedGroup"
+    readonly property bool hasSvgPathControls: false
     readonly property bool hasArcAlignment: isArc
-    readonly property bool hasArcColors: isArc
+    readonly property bool hasArcColors: isArc && !usesSvgDerivedShape
     readonly property bool hasWarning: isArc || isSensor || isShift
     readonly property bool hasStatusConfig: isStatus
     readonly property bool hasGearConfig: isGear
@@ -138,6 +148,14 @@ Popup {
         open()
     }
 
+    function defaultOverlaySizeFor(type) {
+        if (type === "tachGroup")
+            return 575.051
+        if (type === "speedGroup")
+            return 503.17
+        return 0
+    }
+
     function populateFromConfig() {
         var cfg = currentConfig
 
@@ -155,9 +173,18 @@ Popup {
         decimals = cfg.decimals !== undefined ? Number(cfg.decimals) : 0
 
         // Arc geometry
-        startAngle = cfg.startAngle !== undefined ? Number(cfg.startAngle) : 135
-        sweepAngle = cfg.sweepAngle !== undefined ? Number(cfg.sweepAngle) : 270
-        arcWidth = cfg.arcWidth !== undefined ? Number(cfg.arcWidth) : 0.209
+        var rawOverlaySize = cfg.overlaySize !== undefined ? Number(cfg.overlaySize) : undefined
+
+        if (configType === "tachGroup") {
+            overlaySize = rawOverlaySize !== undefined && rawOverlaySize > 0 ? rawOverlaySize : defaultOverlaySizeFor(configType)
+        } else if (configType === "speedGroup") {
+            overlaySize = rawOverlaySize !== undefined && rawOverlaySize > 0 ? rawOverlaySize : defaultOverlaySizeFor(configType)
+        } else {
+            startAngle = cfg.startAngle !== undefined ? Number(cfg.startAngle) : 135
+            sweepAngle = cfg.sweepAngle !== undefined ? Number(cfg.sweepAngle) : 270
+            arcWidth = cfg.arcWidth !== undefined ? Number(cfg.arcWidth) : 0.209
+            overlaySize = rawOverlaySize !== undefined && rawOverlaySize > 0 ? rawOverlaySize : 0
+        }
         alignmentOverrideEnabled = cfg.alignmentOverrideEnabled === true || cfg.alignmentOverrideEnabled === "true"
         alignmentOverrideProgress = cfg.alignmentOverrideProgress !== undefined ? Number(cfg.alignmentOverrideProgress) : 1.0
 
@@ -254,9 +281,15 @@ Popup {
             config.startAngle = startAngle
             config.sweepAngle = sweepAngle
             config.arcWidth = arcWidth
+        }
+
+        if (hasArcAlignment) {
             config.alignmentOverrideEnabled = alignmentOverrideEnabled
             config.alignmentOverrideProgress = alignmentOverrideProgress
         }
+
+        if (hasArcOverlaySize)
+            config.overlaySize = overlaySize
 
         if (hasArcColors) {
             config.arcColorStart = arcColorStart
@@ -269,10 +302,10 @@ Popup {
         if (hasWarning) {
             config.warningEnabled = warningEnabled
             config.warningThreshold = warningThreshold
-            config.warningColor = warningColor
             config.warningFlash = warningFlash
             config.warningFlashRate = warningFlashRate
             if (isSensor) {
+                config.warningColor = warningColor
                 config.warningDirection = warningDirection
                 config.normalColor = normalColor
             }
@@ -648,10 +681,181 @@ Popup {
                 }
 
                 // ============================================================
+                // ARC SIZE SECTION
+                // ============================================================
+                SettingsSection {
+                    title: "Arc Size"
+                    visible: popup.hasArcOverlaySize
+                    Layout.fillWidth: true
+
+                    ColumnLayout {
+                        Layout.fillWidth: true
+                        spacing: 6
+
+                        Text {
+                            text: "Overlay Size (square)"
+                            font.pixelSize: SettingsTheme.fontCaption
+                            font.family: SettingsTheme.fontFamily
+                            color: SettingsTheme.textSecondary
+                        }
+
+                        StyledTextField {
+                            Layout.fillWidth: true
+                            Layout.preferredHeight: SettingsTheme.controlHeight
+                            text: popup.overlaySize.toFixed(3)
+                            inputMethodHints: Qt.ImhFormattedNumbersOnly
+                            onTextEdited: {
+                                var v = parseFloat(text)
+                                if (!isNaN(v) && v >= 150 && v <= 900)
+                                    popup.overlaySize = v
+                            }
+                        }
+
+                        Text {
+                            text: "Keeps width and height locked together so the arc stays circular."
+                            wrapMode: Text.WordWrap
+                            font.pixelSize: SettingsTheme.fontCaption
+                            font.family: SettingsTheme.fontFamily
+                            color: SettingsTheme.textSecondary
+                            Layout.fillWidth: true
+                        }
+                    }
+                }
+
+                // ============================================================
+                // SVG ARC PATH SECTION
+                // ============================================================
+                SettingsSection {
+                    title: "Arc Path"
+                    visible: popup.hasSvgPathControls
+                    Layout.fillWidth: true
+
+                    ColumnLayout {
+                        Layout.fillWidth: true
+                        spacing: 10
+
+                        RowLayout {
+                            Layout.fillWidth: true
+                            spacing: 10
+
+                            ColumnLayout {
+                                Layout.fillWidth: true
+                                spacing: 4
+
+                                Text {
+                                    text: "Start (0.00 - 1.00)"
+                                    font.pixelSize: SettingsTheme.fontCaption
+                                    font.family: SettingsTheme.fontFamily
+                                    color: SettingsTheme.textSecondary
+                                }
+
+                                StyledTextField {
+                                    Layout.fillWidth: true
+                                    Layout.preferredHeight: SettingsTheme.controlHeight
+                                    text: popup.pathStart.toFixed(3)
+                                    inputMethodHints: Qt.ImhFormattedNumbersOnly
+                                    onTextEdited: {
+                                        var v = parseFloat(text)
+                                        if (!isNaN(v) && v >= 0 && v <= 1)
+                                            popup.pathStart = Math.min(v, popup.pathEnd)
+                                    }
+                                }
+                            }
+
+                            ColumnLayout {
+                                Layout.fillWidth: true
+                                spacing: 4
+
+                                Text {
+                                    text: "Stop (0.00 - 1.00)"
+                                    font.pixelSize: SettingsTheme.fontCaption
+                                    font.family: SettingsTheme.fontFamily
+                                    color: SettingsTheme.textSecondary
+                                }
+
+                                StyledTextField {
+                                    Layout.fillWidth: true
+                                    Layout.preferredHeight: SettingsTheme.controlHeight
+                                    text: popup.pathEnd.toFixed(3)
+                                    inputMethodHints: Qt.ImhFormattedNumbersOnly
+                                    onTextEdited: {
+                                        var v = parseFloat(text)
+                                        if (!isNaN(v) && v >= 0 && v <= 1)
+                                            popup.pathEnd = Math.max(v, popup.pathStart)
+                                    }
+                                }
+                            }
+                        }
+
+                        RowLayout {
+                            Layout.fillWidth: true
+                            spacing: 10
+
+                            ColumnLayout {
+                                Layout.fillWidth: true
+                                spacing: 4
+
+                                Text {
+                                    text: "Rotation (deg)"
+                                    font.pixelSize: SettingsTheme.fontCaption
+                                    font.family: SettingsTheme.fontFamily
+                                    color: SettingsTheme.textSecondary
+                                }
+
+                                StyledTextField {
+                                    Layout.fillWidth: true
+                                    Layout.preferredHeight: SettingsTheme.controlHeight
+                                    text: popup.rotationDeg.toFixed(2)
+                                    inputMethodHints: Qt.ImhFormattedNumbersOnly
+                                    onTextEdited: {
+                                        var v = parseFloat(text)
+                                        if (!isNaN(v))
+                                            popup.rotationDeg = v
+                                    }
+                                }
+                            }
+
+                            ColumnLayout {
+                                Layout.fillWidth: true
+                                spacing: 4
+
+                                Text {
+                                    text: "Thickness (0.05 - 2.00)"
+                                    font.pixelSize: SettingsTheme.fontCaption
+                                    font.family: SettingsTheme.fontFamily
+                                    color: SettingsTheme.textSecondary
+                                }
+
+                                StyledTextField {
+                                    Layout.fillWidth: true
+                                    Layout.preferredHeight: SettingsTheme.controlHeight
+                                    text: popup.thicknessScale.toFixed(3)
+                                    inputMethodHints: Qt.ImhFormattedNumbersOnly
+                                    onTextEdited: {
+                                        var v = parseFloat(text)
+                                        if (!isNaN(v) && v >= 0.05 && v <= 2.0)
+                                            popup.thicknessScale = v
+                                    }
+                                }
+                            }
+                        }
+
+                        Text {
+                            text: "Use Start/Stop to match the 7:30-to-1:00 sweep, Rotation to clock the whole shape, and Thickness to widen or narrow the SVG-derived fill."
+                            wrapMode: Text.WordWrap
+                            font.pixelSize: SettingsTheme.fontCaption
+                            font.family: SettingsTheme.fontFamily
+                            color: SettingsTheme.textSecondary
+                            Layout.fillWidth: true
+                        }
+                    }
+                }
+
+                // ============================================================
                 // ARC ALIGNMENT SECTION
                 // ============================================================
                 SettingsSection {
-                    title: "Arc Alignment"
+                    title: "Alignment Guide"
                     visible: popup.hasArcAlignment
                     Layout.fillWidth: true
 
@@ -660,7 +864,7 @@ Popup {
                         spacing: 6
 
                         StyledSwitch {
-                            text: "Lock To Alignment Progress"
+                            text: "Show Full Range Guide"
                             checked: popup.alignmentOverrideEnabled
                             onToggled: popup.alignmentOverrideEnabled = checked
                         }
@@ -671,7 +875,7 @@ Popup {
                             visible: popup.alignmentOverrideEnabled
 
                             Text {
-                                text: "Progress (0.00 - 1.00)"
+                                text: "Preview Progress (0.00 - 1.00)"
                                 font.pixelSize: SettingsTheme.fontCaption
                                 font.family: SettingsTheme.fontFamily
                                 color: SettingsTheme.textSecondary
@@ -687,6 +891,15 @@ Popup {
                                     if (!isNaN(v) && v >= 0 && v <= 1)
                                         popup.alignmentOverrideProgress = v
                                 }
+                            }
+
+                            Text {
+                                text: "Shows the full gauge extent plus a preview position without overriding the live value."
+                                wrapMode: Text.WordWrap
+                                font.pixelSize: SettingsTheme.fontCaption
+                                font.family: SettingsTheme.fontFamily
+                                color: SettingsTheme.textSecondary
+                                Layout.fillWidth: true
                             }
                         }
                     }
@@ -887,6 +1100,7 @@ Popup {
                                 ColumnLayout {
                                     Layout.fillWidth: true
                                     spacing: 4
+                                    visible: popup.isSensor
 
                                     Text {
                                         text: "Warning Color"

@@ -19,9 +19,8 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
-# * Find Qt packages - supports both Qt5 and Qt6
-find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS
+# * Find Qt 6 packages
+find_package(Qt6 REQUIRED COMPONENTS
     Core
     Gui
     Qml
@@ -31,19 +30,8 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS
     SerialBus
 )
 
-# * Qt6-specific: Qt5Compat for GraphicalEffects and other Qt5 modules
-if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
-    find_package(Qt6 COMPONENTS Core5Compat QUIET)
-    if(Qt6Core5Compat_FOUND)
-        set(Qt6Qt5Compat_FOUND TRUE)
-        message(STATUS "Qt5Compat (Core5Compat) found - GraphicalEffects available")
-    else()
-        message(WARNING "Qt5Compat not found - some graphical effects may not work")
-    endif()
-    
-    # * ShaderTools for Qt6 effects
-    find_package(Qt6 COMPONENTS ShaderTools QUIET)
-endif()
+# * Optional ShaderTools - kept available for future Qt 6 effects
+find_package(Qt6 COMPONENTS ShaderTools QUIET)
 
 # Brightness control is detected at runtime via Connect::checkifraspberrypi().
 # ddcutil (or sysfs backlight) presence is probed on startup -- no compile-time flag needed.
@@ -54,6 +42,7 @@ set(CORE_SOURCES
     Core/dashboard.cpp
     Core/appsettings.cpp
     Core/PropertyRouter.cpp
+    Core/RaceArcItem.cpp
     Core/SensorRegistry.cpp
     Core/DiagnosticsProvider.cpp
     Core/Models/UIState.cpp
@@ -77,6 +66,7 @@ set(CORE_HEADERS
     Core/dashboard.h
     Core/appsettings.h
     Core/PropertyRouter.h
+    Core/RaceArcItem.h
     Core/SensorRegistry.h
     Core/DiagnosticsProvider.h
     Core/Models/UIState.h
@@ -117,7 +107,6 @@ set(UTILS_SOURCES
     Utils/shcalc.cpp
     Utils/textprogressbar.cpp
     Utils/UDPReceiver.cpp
-    Utils/UdpTestSimulator.cpp
     Utils/OverlayConfigManager.cpp
     Utils/ShiftIndicatorHelper.cpp
     Utils/wifiscanner.cpp
@@ -134,7 +123,6 @@ set(UTILS_HEADERS
     Utils/shcalc.h
     Utils/textprogressbar.h
     Utils/UDPReceiver.h
-    Utils/UdpTestSimulator.h
     Utils/OverlayConfigManager.h
     Utils/ShiftIndicatorHelper.h
     Utils/wifiscanner.h
@@ -155,18 +143,11 @@ set(PROJECT_HEADERS
 )
 
 # * Create executable
-if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
-    qt_add_executable(${PROJECT_NAME}
-        MANUAL_FINALIZATION
-        ${PROJECT_SOURCES}
-        ${PROJECT_HEADERS}
-    )
-else()
-    add_executable(${PROJECT_NAME}
-        ${PROJECT_SOURCES}
-        ${PROJECT_HEADERS}
-    )
-endif()
+qt_add_executable(${PROJECT_NAME}
+    MANUAL_FINALIZATION
+    ${PROJECT_SOURCES}
+    ${PROJECT_HEADERS}
+)
 
 # * Include directories
 target_include_directories(${PROJECT_NAME} PRIVATE
@@ -178,27 +159,18 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 
 # * Link Qt libraries
 target_link_libraries(${PROJECT_NAME} PRIVATE
-    Qt${QT_VERSION_MAJOR}::Core
-    Qt${QT_VERSION_MAJOR}::Gui
-    Qt${QT_VERSION_MAJOR}::Qml
-    Qt${QT_VERSION_MAJOR}::Quick
-    Qt${QT_VERSION_MAJOR}::QuickControls2
-    Qt${QT_VERSION_MAJOR}::Network
-    Qt${QT_VERSION_MAJOR}::SerialBus
+    Qt6::Core
+    Qt6::Gui
+    Qt6::Qml
+    Qt6::Quick
+    Qt6::QuickControls2
+    Qt6::Network
+    Qt6::SerialBus
 )
 
-# * Link Qt5Compat for GraphicalEffects (Qt6 only)
-if(${QT_VERSION_MAJOR} GREATER_EQUAL 6 AND Qt6Qt5Compat_FOUND)
-    target_link_libraries(${PROJECT_NAME} PRIVATE
-        Qt6::Core5Compat
-    )
-endif()
-
-# * PowerTune QML Sub-Modules (Qt6 only)
+# * PowerTune QML Sub-Modules
 # * Provides organized imports: PowerTune.Core, PowerTune.Settings, PowerTune.Gauges, PowerTune.Utils
-if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
-    # * Suppress Qt policy warning about qmldir files
-    qt_policy(SET QTP0004 OLD)
+qt_policy(SET QTP0004 OLD)
     
     # * Define singletons
     set_source_files_properties(PowerTune/Utils/Translator.qml PROPERTIES
@@ -425,21 +397,6 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
             Resources/graphics/Flags/us.png
     )
 
-    # * Compile arc overlay shader to .qsb for PrismPT.Dashboard ArcGauge
-    if(Qt6ShaderTools_FOUND)
-        qt_add_shaders(PrismPTDashboardLib "dashboard_shaders"
-            BATCHABLE
-            PRECOMPILE
-            OPTIMIZED
-            PREFIX "/qt/qml/PrismPT/Dashboard"
-            FILES
-                PowerTune/Dashboard/Shaders/arc_fill.vert
-                PowerTune/Dashboard/Shaders/arc_fill.frag
-        )
-    else()
-        message(WARNING "Qt6 ShaderTools not found - Dashboard arc overlay shader will not be compiled")
-    endif()
-
     # * Link all QML modules to main executable
     target_link_libraries(${PROJECT_NAME} PRIVATE
         PowerTuneUtilsLibplugin
@@ -451,7 +408,6 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         PrismPTDashboardLibplugin
         PrismKeyboardLibplugin
     )
-endif()
 
 # * QML Import paths for Qt Creator and Qt Design Studio
 set(QML_IMPORT_PATH
@@ -460,6 +416,7 @@ set(QML_IMPORT_PATH
     "${CMAKE_CURRENT_SOURCE_DIR}/PowerTune/Settings"
     "${CMAKE_CURRENT_SOURCE_DIR}/PowerTune/UI"
     "${CMAKE_CURRENT_SOURCE_DIR}/PowerTune/Gauges/Shared"
+    "${CMAKE_CURRENT_SOURCE_DIR}/PowerTune/Gauges/RaceDash"
     "${CMAKE_CURRENT_SOURCE_DIR}/PowerTune/Utils"
     "${CMAKE_CURRENT_SOURCE_DIR}/PowerTune/Dashboard"
     CACHE STRING "Qt Creator/Design Studio QML import paths"
