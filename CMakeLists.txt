@@ -324,7 +324,6 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
             PowerTune/Dashboard/BrakeBiasBar.qml
             PowerTune/Dashboard/BottomStatusBar.qml
             PowerTune/Dashboard/GearIndicator.qml
-            PowerTune/Dashboard/ArcFillOverlay.qml
             PowerTune/Dashboard/DraggableOverlay.qml
             PowerTune/Dashboard/OverlayConfigPopup.qml
             PowerTune/Dashboard/WarningFlashTimer.qml
@@ -415,21 +414,6 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
             Resources/graphics/Flags/jp.png
             Resources/graphics/Flags/us.png
     )
-
-    # * Compile GLSL shaders to .qsb bundles for RaceDash arc gauges
-    if(Qt6ShaderTools_FOUND)
-        qt_add_shaders(${PROJECT_NAME} "racedash_shaders"
-            BATCHABLE
-            PRECOMPILE
-            OPTIMIZED
-            PREFIX "/shaders"
-            FILES
-                Shaders/arcgauge.vert
-                Shaders/arcgauge.frag
-        )
-    else()
-        message(WARNING "Qt6 ShaderTools not found - RaceDash arc gauge shaders will not be compiled")
-    endif()
 
     # * Compile arc overlay shader to .qsb for PrismPT.Dashboard ArcGauge
     if(Qt6ShaderTools_FOUND)
