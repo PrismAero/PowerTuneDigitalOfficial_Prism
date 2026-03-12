@@ -220,7 +220,6 @@ qt_policy(SET QTP0004 OLD)
             PowerTune/Core/Intro.qml
             PowerTune/Core/SettingsManager.qml
             PowerTune/Core/ExBoardAnalog.qml
-            PowerTune/Core/AnalogInputs.qml
             PowerTune/Core/BrightnessPopUp.qml
         RESOURCE_PREFIX /qt/qml
         OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/qt/qml/PowerTune/Core
@@ -271,8 +270,6 @@ qt_policy(SET QTP0004 OLD)
         URI PowerTune.Gauges.Shared
         VERSION 1.0
         QML_FILES
-            PowerTune/Gauges/Shared/DatasourcesList.qml
-            PowerTune/Gauges/Shared/DatasourceService.qml
             PowerTune/Gauges/Shared/Warning.qml
             PowerTune/Gauges/Shared/WarningLoader.qml
             PowerTune/Gauges/Shared/WarningFlashTimer.qml

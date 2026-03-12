@@ -19,9 +19,9 @@ Item {
     // Width depends on layout and dock mode
     width: {
         if (currentLayout === "numeric") {
-            return Math.min(parent ? parent.width : 520, 520)
+            return Math.min(parent ? parent.width : 520, 520);
         }
-        return parent ? parent.width : 520
+        return parent ? parent.width : 520;
     }
     anchors.horizontalCenter: docked ? parent.horizontalCenter : undefined
 
@@ -70,8 +70,14 @@ Item {
             anchors.rightMargin: keyboard.docked ? 0 : 2
             height: 6
             gradient: Gradient {
-                GradientStop { position: 0.0; color: "#30009688" }
-                GradientStop { position: 1.0; color: "#00009688" }
+                GradientStop {
+                    position: 0.0
+                    color: "#30009688"
+                }
+                GradientStop {
+                    position: 1.0
+                    color: "#00009688"
+                }
             }
             z: 1
         }
@@ -105,10 +111,11 @@ Item {
                 anchors.leftMargin: 10
                 anchors.rightMargin: 6
                 text: {
-                    var label = keyboard.fieldLabel
-                    var value = keyboard.target ? keyboard.target.text : ""
-                    if (label !== "") return label + ": " + value
-                    return value
+                    var label = keyboard.fieldLabel;
+                    var value = keyboard.target ? keyboard.target.text : "";
+                    if (label !== "")
+                        return label + ": " + value;
+                    return value;
                 }
                 color: KeyboardTheme.accent
                 font.pixelSize: KeyboardTheme.fontPreview
@@ -170,10 +177,10 @@ Item {
                     onClicked: {
                         if (keyboard.docked) {
                             // Switch to popout mode
-                            keyboard.docked = false
+                            keyboard.docked = false;
                         } else {
                             // Switch back to docked mode
-                            keyboard.docked = true
+                            keyboard.docked = true;
                         }
                     }
                 }
@@ -211,7 +218,9 @@ Item {
             NumericPad {
                 id: numPad
                 visible: keyboard.currentLayout === "numeric"
-                onKeyPressed: function(value) { keyboard.sendKey(value) }
+                onKeyPressed: function (value) {
+                    keyboard.sendKey(value);
+                }
                 onBackspacePressed: keyboard.sendBackspace()
                 onClearPressed: keyboard.sendClear()
                 onEnterPressed: keyboard.hide()
@@ -222,7 +231,9 @@ Item {
                 id: qwertyPad
                 anchors.fill: parent
                 visible: keyboard.currentLayout === "qwerty"
-                onKeyPressed: function(value) { keyboard.sendKey(value) }
+                onKeyPressed: function (value) {
+                    keyboard.sendKey(value);
+                }
                 onBackspacePressed: keyboard.sendBackspace()
                 onEnterPressed: keyboard.hide()
                 onSwitchLayout: keyboard.currentLayout = "numeric"
@@ -237,9 +248,7 @@ Item {
             when: keyboard.visible
             PropertyChanges {
                 target: keyboard
-                y: keyboard.docked
-                   ? keyboard.parent.height - keyboard.height
-                   : keyboard.popoutY
+                y: keyboard.docked ? keyboard.parent.height - keyboard.height : keyboard.popoutY
             }
         },
         State {
@@ -254,27 +263,38 @@ Item {
 
     transitions: [
         Transition {
-            from: "hidden"; to: "visible"
-            NumberAnimation { property: "y"; duration: 200; easing.type: Easing.OutCubic }
+            from: "hidden"
+            to: "visible"
+            NumberAnimation {
+                property: "y"
+                duration: 200
+                easing.type: Easing.OutCubic
+            }
         },
         Transition {
-            from: "visible"; to: "hidden"
-            NumberAnimation { property: "y"; duration: 150; easing.type: Easing.InCubic }
+            from: "visible"
+            to: "hidden"
+            NumberAnimation {
+                property: "y"
+                duration: 150
+                easing.type: Easing.InCubic
+            }
         }
     ]
 
     // Handle dock mode changes while visible
     onDockedChanged: {
-        if (!visible) return
+        if (!visible)
+            return;
         if (docked) {
             // Re-anchor to bottom
-            anchors.horizontalCenter = parent.horizontalCenter
-            y = parent.height - height
+            anchors.horizontalCenter = parent.horizontalCenter;
+            y = parent.height - height;
         } else {
             // Float to center
-            anchors.horizontalCenter = undefined
-            x = popoutX
-            y = popoutY
+            anchors.horizontalCenter = undefined;
+            x = popoutX;
+            y = popoutY;
         }
     }
 
@@ -282,124 +302,124 @@ Item {
     // Attempts to find the field label from placeholderText or sibling Text elements.
     function show(textField) {
         if (!isEditableTarget(textField))
-            return
-        target = textField
+            return;
+        target = textField;
 
         // Try to get field context label
-        fieldLabel = ""
+        fieldLabel = "";
         if (textField.placeholderText && textField.placeholderText !== "") {
-            fieldLabel = textField.placeholderText
+            fieldLabel = textField.placeholderText;
         } else if (textField.parent) {
             // Look for a Text/Label sibling in the parent
             for (var i = 0; i < textField.parent.children.length; i++) {
-                var sibling = textField.parent.children[i]
-                if (sibling !== textField && sibling.text !== undefined
-                    && sibling.text !== "" && sibling.text !== textField.text) {
-                    fieldLabel = sibling.text
-                    break
+                var sibling = textField.parent.children[i];
+                if (sibling !== textField && sibling.text !== undefined && sibling.text !== "" && sibling.text !== textField.text) {
+                    fieldLabel = sibling.text;
+                    break;
                 }
             }
         }
 
         // Auto-detect layout from inputMethodHints
-        if (textField.inputMethodHints & Qt.ImhDigitsOnly ||
-            textField.inputMethodHints & Qt.ImhFormattedNumbersOnly ||
-            textField.inputMethodHints & Qt.ImhPreferNumbers) {
-            currentLayout = "numeric"
+        if (textField.inputMethodHints & Qt.ImhDigitsOnly || textField.inputMethodHints & Qt.ImhFormattedNumbersOnly || textField.inputMethodHints & Qt.ImhPreferNumbers) {
+            currentLayout = "numeric";
         } else {
-            currentLayout = "qwerty"
+            currentLayout = "qwerty";
         }
-        visible = true
-        ensureFieldVisible(textField)
+        visible = true;
+        ensureFieldVisible(textField);
     }
 
     function ensureFieldVisible(field) {
-        if (!field || !docked) return
-
-        var scrollable = findParentFlickable(field)
-        if (!scrollable) return
-
-        var fieldRect = field.mapToItem(scrollable.contentItem, 0, 0)
-        var fieldBottom = fieldRect.y + field.height
-        var visibleTop = scrollable.contentY
-        var visibleBottom = visibleTop + scrollable.height - height
+        if (!field || !docked)
+            return;
+        var scrollable = findParentFlickable(field);
+        if (!scrollable)
+            return;
+        var fieldRect = field.mapToItem(scrollable.contentItem, 0, 0);
+        var fieldBottom = fieldRect.y + field.height;
+        var visibleTop = scrollable.contentY;
+        var visibleBottom = visibleTop + scrollable.height - height;
 
         if (fieldBottom > visibleBottom) {
-            scrollable.contentY = fieldBottom - scrollable.height + height + 20
+            scrollable.contentY = fieldBottom - scrollable.height + height + 20;
         } else if (fieldRect.y < visibleTop) {
-            scrollable.contentY = fieldRect.y - 20
+            scrollable.contentY = fieldRect.y - 20;
         }
     }
 
     function findParentFlickable(item) {
-        var p = item.parent
+        var p = item.parent;
         while (p) {
             if (p.hasOwnProperty("contentY") && p.hasOwnProperty("contentHeight"))
-                return p
-            p = p.parent
+                return p;
+            p = p.parent;
         }
-        return null
+        return null;
     }
 
     // Hides the keyboard and clears the target reference.
     function hide() {
-        visible = false
+        visible = false;
         if (target) {
-            target.focus = false
+            target.focus = false;
         }
-        target = null
-        fieldLabel = ""
+        target = null;
+        fieldLabel = "";
     }
 
     // Inserts a character value at the current cursor position in the target field.
     function sendKey(value) {
-        if (!target) return
-        var pos = target.cursorPosition
+        if (!target)
+            return;
+        var pos = target.cursorPosition;
         if (target.insert) {
-            target.insert(pos, value)
+            target.insert(pos, value);
         } else {
-            var txt = target.text
-            target.text = txt.substring(0, pos) + value + txt.substring(pos)
+            var txt = target.text;
+            target.text = txt.substring(0, pos) + value + txt.substring(pos);
         }
-        target.cursorPosition = pos + value.length
+        target.cursorPosition = pos + value.length;
     }
 
     // Removes the character before the cursor position in the target field.
     function sendBackspace() {
-        if (!target) return
-        var pos = target.cursorPosition
+        if (!target)
+            return;
+        var pos = target.cursorPosition;
         if (pos > 0) {
             if (target.remove) {
-                target.remove(pos - 1, pos)
+                target.remove(pos - 1, pos);
             } else {
-                var txt = target.text
-                target.text = txt.substring(0, pos - 1) + txt.substring(pos)
+                var txt = target.text;
+                target.text = txt.substring(0, pos - 1) + txt.substring(pos);
             }
-            target.cursorPosition = pos - 1
+            target.cursorPosition = pos - 1;
         }
     }
 
     // Clears all text in the target field and resets cursor to position 0.
     function sendClear() {
-        if (!target) return
+        if (!target)
+            return;
         if (target.clear)
-            target.clear()
+            target.clear();
         else
-            target.text = ""
-        target.cursorPosition = 0
+            target.text = "";
+        target.cursorPosition = 0;
     }
 
     function isEditableTarget(item) {
         if (!item)
-            return false
+            return false;
         if (!item.hasOwnProperty("text"))
-            return false
+            return false;
         if (!item.hasOwnProperty("cursorPosition"))
-            return false
+            return false;
         if (item.hasOwnProperty("readOnly") && item.readOnly)
-            return false
+            return false;
         if (item.hasOwnProperty("enabled") && !item.enabled)
-            return false
-        return true
+            return false;
+        return true;
     }
 }

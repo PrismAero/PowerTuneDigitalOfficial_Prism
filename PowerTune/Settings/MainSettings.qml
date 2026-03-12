@@ -14,6 +14,7 @@ SettingsPage {
     property int hexstring2: 0
     property int currentLanguage: (Settings && Settings.language !== undefined) ? Settings.language : 0
     property bool settingsLoaded: false
+    property bool loggerActive: false
 
     readonly property var ecuBackendMap: [5, 0, 4]
     readonly property int genericCanDaemonIndex: 40
@@ -24,6 +25,51 @@ SettingsPage {
             if (ecuBackendMap[i] === backendIdx) return i
         }
         return 0
+    }
+
+    function autoConnect() {
+        if (connectButton.enabled === false) {
+            connectEcu()
+            ecuSelect.enabled = false
+            disconnectButton.enabled = true
+        }
+    }
+
+    function updateWeightLabel() {
+        if (unitSelect.currentIndex === 0)
+            weightRow.label = Translator.translate("Weight", Settings.language) + " kg"
+        if (unitSelect.currentIndex === 1)
+            weightRow.label = Translator.translate("Weight", Settings.language) + " lbs"
+    }
+
+    function toggleDataLogger() {
+        if (loggerswitch.checked) {
+            loggerActive = true
+            Logger.startLog(logfilenameSelect.text)
+        } else {
+            loggerActive = false
+            Logger.stopLog()
+        }
+    }
+
+    function connectEcu() {
+        Connect.setOdometer(odometer.text)
+        Connect.setWeight(weight.text)
+        var backendIdx = ecuBackendMap[ecuSelect.currentIndex]
+        Connect.openConnection("", backendIdx, baseadresstext.text, shiftlightbaseadresstext.text)
+        connected = 1
+    }
+
+    function disconnectEcu() {
+        Connect.closeConnection()
+        connected = 0
+    }
+
+    function triggerWarning() {
+    }
+
+    function applyLanguage() {
+        AppSettings.writeLanguage(languageselect.currentIndex)
     }
 
     Component.onCompleted: {
@@ -41,7 +87,7 @@ SettingsPage {
         canbitrateselect.currentIndex = AppSettings.getValue("ui/bitrateSelect", 0)
         Vehicle.setTrip(tripmeter.text)
         settingsLoaded = true
-        autoconnect.auto()
+        autoConnect()
     }
 
     Connections {
@@ -51,11 +97,10 @@ SettingsPage {
     }
     Connections {
         target: Engine
-        function onWatertempChanged() { if (Engine.Watertemp > Settings.waterwarn) playwarning.start() }
-        function onRpmChanged() { if (Engine.rpm > Settings.rpmwarn) playwarning.start() }
-        function onKnockChanged() { if (Engine.Knock > Settings.knockwarn) playwarning.start() }
+        function onWatertempChanged() { if (Engine.Watertemp > Settings.waterwarn) triggerWarning() }
+        function onRpmChanged() { if (Engine.rpm > Settings.rpmwarn) triggerWarning() }
+        function onKnockChanged() { if (Engine.Knock > Settings.knockwarn) triggerWarning() }
     }
-    // Boost warning is evaluated by the shared warning loader.
 
     RowLayout {
         Layout.fillWidth: true
@@ -79,7 +124,7 @@ SettingsPage {
                         text: Translator.translate("Connect", Settings.language)
                         onEnabledChanged: if (settingsLoaded) AppSettings.setValue("ui/connectAtStartup", enabled)
                         onClicked: {
-                            functconnect.connectfunc()
+                            connectEcu()
                             connectButton.enabled = false
                             ecuSelect.enabled = false
                             disconnectButton.enabled = true
@@ -94,7 +139,7 @@ SettingsPage {
                             connectButton.enabled = true
                             disconnectButton.enabled = false
                             ecuSelect.enabled = true
-                            functdisconnect.disconnectfunc()
+                            disconnectEcu()
                         }
                     }
                 }
@@ -133,7 +178,7 @@ SettingsPage {
                             currentIndex = ecuDropdownFromBackend(stored)
                             Connection.setecu(ecuBackendMap[currentIndex])
                             initialized = true
-                            autoconnect.auto()
+                            autoConnect()
                         }
                     }
                 }
@@ -152,11 +197,11 @@ SettingsPage {
                         model: [Translator.translate("Metric", Settings.language), Translator.translate("Imperial", Settings.language)]
                         Component.onCompleted: {
                             Connect.setSpeedUnits(currentIndex)
-                            changeweighttext.changetext()
+                            updateWeightLabel()
                         }
                         onCurrentIndexChanged: {
                             Connect.setSpeedUnits(currentIndex)
-                            changeweighttext.changetext()
+                            updateWeightLabel()
                             if (settingsLoaded) AppSettings.setValue("ui/unitSelector1", currentIndex)
                         }
                     }
@@ -171,11 +216,11 @@ SettingsPage {
                         model: [Translator.translate("C", Settings.language), Translator.translate("F", Settings.language)]
                         Component.onCompleted: {
                             Connect.setUnits(currentIndex)
-                            changeweighttext.changetext()
+                            updateWeightLabel()
                         }
                         onCurrentIndexChanged: {
                             Connect.setUnits(currentIndex)
-                            changeweighttext.changetext()
+                            updateWeightLabel()
                             if (settingsLoaded) AppSettings.setValue("ui/unitSelector", currentIndex)
                         }
                     }
@@ -340,8 +385,8 @@ SettingsPage {
                 StyledSwitch {
                     id: loggerswitch
                     label: Translator.translate("Data Logger", Settings.language)
-                    Component.onCompleted: logger.datalogger()
-                    onClicked: logger.datalogger()
+                    Component.onCompleted: toggleDataLogger()
+                    onClicked: toggleDataLogger()
                 }
             }
         }
@@ -453,8 +498,8 @@ SettingsPage {
                     Layout.fillWidth: true
                     model: ["English", "Deutsch", "\u65E5\u672C\u8A9E", "Espanol"]
                     onCurrentIndexChanged: {
-                        functLanguageselect.languageselectfunct()
-                        changeweighttext.changetext()
+                        applyLanguage()
+                        updateWeightLabel()
                         if (settingsLoaded) AppSettings.setValue("Language", currentIndex)
                     }
                 }
@@ -496,78 +541,4 @@ SettingsPage {
         }
     }
 
-    // * Non-visual helper items
-    Item {
-        visible: false
-        id: autoconnect
-        function auto() {
-            if (connectButton.enabled === false) {
-                functconnect.connectfunc()
-                ecuSelect.enabled = false
-                disconnectButton.enabled = true
-            }
-        }
-    }
-
-    Item {
-        visible: false
-        id: changeweighttext
-        function changetext() {
-            if (unitSelect.currentIndex === 0)
-                weightRow.label = Translator.translate("Weight", Settings.language) + " kg"
-            if (unitSelect.currentIndex === 1)
-                weightRow.label = Translator.translate("Weight", Settings.language) + " lbs"
-        }
-    }
-
-    Item {
-        visible: false
-        id: logger
-        property int loggeron: 0
-        function datalogger() {
-            if (loggerswitch.checked) {
-                logger.loggeron = 1
-                Logger.startLog(logfilenameSelect.text)
-            } else {
-                logger.loggeron = 0
-                Logger.stopLog()
-            }
-        }
-    }
-
-    Item {
-        visible: false
-        id: functconnect
-        function connectfunc() {
-            Connect.setOdometer(odometer.text)
-            Connect.setWeight(weight.text)
-            var backendIdx = ecuBackendMap[ecuSelect.currentIndex]
-            Connect.openConnection("", backendIdx, baseadresstext.text, shiftlightbaseadresstext.text)
-            connected = 1
-        }
-    }
-
-    Item {
-        visible: false
-        id: functdisconnect
-        function disconnectfunc() {
-            Connect.closeConnection()
-            connected = 0
-        }
-    }
-
-    Item {
-        visible: false
-        id: playwarning
-        function start() {
-        }
-    }
-
-    Item {
-        visible: false
-        id: functLanguageselect
-        function languageselectfunct() {
-            AppSettings.writeLanguage(languageselect.currentIndex)
-        }
-    }
 }

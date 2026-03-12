@@ -988,7 +988,9 @@ SettingsPage {
                 color: canCaptureToggle.checked ? SettingsTheme.success : SettingsTheme.textSecondary
             }
 
-            Item { Layout.fillWidth: true }
+            Item {
+                Layout.fillWidth: true
+            }
 
             StyledTextField {
                 Layout.preferredWidth: 140
@@ -1013,10 +1015,38 @@ SettingsPage {
         RowLayout {
             Layout.fillWidth: true
             spacing: SettingsTheme.contentSpacing
-            Text { text: "ID"; font.pixelSize: SettingsTheme.fontCaption; font.weight: Font.DemiBold; font.family: SettingsTheme.fontFamily; color: SettingsTheme.accent; Layout.preferredWidth: 80 }
-            Text { text: "Len"; font.pixelSize: SettingsTheme.fontCaption; font.weight: Font.DemiBold; font.family: SettingsTheme.fontFamily; color: SettingsTheme.accent; Layout.preferredWidth: 30 }
-            Text { text: "Payload (hex)"; font.pixelSize: SettingsTheme.fontCaption; font.weight: Font.DemiBold; font.family: SettingsTheme.fontFamily; color: SettingsTheme.accent; Layout.fillWidth: true }
-            Text { text: "ASCII"; font.pixelSize: SettingsTheme.fontCaption; font.weight: Font.DemiBold; font.family: SettingsTheme.fontFamily; color: SettingsTheme.accent; Layout.preferredWidth: 80 }
+            Text {
+                text: "ID"
+                font.pixelSize: SettingsTheme.fontCaption
+                font.weight: Font.DemiBold
+                font.family: SettingsTheme.fontFamily
+                color: SettingsTheme.accent
+                Layout.preferredWidth: 80
+            }
+            Text {
+                text: "Len"
+                font.pixelSize: SettingsTheme.fontCaption
+                font.weight: Font.DemiBold
+                font.family: SettingsTheme.fontFamily
+                color: SettingsTheme.accent
+                Layout.preferredWidth: 30
+            }
+            Text {
+                text: "Payload (hex)"
+                font.pixelSize: SettingsTheme.fontCaption
+                font.weight: Font.DemiBold
+                font.family: SettingsTheme.fontFamily
+                color: SettingsTheme.accent
+                Layout.fillWidth: true
+            }
+            Text {
+                text: "ASCII"
+                font.pixelSize: SettingsTheme.fontCaption
+                font.weight: Font.DemiBold
+                font.family: SettingsTheme.fontFamily
+                color: SettingsTheme.accent
+                Layout.preferredWidth: 80
+            }
         }
 
         Rectangle {
@@ -1046,16 +1076,39 @@ SettingsPage {
                     anchors.rightMargin: 4
                     spacing: SettingsTheme.contentSpacing
 
-                    Text { text: modelData.id; font.pixelSize: SettingsTheme.fontCaption; font.family: SettingsTheme.fontFamilyMono; color: SettingsTheme.accent; Layout.preferredWidth: 80 }
-                    Text { text: modelData.length; font.pixelSize: SettingsTheme.fontCaption; font.family: SettingsTheme.fontFamilyMono; color: SettingsTheme.textSecondary; Layout.preferredWidth: 30 }
-                    Text { text: modelData.payload; font.pixelSize: SettingsTheme.fontCaption; font.family: SettingsTheme.fontFamilyMono; color: SettingsTheme.textPrimary; Layout.fillWidth: true }
-                    Text { text: modelData.ascii; font.pixelSize: SettingsTheme.fontCaption; font.family: SettingsTheme.fontFamilyMono; color: SettingsTheme.textDisabled; Layout.preferredWidth: 80 }
+                    Text {
+                        text: modelData.id
+                        font.pixelSize: SettingsTheme.fontCaption
+                        font.family: SettingsTheme.fontFamilyMono
+                        color: SettingsTheme.accent
+                        Layout.preferredWidth: 80
+                    }
+                    Text {
+                        text: modelData.length
+                        font.pixelSize: SettingsTheme.fontCaption
+                        font.family: SettingsTheme.fontFamilyMono
+                        color: SettingsTheme.textSecondary
+                        Layout.preferredWidth: 30
+                    }
+                    Text {
+                        text: modelData.payload
+                        font.pixelSize: SettingsTheme.fontCaption
+                        font.family: SettingsTheme.fontFamilyMono
+                        color: SettingsTheme.textPrimary
+                        Layout.fillWidth: true
+                    }
+                    Text {
+                        text: modelData.ascii
+                        font.pixelSize: SettingsTheme.fontCaption
+                        font.family: SettingsTheme.fontFamilyMono
+                        color: SettingsTheme.textDisabled
+                        Layout.preferredWidth: 80
+                    }
                 }
             }
 
             ScrollBar.vertical: ScrollBar {
-                policy: canFrameList.contentHeight > canFrameList.height
-                        ? ScrollBar.AsNeeded : ScrollBar.AlwaysOff
+                policy: canFrameList.contentHeight > canFrameList.height ? ScrollBar.AsNeeded : ScrollBar.AlwaysOff
             }
         }
     }

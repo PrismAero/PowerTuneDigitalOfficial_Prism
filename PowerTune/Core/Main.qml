@@ -1,5 +1,6 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
+import QtQuick.Layouts 1.15
 import QtQuick.Window 2.15
 import com.powertune 1.0
 import PowerTune.Core 1.0
@@ -32,42 +33,42 @@ ApplicationWindow {
     property int digitalInput8: Digital ? Digital.EXDigitalInput8 : 0
 
     function applyBrightness(val) {
-        currentBrightness = val
-        Connect.setSreenbrightness(val)
-        AppSettings.writebrightnessettings(val)
+        currentBrightness = val;
+        Connect.setSreenbrightness(val);
+        AppSettings.writebrightnessettings(val);
     }
 
     function adjustBrightness(delta) {
-        var step = isDdc ? 25 : 50
-        var min = isDdc ? 0 : 25
-        var max = isDdc ? 75 : 250
-        var next = currentBrightness + (delta * step)
-        applyBrightness(Math.max(min, Math.min(max, next)))
+        var step = isDdc ? 25 : 50;
+        var min = isDdc ? 0 : 25;
+        var max = isDdc ? 75 : 250;
+        var next = currentBrightness + (delta * step);
+        applyBrightness(Math.max(min, Math.min(max, next)));
     }
 
     function handleDigitalBrightness() {
-        if (custom.maxBrightnessOnBoot !== 1) return
-        var inputs = [digitalInput1, digitalInput2, digitalInput3, digitalInput4,
-                      digitalInput5, digitalInput6, digitalInput7, digitalInput8]
-        var current = inputs[custom.digiValue]
+        if (custom.maxBrightnessOnBoot !== 1)
+            return;
+        var inputs = [digitalInput1, digitalInput2, digitalInput3, digitalInput4, digitalInput5, digitalInput6, digitalInput7, digitalInput8];
+        var current = inputs[custom.digiValue];
         if (current === 1)
-            applyBrightness(0)
+            applyBrightness(0);
         else if (current === 0)
-            applyBrightness(isDdc ? 60 : 235)
+            applyBrightness(isDdc ? 60 : 235);
     }
 
     Component.onCompleted: {
-        popUpLoader.enabled = AppSettings.getValue("ui/brightnessPopupEnabled", true)
-        settingsLoaded = true
-        popUpLoader.sourceComponent = Qt.createComponent("BrightnessPopUp.qml")
-        custom.executeOnBootAction()
-        handleDigitalBrightness()
+        popUpLoader.enabled = AppSettings.getValue("ui/brightnessPopupEnabled", true);
+        settingsLoaded = true;
+        popUpLoader.sourceComponent = Qt.createComponent("BrightnessPopUp.qml");
+        custom.executeOnBootAction();
+        handleDigitalBrightness();
     }
 
     Connections {
         target: UI
         function onBrightnessChanged() {
-            brightness.value = UI.Brightness
+            brightness.value = UI.Brightness;
         }
     }
 
@@ -85,7 +86,7 @@ ApplicationWindow {
         running: true
         onTriggered: {
             if (custom.maxBrightnessOnBoot === 1)
-                applyBrightness(isDdc ? 75 : 250)
+                applyBrightness(isDdc ? 75 : 250);
         }
     }
 
@@ -127,7 +128,7 @@ ApplicationWindow {
     }
 
     function showBrightnessPopup() {
-        popUpLoader.visible = true
+        popUpLoader.visible = true;
     }
 
     Loader {
@@ -135,10 +136,11 @@ ApplicationWindow {
         visible: false
         anchors.right: parent.right
         width: window.width * 0.15
-        onEnabledChanged: if (settingsLoaded) AppSettings.setValue("ui/brightnessPopupEnabled", enabled)
+        onEnabledChanged: if (settingsLoaded)
+            AppSettings.setValue("ui/brightnessPopupEnabled", enabled)
         Component.onCompleted: {
             if (popUpLoader.enabled)
-                visible = true
+                visible = true;
         }
     }
 
@@ -148,189 +150,98 @@ ApplicationWindow {
         height: 0.5 * window.height
         edge: Qt.TopEdge
         background: Rectangle {
-            color: "grey"
-            opacity: 0.8
-            Rectangle {
-                x: parent.width - 3
-                width: 1
-                height: parent.height
-                color: "black"
-            }
+            color: SettingsTheme.surface
+            opacity: 0.95
+            radius: SettingsTheme.radiusLarge
         }
 
-        Grid {
-            id: row1
-            rows: 2
-            columns: 1
-            topPadding: window.width / 40
-            spacing: window.width / 30
-            anchors.top: drawerpopup.top
-            anchors.left: parent.left
+        RowLayout {
+            anchors.fill: parent
+            anchors.margins: SettingsTheme.pageMargin
+            spacing: SettingsTheme.sectionSpacing
 
-            Button {
-                id: btntripreset
-                text: "Trip Reset"
-                font.family: SettingsTheme.fontFamily
-                font.bold: true
-                width: window.width / 13
-                height: window.width / 13
-                font.pixelSize: window.width / 100
-                onClicked: Calculations.resettrip()
-                background: Rectangle {
-                    radius: window.width / 10
-                    opacity: enabled ? 1 : 0.3
-                    color: btntripreset.down ? "darkgrey" : "grey"
-                    border.color: btntripreset.down ? "grey" : "darkgrey"
-                    border.width: window.width / 200
+            ColumnLayout {
+                Layout.alignment: Qt.AlignTop
+                spacing: SettingsTheme.contentSpacing
+
+                StyledButton {
+                    text: "Trip Reset"
+                    onClicked: Calculations.resettrip()
+                    implicitWidth: 100
+                }
+
+                StyledButton {
+                    text: "Shutdown"
+                    danger: true
+                    onClicked: Connect.shutdown()
+                    implicitWidth: 100
                 }
             }
 
-            Button {
-                id: btnshutdown
-                text: "Shutdown"
-                font.family: SettingsTheme.fontFamily
-                font.bold: true
-                width: window.width / 13
-                height: window.width / 13
-                font.pixelSize: window.width / 100
-                onClicked: Connect.shutdown()
-                background: Rectangle {
-                    radius: window.width / 10
-                    opacity: enabled ? 1 : 0.3
-                    color: btnshutdown.down ? "darkred" : "red"
-                    border.color: btnshutdown.down ? "red" : "darkred"
-                    border.width: window.width / 200
-                }
-            }
-        }
+            ColumnLayout {
+                Layout.fillWidth: true
+                Layout.alignment: Qt.AlignVCenter
+                spacing: SettingsTheme.contentSpacing
 
-        Grid {
-            id: row4
-            rows: 2
-            columns: 1
-            topPadding: window.width / 40
-            spacing: window.width / 30
-            anchors.top: drawerpopup.top
-            anchors.right: parent.right
+                RowLayout {
+                    Layout.alignment: Qt.AlignHCenter
+                    spacing: 12
 
-            Row {
-                Button {
-                    id: plusBrightness
-                    font.family: SettingsTheme.fontFamily
-                    font.bold: true
-                    width: window.width / 13
-                    height: window.width / 13
-                    font.pixelSize: window.width / 30
-                    onClicked: adjustBrightness(1)
-                    background: Rectangle {
-                        radius: window.width / 10
-                        opacity: enabled ? 1 : 0.3
-                        color: plusBrightness.down ? "darkgrey" : "grey"
-                        border.color: plusBrightness.down ? "grey" : "darkgrey"
-                        border.width: window.width / 200
-                    }
                     Image {
-                        source: "qrc:/Resources/graphics/brightnessIncrease.png"
-                        width: plusBrightness.width
-                        height: plusBrightness.height
-                        anchors.centerIn: plusBrightness
+                        height: 32
+                        width: 32
+                        source: "qrc:/Resources/graphics/brightness.png"
+                    }
+
+                    Slider {
+                        id: brightness
+                        Layout.preferredWidth: window.width / 3
+                        Layout.preferredHeight: 36
+                        stepSize: 5
+                        from: isDdc ? 0 : 20
+                        to: isDdc ? 100 : 255
+                        value: UI.Brightness
+                        onMoved: applyBrightness(value)
                     }
                 }
-            }
 
-            Row {
-                Button {
-                    id: minusBrightness
-                    font.family: SettingsTheme.fontFamily
-                    font.bold: true
-                    width: window.width / 13
-                    height: window.width / 13
-                    font.pixelSize: window.width / 30
-                    onClicked: adjustBrightness(-1)
-                    background: Rectangle {
-                        radius: window.width / 10
-                        opacity: enabled ? 1 : 0.3
-                        color: minusBrightness.down ? "darkgrey" : "grey"
-                        border.color: minusBrightness.down ? "grey" : "darkgrey"
-                        border.width: window.width / 200
-                    }
-                    Image {
-                        source: "qrc:/Resources/graphics/brightnessDecrease.png"
-                        width: minusBrightness.width
-                        height: minusBrightness.height
-                        anchors.centerIn: minusBrightness
-                    }
-                }
-            }
-        }
+                RowLayout {
+                    Layout.alignment: Qt.AlignHCenter
+                    spacing: SettingsTheme.controlGap
 
-        Grid {
-            id: row3
-            columns: 1
-            spacing: window.width / 160
-            anchors.top: drawerpopup.top
-            anchors.topMargin: drawerpopup.height / 30
-            anchors.horizontalCenter: parent.horizontalCenter
-
-            Row {
-                spacing: 12
-
-                Image {
-                    height: window.height / 15
-                    width: height
-                    source: "qrc:/Resources/graphics/brightness.png"
-                    anchors.verticalCenter: parent.verticalCenter
-                }
-
-                Slider {
-                    id: brightness
-                    width: window.width / 3
-                    height: window.height / 15
-                    stepSize: 5
-                    from: isDdc ? 0 : 20
-                    to: isDdc ? 100 : 255
-                    value: UI.Brightness
-                    onMoved: applyBrightness(value)
-                }
-            }
-
-            Row {
-                Rectangle {
-                    id: switchRectangle
-                    width: window.width / 4
-                    height: window.width / 15
-                    color: "transparent"
                     Text {
-                        id: switchText
                         text: "Brightness Pop Up at Boot"
-                        anchors.centerIn: parent
-                        color: "black"
+                        color: SettingsTheme.textPrimary
                         font.family: SettingsTheme.fontFamily
-                        font.bold: true
-                        font.pixelSize: window.width / 70
+                        font.pixelSize: SettingsTheme.fontLabel
+                    }
+
+                    StyledSwitch {
+                        id: disablePopUp
+                        checked: popUpLoader.enabled
+                        onCheckedChanged: {
+                            popUpLoader.enabled = checked;
+                            popUpLoader.visible = false;
+                        }
                     }
                 }
+            }
 
-                Switch {
-                    id: disablePopUp
-                    checked: popUpLoader.enabled
-                    font.family: SettingsTheme.fontFamily
-                    font.bold: true
-                    width: window.width / 7
-                    height: window.width / 15
-                    font.pixelSize: window.width / 70
-                    onToggled: {
-                        popUpLoader.enabled = checked
-                        popUpLoader.visible = false
-                    }
-                    contentItem: Text {
-                        leftPadding: disablePopUp.indicator.width + disablePopUp.spacing
-                        text: disablePopUp.checked ? "On" : "Off"
-                        font: disablePopUp.font
-                        opacity: enabled ? 1.0 : 0.3
-                        elide: Text.ElideRight
-                        verticalAlignment: Text.AlignVCenter
-                    }
+            ColumnLayout {
+                Layout.alignment: Qt.AlignTop
+                spacing: SettingsTheme.contentSpacing
+
+                StyledButton {
+                    text: "+"
+                    onClicked: adjustBrightness(1)
+                    implicitWidth: 48
+                    implicitHeight: 48
+                }
+                StyledButton {
+                    text: "-"
+                    onClicked: adjustBrightness(-1)
+                    implicitWidth: 48
+                    implicitHeight: 48
                 }
             }
         }
@@ -352,17 +263,12 @@ ApplicationWindow {
     Connections {
         target: window
         function onActiveFocusItemChanged() {
-            var item = window.activeFocusItem
-            if (item
-                && item.hasOwnProperty("text")
-                && item.hasOwnProperty("cursorPosition")
-                && item.hasOwnProperty("inputMethodHints")
-                && !item.hasOwnProperty("currentIndex")
-                && (!item.hasOwnProperty("readOnly") || !item.readOnly)) {
-                prismKeyboard.show(item)
+            var item = window.activeFocusItem;
+            if (item && item.hasOwnProperty("text") && item.hasOwnProperty("cursorPosition") && item.hasOwnProperty("inputMethodHints") && !item.hasOwnProperty("currentIndex") && (!item.hasOwnProperty("readOnly") || !item.readOnly)) {
+                prismKeyboard.show(item);
             } else {
                 if (prismKeyboard.visible)
-                    prismKeyboard.hide()
+                    prismKeyboard.hide();
             }
         }
     }
