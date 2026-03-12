@@ -12,117 +12,140 @@ Item {
     property string dashboardId: "racedash"
     property var overlayConfigs: ({})
 
-    function normalizeArcConfig(id, merged) {
-        var normalized = {}
-        for (var key in merged)
-            normalized[key] = merged[key]
-
-        if (id === "tachGroup") {
-            normalized.shapeMode = "tachSvg"
-            delete normalized.pathStart
-            delete normalized.pathEnd
-            delete normalized.rotationDeg
-            delete normalized.thicknessScale
-            delete normalized.startAngle
-            delete normalized.sweepAngle
-            delete normalized.arcWidth
-            delete normalized.arcColorStart
-            delete normalized.arcColorMid
-            delete normalized.arcColorMidPos
-            delete normalized.arcColorEnd
-            delete normalized.arcBgColor
-            delete normalized.warningColor
-            if (normalized.overlaySize === undefined)
-                normalized.overlaySize = DashboardTheme.defaultTachSize
-            if (normalized.referenceOverlaySize === undefined)
-                normalized.referenceOverlaySize = DashboardTheme.defaultTachSize
-            if (normalized.valueOffsetY === undefined)
-                normalized.valueOffsetY = 94
-            if (normalized.contentRightInsetRatio === undefined)
-                normalized.contentRightInsetRatio = 0.0583
-            if (normalized.contentBottomInsetRatio === undefined)
-                normalized.contentBottomInsetRatio = 0.151
-        } else if (id === "speedGroup") {
-            normalized.shapeMode = "speedSvg"
-            delete normalized.pathStart
-            delete normalized.pathEnd
-            delete normalized.rotationDeg
-            delete normalized.thicknessScale
-            delete normalized.startAngle
-            delete normalized.sweepAngle
-            delete normalized.arcWidth
-            delete normalized.arcColorStart
-            delete normalized.arcColorMid
-            delete normalized.arcColorMidPos
-            delete normalized.arcColorEnd
-            delete normalized.arcBgColor
-            delete normalized.warningColor
-            if (normalized.overlaySize === undefined)
-                normalized.overlaySize = DashboardTheme.defaultSpeedSize
-            if (normalized.referenceOverlaySize === undefined)
-                normalized.referenceOverlaySize = DashboardTheme.defaultSpeedSize
-            if (normalized.valueOffsetY === undefined)
-                normalized.valueOffsetY = 62
-            if (normalized.contentRightInsetRatio === undefined)
-                normalized.contentRightInsetRatio = 0.0583
-            if (normalized.contentBottomInsetRatio === undefined)
-                normalized.contentBottomInsetRatio = 0.151
-        }
-
-        return normalized
-    }
-
-    function loadOverlayConfig(id, defaults) {
-        var loaded = AppSettings.loadOverlayConfig(dashboardId, id)
-        var merged = {}
-        for (var key in defaults)
-            merged[key] = defaults[key]
-        for (var loadedKey in loaded)
-            merged[loadedKey] = loaded[loadedKey]
-        return normalizeArcConfig(id, merged)
-    }
-
-    function refreshConfigs() {
-        overlayConfigs = {
-            tachGroup: loadOverlayConfig("tachGroup", {
-                sensorKey: "rpm",
+    function defaultClusterConfig(id) {
+        if (id === "tachCluster") {
+            return {
                 shapeMode: "tachSvg",
+                sensorKey: "rpm",
                 minValue: 0,
                 maxValue: AppSettings.getValue("Max RPM", 10000),
                 unit: "RPM",
                 decimals: 0,
                 overlaySize: DashboardTheme.defaultTachSize,
-                referenceOverlaySize: DashboardTheme.defaultTachSize,
-                shiftPoint: AppSettings.getValue("Shift Light1", 3000) / Math.max(1, AppSettings.getValue("Max RPM", 10000)),
+                startAngle: 225,
+                endAngle: 56,
+                arcWidth: 0.285,
+                arcScale: 0.945,
+                arcOffsetX: 5,
+                arcOffsetY: 0,
+                minimumVisibleFraction: 0.08,
+                startTaper: 0.18,
+                endTaper: 0.18,
+                testLoopEnabled: false,
+                testLoopDuration: 1800,
+                arcColorStart: "#8F4D17",
+                arcColorMid: "#FF8A00",
+                arcColorMidPos: 0.65,
+                arcColorEnd: "#B00000",
                 warningEnabled: false,
-                alignmentOverrideEnabled: false,
-                alignmentOverrideProgress: 1.0,
-                valueOffsetY: 94,
-                contentRightInsetRatio: 0.0583,
-                contentBottomInsetRatio: 0.151
-            }),
-            speedGroup: loadOverlayConfig("speedGroup", {
-                sensorKey: "speed",
+                warningThreshold: AppSettings.getValue("Shift Light1", 3000),
+                warningColor: "#FF3300",
+                warningFlash: true,
+                warningFlashRate: 200,
+                readoutTextColor: "#FFFFFF",
+                readoutStep: 1,
+                readoutOffsetX: 0,
+                readoutOffsetY: 94,
+                readoutValueScale: 0.213,
+                readoutUnitScale: 0.076,
+                unitOffsetX: 34,
+                unitOffsetY: -2,
+                readoutSpacing: -2,
+                gearKey: "Gear",
+                gearTextColor: "#FFFFFF",
+                gearFontSize: 140.013,
+                suffixFontSize: 52.505,
+                gearOffsetX: 21.5,
+                gearOffsetY: -76,
+                gearWidth: 168,
+                gearHeight: 117
+            }
+        }
+
+        if (id === "speedCluster") {
+            return {
                 shapeMode: "speedSvg",
+                sensorKey: "speed",
                 minValue: 0,
                 maxValue: 200,
                 unit: "MPH",
                 decimals: 0,
                 overlaySize: DashboardTheme.defaultSpeedSize,
-                referenceOverlaySize: DashboardTheme.defaultSpeedSize,
+                startAngle: 225,
+                endAngle: 315,
+                arcWidth: 0.285,
+                arcScale: 0.945,
+                arcOffsetX: 5,
+                arcOffsetY: 0,
+                minimumVisibleFraction: 0.08,
+                startTaper: 0.28,
+                endTaper: 0.24,
+                testLoopEnabled: false,
+                testLoopDuration: 1800,
+                arcColorStart: "#7A0D0D",
+                arcColorMid: "#E11B1B",
+                arcColorMidPos: 0.62,
+                arcColorEnd: "#B00000",
                 warningEnabled: false,
-                alignmentOverrideEnabled: false,
-                alignmentOverrideProgress: 1.0,
-                valueOffsetY: 62,
-                contentRightInsetRatio: 0.0583,
-                contentBottomInsetRatio: 0.151
-            }),
-            gearIndicator: loadOverlayConfig("gearIndicator", {
-                gearKey: "Gear",
-                gearTextColor: "#FFFFFF",
-                gearFontSize: 140.013,
-                suffixFontSize: 52.505
-            }),
+                warningThreshold: 180,
+                warningColor: "#FF0000",
+                warningFlash: true,
+                warningFlashRate: 200,
+                readoutTextColor: "#FFFFFF",
+                readoutStep: 1,
+                readoutOffsetX: 0,
+                readoutOffsetY: 62,
+                readoutValueScale: 0.213,
+                readoutUnitScale: 0.076,
+                unitOffsetX: 14,
+                unitOffsetY: -2,
+                readoutSpacing: -1
+            }
+        }
+
+        return {}
+    }
+
+    function normalizeClusterConfig(id, merged) {
+        if (id === "tachCluster") {
+            merged.shapeMode = "tachSvg"
+        } else if (id === "speedCluster") {
+            merged.shapeMode = "speedSvg"
+        }
+        return merged
+    }
+
+    function objectHasKeys(obj) {
+        for (var key in obj)
+            return true
+        return false
+    }
+
+    function mergeConfig(target, source) {
+        for (var key in source)
+            target[key] = source[key]
+    }
+
+    function loadOverlayConfig(id, defaults, legacyIds) {
+        var loaded = AppSettings.loadOverlayConfig(dashboardId, id)
+        var merged = {}
+        for (var key in defaults)
+            merged[key] = defaults[key]
+        if (objectHasKeys(loaded)) {
+            mergeConfig(merged, loaded)
+        } else if (legacyIds !== undefined) {
+            for (var i = 0; i < legacyIds.length; ++i) {
+                var legacyLoaded = AppSettings.loadOverlayConfig(dashboardId, legacyIds[i])
+                mergeConfig(merged, legacyLoaded)
+            }
+        }
+        return normalizeClusterConfig(id, merged)
+    }
+
+    function refreshConfigs() {
+        overlayConfigs = {
+            tachCluster: loadOverlayConfig("tachCluster", defaultClusterConfig("tachCluster"), ["tachGroup", "gearIndicator"]),
+            speedCluster: loadOverlayConfig("speedCluster", defaultClusterConfig("speedCluster"), ["speedGroup"]),
             shiftIndicator: loadOverlayConfig("shiftIndicator", {
                 sensorKey: "rpm",
                 maxValue: AppSettings.getValue("Max RPM", 10000),
@@ -157,6 +180,7 @@ Item {
                 offColor: "#FF0909"
             }),
             brakeBias: loadOverlayConfig("brakeBias", {
+                sensorKey: "brakeBias",
                 leftLabel: "RWD",
                 rightLabel: "FWD",
                 minValue: 0,
@@ -263,7 +287,7 @@ Item {
     OverlayConfigPopup {
         id: overlayPopup
         dashboardId: root.dashboardId
-        onConfigChanged: root.refreshConfigs()
+        onConfigChanged: function(overlayId) { root.refreshConfigs() }
     }
 
     DraggableOverlay {
@@ -273,9 +297,7 @@ Item {
         y: DashboardTheme.defaultShiftY
         width: 925
         height: 30
-        onConfigRequested: function(requestedOverlayId, requestedConfigType) {
-            overlayPopup.openFor(requestedOverlayId, requestedConfigType)
-        }
+        onConfigRequested: overlayPopup.openFor(overlayId, configType)
 
         ShiftIndicator {
             anchors.fill: parent
@@ -284,57 +306,36 @@ Item {
     }
 
     DraggableOverlay {
-        overlayId: "tachGroup"
-        configType: "tachGroup"
+        overlayId: "tachCluster"
+        configType: "tachCluster"
         x: DashboardTheme.defaultTachX
         y: DashboardTheme.defaultTachY
-        width: root.overlayConfigs.tachGroup && root.overlayConfigs.tachGroup.overlaySize !== undefined
-            ? Number(root.overlayConfigs.tachGroup.overlaySize)
+        width: root.overlayConfigs.tachCluster && root.overlayConfigs.tachCluster.overlaySize !== undefined
+            ? Number(root.overlayConfigs.tachCluster.overlaySize)
             : DashboardTheme.defaultTachSize
         height: width
-        onConfigRequested: function(requestedOverlayId, requestedConfigType) {
-            overlayPopup.openFor(requestedOverlayId, requestedConfigType)
-        }
+        onConfigRequested: overlayPopup.openFor(overlayId, configType)
 
-        ArcGauge {
+        TachCluster {
             anchors.fill: parent
-            config: root.overlayConfigs.tachGroup || ({})
+            config: root.overlayConfigs.tachCluster || ({})
         }
     }
 
     DraggableOverlay {
-        overlayId: "gearIndicator"
-        configType: "gear"
-        x: 741
-        y: 243
-        width: 168
-        height: 117
-        onConfigRequested: function(requestedOverlayId, requestedConfigType) {
-            overlayPopup.openFor(requestedOverlayId, requestedConfigType)
-        }
-
-        GearIndicator {
-            anchors.fill: parent
-            config: root.overlayConfigs.gearIndicator || ({})
-        }
-    }
-
-    DraggableOverlay {
-        overlayId: "speedGroup"
-        configType: "speedGroup"
+        overlayId: "speedCluster"
+        configType: "speedCluster"
         x: DashboardTheme.defaultSpeedX
         y: DashboardTheme.defaultSpeedY
-        width: root.overlayConfigs.speedGroup && root.overlayConfigs.speedGroup.overlaySize !== undefined
-            ? Number(root.overlayConfigs.speedGroup.overlaySize)
+        width: root.overlayConfigs.speedCluster && root.overlayConfigs.speedCluster.overlaySize !== undefined
+            ? Number(root.overlayConfigs.speedCluster.overlaySize)
             : DashboardTheme.defaultSpeedSize
         height: width
-        onConfigRequested: function(requestedOverlayId, requestedConfigType) {
-            overlayPopup.openFor(requestedOverlayId, requestedConfigType)
-        }
+        onConfigRequested: overlayPopup.openFor(overlayId, configType)
 
-        ArcGauge {
+        SpeedCluster {
             anchors.fill: parent
-            config: root.overlayConfigs.speedGroup || ({})
+            config: root.overlayConfigs.speedCluster || ({})
         }
     }
 
@@ -345,9 +346,7 @@ Item {
         y: DashboardTheme.defaultWaterTempY
         width: 250
         height: 113
-        onConfigRequested: function(requestedOverlayId, requestedConfigType) {
-            overlayPopup.openFor(requestedOverlayId, requestedConfigType)
-        }
+        onConfigRequested: overlayPopup.openFor(overlayId, configType)
 
         SensorCard {
             anchors.fill: parent
@@ -362,9 +361,7 @@ Item {
         y: DashboardTheme.defaultOilPressureY
         width: 250
         height: 113
-        onConfigRequested: function(requestedOverlayId, requestedConfigType) {
-            overlayPopup.openFor(requestedOverlayId, requestedConfigType)
-        }
+        onConfigRequested: overlayPopup.openFor(overlayId, configType)
 
         SensorCard {
             anchors.fill: parent
@@ -379,9 +376,7 @@ Item {
         y: DashboardTheme.defaultStatusRow0Y
         width: 250
         height: 25
-        onConfigRequested: function(requestedOverlayId, requestedConfigType) {
-            overlayPopup.openFor(requestedOverlayId, requestedConfigType)
-        }
+        onConfigRequested: overlayPopup.openFor(overlayId, configType)
 
         StatusBox {
             anchors.fill: parent
@@ -396,9 +391,7 @@ Item {
         y: DashboardTheme.defaultStatusRow1Y
         width: 250
         height: 25
-        onConfigRequested: function(requestedOverlayId, requestedConfigType) {
-            overlayPopup.openFor(requestedOverlayId, requestedConfigType)
-        }
+        onConfigRequested: overlayPopup.openFor(overlayId, configType)
 
         StatusBox {
             anchors.fill: parent
@@ -413,9 +406,7 @@ Item {
         y: DashboardTheme.defaultBrakeBiasY
         width: 365
         height: 82
-        onConfigRequested: function(requestedOverlayId, requestedConfigType) {
-            overlayPopup.openFor(requestedOverlayId, requestedConfigType)
-        }
+        onConfigRequested: overlayPopup.openFor(overlayId, configType)
 
         BrakeBiasBar {
             anchors.fill: parent
@@ -430,9 +421,7 @@ Item {
         y: DashboardTheme.defaultBottomBarY
         width: 1600
         height: 40
-        onConfigRequested: function(requestedOverlayId, requestedConfigType) {
-            overlayPopup.openFor(requestedOverlayId, requestedConfigType)
-        }
+        onConfigRequested: overlayPopup.openFor(overlayId, configType)
 
         BottomStatusBar {
             anchors.fill: parent

@@ -28,24 +28,33 @@ Popup {
     property real maxValue: 100
     property int decimals: 0
 
-    // Arc geometry
-    property real startAngle: 135
-    property real sweepAngle: 270
-    property real arcWidth: 0.209
+    // Race dash arc settings
     property real overlaySize: 0
-    property real pathStart: 0.0
-    property real pathEnd: 1.0
-    property real rotationDeg: 0.0
-    property real thicknessScale: 1.0
-    property bool alignmentOverrideEnabled: false
-    property real alignmentOverrideProgress: 1.0
-
-    // Arc colors
-    property string arcColorStart: "#E88A1A"
-    property string arcColorEnd: "#C45A00"
-    property string arcColorMid: ""
-    property real arcColorMidPos: 0.5
-    property string arcBgColor: "#151518"
+    property real startAngle: 225
+    property real endAngle: 56
+    property real arcWidth: 0.285
+    property real arcScale: 0.945
+    property real arcOffsetX: 5
+    property real arcOffsetY: 0
+    property real minimumVisibleFraction: 0.08
+    property real startTaper: 0.18
+    property real endTaper: 0.18
+    property bool testLoopEnabled: false
+    property int testLoopDuration: 1800
+    property string arcColorStart: "#8F4D17"
+    property string arcColorMid: "#FF8A00"
+    property real arcColorMidPos: 0.65
+    property string arcColorEnd: "#B00000"
+    property real valueOffsetY: 0
+    property real readoutOffsetX: 0
+    property real readoutOffsetY: 0
+    property real readoutStep: 1
+    property real readoutValueScale: 0.213
+    property real readoutUnitScale: 0.076
+    property real unitOffsetX: 0
+    property real unitOffsetY: 0
+    property real readoutSpacing: 0
+    property string readoutTextColor: "#FFFFFF"
 
     // Warning
     property bool warningEnabled: false
@@ -66,6 +75,11 @@ Popup {
     property string gearSensorKey: "Gear"
     property string gearTextColor: "#FFFFFF"
     property int gearFontSize: 140
+    property real suffixFontSize: 52.505
+    property real gearOffsetX: 0
+    property real gearOffsetY: 0
+    property real gearWidth: 168
+    property real gearHeight: 117
 
     // Shift
     property real shiftPoint: 0.75
@@ -80,44 +94,35 @@ Popup {
     property bool timeEnabled: true
 
     // -- Config type classification --
-    // Support both old (tachGroup, speedGroup, sensorCard, statusRow, staticText)
-    // and new (arc, gear, sensor, status, brakebias, shift, bottombar) config types
-    readonly property bool isArc: configType === "arc"
-                                  || configType === "tachGroup"
-                                  || configType === "speedGroup"
+    readonly property bool isArc: configType === "tachCluster"
+                                  || configType === "speedCluster"
     readonly property bool isGear: configType === "gear"
-                                   || configType === "tachGroup"
-    readonly property bool isSensor: configType === "sensor"
-                                     || configType === "sensorCard"
-    readonly property bool isStatus: configType === "status"
-                                     || configType === "statusRow"
+    readonly property bool isSensor: configType === "sensorCard"
+    readonly property bool isStatus: configType === "statusRow"
     readonly property bool isBrakeBias: configType === "brakebias"
-                                        || configType === "brakeBias"
     readonly property bool isShift: configType === "shift"
-                                    || configType === "tachGroup"
     readonly property bool isBottomBar: configType === "bottombar"
-                                        || configType === "staticText"
-    readonly property bool usesSvgDerivedShape: configType === "tachGroup"
-                                             || configType === "speedGroup"
-
+    readonly property bool isCluster: configType === "tachCluster"
+                                      || configType === "speedCluster"
+    readonly property bool isTachCluster: configType === "tachCluster"
     // Section visibility flags
     readonly property bool hasDatasource: isArc || isGear || isSensor
                                           || isStatus || isBrakeBias
     readonly property bool hasLabel: isSensor || isStatus
     readonly property bool hasUnitDecimals: isArc || isSensor
     readonly property bool hasValueRange: isArc || isBrakeBias
-    readonly property bool hasArcGeometry: isArc && !usesSvgDerivedShape
-    readonly property bool hasArcOverlaySize: configType === "tachGroup"
-                                         || configType === "speedGroup"
-    readonly property bool hasSvgPathControls: false
+    readonly property bool hasArcGeometry: isArc
+    readonly property bool hasArcOverlaySize: configType === "tachCluster"
+                                         || configType === "speedCluster"
+    readonly property bool hasArcColors: isArc
     readonly property bool hasArcAlignment: isArc
-    readonly property bool hasArcColors: isArc && !usesSvgDerivedShape
     readonly property bool hasWarning: isArc || isSensor || isShift
     readonly property bool hasStatusConfig: isStatus
-    readonly property bool hasGearConfig: isGear
+    readonly property bool hasGearConfig: isGear || isTachCluster
     readonly property bool hasShiftConfig: isShift
     readonly property bool hasBiasLabels: isBrakeBias
     readonly property bool hasStaticText: isBottomBar
+    readonly property bool hasReadoutConfig: isCluster
 
     // -- Popup layout --
     width: 500
@@ -144,20 +149,103 @@ Popup {
         overlayId = id
         configType = type
         currentConfig = AppSettings.loadOverlayConfig(dashboardId, id)
+        if (!configHasKeys(currentConfig) && type === "tachCluster") {
+            currentConfig = AppSettings.loadOverlayConfig(dashboardId, "tachGroup")
+            var legacyGear = AppSettings.loadOverlayConfig(dashboardId, "gearIndicator")
+            for (var gearKey in legacyGear)
+                currentConfig[gearKey] = legacyGear[gearKey]
+        } else if (!configHasKeys(currentConfig) && type === "speedCluster") {
+            currentConfig = AppSettings.loadOverlayConfig(dashboardId, "speedGroup")
+        }
         populateFromConfig()
         open()
     }
 
+    function configHasKeys(obj) {
+        for (var key in obj)
+            return true
+        return false
+    }
+
     function defaultOverlaySizeFor(type) {
-        if (type === "tachGroup")
+        if (type === "tachCluster")
             return 575.051
-        if (type === "speedGroup")
+        if (type === "speedCluster")
             return 503.17
         return 0
     }
 
+    function defaultArcConfigFor(type) {
+        if (type === "speedCluster") {
+            return {
+                startAngle: 225,
+                endAngle: 315,
+                arcWidth: 0.285,
+                arcScale: 0.945,
+                arcOffsetX: 5,
+                arcOffsetY: 0,
+                minimumVisibleFraction: 0.08,
+                startTaper: 0.28,
+                endTaper: 0.24,
+                testLoopEnabled: false,
+                testLoopDuration: 1800,
+                arcColorStart: "#7A0D0D",
+                arcColorMid: "#E11B1B",
+                arcColorMidPos: 0.62,
+                arcColorEnd: "#B00000",
+                readoutTextColor: "#FFFFFF",
+                readoutStep: 1,
+                readoutOffsetX: 0,
+                readoutOffsetY: 62,
+                readoutValueScale: 0.213,
+                readoutUnitScale: 0.076,
+                unitOffsetX: 14,
+                unitOffsetY: -2,
+                readoutSpacing: -1,
+                valueOffsetY: 62
+            }
+        }
+
+        return {
+            startAngle: 225,
+            endAngle: 56,
+            arcWidth: 0.285,
+            arcScale: 0.945,
+            arcOffsetX: 5,
+            arcOffsetY: 0,
+            minimumVisibleFraction: 0.08,
+            startTaper: 0.18,
+            endTaper: 0.18,
+            testLoopEnabled: false,
+            testLoopDuration: 1800,
+            arcColorStart: "#8F4D17",
+            arcColorMid: "#FF8A00",
+            arcColorMidPos: 0.65,
+            arcColorEnd: "#B00000",
+            readoutTextColor: "#FFFFFF",
+            readoutStep: 1,
+            readoutOffsetX: 0,
+            readoutOffsetY: 94,
+            readoutValueScale: 0.213,
+            readoutUnitScale: 0.076,
+            unitOffsetX: 34,
+            unitOffsetY: -2,
+            readoutSpacing: -2,
+            gearOffsetX: 21.5,
+            gearOffsetY: -76,
+            gearWidth: 168,
+            gearHeight: 117,
+            suffixFontSize: 52.505,
+            valueOffsetY: 94
+        }
+    }
+
+    function num(val, def) { return val !== undefined ? Number(val) : def; }
+    function toBool(val, def) { return val !== undefined ? (val === true || val === "true") : def; }
+
     function populateFromConfig() {
         var cfg = currentConfig
+        var arcDefaults = defaultArcConfigFor(configType)
 
         // Datasource
         sensorKey = cfg.sensorKey || ""
@@ -168,56 +256,76 @@ Popup {
         staticText = cfg.text || ""
 
         // Value range
-        minValue = cfg.minValue !== undefined ? Number(cfg.minValue) : 0
-        maxValue = cfg.maxValue !== undefined ? Number(cfg.maxValue) : 100
-        decimals = cfg.decimals !== undefined ? Number(cfg.decimals) : 0
+        minValue = num(cfg.minValue, 0)
+        maxValue = num(cfg.maxValue, 100)
+        decimals = num(cfg.decimals, 0)
 
-        // Arc geometry
-        var rawOverlaySize = cfg.overlaySize !== undefined ? Number(cfg.overlaySize) : undefined
-
-        if (configType === "tachGroup") {
-            overlaySize = rawOverlaySize !== undefined && rawOverlaySize > 0 ? rawOverlaySize : defaultOverlaySizeFor(configType)
-        } else if (configType === "speedGroup") {
-            overlaySize = rawOverlaySize !== undefined && rawOverlaySize > 0 ? rawOverlaySize : defaultOverlaySizeFor(configType)
+        var rawOverlaySize = num(cfg.overlaySize, 0)
+        if (configType === "tachCluster" || configType === "speedCluster") {
+            overlaySize = rawOverlaySize > 0 ? rawOverlaySize : defaultOverlaySizeFor(configType)
         } else {
-            startAngle = cfg.startAngle !== undefined ? Number(cfg.startAngle) : 135
-            sweepAngle = cfg.sweepAngle !== undefined ? Number(cfg.sweepAngle) : 270
-            arcWidth = cfg.arcWidth !== undefined ? Number(cfg.arcWidth) : 0.209
-            overlaySize = rawOverlaySize !== undefined && rawOverlaySize > 0 ? rawOverlaySize : 0
+            overlaySize = rawOverlaySize > 0 ? rawOverlaySize : 0
         }
-        alignmentOverrideEnabled = cfg.alignmentOverrideEnabled === true || cfg.alignmentOverrideEnabled === "true"
-        alignmentOverrideProgress = cfg.alignmentOverrideProgress !== undefined ? Number(cfg.alignmentOverrideProgress) : 1.0
 
-        // Arc colors
-        arcColorStart = cfg.arcColorStart || "#E88A1A"
-        arcColorEnd = cfg.arcColorEnd || "#C45A00"
-        arcColorMid = cfg.arcColorMid || ""
-        arcColorMidPos = cfg.arcColorMidPos !== undefined ? Number(cfg.arcColorMidPos) : 0.5
-        arcBgColor = cfg.arcBgColor || "#151518"
+        startAngle = num(cfg.startAngle, arcDefaults.startAngle)
+        endAngle = num(cfg.endAngle, arcDefaults.endAngle)
+        arcWidth = num(cfg.arcWidth, arcDefaults.arcWidth)
+        arcScale = num(cfg.arcScale, arcDefaults.arcScale)
+        arcOffsetX = num(cfg.arcOffsetX, arcDefaults.arcOffsetX)
+        arcOffsetY = num(cfg.arcOffsetY, arcDefaults.arcOffsetY)
+        minimumVisibleFraction = num(cfg.minimumVisibleFraction, arcDefaults.minimumVisibleFraction)
+        startTaper = num(cfg.startTaper, arcDefaults.startTaper)
+        endTaper = num(cfg.endTaper, arcDefaults.endTaper)
+        
+        if (cfg.testLoopEnabled !== undefined)
+            testLoopEnabled = toBool(cfg.testLoopEnabled, false)
+        else
+            testLoopEnabled = toBool(cfg.alignmentOverrideEnabled, false)
+            
+        testLoopDuration = num(cfg.testLoopDuration, arcDefaults.testLoopDuration)
+        arcColorStart = cfg.arcColorStart || arcDefaults.arcColorStart
+        arcColorMid = cfg.arcColorMid || arcDefaults.arcColorMid
+        arcColorMidPos = num(cfg.arcColorMidPos, arcDefaults.arcColorMidPos)
+        arcColorEnd = cfg.arcColorEnd || arcDefaults.arcColorEnd
+        valueOffsetY = num(cfg.valueOffsetY, arcDefaults.valueOffsetY)
+        readoutOffsetX = num(cfg.readoutOffsetX, arcDefaults.readoutOffsetX)
+        readoutOffsetY = num(cfg.readoutOffsetY, cfg.valueOffsetY !== undefined ? num(cfg.valueOffsetY, 0) : arcDefaults.readoutOffsetY)
+        readoutStep = num(cfg.readoutStep, arcDefaults.readoutStep)
+        readoutValueScale = num(cfg.readoutValueScale, arcDefaults.readoutValueScale)
+        readoutUnitScale = num(cfg.readoutUnitScale, arcDefaults.readoutUnitScale)
+        unitOffsetX = num(cfg.unitOffsetX, arcDefaults.unitOffsetX)
+        unitOffsetY = num(cfg.unitOffsetY, arcDefaults.unitOffsetY)
+        readoutSpacing = num(cfg.readoutSpacing, arcDefaults.readoutSpacing)
+        readoutTextColor = cfg.readoutTextColor || arcDefaults.readoutTextColor
 
         // Warning
-        warningEnabled = cfg.warningEnabled === true || cfg.warningEnabled === "true"
-        warningThreshold = cfg.warningThreshold !== undefined ? Number(cfg.warningThreshold) : 0
+        warningEnabled = toBool(cfg.warningEnabled, false)
+        warningThreshold = num(cfg.warningThreshold, 0)
         warningColor = cfg.warningColor || "#FF0000"
-        warningFlash = cfg.warningFlash !== undefined ? (cfg.warningFlash === true || cfg.warningFlash === "true") : true
-        warningFlashRate = cfg.warningFlashRate !== undefined ? Number(cfg.warningFlashRate) : 200
+        warningFlash = toBool(cfg.warningFlash, true)
+        warningFlashRate = num(cfg.warningFlashRate, 200)
         warningDirection = cfg.warningDirection || "above"
         normalColor = cfg.normalColor || "#FFFFFF"
 
         // Status
-        threshold = cfg.threshold !== undefined ? Number(cfg.threshold) : 0.5
+        threshold = num(cfg.threshold, 0.5)
         onColor = cfg.onColor || "#1ED033"
         offColor = cfg.offColor || "#FF0909"
-        invertLogic = cfg.invertLogic === true || cfg.invertLogic === "true"
+        invertLogic = toBool(cfg.invertLogic, false)
 
         // Gear
         gearSensorKey = cfg.gearKey || "Gear"
         gearTextColor = cfg.gearTextColor || "#FFFFFF"
-        gearFontSize = cfg.gearFontSize !== undefined ? Number(cfg.gearFontSize) : 140
+        gearFontSize = num(cfg.gearFontSize, 140)
+        suffixFontSize = num(cfg.suffixFontSize, arcDefaults.suffixFontSize !== undefined ? arcDefaults.suffixFontSize : 52.505)
+        gearOffsetX = num(cfg.gearOffsetX, arcDefaults.gearOffsetX !== undefined ? arcDefaults.gearOffsetX : 0)
+        gearOffsetY = num(cfg.gearOffsetY, arcDefaults.gearOffsetY !== undefined ? arcDefaults.gearOffsetY : 0)
+        gearWidth = num(cfg.gearWidth, arcDefaults.gearWidth !== undefined ? arcDefaults.gearWidth : 168)
+        gearHeight = num(cfg.gearHeight, arcDefaults.gearHeight !== undefined ? arcDefaults.gearHeight : 117)
 
         // Shift
-        shiftPoint = cfg.shiftPoint !== undefined ? Number(cfg.shiftPoint) : 0.75
-        shiftCount = cfg.shiftCount !== undefined ? Number(cfg.shiftCount) : 11
+        shiftPoint = num(cfg.shiftPoint, 0.75)
+        shiftCount = num(cfg.shiftCount, 11)
         shiftPattern = cfg.shiftPattern || "center-out"
 
         // Brake bias labels
@@ -225,7 +333,7 @@ Popup {
         rightLabel = cfg.rightLabel || "FWD"
 
         // Bottom bar
-        timeEnabled = cfg.timeEnabled !== undefined ? (cfg.timeEnabled === true || cfg.timeEnabled === "true") : true
+        timeEnabled = toBool(cfg.timeEnabled, true)
 
         // Set datasource combo index
         updateDatasourceIndex()
@@ -279,13 +387,26 @@ Popup {
 
         if (hasArcGeometry) {
             config.startAngle = startAngle
-            config.sweepAngle = sweepAngle
+            config.endAngle = endAngle
             config.arcWidth = arcWidth
-        }
-
-        if (hasArcAlignment) {
-            config.alignmentOverrideEnabled = alignmentOverrideEnabled
-            config.alignmentOverrideProgress = alignmentOverrideProgress
+            config.arcScale = arcScale
+            config.arcOffsetX = arcOffsetX
+            config.arcOffsetY = arcOffsetY
+            config.minimumVisibleFraction = minimumVisibleFraction
+            config.startTaper = startTaper
+            config.endTaper = endTaper
+            config.testLoopEnabled = testLoopEnabled
+            config.testLoopDuration = testLoopDuration
+            config.valueOffsetY = valueOffsetY
+            config.readoutOffsetX = readoutOffsetX
+            config.readoutOffsetY = readoutOffsetY
+            config.readoutStep = readoutStep
+            config.readoutValueScale = readoutValueScale
+            config.readoutUnitScale = readoutUnitScale
+            config.unitOffsetX = unitOffsetX
+            config.unitOffsetY = unitOffsetY
+            config.readoutSpacing = readoutSpacing
+            config.readoutTextColor = readoutTextColor
         }
 
         if (hasArcOverlaySize)
@@ -293,10 +414,9 @@ Popup {
 
         if (hasArcColors) {
             config.arcColorStart = arcColorStart
-            config.arcColorEnd = arcColorEnd
             config.arcColorMid = arcColorMid
             config.arcColorMidPos = arcColorMidPos
-            config.arcBgColor = arcBgColor
+            config.arcColorEnd = arcColorEnd
         }
 
         if (hasWarning) {
@@ -304,6 +424,8 @@ Popup {
             config.warningThreshold = warningThreshold
             config.warningFlash = warningFlash
             config.warningFlashRate = warningFlashRate
+            if (isArc)
+                config.warningColor = warningColor
             if (isSensor) {
                 config.warningColor = warningColor
                 config.warningDirection = warningDirection
@@ -322,6 +444,11 @@ Popup {
             config.gearKey = gearSensorKey
             config.gearTextColor = gearTextColor
             config.gearFontSize = gearFontSize
+            config.suffixFontSize = suffixFontSize
+            config.gearOffsetX = gearOffsetX
+            config.gearOffsetY = gearOffsetY
+            config.gearWidth = gearWidth
+            config.gearHeight = gearHeight
         }
 
         if (hasShiftConfig) {
@@ -602,79 +729,386 @@ Popup {
                     visible: popup.hasArcGeometry
                     Layout.fillWidth: true
 
-                    RowLayout {
+                    ColumnLayout {
                         Layout.fillWidth: true
                         spacing: 10
 
-                        ColumnLayout {
+                        Text {
+                            text: "Angles use clock-style degrees: 0 at top, 90 at right, 180 at bottom, 270 at left."
+                            wrapMode: Text.WordWrap
+                            font.pixelSize: SettingsTheme.fontCaption
+                            font.family: SettingsTheme.fontFamily
+                            color: SettingsTheme.textSecondary
                             Layout.fillWidth: true
-                            spacing: 4
+                        }
 
-                            Text {
-                                text: "Start Angle (deg)"
-                                font.pixelSize: SettingsTheme.fontCaption
-                                font.family: SettingsTheme.fontFamily
-                                color: SettingsTheme.textSecondary
+                        RowLayout {
+                            Layout.fillWidth: true
+                            spacing: 10
+
+                            ColumnLayout {
+                                Layout.fillWidth: true
+                                spacing: 4
+
+                                Text {
+                                    text: "Start Angle"
+                                    font.pixelSize: SettingsTheme.fontCaption
+                                    font.family: SettingsTheme.fontFamily
+                                    color: SettingsTheme.textSecondary
+                                }
+
+                                StyledTextField {
+                                    Layout.fillWidth: true
+                                    Layout.preferredHeight: SettingsTheme.controlHeight
+                                    text: popup.startAngle.toFixed(1)
+                                    inputMethodHints: Qt.ImhFormattedNumbersOnly
+                                    onTextEdited: {
+                                        var v = parseFloat(text)
+                                        if (!isNaN(v))
+                                            popup.startAngle = v
+                                    }
+                                }
                             }
 
-                            StyledTextField {
+                            ColumnLayout {
                                 Layout.fillWidth: true
-                                Layout.preferredHeight: SettingsTheme.controlHeight
-                                text: popup.startAngle.toString()
-                                inputMethodHints: Qt.ImhFormattedNumbersOnly
-                                onTextEdited: {
-                                    var v = parseFloat(text)
-                                    if (!isNaN(v))
-                                        popup.startAngle = v
+                                spacing: 4
+
+                                Text {
+                                    text: "End Angle"
+                                    font.pixelSize: SettingsTheme.fontCaption
+                                    font.family: SettingsTheme.fontFamily
+                                    color: SettingsTheme.textSecondary
+                                }
+
+                                StyledTextField {
+                                    Layout.fillWidth: true
+                                    Layout.preferredHeight: SettingsTheme.controlHeight
+                                    text: popup.endAngle.toFixed(1)
+                                    inputMethodHints: Qt.ImhFormattedNumbersOnly
+                                    onTextEdited: {
+                                        var v = parseFloat(text)
+                                        if (!isNaN(v))
+                                            popup.endAngle = v
+                                    }
                                 }
                             }
                         }
 
-                        ColumnLayout {
+                        RowLayout {
                             Layout.fillWidth: true
-                            spacing: 4
+                            spacing: 10
 
-                            Text {
-                                text: "Sweep Angle (deg)"
-                                font.pixelSize: SettingsTheme.fontCaption
-                                font.family: SettingsTheme.fontFamily
-                                color: SettingsTheme.textSecondary
+                            ColumnLayout {
+                                Layout.fillWidth: true
+                                spacing: 4
+
+                                Text {
+                                    text: "Arc Width"
+                                    font.pixelSize: SettingsTheme.fontCaption
+                                    font.family: SettingsTheme.fontFamily
+                                    color: SettingsTheme.textSecondary
+                                }
+
+                                StyledTextField {
+                                    Layout.fillWidth: true
+                                    Layout.preferredHeight: SettingsTheme.controlHeight
+                                    text: popup.arcWidth.toFixed(3)
+                                    inputMethodHints: Qt.ImhFormattedNumbersOnly
+                                    onTextEdited: {
+                                        var v = parseFloat(text)
+                                        if (!isNaN(v) && v >= 0.01 && v <= 0.95)
+                                            popup.arcWidth = v
+                                    }
+                                }
                             }
 
-                            StyledTextField {
+                            ColumnLayout {
                                 Layout.fillWidth: true
-                                Layout.preferredHeight: SettingsTheme.controlHeight
-                                text: popup.sweepAngle.toString()
-                                inputMethodHints: Qt.ImhFormattedNumbersOnly
-                                onTextEdited: {
-                                    var v = parseFloat(text)
-                                    if (!isNaN(v))
-                                        popup.sweepAngle = v
+                                spacing: 4
+
+                                Text {
+                                    text: "Arc Scale"
+                                    font.pixelSize: SettingsTheme.fontCaption
+                                    font.family: SettingsTheme.fontFamily
+                                    color: SettingsTheme.textSecondary
+                                }
+
+                                StyledTextField {
+                                    Layout.fillWidth: true
+                                    Layout.preferredHeight: SettingsTheme.controlHeight
+                                    text: popup.arcScale.toFixed(3)
+                                    inputMethodHints: Qt.ImhFormattedNumbersOnly
+                                    onTextEdited: {
+                                        var v = parseFloat(text)
+                                        if (!isNaN(v) && v >= 0.1 && v <= 2.0)
+                                            popup.arcScale = v
+                                    }
+                                }
+                            }
+                        }
+
+                        RowLayout {
+                            Layout.fillWidth: true
+                            spacing: 10
+
+                            ColumnLayout {
+                                Layout.fillWidth: true
+                                spacing: 4
+
+                                Text {
+                                    text: "Arc Offset X"
+                                    font.pixelSize: SettingsTheme.fontCaption
+                                    font.family: SettingsTheme.fontFamily
+                                    color: SettingsTheme.textSecondary
+                                }
+
+                                StyledTextField {
+                                    Layout.fillWidth: true
+                                    Layout.preferredHeight: SettingsTheme.controlHeight
+                                    text: popup.arcOffsetX.toFixed(1)
+                                    inputMethodHints: Qt.ImhFormattedNumbersOnly
+                                    onTextEdited: {
+                                        var v = parseFloat(text)
+                                        if (!isNaN(v))
+                                            popup.arcOffsetX = v
+                                    }
+                                }
+                            }
+
+                            ColumnLayout {
+                                Layout.fillWidth: true
+                                spacing: 4
+
+                                Text {
+                                    text: "Arc Offset Y"
+                                    font.pixelSize: SettingsTheme.fontCaption
+                                    font.family: SettingsTheme.fontFamily
+                                    color: SettingsTheme.textSecondary
+                                }
+
+                                StyledTextField {
+                                    Layout.fillWidth: true
+                                    Layout.preferredHeight: SettingsTheme.controlHeight
+                                    text: popup.arcOffsetY.toFixed(1)
+                                    inputMethodHints: Qt.ImhFormattedNumbersOnly
+                                    onTextEdited: {
+                                        var v = parseFloat(text)
+                                        if (!isNaN(v))
+                                            popup.arcOffsetY = v
+                                    }
+                                }
+                            }
+                        }
+
+                        RowLayout {
+                            Layout.fillWidth: true
+                            spacing: 10
+
+                            ColumnLayout {
+                                Layout.fillWidth: true
+                                spacing: 4
+
+                                Text {
+                                    text: "Start Seed"
+                                    font.pixelSize: SettingsTheme.fontCaption
+                                    font.family: SettingsTheme.fontFamily
+                                    color: SettingsTheme.textSecondary
+                                }
+
+                                StyledTextField {
+                                    Layout.fillWidth: true
+                                    Layout.preferredHeight: SettingsTheme.controlHeight
+                                    text: popup.minimumVisibleFraction.toFixed(3)
+                                    inputMethodHints: Qt.ImhFormattedNumbersOnly
+                                    onTextEdited: {
+                                        var v = parseFloat(text)
+                                        if (!isNaN(v) && v >= 0 && v <= 0.5)
+                                            popup.minimumVisibleFraction = v
+                                    }
+                                }
+                            }
+
+                            ColumnLayout {
+                                Layout.fillWidth: true
+                                spacing: 4
+
+                                Text {
+                                    text: "Value Offset Y"
+                                    font.pixelSize: SettingsTheme.fontCaption
+                                    font.family: SettingsTheme.fontFamily
+                                    color: SettingsTheme.textSecondary
+                                }
+
+                                StyledTextField {
+                                    Layout.fillWidth: true
+                                    Layout.preferredHeight: SettingsTheme.controlHeight
+                                    text: popup.valueOffsetY.toFixed(1)
+                                    inputMethodHints: Qt.ImhFormattedNumbersOnly
+                                    onTextEdited: {
+                                        var v = parseFloat(text)
+                                        if (!isNaN(v))
+                                            popup.valueOffsetY = v
+                                    }
+                                }
+                            }
+                        }
+
+                        RowLayout {
+                            Layout.fillWidth: true
+                            spacing: 10
+
+                            ColumnLayout {
+                                Layout.fillWidth: true
+                                spacing: 4
+
+                                Text {
+                                    text: "Start Taper"
+                                    font.pixelSize: SettingsTheme.fontCaption
+                                    font.family: SettingsTheme.fontFamily
+                                    color: SettingsTheme.textSecondary
+                                }
+
+                                StyledTextField {
+                                    Layout.fillWidth: true
+                                    Layout.preferredHeight: SettingsTheme.controlHeight
+                                    text: popup.startTaper.toFixed(3)
+                                    inputMethodHints: Qt.ImhFormattedNumbersOnly
+                                    onTextEdited: {
+                                        var v = parseFloat(text)
+                                        if (!isNaN(v) && v >= 0 && v <= 0.49)
+                                            popup.startTaper = v
+                                    }
+                                }
+                            }
+
+                            ColumnLayout {
+                                Layout.fillWidth: true
+                                spacing: 4
+
+                                Text {
+                                    text: "End Taper"
+                                    font.pixelSize: SettingsTheme.fontCaption
+                                    font.family: SettingsTheme.fontFamily
+                                    color: SettingsTheme.textSecondary
+                                }
+
+                                StyledTextField {
+                                    Layout.fillWidth: true
+                                    Layout.preferredHeight: SettingsTheme.controlHeight
+                                    text: popup.endTaper.toFixed(3)
+                                    inputMethodHints: Qt.ImhFormattedNumbersOnly
+                                    onTextEdited: {
+                                        var v = parseFloat(text)
+                                        if (!isNaN(v) && v >= 0 && v <= 0.49)
+                                            popup.endTaper = v
+                                    }
                                 }
                             }
                         }
                     }
+                }
+
+                // ============================================================
+                // ARC COLORS SECTION
+                // ============================================================
+                SettingsSection {
+                    title: "Arc Colors"
+                    visible: popup.hasArcColors
+                    Layout.fillWidth: true
 
                     ColumnLayout {
                         Layout.fillWidth: true
-                        spacing: 4
+                        spacing: 10
 
-                        Text {
-                            text: "Arc Width (0.01 - 0.5)"
-                            font.pixelSize: SettingsTheme.fontCaption
-                            font.family: SettingsTheme.fontFamily
-                            color: SettingsTheme.textSecondary
+                        RowLayout {
+                            Layout.fillWidth: true
+                            spacing: 10
+
+                            ColumnLayout {
+                                Layout.fillWidth: true
+                                spacing: 4
+
+                                Text {
+                                    text: "Start Color"
+                                    font.pixelSize: SettingsTheme.fontCaption
+                                    font.family: SettingsTheme.fontFamily
+                                    color: SettingsTheme.textSecondary
+                                }
+
+                                StyledColorPicker {
+                                    Layout.fillWidth: true
+                                    Layout.preferredHeight: SettingsTheme.controlHeight
+                                    colorValue: popup.arcColorStart
+                                    onColorEdited: function(c) { popup.arcColorStart = c }
+                                }
+                            }
+
+                            ColumnLayout {
+                                Layout.fillWidth: true
+                                spacing: 4
+
+                                Text {
+                                    text: "Mid Color"
+                                    font.pixelSize: SettingsTheme.fontCaption
+                                    font.family: SettingsTheme.fontFamily
+                                    color: SettingsTheme.textSecondary
+                                }
+
+                                StyledColorPicker {
+                                    Layout.fillWidth: true
+                                    Layout.preferredHeight: SettingsTheme.controlHeight
+                                    colorValue: popup.arcColorMid
+                                    onColorEdited: function(c) { popup.arcColorMid = c }
+                                }
+                            }
                         }
 
-                        StyledTextField {
+                        RowLayout {
                             Layout.fillWidth: true
-                            Layout.preferredHeight: SettingsTheme.controlHeight
-                            text: popup.arcWidth.toFixed(3)
-                            inputMethodHints: Qt.ImhFormattedNumbersOnly
-                            onTextEdited: {
-                                var v = parseFloat(text)
-                                if (!isNaN(v) && v >= 0.01 && v <= 0.5)
-                                    popup.arcWidth = v
+                            spacing: 10
+
+                            ColumnLayout {
+                                Layout.fillWidth: true
+                                spacing: 4
+
+                                Text {
+                                    text: "End Color"
+                                    font.pixelSize: SettingsTheme.fontCaption
+                                    font.family: SettingsTheme.fontFamily
+                                    color: SettingsTheme.textSecondary
+                                }
+
+                                StyledColorPicker {
+                                    Layout.fillWidth: true
+                                    Layout.preferredHeight: SettingsTheme.controlHeight
+                                    colorValue: popup.arcColorEnd
+                                    onColorEdited: function(c) { popup.arcColorEnd = c }
+                                }
+                            }
+
+                            ColumnLayout {
+                                Layout.fillWidth: true
+                                spacing: 4
+
+                                Text {
+                                    text: "Mid Stop"
+                                    font.pixelSize: SettingsTheme.fontCaption
+                                    font.family: SettingsTheme.fontFamily
+                                    color: SettingsTheme.textSecondary
+                                }
+
+                                StyledTextField {
+                                    Layout.fillWidth: true
+                                    Layout.preferredHeight: SettingsTheme.controlHeight
+                                    text: popup.arcColorMidPos.toFixed(2)
+                                    inputMethodHints: Qt.ImhFormattedNumbersOnly
+                                    onTextEdited: {
+                                        var v = parseFloat(text)
+                                        if (!isNaN(v) && v >= 0 && v <= 1)
+                                            popup.arcColorMidPos = v
+                                    }
+                                }
                             }
                         }
                     }
@@ -723,267 +1157,51 @@ Popup {
                 }
 
                 // ============================================================
-                // SVG ARC PATH SECTION
+                // READOUT SECTION
                 // ============================================================
                 SettingsSection {
-                    title: "Arc Path"
-                    visible: popup.hasSvgPathControls
-                    Layout.fillWidth: true
-
-                    ColumnLayout {
-                        Layout.fillWidth: true
-                        spacing: 10
-
-                        RowLayout {
-                            Layout.fillWidth: true
-                            spacing: 10
-
-                            ColumnLayout {
-                                Layout.fillWidth: true
-                                spacing: 4
-
-                                Text {
-                                    text: "Start (0.00 - 1.00)"
-                                    font.pixelSize: SettingsTheme.fontCaption
-                                    font.family: SettingsTheme.fontFamily
-                                    color: SettingsTheme.textSecondary
-                                }
-
-                                StyledTextField {
-                                    Layout.fillWidth: true
-                                    Layout.preferredHeight: SettingsTheme.controlHeight
-                                    text: popup.pathStart.toFixed(3)
-                                    inputMethodHints: Qt.ImhFormattedNumbersOnly
-                                    onTextEdited: {
-                                        var v = parseFloat(text)
-                                        if (!isNaN(v) && v >= 0 && v <= 1)
-                                            popup.pathStart = Math.min(v, popup.pathEnd)
-                                    }
-                                }
-                            }
-
-                            ColumnLayout {
-                                Layout.fillWidth: true
-                                spacing: 4
-
-                                Text {
-                                    text: "Stop (0.00 - 1.00)"
-                                    font.pixelSize: SettingsTheme.fontCaption
-                                    font.family: SettingsTheme.fontFamily
-                                    color: SettingsTheme.textSecondary
-                                }
-
-                                StyledTextField {
-                                    Layout.fillWidth: true
-                                    Layout.preferredHeight: SettingsTheme.controlHeight
-                                    text: popup.pathEnd.toFixed(3)
-                                    inputMethodHints: Qt.ImhFormattedNumbersOnly
-                                    onTextEdited: {
-                                        var v = parseFloat(text)
-                                        if (!isNaN(v) && v >= 0 && v <= 1)
-                                            popup.pathEnd = Math.max(v, popup.pathStart)
-                                    }
-                                }
-                            }
-                        }
-
-                        RowLayout {
-                            Layout.fillWidth: true
-                            spacing: 10
-
-                            ColumnLayout {
-                                Layout.fillWidth: true
-                                spacing: 4
-
-                                Text {
-                                    text: "Rotation (deg)"
-                                    font.pixelSize: SettingsTheme.fontCaption
-                                    font.family: SettingsTheme.fontFamily
-                                    color: SettingsTheme.textSecondary
-                                }
-
-                                StyledTextField {
-                                    Layout.fillWidth: true
-                                    Layout.preferredHeight: SettingsTheme.controlHeight
-                                    text: popup.rotationDeg.toFixed(2)
-                                    inputMethodHints: Qt.ImhFormattedNumbersOnly
-                                    onTextEdited: {
-                                        var v = parseFloat(text)
-                                        if (!isNaN(v))
-                                            popup.rotationDeg = v
-                                    }
-                                }
-                            }
-
-                            ColumnLayout {
-                                Layout.fillWidth: true
-                                spacing: 4
-
-                                Text {
-                                    text: "Thickness (0.05 - 2.00)"
-                                    font.pixelSize: SettingsTheme.fontCaption
-                                    font.family: SettingsTheme.fontFamily
-                                    color: SettingsTheme.textSecondary
-                                }
-
-                                StyledTextField {
-                                    Layout.fillWidth: true
-                                    Layout.preferredHeight: SettingsTheme.controlHeight
-                                    text: popup.thicknessScale.toFixed(3)
-                                    inputMethodHints: Qt.ImhFormattedNumbersOnly
-                                    onTextEdited: {
-                                        var v = parseFloat(text)
-                                        if (!isNaN(v) && v >= 0.05 && v <= 2.0)
-                                            popup.thicknessScale = v
-                                    }
-                                }
-                            }
-                        }
-
-                        Text {
-                            text: "Use Start/Stop to match the 7:30-to-1:00 sweep, Rotation to clock the whole shape, and Thickness to widen or narrow the SVG-derived fill."
-                            wrapMode: Text.WordWrap
-                            font.pixelSize: SettingsTheme.fontCaption
-                            font.family: SettingsTheme.fontFamily
-                            color: SettingsTheme.textSecondary
-                            Layout.fillWidth: true
-                        }
-                    }
-                }
-
-                // ============================================================
-                // ARC ALIGNMENT SECTION
-                // ============================================================
-                SettingsSection {
-                    title: "Alignment Guide"
-                    visible: popup.hasArcAlignment
+                    title: "Readout"
+                    visible: popup.hasReadoutConfig
                     Layout.fillWidth: true
 
                     ColumnLayout {
                         Layout.fillWidth: true
                         spacing: 6
 
-                        StyledSwitch {
-                            text: "Show Full Range Guide"
-                            checked: popup.alignmentOverrideEnabled
-                            onToggled: popup.alignmentOverrideEnabled = checked
-                        }
-
-                        ColumnLayout {
-                            Layout.fillWidth: true
-                            spacing: 4
-                            visible: popup.alignmentOverrideEnabled
-
-                            Text {
-                                text: "Preview Progress (0.00 - 1.00)"
-                                font.pixelSize: SettingsTheme.fontCaption
-                                font.family: SettingsTheme.fontFamily
-                                color: SettingsTheme.textSecondary
-                            }
-
-                            StyledTextField {
-                                Layout.fillWidth: true
-                                Layout.preferredHeight: SettingsTheme.controlHeight
-                                text: popup.alignmentOverrideProgress.toFixed(2)
-                                inputMethodHints: Qt.ImhFormattedNumbersOnly
-                                onTextEdited: {
-                                    var v = parseFloat(text)
-                                    if (!isNaN(v) && v >= 0 && v <= 1)
-                                        popup.alignmentOverrideProgress = v
-                                }
-                            }
-
-                            Text {
-                                text: "Shows the full gauge extent plus a preview position without overriding the live value."
-                                wrapMode: Text.WordWrap
-                                font.pixelSize: SettingsTheme.fontCaption
-                                font.family: SettingsTheme.fontFamily
-                                color: SettingsTheme.textSecondary
-                                Layout.fillWidth: true
-                            }
-                        }
-                    }
-                }
-
-                // ============================================================
-                // ARC COLORS SECTION
-                // ============================================================
-                SettingsSection {
-                    title: "Colors + Gradient"
-                    visible: popup.hasArcColors
-                    Layout.fillWidth: true
-
-                    RowLayout {
-                        Layout.fillWidth: true
-                        spacing: 10
-
-                        ColumnLayout {
-                            Layout.fillWidth: true
-                            spacing: 4
-
-                            Text {
-                                text: "Start Color"
-                                font.pixelSize: SettingsTheme.fontCaption
-                                font.family: SettingsTheme.fontFamily
-                                color: SettingsTheme.textSecondary
-                            }
-
-                            StyledColorPicker {
-                                Layout.fillWidth: true
-                                Layout.preferredHeight: SettingsTheme.controlHeight
-                                colorValue: popup.arcColorStart
-                                onColorEdited: function(c) { popup.arcColorStart = c }
-                            }
-                        }
-
-                        ColumnLayout {
-                            Layout.fillWidth: true
-                            spacing: 4
-
-                            Text {
-                                text: "End Color"
-                                font.pixelSize: SettingsTheme.fontCaption
-                                font.family: SettingsTheme.fontFamily
-                                color: SettingsTheme.textSecondary
-                            }
-
-                            StyledColorPicker {
-                                Layout.fillWidth: true
-                                Layout.preferredHeight: SettingsTheme.controlHeight
-                                colorValue: popup.arcColorEnd
-                                onColorEdited: function(c) { popup.arcColorEnd = c }
-                            }
-                        }
-                    }
-
-                    // Mid color toggle + picker
-                    ColumnLayout {
-                        Layout.fillWidth: true
-                        spacing: 4
-
-                        StyledSwitch {
-                            id: midColorSwitch
-                            text: "Use Mid Color"
-                            checked: popup.arcColorMid !== ""
-                            onToggled: {
-                                if (!checked)
-                                    popup.arcColorMid = ""
-                                else if (popup.arcColorMid === "")
-                                    popup.arcColorMid = "#FFFF00"
-                            }
-                        }
-
                         RowLayout {
                             Layout.fillWidth: true
                             spacing: 10
-                            visible: midColorSwitch.checked
 
                             ColumnLayout {
                                 Layout.fillWidth: true
                                 spacing: 4
 
                                 Text {
-                                    text: "Mid Color"
+                                    text: "Readout Step"
+                                    font.pixelSize: SettingsTheme.fontCaption
+                                    font.family: SettingsTheme.fontFamily
+                                    color: SettingsTheme.textSecondary
+                                }
+
+                                StyledTextField {
+                                    Layout.fillWidth: true
+                                    Layout.preferredHeight: SettingsTheme.controlHeight
+                                    text: popup.readoutStep.toString()
+                                    inputMethodHints: Qt.ImhFormattedNumbersOnly
+                                    onTextEdited: {
+                                        var v = parseFloat(text)
+                                        if (!isNaN(v) && v > 0)
+                                            popup.readoutStep = v
+                                    }
+                                }
+                            }
+
+                            ColumnLayout {
+                                Layout.fillWidth: true
+                                spacing: 4
+
+                                Text {
+                                    text: "Readout Color"
                                     font.pixelSize: SettingsTheme.fontCaption
                                     font.family: SettingsTheme.fontFamily
                                     color: SettingsTheme.textSecondary
@@ -992,54 +1210,170 @@ Popup {
                                 StyledColorPicker {
                                     Layout.fillWidth: true
                                     Layout.preferredHeight: SettingsTheme.controlHeight
-                                    colorValue: popup.arcColorMid
-                                    onColorEdited: function(c) { popup.arcColorMid = c }
+                                    colorValue: popup.readoutTextColor
+                                    onColorEdited: function(c) { popup.readoutTextColor = c }
                                 }
                             }
+                        }
+
+                        RowLayout {
+                            Layout.fillWidth: true
+                            spacing: 10
 
                             ColumnLayout {
-                                Layout.preferredWidth: 140
+                                Layout.fillWidth: true
                                 spacing: 4
 
                                 Text {
-                                    text: "Mid Position"
+                                    text: "Offset X"
                                     font.pixelSize: SettingsTheme.fontCaption
                                     font.family: SettingsTheme.fontFamily
                                     color: SettingsTheme.textSecondary
                                 }
 
                                 StyledTextField {
-                                    Layout.preferredWidth: 140
+                                    Layout.fillWidth: true
                                     Layout.preferredHeight: SettingsTheme.controlHeight
-                                    text: popup.arcColorMidPos.toFixed(2)
+                                    text: popup.readoutOffsetX.toFixed(1)
                                     inputMethodHints: Qt.ImhFormattedNumbersOnly
                                     onTextEdited: {
                                         var v = parseFloat(text)
-                                        if (!isNaN(v) && v >= 0 && v <= 1)
-                                            popup.arcColorMidPos = v
+                                        if (!isNaN(v))
+                                            popup.readoutOffsetX = v
+                                    }
+                                }
+                            }
+
+                            ColumnLayout {
+                                Layout.fillWidth: true
+                                spacing: 4
+
+                                Text {
+                                    text: "Offset Y"
+                                    font.pixelSize: SettingsTheme.fontCaption
+                                    font.family: SettingsTheme.fontFamily
+                                    color: SettingsTheme.textSecondary
+                                }
+
+                                StyledTextField {
+                                    Layout.fillWidth: true
+                                    Layout.preferredHeight: SettingsTheme.controlHeight
+                                    text: popup.readoutOffsetY.toFixed(1)
+                                    inputMethodHints: Qt.ImhFormattedNumbersOnly
+                                    onTextEdited: {
+                                        var v = parseFloat(text)
+                                        if (!isNaN(v))
+                                            popup.readoutOffsetY = v
+                                    }
+                                }
+                            }
+                        }
+
+                        RowLayout {
+                            Layout.fillWidth: true
+                            spacing: 10
+
+                            ColumnLayout {
+                                Layout.fillWidth: true
+                                spacing: 4
+
+                                Text {
+                                    text: "Value Scale"
+                                    font.pixelSize: SettingsTheme.fontCaption
+                                    font.family: SettingsTheme.fontFamily
+                                    color: SettingsTheme.textSecondary
+                                }
+
+                                StyledTextField {
+                                    Layout.fillWidth: true
+                                    Layout.preferredHeight: SettingsTheme.controlHeight
+                                    text: popup.readoutValueScale.toFixed(3)
+                                    inputMethodHints: Qt.ImhFormattedNumbersOnly
+                                    onTextEdited: {
+                                        var v = parseFloat(text)
+                                        if (!isNaN(v) && v > 0)
+                                            popup.readoutValueScale = v
+                                    }
+                                }
+                            }
+
+                            ColumnLayout {
+                                Layout.fillWidth: true
+                                spacing: 4
+
+                                Text {
+                                    text: "Unit Scale"
+                                    font.pixelSize: SettingsTheme.fontCaption
+                                    font.family: SettingsTheme.fontFamily
+                                    color: SettingsTheme.textSecondary
+                                }
+
+                                StyledTextField {
+                                    Layout.fillWidth: true
+                                    Layout.preferredHeight: SettingsTheme.controlHeight
+                                    text: popup.readoutUnitScale.toFixed(3)
+                                    inputMethodHints: Qt.ImhFormattedNumbersOnly
+                                    onTextEdited: {
+                                        var v = parseFloat(text)
+                                        if (!isNaN(v) && v > 0)
+                                            popup.readoutUnitScale = v
                                     }
                                 }
                             }
                         }
                     }
+                }
 
-                    // Background color
+                // ============================================================
+                // LOOP TEST SECTION
+                // ============================================================
+                SettingsSection {
+                    title: "Loop Test"
+                    visible: popup.hasArcAlignment
+                    Layout.fillWidth: true
+
                     ColumnLayout {
                         Layout.fillWidth: true
-                        spacing: 4
+                        spacing: 6
 
-                        Text {
-                            text: "Background Color"
-                            font.pixelSize: SettingsTheme.fontCaption
-                            font.family: SettingsTheme.fontFamily
-                            color: SettingsTheme.textSecondary
+                        StyledSwitch {
+                            text: "Enable Arc Loop Test"
+                            checked: popup.testLoopEnabled
+                            onToggled: popup.testLoopEnabled = checked
                         }
 
-                        StyledColorPicker {
+                        ColumnLayout {
                             Layout.fillWidth: true
-                            Layout.preferredHeight: SettingsTheme.controlHeight
-                            colorValue: popup.arcBgColor
-                            onColorEdited: function(c) { popup.arcBgColor = c }
+                            spacing: 4
+                            visible: popup.testLoopEnabled
+
+                            Text {
+                                text: "Loop Duration (ms)"
+                                font.pixelSize: SettingsTheme.fontCaption
+                                font.family: SettingsTheme.fontFamily
+                                color: SettingsTheme.textSecondary
+                            }
+
+                            StyledTextField {
+                                Layout.fillWidth: true
+                                Layout.preferredHeight: SettingsTheme.controlHeight
+                                text: popup.testLoopDuration.toString()
+                                inputMethodHints: Qt.ImhFormattedNumbersOnly
+                                onTextEdited: {
+                                    var v = parseInt(text)
+                                    if (!isNaN(v) && v >= 100)
+                                        popup.testLoopDuration = v
+                                }
+                            }
+
+                            Text {
+                                text: "Runs the arc from zero to full range and back in place of live sensor input while enabled."
+                                wrapMode: Text.WordWrap
+                                font.pixelSize: SettingsTheme.fontCaption
+                                font.family: SettingsTheme.fontFamily
+                                color: SettingsTheme.textSecondary
+                                Layout.fillWidth: true
+                            }
                         }
                     }
                 }
@@ -1368,6 +1702,136 @@ Popup {
                                     onValueChanged: popup.gearFontSize = value
                                     Layout.preferredWidth: 140
                                     Layout.preferredHeight: SettingsTheme.controlHeight
+                                }
+                            }
+                        }
+
+                        RowLayout {
+                            Layout.fillWidth: true
+                            spacing: 10
+
+                            ColumnLayout {
+                                Layout.fillWidth: true
+                                spacing: 4
+
+                                Text {
+                                    text: "Suffix Size"
+                                    font.pixelSize: SettingsTheme.fontCaption
+                                    font.family: SettingsTheme.fontFamily
+                                    color: SettingsTheme.textSecondary
+                                }
+
+                                StyledTextField {
+                                    Layout.fillWidth: true
+                                    Layout.preferredHeight: SettingsTheme.controlHeight
+                                    text: popup.suffixFontSize.toFixed(1)
+                                    inputMethodHints: Qt.ImhFormattedNumbersOnly
+                                    onTextEdited: {
+                                        var v = parseFloat(text)
+                                        if (!isNaN(v) && v > 0)
+                                            popup.suffixFontSize = v
+                                    }
+                                }
+                            }
+
+                            ColumnLayout {
+                                Layout.fillWidth: true
+                                spacing: 4
+
+                                Text {
+                                    text: "Offset X"
+                                    font.pixelSize: SettingsTheme.fontCaption
+                                    font.family: SettingsTheme.fontFamily
+                                    color: SettingsTheme.textSecondary
+                                }
+
+                                StyledTextField {
+                                    Layout.fillWidth: true
+                                    Layout.preferredHeight: SettingsTheme.controlHeight
+                                    text: popup.gearOffsetX.toFixed(1)
+                                    inputMethodHints: Qt.ImhFormattedNumbersOnly
+                                    onTextEdited: {
+                                        var v = parseFloat(text)
+                                        if (!isNaN(v))
+                                            popup.gearOffsetX = v
+                                    }
+                                }
+                            }
+                        }
+
+                        RowLayout {
+                            Layout.fillWidth: true
+                            spacing: 10
+
+                            ColumnLayout {
+                                Layout.fillWidth: true
+                                spacing: 4
+
+                                Text {
+                                    text: "Offset Y"
+                                    font.pixelSize: SettingsTheme.fontCaption
+                                    font.family: SettingsTheme.fontFamily
+                                    color: SettingsTheme.textSecondary
+                                }
+
+                                StyledTextField {
+                                    Layout.fillWidth: true
+                                    Layout.preferredHeight: SettingsTheme.controlHeight
+                                    text: popup.gearOffsetY.toFixed(1)
+                                    inputMethodHints: Qt.ImhFormattedNumbersOnly
+                                    onTextEdited: {
+                                        var v = parseFloat(text)
+                                        if (!isNaN(v))
+                                            popup.gearOffsetY = v
+                                    }
+                                }
+                            }
+
+                            ColumnLayout {
+                                Layout.fillWidth: true
+                                spacing: 4
+
+                                Text {
+                                    text: "Width"
+                                    font.pixelSize: SettingsTheme.fontCaption
+                                    font.family: SettingsTheme.fontFamily
+                                    color: SettingsTheme.textSecondary
+                                }
+
+                                StyledTextField {
+                                    Layout.fillWidth: true
+                                    Layout.preferredHeight: SettingsTheme.controlHeight
+                                    text: popup.gearWidth.toFixed(1)
+                                    inputMethodHints: Qt.ImhFormattedNumbersOnly
+                                    onTextEdited: {
+                                        var v = parseFloat(text)
+                                        if (!isNaN(v) && v > 0)
+                                            popup.gearWidth = v
+                                    }
+                                }
+                            }
+                        }
+
+                        ColumnLayout {
+                            Layout.fillWidth: true
+                            spacing: 4
+
+                            Text {
+                                text: "Height"
+                                font.pixelSize: SettingsTheme.fontCaption
+                                font.family: SettingsTheme.fontFamily
+                                color: SettingsTheme.textSecondary
+                            }
+
+                            StyledTextField {
+                                Layout.fillWidth: true
+                                Layout.preferredHeight: SettingsTheme.controlHeight
+                                text: popup.gearHeight.toFixed(1)
+                                inputMethodHints: Qt.ImhFormattedNumbersOnly
+                                onTextEdited: {
+                                    var v = parseFloat(text)
+                                    if (!isNaN(v) && v > 0)
+                                        popup.gearHeight = v
                                 }
                             }
                         }
