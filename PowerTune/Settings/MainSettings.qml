@@ -512,12 +512,62 @@ SettingsPage {
             }
 
             SettingsSection {
-                title: "Display"
+                title: Translator.translate("Display", Settings.language)
                 Layout.fillWidth: true
 
-                StyledButton {
-                    text: "Show Brightness Popup"
-                    onClicked: window.showBrightnessPopup()
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: SettingsTheme.controlGap
+
+                    Text {
+                        text: Translator.translate("Brightness", Settings.language)
+                        font.pixelSize: SettingsTheme.fontLabel
+                        font.family: SettingsTheme.fontFamily
+                        color: SettingsTheme.textPrimary
+                        Layout.preferredWidth: SettingsTheme.labelWidth
+                    }
+
+                    StyledButton {
+                        text: "-"
+                        implicitWidth: 36
+                        implicitHeight: 36
+                        primary: false
+                        onClicked: window.adjustBrightness(-1)
+                    }
+
+                    Slider {
+                        id: brightnessSlider
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: SettingsTheme.controlHeight
+                        stepSize: 5
+                        from: window.isDdc ? 0 : 20
+                        to: window.isDdc ? 100 : 255
+                        value: UI.Brightness
+                        onMoved: window.applyBrightness(value)
+
+                        Connections {
+                            target: UI
+                            function onBrightnessChanged() {
+                                brightnessSlider.value = UI.Brightness;
+                            }
+                        }
+                    }
+
+                    StyledButton {
+                        text: "+"
+                        implicitWidth: 36
+                        implicitHeight: 36
+                        primary: false
+                        onClicked: window.adjustBrightness(1)
+                    }
+                }
+
+                StyledSwitch {
+                    label: Translator.translate("Brightness Pop Up at Boot", Settings.language)
+                    checked: AppSettings.getValue("ui/brightnessPopupEnabled", true)
+                    onCheckedChanged: {
+                        AppSettings.setValue("ui/brightnessPopupEnabled", checked)
+                    }
                 }
             }
 

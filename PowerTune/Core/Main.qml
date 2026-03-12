@@ -1,6 +1,5 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
-import QtQuick.Layouts 1.15
 import QtQuick.Window 2.15
 import com.powertune 1.0
 import PowerTune.Core 1.0
@@ -63,13 +62,6 @@ ApplicationWindow {
         popUpLoader.sourceComponent = Qt.createComponent("BrightnessPopUp.qml");
         custom.executeOnBootAction();
         handleDigitalBrightness();
-    }
-
-    Connections {
-        target: UI
-        function onBrightnessChanged() {
-            brightness.value = UI.Brightness;
-        }
     }
 
     onDigitalInput1Changed: handleDigitalBrightness()
@@ -141,109 +133,6 @@ ApplicationWindow {
         Component.onCompleted: {
             if (popUpLoader.enabled)
                 visible = true;
-        }
-    }
-
-    Drawer {
-        id: drawerpopup
-        width: window.width
-        height: 0.5 * window.height
-        edge: Qt.TopEdge
-        background: Rectangle {
-            color: SettingsTheme.surface
-            opacity: 0.95
-            radius: SettingsTheme.radiusLarge
-        }
-
-        RowLayout {
-            anchors.fill: parent
-            anchors.margins: SettingsTheme.pageMargin
-            spacing: SettingsTheme.sectionSpacing
-
-            ColumnLayout {
-                Layout.alignment: Qt.AlignTop
-                spacing: SettingsTheme.contentSpacing
-
-                StyledButton {
-                    text: "Trip Reset"
-                    onClicked: Calculations.resettrip()
-                    implicitWidth: 100
-                }
-
-                StyledButton {
-                    text: "Shutdown"
-                    danger: true
-                    onClicked: Connect.shutdown()
-                    implicitWidth: 100
-                }
-            }
-
-            ColumnLayout {
-                Layout.fillWidth: true
-                Layout.alignment: Qt.AlignVCenter
-                spacing: SettingsTheme.contentSpacing
-
-                RowLayout {
-                    Layout.alignment: Qt.AlignHCenter
-                    spacing: 12
-
-                    Image {
-                        height: 32
-                        width: 32
-                        source: "qrc:/Resources/graphics/brightness.png"
-                    }
-
-                    Slider {
-                        id: brightness
-                        Layout.preferredWidth: window.width / 3
-                        Layout.preferredHeight: 36
-                        stepSize: 5
-                        from: isDdc ? 0 : 20
-                        to: isDdc ? 100 : 255
-                        value: UI.Brightness
-                        onMoved: applyBrightness(value)
-                    }
-                }
-
-                RowLayout {
-                    Layout.alignment: Qt.AlignHCenter
-                    spacing: SettingsTheme.controlGap
-
-                    Text {
-                        text: "Brightness Pop Up at Boot"
-                        color: SettingsTheme.textPrimary
-                        font.family: SettingsTheme.fontFamily
-                        font.pixelSize: SettingsTheme.fontLabel
-                    }
-
-                    StyledSwitch {
-                        id: disablePopUp
-                        checked: popUpLoader.enabled
-                        onCheckedChanged: {
-                            popUpLoader.enabled = checked;
-                            popUpLoader.visible = false;
-                        }
-                    }
-                }
-            }
-
-            ColumnLayout {
-                Layout.alignment: Qt.AlignTop
-                spacing: SettingsTheme.contentSpacing
-
-                StyledButton {
-                    text: "+"
-                    onClicked: adjustBrightness(1)
-                    implicitWidth: 48
-                    implicitHeight: 48
-                }
-                StyledButton {
-                    text: "-"
-                    onClicked: adjustBrightness(-1)
-                    implicitWidth: 48
-                    implicitHeight: 48
-                }
-            }
         }
     }
 
