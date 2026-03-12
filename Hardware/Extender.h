@@ -32,6 +32,7 @@ class SettingsData;
 class VehicleData;
 class ConnectionData;
 class SteinhartCalculator;
+class SensorRegistry;
 
 static constexpr int EX_ANALOG_CHANNELS = 8;
 
@@ -83,6 +84,7 @@ public:
     ~Extender() override;
 
     void setSteinhartCalculator(SteinhartCalculator *calc);
+    void setSensorRegistry(SensorRegistry *reg) { m_sensorRegistry = reg; }
     void connectCalibrationSignals();
 
     Q_INVOKABLE void setGearVoltageConfig(const QVariantMap &config);
@@ -115,6 +117,7 @@ private:
     VehicleData *m_vehicleData;
     ConnectionData *m_connectionData;
     SteinhartCalculator *m_steinhartCalc = nullptr;
+    SensorRegistry *m_sensorRegistry = nullptr;
 
     double pkgpayload[8];
     struct payload

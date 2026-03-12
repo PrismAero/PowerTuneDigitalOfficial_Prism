@@ -21,10 +21,141 @@
 #include "../Core/Models/SensorData.h"
 #include "../Core/Models/SettingsData.h"
 #include "../Core/Models/VehicleData.h"
+#include "../Core/SensorRegistry.h"
 
-#include <QDataStream>
 #include <QHostAddress>
 #include <QUdpSocket>
+
+QHash<int, QString> udpreceiver::buildIdentToSensorKeyMap()
+{
+    return {
+        // Engine
+        {179, QStringLiteral("rpm")},
+        {22,  QStringLiteral("BoostPres")},
+        {278, QStringLiteral("BoostPreskpa")},
+        {155, QStringLiteral("MAP")},
+        {210, QStringLiteral("TPS")},
+        {135, QStringLiteral("Intaketemp")},
+        {221, QStringLiteral("Watertemp")},
+        {6,   QStringLiteral("AFR")},
+        {142, QStringLiteral("LAMBDA")},
+        {133, QStringLiteral("InjDuty")},
+        {121, QStringLiteral("Ign")},
+        {46,  QStringLiteral("EngLoad")},
+        {137, QStringLiteral("Knock")},
+        {33,  QStringLiteral("Dwell")},
+        {21,  QStringLiteral("BoostDuty")},
+        {229, QStringLiteral("Intakepress")},
+        {173, QStringLiteral("Power")},
+        {207, QStringLiteral("Torque")},
+        {26,  QStringLiteral("brakepress")},
+        {29,  QStringLiteral("coolantpress")},
+        {156, QStringLiteral("MAP2")},
+        {218, QStringLiteral("turborpm")},
+        {220, QStringLiteral("wastegatepress")},
+        {1,   QStringLiteral("accelpedpos")},
+
+        // Vehicle
+        {199, QStringLiteral("speed")},
+        {106, QStringLiteral("Gear")},
+        {168, QStringLiteral("Odo")},
+        {228, QStringLiteral("BatteryV")},
+        {191, QStringLiteral("FuelLevel")},
+        {194, QStringLiteral("SteeringWheelAngle")},
+        {224, QStringLiteral("wheelspdftleft")},
+        {225, QStringLiteral("wheelspdftright")},
+        {226, QStringLiteral("wheelspdrearleft")},
+        {227, QStringLiteral("wheelspdrearright")},
+
+        // Fuel
+        {100, QStringLiteral("FuelPress")},
+        {101, QStringLiteral("Fueltemp")},
+        {83,  QStringLiteral("fuelclevel")},
+        {87,  QStringLiteral("fuelflow")},
+        {85,  QStringLiteral("fuelconsrate")},
+
+        // Oil
+        {169, QStringLiteral("oilpres")},
+        {170, QStringLiteral("oiltemp")},
+        {213, QStringLiteral("transoiltemp")},
+        {31,  QStringLiteral("diffoiltemp")},
+        {271, QStringLiteral("GearOilPress")},
+        {159, QStringLiteral("Moilp")},
+
+        // Exhaust (EGT 1-12)
+        {34,  QStringLiteral("egt1")},
+        {35,  QStringLiteral("egt2")},
+        {36,  QStringLiteral("egt3")},
+        {37,  QStringLiteral("egt4")},
+        {38,  QStringLiteral("egt5")},
+        {39,  QStringLiteral("egt6")},
+        {40,  QStringLiteral("egt7")},
+        {41,  QStringLiteral("egt8")},
+        {42,  QStringLiteral("egt9")},
+        {43,  QStringLiteral("egt10")},
+        {44,  QStringLiteral("egt11")},
+        {45,  QStringLiteral("egt12")},
+        {410, QStringLiteral("egthighest")},
+
+        // Tires
+        {864, QStringLiteral("TiretempLF")},
+        {865, QStringLiteral("TiretempRF")},
+        {866, QStringLiteral("TiretempLR")},
+        {867, QStringLiteral("TiretempRR")},
+        {868, QStringLiteral("TirepresLF")},
+        {869, QStringLiteral("TirepresRF")},
+        {870, QStringLiteral("TirepresLR")},
+        {871, QStringLiteral("TirepresRR")},
+
+        // Electrical
+        {166, QStringLiteral("O2volt")},
+        {167, QStringLiteral("O2volt_2")},
+
+        // Analog Inputs
+        {260, QStringLiteral("Analog0")},
+        {261, QStringLiteral("Analog1")},
+        {262, QStringLiteral("Analog2")},
+        {263, QStringLiteral("Analog3")},
+        {264, QStringLiteral("Analog4")},
+        {265, QStringLiteral("Analog5")},
+        {266, QStringLiteral("Analog6")},
+        {267, QStringLiteral("Analog7")},
+        {268, QStringLiteral("Analog8")},
+        {269, QStringLiteral("Analog9")},
+        {270, QStringLiteral("Analog10")},
+
+        // Digital Inputs
+        {279, QStringLiteral("DigitalInput1")},
+        {280, QStringLiteral("DigitalInput2")},
+        {281, QStringLiteral("DigitalInput3")},
+        {282, QStringLiteral("DigitalInput4")},
+        {283, QStringLiteral("DigitalInput5")},
+        {284, QStringLiteral("DigitalInput6")},
+        {285, QStringLiteral("DigitalInput7")},
+
+        // Expander Board Analog Inputs
+        {908, QStringLiteral("EXAnalogInput0")},
+        {909, QStringLiteral("EXAnalogInput1")},
+        {910, QStringLiteral("EXAnalogInput2")},
+        {911, QStringLiteral("EXAnalogInput3")},
+        {912, QStringLiteral("EXAnalogInput4")},
+        {913, QStringLiteral("EXAnalogInput5")},
+        {914, QStringLiteral("EXAnalogInput6")},
+        {915, QStringLiteral("EXAnalogInput7")},
+
+        // Expander Board Digital Inputs
+        {900, QStringLiteral("EXDigitalInput1")},
+        {901, QStringLiteral("EXDigitalInput2")},
+        {902, QStringLiteral("EXDigitalInput3")},
+        {903, QStringLiteral("EXDigitalInput4")},
+        {904, QStringLiteral("EXDigitalInput5")},
+        {905, QStringLiteral("EXDigitalInput6")},
+        {906, QStringLiteral("EXDigitalInput7")},
+        {907, QStringLiteral("EXDigitalInput8")},
+    };
+}
+
+const QHash<int, QString> udpreceiver::s_identToSensorKey = udpreceiver::buildIdentToSensorKeyMap();
 
 udpreceiver::udpreceiver(QObject *parent)
     : QObject(parent)
@@ -72,6 +203,11 @@ udpreceiver::udpreceiver(
 
 void udpreceiver::startreceiver()
 {
+    if (udpSocket) {
+        udpSocket->close();
+        udpSocket->deleteLater();
+        udpSocket = nullptr;
+    }
     udpSocket = new QUdpSocket(this);
     udpSocket->bind(45454, QUdpSocket::ShareAddress);
     connect(udpSocket, &QUdpSocket::readyRead, this, &udpreceiver::processPendingDatagrams);
@@ -79,7 +215,11 @@ void udpreceiver::startreceiver()
 
 void udpreceiver::closeConnection()
 {
-    // TODO: Implement proper cleanup if needed
+    if (udpSocket) {
+        udpSocket->close();
+        udpSocket->deleteLater();
+        udpSocket = nullptr;
+    }
 }
 
 void udpreceiver::processPendingDatagrams()
@@ -90,17 +230,14 @@ void udpreceiver::processPendingDatagrams()
         datagram.resize(int(udpSocket->pendingDatagramSize()));
         udpSocket->readDatagram(datagram.data(), datagram.size());
 
-        QDataStream in(&datagram, QIODevice::ReadOnly);
         QString raw = datagram.data();
 
-        if (raw.isEmpty()) {
-            raw = "0,0";
-        }
-        if (!raw.contains(",")) {
-            raw = "0,0";
-        }
+        if (raw.isEmpty() || !raw.contains(","))
+            continue;
 
         QStringList list = raw.split(",");
+        if (list.size() < 2)
+            continue;
         int ident = list[0].toInt();
         float Value = list[1].toFloat();
 
@@ -1351,6 +1488,12 @@ void udpreceiver::processPendingDatagrams()
 
         default:
             break;
+        }
+
+        if (m_sensorRegistry) {
+            auto it = s_identToSensorKey.constFind(ident);
+            if (it != s_identToSensorKey.constEnd())
+                m_sensorRegistry->markCanSensorActive(it.value());
         }
     }
 }

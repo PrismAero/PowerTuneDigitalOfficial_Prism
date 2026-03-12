@@ -141,6 +141,8 @@ Connect::Connect(QObject *parent)
     m_calibrationHelper = new CalibrationHelper(m_steinhartCalc, this);
     // * Phase 7: Create SensorRegistry for runtime sensor tracking
     m_sensorRegistry = new SensorRegistry(this);
+    m_udpreceiver->setSensorRegistry(m_sensorRegistry);
+    m_extender->setSensorRegistry(m_sensorRegistry);
     // * Phase 8: Create DiagnosticsProvider and wire to SensorRegistry
     m_diagnosticsProvider = new DiagnosticsProvider(this);
     m_diagnosticsProvider->setSensorRegistry(m_sensorRegistry);

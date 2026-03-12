@@ -26,6 +26,7 @@ class FlagsData;
 class SensorData;
 class ConnectionData;
 class SettingsData;
+class SensorRegistry;
 
 class udpreceiver : public QObject
 {
@@ -79,6 +80,13 @@ private:
     SettingsData *m_settings = nullptr;
 
     QUdpSocket *udpSocket = nullptr;
+    SensorRegistry *m_sensorRegistry = nullptr;
+
+    static const QHash<int, QString> s_identToSensorKey;
+    static QHash<int, QString> buildIdentToSensorKeyMap();
+
+public:
+    void setSensorRegistry(SensorRegistry *reg) { m_sensorRegistry = reg; }
 
 public slots:
     void processPendingDatagrams();

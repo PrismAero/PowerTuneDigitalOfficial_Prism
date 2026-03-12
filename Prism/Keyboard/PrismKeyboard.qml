@@ -341,7 +341,7 @@ Item {
         var pos = target.cursorPosition
         if (pos > 0) {
             if (target.remove) {
-                target.remove(pos - 1, 1)
+                target.remove(pos - 1, pos)
             } else {
                 var txt = target.text
                 target.text = txt.substring(0, pos - 1) + txt.substring(pos)

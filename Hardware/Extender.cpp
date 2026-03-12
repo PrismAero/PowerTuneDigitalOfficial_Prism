@@ -15,6 +15,7 @@
 #include "../Core/Models/SettingsData.h"
 #include "../Core/Models/VehicleData.h"
 #include "../Core/Models/ConnectionData.h"
+#include "../Core/SensorRegistry.h"
 #include "../Utils/SteinhartCalculator.h"
 
 #include <QDebug>
@@ -421,6 +422,10 @@ void Extender::readyToRead()
                         m_digitalInputs->RPMFrequencyDividerDi1());
                 }
             }
+            if (m_sensorRegistry) {
+                for (int i = 1; i <= 8; ++i)
+                    m_sensorRegistry->markCanSensorActive(QStringLiteral("EXDigitalInput%1").arg(i));
+            }
         }
 
         if (frame.frameId() == m_address2) {
@@ -430,6 +435,10 @@ void Extender::readyToRead()
                 m_expanderBoardData->setEXAnalogInput2(pkgpayload[2] * 0.001);
                 m_expanderBoardData->setEXAnalogInput3(pkgpayload[3] * 0.001);
             }
+            if (m_sensorRegistry) {
+                for (int i = 0; i <= 3; ++i)
+                    m_sensorRegistry->markCanSensorActive(QStringLiteral("EXAnalogInput%1").arg(i));
+            }
         }
         if (frame.frameId() == m_address3) {
             if (m_expanderBoardData) {
@@ -437,6 +446,10 @@ void Extender::readyToRead()
                 m_expanderBoardData->setEXAnalogInput5(pkgpayload[1] * 0.001);
                 m_expanderBoardData->setEXAnalogInput6(pkgpayload[2] * 0.001);
                 m_expanderBoardData->setEXAnalogInput7(pkgpayload[3] * 0.001);
+            }
+            if (m_sensorRegistry) {
+                for (int i = 4; i <= 7; ++i)
+                    m_sensorRegistry->markCanSensorActive(QStringLiteral("EXAnalogInput%1").arg(i));
             }
         }
         if (frame.frameId() == m_address5 && m_engineData && m_settingsData &&

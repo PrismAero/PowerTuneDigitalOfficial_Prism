@@ -625,7 +625,9 @@ void SensorRegistry::checkCanTimeouts()
     bool changed = false;
 
     for (auto it = m_sensors.begin(); it != m_sensors.end(); ++it) {
-        if (it->source == SensorSource::DaemonUDP && it->active) {
+        if ((it->source == SensorSource::DaemonUDP ||
+             it->source == SensorSource::ExtenderAnalog ||
+             it->source == SensorSource::ExtenderDigital) && it->active) {
             if (it->lastActiveTimestamp > 0 && (now - it->lastActiveTimestamp) > kCanTimeoutMs) {
                 it->active = false;
                 changed = true;
