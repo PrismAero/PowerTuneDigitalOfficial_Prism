@@ -310,6 +310,35 @@ Item {
             currentLayout = "qwerty"
         }
         visible = true
+        ensureFieldVisible(textField)
+    }
+
+    function ensureFieldVisible(field) {
+        if (!field || !docked) return
+
+        var scrollable = findParentFlickable(field)
+        if (!scrollable) return
+
+        var fieldRect = field.mapToItem(scrollable.contentItem, 0, 0)
+        var fieldBottom = fieldRect.y + field.height
+        var visibleTop = scrollable.contentY
+        var visibleBottom = visibleTop + scrollable.height - height
+
+        if (fieldBottom > visibleBottom) {
+            scrollable.contentY = fieldBottom - scrollable.height + height + 20
+        } else if (fieldRect.y < visibleTop) {
+            scrollable.contentY = fieldRect.y - 20
+        }
+    }
+
+    function findParentFlickable(item) {
+        var p = item.parent
+        while (p) {
+            if (p.hasOwnProperty("contentY") && p.hasOwnProperty("contentHeight"))
+                return p
+            p = p.parent
+        }
+        return null
     }
 
     // Hides the keyboard and clears the target reference.

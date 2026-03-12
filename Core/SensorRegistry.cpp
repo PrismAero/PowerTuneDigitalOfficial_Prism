@@ -121,25 +121,45 @@ void SensorRegistry::markCanSensorActive(const QString &key)
  * @param category Category filter (empty string = all sensors)
  * @return List of sensor maps with keys: key, displayName, category, unit, source, active
  */
-QVariantList SensorRegistry::getSensorsByCategory(const QString &category) const
+QVariantList SensorRegistry::getSensorsByCategory(const QString &category, bool activeOnly) const
 {
     QVariantList result;
     for (auto it = m_sensors.constBegin(); it != m_sensors.constEnd(); ++it) {
-        if (category.isEmpty() || it->category == category) {
+        if (activeOnly && !it->active)
+            continue;
+        if (category.isEmpty() || it->category == category)
             result.append(entryToVariantMap(it.value()));
-        }
     }
     return result;
 }
 
-QStringList SensorRegistry::sensorDisplayNames(const QString &category) const
+QVariantList SensorRegistry::getActiveSensors() const
+{
+    return getSensorsByCategory(QString(), true);
+}
+
+QStringList SensorRegistry::sensorDisplayNames(const QString &category, bool activeOnly) const
 {
     QStringList names;
     for (auto it = m_sensors.constBegin(); it != m_sensors.constEnd(); ++it) {
+        if (activeOnly && !it->active)
+            continue;
         if (category.isEmpty() || it->category == category)
             names.append(it->displayName + QStringLiteral(" (") + it->key + QStringLiteral(")"));
     }
     return names;
+}
+
+QStringList SensorRegistry::sensorKeys(const QString &category, bool activeOnly) const
+{
+    QStringList keys;
+    for (auto it = m_sensors.constBegin(); it != m_sensors.constEnd(); ++it) {
+        if (activeOnly && !it->active)
+            continue;
+        if (category.isEmpty() || it->category == category)
+            keys.append(it->key);
+    }
+    return keys;
 }
 
 int SensorRegistry::indexOfSensorKey(const QString &key, const QString &category) const
@@ -625,9 +645,9 @@ void SensorRegistry::checkCanTimeouts()
     bool changed = false;
 
     for (auto it = m_sensors.begin(); it != m_sensors.end(); ++it) {
-        if ((it->source == SensorSource::DaemonUDP ||
-             it->source == SensorSource::ExtenderAnalog ||
-             it->source == SensorSource::ExtenderDigital) && it->active) {
+        if ((it->source == SensorSource::DaemonUDP || it->source == SensorSource::ExtenderAnalog ||
+             it->source == SensorSource::ExtenderDigital) &&
+            it->active) {
             if (it->lastActiveTimestamp > 0 && (now - it->lastActiveTimestamp) > kCanTimeoutMs) {
                 it->active = false;
                 changed = true;

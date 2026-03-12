@@ -335,35 +335,6 @@ Popup {
         // Bottom bar
         timeEnabled = toBool(cfg.timeEnabled, true)
 
-        // Set datasource combo index
-        updateDatasourceIndex()
-        updateGearDatasourceIndex()
-    }
-
-    function updateDatasourceIndex() {
-        if (!datasourceCombo) return
-        var props = PropertyRouter.availableProperties()
-        var idx = -1
-        for (var i = 0; i < props.length; i++) {
-            if (props[i] === popup.sensorKey) {
-                idx = i
-                break
-            }
-        }
-        datasourceCombo.currentIndex = idx
-    }
-
-    function updateGearDatasourceIndex() {
-        if (!gearDatasourceCombo) return
-        var props = PropertyRouter.availableProperties()
-        var idx = -1
-        for (var i = 0; i < props.length; i++) {
-            if (props[i] === popup.gearSensorKey) {
-                idx = i
-                break
-            }
-        }
-        gearDatasourceCombo.currentIndex = idx
     }
 
     function collectConfig() {
@@ -563,15 +534,12 @@ Popup {
                             color: SettingsTheme.textSecondary
                         }
 
-                        StyledComboBox {
-                            id: datasourceCombo
+                        SensorPicker {
+                            id: datasourcePicker
                             Layout.fillWidth: true
-                            Layout.preferredHeight: SettingsTheme.controlHeight
-                            model: PropertyRouter.availableProperties()
-                            onActivated: function(idx) {
-                                var props = PropertyRouter.availableProperties()
-                                if (idx >= 0 && idx < props.length)
-                                    popup.sensorKey = props[idx]
+                            selectedKey: popup.sensorKey
+                            onSensorSelected: function(key, displayName, unit) {
+                                popup.sensorKey = key
                             }
                         }
                     }
@@ -1647,15 +1615,12 @@ Popup {
                                 color: SettingsTheme.textSecondary
                             }
 
-                            StyledComboBox {
-                                id: gearDatasourceCombo
+                            SensorPicker {
+                                id: gearDatasourcePicker
                                 Layout.fillWidth: true
-                                Layout.preferredHeight: SettingsTheme.controlHeight
-                                model: PropertyRouter.availableProperties()
-                                onActivated: function(idx) {
-                                    var props = PropertyRouter.availableProperties()
-                                    if (idx >= 0 && idx < props.length)
-                                        popup.gearSensorKey = props[idx]
+                                selectedKey: popup.gearSensorKey
+                                onSensorSelected: function(key, displayName, unit) {
+                                    popup.gearSensorKey = key
                                 }
                             }
                         }

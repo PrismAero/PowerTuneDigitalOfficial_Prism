@@ -451,6 +451,8 @@ SettingsPage {
             AppSettings.setValue("ui/exboard/ch5_enabled", chEnable5.checked);
             AppSettings.setValue("ui/exboard/ch6_enabled", chEnable6.checked);
             AppSettings.setValue("ui/exboard/ch7_enabled", chEnable7.checked);
+            SensorRegistry.refreshExtenderAnalogInputs()
+            SensorRegistry.refreshExtenderDigitalInputs()
         }
     }
 

@@ -243,6 +243,7 @@ qt_policy(SET QTP0004 OLD)
             PowerTune/Settings/components/StyledSpinBox.qml
             PowerTune/Settings/components/StyledColorPicker.qml
             PowerTune/Settings/components/ConnectionStatusIndicator.qml
+            PowerTune/Settings/components/SensorPicker.qml
         RESOURCE_PREFIX /qt/qml
         OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/qt/qml/PowerTune/UI
     )
