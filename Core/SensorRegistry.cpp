@@ -58,8 +58,7 @@ void SensorRegistry::registerSensor(const QString &key, const QString &displayNa
     entry.category = category;
     entry.unit = unit;
     entry.source = source;
-    entry.active = (source != SensorSource::DaemonUDP && source != SensorSource::ExtenderAnalog &&
-                    source != SensorSource::ExtenderDigital);
+    entry.active = (source == SensorSource::Computed);
     entry.lastActiveTimestamp = 0;
 
     m_sensors.insert(key, entry);
@@ -634,9 +633,9 @@ QVariantMap SensorRegistry::entryToVariantMap(const SensorEntry &entry) const
 }
 
 /**
- * @brief Timer callback to mark DaemonUDP sensors as inactive if no data received recently.
+ * @brief Timer callback to mark sensors as inactive if no data received recently.
  *
- * Iterates all DaemonUDP-sourced sensors and sets active=false for any that have not
+ * Iterates all non-Computed sensors and sets active=false for any that have not
  * received data within the last 10 seconds. Emits sensorsChanged if any state changed.
  */
 void SensorRegistry::checkCanTimeouts()
@@ -645,13 +644,11 @@ void SensorRegistry::checkCanTimeouts()
     bool changed = false;
 
     for (auto it = m_sensors.begin(); it != m_sensors.end(); ++it) {
-        if ((it->source == SensorSource::DaemonUDP || it->source == SensorSource::ExtenderAnalog ||
-             it->source == SensorSource::ExtenderDigital) &&
-            it->active) {
-            if (it->lastActiveTimestamp > 0 && (now - it->lastActiveTimestamp) > kCanTimeoutMs) {
-                it->active = false;
-                changed = true;
-            }
+        if (it->source == SensorSource::Computed)
+            continue;
+        if (it->active && it->lastActiveTimestamp > 0 && (now - it->lastActiveTimestamp) > kCanTimeoutMs) {
+            it->active = false;
+            changed = true;
         }
     }
 

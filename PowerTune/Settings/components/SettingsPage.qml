@@ -23,7 +23,7 @@ Rectangle {
 
         ColumnLayout {
             id: contentColumn
-            width: scrollView.width - 20
+            width: scrollView.availableWidth
             spacing: SettingsTheme.sectionSpacing
         }
     }

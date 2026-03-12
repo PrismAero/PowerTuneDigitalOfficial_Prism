@@ -12,10 +12,12 @@ Rectangle {
     property bool collapsed: false
     default property alias content: contentColumn.data
 
+    readonly property int _inset: SettingsTheme.sectionPadding + SettingsTheme.borderWidth
+
     Layout.fillWidth: true
-    implicitHeight: collapsed ? headerRow.height + (SettingsTheme.sectionPadding * 2)
-                              : headerRow.height + contentColumn.height + (SettingsTheme.sectionPadding * 2)
-                                + (SettingsTheme.contentSpacing * 2) + SettingsTheme.borderWidth
+    implicitHeight: collapsed ? headerRow.height + (_inset * 2)
+                              : headerRow.height + contentColumn.height + (_inset * 2)
+                                + (SettingsTheme.contentSpacing * 2)
     color: SettingsTheme.surface
     radius: SettingsTheme.radiusLarge
     border.color: SettingsTheme.border
@@ -27,7 +29,7 @@ Rectangle {
 
     ColumnLayout {
         anchors.fill: parent
-        anchors.margins: SettingsTheme.sectionPadding
+        anchors.margins: root._inset
         spacing: SettingsTheme.contentSpacing
 
         RowLayout {

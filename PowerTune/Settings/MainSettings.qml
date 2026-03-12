@@ -120,7 +120,7 @@ SettingsPage {
         Layout.fillWidth: true
         spacing: SettingsTheme.sectionSpacing
 
-        // * LEFT COLUMN
+        // * LEFT COLUMN - Connection, Units, Language, Data Logging
         ColumnLayout {
             Layout.fillWidth: true
             Layout.fillHeight: true
@@ -261,9 +261,49 @@ SettingsPage {
                     }
                 }
             }
+
+            SettingsSection {
+                title: Translator.translate("Language", Settings.language)
+                Layout.fillWidth: true
+
+                StyledComboBox {
+                    id: languageselect
+                    Layout.fillWidth: true
+                    model: ["English", "Deutsch", "\u65E5\u672C\u8A9E", "Espanol"]
+                    onCurrentIndexChanged: {
+                        applyLanguage();
+                        updateWeightLabel();
+                        if (settingsLoaded)
+                            AppSettings.setValue("Language", currentIndex);
+                    }
+                }
+            }
+
+            SettingsSection {
+                title: Translator.translate("Data Logging", Settings.language)
+                Layout.fillWidth: true
+
+                SettingsRow {
+                    label: Translator.translate("Logfile name", Settings.language)
+                    StyledTextField {
+                        id: logfilenameSelect
+                        width: parent.width
+                        height: parent.height
+                        text: "DataLog"
+                        inputMethodHints: Qt.ImhNoAutoUppercase | Qt.ImhPreferLowercase | Qt.ImhSensitiveData | Qt.ImhNoPredictiveText
+                    }
+                }
+
+                StyledSwitch {
+                    id: loggerswitch
+                    label: Translator.translate("Data Logger", Settings.language)
+                    Component.onCompleted: toggleDataLogger()
+                    onClicked: toggleDataLogger()
+                }
+            }
         }
 
-        // * MIDDLE COLUMN
+        // * MIDDLE COLUMN - Vehicle, CAN Bus, Daemon, Display
         ColumnLayout {
             Layout.fillWidth: true
             Layout.fillHeight: true
@@ -391,30 +431,67 @@ SettingsPage {
             }
 
             SettingsSection {
-                title: Translator.translate("Data Logging", Settings.language)
+                title: Translator.translate("Display", Settings.language)
                 Layout.fillWidth: true
 
-                SettingsRow {
-                    label: Translator.translate("Logfile name", Settings.language)
-                    StyledTextField {
-                        id: logfilenameSelect
-                        width: parent.width
-                        height: parent.height
-                        text: "DataLog"
-                        inputMethodHints: Qt.ImhNoAutoUppercase | Qt.ImhPreferLowercase | Qt.ImhSensitiveData | Qt.ImhNoPredictiveText
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: SettingsTheme.controlGap
+
+                    Text {
+                        text: Translator.translate("Brightness", Settings.language)
+                        font.pixelSize: SettingsTheme.fontLabel
+                        font.family: SettingsTheme.fontFamily
+                        color: SettingsTheme.textPrimary
+                        Layout.preferredWidth: SettingsTheme.labelWidth
+                    }
+
+                    StyledButton {
+                        text: "-"
+                        implicitWidth: 36
+                        implicitHeight: 36
+                        primary: false
+                        onClicked: window.adjustBrightness(-1)
+                    }
+
+                    Slider {
+                        id: brightnessSlider
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: SettingsTheme.controlHeight
+                        stepSize: 5
+                        from: window.isDdc ? 0 : 20
+                        to: window.isDdc ? 100 : 255
+                        value: UI.Brightness
+                        onMoved: window.applyBrightness(value)
+
+                        Connections {
+                            target: UI
+                            function onBrightnessChanged() {
+                                brightnessSlider.value = UI.Brightness;
+                            }
+                        }
+                    }
+
+                    StyledButton {
+                        text: "+"
+                        implicitWidth: 36
+                        implicitHeight: 36
+                        primary: false
+                        onClicked: window.adjustBrightness(1)
                     }
                 }
 
                 StyledSwitch {
-                    id: loggerswitch
-                    label: Translator.translate("Data Logger", Settings.language)
-                    Component.onCompleted: toggleDataLogger()
-                    onClicked: toggleDataLogger()
+                    label: Translator.translate("Brightness Pop Up at Boot", Settings.language)
+                    checked: AppSettings.getValue("ui/brightnessPopupEnabled", true)
+                    onCheckedChanged: {
+                        AppSettings.setValue("ui/brightnessPopupEnabled", checked)
+                    }
                 }
             }
         }
 
-        // * RIGHT COLUMN
+        // * RIGHT COLUMN - CAN Configuration, System
         ColumnLayout {
             Layout.fillWidth: true
             Layout.fillHeight: true
@@ -507,83 +584,6 @@ SettingsPage {
                         font.weight: Font.DemiBold
                         font.family: SettingsTheme.fontFamily
                         color: SettingsTheme.accent
-                    }
-                }
-            }
-
-            SettingsSection {
-                title: Translator.translate("Display", Settings.language)
-                Layout.fillWidth: true
-
-                RowLayout {
-                    Layout.fillWidth: true
-                    spacing: SettingsTheme.controlGap
-
-                    Text {
-                        text: Translator.translate("Brightness", Settings.language)
-                        font.pixelSize: SettingsTheme.fontLabel
-                        font.family: SettingsTheme.fontFamily
-                        color: SettingsTheme.textPrimary
-                        Layout.preferredWidth: SettingsTheme.labelWidth
-                    }
-
-                    StyledButton {
-                        text: "-"
-                        implicitWidth: 36
-                        implicitHeight: 36
-                        primary: false
-                        onClicked: window.adjustBrightness(-1)
-                    }
-
-                    Slider {
-                        id: brightnessSlider
-                        Layout.fillWidth: true
-                        Layout.preferredHeight: SettingsTheme.controlHeight
-                        stepSize: 5
-                        from: window.isDdc ? 0 : 20
-                        to: window.isDdc ? 100 : 255
-                        value: UI.Brightness
-                        onMoved: window.applyBrightness(value)
-
-                        Connections {
-                            target: UI
-                            function onBrightnessChanged() {
-                                brightnessSlider.value = UI.Brightness;
-                            }
-                        }
-                    }
-
-                    StyledButton {
-                        text: "+"
-                        implicitWidth: 36
-                        implicitHeight: 36
-                        primary: false
-                        onClicked: window.adjustBrightness(1)
-                    }
-                }
-
-                StyledSwitch {
-                    label: Translator.translate("Brightness Pop Up at Boot", Settings.language)
-                    checked: AppSettings.getValue("ui/brightnessPopupEnabled", true)
-                    onCheckedChanged: {
-                        AppSettings.setValue("ui/brightnessPopupEnabled", checked)
-                    }
-                }
-            }
-
-            SettingsSection {
-                title: Translator.translate("Language", Settings.language)
-                Layout.fillWidth: true
-
-                StyledComboBox {
-                    id: languageselect
-                    Layout.fillWidth: true
-                    model: ["English", "Deutsch", "\u65E5\u672C\u8A9E", "Espanol"]
-                    onCurrentIndexChanged: {
-                        applyLanguage();
-                        updateWeightLabel();
-                        if (settingsLoaded)
-                            AppSettings.setValue("Language", currentIndex);
                     }
                 }
             }

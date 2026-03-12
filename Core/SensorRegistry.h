@@ -245,7 +245,7 @@ private:
     QVariantMap entryToVariantMap(const SensorEntry &entry) const;
 
     /**
-     * @brief Timer callback to mark DaemonUDP sensors as inactive if no data received in 10 seconds.
+     * @brief Timer callback to mark non-Computed sensors as inactive if no data received in 10 seconds.
      */
     void checkCanTimeouts();
 };

@@ -111,6 +111,24 @@ QHash<int, QString> udpreceiver::buildIdentToSensorKeyMap()
         {166, QStringLiteral("O2volt")},
         {167, QStringLiteral("O2volt_2")},
 
+        // SenseHat / Built-in Sensors
+        {3, QStringLiteral("accelx")},
+        {4, QStringLiteral("accely")},
+        {5, QStringLiteral("accelz")},
+        {28, QStringLiteral("compass")},
+        {114, QStringLiteral("gyrox")},
+        {115, QStringLiteral("gyroy")},
+        {116, QStringLiteral("gyroz")},
+        {8, QStringLiteral("ambipress")},
+        {9, QStringLiteral("ambitemp")},
+
+        // GPS (idents disabled in switch but mapped for liveness)
+        {108, QStringLiteral("gpsAltitude")},
+        {109, QStringLiteral("gpsLatitude")},
+        {110, QStringLiteral("gpsLongitude")},
+        {111, QStringLiteral("gpsSpeed")},
+        {112, QStringLiteral("gpsbearing")},
+
         // Analog Inputs
         {260, QStringLiteral("Analog0")},
         {261, QStringLiteral("Analog1")},
