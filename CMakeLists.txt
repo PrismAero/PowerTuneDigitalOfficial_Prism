@@ -44,6 +44,8 @@ set(CORE_SOURCES
     Core/PropertyRouter.cpp
     Core/SensorRegistry.cpp
     Core/DiagnosticsProvider.cpp
+    Core/ExBoardConfigManager.cpp
+    Core/OverlayConfigDefaults.cpp
     Core/Models/UIState.cpp
     Core/Models/EngineData.cpp
     Core/Models/VehicleData.cpp
@@ -67,6 +69,8 @@ set(CORE_HEADERS
     Core/PropertyRouter.h
     Core/SensorRegistry.h
     Core/DiagnosticsProvider.h
+    Core/ExBoardConfigManager.h
+    Core/OverlayConfigDefaults.h
     Core/Models/UIState.h
     Core/Models/DataModels.h
     Core/Models/EngineData.h

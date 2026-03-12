@@ -31,6 +31,8 @@
 #include "../Utils/UDPReceiver.h"
 #include "../Utils/wifiscanner.h"
 #include "DiagnosticsProvider.h"
+#include "ExBoardConfigManager.h"
+#include "OverlayConfigDefaults.h"
 #include "Models/CanFrameModel.h"
 #include "Models/DataModels.h"
 #include "Models/UIState.h"
@@ -55,15 +57,7 @@
 #include <QVector>
 
 
-int ecu;      // 0=apex, 1=adaptronic;2= OBD; 3= Dicktator ECU
-int logging;  // 0 Logging off , 1 Logging to file
-int connectclicked = 0;
-int canbaseadress;
-int rpmcanbaseadress;
-QByteArray checksumhex;
-QByteArray recvchecksumhex;
-QString selectedPort;
-QVector<QString> dashfilenames(3);
+// File-scope globals migrated to Connect class members (Phase 5.3)
 
 Connect::Connect(QObject *parent)
     : QObject(parent),
@@ -150,6 +144,12 @@ Connect::Connect(QObject *parent)
     m_overlayConfigManager = new OverlayConfigManager(this);
     m_shiftIndicatorHelper = new ShiftIndicatorHelper(this);
     m_canFrameModel = new CanFrameModel(m_connectionData, m_extender, this);
+    m_exBoardConfigManager = new ExBoardConfigManager(this);
+    m_exBoardConfigManager->setAppSettings(m_appSettings);
+    m_exBoardConfigManager->setCalibrationHelper(m_calibrationHelper);
+    m_exBoardConfigManager->setSensorRegistry(m_sensorRegistry);
+    m_overlayConfigDefaults = new OverlayConfigDefaults(this);
+    m_overlayConfigDefaults->setAppSettings(m_appSettings);
     // m_wifiscanner = new WifScanner(this);
     // Use AppDataLocation instead of "/" to prevent QFileSystemModel from
     // indexing the entire filesystem (saves 0.5-2GB+ RAM on macOS dev builds)
@@ -204,6 +204,8 @@ Connect::Connect(QObject *parent)
     engine->rootContext()->setContextProperty("OverlayConfig", m_overlayConfigManager);
     engine->rootContext()->setContextProperty("ShiftHelper", m_shiftIndicatorHelper);
     engine->rootContext()->setContextProperty("CanMonitorModel", m_canFrameModel);
+    engine->rootContext()->setContextProperty("ExBoardConfig", m_exBoardConfigManager);
+    engine->rootContext()->setContextProperty("OverlayDefaults", m_overlayConfigDefaults);
     m_appSettings->setExtender(m_extender);
     m_appSettings->setSteinhartCalculator(m_steinhartCalc);
     m_appSettings->readandApplySettings();
@@ -242,9 +244,9 @@ void Connect::setDashFilename(int index, const QString &filename)
 {
     if (index < 0)
         return;
-    while (dashfilenames.size() <= index)
-        dashfilenames.append(QString());
-    dashfilenames[index] = filename;
+    while (m_dashFilenames.size() <= index)
+        m_dashFilenames.append(QString());
+    m_dashFilenames[index] = filename;
 }
 
 void Connect::setRpmStyle(int index, int style)
@@ -339,10 +341,10 @@ void Connect::readMaindashsetup()
 }
 void Connect::readDashSetup(int index)
 {
-    if (index < 0 || index >= dashfilenames.size())
+    if (index < 0 || index >= m_dashFilenames.size())
         return;
 
-    const QString &filename = dashfilenames.at(index);
+    const QString &filename = m_dashFilenames.at(index);
     if (filename.isEmpty())
         return;
 
@@ -475,12 +477,22 @@ void Connect::checkOBDReg()
     }
 }
 
+static const QHash<int, int> s_registerMap = {
+    {0x00, 0},  {0x01, 1},  {0x02, 2},  {0x03, 3},  {0x04, 4},  {0x05, 5},
+    {0x06, 6},  {0x07, 7},  {0x08, 8},  {0x09, 9},  {0x0a, 10}, {0x0b, 11},
+    {0x0c, 12}, {0x0d, 13}, {0x0f, 14}, {0x11, 15}, {0x12, 16}, {0x13, 17},
+    {0x14, 18}, {0x15, 19}, {0x16, 20}, {0x17, 21}, {0x1a, 22}, {0x1b, 23},
+    {0x1c, 24}, {0x1d, 25}, {0x1e, 26}, {0x1f, 27}, {0x21, 28}, {0x22, 29},
+    {0x23, 30}, {0x25, 35}, {0x26, 36}, {0x27, 37}, {0x28, 31}, {0x29, 32},
+    {0x2a, 33}, {0x2e, 34}, {0x2f, 38}, {0x30, 39}, {0x31, 40}, {0x32, 41},
+    {0x33, 42}, {0x34, 43}, {0x35, 44}, {0x36, 45}, {0x37, 46}, {0x38, 47},
+    {0x39, 48}, {0x3a, 49}, {0x4a, 50}, {0x52, 51}, {0x53, 52},
+};
+
 void Connect::checkReg()
 {
-    int i = 0;
     bool ok;
     QStringList list;
-    // QString path = "Regs.txt";
     QString path = "/home/pi/daemons/Regs.txt";
     QFile inputFile(path);
     if (inputFile.open(QIODevice::ReadOnly)) {
@@ -491,229 +503,13 @@ void Connect::checkReg()
         }
         inputFile.close();
     }
-    while (i < list.length()) {
-        // qDebug()<< "Read supported Consult Reg" <<list[i];
-        switch (list[i].toInt(&ok, 16)) {
-        case 0x00:
-            m_connectionData->setsupportedReg(0);
-            i++;
-            break;
-        case 0x01:
-            m_connectionData->setsupportedReg(1);
-            i++;
-            break;
-        case 0x02:
-            m_connectionData->setsupportedReg(2);
-            i++;
-            break;
-        case 0x03:
-            m_connectionData->setsupportedReg(3);
-            i++;
-            break;
-        case 0x04:
-            m_connectionData->setsupportedReg(4);
-            i++;
-            break;
-        case 0x05:
-            m_connectionData->setsupportedReg(5);
-            i++;
-            break;
-        case 0x06:
-            m_connectionData->setsupportedReg(6);
-            i++;
-            break;
-        case 0x07:
-            m_connectionData->setsupportedReg(7);
-            i++;
-            break;
-        case 0x08:
-            m_connectionData->setsupportedReg(8);
-            i++;
-            break;
-        case 0x09:
-            m_connectionData->setsupportedReg(9);
-            i++;
-            break;
-        case 0x0a:
-            m_connectionData->setsupportedReg(10);
-            i++;
-            break;
-        case 0x0b:
-            m_connectionData->setsupportedReg(11);
-            i++;
-            break;
-        case 0x0c:
-            m_connectionData->setsupportedReg(12);
-            i++;
-            break;
-        case 0x0d:
-            m_connectionData->setsupportedReg(13);
-            i++;
-            break;
-        case 0x0f:
-            m_connectionData->setsupportedReg(14);
-            i++;
-            break;
-        case 0x11:
-            m_connectionData->setsupportedReg(15);
-            i++;
-            break;
-        case 0x12:
-            m_connectionData->setsupportedReg(16);
-            i++;
-            break;
-        case 0x13:
-            m_connectionData->setsupportedReg(17);
-            i++;
-            break;
-        case 0x14:
-            m_connectionData->setsupportedReg(18);
-            i++;
-            break;
-        case 0x15:
-            m_connectionData->setsupportedReg(19);
-            i++;
-            break;
-        case 0x16:
-            m_connectionData->setsupportedReg(20);
-            i++;
-            break;
-        case 0x17:
-            m_connectionData->setsupportedReg(21);
-            i++;
-            break;
-        case 0x1a:
-            m_connectionData->setsupportedReg(22);
-            i++;
-            break;
-        case 0x1b:
-            m_connectionData->setsupportedReg(23);
-            i++;
-            break;
-        case 0x1c:
-            m_connectionData->setsupportedReg(24);
-            i++;
-            break;
-        case 0x1d:
-            m_connectionData->setsupportedReg(25);
-            i++;
-            break;
-        case 0x1e:
-            m_connectionData->setsupportedReg(26);
-            i++;
-            break;
-        case 0x1f:
-            m_connectionData->setsupportedReg(27);
-            i++;
-            break;
-        case 0x21:
-            m_connectionData->setsupportedReg(28);
-            i++;
-            break;
-        case 0x22:
-            m_connectionData->setsupportedReg(29);
-            i++;
-            break;
-        case 0x23:
-            m_connectionData->setsupportedReg(30);
-            i++;
-            break;
-        case 0x28:
-            m_connectionData->setsupportedReg(31);
-            i++;
-            break;
-        case 0x29:  // corrct
-            m_connectionData->setsupportedReg(32);
-            i++;
-            break;
-        case 0x2a:  // corrct
-            m_connectionData->setsupportedReg(33);
-            i++;
-            break;
-        case 0x2e:  // corrct
-            m_connectionData->setsupportedReg(34);
-            i++;
-            break;
-        case 0x25:  // corrct
-            m_connectionData->setsupportedReg(35);
-            i++;
-            break;
-        case 0x26:  // corrct
-            m_connectionData->setsupportedReg(36);
-            i++;
-            break;
-        case 0x27:  // corrct
-            m_connectionData->setsupportedReg(37);
-            i++;
-            break;
-        case 0x2f:
-            m_connectionData->setsupportedReg(38);
-            i++;
-            break;
-        case 0x30:
-            m_connectionData->setsupportedReg(39);
-            i++;
-            break;
-        case 0x31:
-            m_connectionData->setsupportedReg(40);
-            i++;
-            break;
-        case 0x32:
-            m_connectionData->setsupportedReg(41);
-            i++;
-            break;
-        case 0x33:
-            m_connectionData->setsupportedReg(42);
-            i++;
-            break;
-        case 0x34:
-            m_connectionData->setsupportedReg(43);
-            i++;
-            break;
-        case 0x35:
-            m_connectionData->setsupportedReg(44);
-            i++;
-            break;
-        case 0x36:
-            m_connectionData->setsupportedReg(45);
-            i++;
-            break;
-        case 0x37:
-            m_connectionData->setsupportedReg(46);
-            i++;
-            break;
-        case 0x38:
-            m_connectionData->setsupportedReg(47);
-            i++;
-            break;
-        case 0x39:
-            m_connectionData->setsupportedReg(48);
-            i++;
-            break;
-        case 0x3a:
-            m_connectionData->setsupportedReg(49);
-            i++;
-            break;
-        case 0x4a:
-            m_connectionData->setsupportedReg(50);
-            i++;
-            break;
-        case 0x52:
-            m_connectionData->setsupportedReg(51);
-            i++;
-            break;
-        case 0x53:
-            m_connectionData->setsupportedReg(52);
-            i++;
-            break;
-        case 0xFE:
-            // Not supported Register
-            i++;
-            break;
-
-        default:
-            break;
-        }
+    for (int i = 0; i < list.length(); ++i) {
+        int hexVal = list[i].toInt(&ok, 16);
+        if (!ok || hexVal == 0xFE)
+            continue;
+        auto it = s_registerMap.constFind(hexVal);
+        if (it != s_registerMap.constEnd())
+            m_connectionData->setsupportedReg(it.value());
     }
 }
 
@@ -751,194 +547,44 @@ void Connect::LiveReqMsgOBD(const QString &obdpids)
     reboot();
 }
 
+static const QHash<int, QString> s_daemonMap = {
+    {0, ""},                              {1, "./Haltechd"},
+    {2, "./Linkd"},                       {3, "./Microtechd"},
+    {4, "./Consult /dev/ttyUSB0"},        {5, "./M800ADLSet1d"},
+    {6, "./OBD /dev/ttyUSB0"},            {7, "./Hondatad"},
+    {8, "./AdaptronicCANd"},              {9, "./MotecM1d"},
+    {10, "./AEMV2d"},                     {11, "./AudiB7d"},
+    {12, "./BRZFRS86d"},                  {13, "./EMUCANd"},
+    {14, "./AudiB8d"},                    {15, "./Emtrond"},
+    {16, "./Holleyd"},                    {17, "./MaxxECUd"},
+    {18, "./FordBarraFGMK1CAN"},          {19, "./FordBarraFGMK1CANOBD"},
+    {20, "./FordBarraBXCAN"},             {21, "./FordBarraBXCANOBD"},
+    {22, "./FordBarraFG2xCAN"},           {23, "./FordBarraFG2XCANOBD"},
+    {24, "./EVOXCAN"},                    {25, "./BlackboxM3"},
+    {26, "./NISSAN370Z"},                 {27, "./GMCANd"},
+    {28, "./NISSAN350Z"},                 {29, "./MegasquirtCan"},
+    {30, "./EMSCAN"},                     {31, "./WRX2012"},
+    {32, "./M800ADLSet3d"},               {33, "./Testdaemon"},
+    {34, "./ecoboost"},                   {35, "./Emerald"},
+    {36, "./WolfEMS"},                    {37, "./GMCANOBD"},
+    {38, ""},                             {39, "./HondataS300"},
+    {40, "./genericcan"},                 {41, "./ME13"},
+    {42, "./FTCAN20"},                    {43, "./Delta"},
+    {44, "./BigNET"},                     {45, "./BigNETLamda"},
+    {46, "./R35"},                        {47, "./Prado"},
+    {48, "./WRX2016"},                    {49, "./LifeRacing"},
+    {50, "./DTAFast"},                    {51, "./ProEFI"},
+    {52, "./TeslaSDU"},                   {53, "./NeuroBasic"},
+    {54, "./GR_Yaris"},                   {55, "./SyvecsS7"},
+    {56, "./Rsport"},                     {57, "./Generic"},
+    {58, "./Edelbrock"},                  {59, "./Boostec"},
+    {60, "./HEFI"},
+};
+
 void Connect::daemonstartup(const int &daemon)
 {
-    QString daemonstart;
-    switch (daemon) {
-    case 0:
-        daemonstart = "";
-        break;
-    case 1:
-        daemonstart = "./Haltechd";
-        break;
-    case 2:
-        daemonstart = "./Linkd";
-        break;
-    case 3:
-        daemonstart = "./Microtechd";
-        break;
-    case 4:
-        daemonstart = "./Consult /dev/ttyUSB0";
-        break;
-    case 5:
-        daemonstart = "./M800ADLSet1d";
-        break;
-    case 6:
-        daemonstart = "./OBD /dev/ttyUSB0";
-        break;
-    case 7:
-        daemonstart = "./Hondatad";
-        break;
-    case 8:
-        daemonstart = "./AdaptronicCANd";
-        break;
-    case 9:
-        daemonstart = "./MotecM1d";
-        break;
-    case 10:
-        daemonstart = "./AEMV2d";
-        break;
-    case 11:
-        daemonstart = "./AudiB7d";
-        break;
-    case 12:
-        daemonstart = "./BRZFRS86d";
-        break;
-    case 13:
-        daemonstart = "./EMUCANd";
-        break;
-    case 14:
-        daemonstart = "./AudiB8d";
-        break;
-    case 15:
-        daemonstart = "./Emtrond";
-        break;
-    case 16:
-        daemonstart = "./Holleyd";
-        break;
-    case 17:
-        daemonstart = "./MaxxECUd";
-        break;
-    case 18:
-        daemonstart = "./FordBarraFGMK1CAN";
-        break;
-    case 19:
-        daemonstart = "./FordBarraFGMK1CANOBD";
-        break;
-    case 20:
-        daemonstart = "./FordBarraBXCAN";
-        break;
-    case 21:
-        daemonstart = "./FordBarraBXCANOBD";
-        break;
-    case 22:
-        daemonstart = "./FordBarraFG2xCAN";
-        break;
-    case 23:
-        daemonstart = "./FordBarraFG2XCANOBD";
-        break;
-    case 24:
-        daemonstart = "./EVOXCAN";
-        break;
-    case 25:
-        daemonstart = "./BlackboxM3";
-        break;
-    case 26:
-        daemonstart = "./NISSAN370Z";
-        break;
-    case 27:
-        daemonstart = "./GMCANd";
-        break;
-    case 28:
-        daemonstart = "./NISSAN350Z";
-        break;
-    case 29:
-        daemonstart = "./MegasquirtCan";
-        break;
-    case 30:
-        daemonstart = "./EMSCAN";
-        break;
-    case 31:
-        daemonstart = "./WRX2012";
-        break;
-    case 32:
-        daemonstart = "./M800ADLSet3d";
-        break;
-    case 33:
-        daemonstart = "./Testdaemon";
-        break;
-    case 34:
-        daemonstart = "./ecoboost";
-        break;
-    case 35:
-        daemonstart = "./Emerald";
-        break;
-    case 36:
-        daemonstart = "./WolfEMS";
-        break;
-    case 37:
-        daemonstart = "./GMCANOBD";
-        break;
-    case 38:
-        daemonstart = "";
-        break;
-    case 39:
-        daemonstart = "./HondataS300";
-        break;
-    case 40:
-        daemonstart = "./genericcan";
-        break;
-    case 41:
-        daemonstart = "./ME13";
-        break;
-    case 42:
-        daemonstart = "./FTCAN20";
-        break;
-    case 43:
-        daemonstart = "./Delta";
-        break;
-    case 44:
-        daemonstart = "./BigNET";
-        break;
-    case 45:
-        daemonstart = "./BigNETLamda";
-        break;
-    case 46:
-        daemonstart = "./R35";
-        break;
-    case 47:
-        daemonstart = "./Prado";
-        break;
-    case 48:
-        daemonstart = "./WRX2016";
-        break;
-    case 49:
-        daemonstart = "./LifeRacing";
-        break;
-    case 50:
-        daemonstart = "./DTAFast";
-        break;
-    case 51:
-        daemonstart = "./ProEFI";
-        break;
-    case 52:
-        daemonstart = "./TeslaSDU";
-        break;
-    case 53:
-        daemonstart = "./NeuroBasic";
-        break;
-    case 54:
-        daemonstart = "./GR_Yaris";
-        break;
-    case 55:
-        daemonstart = "./SyvecsS7";
-        break;
-    case 56:
-        daemonstart = "./Rsport";
-        break;
-    case 57:
-        daemonstart = "./Generic";
-        break;
-    case 58:
-        daemonstart = "./Edelbrock";
-        break;
-    case 59:
-        daemonstart = "./Boostec";
-        break;
-    case 60:
-        daemonstart = "./HEFI";
-        break;
-    }
+    auto it = s_daemonMap.constFind(daemon);
+    const QString daemonstart = (it != s_daemonMap.constEnd()) ? it.value() : QString();
 
 
     QString fileName = "/home/pi/startdaemon.sh";  // This will be the correct path on pi
@@ -1041,176 +687,93 @@ void Connect::canbitratesetup(const int &cansetting)
 
 
 //////////
-void Connect::LiveReqMsg(const int &val1, const int &val2, const int &val3, const int &val4, const int &val5,
-                         const int &val6, const int &val7, const int &val8, const int &val9, const int &val10,
-                         const int &val11, const int &val12, const int &val13, const int &val14, const int &val15,
-                         const int &val16, const int &val17, const int &val18, const int &val19, const int &val20,
-                         const int &val21, const int &val22, const int &val23, const int &val24, const int &val25,
-                         const int &val26, const int &val27, const int &val28, const int &val29, const int &val30,
-                         const int &val31, const int &val32, const int &val33, const int &val34, const int &val35,
-                         const int &val36, const int &val37, const int &val38, const int &val39, const int &val40,
-                         const int &val41, const int &val42, const int &val43, const int &val44, const int &val45)
+struct ConsultRegDef {
+    const char *hexCodes;
+};
+
+static const ConsultRegDef s_consultRegs[] = {
+    {"0x00,0x01"},  //  0: RPM
+    {"0x02,0x03"},  //  1: RPM Reference
+    {"0x04,0x05"},  //  2: MAF Voltage
+    {"0x06,0x07"},  //  3: RH MAF Voltage
+    {"0x08"},       //  4: Coolant Temp
+    {"0x09"},       //  5: LH O2 Voltage
+    {"0x0a"},       //  6: RH O2 Voltage
+    {"0x0b"},       //  7: Speed
+    {"0x0c"},       //  8: Battery Voltage
+    {"0x0d"},       //  9: TPS Voltage
+    {"0x0f"},       // 10: Fuel Temp
+    {"0x11"},       // 11: Intake Temp
+    {"0x12"},       // 12: EGT
+    {"0x13"},       // 13: Digital Bit Register
+    {"0x14,0x15"},  // 14: Injection Time (LH)
+    {"0x16"},       // 15: Ignition Timing
+    {"0x17"},       // 16: AAC Valve (Idle Air Valve %)
+    {"0x1a"},       // 17: A/F Alpha LH
+    {"0x1b"},       // 18: A/F Alpha RH
+    {"0x1c"},       // 19: A/F Alpha LH (SelfLearn)
+    {"0x1d"},       // 20: A/F Alpha RH (SelfLearn)
+    {"0x1e"},       // 21: Digital Control Register 1
+    {"0x1f"},       // 22: Digital Control Register 2
+    {"0x21"},       // 23: M/R F/C MNT
+    {"0x22,0x23"},  // 24: Injector Time (RH)
+    {"0x28"},       // 25: Waste Gate Solenoid %
+    {"0x29"},       // 26: Turbo Boost Sensor Voltage
+    {"0x2a"},       // 27: Engine Mount On/Off
+    {"0x2e"},       // 28: Position Counter
+    {"0x25"},       // 29: Purg. Vol. Control Valve Step
+    {"0x26"},       // 30: Tank Fuel Temperature C
+    {"0x27"},       // 31: FPCM DR Voltage
+    {"0x2f"},       // 32: Fuel Gauge Voltage
+    {"0x30"},       // 33: FR O2 Heater B1
+    {"0x31"},       // 34: FR O2 Heater B2
+    {"0x32"},       // 35: Ignition Switch
+    {"0x33"},       // 36: CAL/LD Value %
+    {"0x34"},       // 37: B/Fuel Schedule mS
+    {"0x35"},       // 38: RR O2 Sensor Voltage
+    {"0x36"},       // 39: RR O2 Sensor B2 Voltage
+    {"0x37"},       // 40: Absolute Throttle Position Voltage
+    {"0x38"},       // 41: MAF gm/S
+    {"0x39"},       // 42: Evap System Pressure Voltage
+    {"0x3a,0x4a"},  // 43: Absolute Pressure Sensor Voltage
+    {"0x52,0x53"},  // 44: FPCM F/P Voltage
+};
+
+static constexpr int kConsultRegCount = sizeof(s_consultRegs) / sizeof(s_consultRegs[0]);
+
+void Connect::LiveReqMsg(const QVariantList &values)
 {
-    QString Message;
+    QString message;
 
-    if (val1 == 2) {
-        Message.append("0x00,0x01,");
-    }  // RPM}
-    if (val2 == 2) {
-        Message.append("0x02,0x03,");
-    }  // RPMREF}
-    if (val3 == 2) {
-        Message.append("0x04,0x05,");
-    }  // MAFVoltage}
-    if (val4 == 2) {
-        Message.append("0x06,0x07,");
-    }  // RHMAFVoltage}
-    if (val5 == 2) {
-        Message.append("0x08,");
-    }  // Coolant Temp}
-    if (val6 == 2) {
-        Message.append("0x09,");
-    }  // LH 02 volt}
-    if (val7 == 2) {
-        Message.append("0x0a,");
-    }  // RH 02 volt}
-    if (val8 == 2) {
-        Message.append("0x0b,");
-    }  // Speed}
-    if (val9 == 2) {
-        Message.append("0x0c,");
-    }  // Battery Voltage}
-    if (val10 == 2) {
-        Message.append("0x0d,");
-    }  // TPS Voltage}
-    if (val11 == 2) {
-        Message.append("0x0f,");
-    }  // FuelTemp}
-    if (val12 == 2) {
-        Message.append("0x11,");
-    }  // Intake Temp}
-    if (val13 == 2) {
-        Message.append("0x12,");
-    }  // EGT}
-    if (val14 == 2) {
-        Message.append("0x13,");
-    }  // Digital Bit Register}
-    if (val15 == 2) {
-        Message.append("0x14,0x15,");
-    }  // Injection Time (LH)}
-    if (val16 == 2) {
-        Message.append("0x16,");
-    }  // Ignition Timing}
-    if (val17 == 2) {
-        Message.append("0x17,");
-    }  // AAC Valve (Idle Air Valve %)}
-    if (val18 == 2) {
-        Message.append("0x1a,");
-    }  // A/F ALPHA-LH}
-    if (val19 == 2) {
-        Message.append("0x1b,");
-    }  // A/F ALPHA-RH}
-    if (val20 == 2) {
-        Message.append("0x1c,");
-    }  // A/F ALPHA-LH (SELFLEARN)}
-    if (val21 == 2) {
-        Message.append("0x1d,");
-    }  // A/F ALPHA-RH (SELFLEARN)}
-    if (val22 == 2) {
-        Message.append("0x1e,");
-    }  // Digital Control Register 1}
-    if (val23 == 2) {
-        Message.append("0x1f,");
-    }  // Digital Control Register 2}
-    if (val24 == 2) {
-        Message.append("0x21,");
-    }  // M/R F/C MNT}
-    if (val25 == 2) {
-        Message.append("0x22,0x23,");
-    }  // Injector time (RH)}
-    if (val26 == 2) {
-        Message.append("0x28,");
-    }  // Waste Gate Solenoid %}
-    if (val27 == 2) {
-        Message.append("0x29,");
-    }  // Turbo Boost Sensor, Voltage}
-    if (val28 == 2) {
-        Message.append("0x2a,");
-    }  // Engine Mount On/Off}
-    if (val29 == 2) {
-        Message.append("0x2e,");
-    }  // Position Counter}
-    if (val30 == 2) {
-        Message.append("0x25,");
-    }  // Purg. Vol. Control Valve, Step}
-    if (val31 == 2) {
-        Message.append("0x26,");
-    }  // Tank Fuel Temperature, C}
-    if (val32 == 2) {
-        Message.append("0x27,");
-    }  // FPCM DR, Voltage}
-    if (val33 == 2) {
-        Message.append("0x2f,");
-    }  // Fuel Gauge, Voltage}
-    if (val34 == 2) {
-        Message.append("0x30,");
-    }  // FR O2 Heater-B1}
-    if (val35 == 2) {
-        Message.append("0x31,");
-    }  // FR O2 Heater-B2}
-    if (val36 == 2) {
-        Message.append("0x32,");
-    }  // Ignition Switch}
-    if (val37 == 2) {
-        Message.append("0x33,");
-    }  // CAL/LD Value, %}
-    if (val38 == 2) {
-        Message.append("0x34,");
-    }  // B/Fuel Schedule, mS}
-    if (val39 == 2) {
-        Message.append("0x35,");
-    }  // RR O2 Sensor Voltage}
-    if (val40 == 2) {
-        Message.append("0x36,");
-    }  // RR O2 Sensor-B2 Voltage}
-    if (val41 == 2) {
-        Message.append("0x37,");
-    }  // Absolute Throttle Position, Voltage }
-    if (val42 == 2) {
-        Message.append("0x38,");
-    }  // MAF gm/S}
-    if (val43 == 2) {
-        Message.append("0x39,");
-    }  // Evap System Pressure, Voltage}
-    if (val44 == 2) {
-        Message.append("0x3a,0x4a,");
-    }  // Absolute Pressure Sensor,Voltage}
-    if (val45 == 2) {
-        Message.append("0x52,0x53,");
-    }  // FPCM F/P Voltage}
-    Message.remove(Message.length() - 1, 1);  // remove the last comma from string
-    // qDebug()<< "write" <<Message;
+    const int count = qMin(values.size(), kConsultRegCount);
+    for (int i = 0; i < count; ++i) {
+        if (values.at(i).toInt() == 2) {
+            if (!message.isEmpty())
+                message.append(QLatin1Char(','));
+            message.append(QLatin1String(s_consultRegs[i].hexCodes));
+        }
+    }
 
+    if (message.isEmpty())
+        return;
 
-    QString fileName = "/home/pi/daemons/Consult.cfg";  // This will be the correct path on pi
-    // QString fileName = "Consult.cfg";//for testing on windows
+    QString fileName = "/home/pi/daemons/Consult.cfg";
     QFile mFile(fileName);
     mFile.open(QIODevice::ReadWrite | QIODevice::Truncate | QIODevice::Text);
 
     QTextStream out(&mFile);
-    out << Message;
+    out << message;
     mFile.close();
 
-    // Reboot the PI for settings to take Effect
     reboot();
 }
 
 void Connect::openConnection(const QString &portName, const int &ecuSelect, const int &canbase, const int &rpmcanbase)
 {
-    ecu = ecuSelect;
-    selectedPort = portName;
-    canbaseadress = canbase;
-    rpmcanbaseadress = rpmcanbase;
+    m_ecu = ecuSelect;
+    m_selectedPort = portName;
+    m_canBaseAddress = canbase;
+    m_rpmCanBaseAddress = rpmcanbase;
 
     if (m_diagnosticsProvider) {
         m_diagnosticsProvider->addLogMessage(
@@ -1219,7 +782,7 @@ void Connect::openConnection(const QString &portName, const int &ecuSelect, cons
         m_diagnosticsProvider->setCanStatus(true, QStringLiteral("Generic CAN"));
     }
 
-    m_extender->openCAN(canbaseadress, rpmcanbaseadress);
+    m_extender->openCAN(m_canBaseAddress, m_rpmCanBaseAddress);
     m_udpreceiver->startreceiver();
 }
 void Connect::closeConnection()
