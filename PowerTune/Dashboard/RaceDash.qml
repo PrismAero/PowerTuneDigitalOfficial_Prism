@@ -7,7 +7,6 @@ import PowerTune.Gauges.RaceDash 1.0
 
 Item {
     id: root
-    anchors.fill: parent
 
     property string dashboardId: "racedash"
     property var overlayConfigs: ({})
@@ -59,7 +58,7 @@ Item {
                 gearOffsetY: -85,
                 gearWidth: 168,
                 gearHeight: 117
-            }
+            };
         }
 
         if (id === "speedCluster") {
@@ -100,114 +99,121 @@ Item {
                 unitOffsetX: 14,
                 unitOffsetY: -2,
                 readoutSpacing: -1
+            };
+        }
+
+        return {};
+    }
+
+    function loadOverlayConfig(id, defaults, legacyIds) {
+        var loaded = AppSettings.loadOverlayConfig(dashboardId, id);
+        var merged = {};
+        for (var key in defaults)
+            merged[key] = defaults[key];
+        if (objectHasKeys(loaded)) {
+            mergeConfig(merged, loaded);
+        } else if (legacyIds !== undefined) {
+            for (var i = 0; i < legacyIds.length; ++i) {
+                var legacyLoaded = AppSettings.loadOverlayConfig(dashboardId, legacyIds[i]);
+                mergeConfig(merged, legacyLoaded);
             }
         }
-
-        return {}
-    }
-
-    function normalizeClusterConfig(id, merged) {
-        if (id === "tachCluster") {
-            merged.shapeMode = "tachSvg"
-        } else if (id === "speedCluster") {
-            merged.shapeMode = "speedSvg"
-        }
-        return merged
-    }
-
-    function objectHasKeys(obj) {
-        for (var key in obj)
-            return true
-        return false
+        return normalizeClusterConfig(id, merged);
     }
 
     function mergeConfig(target, source) {
         for (var key in source)
-            target[key] = source[key]
+            target[key] = source[key];
     }
 
-    function loadOverlayConfig(id, defaults, legacyIds) {
-        var loaded = AppSettings.loadOverlayConfig(dashboardId, id)
-        var merged = {}
-        for (var key in defaults)
-            merged[key] = defaults[key]
-        if (objectHasKeys(loaded)) {
-            mergeConfig(merged, loaded)
-        } else if (legacyIds !== undefined) {
-            for (var i = 0; i < legacyIds.length; ++i) {
-                var legacyLoaded = AppSettings.loadOverlayConfig(dashboardId, legacyIds[i])
-                mergeConfig(merged, legacyLoaded)
-            }
+    function normalizeClusterConfig(id, merged) {
+        if (id === "tachCluster") {
+            merged.shapeMode = "tachSvg";
+        } else if (id === "speedCluster") {
+            merged.shapeMode = "speedSvg";
         }
-        return normalizeClusterConfig(id, merged)
+        return merged;
+    }
+
+    function objectHasKeys(obj) {
+        for (var key in obj)
+            return true;
+        return false;
     }
 
     function refreshConfigs() {
         overlayConfigs = {
-            tachCluster: loadOverlayConfig("tachCluster", defaultClusterConfig("tachCluster"), ["tachGroup", "gearIndicator"]),
+            tachCluster: loadOverlayConfig("tachCluster", defaultClusterConfig("tachCluster"), ["tachGroup",
+                                                                                                "gearIndicator"]),
             speedCluster: loadOverlayConfig("speedCluster", defaultClusterConfig("speedCluster"), ["speedGroup"]),
             shiftIndicator: loadOverlayConfig("shiftIndicator", {
-                sensorKey: "rpm",
-                maxValue: AppSettings.getValue("Max RPM", 10000),
-                shiftPoint: AppSettings.getValue("Shift Light1", 3000) / Math.max(1, AppSettings.getValue("Max RPM", 10000)),
-                shiftCount: 11,
-                shiftPattern: "center-out"
-            }),
+                                                  sensorKey: "rpm",
+                                                  maxValue: AppSettings.getValue("Max RPM", 10000),
+                                                  shiftPoint: AppSettings.getValue("Shift Light1", 3000) / Math.max(1,
+                                                                                                                    AppSettings.getValue(
+                                                                                                                        "Max RPM",
+                                                                                                                        10000)),
+                                                  shiftCount: 11,
+                                                  shiftPattern: "center-out"
+                                              }),
             waterTemp: loadOverlayConfig("waterTemp", {
-                sensorKey: "Watertemp",
-                label: "Water Temp",
-                unit: "F°",
-                decimals: 2
-            }),
+                                             sensorKey: "Watertemp",
+                                             label: "Water Temp",
+                                             unit: "F°",
+                                             decimals: 2
+                                         }),
             oilPressure: loadOverlayConfig("oilPressure", {
-                sensorKey: "oilpres",
-                label: "Oil Pressure",
-                unit: "PSI",
-                decimals: 2
-            }),
+                                               sensorKey: "oilpres",
+                                               label: "Oil Pressure",
+                                               unit: "PSI",
+                                               decimals: 2
+                                           }),
             statusRow0: loadOverlayConfig("statusRow0", {
-                sensorKey: "DigitalInput1",
-                label: "Fuel Pump:",
-                threshold: 0.5,
-                onColor: "#1ED033",
-                offColor: "#FF0909"
-            }),
+                                              sensorKey: "DigitalInput1",
+                                              label: "Fuel Pump:",
+                                              threshold: 0.5,
+                                              onColor: "#1ED033",
+                                              offColor: "#FF0909"
+                                          }),
             statusRow1: loadOverlayConfig("statusRow1", {
-                sensorKey: "DigitalInput2",
-                label: "Cooling Fan:",
-                threshold: 0.5,
-                onColor: "#1ED033",
-                offColor: "#FF0909"
-            }),
+                                              sensorKey: "DigitalInput2",
+                                              label: "Cooling Fan:",
+                                              threshold: 0.5,
+                                              onColor: "#1ED033",
+                                              offColor: "#FF0909"
+                                          }),
             brakeBias: loadOverlayConfig("brakeBias", {
-                sensorKey: "brakeBias",
-                leftLabel: "RWD",
-                rightLabel: "FWD",
-                minValue: 0,
-                maxValue: 100
-            }),
+                                             sensorKey: "brakeBias",
+                                             leftLabel: "RWD",
+                                             rightLabel: "FWD",
+                                             minValue: 0,
+                                             maxValue: 100
+                                         }),
             bottomBar: loadOverlayConfig("bottomBar", {
-                text: "Cardinal Racing",
-                timeEnabled: true
-            })
-        }
+                                             text: "Cardinal Racing",
+                                             timeEnabled: true
+                                         })
+        };
     }
+
+    anchors.fill: parent
 
     Component.onCompleted: refreshConfigs()
 
     Popup {
         id: layoutPopup
+
+        closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
+        focus: true
+        modal: false
+        padding: 12
+        width: 240
         x: root.width - width - 16
         y: 16
-        width: 240
-        modal: false
-        focus: true
-        padding: 12
-        closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
 
         background: Rectangle {
-            color: Qt.rgba(0.05, 0.05, 0.05, 0.92)
             border.color: Qt.rgba(1, 1, 1, 0.16)
+            color: Qt.rgba(0.05, 0.05, 0.05, 0.92)
             radius: 10
         }
 
@@ -216,27 +222,29 @@ Item {
             spacing: 10
 
             Text {
-                text: "Layout Tools"
                 color: "#FFFFFF"
                 font.family: SettingsTheme.fontFamily
                 font.pixelSize: SettingsTheme.fontLabel
                 font.weight: Font.DemiBold
+                text: "Layout Tools"
             }
 
             StyledSwitch {
-                width: parent.width
-                text: OverlayConfig.positionsLocked ? "Positions Locked" : "Positions Unlocked"
                 checked: OverlayConfig.positionsLocked
+                text: OverlayConfig.positionsLocked ? "Positions Locked" : "Positions Unlocked"
+                width: parent.width
+
                 onToggled: OverlayConfig.positionsLocked = checked
             }
 
             StyledButton {
-                width: parent.width
-                text: "Reset Positions"
                 danger: true
+                text: "Reset Positions"
+                width: parent.width
+
                 onClicked: {
-                    OverlayConfig.resetAllPositions()
-                    layoutPopup.close()
+                    OverlayConfig.resetAllPositions();
+                    layoutPopup.close();
                 }
             }
         }
@@ -249,21 +257,21 @@ Item {
 
     Image {
         anchors.fill: parent
-        source: DashboardTheme.backgroundAsset
         fillMode: Image.Stretch
         smooth: true
+        source: DashboardTheme.backgroundAsset
     }
 
     Rectangle {
-        width: 34
+        anchors.right: parent.right
+        anchors.rightMargin: 10
+        anchors.top: parent.top
+        anchors.topMargin: 10
+        border.color: Qt.rgba(1, 1, 1, 0.18)
+        color: Qt.rgba(0, 0, 0, 0.35)
         height: 34
         radius: 17
-        anchors.top: parent.top
-        anchors.right: parent.right
-        anchors.topMargin: 10
-        anchors.rightMargin: 10
-        color: Qt.rgba(0, 0, 0, 0.35)
-        border.color: Qt.rgba(1, 1, 1, 0.18)
+        width: 34
         z: 500
 
         Text {
@@ -277,26 +285,31 @@ Item {
         TapHandler {
             onTapped: {
                 if (layoutPopup.opened)
-                    layoutPopup.close()
+                    layoutPopup.close();
                 else
-                    layoutPopup.open()
+                    layoutPopup.open();
             }
         }
     }
 
     OverlayConfigPopup {
         id: overlayPopup
+
         dashboardId: root.dashboardId
-        onConfigChanged: function(overlayId) { root.refreshConfigs() }
+
+        onConfigChanged: function (overlayId) {
+            root.refreshConfigs();
+        }
     }
 
     DraggableOverlay {
-        overlayId: "shiftIndicator"
         configType: "shift"
+        height: 30
+        overlayId: "shiftIndicator"
+        width: 925
         x: DashboardTheme.defaultShiftX
         y: DashboardTheme.defaultShiftY
-        width: 925
-        height: 30
+
         onConfigRequested: overlayPopup.openFor(overlayId, configType)
 
         ShiftIndicator {
@@ -306,14 +319,15 @@ Item {
     }
 
     DraggableOverlay {
-        overlayId: "tachCluster"
         configType: "tachCluster"
+        height: width
+        overlayId: "tachCluster"
+        width: root.overlayConfigs.tachCluster && root.overlayConfigs.tachCluster.overlaySize !== undefined ? Number(
+                                                                                                                  root.overlayConfigs.tachCluster.overlaySize) :
+                                                                                                              DashboardTheme.defaultTachSize
         x: DashboardTheme.defaultTachX
         y: DashboardTheme.defaultTachY
-        width: root.overlayConfigs.tachCluster && root.overlayConfigs.tachCluster.overlaySize !== undefined
-            ? Number(root.overlayConfigs.tachCluster.overlaySize)
-            : DashboardTheme.defaultTachSize
-        height: width
+
         onConfigRequested: overlayPopup.openFor(overlayId, configType)
 
         TachCluster {
@@ -323,14 +337,15 @@ Item {
     }
 
     DraggableOverlay {
-        overlayId: "speedCluster"
         configType: "speedCluster"
+        height: width
+        overlayId: "speedCluster"
+        width: root.overlayConfigs.speedCluster && root.overlayConfigs.speedCluster.overlaySize !== undefined ? Number(
+                                                                                                                    root.overlayConfigs.speedCluster.overlaySize) :
+                                                                                                                DashboardTheme.defaultSpeedSize
         x: DashboardTheme.defaultSpeedX
         y: DashboardTheme.defaultSpeedY
-        width: root.overlayConfigs.speedCluster && root.overlayConfigs.speedCluster.overlaySize !== undefined
-            ? Number(root.overlayConfigs.speedCluster.overlaySize)
-            : DashboardTheme.defaultSpeedSize
-        height: width
+
         onConfigRequested: overlayPopup.openFor(overlayId, configType)
 
         SpeedCluster {
@@ -340,12 +355,13 @@ Item {
     }
 
     DraggableOverlay {
-        overlayId: "waterTemp"
         configType: "sensorCard"
+        height: 113
+        overlayId: "waterTemp"
+        width: 250
         x: DashboardTheme.defaultWaterTempX
         y: DashboardTheme.defaultWaterTempY
-        width: 250
-        height: 113
+
         onConfigRequested: overlayPopup.openFor(overlayId, configType)
 
         SensorCard {
@@ -355,12 +371,13 @@ Item {
     }
 
     DraggableOverlay {
-        overlayId: "oilPressure"
         configType: "sensorCard"
+        height: 113
+        overlayId: "oilPressure"
+        width: 250
         x: DashboardTheme.defaultOilPressureX
         y: DashboardTheme.defaultOilPressureY
-        width: 250
-        height: 113
+
         onConfigRequested: overlayPopup.openFor(overlayId, configType)
 
         SensorCard {
@@ -370,12 +387,13 @@ Item {
     }
 
     DraggableOverlay {
-        overlayId: "statusRow0"
         configType: "statusRow"
+        height: 25
+        overlayId: "statusRow0"
+        width: 250
         x: DashboardTheme.defaultStatusRow0X
         y: DashboardTheme.defaultStatusRow0Y
-        width: 250
-        height: 25
+
         onConfigRequested: overlayPopup.openFor(overlayId, configType)
 
         StatusBox {
@@ -385,12 +403,13 @@ Item {
     }
 
     DraggableOverlay {
-        overlayId: "statusRow1"
         configType: "statusRow"
+        height: 25
+        overlayId: "statusRow1"
+        width: 250
         x: DashboardTheme.defaultStatusRow1X
         y: DashboardTheme.defaultStatusRow1Y
-        width: 250
-        height: 25
+
         onConfigRequested: overlayPopup.openFor(overlayId, configType)
 
         StatusBox {
@@ -400,12 +419,13 @@ Item {
     }
 
     DraggableOverlay {
-        overlayId: "brakeBias"
         configType: "brakebias"
+        height: 82
+        overlayId: "brakeBias"
+        width: 365
         x: DashboardTheme.defaultBrakeBiasX
         y: DashboardTheme.defaultBrakeBiasY
-        width: 365
-        height: 82
+
         onConfigRequested: overlayPopup.openFor(overlayId, configType)
 
         BrakeBiasBar {
@@ -415,12 +435,13 @@ Item {
     }
 
     DraggableOverlay {
-        overlayId: "bottomBar"
         configType: "bottombar"
+        height: 40
+        overlayId: "bottomBar"
+        width: 1600
         x: DashboardTheme.defaultBottomBarX
         y: DashboardTheme.defaultBottomBarY
-        width: 1600
-        height: 40
+
         onConfigRequested: overlayPopup.openFor(overlayId, configType)
 
         BottomStatusBar {
@@ -432,6 +453,8 @@ Item {
     Item {
         anchors.fill: parent
         z: 300
-        WarningLoader {}
+
+        WarningLoader {
+        }
     }
 }

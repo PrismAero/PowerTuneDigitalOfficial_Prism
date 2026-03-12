@@ -1,10 +1,8 @@
 #include "OverlayConfigDefaults.h"
+
 #include "appsettings.h"
 
-OverlayConfigDefaults::OverlayConfigDefaults(QObject *parent)
-    : QObject(parent)
-{
-}
+OverlayConfigDefaults::OverlayConfigDefaults(QObject *parent) : QObject(parent) {}
 
 QVariantMap OverlayConfigDefaults::defaultsFor(const QString &configType) const
 {
@@ -38,11 +36,11 @@ QVariantMap OverlayConfigDefaults::arcDefaults(const QString &configType) const
     const QVariantMap defs = defaultsFor(configType);
     QVariantMap arc;
     const QStringList arcKeys = {
-        QStringLiteral("startAngle"),  QStringLiteral("endAngle"),
-        QStringLiteral("arcWidth"),    QStringLiteral("arcScale"),
-        QStringLiteral("arcOffsetX"),  QStringLiteral("arcOffsetY"),
-        QStringLiteral("arcColorStart"), QStringLiteral("arcColorMid"), QStringLiteral("arcColorEnd"),
-        QStringLiteral("minimumVisibleFraction"),
+        QStringLiteral("startAngle"),    QStringLiteral("endAngle"),
+        QStringLiteral("arcWidth"),      QStringLiteral("arcScale"),
+        QStringLiteral("arcOffsetX"),    QStringLiteral("arcOffsetY"),
+        QStringLiteral("arcColorStart"), QStringLiteral("arcColorMid"),
+        QStringLiteral("arcColorEnd"),   QStringLiteral("minimumVisibleFraction"),
     };
     for (const QString &k : arcKeys) {
         if (defs.contains(k))
@@ -66,98 +64,98 @@ QVariantMap OverlayConfigDefaults::tachClusterDefaults() const
     }
 
     return {
-        {QStringLiteral("sensorKey"),              QStringLiteral("RPMFrequencyDividerDi1")},
-        {QStringLiteral("minValue"),               0.0},
-        {QStringLiteral("maxValue"),               maxRpm},
-        {QStringLiteral("overlaySize"),            575.051},
+        {QStringLiteral("sensorKey"), QStringLiteral("RPMFrequencyDividerDi1")},
+        {QStringLiteral("minValue"), 0.0},
+        {QStringLiteral("maxValue"), maxRpm},
+        {QStringLiteral("overlaySize"), 575.051},
         {QStringLiteral("minimumVisibleFraction"), 0.0},
-        {QStringLiteral("startAngle"),             135.0},
-        {QStringLiteral("endAngle"),               400.0},
-        {QStringLiteral("arcWidth"),               0.32},
-        {QStringLiteral("arcScale"),               1.0},
-        {QStringLiteral("arcOffsetX"),             0.0},
-        {QStringLiteral("arcOffsetY"),             0.0},
-        {QStringLiteral("arcColorStart"),          QStringLiteral("#8F4D17")},
-        {QStringLiteral("arcColorMid"),            QString()},
-        {QStringLiteral("arcColorEnd"),            QStringLiteral("#B00000")},
-        {QStringLiteral("readoutStep"),            100.0},
-        {QStringLiteral("readoutOffsetX"),         0.0},
-        {QStringLiteral("readoutOffsetY"),         50.0},
-        {QStringLiteral("valueOffsetY"),           50.0},
-        {QStringLiteral("unitOffsetX"),            34.0},
-        {QStringLiteral("gearKey"),                QStringLiteral("Gear")},
-        {QStringLiteral("gearFontSize"),           160.0},
-        {QStringLiteral("gearOffsetX"),            0.0},
-        {QStringLiteral("gearOffsetY"),            -85.0},
-        {QStringLiteral("warningThreshold"),       shiftLight},
-        {QStringLiteral("shiftPoint"),             0.75},
+        {QStringLiteral("startAngle"), 135.0},
+        {QStringLiteral("endAngle"), 400.0},
+        {QStringLiteral("arcWidth"), 0.32},
+        {QStringLiteral("arcScale"), 1.0},
+        {QStringLiteral("arcOffsetX"), 0.0},
+        {QStringLiteral("arcOffsetY"), 0.0},
+        {QStringLiteral("arcColorStart"), QStringLiteral("#8F4D17")},
+        {QStringLiteral("arcColorMid"), QString()},
+        {QStringLiteral("arcColorEnd"), QStringLiteral("#B00000")},
+        {QStringLiteral("readoutStep"), 100.0},
+        {QStringLiteral("readoutOffsetX"), 0.0},
+        {QStringLiteral("readoutOffsetY"), 50.0},
+        {QStringLiteral("valueOffsetY"), 50.0},
+        {QStringLiteral("unitOffsetX"), 34.0},
+        {QStringLiteral("gearKey"), QStringLiteral("Gear")},
+        {QStringLiteral("gearFontSize"), 160.0},
+        {QStringLiteral("gearOffsetX"), 0.0},
+        {QStringLiteral("gearOffsetY"), -85.0},
+        {QStringLiteral("warningThreshold"), shiftLight},
+        {QStringLiteral("shiftPoint"), 0.75},
     };
 }
 
 QVariantMap OverlayConfigDefaults::speedClusterDefaults() const
 {
     return {
-        {QStringLiteral("sensorKey"),              QStringLiteral("speed")},
-        {QStringLiteral("minValue"),               0.0},
-        {QStringLiteral("maxValue"),               220.0},
-        {QStringLiteral("overlaySize"),            503.17},
+        {QStringLiteral("sensorKey"), QStringLiteral("speed")},
+        {QStringLiteral("minValue"), 0.0},
+        {QStringLiteral("maxValue"), 220.0},
+        {QStringLiteral("overlaySize"), 503.17},
         {QStringLiteral("minimumVisibleFraction"), 0.0},
-        {QStringLiteral("startAngle"),             135.0},
-        {QStringLiteral("endAngle"),               400.0},
-        {QStringLiteral("arcWidth"),               0.32},
-        {QStringLiteral("arcScale"),               1.0},
-        {QStringLiteral("arcOffsetX"),             0.0},
-        {QStringLiteral("arcOffsetY"),             0.0},
-        {QStringLiteral("arcColorStart"),          QStringLiteral("#7A0D0D")},
-        {QStringLiteral("arcColorMid"),            QStringLiteral("#E11B1B")},
-        {QStringLiteral("arcColorEnd"),            QStringLiteral("#B00000")},
-        {QStringLiteral("readoutStep"),            10.0},
-        {QStringLiteral("readoutOffsetX"),         0.0},
-        {QStringLiteral("readoutOffsetY"),         0.0},
-        {QStringLiteral("valueOffsetY"),           0.0},
-        {QStringLiteral("unitOffsetX"),            14.0},
+        {QStringLiteral("startAngle"), 135.0},
+        {QStringLiteral("endAngle"), 400.0},
+        {QStringLiteral("arcWidth"), 0.32},
+        {QStringLiteral("arcScale"), 1.0},
+        {QStringLiteral("arcOffsetX"), 0.0},
+        {QStringLiteral("arcOffsetY"), 0.0},
+        {QStringLiteral("arcColorStart"), QStringLiteral("#7A0D0D")},
+        {QStringLiteral("arcColorMid"), QStringLiteral("#E11B1B")},
+        {QStringLiteral("arcColorEnd"), QStringLiteral("#B00000")},
+        {QStringLiteral("readoutStep"), 10.0},
+        {QStringLiteral("readoutOffsetX"), 0.0},
+        {QStringLiteral("readoutOffsetY"), 0.0},
+        {QStringLiteral("valueOffsetY"), 0.0},
+        {QStringLiteral("unitOffsetX"), 14.0},
     };
 }
 
 QVariantMap OverlayConfigDefaults::waterTempDefaults() const
 {
     return {
-        {QStringLiteral("sensorKey"),              QStringLiteral("Watertemp")},
-        {QStringLiteral("minValue"),               0.0},
-        {QStringLiteral("maxValue"),               150.0},
-        {QStringLiteral("overlaySize"),            300.0},
+        {QStringLiteral("sensorKey"), QStringLiteral("Watertemp")},
+        {QStringLiteral("minValue"), 0.0},
+        {QStringLiteral("maxValue"), 150.0},
+        {QStringLiteral("overlaySize"), 300.0},
         {QStringLiteral("minimumVisibleFraction"), 0.0},
-        {QStringLiteral("startAngle"),             135.0},
-        {QStringLiteral("endAngle"),               400.0},
-        {QStringLiteral("arcWidth"),               0.32},
-        {QStringLiteral("arcScale"),               1.0},
-        {QStringLiteral("arcOffsetX"),             0.0},
-        {QStringLiteral("arcOffsetY"),             0.0},
-        {QStringLiteral("arcColorStart"),          QStringLiteral("#0066CC")},
-        {QStringLiteral("arcColorMid"),            QStringLiteral("#FFB800")},
-        {QStringLiteral("arcColorEnd"),            QStringLiteral("#B00000")},
-        {QStringLiteral("readoutStep"),            10.0},
+        {QStringLiteral("startAngle"), 135.0},
+        {QStringLiteral("endAngle"), 400.0},
+        {QStringLiteral("arcWidth"), 0.32},
+        {QStringLiteral("arcScale"), 1.0},
+        {QStringLiteral("arcOffsetX"), 0.0},
+        {QStringLiteral("arcOffsetY"), 0.0},
+        {QStringLiteral("arcColorStart"), QStringLiteral("#0066CC")},
+        {QStringLiteral("arcColorMid"), QStringLiteral("#FFB800")},
+        {QStringLiteral("arcColorEnd"), QStringLiteral("#B00000")},
+        {QStringLiteral("readoutStep"), 10.0},
     };
 }
 
 QVariantMap OverlayConfigDefaults::oilPressureDefaults() const
 {
     return {
-        {QStringLiteral("sensorKey"),              QStringLiteral("oilpres")},
-        {QStringLiteral("minValue"),               0.0},
-        {QStringLiteral("maxValue"),               150.0},
-        {QStringLiteral("overlaySize"),            300.0},
+        {QStringLiteral("sensorKey"), QStringLiteral("oilpres")},
+        {QStringLiteral("minValue"), 0.0},
+        {QStringLiteral("maxValue"), 150.0},
+        {QStringLiteral("overlaySize"), 300.0},
         {QStringLiteral("minimumVisibleFraction"), 0.0},
-        {QStringLiteral("startAngle"),             135.0},
-        {QStringLiteral("endAngle"),               400.0},
-        {QStringLiteral("arcWidth"),               0.32},
-        {QStringLiteral("arcScale"),               1.0},
-        {QStringLiteral("arcOffsetX"),             0.0},
-        {QStringLiteral("arcOffsetY"),             0.0},
-        {QStringLiteral("arcColorStart"),          QStringLiteral("#B00000")},
-        {QStringLiteral("arcColorMid"),            QStringLiteral("#FFB800")},
-        {QStringLiteral("arcColorEnd"),            QStringLiteral("#00AA00")},
-        {QStringLiteral("readoutStep"),            10.0},
+        {QStringLiteral("startAngle"), 135.0},
+        {QStringLiteral("endAngle"), 400.0},
+        {QStringLiteral("arcWidth"), 0.32},
+        {QStringLiteral("arcScale"), 1.0},
+        {QStringLiteral("arcOffsetX"), 0.0},
+        {QStringLiteral("arcOffsetY"), 0.0},
+        {QStringLiteral("arcColorStart"), QStringLiteral("#B00000")},
+        {QStringLiteral("arcColorMid"), QStringLiteral("#FFB800")},
+        {QStringLiteral("arcColorEnd"), QStringLiteral("#00AA00")},
+        {QStringLiteral("readoutStep"), 10.0},
     };
 }
 
@@ -168,18 +166,18 @@ QVariantMap OverlayConfigDefaults::shiftIndicatorDefaults() const
         shiftLight = m_appSettings->getValue(QStringLiteral("Shift Light1"), 3000).toDouble();
 
     return {
-        {QStringLiteral("sensorKey"),        QStringLiteral("RPMFrequencyDividerDi1")},
-        {QStringLiteral("overlaySize"),      200.0},
+        {QStringLiteral("sensorKey"), QStringLiteral("RPMFrequencyDividerDi1")},
+        {QStringLiteral("overlaySize"), 200.0},
         {QStringLiteral("warningThreshold"), shiftLight},
-        {QStringLiteral("shiftPoint"),       0.75},
+        {QStringLiteral("shiftPoint"), 0.75},
     };
 }
 
 QVariantMap OverlayConfigDefaults::statusRowDefaults() const
 {
     return {
-        {QStringLiteral("sensorKey"),   QStringLiteral("EXDigitalInput1")},
-        {QStringLiteral("label"),       QStringLiteral("Fuel Pump:")},
+        {QStringLiteral("sensorKey"), QStringLiteral("EXDigitalInput1")},
+        {QStringLiteral("label"), QStringLiteral("Fuel Pump:")},
         {QStringLiteral("overlaySize"), 160.0},
     };
 }
@@ -187,10 +185,10 @@ QVariantMap OverlayConfigDefaults::statusRowDefaults() const
 QVariantMap OverlayConfigDefaults::brakeBiasDefaults() const
 {
     return {
-        {QStringLiteral("sensorKey"),   QStringLiteral("BrakeBias")},
+        {QStringLiteral("sensorKey"), QStringLiteral("BrakeBias")},
         {QStringLiteral("overlaySize"), 300.0},
-        {QStringLiteral("minValue"),    0.0},
-        {QStringLiteral("maxValue"),    100.0},
+        {QStringLiteral("minValue"), 0.0},
+        {QStringLiteral("maxValue"), 100.0},
     };
 }
 
@@ -204,20 +202,20 @@ QVariantMap OverlayConfigDefaults::bottomBarDefaults() const
 QVariantMap OverlayConfigDefaults::genericDefaults() const
 {
     return {
-        {QStringLiteral("sensorKey"),              QStringLiteral("rpm")},
-        {QStringLiteral("minValue"),               0.0},
-        {QStringLiteral("maxValue"),               100.0},
-        {QStringLiteral("overlaySize"),            300.0},
+        {QStringLiteral("sensorKey"), QStringLiteral("rpm")},
+        {QStringLiteral("minValue"), 0.0},
+        {QStringLiteral("maxValue"), 100.0},
+        {QStringLiteral("overlaySize"), 300.0},
         {QStringLiteral("minimumVisibleFraction"), 0.0},
-        {QStringLiteral("startAngle"),             135.0},
-        {QStringLiteral("endAngle"),               400.0},
-        {QStringLiteral("arcWidth"),               0.32},
-        {QStringLiteral("arcScale"),               1.0},
-        {QStringLiteral("arcOffsetX"),             0.0},
-        {QStringLiteral("arcOffsetY"),             0.0},
-        {QStringLiteral("arcColorStart"),          QStringLiteral("#8F4D17")},
-        {QStringLiteral("arcColorMid"),            QStringLiteral("#FF8A00")},
-        {QStringLiteral("arcColorEnd"),            QStringLiteral("#B00000")},
-        {QStringLiteral("readoutStep"),            1.0},
+        {QStringLiteral("startAngle"), 135.0},
+        {QStringLiteral("endAngle"), 400.0},
+        {QStringLiteral("arcWidth"), 0.32},
+        {QStringLiteral("arcScale"), 1.0},
+        {QStringLiteral("arcOffsetX"), 0.0},
+        {QStringLiteral("arcOffsetY"), 0.0},
+        {QStringLiteral("arcColorStart"), QStringLiteral("#8F4D17")},
+        {QStringLiteral("arcColorMid"), QStringLiteral("#FF8A00")},
+        {QStringLiteral("arcColorEnd"), QStringLiteral("#B00000")},
+        {QStringLiteral("readoutStep"), 1.0},
     };
 }

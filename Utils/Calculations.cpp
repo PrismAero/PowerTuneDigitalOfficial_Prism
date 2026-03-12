@@ -8,11 +8,11 @@
 
 #include "Calculations.h"
 
-#include "../Core/dashboard.h"
-#include "../Core/Models/VehicleData.h"
 #include "../Core/Models/EngineData.h"
-#include "../Core/Models/TimingData.h"
 #include "../Core/Models/SettingsData.h"
+#include "../Core/Models/TimingData.h"
+#include "../Core/Models/VehicleData.h"
+#include "../Core/dashboard.h"
 
 #include <QDebug>
 
@@ -58,8 +58,23 @@ int GearN;
 double prev_speed = 0;
 qint64 prev_timestamp = QDateTime::currentMSecsSinceEpoch();
 
-calculations::calculations(QObject *parent) : QObject(parent), m_dashboard(nullptr), m_vehicleData(nullptr), m_engineData(nullptr), m_timingData(nullptr), m_settingsData(nullptr) {}
-calculations::calculations(DashBoard *dashboard, VehicleData *vehicleData, EngineData *engineData, TimingData *timingData, SettingsData *settingsData, QObject *parent) : QObject(parent), m_dashboard(dashboard), m_vehicleData(vehicleData), m_engineData(engineData), m_timingData(timingData), m_settingsData(settingsData) {}
+calculations::calculations(QObject *parent)
+    : QObject(parent),
+      m_dashboard(nullptr),
+      m_vehicleData(nullptr),
+      m_engineData(nullptr),
+      m_timingData(nullptr),
+      m_settingsData(nullptr)
+{}
+calculations::calculations(DashBoard *dashboard, VehicleData *vehicleData, EngineData *engineData,
+                           TimingData *timingData, SettingsData *settingsData, QObject *parent)
+    : QObject(parent),
+      m_dashboard(dashboard),
+      m_vehicleData(vehicleData),
+      m_engineData(engineData),
+      m_timingData(timingData),
+      m_settingsData(settingsData)
+{}
 
 void calculations::start()
 {
@@ -261,13 +276,15 @@ void calculations::calculate()
                                              ? 4.0
                                              : (m_settingsData->gearcalc5() == 0
                                                     ? 0.0
-                                                    : (N > ((m_settingsData->gearcalc5() + m_settingsData->gearcalc6()) / 2.0)
+                                                    : (N > ((m_settingsData->gearcalc5() +
+                                                             m_settingsData->gearcalc6()) /
+                                                            2.0)
                                                            ? 5.0
                                                            : (m_settingsData->gearcalc6() == 0
                                                                   ? 0.0
                                                                   : (N > (m_settingsData->gearcalc6() / 2.0)
                                                                          ? 6.0
-                                                                         : 0.0))))))))); 
+                                                                         : 0.0)))))))));
         m_vehicleData->setGear(CurrentGear);
         m_vehicleData->setGearCalculation(CurrentGear);
         // qDebug()<<"Gear"<< m_vehicleData->Gear();
@@ -358,7 +375,8 @@ void calculations::calculate()
         {
         if (m_vehicleData->speed() > PreviousSpeed)
         {
-        m_vehicleData->setaccely((((m_vehicleData->speed() - PreviousSpeed) *0.277778) / (25 * 0.001))*0.10197162129779);
+        m_vehicleData->setaccely((((m_vehicleData->speed() - PreviousSpeed) *0.277778) / (25 *
+       0.001))*0.10197162129779);
        // qDebug() << "G force "<< m_vehicleData->accely();
         }
         }

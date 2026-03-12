@@ -5,23 +5,12 @@ import QtQuick.Layouts 1.15
 Rectangle {
     id: root
 
-    property string selectedKey: ""
-    property string filterMode: "all"
     property string categoryFilter: ""
+    property string filterMode: "all"
     property string searchText: ""
+    property string selectedKey: ""
 
     signal sensorSelected(string key, string displayName, string unit)
-
-    Layout.fillWidth: true
-    implicitHeight: 420
-    color: SettingsTheme.surface
-    radius: SettingsTheme.radiusLarge
-    border.color: SettingsTheme.border
-    border.width: SettingsTheme.borderWidth
-
-    ListModel {
-        id: filteredModel
-    }
 
     function refresh() {
         filteredModel.clear();
@@ -37,27 +26,39 @@ Rectangle {
                     continue;
             }
             filteredModel.append({
-                sensorKey: s.key,
-                displayName: s.displayName,
-                category: s.category,
-                unit: s.unit ? s.unit : "",
-                active: s.active
-            });
+                                     sensorKey: s.key,
+                                     displayName: s.displayName,
+                                     category: s.category,
+                                     unit: s.unit ? s.unit : "",
+                                     active: s.active
+                                 });
         }
     }
 
+    Layout.fillWidth: true
+    border.color: SettingsTheme.border
+    border.width: SettingsTheme.borderWidth
+    color: SettingsTheme.surface
+    implicitHeight: 420
+    radius: SettingsTheme.radiusLarge
+
     Component.onCompleted: refresh()
+    onCategoryFilterChanged: refresh()
+    onFilterModeChanged: refresh()
+    onSearchTextChanged: refresh()
+
+    ListModel {
+        id: filteredModel
+
+    }
 
     Connections {
-        target: SensorRegistry
         function onSensorsChanged() {
             root.refresh();
         }
-    }
 
-    onFilterModeChanged: refresh()
-    onCategoryFilterChanged: refresh()
-    onSearchTextChanged: refresh()
+        target: SensorRegistry
+    }
 
     ColumnLayout {
         anchors.fill: parent
@@ -69,21 +70,26 @@ Rectangle {
             spacing: 6
 
             StyledButton {
-                text: "All"
-                primary: root.filterMode === "all"
                 implicitWidth: 60
+                primary: root.filterMode === "all"
+                text: "All"
+
                 onClicked: root.filterMode = "all"
             }
+
             StyledButton {
-                text: "Active"
-                primary: root.filterMode === "active"
                 implicitWidth: 70
+                primary: root.filterMode === "active"
+                text: "Active"
+
                 onClicked: root.filterMode = "active"
             }
+
             StyledButton {
-                text: "Category"
-                primary: root.filterMode === "category"
                 implicitWidth: 90
+                primary: root.filterMode === "category"
+                text: "Category"
+
                 onClicked: {
                     root.filterMode = "category";
                     if (root.categoryFilter === "")
@@ -94,10 +100,11 @@ Rectangle {
 
         StyledTextField {
             Layout.fillWidth: true
+            inputMethodHints: Qt.ImhNoPredictiveText
             placeholderText: "Search sensors..."
             text: root.searchText
+
             onTextChanged: root.searchText = text
-            inputMethodHints: Qt.ImhNoPredictiveText
         }
 
         Flow {
@@ -109,11 +116,12 @@ Rectangle {
                 model: SensorRegistry.availableCategories
 
                 StyledButton {
-                    text: modelData
-                    primary: root.categoryFilter === modelData
-                    implicitWidth: Math.max(60, implicitContentWidth + 16)
-                    implicitHeight: 28
                     font.pixelSize: SettingsTheme.fontCaption
+                    implicitHeight: 28
+                    implicitWidth: Math.max(60, implicitContentWidth + 16)
+                    primary: root.categoryFilter === modelData
+                    text: modelData
+
                     onClicked: root.categoryFilter = modelData
                 }
             }
@@ -121,34 +129,20 @@ Rectangle {
 
         ListView {
             id: sensorList
-            Layout.fillWidth: true
+
             Layout.fillHeight: true
+            Layout.fillWidth: true
             clip: true
             model: filteredModel
-
             section.property: "category"
-            section.delegate: Rectangle {
-                width: sensorList.width
-                height: 28
-                color: SettingsTheme.surfaceElevated
-                radius: 4
 
-                Text {
-                    anchors.verticalCenter: parent.verticalCenter
-                    leftPadding: 8
-                    text: section
-                    font.pixelSize: SettingsTheme.fontCaption
-                    font.weight: Font.Bold
-                    font.family: SettingsTheme.fontFamily
-                    color: SettingsTheme.accent
-                }
+            ScrollBar.vertical: ScrollBar {
+                minimumSize: 0.1
+                policy: ScrollBar.AlwaysOn
             }
-
             delegate: Rectangle {
                 id: delegateRoot
-                width: sensorList.width
-                height: 38
-                radius: SettingsTheme.radiusSmall
+
                 color: {
                     if (model.sensorKey === root.selectedKey)
                         return SettingsTheme.accent;
@@ -156,6 +150,9 @@ Rectangle {
                         return SettingsTheme.surfacePressed;
                     return index % 2 === 0 ? SettingsTheme.controlBg : SettingsTheme.surfaceElevated;
                 }
+                height: 38
+                radius: SettingsTheme.radiusSmall
+                width: sensorList.width
 
                 RowLayout {
                     anchors.fill: parent
@@ -164,54 +161,67 @@ Rectangle {
                     spacing: 8
 
                     Rectangle {
-                        width: SettingsTheme.statusDotSize
+                        color: model.active ? SettingsTheme.success : SettingsTheme.textDisabled
                         height: SettingsTheme.statusDotSize
                         radius: SettingsTheme.statusDotSize / 2
-                        color: model.active ? SettingsTheme.success : SettingsTheme.textDisabled
+                        width: SettingsTheme.statusDotSize
                     }
 
                     Text {
                         Layout.fillWidth: true
-                        text: model.displayName
-                        font.pixelSize: SettingsTheme.fontControl
-                        font.family: SettingsTheme.fontFamily
-                        font.weight: model.sensorKey === root.selectedKey ? Font.Bold : Font.Normal
                         color: SettingsTheme.textPrimary
                         elide: Text.ElideRight
+                        font.family: SettingsTheme.fontFamily
+                        font.pixelSize: SettingsTheme.fontControl
+                        font.weight: model.sensorKey === root.selectedKey ? Font.Bold : Font.Normal
+                        text: model.displayName
                     }
 
                     Text {
-                        text: model.unit
-                        font.pixelSize: SettingsTheme.fontCaption
-                        font.family: SettingsTheme.fontFamily
                         color: SettingsTheme.textSecondary
+                        font.family: SettingsTheme.fontFamily
+                        font.pixelSize: SettingsTheme.fontCaption
+                        text: model.unit
                         visible: model.unit.length > 0
                     }
                 }
 
                 MouseArea {
                     id: delegateArea
+
                     anchors.fill: parent
                     hoverEnabled: true
+
                     onClicked: {
                         root.selectedKey = model.sensorKey;
                         root.sensorSelected(model.sensorKey, model.displayName, model.unit);
                     }
                 }
             }
+            section.delegate: Rectangle {
+                color: SettingsTheme.surfaceElevated
+                height: 28
+                radius: 4
+                width: sensorList.width
 
-            ScrollBar.vertical: ScrollBar {
-                policy: ScrollBar.AlwaysOn
-                minimumSize: 0.1
+                Text {
+                    anchors.verticalCenter: parent.verticalCenter
+                    color: SettingsTheme.accent
+                    font.family: SettingsTheme.fontFamily
+                    font.pixelSize: SettingsTheme.fontCaption
+                    font.weight: Font.Bold
+                    leftPadding: 8
+                    text: section
+                }
             }
 
             Text {
                 anchors.centerIn: parent
-                visible: filteredModel.count === 0
-                text: root.filterMode === "active" ? "No active sensors" : "No sensors found"
-                font.pixelSize: SettingsTheme.fontLabel
-                font.family: SettingsTheme.fontFamily
                 color: SettingsTheme.textDisabled
+                font.family: SettingsTheme.fontFamily
+                font.pixelSize: SettingsTheme.fontLabel
+                text: root.filterMode === "active" ? "No active sensors" : "No sensors found"
+                visible: filteredModel.count === 0
             }
         }
     }

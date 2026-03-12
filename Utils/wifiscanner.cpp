@@ -1,7 +1,7 @@
 #include "wifiscanner.h"
 
-#include "../Core/connect.h"
 #include "../Core/Models/ConnectionData.h"
+#include "../Core/connect.h"
 
 #include <QByteArray>
 #include <QFile>
@@ -20,7 +20,9 @@ QString wlanip;
 WifiScanner::WifiScanner(QObject *parent) : QObject(parent), m_connectionData(nullptr) {}
 
 
-WifiScanner::WifiScanner(ConnectionData *connectionData, QObject *parent) : QObject(parent), m_connectionData(connectionData) {}
+WifiScanner::WifiScanner(ConnectionData *connectionData, QObject *parent)
+    : QObject(parent), m_connectionData(connectionData)
+{}
 
 
 void WifiScanner::initializeWifiscanner()

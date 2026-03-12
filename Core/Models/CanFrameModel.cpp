@@ -1,16 +1,12 @@
 #include "CanFrameModel.h"
-#include "ConnectionData.h"
-#include "../../Hardware/Extender.h"
 
-CanFrameModel::CanFrameModel(QObject *parent)
-    : QAbstractListModel(parent)
-{
-}
+#include "../../Hardware/Extender.h"
+#include "ConnectionData.h"
+
+CanFrameModel::CanFrameModel(QObject *parent) : QAbstractListModel(parent) {}
 
 CanFrameModel::CanFrameModel(ConnectionData *connectionData, Extender *extender, QObject *parent)
-    : QAbstractListModel(parent)
-    , m_connectionData(connectionData)
-    , m_extender(extender)
+    : QAbstractListModel(parent), m_connectionData(connectionData), m_extender(extender)
 {
     if (m_connectionData)
         connect(m_connectionData, &ConnectionData::canChanged, this, &CanFrameModel::onCanChanged);
@@ -47,18 +43,17 @@ QVariant CanFrameModel::data(const QModelIndex &index, int role) const
     }
 
     switch (role) {
-    case CanIdRole:   return frame->canId;
-    case PayloadRole: return frame->payload;
+    case CanIdRole:
+        return frame->canId;
+    case PayloadRole:
+        return frame->payload;
     }
     return {};
 }
 
 QHash<int, QByteArray> CanFrameModel::roleNames() const
 {
-    return {
-        { CanIdRole,   "canId" },
-        { PayloadRole, "payload" }
-    };
+    return {{CanIdRole, "canId"}, {PayloadRole, "payload"}};
 }
 
 bool CanFrameModel::showAllFrames() const
@@ -103,12 +98,12 @@ void CanFrameModel::onCanChanged(const QStringList &can)
 
         if (m_showAllFrames) {
             QModelIndex mi = index(existingIdx);
-            emit dataChanged(mi, mi, { PayloadRole });
+            emit dataChanged(mi, mi, {PayloadRole});
         } else {
             for (int v = 0; v < m_visibleIndices.size(); ++v) {
                 if (m_visibleIndices[v] == existingIdx) {
                     QModelIndex mi = index(v);
-                    emit dataChanged(mi, mi, { PayloadRole });
+                    emit dataChanged(mi, mi, {PayloadRole});
                     break;
                 }
             }
@@ -118,10 +113,10 @@ void CanFrameModel::onCanChanged(const QStringList &can)
 
         if (m_showAllFrames) {
             beginInsertRows(QModelIndex(), m_allFrames.size(), m_allFrames.size());
-            m_allFrames.append({ canId, payload });
+            m_allFrames.append({canId, payload});
             endInsertRows();
         } else {
-            m_allFrames.append({ canId, payload });
+            m_allFrames.append({canId, payload});
             if (extFrame) {
                 int newVisRow = m_visibleIndices.size();
                 beginInsertRows(QModelIndex(), newVisRow, newVisRow);
@@ -169,9 +164,7 @@ bool CanFrameModel::isExtenderFrame(const QString &canIdHex) const
     if (!ok)
         return false;
 
-    if (static_cast<int>(id) == base + 1 ||
-        static_cast<int>(id) == base + 2 ||
-        static_cast<int>(id) == base + 3)
+    if (static_cast<int>(id) == base + 1 || static_cast<int>(id) == base + 2 || static_cast<int>(id) == base + 3)
         return true;
 
     if (rpmBase > 0 && static_cast<int>(id) == rpmBase + 1)

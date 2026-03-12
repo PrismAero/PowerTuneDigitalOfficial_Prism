@@ -4,33 +4,35 @@ import QtQuick.Controls 2.15
 TextField {
     id: root
 
-    implicitWidth: Math.max(SettingsTheme.textFieldMinWidth, contentWidth + leftPadding + rightPadding + 20)
-    implicitHeight: SettingsTheme.controlHeight
-    font.pixelSize: SettingsTheme.fontControl
-    font.family: SettingsTheme.fontFamily
-    color: SettingsTheme.textPrimary
-    placeholderTextColor: SettingsTheme.textPlaceholder
-    verticalAlignment: TextInput.AlignVCenter
-    leftPadding: 12
-    rightPadding: 12
-    topPadding: 4
     bottomPadding: 4
+    color: SettingsTheme.textPrimary
+    font.family: SettingsTheme.fontFamily
+    font.pixelSize: SettingsTheme.fontControl
+    implicitHeight: SettingsTheme.controlHeight
+    implicitWidth: Math.max(SettingsTheme.textFieldMinWidth, contentWidth + leftPadding + rightPadding + 20)
+    leftPadding: 12
+    placeholderTextColor: SettingsTheme.textPlaceholder
+    rightPadding: 12
+    selectedTextColor: SettingsTheme.textPrimary
+    selectionColor: SettingsTheme.accent
+    topPadding: 4
+    verticalAlignment: TextInput.AlignVCenter
 
     background: Rectangle {
-        color: SettingsTheme.controlBg
-        radius: SettingsTheme.radiusSmall
         border.color: root.activeFocus ? SettingsTheme.accent : SettingsTheme.border
         border.width: root.activeFocus ? 2 : SettingsTheme.borderWidth
+        color: SettingsTheme.controlBg
+        radius: SettingsTheme.radiusSmall
 
-        Behavior on border.color { ColorAnimation { duration: 150 } }
+        Behavior on border.color {
+            ColorAnimation {
+                duration: 150
+            }
+        }
     }
-
-    selectionColor: SettingsTheme.accent
-    selectedTextColor: SettingsTheme.textPrimary
-
     cursorDelegate: Rectangle {
-        visible: root.cursorVisible
         color: SettingsTheme.accent
+        visible: root.cursorVisible
         width: 2
     }
 }

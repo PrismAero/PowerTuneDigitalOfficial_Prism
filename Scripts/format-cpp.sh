@@ -15,7 +15,10 @@ cd "${PROJECT_DIR}"
 if [ "$#" -gt 0 ]; then
     files=("$@")
 else
-    mapfile -t files < <(git ls-files '*.cpp' '*.cc' '*.cxx' '*.h' '*.hh' '*.hpp')
+    files=()
+    while IFS= read -r file; do
+        files+=("${file}")
+    done < <(git ls-files '*.cpp' '*.cc' '*.cxx' '*.h' '*.hh' '*.hpp')
 fi
 
 if [ "${#files[@]}" -eq 0 ]; then

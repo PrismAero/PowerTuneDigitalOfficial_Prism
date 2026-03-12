@@ -51,8 +51,7 @@ GPS::GPS(QObject *parent) : QObject(parent), m_gpsData(nullptr), m_timingData(nu
 
 GPS::GPS(GPSData *gpsData, TimingData *timingData, QObject *parent)
     : QObject(parent), m_gpsData(gpsData), m_timingData(timingData)
-{
-}
+{}
 
 void GPS::initSerialPort()
 {
@@ -330,7 +329,7 @@ void GPS::processGPRMC(const QString &line)
         //  hdop is low
         //     {
         m_gpsData->setgpsSpeed(qRound(speed));  // round speed to the nearest integer
-                                                  //     }
+                                                //     }
         checknewLap();
     }
     if (m_gpsData) {
@@ -461,8 +460,7 @@ void GPS::checknewLap()
 
     // Somehow we need to add something that if the Second Finishline exists it needs to stop the timer
     if (zeroslope == 1) {
-        currentintercept =
-            m_gpsData->gpsLatitude() - ((m * m_gpsData->gpsLongitude()) + b);  // needed for Finish Line1
+        currentintercept = m_gpsData->gpsLatitude() - ((m * m_gpsData->gpsLongitude()) + b);  // needed for Finish Line1
     }
     if (zeroslope == 0) {
         currentintercept = m_gpsData->gpsLatitude() - b;
@@ -478,7 +476,7 @@ void GPS::checknewLap()
     }
 
     if ((previousintercept <= 0 && currentintercept >= 0) || (previousintercept >= 0 && currentintercept <= 0) ||
-        (currentintercept == 0) ||         (previousintercept2 <= 0 && currentintercept2 >= 0) ||
+        (currentintercept == 0) || (previousintercept2 <= 0 && currentintercept2 >= 0) ||
         (previousintercept2 >= 0 && currentintercept2 <= 0) || (currentintercept2 == 0)) {
         // Finish Line 1
         if ((((m_gpsData->gpsLongitude() <= startlineX2 && m_gpsData->gpsLongitude() >= startlineX1)) ||

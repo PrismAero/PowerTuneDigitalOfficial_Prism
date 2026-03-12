@@ -28,10 +28,10 @@ int main(int argc, char *argv[])
         QFontDatabase::addApplicationFont(fontDir.absoluteFilePath(f));
 
     QQmlApplicationEngine engine;
-    
+
     // * Add QML module import paths for PowerTune modules
     engine.addImportPath("qrc:/qt/qml");
-    
+
     qmlRegisterType<DownloadManager>("DLM", 1, 0, "DLM");
     qmlRegisterType<Connect>("com.powertune", 1, 0, "ConnectObject");
     engine.rootContext()->setContextProperty("DLM", new DownloadManager(&engine));

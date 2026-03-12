@@ -9,30 +9,34 @@ import PowerTune.UI 1.0
 SettingsPage {
     id: root
 
-    property bool showAllSensors: Diagnostics.showAllSensors
+    readonly property int _statusLabelWidth: 100
 
     // Compact status row height and spacing for the read-only top sections
     readonly property int _statusRowHeight: 22
     readonly property int _statusRowSpacing: 2
-    readonly property int _statusLabelWidth: 100
+    property bool showAllSensors: Diagnostics.showAllSensors
 
     Component.onCompleted: Diagnostics.setPageVisible(true)
     Component.onDestruction: Diagnostics.setPageVisible(false)
 
     ListModel {
         id: logLevelModel
+
         ListElement {
             label: "All"
             level: 0
         }
+
         ListElement {
             label: "Info"
             level: 1
         }
+
         ListElement {
             label: "Warn"
             level: 2
         }
+
         ListElement {
             label: "Error"
             level: 3
@@ -42,12 +46,13 @@ SettingsPage {
     // * TOP ROW: System Information + Connection Status (compact)
     RowLayout {
         id: topRow
+
         Layout.fillWidth: true
         spacing: SettingsTheme.sectionSpacing
 
         SettingsSection {
-            title: "System Information"
             Layout.fillWidth: true
+            title: "System Information"
 
             ColumnLayout {
                 Layout.fillWidth: true
@@ -58,19 +63,22 @@ SettingsPage {
                     Layout.fillWidth: true
                     Layout.preferredHeight: root._statusRowHeight
                     spacing: SettingsTheme.contentSpacing
+
                     Text {
-                        text: "CPU Temp"
-                        font.pixelSize: SettingsTheme.fontStatus
-                        font.family: SettingsTheme.fontFamily
-                        color: SettingsTheme.textSecondary
                         Layout.preferredWidth: root._statusLabelWidth
-                    }
-                    Text {
-                        text: Diagnostics.cpuTemperatureAvailable ? Diagnostics.cpuTemperature.toFixed(1) + " C" : "N/A"
-                        font.pixelSize: SettingsTheme.fontStatus
+                        color: SettingsTheme.textSecondary
                         font.family: SettingsTheme.fontFamily
-                        color: Diagnostics.cpuTemperatureAvailable ? SettingsTheme.textPrimary : SettingsTheme.textDisabled
+                        font.pixelSize: SettingsTheme.fontStatus
+                        text: "CPU Temp"
+                    }
+
+                    Text {
                         Layout.fillWidth: true
+                        color: Diagnostics.cpuTemperatureAvailable ? SettingsTheme.textPrimary :
+                                                                     SettingsTheme.textDisabled
+                        font.family: SettingsTheme.fontFamily
+                        font.pixelSize: SettingsTheme.fontStatus
+                        text: Diagnostics.cpuTemperatureAvailable ? Diagnostics.cpuTemperature.toFixed(1) + " C" : "N/A"
                     }
                 }
 
@@ -79,19 +87,21 @@ SettingsPage {
                     Layout.fillWidth: true
                     Layout.preferredHeight: root._statusRowHeight
                     spacing: SettingsTheme.contentSpacing
+
                     Text {
-                        text: "CPU Load"
-                        font.pixelSize: SettingsTheme.fontStatus
-                        font.family: SettingsTheme.fontFamily
-                        color: SettingsTheme.textSecondary
                         Layout.preferredWidth: root._statusLabelWidth
-                    }
-                    Text {
-                        text: Diagnostics.cpuLoadAverage.toFixed(2)
-                        font.pixelSize: SettingsTheme.fontStatus
+                        color: SettingsTheme.textSecondary
                         font.family: SettingsTheme.fontFamily
-                        color: SettingsTheme.textPrimary
+                        font.pixelSize: SettingsTheme.fontStatus
+                        text: "CPU Load"
+                    }
+
+                    Text {
                         Layout.fillWidth: true
+                        color: SettingsTheme.textPrimary
+                        font.family: SettingsTheme.fontFamily
+                        font.pixelSize: SettingsTheme.fontStatus
+                        text: Diagnostics.cpuLoadAverage.toFixed(2)
                     }
                 }
 
@@ -100,19 +110,22 @@ SettingsPage {
                     Layout.fillWidth: true
                     Layout.preferredHeight: root._statusRowHeight
                     spacing: SettingsTheme.contentSpacing
+
                     Text {
-                        text: "RAM"
-                        font.pixelSize: SettingsTheme.fontStatus
-                        font.family: SettingsTheme.fontFamily
-                        color: SettingsTheme.textSecondary
                         Layout.preferredWidth: root._statusLabelWidth
-                    }
-                    Text {
-                        text: Diagnostics.memoryUsedMB.toFixed(0) + " / " + Diagnostics.memoryTotalMB.toFixed(0) + " MB (" + Diagnostics.memoryUsagePercent.toFixed(1) + "%)"
-                        font.pixelSize: SettingsTheme.fontStatus
+                        color: SettingsTheme.textSecondary
                         font.family: SettingsTheme.fontFamily
-                        color: SettingsTheme.textPrimary
+                        font.pixelSize: SettingsTheme.fontStatus
+                        text: "RAM"
+                    }
+
+                    Text {
                         Layout.fillWidth: true
+                        color: SettingsTheme.textPrimary
+                        font.family: SettingsTheme.fontFamily
+                        font.pixelSize: SettingsTheme.fontStatus
+                        text: Diagnostics.memoryUsedMB.toFixed(0) + " / " + Diagnostics.memoryTotalMB.toFixed(0) + " MB ("
+                              + Diagnostics.memoryUsagePercent.toFixed(1) + "%)"
                     }
                 }
 
@@ -121,19 +134,21 @@ SettingsPage {
                     Layout.fillWidth: true
                     Layout.preferredHeight: root._statusRowHeight
                     spacing: SettingsTheme.contentSpacing
+
                     Text {
-                        text: "Disk"
-                        font.pixelSize: SettingsTheme.fontStatus
-                        font.family: SettingsTheme.fontFamily
-                        color: SettingsTheme.textSecondary
                         Layout.preferredWidth: root._statusLabelWidth
-                    }
-                    Text {
-                        text: Diagnostics.diskUsagePercent.toFixed(1) + "% used"
-                        font.pixelSize: SettingsTheme.fontStatus
+                        color: SettingsTheme.textSecondary
                         font.family: SettingsTheme.fontFamily
-                        color: SettingsTheme.textPrimary
+                        font.pixelSize: SettingsTheme.fontStatus
+                        text: "Disk"
+                    }
+
+                    Text {
                         Layout.fillWidth: true
+                        color: SettingsTheme.textPrimary
+                        font.family: SettingsTheme.fontFamily
+                        font.pixelSize: SettingsTheme.fontStatus
+                        text: Diagnostics.diskUsagePercent.toFixed(1) + "% used"
                     }
                 }
 
@@ -142,19 +157,21 @@ SettingsPage {
                     Layout.fillWidth: true
                     Layout.preferredHeight: root._statusRowHeight
                     spacing: SettingsTheme.contentSpacing
+
                     Text {
-                        text: "Uptime"
-                        font.pixelSize: SettingsTheme.fontStatus
-                        font.family: SettingsTheme.fontFamily
-                        color: SettingsTheme.textSecondary
                         Layout.preferredWidth: root._statusLabelWidth
-                    }
-                    Text {
-                        text: Diagnostics.uptime
-                        font.pixelSize: SettingsTheme.fontStatus
+                        color: SettingsTheme.textSecondary
                         font.family: SettingsTheme.fontFamily
-                        color: SettingsTheme.textPrimary
+                        font.pixelSize: SettingsTheme.fontStatus
+                        text: "Uptime"
+                    }
+
+                    Text {
                         Layout.fillWidth: true
+                        color: SettingsTheme.textPrimary
+                        font.family: SettingsTheme.fontFamily
+                        font.pixelSize: SettingsTheme.fontStatus
+                        text: Diagnostics.uptime
                     }
                 }
 
@@ -163,19 +180,21 @@ SettingsPage {
                     Layout.fillWidth: true
                     Layout.preferredHeight: root._statusRowHeight
                     spacing: SettingsTheme.contentSpacing
+
                     Text {
-                        text: "Platform"
-                        font.pixelSize: SettingsTheme.fontStatus
-                        font.family: SettingsTheme.fontFamily
-                        color: SettingsTheme.textSecondary
                         Layout.preferredWidth: root._statusLabelWidth
-                    }
-                    Text {
-                        text: Connection ? Connection.Platform : "Unknown"
-                        font.pixelSize: SettingsTheme.fontStatus
+                        color: SettingsTheme.textSecondary
                         font.family: SettingsTheme.fontFamily
-                        color: SettingsTheme.textPrimary
+                        font.pixelSize: SettingsTheme.fontStatus
+                        text: "Platform"
+                    }
+
+                    Text {
                         Layout.fillWidth: true
+                        color: SettingsTheme.textPrimary
+                        font.family: SettingsTheme.fontFamily
+                        font.pixelSize: SettingsTheme.fontStatus
+                        text: Connection ? Connection.Platform : "Unknown"
                     }
                 }
 
@@ -184,27 +203,29 @@ SettingsPage {
                     Layout.fillWidth: true
                     Layout.preferredHeight: root._statusRowHeight
                     spacing: SettingsTheme.contentSpacing
+
                     Text {
-                        text: "Sensors"
-                        font.pixelSize: SettingsTheme.fontStatus
-                        font.family: SettingsTheme.fontFamily
-                        color: SettingsTheme.textSecondary
                         Layout.preferredWidth: root._statusLabelWidth
-                    }
-                    Text {
-                        text: Diagnostics.activeSensorCount + " / " + Diagnostics.totalSensorCount
-                        font.pixelSize: SettingsTheme.fontStatus
+                        color: SettingsTheme.textSecondary
                         font.family: SettingsTheme.fontFamily
-                        color: SettingsTheme.textPrimary
+                        font.pixelSize: SettingsTheme.fontStatus
+                        text: "Sensors"
+                    }
+
+                    Text {
                         Layout.fillWidth: true
+                        color: SettingsTheme.textPrimary
+                        font.family: SettingsTheme.fontFamily
+                        font.pixelSize: SettingsTheme.fontStatus
+                        text: Diagnostics.activeSensorCount + " / " + Diagnostics.totalSensorCount
                     }
                 }
             }
         }
 
         SettingsSection {
-            title: "Connection"
             Layout.fillWidth: true
+            title: "Connection"
 
             ColumnLayout {
                 Layout.fillWidth: true
@@ -215,17 +236,16 @@ SettingsPage {
                     Layout.fillWidth: true
                     Layout.preferredHeight: root._statusRowHeight
                     spacing: SettingsTheme.contentSpacing
+
                     Text {
-                        text: "CAN Status"
-                        font.pixelSize: SettingsTheme.fontStatus
-                        font.family: SettingsTheme.fontFamily
-                        color: SettingsTheme.textSecondary
                         Layout.preferredWidth: root._statusLabelWidth
+                        color: SettingsTheme.textSecondary
+                        font.family: SettingsTheme.fontFamily
+                        font.pixelSize: SettingsTheme.fontStatus
+                        text: "CAN Status"
                     }
+
                     Rectangle {
-                        width: SettingsTheme.statusDotSize
-                        height: SettingsTheme.statusDotSize
-                        radius: SettingsTheme.statusDotSize / 2
                         Layout.alignment: Qt.AlignVCenter
                         color: {
                             if (Diagnostics.canStatusText === "Active")
@@ -234,11 +254,12 @@ SettingsPage {
                                 return SettingsTheme.warning;
                             return SettingsTheme.error;
                         }
+                        height: SettingsTheme.statusDotSize
+                        radius: SettingsTheme.statusDotSize / 2
+                        width: SettingsTheme.statusDotSize
                     }
+
                     Text {
-                        text: Diagnostics.canStatusText
-                        font.pixelSize: SettingsTheme.fontStatus
-                        font.family: SettingsTheme.fontFamily
                         Layout.fillWidth: true
                         color: {
                             if (Diagnostics.canStatusText === "Active")
@@ -247,6 +268,9 @@ SettingsPage {
                                 return SettingsTheme.warning;
                             return SettingsTheme.error;
                         }
+                        font.family: SettingsTheme.fontFamily
+                        font.pixelSize: SettingsTheme.fontStatus
+                        text: Diagnostics.canStatusText
                     }
                 }
 
@@ -255,19 +279,21 @@ SettingsPage {
                     Layout.fillWidth: true
                     Layout.preferredHeight: root._statusRowHeight
                     spacing: SettingsTheme.contentSpacing
+
                     Text {
-                        text: "Daemon"
-                        font.pixelSize: SettingsTheme.fontStatus
-                        font.family: SettingsTheme.fontFamily
-                        color: SettingsTheme.textSecondary
                         Layout.preferredWidth: root._statusLabelWidth
-                    }
-                    Text {
-                        text: Diagnostics.daemonName
-                        font.pixelSize: SettingsTheme.fontStatus
+                        color: SettingsTheme.textSecondary
                         font.family: SettingsTheme.fontFamily
-                        color: SettingsTheme.textPrimary
+                        font.pixelSize: SettingsTheme.fontStatus
+                        text: "Daemon"
+                    }
+
+                    Text {
                         Layout.fillWidth: true
+                        color: SettingsTheme.textPrimary
+                        font.family: SettingsTheme.fontFamily
+                        font.pixelSize: SettingsTheme.fontStatus
+                        text: Diagnostics.daemonName
                     }
                 }
 
@@ -276,19 +302,21 @@ SettingsPage {
                     Layout.fillWidth: true
                     Layout.preferredHeight: root._statusRowHeight
                     spacing: SettingsTheme.contentSpacing
+
                     Text {
-                        text: "CAN Rate"
-                        font.pixelSize: SettingsTheme.fontStatus
-                        font.family: SettingsTheme.fontFamily
-                        color: SettingsTheme.textSecondary
                         Layout.preferredWidth: root._statusLabelWidth
-                    }
-                    Text {
-                        text: Diagnostics.canMessageRate + " msg/s"
-                        font.pixelSize: SettingsTheme.fontStatus
+                        color: SettingsTheme.textSecondary
                         font.family: SettingsTheme.fontFamily
-                        color: SettingsTheme.textPrimary
+                        font.pixelSize: SettingsTheme.fontStatus
+                        text: "CAN Rate"
+                    }
+
+                    Text {
                         Layout.fillWidth: true
+                        color: SettingsTheme.textPrimary
+                        font.family: SettingsTheme.fontFamily
+                        font.pixelSize: SettingsTheme.fontStatus
+                        text: Diagnostics.canMessageRate + " msg/s"
                     }
                 }
 
@@ -297,19 +325,21 @@ SettingsPage {
                     Layout.fillWidth: true
                     Layout.preferredHeight: root._statusRowHeight
                     spacing: SettingsTheme.contentSpacing
+
                     Text {
-                        text: "CAN Total"
-                        font.pixelSize: SettingsTheme.fontStatus
-                        font.family: SettingsTheme.fontFamily
-                        color: SettingsTheme.textSecondary
                         Layout.preferredWidth: root._statusLabelWidth
-                    }
-                    Text {
-                        text: Diagnostics.canTotalMessages + " msgs | " + Diagnostics.canErrorCount + " errors"
-                        font.pixelSize: SettingsTheme.fontStatus
+                        color: SettingsTheme.textSecondary
                         font.family: SettingsTheme.fontFamily
-                        color: Diagnostics.canErrorCount > 0 ? SettingsTheme.error : SettingsTheme.textPrimary
+                        font.pixelSize: SettingsTheme.fontStatus
+                        text: "CAN Total"
+                    }
+
+                    Text {
                         Layout.fillWidth: true
+                        color: Diagnostics.canErrorCount > 0 ? SettingsTheme.error : SettingsTheme.textPrimary
+                        font.family: SettingsTheme.fontFamily
+                        font.pixelSize: SettingsTheme.fontStatus
+                        text: Diagnostics.canTotalMessages + " msgs | " + Diagnostics.canErrorCount + " errors"
                     }
                 }
 
@@ -318,26 +348,29 @@ SettingsPage {
                     Layout.fillWidth: true
                     Layout.preferredHeight: root._statusRowHeight
                     spacing: SettingsTheme.contentSpacing
+
                     Text {
-                        text: "Serial"
-                        font.pixelSize: SettingsTheme.fontStatus
-                        font.family: SettingsTheme.fontFamily
-                        color: SettingsTheme.textSecondary
                         Layout.preferredWidth: root._statusLabelWidth
+                        color: SettingsTheme.textSecondary
+                        font.family: SettingsTheme.fontFamily
+                        font.pixelSize: SettingsTheme.fontStatus
+                        text: "Serial"
                     }
+
                     Rectangle {
-                        width: SettingsTheme.statusDotSize
-                        height: SettingsTheme.statusDotSize
-                        radius: SettingsTheme.statusDotSize / 2
                         Layout.alignment: Qt.AlignVCenter
                         color: Diagnostics.serialConnected ? SettingsTheme.success : SettingsTheme.error
+                        height: SettingsTheme.statusDotSize
+                        radius: SettingsTheme.statusDotSize / 2
+                        width: SettingsTheme.statusDotSize
                     }
+
                     Text {
-                        text: Diagnostics.serialPort + " @ " + Diagnostics.serialBaudRate
-                        font.pixelSize: SettingsTheme.fontStatus
-                        font.family: SettingsTheme.fontFamily
-                        color: SettingsTheme.textPrimary
                         Layout.fillWidth: true
+                        color: SettingsTheme.textPrimary
+                        font.family: SettingsTheme.fontFamily
+                        font.pixelSize: SettingsTheme.fontStatus
+                        text: Diagnostics.serialPort + " @ " + Diagnostics.serialBaudRate
                     }
                 }
 
@@ -346,19 +379,21 @@ SettingsPage {
                     Layout.fillWidth: true
                     Layout.preferredHeight: root._statusRowHeight
                     spacing: SettingsTheme.contentSpacing
+
                     Text {
-                        text: "Type"
-                        font.pixelSize: SettingsTheme.fontStatus
-                        font.family: SettingsTheme.fontFamily
-                        color: SettingsTheme.textSecondary
                         Layout.preferredWidth: root._statusLabelWidth
-                    }
-                    Text {
-                        text: Diagnostics.connectionType
-                        font.pixelSize: SettingsTheme.fontStatus
+                        color: SettingsTheme.textSecondary
                         font.family: SettingsTheme.fontFamily
-                        color: SettingsTheme.textPrimary
+                        font.pixelSize: SettingsTheme.fontStatus
+                        text: "Type"
+                    }
+
+                    Text {
                         Layout.fillWidth: true
+                        color: SettingsTheme.textPrimary
+                        font.family: SettingsTheme.fontFamily
+                        font.pixelSize: SettingsTheme.fontStatus
+                        text: Diagnostics.connectionType
                     }
                 }
 
@@ -367,19 +402,21 @@ SettingsPage {
                     Layout.fillWidth: true
                     Layout.preferredHeight: root._statusRowHeight
                     spacing: SettingsTheme.contentSpacing
+
                     Text {
-                        text: "Time"
-                        font.pixelSize: SettingsTheme.fontStatus
-                        font.family: SettingsTheme.fontFamily
-                        color: SettingsTheme.textSecondary
                         Layout.preferredWidth: root._statusLabelWidth
-                    }
-                    Text {
-                        text: Diagnostics.systemTime
-                        font.pixelSize: SettingsTheme.fontStatus
+                        color: SettingsTheme.textSecondary
                         font.family: SettingsTheme.fontFamily
-                        color: SettingsTheme.textPrimary
+                        font.pixelSize: SettingsTheme.fontStatus
+                        text: "Time"
+                    }
+
+                    Text {
                         Layout.fillWidth: true
+                        color: SettingsTheme.textPrimary
+                        font.family: SettingsTheme.fontFamily
+                        font.pixelSize: SettingsTheme.fontStatus
+                        text: Diagnostics.systemTime
                     }
                 }
             }
@@ -393,45 +430,50 @@ SettingsPage {
     // Bottom row height = available - topRow height - sectionSpacing between rows.
     RowLayout {
         Layout.fillWidth: true
-        Layout.preferredHeight: root.height - (SettingsTheme.pageMargin * 2) - topRow.height - SettingsTheme.sectionSpacing
+        Layout.preferredHeight: root.height - (SettingsTheme.pageMargin * 2) - topRow.height
+                                - SettingsTheme.sectionSpacing
+
         spacing: SettingsTheme.sectionSpacing
 
         // * Live Sensor Data Table
         SettingsSection {
-            title: "Live Sensor Data"
-            Layout.fillWidth: true
             Layout.fillHeight: true
+            Layout.fillWidth: true
+            title: "Live Sensor Data"
 
             RowLayout {
                 Layout.fillWidth: true
                 spacing: SettingsTheme.contentSpacing
 
                 Text {
-                    text: Diagnostics.liveSensorEntries.length + " sensors"
-                    font.pixelSize: SettingsTheme.fontCaption
-                    font.family: SettingsTheme.fontFamily
-                    color: SettingsTheme.textSecondary
                     Layout.fillWidth: true
+                    color: SettingsTheme.textSecondary
+                    font.family: SettingsTheme.fontFamily
+                    font.pixelSize: SettingsTheme.fontCaption
+                    text: Diagnostics.liveSensorEntries.length + " sensors"
                 }
 
                 Rectangle {
-                    Layout.preferredWidth: 120
                     Layout.preferredHeight: SettingsTheme.controlHeight
-                    radius: SettingsTheme.radiusSmall
-                    color: toggleArea.pressed ? SettingsTheme.surfacePressed : SettingsTheme.controlBg
+                    Layout.preferredWidth: 120
                     border.color: SettingsTheme.border
                     border.width: SettingsTheme.borderWidth
+                    color: toggleArea.pressed ? SettingsTheme.surfacePressed : SettingsTheme.controlBg
+                    radius: SettingsTheme.radiusSmall
 
                     Text {
                         anchors.centerIn: parent
-                        text: showAllSensors ? "Show Active" : "Show All"
-                        font.pixelSize: SettingsTheme.fontCaption
-                        font.family: SettingsTheme.fontFamily
                         color: SettingsTheme.textPrimary
+                        font.family: SettingsTheme.fontFamily
+                        font.pixelSize: SettingsTheme.fontCaption
+                        text: showAllSensors ? "Show Active" : "Show All"
                     }
+
                     MouseArea {
                         id: toggleArea
+
                         anchors.fill: parent
+
                         onClicked: Diagnostics.showAllSensors = !Diagnostics.showAllSensors
                     }
                 }
@@ -443,59 +485,68 @@ SettingsPage {
                 spacing: SettingsTheme.contentSpacing
 
                 Text {
-                    text: "Name"
-                    font.pixelSize: SettingsTheme.fontCaption
-                    font.weight: Font.DemiBold
-                    font.family: SettingsTheme.fontFamily
-                    color: SettingsTheme.accent
                     Layout.preferredWidth: 160
-                }
-                Text {
-                    text: "Source"
+                    color: SettingsTheme.accent
+                    font.family: SettingsTheme.fontFamily
                     font.pixelSize: SettingsTheme.fontCaption
                     font.weight: Font.DemiBold
-                    font.family: SettingsTheme.fontFamily
-                    color: SettingsTheme.accent
+                    text: "Name"
+                }
+
+                Text {
                     Layout.preferredWidth: 100
-                }
-                Text {
-                    text: "Live Value"
+                    color: SettingsTheme.accent
+                    font.family: SettingsTheme.fontFamily
                     font.pixelSize: SettingsTheme.fontCaption
                     font.weight: Font.DemiBold
-                    font.family: SettingsTheme.fontFamily
-                    color: SettingsTheme.accent
+                    text: "Source"
+                }
+
+                Text {
                     Layout.fillWidth: true
-                }
-                Text {
-                    text: "Unit"
+                    color: SettingsTheme.accent
+                    font.family: SettingsTheme.fontFamily
                     font.pixelSize: SettingsTheme.fontCaption
                     font.weight: Font.DemiBold
-                    font.family: SettingsTheme.fontFamily
-                    color: SettingsTheme.accent
+                    text: "Live Value"
+                }
+
+                Text {
                     Layout.preferredWidth: 60
+                    color: SettingsTheme.accent
+                    font.family: SettingsTheme.fontFamily
+                    font.pixelSize: SettingsTheme.fontCaption
+                    font.weight: Font.DemiBold
+                    text: "Unit"
                 }
             }
 
             Rectangle {
                 Layout.fillWidth: true
-                height: SettingsTheme.borderWidth
                 color: SettingsTheme.border
+                height: SettingsTheme.borderWidth
             }
 
             ListView {
                 id: sensorListView
-                Layout.fillWidth: true
+
                 Layout.fillHeight: true
+                Layout.fillWidth: true
                 clip: true
                 model: Diagnostics.liveSensorEntries
                 spacing: 1
 
+                ScrollBar.vertical: ScrollBar {
+                    policy: sensorListView.contentHeight > sensorListView.height ? ScrollBar.AsNeeded :
+                                                                                   ScrollBar.AlwaysOff
+                }
                 delegate: Rectangle {
-                    required property var modelData
                     required property int index
-                    width: sensorListView.width
-                    height: 32
+                    required property var modelData
+
                     color: index % 2 === 0 ? SettingsTheme.surface : SettingsTheme.background
+                    height: 32
+                    width: sensorListView.width
 
                     RowLayout {
                         anchors.fill: parent
@@ -504,55 +555,56 @@ SettingsPage {
                         spacing: SettingsTheme.contentSpacing
 
                         Rectangle {
-                            width: SettingsTheme.statusDotSize
+                            color: modelData.active ? SettingsTheme.success : SettingsTheme.textDisabled
                             height: SettingsTheme.statusDotSize
                             radius: SettingsTheme.statusDotSize / 2
-                            color: modelData.active ? SettingsTheme.success : SettingsTheme.textDisabled
+                            width: SettingsTheme.statusDotSize
                         }
+
                         Text {
-                            text: modelData.name
-                            font.pixelSize: SettingsTheme.fontCaption
-                            font.family: SettingsTheme.fontFamily
-                            color: SettingsTheme.textPrimary
                             Layout.preferredWidth: 160
+                            color: SettingsTheme.textPrimary
                             elide: Text.ElideRight
-                        }
-                        Text {
-                            text: modelData.source
-                            font.pixelSize: SettingsTheme.fontCaption
                             font.family: SettingsTheme.fontFamily
-                            color: SettingsTheme.textSecondary
+                            font.pixelSize: SettingsTheme.fontCaption
+                            text: modelData.name
+                        }
+
+                        Text {
                             Layout.preferredWidth: 100
-                        }
-                        Text {
-                            text: modelData.unit === "" ? Number(modelData.value).toFixed(0) : Number(modelData.value).toFixed(3)
-                            font.pixelSize: SettingsTheme.fontCaption
-                            font.family: SettingsTheme.fontFamily
-                            font.weight: Font.DemiBold
-                            color: modelData.active ? SettingsTheme.success : SettingsTheme.textDisabled
-                            Layout.fillWidth: true
-                        }
-                        Text {
-                            text: modelData.unit
-                            font.pixelSize: SettingsTheme.fontCaption
-                            font.family: SettingsTheme.fontFamily
                             color: SettingsTheme.textSecondary
+                            font.family: SettingsTheme.fontFamily
+                            font.pixelSize: SettingsTheme.fontCaption
+                            text: modelData.source
+                        }
+
+                        Text {
+                            Layout.fillWidth: true
+                            color: modelData.active ? SettingsTheme.success : SettingsTheme.textDisabled
+                            font.family: SettingsTheme.fontFamily
+                            font.pixelSize: SettingsTheme.fontCaption
+                            font.weight: Font.DemiBold
+                            text: modelData.unit === "" ? Number(modelData.value).toFixed(0) : Number(
+                                                              modelData.value).toFixed(3)
+                        }
+
+                        Text {
                             Layout.preferredWidth: 60
+                            color: SettingsTheme.textSecondary
+                            font.family: SettingsTheme.fontFamily
+                            font.pixelSize: SettingsTheme.fontCaption
+                            text: modelData.unit
                         }
                     }
-                }
-
-                ScrollBar.vertical: ScrollBar {
-                    policy: sensorListView.contentHeight > sensorListView.height ? ScrollBar.AsNeeded : ScrollBar.AlwaysOff
                 }
             }
         }
 
         // * System Log
         SettingsSection {
-            title: "System Log"
-            Layout.fillWidth: true
             Layout.fillHeight: true
+            Layout.fillWidth: true
+            title: "System Log"
 
             RowLayout {
                 Layout.fillWidth: true
@@ -566,69 +618,75 @@ SettingsPage {
                     model: logLevelModel
 
                     Rectangle {
-                        Layout.preferredWidth: 60
                         Layout.preferredHeight: SettingsTheme.controlHeight
-                        radius: SettingsTheme.radiusSmall
-                        color: Diagnostics.logLevel === model.level ? SettingsTheme.accent : SettingsTheme.controlBg
+                        Layout.preferredWidth: 60
                         border.color: Diagnostics.logLevel === model.level ? SettingsTheme.accent : SettingsTheme.border
                         border.width: SettingsTheme.borderWidth
+                        color: Diagnostics.logLevel === model.level ? SettingsTheme.accent : SettingsTheme.controlBg
+                        radius: SettingsTheme.radiusSmall
 
                         Text {
                             anchors.centerIn: parent
-                            text: model.label
-                            font.pixelSize: SettingsTheme.fontCaption
+                            color: Diagnostics.logLevel === model.level ? SettingsTheme.textPrimary :
+                                                                          SettingsTheme.textSecondary
                             font.family: SettingsTheme.fontFamily
-                            color: Diagnostics.logLevel === model.level ? SettingsTheme.textPrimary : SettingsTheme.textSecondary
+                            font.pixelSize: SettingsTheme.fontCaption
+                            text: model.label
                         }
+
                         MouseArea {
                             anchors.fill: parent
+
                             onClicked: Diagnostics.logLevel = model.level
                         }
                     }
                 }
 
                 Rectangle {
-                    Layout.preferredWidth: 60
                     Layout.preferredHeight: SettingsTheme.controlHeight
-                    radius: SettingsTheme.radiusSmall
-                    color: clearArea.pressed ? SettingsTheme.surfacePressed : SettingsTheme.controlBg
+                    Layout.preferredWidth: 60
                     border.color: SettingsTheme.border
                     border.width: SettingsTheme.borderWidth
+                    color: clearArea.pressed ? SettingsTheme.surfacePressed : SettingsTheme.controlBg
+                    radius: SettingsTheme.radiusSmall
 
                     Text {
                         anchors.centerIn: parent
-                        text: "Clear"
-                        font.pixelSize: SettingsTheme.fontCaption
-                        font.family: SettingsTheme.fontFamily
                         color: SettingsTheme.textPrimary
+                        font.family: SettingsTheme.fontFamily
+                        font.pixelSize: SettingsTheme.fontCaption
+                        text: "Clear"
                     }
+
                     MouseArea {
                         id: clearArea
+
                         anchors.fill: parent
+
                         onClicked: Diagnostics.clearLog()
                     }
                 }
             }
 
             Rectangle {
-                Layout.fillWidth: true
                 Layout.fillHeight: true
+                Layout.fillWidth: true
                 color: SettingsTheme.consoleBg
                 radius: SettingsTheme.radiusSmall
 
                 ListView {
                     id: logListView
+
                     anchors.fill: parent
                     anchors.margins: SettingsTheme.radiusSmall
                     clip: true
                     model: Diagnostics.filteredLogMessages
                     spacing: 1
 
+                    ScrollBar.vertical: ScrollBar {
+                        policy: ScrollBar.AsNeeded
+                    }
                     delegate: Text {
-                        width: logListView.width
-                        text: modelData
-                        font.pixelSize: SettingsTheme.fontCaption
-                        font.family: SettingsTheme.fontFamilyMono
                         color: {
                             if (modelData.indexOf("[ERROR]") !== -1 || modelData.indexOf("[FATAL]") !== -1)
                                 return SettingsTheme.error;
@@ -638,11 +696,11 @@ SettingsPage {
                                 return SettingsTheme.textDisabled;
                             return SettingsTheme.consoleText;
                         }
+                        font.family: SettingsTheme.fontFamilyMono
+                        font.pixelSize: SettingsTheme.fontCaption
+                        text: modelData
+                        width: logListView.width
                         wrapMode: Text.WrapAnywhere
-                    }
-
-                    ScrollBar.vertical: ScrollBar {
-                        policy: ScrollBar.AsNeeded
                     }
 
                     onCountChanged: {
@@ -658,21 +716,24 @@ SettingsPage {
     // * ANALOG INPUTS DIAGNOSTICS
     SettingsSection {
         id: analogSection
-        title: "Analog Inputs"
-        collapsible: true
-        collapsed: true
+
         Layout.fillWidth: true
+        collapsed: true
+        collapsible: true
+        title: "Analog Inputs"
 
         Timer {
             interval: 1000
-            running: !analogSection.collapsed
             repeat: true
+            running: !analogSection.collapsed
             triggeredOnStart: true
+
             onTriggered: analogDiagModel.refresh()
         }
 
         ListModel {
             id: analogDiagModel
+
             function refresh() {
                 clear();
                 var data = Diagnostics.getAnalogInputDiagnostics();
@@ -684,73 +745,82 @@ SettingsPage {
         RowLayout {
             Layout.fillWidth: true
             spacing: SettingsTheme.contentSpacing
+
             Text {
+                Layout.preferredWidth: 80
+                color: SettingsTheme.accent
+                font.family: SettingsTheme.fontFamily
+                font.pixelSize: SettingsTheme.fontCaption
+                font.weight: Font.DemiBold
                 text: "Channel"
+            }
+
+            Text {
+                Layout.preferredWidth: 80
+                color: SettingsTheme.accent
+                font.family: SettingsTheme.fontFamily
                 font.pixelSize: SettingsTheme.fontCaption
                 font.weight: Font.DemiBold
-                font.family: SettingsTheme.fontFamily
-                color: SettingsTheme.accent
-                Layout.preferredWidth: 80
-            }
-            Text {
                 text: "Raw (V)"
-                font.pixelSize: SettingsTheme.fontCaption
-                font.weight: Font.DemiBold
-                font.family: SettingsTheme.fontFamily
-                color: SettingsTheme.accent
-                Layout.preferredWidth: 80
             }
+
             Text {
-                text: "Calibrated"
-                font.pixelSize: SettingsTheme.fontCaption
-                font.weight: Font.DemiBold
-                font.family: SettingsTheme.fontFamily
-                color: SettingsTheme.accent
                 Layout.fillWidth: true
-            }
-            Text {
-                text: "Unit"
+                color: SettingsTheme.accent
+                font.family: SettingsTheme.fontFamily
                 font.pixelSize: SettingsTheme.fontCaption
                 font.weight: Font.DemiBold
-                font.family: SettingsTheme.fontFamily
-                color: SettingsTheme.accent
+                text: "Calibrated"
+            }
+
+            Text {
                 Layout.preferredWidth: 60
+                color: SettingsTheme.accent
+                font.family: SettingsTheme.fontFamily
+                font.pixelSize: SettingsTheme.fontCaption
+                font.weight: Font.DemiBold
+                text: "Unit"
             }
         }
 
         Repeater {
             model: analogDiagModel
+
             delegate: RowLayout {
                 Layout.fillWidth: true
                 spacing: SettingsTheme.contentSpacing
+
                 Text {
-                    text: model.channel !== undefined ? model.channel : ""
-                    font.pixelSize: SettingsTheme.fontCaption
-                    font.family: SettingsTheme.fontFamily
+                    Layout.preferredWidth: 80
                     color: SettingsTheme.textPrimary
-                    Layout.preferredWidth: 80
+                    font.family: SettingsTheme.fontFamily
+                    font.pixelSize: SettingsTheme.fontCaption
+                    text: model.channel !== undefined ? model.channel : ""
                 }
+
                 Text {
+                    Layout.preferredWidth: 80
+                    color: SettingsTheme.textSecondary
+                    font.family: SettingsTheme.fontFamily
+                    font.pixelSize: SettingsTheme.fontCaption
                     text: model.rawVoltage !== undefined ? Number(model.rawVoltage).toFixed(3) : ""
-                    font.pixelSize: SettingsTheme.fontCaption
-                    font.family: SettingsTheme.fontFamily
-                    color: SettingsTheme.textSecondary
-                    Layout.preferredWidth: 80
                 }
+
                 Text {
-                    text: model.calibratedValue !== undefined ? Number(model.calibratedValue).toFixed(3) : ""
-                    font.pixelSize: SettingsTheme.fontCaption
-                    font.family: SettingsTheme.fontFamily
-                    font.weight: Font.DemiBold
-                    color: SettingsTheme.success
                     Layout.fillWidth: true
-                }
-                Text {
-                    text: model.unit !== undefined ? model.unit : ""
-                    font.pixelSize: SettingsTheme.fontCaption
+                    color: SettingsTheme.success
                     font.family: SettingsTheme.fontFamily
-                    color: SettingsTheme.textSecondary
+                    font.pixelSize: SettingsTheme.fontCaption
+                    font.weight: Font.DemiBold
+                    text: model.calibratedValue !== undefined ? Number(model.calibratedValue).toFixed(3) : ""
+                }
+
+                Text {
                     Layout.preferredWidth: 60
+                    color: SettingsTheme.textSecondary
+                    font.family: SettingsTheme.fontFamily
+                    font.pixelSize: SettingsTheme.fontCaption
+                    text: model.unit !== undefined ? model.unit : ""
                 }
             }
         }
@@ -759,21 +829,24 @@ SettingsPage {
     // * DIGITAL INPUTS DIAGNOSTICS
     SettingsSection {
         id: digitalSection
-        title: "Digital Inputs"
-        collapsible: true
-        collapsed: true
+
         Layout.fillWidth: true
+        collapsed: true
+        collapsible: true
+        title: "Digital Inputs"
 
         Timer {
             interval: 1000
-            running: !digitalSection.collapsed
             repeat: true
+            running: !digitalSection.collapsed
             triggeredOnStart: true
+
             onTriggered: digitalDiagModel.refresh()
         }
 
         ListModel {
             id: digitalDiagModel
+
             function refresh() {
                 clear();
                 var ecu = Diagnostics.getDigitalInputDiagnostics();
@@ -788,64 +861,72 @@ SettingsPage {
         RowLayout {
             Layout.fillWidth: true
             spacing: SettingsTheme.contentSpacing
+
             Text {
-                text: "Channel"
-                font.pixelSize: SettingsTheme.fontCaption
-                font.weight: Font.DemiBold
-                font.family: SettingsTheme.fontFamily
-                color: SettingsTheme.accent
                 Layout.preferredWidth: 120
-            }
-            Text {
-                text: "State"
+                color: SettingsTheme.accent
+                font.family: SettingsTheme.fontFamily
                 font.pixelSize: SettingsTheme.fontCaption
                 font.weight: Font.DemiBold
-                font.family: SettingsTheme.fontFamily
-                color: SettingsTheme.accent
+                text: "Channel"
+            }
+
+            Text {
                 Layout.preferredWidth: 80
-            }
-            Text {
-                text: "Name"
+                color: SettingsTheme.accent
+                font.family: SettingsTheme.fontFamily
                 font.pixelSize: SettingsTheme.fontCaption
                 font.weight: Font.DemiBold
-                font.family: SettingsTheme.fontFamily
-                color: SettingsTheme.accent
+                text: "State"
+            }
+
+            Text {
                 Layout.fillWidth: true
+                color: SettingsTheme.accent
+                font.family: SettingsTheme.fontFamily
+                font.pixelSize: SettingsTheme.fontCaption
+                font.weight: Font.DemiBold
+                text: "Name"
             }
         }
 
         Repeater {
             model: digitalDiagModel
+
             delegate: RowLayout {
                 Layout.fillWidth: true
                 spacing: SettingsTheme.contentSpacing
+
                 Text {
-                    text: model.channel !== undefined ? model.channel : ""
-                    font.pixelSize: SettingsTheme.fontCaption
-                    font.family: SettingsTheme.fontFamily
-                    color: SettingsTheme.textPrimary
                     Layout.preferredWidth: 120
+                    color: SettingsTheme.textPrimary
+                    font.family: SettingsTheme.fontFamily
+                    font.pixelSize: SettingsTheme.fontCaption
+                    text: model.channel !== undefined ? model.channel : ""
                 }
+
                 Rectangle {
-                    Layout.preferredWidth: 80
                     Layout.preferredHeight: 20
-                    radius: 4
+                    Layout.preferredWidth: 80
                     color: model.state ? SettingsTheme.success : SettingsTheme.textDisabled
+                    radius: 4
+
                     Text {
                         anchors.centerIn: parent
-                        text: model.state ? "ON" : "OFF"
-                        font.pixelSize: 12
-                        font.family: SettingsTheme.fontFamily
-                        font.weight: Font.Bold
                         color: SettingsTheme.textPrimary
+                        font.family: SettingsTheme.fontFamily
+                        font.pixelSize: 12
+                        font.weight: Font.Bold
+                        text: model.state ? "ON" : "OFF"
                     }
                 }
+
                 Text {
-                    text: model.label !== undefined ? model.label : ""
-                    font.pixelSize: SettingsTheme.fontCaption
-                    font.family: SettingsTheme.fontFamily
-                    color: SettingsTheme.textSecondary
                     Layout.fillWidth: true
+                    color: SettingsTheme.textSecondary
+                    font.family: SettingsTheme.fontFamily
+                    font.pixelSize: SettingsTheme.fontCaption
+                    text: model.label !== undefined ? model.label : ""
                 }
             }
         }
@@ -854,21 +935,24 @@ SettingsPage {
     // * EXTENDER BOARD DIAGNOSTICS
     SettingsSection {
         id: extenderSection
-        title: "Extender Board"
-        collapsible: true
-        collapsed: true
+
         Layout.fillWidth: true
+        collapsed: true
+        collapsible: true
+        title: "Extender Board"
 
         Timer {
             interval: 1000
-            running: !extenderSection.collapsed
             repeat: true
+            running: !extenderSection.collapsed
             triggeredOnStart: true
+
             onTriggered: extenderDiagModel.refresh()
         }
 
         ListModel {
             id: extenderDiagModel
+
             function refresh() {
                 clear();
                 var data = Diagnostics.getExpanderBoardDiagnostics();
@@ -880,88 +964,99 @@ SettingsPage {
         RowLayout {
             Layout.fillWidth: true
             spacing: SettingsTheme.contentSpacing
+
             Text {
+                Layout.preferredWidth: 80
+                color: SettingsTheme.accent
+                font.family: SettingsTheme.fontFamily
+                font.pixelSize: SettingsTheme.fontCaption
+                font.weight: Font.DemiBold
                 text: "Channel"
+            }
+
+            Text {
+                Layout.preferredWidth: 80
+                color: SettingsTheme.accent
+                font.family: SettingsTheme.fontFamily
                 font.pixelSize: SettingsTheme.fontCaption
                 font.weight: Font.DemiBold
-                font.family: SettingsTheme.fontFamily
-                color: SettingsTheme.accent
-                Layout.preferredWidth: 80
-            }
-            Text {
                 text: "Raw (V)"
-                font.pixelSize: SettingsTheme.fontCaption
-                font.weight: Font.DemiBold
-                font.family: SettingsTheme.fontFamily
-                color: SettingsTheme.accent
-                Layout.preferredWidth: 80
             }
+
             Text {
-                text: "Calibrated"
-                font.pixelSize: SettingsTheme.fontCaption
-                font.weight: Font.DemiBold
-                font.family: SettingsTheme.fontFamily
-                color: SettingsTheme.accent
                 Layout.fillWidth: true
-            }
-            Text {
-                text: "Unit"
+                color: SettingsTheme.accent
+                font.family: SettingsTheme.fontFamily
                 font.pixelSize: SettingsTheme.fontCaption
                 font.weight: Font.DemiBold
-                font.family: SettingsTheme.fontFamily
-                color: SettingsTheme.accent
+                text: "Calibrated"
+            }
+
+            Text {
                 Layout.preferredWidth: 60
-            }
-            Text {
-                text: "NTC"
+                color: SettingsTheme.accent
+                font.family: SettingsTheme.fontFamily
                 font.pixelSize: SettingsTheme.fontCaption
                 font.weight: Font.DemiBold
-                font.family: SettingsTheme.fontFamily
-                color: SettingsTheme.accent
+                text: "Unit"
+            }
+
+            Text {
                 Layout.preferredWidth: 40
+                color: SettingsTheme.accent
+                font.family: SettingsTheme.fontFamily
+                font.pixelSize: SettingsTheme.fontCaption
+                font.weight: Font.DemiBold
+                text: "NTC"
             }
         }
 
         Repeater {
             model: extenderDiagModel
+
             delegate: RowLayout {
                 Layout.fillWidth: true
                 spacing: SettingsTheme.contentSpacing
+
                 Text {
-                    text: model.channel !== undefined ? model.channel : ""
-                    font.pixelSize: SettingsTheme.fontCaption
-                    font.family: SettingsTheme.fontFamily
+                    Layout.preferredWidth: 80
                     color: SettingsTheme.textPrimary
-                    Layout.preferredWidth: 80
+                    font.family: SettingsTheme.fontFamily
+                    font.pixelSize: SettingsTheme.fontCaption
+                    text: model.channel !== undefined ? model.channel : ""
                 }
+
                 Text {
+                    Layout.preferredWidth: 80
+                    color: SettingsTheme.textSecondary
+                    font.family: SettingsTheme.fontFamily
+                    font.pixelSize: SettingsTheme.fontCaption
                     text: model.rawVoltage !== undefined ? Number(model.rawVoltage).toFixed(3) : ""
-                    font.pixelSize: SettingsTheme.fontCaption
-                    font.family: SettingsTheme.fontFamily
-                    color: SettingsTheme.textSecondary
-                    Layout.preferredWidth: 80
                 }
+
                 Text {
-                    text: model.calibratedValue !== undefined ? Number(model.calibratedValue).toFixed(3) : ""
-                    font.pixelSize: SettingsTheme.fontCaption
-                    font.family: SettingsTheme.fontFamily
-                    font.weight: Font.DemiBold
-                    color: SettingsTheme.success
                     Layout.fillWidth: true
-                }
-                Text {
-                    text: model.unit !== undefined ? model.unit : ""
-                    font.pixelSize: SettingsTheme.fontCaption
+                    color: SettingsTheme.success
                     font.family: SettingsTheme.fontFamily
-                    color: SettingsTheme.textSecondary
+                    font.pixelSize: SettingsTheme.fontCaption
+                    font.weight: Font.DemiBold
+                    text: model.calibratedValue !== undefined ? Number(model.calibratedValue).toFixed(3) : ""
+                }
+
+                Text {
                     Layout.preferredWidth: 60
-                }
-                Text {
-                    text: model.ntcEnabled ? "Yes" : "No"
-                    font.pixelSize: SettingsTheme.fontCaption
+                    color: SettingsTheme.textSecondary
                     font.family: SettingsTheme.fontFamily
-                    color: model.ntcEnabled ? SettingsTheme.accent : SettingsTheme.textDisabled
+                    font.pixelSize: SettingsTheme.fontCaption
+                    text: model.unit !== undefined ? model.unit : ""
+                }
+
+                Text {
                     Layout.preferredWidth: 40
+                    color: model.ntcEnabled ? SettingsTheme.accent : SettingsTheme.textDisabled
+                    font.family: SettingsTheme.fontFamily
+                    font.pixelSize: SettingsTheme.fontCaption
+                    text: model.ntcEnabled ? "Yes" : "No"
                 }
             }
         }
@@ -970,10 +1065,11 @@ SettingsPage {
     // * CAN MESSAGE VIEWER
     SettingsSection {
         id: canSection
-        title: "CAN Messages"
-        collapsible: true
-        collapsed: true
+
         Layout.fillWidth: true
+        collapsed: true
+        collapsible: true
+        title: "CAN Messages"
 
         RowLayout {
             Layout.fillWidth: true
@@ -981,14 +1077,17 @@ SettingsPage {
 
             StyledSwitch {
                 id: canCaptureToggle
+
                 checked: Diagnostics.canCaptureEnabled
+
                 onCheckedChanged: Diagnostics.canCaptureEnabled = checked
             }
+
             Text {
-                text: canCaptureToggle.checked ? "Capturing" : "Stopped"
-                font.pixelSize: SettingsTheme.fontCaption
-                font.family: SettingsTheme.fontFamily
                 color: canCaptureToggle.checked ? SettingsTheme.success : SettingsTheme.textSecondary
+                font.family: SettingsTheme.fontFamily
+                font.pixelSize: SettingsTheme.fontCaption
+                text: canCaptureToggle.checked ? "Capturing" : "Stopped"
             }
 
             Item {
@@ -997,20 +1096,24 @@ SettingsPage {
 
             StyledTextField {
                 Layout.preferredWidth: 140
+                inputMethodHints: Qt.ImhNoPredictiveText
                 placeholderText: "Filter CAN ID (hex)"
                 text: Diagnostics.canIdFilter
+
                 onTextChanged: Diagnostics.canIdFilter = text
-                inputMethodHints: Qt.ImhNoPredictiveText
             }
 
             StyledButton {
-                text: "Clear"
                 primary: false
+                text: "Clear"
+
                 onClicked: Diagnostics.clearCanFrameBuffer()
             }
+
             StyledButton {
-                text: "Reset Errors"
                 primary: false
+                text: "Reset Errors"
+
                 onClicked: Diagnostics.resetCanErrors()
             }
         }
@@ -1018,60 +1121,69 @@ SettingsPage {
         RowLayout {
             Layout.fillWidth: true
             spacing: SettingsTheme.contentSpacing
+
             Text {
+                Layout.preferredWidth: 80
+                color: SettingsTheme.accent
+                font.family: SettingsTheme.fontFamily
+                font.pixelSize: SettingsTheme.fontCaption
+                font.weight: Font.DemiBold
                 text: "ID"
-                font.pixelSize: SettingsTheme.fontCaption
-                font.weight: Font.DemiBold
-                font.family: SettingsTheme.fontFamily
-                color: SettingsTheme.accent
-                Layout.preferredWidth: 80
             }
+
             Text {
-                text: "Len"
-                font.pixelSize: SettingsTheme.fontCaption
-                font.weight: Font.DemiBold
-                font.family: SettingsTheme.fontFamily
-                color: SettingsTheme.accent
                 Layout.preferredWidth: 30
-            }
-            Text {
-                text: "Payload (hex)"
+                color: SettingsTheme.accent
+                font.family: SettingsTheme.fontFamily
                 font.pixelSize: SettingsTheme.fontCaption
                 font.weight: Font.DemiBold
-                font.family: SettingsTheme.fontFamily
-                color: SettingsTheme.accent
+                text: "Len"
+            }
+
+            Text {
                 Layout.fillWidth: true
-            }
-            Text {
-                text: "ASCII"
+                color: SettingsTheme.accent
+                font.family: SettingsTheme.fontFamily
                 font.pixelSize: SettingsTheme.fontCaption
                 font.weight: Font.DemiBold
-                font.family: SettingsTheme.fontFamily
-                color: SettingsTheme.accent
+                text: "Payload (hex)"
+            }
+
+            Text {
                 Layout.preferredWidth: 80
+                color: SettingsTheme.accent
+                font.family: SettingsTheme.fontFamily
+                font.pixelSize: SettingsTheme.fontCaption
+                font.weight: Font.DemiBold
+                text: "ASCII"
             }
         }
 
         Rectangle {
             Layout.fillWidth: true
-            height: SettingsTheme.borderWidth
             color: SettingsTheme.border
+            height: SettingsTheme.borderWidth
         }
 
         ListView {
             id: canFrameList
+
             Layout.fillWidth: true
             Layout.preferredHeight: 300
             clip: true
             model: Diagnostics.canFrameBuffer
             spacing: 1
 
+            ScrollBar.vertical: ScrollBar {
+                policy: canFrameList.contentHeight > canFrameList.height ? ScrollBar.AsNeeded : ScrollBar.AlwaysOff
+            }
             delegate: Rectangle {
-                required property var modelData
                 required property int index
-                width: canFrameList.width
-                height: 28
+                required property var modelData
+
                 color: index % 2 === 0 ? SettingsTheme.surface : SettingsTheme.background
+                height: 28
+                width: canFrameList.width
 
                 RowLayout {
                     anchors.fill: parent
@@ -1080,56 +1192,56 @@ SettingsPage {
                     spacing: SettingsTheme.contentSpacing
 
                     Text {
-                        text: modelData.id
-                        font.pixelSize: SettingsTheme.fontCaption
-                        font.family: SettingsTheme.fontFamilyMono
+                        Layout.preferredWidth: 80
                         color: SettingsTheme.accent
-                        Layout.preferredWidth: 80
-                    }
-                    Text {
-                        text: modelData.length
-                        font.pixelSize: SettingsTheme.fontCaption
                         font.family: SettingsTheme.fontFamilyMono
-                        color: SettingsTheme.textSecondary
+                        font.pixelSize: SettingsTheme.fontCaption
+                        text: modelData.id
+                    }
+
+                    Text {
                         Layout.preferredWidth: 30
-                    }
-                    Text {
-                        text: modelData.payload
-                        font.pixelSize: SettingsTheme.fontCaption
+                        color: SettingsTheme.textSecondary
                         font.family: SettingsTheme.fontFamilyMono
-                        color: SettingsTheme.textPrimary
+                        font.pixelSize: SettingsTheme.fontCaption
+                        text: modelData.length
+                    }
+
+                    Text {
                         Layout.fillWidth: true
-                    }
-                    Text {
-                        text: modelData.ascii
-                        font.pixelSize: SettingsTheme.fontCaption
+                        color: SettingsTheme.textPrimary
                         font.family: SettingsTheme.fontFamilyMono
-                        color: SettingsTheme.textDisabled
+                        font.pixelSize: SettingsTheme.fontCaption
+                        text: modelData.payload
+                    }
+
+                    Text {
                         Layout.preferredWidth: 80
+                        color: SettingsTheme.textDisabled
+                        font.family: SettingsTheme.fontFamilyMono
+                        font.pixelSize: SettingsTheme.fontCaption
+                        text: modelData.ascii
                     }
                 }
-            }
-
-            ScrollBar.vertical: ScrollBar {
-                policy: canFrameList.contentHeight > canFrameList.height ? ScrollBar.AsNeeded : ScrollBar.AlwaysOff
             }
         }
     }
 
     // * DEBUG TOOLS
     SettingsSection {
-        title: "Debug Tools"
         Layout.fillWidth: true
+        title: "Debug Tools"
 
         SettingsRow {
-            label: "Full Arc Sweep"
             description: "Force all arc gauges to 100% fill for alignment verification"
+            label: "Full Arc Sweep"
 
             StyledSwitch {
                 checked: {
                     var v = AppSettings.getValue("debug/arcFullSweep", false);
                     return v === true || v === "true";
                 }
+
                 onCheckedChanged: AppSettings.setValue("debug/arcFullSweep", checked)
             }
         }

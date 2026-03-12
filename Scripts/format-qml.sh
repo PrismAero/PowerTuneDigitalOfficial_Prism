@@ -15,7 +15,10 @@ cd "${PROJECT_DIR}"
 if [ "$#" -gt 0 ]; then
     files=("$@")
 else
-    mapfile -t files < <(git ls-files '*.qml')
+    files=()
+    while IFS= read -r file; do
+        files+=("${file}")
+    done < <(git ls-files '*.qml')
 fi
 
 if [ "${#files[@]}" -eq 0 ]; then

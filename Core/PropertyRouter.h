@@ -1,7 +1,7 @@
 /**
  * @file PropertyRouter.h
  * @brief Provides dynamic property access across all data models
- * 
+ *
  * This class serves as a bridge for QML components that need to access
  * properties dynamically by name (e.g., Dashboard[propertyName] pattern).
  * It routes property requests to the appropriate domain model.
@@ -14,13 +14,13 @@
 #ifndef PROPERTYROUTER_H
 #define PROPERTYROUTER_H
 
-#include <QObject>
-#include <QVariant>
-#include <QString>
-#include <QStringList>
-#include <QSet>
 #include <QHash>
 #include <QMetaProperty>
+#include <QObject>
+#include <QSet>
+#include <QString>
+#include <QStringList>
+#include <QVariant>
 
 // * Forward declarations for all data models
 class EngineData;
@@ -40,7 +40,7 @@ class UIState;
 /**
  * @class PropertyRouter
  * @brief Routes dynamic property access to the appropriate data model
- * 
+ *
  * QML components that previously used Dashboard[propertyName] for dynamic
  * property binding can now use PropertyRouter.getValue(propertyName) instead.
  * This maintains backward compatibility with the dynamic access pattern while
@@ -62,28 +62,16 @@ class PropertyRouter : public QObject
     Q_OBJECT
 
 public:
-    explicit PropertyRouter(
-        EngineData *engine,
-        VehicleData *vehicle,
-        GPSData *gps,
-        AnalogInputs *analog,
-        DigitalInputs *digital,
-        ExpanderBoardData *expander,
-        ElectricMotorData *motor,
-        FlagsData *flags,
-        SensorData *sensor,
-        ConnectionData *connection,
-        SettingsData *settings,
-        TimingData *timing,
-        UIState *ui,
-        QObject *parent = nullptr
-    );
+    explicit PropertyRouter(EngineData *engine, VehicleData *vehicle, GPSData *gps, AnalogInputs *analog,
+                            DigitalInputs *digital, ExpanderBoardData *expander, ElectricMotorData *motor,
+                            FlagsData *flags, SensorData *sensor, ConnectionData *connection, SettingsData *settings,
+                            TimingData *timing, UIState *ui, QObject *parent = nullptr);
 
     /**
      * @brief Get a property value by name from the appropriate model
      * @param propertyName The name of the property to retrieve
      * @return The property value as QVariant, or 0 if not found
-     * 
+     *
      * Usage in QML:
      *   PropertyRouter.getValue("rpm")      // Returns Engine.rpm
      *   PropertyRouter.getValue("speed")    // Returns Vehicle.speed
@@ -187,14 +175,15 @@ private:
 
     // * Maps property names to their owning model
     QHash<QString, ModelType> m_propertyModelMap;
-    QHash<QString, QString> m_aliases;              // aliasKey -> sourceKey
-    QHash<QString, QStringList> m_reverseAliases;   // sourceKey -> alias keys
+    QHash<QString, QString> m_aliases;             // aliasKey -> sourceKey
+    QHash<QString, QStringList> m_reverseAliases;  // sourceKey -> alias keys
 
     /**
      * @struct SignalPropertyInfo
      * @brief Holds the property name and index for a connected NOTIFY signal
      */
-    struct SignalPropertyInfo {
+    struct SignalPropertyInfo
+    {
         QString propertyName;
         int propertyIndex;
     };
@@ -206,4 +195,4 @@ private:
     QHash<QObject *, QHash<int, SignalPropertyInfo>> m_signalToPropertyMap;
 };
 
-#endif // PROPERTYROUTER_H
+#endif  // PROPERTYROUTER_H

@@ -32,10 +32,10 @@
 #include "../Utils/wifiscanner.h"
 #include "DiagnosticsProvider.h"
 #include "ExBoardConfigManager.h"
-#include "OverlayConfigDefaults.h"
 #include "Models/CanFrameModel.h"
 #include "Models/DataModels.h"
 #include "Models/UIState.h"
+#include "OverlayConfigDefaults.h"
 #include "PropertyRouter.h"
 #include "SensorRegistry.h"
 #include "appsettings.h"
@@ -478,15 +478,12 @@ void Connect::checkOBDReg()
 }
 
 static const QHash<int, int> s_registerMap = {
-    {0x00, 0},  {0x01, 1},  {0x02, 2},  {0x03, 3},  {0x04, 4},  {0x05, 5},
-    {0x06, 6},  {0x07, 7},  {0x08, 8},  {0x09, 9},  {0x0a, 10}, {0x0b, 11},
-    {0x0c, 12}, {0x0d, 13}, {0x0f, 14}, {0x11, 15}, {0x12, 16}, {0x13, 17},
-    {0x14, 18}, {0x15, 19}, {0x16, 20}, {0x17, 21}, {0x1a, 22}, {0x1b, 23},
-    {0x1c, 24}, {0x1d, 25}, {0x1e, 26}, {0x1f, 27}, {0x21, 28}, {0x22, 29},
-    {0x23, 30}, {0x25, 35}, {0x26, 36}, {0x27, 37}, {0x28, 31}, {0x29, 32},
-    {0x2a, 33}, {0x2e, 34}, {0x2f, 38}, {0x30, 39}, {0x31, 40}, {0x32, 41},
-    {0x33, 42}, {0x34, 43}, {0x35, 44}, {0x36, 45}, {0x37, 46}, {0x38, 47},
-    {0x39, 48}, {0x3a, 49}, {0x4a, 50}, {0x52, 51}, {0x53, 52},
+    {0x00, 0},  {0x01, 1},  {0x02, 2},  {0x03, 3},  {0x04, 4},  {0x05, 5},  {0x06, 6},  {0x07, 7},  {0x08, 8},
+    {0x09, 9},  {0x0a, 10}, {0x0b, 11}, {0x0c, 12}, {0x0d, 13}, {0x0f, 14}, {0x11, 15}, {0x12, 16}, {0x13, 17},
+    {0x14, 18}, {0x15, 19}, {0x16, 20}, {0x17, 21}, {0x1a, 22}, {0x1b, 23}, {0x1c, 24}, {0x1d, 25}, {0x1e, 26},
+    {0x1f, 27}, {0x21, 28}, {0x22, 29}, {0x23, 30}, {0x25, 35}, {0x26, 36}, {0x27, 37}, {0x28, 31}, {0x29, 32},
+    {0x2a, 33}, {0x2e, 34}, {0x2f, 38}, {0x30, 39}, {0x31, 40}, {0x32, 41}, {0x33, 42}, {0x34, 43}, {0x35, 44},
+    {0x36, 45}, {0x37, 46}, {0x38, 47}, {0x39, 48}, {0x3a, 49}, {0x4a, 50}, {0x52, 51}, {0x53, 52},
 };
 
 void Connect::checkReg()
@@ -548,36 +545,66 @@ void Connect::LiveReqMsgOBD(const QString &obdpids)
 }
 
 static const QHash<int, QString> s_daemonMap = {
-    {0, ""},                              {1, "./Haltechd"},
-    {2, "./Linkd"},                       {3, "./Microtechd"},
-    {4, "./Consult /dev/ttyUSB0"},        {5, "./M800ADLSet1d"},
-    {6, "./OBD /dev/ttyUSB0"},            {7, "./Hondatad"},
-    {8, "./AdaptronicCANd"},              {9, "./MotecM1d"},
-    {10, "./AEMV2d"},                     {11, "./AudiB7d"},
-    {12, "./BRZFRS86d"},                  {13, "./EMUCANd"},
-    {14, "./AudiB8d"},                    {15, "./Emtrond"},
-    {16, "./Holleyd"},                    {17, "./MaxxECUd"},
-    {18, "./FordBarraFGMK1CAN"},          {19, "./FordBarraFGMK1CANOBD"},
-    {20, "./FordBarraBXCAN"},             {21, "./FordBarraBXCANOBD"},
-    {22, "./FordBarraFG2xCAN"},           {23, "./FordBarraFG2XCANOBD"},
-    {24, "./EVOXCAN"},                    {25, "./BlackboxM3"},
-    {26, "./NISSAN370Z"},                 {27, "./GMCANd"},
-    {28, "./NISSAN350Z"},                 {29, "./MegasquirtCan"},
-    {30, "./EMSCAN"},                     {31, "./WRX2012"},
-    {32, "./M800ADLSet3d"},               {33, "./Testdaemon"},
-    {34, "./ecoboost"},                   {35, "./Emerald"},
-    {36, "./WolfEMS"},                    {37, "./GMCANOBD"},
-    {38, ""},                             {39, "./HondataS300"},
-    {40, "./genericcan"},                 {41, "./ME13"},
-    {42, "./FTCAN20"},                    {43, "./Delta"},
-    {44, "./BigNET"},                     {45, "./BigNETLamda"},
-    {46, "./R35"},                        {47, "./Prado"},
-    {48, "./WRX2016"},                    {49, "./LifeRacing"},
-    {50, "./DTAFast"},                    {51, "./ProEFI"},
-    {52, "./TeslaSDU"},                   {53, "./NeuroBasic"},
-    {54, "./GR_Yaris"},                   {55, "./SyvecsS7"},
-    {56, "./Rsport"},                     {57, "./Generic"},
-    {58, "./Edelbrock"},                  {59, "./Boostec"},
+    {0, ""},
+    {1, "./Haltechd"},
+    {2, "./Linkd"},
+    {3, "./Microtechd"},
+    {4, "./Consult /dev/ttyUSB0"},
+    {5, "./M800ADLSet1d"},
+    {6, "./OBD /dev/ttyUSB0"},
+    {7, "./Hondatad"},
+    {8, "./AdaptronicCANd"},
+    {9, "./MotecM1d"},
+    {10, "./AEMV2d"},
+    {11, "./AudiB7d"},
+    {12, "./BRZFRS86d"},
+    {13, "./EMUCANd"},
+    {14, "./AudiB8d"},
+    {15, "./Emtrond"},
+    {16, "./Holleyd"},
+    {17, "./MaxxECUd"},
+    {18, "./FordBarraFGMK1CAN"},
+    {19, "./FordBarraFGMK1CANOBD"},
+    {20, "./FordBarraBXCAN"},
+    {21, "./FordBarraBXCANOBD"},
+    {22, "./FordBarraFG2xCAN"},
+    {23, "./FordBarraFG2XCANOBD"},
+    {24, "./EVOXCAN"},
+    {25, "./BlackboxM3"},
+    {26, "./NISSAN370Z"},
+    {27, "./GMCANd"},
+    {28, "./NISSAN350Z"},
+    {29, "./MegasquirtCan"},
+    {30, "./EMSCAN"},
+    {31, "./WRX2012"},
+    {32, "./M800ADLSet3d"},
+    {33, "./Testdaemon"},
+    {34, "./ecoboost"},
+    {35, "./Emerald"},
+    {36, "./WolfEMS"},
+    {37, "./GMCANOBD"},
+    {38, ""},
+    {39, "./HondataS300"},
+    {40, "./genericcan"},
+    {41, "./ME13"},
+    {42, "./FTCAN20"},
+    {43, "./Delta"},
+    {44, "./BigNET"},
+    {45, "./BigNETLamda"},
+    {46, "./R35"},
+    {47, "./Prado"},
+    {48, "./WRX2016"},
+    {49, "./LifeRacing"},
+    {50, "./DTAFast"},
+    {51, "./ProEFI"},
+    {52, "./TeslaSDU"},
+    {53, "./NeuroBasic"},
+    {54, "./GR_Yaris"},
+    {55, "./SyvecsS7"},
+    {56, "./Rsport"},
+    {57, "./Generic"},
+    {58, "./Edelbrock"},
+    {59, "./Boostec"},
     {60, "./HEFI"},
 };
 
@@ -687,7 +714,8 @@ void Connect::canbitratesetup(const int &cansetting)
 
 
 //////////
-struct ConsultRegDef {
+struct ConsultRegDef
+{
     const char *hexCodes;
 };
 

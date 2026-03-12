@@ -50,8 +50,10 @@ class ConnectionData : public QObject
     Q_PROPERTY(QString Error READ Error WRITE setError NOTIFY ErrorChanged)
 
     // * External speed connection
-    Q_PROPERTY(int externalspeedconnectionrequest READ externalspeedconnectionrequest WRITE setexternalspeedconnectionrequest NOTIFY externalspeedconnectionrequestChanged)
-    Q_PROPERTY(QString externalspeedport READ externalspeedport WRITE setexternalspeedport NOTIFY externalspeedportChanged)
+    Q_PROPERTY(int externalspeedconnectionrequest READ externalspeedconnectionrequest WRITE
+                   setexternalspeedconnectionrequest NOTIFY externalspeedconnectionrequestChanged)
+    Q_PROPERTY(
+        QString externalspeedport READ externalspeedport WRITE setexternalspeedport NOTIFY externalspeedportChanged)
 
     // * Media path
     Q_PROPERTY(QString musicpath READ musicpath WRITE setmusicpath NOTIFY musicpathChanged)

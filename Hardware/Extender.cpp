@@ -9,13 +9,13 @@
 
 #include "Extender.h"
 
+#include "../Core/DiagnosticsProvider.h"
 #include "../Core/Models/ConnectionData.h"
 #include "../Core/Models/DigitalInputs.h"
 #include "../Core/Models/EngineData.h"
 #include "../Core/Models/ExpanderBoardData.h"
 #include "../Core/Models/SettingsData.h"
 #include "../Core/Models/VehicleData.h"
-#include "../Core/DiagnosticsProvider.h"
 #include "../Core/SensorRegistry.h"
 #include "../Utils/SteinhartCalculator.h"
 
@@ -445,8 +445,7 @@ void Extender::readyToRead()
             m_connectionData->setcan(list);
         }
         if (m_diagnosticsProvider) {
-            m_diagnosticsProvider->recordCanFrame(
-                static_cast<quint32>(frame.frameId()), frame.payload());
+            m_diagnosticsProvider->recordCanFrame(static_cast<quint32>(frame.frameId()), frame.payload());
         }
         // Just for testing  start
         QString view;

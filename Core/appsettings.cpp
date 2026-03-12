@@ -646,8 +646,8 @@ void AppSettings::removeOverlayConfig(const QString &dashboardId, const QString 
 void AppSettings::writeGearSensorConfig(const QVariantMap &config)
 {
     static const char *prefix = "ui/exboard/gearSensor/";
-    const QStringList keys = {"enabled", "port", "tolerance", "voltageN", "voltageR",
-                              "voltage1", "voltage2", "voltage3", "voltage4", "voltage5", "voltage6"};
+    const QStringList keys = {"enabled",  "port",     "tolerance", "voltageN", "voltageR", "voltage1",
+                              "voltage2", "voltage3", "voltage4",  "voltage5", "voltage6"};
     for (const QString &key : keys) {
         if (config.contains(key))
             setValue(QString(prefix) + key, config.value(key));
@@ -677,9 +677,9 @@ QVariantMap AppSettings::readGearSensorConfig()
 void AppSettings::writeSpeedSensorConfig(const QVariantMap &config)
 {
     static const char *prefix = "ui/exboard/speedSensor/";
-    const QStringList keys = {"enabled", "sourceType", "analogPort", "digitalPort",
-                              "pulsesPerRev", "voltageMultiplier", "tireCircumference",
-                              "finalDriveRatio", "unit"};
+    const QStringList keys = {"enabled",           "sourceType",      "analogPort",
+                              "digitalPort",       "pulsesPerRev",    "voltageMultiplier",
+                              "tireCircumference", "finalDriveRatio", "unit"};
     for (const QString &key : keys) {
         if (config.contains(key))
             setValue(QString(prefix) + key, config.value(key));

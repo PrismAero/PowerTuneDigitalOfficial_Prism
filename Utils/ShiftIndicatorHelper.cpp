@@ -1,12 +1,10 @@
 // Copyright (c) 2026 Kai Wyborny. All rights reserved.
 
 #include "ShiftIndicatorHelper.h"
+
 #include <QtMath>
 
-ShiftIndicatorHelper::ShiftIndicatorHelper(QObject *parent)
-    : QObject(parent)
-{
-}
+ShiftIndicatorHelper::ShiftIndicatorHelper(QObject *parent) : QObject(parent) {}
 
 QVariantList ShiftIndicatorHelper::pillColors(int pillCount) const
 {

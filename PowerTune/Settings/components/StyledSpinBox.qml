@@ -6,16 +6,18 @@ Item {
     id: root
 
     property int from: 0
+    property int stepSize: 1
     property int to: 100
     property int value: 0
-    property int stepSize: 1
 
-    implicitWidth: 140
     implicitHeight: SettingsTheme.controlHeight
+    implicitWidth: 140
 
     onValueChanged: {
-        if (value < from) value = from;
-        if (value > to) value = to;
+        if (value < from)
+            value = from;
+        if (value > to)
+            value = to;
     }
 
     RowLayout {
@@ -24,25 +26,27 @@ Item {
 
         Rectangle {
             id: minusBtn
-            Layout.preferredWidth: root.height
+
             Layout.fillHeight: true
-            radius: SettingsTheme.radiusSmall
-            color: minusArea.pressed ? SettingsTheme.surfacePressed : SettingsTheme.controlBg
+            Layout.preferredWidth: root.height
             border.color: SettingsTheme.border
             border.width: SettingsTheme.borderWidth
+            color: minusArea.pressed ? SettingsTheme.surfacePressed : SettingsTheme.controlBg
             opacity: root.value > root.from ? 1.0 : 0.4
+            radius: SettingsTheme.radiusSmall
 
             Text {
-                text: "-"
+                anchors.centerIn: parent
+                color: SettingsTheme.textPrimary
+                font.family: SettingsTheme.fontFamily
                 font.pixelSize: SettingsTheme.fontControl
                 font.weight: Font.Bold
-                font.family: SettingsTheme.fontFamily
-                color: SettingsTheme.textPrimary
-                anchors.centerIn: parent
+                text: "-"
             }
 
             TapHandler {
                 id: minusArea
+
                 onTapped: {
                     if (root.value - root.stepSize >= root.from)
                         root.value -= root.stepSize;
@@ -51,42 +55,44 @@ Item {
         }
 
         Rectangle {
-            Layout.fillWidth: true
             Layout.fillHeight: true
-            color: SettingsTheme.controlBg
+            Layout.fillWidth: true
             border.color: SettingsTheme.border
             border.width: SettingsTheme.borderWidth
+            color: SettingsTheme.controlBg
 
             Text {
-                text: root.value.toString()
-                font.pixelSize: SettingsTheme.fontControl
-                font.family: SettingsTheme.fontFamily
-                color: SettingsTheme.textPrimary
                 anchors.centerIn: parent
+                color: SettingsTheme.textPrimary
+                font.family: SettingsTheme.fontFamily
+                font.pixelSize: SettingsTheme.fontControl
+                text: root.value.toString()
             }
         }
 
         Rectangle {
             id: plusBtn
-            Layout.preferredWidth: root.height
+
             Layout.fillHeight: true
-            radius: SettingsTheme.radiusSmall
-            color: plusArea.pressed ? SettingsTheme.surfacePressed : SettingsTheme.controlBg
+            Layout.preferredWidth: root.height
             border.color: SettingsTheme.border
             border.width: SettingsTheme.borderWidth
+            color: plusArea.pressed ? SettingsTheme.surfacePressed : SettingsTheme.controlBg
             opacity: root.value < root.to ? 1.0 : 0.4
+            radius: SettingsTheme.radiusSmall
 
             Text {
-                text: "+"
+                anchors.centerIn: parent
+                color: SettingsTheme.textPrimary
+                font.family: SettingsTheme.fontFamily
                 font.pixelSize: SettingsTheme.fontControl
                 font.weight: Font.Bold
-                font.family: SettingsTheme.fontFamily
-                color: SettingsTheme.textPrimary
-                anchors.centerIn: parent
+                text: "+"
             }
 
             TapHandler {
                 id: plusArea
+
                 onTapped: {
                     if (root.value + root.stepSize <= root.to)
                         root.value += root.stepSize;

@@ -10,21 +10,22 @@ Text {
     // Icon name using Material Symbols ligature (e.g. "backspace", "keyboard_return")
     property string icon: ""
 
-    // Icon size in pixels
-    property int iconSize: 24
-
     // Icon color
     property color iconColor: "#FFFFFF"
 
-    FontLoader {
-        id: materialFont
-        source: "qrc:/Resources/fonts/MaterialSymbolsOutlined.ttf"
-    }
+    // Icon size in pixels
+    property int iconSize: 24
 
+    color: iconColor
     font.family: materialFont.name
     font.pixelSize: iconSize
-    color: iconColor
-    text: icon
     horizontalAlignment: Text.AlignHCenter
+    text: icon
     verticalAlignment: Text.AlignVCenter
+
+    FontLoader {
+        id: materialFont
+
+        source: "qrc:/Resources/fonts/MaterialSymbolsOutlined.ttf"
+    }
 }

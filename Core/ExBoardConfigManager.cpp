@@ -1,8 +1,8 @@
 #include "ExBoardConfigManager.h"
 
+#include "../Utils/CalibrationHelper.h"
 #include "SensorRegistry.h"
 #include "appsettings.h"
-#include "../Utils/CalibrationHelper.h"
 
 #include <algorithm>
 #include <cmath>
@@ -90,21 +90,18 @@ const QString ExBoardConfigManager::s_steinhartRKeys[kNtcChannels][3] = {
 };
 
 const QString ExBoardConfigManager::s_channelNameKeys[kAnalogChannels] = {
-    "ui/exboard/exan0name", "ui/exboard/exan1name", "ui/exboard/exan2name",
-    "ui/exboard/exan3name", "ui/exboard/exan4name", "ui/exboard/exan5name",
-    "ui/exboard/exan6name", "ui/exboard/exan7name",
+    "ui/exboard/exan0name", "ui/exboard/exan1name", "ui/exboard/exan2name", "ui/exboard/exan3name",
+    "ui/exboard/exan4name", "ui/exboard/exan5name", "ui/exboard/exan6name", "ui/exboard/exan7name",
 };
 
 const QString ExBoardConfigManager::s_digitalNameKeys[kDigitalChannels] = {
-    "ui/exboard/exdigi1name", "ui/exboard/exdigi2name", "ui/exboard/exdigi3name",
-    "ui/exboard/exdigi4name", "ui/exboard/exdigi5name", "ui/exboard/exdigi6name",
-    "ui/exboard/exdigi7name", "ui/exboard/exdigi8name",
+    "ui/exboard/exdigi1name", "ui/exboard/exdigi2name", "ui/exboard/exdigi3name", "ui/exboard/exdigi4name",
+    "ui/exboard/exdigi5name", "ui/exboard/exdigi6name", "ui/exboard/exdigi7name", "ui/exboard/exdigi8name",
 };
 
 const QString ExBoardConfigManager::s_channelEnableKeys[kAnalogChannels] = {
-    "ui/exboard/ch0_enabled", "ui/exboard/ch1_enabled", "ui/exboard/ch2_enabled",
-    "ui/exboard/ch3_enabled", "ui/exboard/ch4_enabled", "ui/exboard/ch5_enabled",
-    "ui/exboard/ch6_enabled", "ui/exboard/ch7_enabled",
+    "ui/exboard/ch0_enabled", "ui/exboard/ch1_enabled", "ui/exboard/ch2_enabled", "ui/exboard/ch3_enabled",
+    "ui/exboard/ch4_enabled", "ui/exboard/ch5_enabled", "ui/exboard/ch6_enabled", "ui/exboard/ch7_enabled",
 };
 
 const QString ExBoardConfigManager::s_digitalEnableKeys[kDigitalChannels] = {
@@ -112,10 +109,7 @@ const QString ExBoardConfigManager::s_digitalEnableKeys[kDigitalChannels] = {
     "ui/exboard/di5_enabled", "ui/exboard/di6_enabled", "ui/exboard/di7_enabled", "ui/exboard/di8_enabled",
 };
 
-ExBoardConfigManager::ExBoardConfigManager(QObject *parent)
-    : QObject(parent)
-{
-}
+ExBoardConfigManager::ExBoardConfigManager(QObject *parent) : QObject(parent) {}
 
 QVariantMap ExBoardConfigManager::loadAllSettings() const
 {
@@ -254,12 +248,12 @@ void ExBoardConfigManager::applyNtcPreset(int channel, const QString &presetName
     if (m_calibrationHelper && presetName != QLatin1String("Custom")) {
         const QVariantMap preset = m_calibrationHelper->getNtcPreset(presetName);
         if (!preset.isEmpty()) {
-            config[QStringLiteral("steinhartT")] =
-                QVariantList{preset.value(QStringLiteral("t1")).toString(), preset.value(QStringLiteral("t2")).toString(),
-                             preset.value(QStringLiteral("t3")).toString()};
-            config[QStringLiteral("steinhartR")] =
-                QVariantList{preset.value(QStringLiteral("r1")).toString(), preset.value(QStringLiteral("r2")).toString(),
-                             preset.value(QStringLiteral("r3")).toString()};
+            config[QStringLiteral("steinhartT")] = QVariantList{preset.value(QStringLiteral("t1")).toString(),
+                                                                preset.value(QStringLiteral("t2")).toString(),
+                                                                preset.value(QStringLiteral("t3")).toString()};
+            config[QStringLiteral("steinhartR")] = QVariantList{preset.value(QStringLiteral("r1")).toString(),
+                                                                preset.value(QStringLiteral("r2")).toString(),
+                                                                preset.value(QStringLiteral("r3")).toString()};
         }
     }
 
@@ -303,8 +297,10 @@ void ExBoardConfigManager::saveBoardConfig(const QVariantMap &config)
     const int rpmSource = merged.value(QStringLiteral("rpmSource"), 0).toInt();
     const int rpmCanVersion = merged.value(QStringLiteral("rpmCanVersion"), 0).toInt();
 
-    m_appSettings->setValue(QStringLiteral("ui/exboard/selectedValue"), merged.value(QStringLiteral("selectedValue"), 0));
-    m_appSettings->setValue(QStringLiteral("ui/exboard/switchValue"), merged.value(QStringLiteral("switchValue"), false));
+    m_appSettings->setValue(QStringLiteral("ui/exboard/selectedValue"),
+                            merged.value(QStringLiteral("selectedValue"), 0));
+    m_appSettings->setValue(QStringLiteral("ui/exboard/switchValue"),
+                            merged.value(QStringLiteral("switchValue"), false));
     m_appSettings->setValue(QStringLiteral("ui/exboard/rpmSource"), rpmSource);
     m_appSettings->setValue(QStringLiteral("ui/exboard/rpmCanVersion"), rpmCanVersion);
     m_appSettings->setValue(QStringLiteral("ui/exboard/cylinderCombobox"),
@@ -323,10 +319,10 @@ void ExBoardConfigManager::saveBoardConfig(const QVariantMap &config)
         double cylinders = merged.value(QStringLiteral("cylinderComboboxValue")).toDouble();
         if (rpmCanVersion == 1) {
             const double v2Value = merged.value(QStringLiteral("cylinderComboboxV2Value")).toDouble();
-            const int multiplier =
-                m_calibrationHelper ? m_calibrationHelper->expanderChannelMultiplier(
-                                          merged.value(QStringLiteral("cylinderComboboxV2"), 0).toInt())
-                                    : 1;
+            const int multiplier = m_calibrationHelper
+                                       ? m_calibrationHelper->expanderChannelMultiplier(
+                                             merged.value(QStringLiteral("cylinderComboboxV2"), 0).toInt())
+                                       : 1;
             cylinders = v2Value * multiplier;
         }
 
@@ -334,10 +330,9 @@ void ExBoardConfigManager::saveBoardConfig(const QVariantMap &config)
             m_appSettings->writeCylinderSettings(cylinders);
         m_appSettings->writeRPMFrequencySettings(0.0, 0);
     } else {
-        const double divider = m_calibrationHelper
-                                   ? m_calibrationHelper->frequencyDividerForCylinders(
-                                         merged.value(QStringLiteral("cylinderComboboxDi1"), 0).toInt())
-                                   : 1.0;
+        const double divider = m_calibrationHelper ? m_calibrationHelper->frequencyDividerForCylinders(
+                                                         merged.value(QStringLiteral("cylinderComboboxDi1"), 0).toInt())
+                                                   : 1.0;
         m_appSettings->writeRPMFrequencySettings(divider, 1);
     }
 
@@ -567,7 +562,7 @@ void ExBoardConfigManager::syncChannelSensorMetadata(int channel) const
     }
 
     m_sensorRegistry->updateSensorMetadata(QStringLiteral("EXAnalogInput%1").arg(channel), QStringLiteral("V"), 3, 5.0,
-                                          0.1);
-    m_sensorRegistry->updateSensorMetadata(QStringLiteral("EXAnalogCalc%1").arg(channel), metadata.unit, metadata.decimals,
-                                          metadata.maxValue, metadata.stepSize);
+                                           0.1);
+    m_sensorRegistry->updateSensorMetadata(QStringLiteral("EXAnalogCalc%1").arg(channel), metadata.unit,
+                                           metadata.decimals, metadata.maxValue, metadata.stepSize);
 }

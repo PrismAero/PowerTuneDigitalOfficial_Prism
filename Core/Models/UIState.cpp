@@ -5,12 +5,7 @@
 
 #include "UIState.h"
 
-UIState::UIState(QObject *parent)
-    : QObject(parent),
-      m_dashSetups(3),
-      m_rpmStyles(3, 0)
-{
-}
+UIState::UIState(QObject *parent) : QObject(parent), m_dashSetups(3), m_rpmStyles(3, 0) {}
 
 void UIState::setdraggable(int draggable)
 {
@@ -114,9 +109,12 @@ void UIState::setDashSetup(int index, const QStringList &setup)
     m_dashSetups[index] = setup;
     emit dashSetupChanged(index, setup);
 
-    if (index == 0) emit dashsetup1Changed(setup);
-    else if (index == 1) emit dashsetup2Changed(setup);
-    else if (index == 2) emit dashsetup3Changed(setup);
+    if (index == 0)
+        emit dashsetup1Changed(setup);
+    else if (index == 1)
+        emit dashsetup2Changed(setup);
+    else if (index == 2)
+        emit dashsetup3Changed(setup);
 }
 
 void UIState::setRpmStyle(int index, int style)
@@ -132,9 +130,12 @@ void UIState::setRpmStyle(int index, int style)
     m_rpmStyles[index] = style;
     emit rpmStyleChanged(index, style);
 
-    if (index == 0) emit rpmstyle1Changed(style);
-    else if (index == 1) emit rpmstyle2Changed(style);
-    else if (index == 2) emit rpmstyle3Changed(style);
+    if (index == 0)
+        emit rpmstyle1Changed(style);
+    else if (index == 1)
+        emit rpmstyle2Changed(style);
+    else if (index == 2)
+        emit rpmstyle3Changed(style);
 }
 
 void UIState::ensureDashCapacity(int index)

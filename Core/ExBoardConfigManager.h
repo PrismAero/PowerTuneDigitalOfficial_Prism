@@ -69,4 +69,4 @@ private:
     void syncChannelSensorMetadata(int channel) const;
 };
 
-#endif // EXBOARDCONFIGMANAGER_H
+#endif  // EXBOARDCONFIGMANAGER_H

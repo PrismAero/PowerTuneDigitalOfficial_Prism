@@ -10,24 +10,44 @@ import PowerTune.Utils 1.0
 
 Rectangle {
     id: tabView
+
+    property int currentIndex: tabBar.currentIndex
+    property int lastdashamount
+
     anchors.fill: parent
     color: SettingsTheme.background
 
-    property int lastdashamount
-    property int currentIndex: tabBar.currentIndex
-
     DLM {
         id: downloadManager
+
     }
 
     ListModel {
         id: tabModel
-        ListElement { title: "Main" }
-        ListElement { title: "Dash Sel." }
-        ListElement { title: "Vehicle / RPM" }
-        ListElement { title: "EX Board" }
-        ListElement { title: "Network" }
-        ListElement { title: "Diagnostics" }
+
+        ListElement {
+            title: "Main"
+        }
+
+        ListElement {
+            title: "Dash Sel."
+        }
+
+        ListElement {
+            title: "Vehicle / RPM"
+        }
+
+        ListElement {
+            title: "EX Board"
+        }
+
+        ListElement {
+            title: "Network"
+        }
+
+        ListElement {
+            title: "Diagnostics"
+        }
     }
 
     ColumnLayout {
@@ -41,34 +61,37 @@ Rectangle {
 
             TabBar {
                 id: tabBar
+
                 anchors.fill: parent
-                background: Rectangle { color: "transparent" }
+
+                background: Rectangle {
+                    color: "transparent"
+                }
 
                 Repeater {
                     model: tabModel
+
                     TabButton {
+                        height: SettingsTheme.tabBarHeight
                         text: Translator.translate(model.title, Settings.language)
                         width: tabView.width / tabModel.count
-                        height: SettingsTheme.tabBarHeight
-
-                        contentItem: Text {
-                            text: parent.text
-                            font.pixelSize: SettingsTheme.fontTab
-                            font.family: SettingsTheme.fontFamily
-                            font.weight: parent.checked ? Font.DemiBold : Font.Normal
-                            color: parent.checked ? SettingsTheme.textPrimary : SettingsTheme.textSecondary
-                            horizontalAlignment: Text.AlignHCenter
-                            verticalAlignment: Text.AlignVCenter
-                            elide: Text.ElideRight
-                        }
 
                         background: Rectangle {
-                            color: parent.checked ? SettingsTheme.accent
-                                 : parent.pressed ? SettingsTheme.surfacePressed
-                                 : SettingsTheme.surface
                             border.color: parent.checked ? SettingsTheme.accent : SettingsTheme.border
                             border.width: SettingsTheme.borderWidth
+                            color: parent.checked ? SettingsTheme.accent : parent.pressed
+                                                    ? SettingsTheme.surfacePressed : SettingsTheme.surface
                             radius: SettingsTheme.radiusSmall
+                        }
+                        contentItem: Text {
+                            color: parent.checked ? SettingsTheme.textPrimary : SettingsTheme.textSecondary
+                            elide: Text.ElideRight
+                            font.family: SettingsTheme.fontFamily
+                            font.pixelSize: SettingsTheme.fontTab
+                            font.weight: parent.checked ? Font.DemiBold : Font.Normal
+                            horizontalAlignment: Text.AlignHCenter
+                            text: parent.text
+                            verticalAlignment: Text.AlignVCenter
                         }
                     }
                 }
@@ -77,25 +100,31 @@ Rectangle {
 
         StackLayout {
             id: stackLayout
-            Layout.fillWidth: true
+
             Layout.fillHeight: true
+            Layout.fillWidth: true
             currentIndex: tabBar.currentIndex
 
             MainSettings {
                 visible: stackLayout.currentIndex === 0
             }
+
             DashSelector {
                 visible: stackLayout.currentIndex === 1
             }
+
             VehicleRPMSettings {
                 visible: stackLayout.currentIndex === 2
             }
+
             ExBoardAnalog {
                 visible: stackLayout.currentIndex === 3
             }
+
             NetworkSettings {
                 visible: stackLayout.currentIndex === 4
             }
+
             DiagnosticsSettings {
                 visible: stackLayout.currentIndex === 5
             }

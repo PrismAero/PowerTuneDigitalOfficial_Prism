@@ -34,4 +34,4 @@ private:
     QVariantMap genericDefaults() const;
 };
 
-#endif // OVERLAYCONFIGDEFAULTS_H
+#endif  // OVERLAYCONFIGDEFAULTS_H

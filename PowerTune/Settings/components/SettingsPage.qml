@@ -7,24 +7,27 @@ import QtQuick.Layouts 1.15
 
 Rectangle {
     id: root
-    Layout.fillWidth: true
-    Layout.fillHeight: true
-    color: SettingsTheme.background
 
     default property alias content: contentColumn.data
 
+    Layout.fillHeight: true
+    Layout.fillWidth: true
+    color: SettingsTheme.background
+
     ScrollView {
         id: scrollView
+
+        ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
+        ScrollBar.vertical.policy: ScrollBar.AsNeeded
         anchors.fill: parent
         anchors.margins: SettingsTheme.pageMargin
         clip: true
-        ScrollBar.vertical.policy: ScrollBar.AsNeeded
-        ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
 
         ColumnLayout {
             id: contentColumn
-            width: scrollView.availableWidth
+
             spacing: SettingsTheme.sectionSpacing
+            width: scrollView.availableWidth
         }
     }
 }

@@ -22,7 +22,8 @@ class RaceArcItem : public QQuickItem
     Q_PROPERTY(qreal arcScale READ arcScale WRITE setArcScale NOTIFY appearanceChanged)
     Q_PROPERTY(qreal centerOffsetX READ centerOffsetX WRITE setCenterOffsetX NOTIFY appearanceChanged)
     Q_PROPERTY(qreal centerOffsetY READ centerOffsetY WRITE setCenterOffsetY NOTIFY appearanceChanged)
-    Q_PROPERTY(qreal minimumVisibleFraction READ minimumVisibleFraction WRITE setMinimumVisibleFraction NOTIFY appearanceChanged)
+    Q_PROPERTY(qreal minimumVisibleFraction READ minimumVisibleFraction WRITE setMinimumVisibleFraction NOTIFY
+                   appearanceChanged)
     Q_PROPERTY(qreal startTaper READ startTaper WRITE setStartTaper NOTIFY appearanceChanged)
     Q_PROPERTY(qreal endTaper READ endTaper WRITE setEndTaper NOTIFY appearanceChanged)
     Q_PROPERTY(QColor startColor READ startColor WRITE setStartColor NOTIFY appearanceChanged)

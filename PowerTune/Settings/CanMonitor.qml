@@ -5,10 +5,11 @@ import PowerTune.UI 1.0
 
 Rectangle {
     id: root
+
+    color: "#121212"
+    height: parent.height
     visible: true
     width: parent.width
-    height: parent.height
-    color: "#121212"
 
     ColumnLayout {
         anchors.fill: parent
@@ -27,57 +28,74 @@ Rectangle {
                 spacing: 16
 
                 Text {
-                    text: "CAN Bus Monitor"
+                    color: "#FFFFFF"
+                    font.family: SettingsTheme.fontFamily
                     font.pixelSize: 24
                     font.weight: Font.DemiBold
-                    font.family: SettingsTheme.fontFamily
-                    color: "#FFFFFF"
+                    text: "CAN Bus Monitor"
                 }
 
-                Item { Layout.fillWidth: true }
+                Item {
+                    Layout.fillWidth: true
+                }
 
                 RowLayout {
                     spacing: 8
+
                     Text {
-                        text: "Extender Only"
-                        font.pixelSize: 16
-                        font.family: SettingsTheme.fontFamily
                         color: CanMonitorModel.showAllFrames ? "#707070" : "#009688"
+                        font.family: SettingsTheme.fontFamily
+                        font.pixelSize: 16
+                        text: "Extender Only"
                     }
+
                     Switch {
                         id: frameFilterSwitch
+
                         checked: CanMonitorModel.showAllFrames
+
                         onCheckedChanged: CanMonitorModel.showAllFrames = checked
                     }
+
                     Text {
-                        text: "All Frames"
-                        font.pixelSize: 16
-                        font.family: SettingsTheme.fontFamily
                         color: CanMonitorModel.showAllFrames ? "#009688" : "#707070"
+                        font.family: SettingsTheme.fontFamily
+                        font.pixelSize: 16
+                        text: "All Frames"
                     }
                 }
 
-                Item { width: 16 }
+                Item {
+                    width: 16
+                }
 
                 Rectangle {
-                    width: 12
+                    color: CanMonitorModel.messageCount > 0 ? "#4CAF50" : "#707070"
                     height: 12
                     radius: 6
-                    color: CanMonitorModel.messageCount > 0 ? "#4CAF50" : "#707070"
+                    width: 12
 
                     SequentialAnimation on opacity {
-                        running: CanMonitorModel.messageCount > 0
                         loops: Animation.Infinite
-                        NumberAnimation { to: 0.5; duration: 500 }
-                        NumberAnimation { to: 1.0; duration: 500 }
+                        running: CanMonitorModel.messageCount > 0
+
+                        NumberAnimation {
+                            duration: 500
+                            to: 0.5
+                        }
+
+                        NumberAnimation {
+                            duration: 500
+                            to: 1.0
+                        }
                     }
                 }
 
                 Text {
-                    text: CanMonitorModel.messageCount + " messages"
-                    font.pixelSize: 18
-                    font.family: SettingsTheme.fontFamily
                     color: "#B0B0B0"
+                    font.family: SettingsTheme.fontFamily
+                    font.pixelSize: 18
+                    text: CanMonitorModel.messageCount + " messages"
                 }
             }
         }
@@ -94,47 +112,50 @@ Rectangle {
                 spacing: 20
 
                 Text {
-                    text: "CAN ID"
+                    Layout.preferredWidth: 150
+                    color: "#009688"
+                    font.family: SettingsTheme.fontFamily
                     font.pixelSize: 18
                     font.weight: Font.DemiBold
-                    font.family: SettingsTheme.fontFamily
-                    color: "#009688"
-                    Layout.preferredWidth: 150
+                    text: "CAN ID"
                 }
 
                 Text {
-                    text: "Payload (Hex)"
+                    Layout.fillWidth: true
+                    color: "#009688"
+                    font.family: SettingsTheme.fontFamily
                     font.pixelSize: 18
                     font.weight: Font.DemiBold
-                    font.family: SettingsTheme.fontFamily
-                    color: "#009688"
-                    Layout.fillWidth: true
+                    text: "Payload (Hex)"
                 }
             }
         }
 
         Rectangle {
-            Layout.fillWidth: true
             Layout.fillHeight: true
-            color: "#1E1E1E"
-            radius: 8
+            Layout.fillWidth: true
             border.color: "#3D3D3D"
             border.width: 1
+            color: "#1E1E1E"
+            radius: 8
 
             ListView {
                 id: listView
+
                 anchors.fill: parent
                 anchors.margins: 8
                 clip: true
+                model: CanMonitorModel
                 spacing: 2
 
-                model: CanMonitorModel
-
+                ScrollBar.vertical: ScrollBar {
+                    policy: ScrollBar.AsNeeded
+                }
                 delegate: Rectangle {
-                    width: listView.width
-                    height: 36
                     color: index % 2 === 0 ? "#252525" : "#2D2D2D"
+                    height: 36
                     radius: 4
+                    width: listView.width
 
                     RowLayout {
                         anchors.fill: parent
@@ -142,42 +163,38 @@ Rectangle {
                         spacing: 20
 
                         Rectangle {
-                            width: 120
-                            height: 24
                             color: "#009688"
+                            height: 24
                             radius: 4
+                            width: 120
 
                             Text {
                                 anchors.centerIn: parent
-                                text: model.canId
+                                color: "#FFFFFF"
+                                font.family: SettingsTheme.fontFamilyMono
                                 font.pixelSize: 14
                                 font.weight: Font.DemiBold
-                                font.family: SettingsTheme.fontFamilyMono
-                                color: "#FFFFFF"
+                                text: model.canId
                             }
                         }
 
                         Text {
-                            text: model.payload
-                            font.pixelSize: 14
-                            font.family: SettingsTheme.fontFamilyMono
-                            color: "#FFFFFF"
                             Layout.fillWidth: true
+                            color: "#FFFFFF"
+                            font.family: SettingsTheme.fontFamilyMono
+                            font.pixelSize: 14
+                            text: model.payload
                         }
                     }
-                }
-
-                ScrollBar.vertical: ScrollBar {
-                    policy: ScrollBar.AsNeeded
                 }
             }
 
             Text {
                 anchors.centerIn: parent
-                text: "No CAN messages received"
-                font.pixelSize: 18
-                font.family: SettingsTheme.fontFamily
                 color: "#707070"
+                font.family: SettingsTheme.fontFamily
+                font.pixelSize: 18
+                text: "No CAN messages received"
                 visible: CanMonitorModel.messageCount === 0
             }
         }

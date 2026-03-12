@@ -54,20 +54,10 @@ public:
      * @param settings Settings data model (for ExternalSpeed check)
      * @param parent Parent QObject
      */
-    explicit udpreceiver(
-        EngineData *engine,
-        VehicleData *vehicle,
-        GPSData *gps,
-        AnalogInputs *analog,
-        DigitalInputs *digital,
-        ExpanderBoardData *expander,
-        ElectricMotorData *motor,
-        FlagsData *flags,
-        SensorData *sensor,
-        ConnectionData *connection,
-        SettingsData *settings,
-        QObject *parent = nullptr
-    );
+    explicit udpreceiver(EngineData *engine, VehicleData *vehicle, GPSData *gps, AnalogInputs *analog,
+                         DigitalInputs *digital, ExpanderBoardData *expander, ElectricMotorData *motor,
+                         FlagsData *flags, SensorData *sensor, ConnectionData *connection, SettingsData *settings,
+                         QObject *parent = nullptr);
 
 private:
     using FloatHandler = std::function<void(float)>;

@@ -1,8 +1,6 @@
 #include "OverlayConfigManager.h"
 
-OverlayConfigManager::OverlayConfigManager(QObject *parent)
-    : QObject(parent)
-    , m_positionsLocked(false)
+OverlayConfigManager::OverlayConfigManager(QObject *parent) : QObject(parent), m_positionsLocked(false)
 {
     QSettings settings(ORG_NAME, APP_NAME);
     m_positionsLocked = settings.value(QStringLiteral("ui/overlayPositionsLocked"), false).toBool();
@@ -135,7 +133,8 @@ QVariantMap OverlayConfigManager::getConfigForPopup(const QString &overlayId, co
         double maxRpm = cfg.value(QStringLiteral("maxValue"), 0.0).toDouble();
         if (maxRpm <= 0.0) {
             maxRpm = appSettings.value(QStringLiteral("Max RPM"), 10000).toDouble();
-            if (maxRpm <= 0.0) maxRpm = 10000.0;
+            if (maxRpm <= 0.0)
+                maxRpm = 10000.0;
         }
         result[QStringLiteral("maxValue")] = maxRpm;
 
@@ -155,7 +154,8 @@ QVariantMap OverlayConfigManager::getConfigForPopup(const QString &overlayId, co
     return result;
 }
 
-void OverlayConfigManager::saveConfigFromPopup(const QString &overlayId, const QString &configType, const QVariantMap &fields)
+void OverlayConfigManager::saveConfigFromPopup(const QString &overlayId, const QString &configType,
+                                               const QVariantMap &fields)
 {
     QVariantMap cfg;
 
@@ -220,9 +220,7 @@ QVariantMap OverlayConfigManager::getOverlayProperties(const QString &overlayId)
     QVariantMap result;
     QSettings appSettings(ORG_NAME, APP_NAME);
 
-    auto strVal = [&](const QString &key, const QString &def) -> QString {
-        return cfg.value(key, def).toString();
-    };
+    auto strVal = [&](const QString &key, const QString &def) -> QString { return cfg.value(key, def).toString(); };
     auto dblVal = [&](const QString &key, double def) -> double {
         QVariant v = cfg.value(key);
         return v.isValid() ? v.toDouble() : def;
@@ -252,7 +250,8 @@ QVariantMap OverlayConfigManager::getOverlayProperties(const QString &overlayId)
         result[QStringLiteral("threshold")] = dblVal(QStringLiteral("threshold"), 0.5);
     } else if (overlayId == QLatin1String("tachGroup") || overlayId == QLatin1String("tachCluster")) {
         double defMax = appSettings.value(QStringLiteral("Max RPM"), 10000).toDouble();
-        if (defMax <= 0.0) defMax = 10000.0;
+        if (defMax <= 0.0)
+            defMax = 10000.0;
         double s1 = appSettings.value(QStringLiteral("Shift Light1"), 3000).toDouble();
         double defShift = defMax > 0.0 ? s1 / defMax : 0.75;
 
@@ -275,7 +274,8 @@ QVariantMap OverlayConfigManager::getOverlayProperties(const QString &overlayId)
         result[QStringLiteral("readoutOffsetY")] = dblVal(QStringLiteral("readoutOffsetY"), 94.0);
         result[QStringLiteral("readoutValueScale")] = dblVal(QStringLiteral("readoutValueScale"), 0.213);
         result[QStringLiteral("readoutUnitScale")] = dblVal(QStringLiteral("readoutUnitScale"), 0.076);
-        result[QStringLiteral("readoutTextColor")] = strVal(QStringLiteral("readoutTextColor"), QStringLiteral("#FFFFFF"));
+        result[QStringLiteral("readoutTextColor")] =
+            strVal(QStringLiteral("readoutTextColor"), QStringLiteral("#FFFFFF"));
         result[QStringLiteral("shiftPoint")] = dblVal(QStringLiteral("shiftPoint"), defShift);
         result[QStringLiteral("shiftCount")] = intVal(QStringLiteral("shiftCount"), 11);
         result[QStringLiteral("shiftPattern")] = strVal(QStringLiteral("shiftPattern"), QStringLiteral("center-out"));
@@ -292,7 +292,8 @@ QVariantMap OverlayConfigManager::getOverlayProperties(const QString &overlayId)
         result[QStringLiteral("readoutOffsetY")] = dblVal(QStringLiteral("readoutOffsetY"), 62.0);
         result[QStringLiteral("readoutValueScale")] = dblVal(QStringLiteral("readoutValueScale"), 0.213);
         result[QStringLiteral("readoutUnitScale")] = dblVal(QStringLiteral("readoutUnitScale"), 0.076);
-        result[QStringLiteral("readoutTextColor")] = strVal(QStringLiteral("readoutTextColor"), QStringLiteral("#FFFFFF"));
+        result[QStringLiteral("readoutTextColor")] =
+            strVal(QStringLiteral("readoutTextColor"), QStringLiteral("#FFFFFF"));
         result[QStringLiteral("decimals")] = intVal(QStringLiteral("decimals"), 0);
     } else if (overlayId == QLatin1String("bottomBar")) {
         result[QStringLiteral("text")] = strVal(QStringLiteral("text"), QStringLiteral("Cardinal Racing"));

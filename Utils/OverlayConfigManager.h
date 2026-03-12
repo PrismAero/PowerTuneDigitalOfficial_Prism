@@ -20,7 +20,8 @@ public:
     Q_INVOKABLE QStringList configKeys(const QString &overlayId) const;
 
     Q_INVOKABLE QVariantMap getConfigForPopup(const QString &overlayId, const QString &configType) const;
-    Q_INVOKABLE void saveConfigFromPopup(const QString &overlayId, const QString &configType, const QVariantMap &fields);
+    Q_INVOKABLE void saveConfigFromPopup(const QString &overlayId, const QString &configType,
+                                         const QVariantMap &fields);
     Q_INVOKABLE QVariantMap getOverlayProperties(const QString &overlayId) const;
 
     Q_INVOKABLE void savePosition(const QString &overlayId, qreal x, qreal y);
@@ -43,4 +44,4 @@ private:
     QString prefix(const QString &overlayId) const;
 };
 
-#endif // OVERLAYCONFIGMANAGER_H
+#endif  // OVERLAYCONFIGMANAGER_H

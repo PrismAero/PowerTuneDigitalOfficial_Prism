@@ -93,4 +93,4 @@ private:
     qreal m_average;
 };
 
-#endif // SIGNALSMOOTHER_H
+#endif  // SIGNALSMOOTHER_H

@@ -10,10 +10,9 @@ namespace {
 QColor lerpColor(const QColor &a, const QColor &b, qreal t)
 {
     const qreal clamped = qBound(0.0, t, 1.0);
-    return QColor::fromRgbF(a.redF() + ((b.redF() - a.redF()) * clamped),
-                            a.greenF() + ((b.greenF() - a.greenF()) * clamped),
-                            a.blueF() + ((b.blueF() - a.blueF()) * clamped),
-                            a.alphaF() + ((b.alphaF() - a.alphaF()) * clamped));
+    return QColor::fromRgbF(
+        a.redF() + ((b.redF() - a.redF()) * clamped), a.greenF() + ((b.greenF() - a.greenF()) * clamped),
+        a.blueF() + ((b.blueF() - a.blueF()) * clamped), a.alphaF() + ((b.alphaF() - a.alphaF()) * clamped));
 }
 
 QColor withScaledAlpha(const QColor &color, qreal alphaScale)
@@ -64,14 +63,10 @@ qreal clockwiseSweep(qreal startAngle, qreal endAngle)
 QPointF pointForClockAngle(const QPointF &center, qreal radius, qreal clockDegrees)
 {
     const qreal radians = qDegreesToRadians(clockDegrees);
-    return QPointF(center.x() + (qSin(radians) * radius),
-                   center.y() - (qCos(radians) * radius));
+    return QPointF(center.x() + (qSin(radians) * radius), center.y() - (qCos(radians) * radius));
 }
 
-QColor colorAtFraction(const QColor &startColor,
-                       const QColor &midColor,
-                       qreal midStop,
-                       const QColor &endColor,
+QColor colorAtFraction(const QColor &startColor, const QColor &midColor, qreal midStop, const QColor &endColor,
                        qreal fraction)
 {
     const qreal clamped = qBound(0.0, fraction, 1.0);
@@ -117,11 +112,7 @@ ArcSampleProfile sampleProfileAt(qreal fraction, qreal startTaper, qreal endTape
         return {1.0, eased, eased};
     }
 
-    return {
-        qBound(0.0, (clampedFraction - clampedStartTaper) / bodyFraction, 1.0),
-        1.0,
-        1.0
-    };
+    return {qBound(0.0, (clampedFraction - clampedStartTaper) / bodyFraction, 1.0), 1.0, 1.0};
 }
 
 qreal bodyOpacityAt(qreal fraction, const QString &shapeMode)
@@ -132,10 +123,9 @@ qreal bodyOpacityAt(qreal fraction, const QString &shapeMode)
     return qBound(0.0, startOpacity + ((1.0 - startOpacity) * ramp), 1.0);
 }
 
-} // namespace
+}  // namespace
 
-RaceArcItem::RaceArcItem(QQuickItem *parent)
-    : QQuickItem(parent)
+RaceArcItem::RaceArcItem(QQuickItem *parent) : QQuickItem(parent)
 {
     setFlag(ItemHasContents, true);
     setAntialiasing(true);
@@ -323,9 +313,7 @@ QSGNode *RaceArcItem::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *)
     const qreal centerRadius = 0.5 * (outerRadius + innerRadius);
     const qreal baseHalfWidth = 0.5 * (outerRadius - innerRadius);
     const qreal sweepDegrees = clockwiseSweep(m_startAngle, m_endAngle);
-    const qreal visibleFraction = qBound(0.0,
-                                         qMax(m_progress, m_minimumVisibleFraction),
-                                         1.0);
+    const qreal visibleFraction = qBound(0.0, qMax(m_progress, m_minimumVisibleFraction), 1.0);
 
     if (outerRadius <= 0.0 || visibleFraction <= 0.0) {
         geometry->allocate(0);
@@ -333,8 +321,7 @@ QSGNode *RaceArcItem::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *)
         return node;
     }
 
-    const QPointF center(bounds.center().x() + m_centerOffsetX,
-                         bounds.center().y() + m_centerOffsetY);
+    const QPointF center(bounds.center().x() + m_centerOffsetX, bounds.center().y() + m_centerOffsetY);
     const qreal visibleSweep = sweepDegrees * visibleFraction;
     const int segments = segmentCountForArc(outerRadius, visibleSweep);
     const int vertexCount = (segments + 1) * 2;
@@ -355,22 +342,20 @@ QSGNode *RaceArcItem::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *)
         const qreal taperedInnerRadius = qMax(0.0, centerRadius - halfWidth);
         const QPointF outerPoint = pointForClockAngle(center, taperedOuterRadius, angle);
         const QPointF innerPoint = pointForClockAngle(center, taperedInnerRadius, angle);
-        const QColor baseColor = colorAtFraction(tintedStartColor, tintedMidColor, m_midColorStop, tintedEndColor, profile.angleFraction);
+        const QColor baseColor =
+            colorAtFraction(tintedStartColor, tintedMidColor, m_midColorStop, tintedEndColor, profile.angleFraction);
         const qreal bodyOpacity = bodyOpacityAt(fraction, m_shapeMode) * profile.alphaScale;
-        const QColor outerColor = withScaledAlpha(brightenedColor(baseColor, m_shapeMode == QStringLiteral("speedSvg") ? 0.06 : 0.04),
-                                                  bodyOpacity);
-        const QColor innerColor = withScaledAlpha(shadedColor(baseColor, m_shapeMode == QStringLiteral("speedSvg") ? 0.5 : 0.4),
-                                                  bodyOpacity * (m_shapeMode == QStringLiteral("speedSvg") ? 0.18 : 0.24));
+        const QColor outerColor = withScaledAlpha(
+            brightenedColor(baseColor, m_shapeMode == QStringLiteral("speedSvg") ? 0.06 : 0.04), bodyOpacity);
+        const QColor innerColor =
+            withScaledAlpha(shadedColor(baseColor, m_shapeMode == QStringLiteral("speedSvg") ? 0.5 : 0.4),
+                            bodyOpacity * (m_shapeMode == QStringLiteral("speedSvg") ? 0.18 : 0.24));
 
-        vertices[(i * 2)].set(outerPoint.x(), outerPoint.y(),
-                              static_cast<uchar>(outerColor.red()),
-                              static_cast<uchar>(outerColor.green()),
-                              static_cast<uchar>(outerColor.blue()),
+        vertices[(i * 2)].set(outerPoint.x(), outerPoint.y(), static_cast<uchar>(outerColor.red()),
+                              static_cast<uchar>(outerColor.green()), static_cast<uchar>(outerColor.blue()),
                               static_cast<uchar>(outerColor.alpha()));
-        vertices[(i * 2) + 1].set(innerPoint.x(), innerPoint.y(),
-                                  static_cast<uchar>(innerColor.red()),
-                                  static_cast<uchar>(innerColor.green()),
-                                  static_cast<uchar>(innerColor.blue()),
+        vertices[(i * 2) + 1].set(innerPoint.x(), innerPoint.y(), static_cast<uchar>(innerColor.red()),
+                                  static_cast<uchar>(innerColor.green()), static_cast<uchar>(innerColor.blue()),
                                   static_cast<uchar>(innerColor.alpha()));
     }
 

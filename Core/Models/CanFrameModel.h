@@ -15,10 +15,7 @@ class CanFrameModel : public QAbstractListModel
     Q_PROPERTY(int messageCount READ messageCount NOTIFY messageCountChanged)
 
 public:
-    enum Roles {
-        CanIdRole = Qt::UserRole + 1,
-        PayloadRole
-    };
+    enum Roles { CanIdRole = Qt::UserRole + 1, PayloadRole };
 
     explicit CanFrameModel(QObject *parent = nullptr);
     explicit CanFrameModel(ConnectionData *connectionData, Extender *extender, QObject *parent = nullptr);
@@ -40,7 +37,8 @@ private slots:
     void onBaseIdsChanged();
 
 private:
-    struct CanFrame {
+    struct CanFrame
+    {
         QString canId;
         QString payload;
     };
@@ -56,4 +54,4 @@ private:
     QVector<int> m_visibleIndices;
 };
 
-#endif // CANFRAMEMODEL_H
+#endif  // CANFRAMEMODEL_H

@@ -28,19 +28,10 @@ class datalogger : public QObject
 public:
     explicit datalogger(QObject *parent = nullptr);
     explicit datalogger(DashBoard *dashboard, QObject *parent = nullptr);
-    explicit datalogger(
-        EngineData *engineData,
-        VehicleData *vehicleData,
-        GPSData *gpsData,
-        SensorData *sensorData,
-        FlagsData *flagsData,
-        AnalogInputs *analogInputs,
-        ExpanderBoardData *expanderBoardData,
-        DigitalInputs *digitalInputs,
-        ConnectionData *connectionData,
-        TimingData *timingData,
-        QObject *parent = nullptr
-    );
+    explicit datalogger(EngineData *engineData, VehicleData *vehicleData, GPSData *gpsData, SensorData *sensorData,
+                        FlagsData *flagsData, AnalogInputs *analogInputs, ExpanderBoardData *expanderBoardData,
+                        DigitalInputs *digitalInputs, ConnectionData *connectionData, TimingData *timingData,
+                        QObject *parent = nullptr);
     Q_INVOKABLE void startLog(QString Logfilename);
     Q_INVOKABLE void stopLog();
 
@@ -52,7 +43,7 @@ public slots:
 
 private:
     DashBoard *m_dashboard = nullptr;
-    
+
     // Domain model pointers
     EngineData *m_engineData = nullptr;
     VehicleData *m_vehicleData = nullptr;
@@ -64,7 +55,7 @@ private:
     DigitalInputs *m_digitalInputs = nullptr;
     ConnectionData *m_connectionData = nullptr;
     TimingData *m_timingData = nullptr;
-    
+
     QTimer m_updatetimer;
 };
 

@@ -5,10 +5,7 @@
 
 #include "ConnectionData.h"
 
-ConnectionData::ConnectionData(QObject *parent)
-    : QObject(parent)
-{
-}
+ConnectionData::ConnectionData(QObject *parent) : QObject(parent) {}
 
 // * Setters - Serial status
 void ConnectionData::setSerialStat(const QString &SerialStat)

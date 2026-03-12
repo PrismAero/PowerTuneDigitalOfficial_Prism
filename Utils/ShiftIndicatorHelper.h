@@ -4,8 +4,8 @@
 #define SHIFTINDICATORHELPER_H
 
 #include <QObject>
-#include <QVariantList>
 #include <QString>
+#include <QVariantList>
 
 class ShiftIndicatorHelper : public QObject
 {
@@ -20,4 +20,4 @@ public:
     Q_INVOKABLE bool isPillLit(int index, int activeCount, const QVariantList &order) const;
 };
 
-#endif // SHIFTINDICATORHELPER_H
+#endif  // SHIFTINDICATORHELPER_H

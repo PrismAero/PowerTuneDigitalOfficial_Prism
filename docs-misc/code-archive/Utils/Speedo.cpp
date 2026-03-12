@@ -1,7 +1,7 @@
 #include "Speedo.h"
 
-#include "../Core/connect.h"
 #include "../Core/Models/VehicleData.h"
+#include "../Core/connect.h"
 
 #include <QDebug>
 
