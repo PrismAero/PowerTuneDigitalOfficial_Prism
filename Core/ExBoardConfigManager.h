@@ -47,6 +47,8 @@ private:
     SensorRegistry *m_sensorRegistry = nullptr;
 
     static const QString s_linearKeys[kAnalogChannels][2];
+    static const QString s_linearPresetKeys[kAnalogChannels];
+    static const QString s_ntcPresetKeys[kNtcChannels];
     static const QString s_ntcOnKeys[kNtcChannels];
     static const QString s_divider100Keys[kNtcChannels];
     static const QString s_divider1kKeys[kNtcChannels];
@@ -55,6 +57,14 @@ private:
     static const QString s_channelNameKeys[kAnalogChannels];
     static const QString s_digitalNameKeys[kDigitalChannels];
     static const QString s_channelEnableKeys[kAnalogChannels];
+    static const QString s_digitalEnableKeys[kDigitalChannels];
+
+    QVariantMap getDigitalChannelConfig(int channel) const;
+    void saveChannelConfigInternal(int channel, const QVariantMap &config);
+    void saveDigitalChannelConfigInternal(int channel, const QVariantMap &config);
+    void applyAnalogRuntimeSettings() const;
+    void refreshSensorRegistry() const;
+    void syncChannelSensorMetadata(int channel) const;
 };
 
 #endif // EXBOARDCONFIGMANAGER_H

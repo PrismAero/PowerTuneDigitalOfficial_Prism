@@ -132,6 +132,7 @@ class DiagnosticsProvider : public QObject
     Q_PROPERTY(QVariantList canFrameBuffer READ canFrameBuffer NOTIFY canFrameBufferChanged)
     Q_PROPERTY(bool canCaptureEnabled READ canCaptureEnabled WRITE setCanCaptureEnabled NOTIFY canCaptureEnabledChanged)
     Q_PROPERTY(QString canIdFilter READ canIdFilter WRITE setCanIdFilter NOTIFY canIdFilterChanged)
+    Q_PROPERTY(bool pageVisible READ pageVisible WRITE setPageVisible NOTIFY pageVisibleChanged)
 
 public:
     /**
@@ -367,6 +368,8 @@ public:
     void setCanCaptureEnabled(bool enabled);
     QString canIdFilter() const;
     void setCanIdFilter(const QString &filter);
+    bool pageVisible() const;
+    Q_INVOKABLE void setPageVisible(bool visible);
 
     Q_INVOKABLE void resetCanErrors();
     Q_INVOKABLE void clearCanFrameBuffer();
@@ -432,6 +435,9 @@ signals:
 
     /// Emitted when CAN ID filter changes
     void canIdFilterChanged();
+
+    /// Emitted when diagnostics page visibility changes
+    void pageVisibleChanged();
 
     /// Emitted when log buffer is modified
     void logChanged();
@@ -523,6 +529,7 @@ private:
     bool m_canCaptureEnabled = false;
     QString m_canIdFilter;
     static constexpr int MAX_CAN_FRAMES = 500;
+    bool m_pageVisible = true;
 
     // Timers
     QTimer m_systemInfoTimer;  // 2-second interval for system info

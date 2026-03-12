@@ -164,16 +164,21 @@ void PropertyRouter::onModelPropertyChanged()
     const SignalPropertyInfo &info = propIt.value();
     QVariant val = model->metaObject()->property(info.propertyIndex).read(model);
     emit valueChanged(info.propertyName, val);
+
+    const QStringList aliases = m_reverseAliases.value(info.propertyName);
+    for (const QString &aliasKey : aliases)
+        emit valueChanged(aliasKey, val);
 }
 
 QVariant PropertyRouter::getValue(const QString &propertyName) const
 {
-    if (!m_propertyModelMap.contains(propertyName)) {
+    const QString resolvedProperty = resolveAlias(propertyName);
+    if (!m_propertyModelMap.contains(resolvedProperty)) {
         qWarning() << "PropertyRouter: Unknown property:" << propertyName;
         return QVariant(0);
     }
 
-    ModelType type = m_propertyModelMap.value(propertyName);
+    ModelType type = m_propertyModelMap.value(resolvedProperty);
     QObject *model = nullptr;
 
     switch (type) {
@@ -226,7 +231,7 @@ QVariant PropertyRouter::getValue(const QString &propertyName) const
         return QVariant(0);
     }
 
-    QVariant val = model->property(propertyName.toLatin1().constData());
+    QVariant val = model->property(resolvedProperty.toLatin1().constData());
     if (!val.isValid())
         return QVariant(0);
     return val;
@@ -234,11 +239,12 @@ QVariant PropertyRouter::getValue(const QString &propertyName) const
 
 QString PropertyRouter::getModelName(const QString &propertyName) const
 {
-    if (!m_propertyModelMap.contains(propertyName)) {
+    const QString resolvedProperty = resolveAlias(propertyName);
+    if (!m_propertyModelMap.contains(resolvedProperty)) {
         return QString();
     }
 
-    ModelType type = m_propertyModelMap.value(propertyName);
+    ModelType type = m_propertyModelMap.value(resolvedProperty);
 
     switch (type) {
     case ModelType::Engine:
@@ -274,12 +280,59 @@ QString PropertyRouter::getModelName(const QString &propertyName) const
 
 bool PropertyRouter::hasProperty(const QString &propertyName) const
 {
-    return m_propertyModelMap.contains(propertyName);
+    return m_propertyModelMap.contains(resolveAlias(propertyName));
 }
 
 QStringList PropertyRouter::availableProperties() const
 {
     QStringList properties = m_propertyModelMap.keys();
+    properties.append(m_aliases.keys());
+    properties.removeDuplicates();
     properties.sort(Qt::CaseInsensitive);
     return properties;
+}
+
+void PropertyRouter::aliasProperty(const QString &sourceKey, const QString &aliasKey)
+{
+    if (sourceKey.isEmpty() || aliasKey.isEmpty() || sourceKey == aliasKey)
+        return;
+
+    if (!m_propertyModelMap.contains(sourceKey)) {
+        qWarning() << "PropertyRouter: Cannot alias unknown source property:" << sourceKey;
+        return;
+    }
+
+    removeAlias(aliasKey);
+
+    m_aliases.insert(aliasKey, sourceKey);
+    QStringList &aliases = m_reverseAliases[sourceKey];
+    if (!aliases.contains(aliasKey))
+        aliases.append(aliasKey);
+}
+
+void PropertyRouter::removeAlias(const QString &aliasKey)
+{
+    const auto it = m_aliases.find(aliasKey);
+    if (it == m_aliases.end())
+        return;
+
+    const QString sourceKey = it.value();
+    m_aliases.erase(it);
+
+    auto reverseIt = m_reverseAliases.find(sourceKey);
+    if (reverseIt != m_reverseAliases.end()) {
+        reverseIt->removeAll(aliasKey);
+        if (reverseIt->isEmpty())
+            m_reverseAliases.erase(reverseIt);
+    }
+}
+
+bool PropertyRouter::isAlias(const QString &key) const
+{
+    return m_aliases.contains(key);
+}
+
+QString PropertyRouter::resolveAlias(const QString &key) const
+{
+    return m_aliases.value(key, key);
 }

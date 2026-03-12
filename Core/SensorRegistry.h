@@ -71,7 +71,7 @@ public:
      * @param source Where this sensor data comes from
      */
     void registerSensor(const QString &key, const QString &displayName, const QString &category, const QString &unit,
-                        SensorSource source);
+                        SensorSource source, int decimals = 2, double maxValue = 100.0, double stepSize = 1.0);
 
     /**
      * @brief Unregister a sensor (e.g., when analog input is unconfigured).
@@ -125,6 +125,11 @@ public:
      * @return Unit string or empty string if not found
      */
     Q_INVOKABLE QString getUnit(const QString &key) const;
+    Q_INVOKABLE int getDecimals(const QString &key) const;
+    Q_INVOKABLE double getMaxValue(const QString &key) const;
+    Q_INVOKABLE double getStepSize(const QString &key) const;
+    Q_INVOKABLE void updateSensorMetadata(const QString &key, const QString &unit, int decimals, double maxValue,
+                                          double stepSize);
 
     /**
      * @brief Register ECU-reported analog voltage channels via daemon UDP.
@@ -221,6 +226,9 @@ private:
         SensorSource source;
         bool active = true;              ///< For DaemonUDP sensors: true if data received recently
         qint64 lastActiveTimestamp = 0;  ///< msecsSinceEpoch of last markCanSensorActive call
+        int decimals = 2;
+        double maxValue = 100.0;
+        double stepSize = 1.0;
     };
 
     QMap<QString, SensorEntry> m_sensors;

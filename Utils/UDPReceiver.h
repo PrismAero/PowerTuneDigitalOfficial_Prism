@@ -11,7 +11,11 @@
 #ifndef UDPRECEIVER_H
 #define UDPRECEIVER_H
 
+#include <QHash>
 #include <QObject>
+#include <QString>
+
+#include <functional>
 
 // * Forward declarations
 class QUdpSocket;
@@ -66,6 +70,9 @@ public:
     );
 
 private:
+    using FloatHandler = std::function<void(float)>;
+    using StringHandler = std::function<void(const QString &)>;
+
     // * Model pointers
     EngineData *m_engine = nullptr;
     VehicleData *m_vehicle = nullptr;
@@ -82,8 +89,12 @@ private:
     QUdpSocket *udpSocket = nullptr;
     SensorRegistry *m_sensorRegistry = nullptr;
 
+    QHash<int, FloatHandler> m_floatDispatchTable;
+    QHash<int, StringHandler> m_stringDispatchTable;
+
     static const QHash<int, QString> s_identToSensorKey;
     static QHash<int, QString> buildIdentToSensorKeyMap();
+    void buildDispatchTables();
 
 public:
     void setSensorRegistry(SensorRegistry *reg) { m_sensorRegistry = reg; }

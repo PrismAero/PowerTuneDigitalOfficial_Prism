@@ -9,8 +9,11 @@
 #include <QNetworkInterface>
 #include <QSettings>
 
+#include <iterator>
+
 static const char *ORG_NAME = "PowerTune";
 static const char *APP_NAME = "PowerTune";
+static constexpr int ECU_DROPDOWN_TO_BACKEND[] = {5, 0, 4};
 
 AppSettings::AppSettings(QObject *parent)
     : QObject(parent),
@@ -71,6 +74,81 @@ void AppSettings::sync()
 {
     QSettings settings(ORG_NAME, APP_NAME, this);
     settings.sync();
+}
+
+void AppSettings::setSpeedUnitIndex(int index)
+{
+    setValue(QStringLiteral("ui/unitSelector1"), index);
+
+    if (!m_settingsData)
+        return;
+
+    switch (index) {
+    case 0:
+        m_settingsData->setspeedunits(QStringLiteral("metric"));
+        break;
+    case 1:
+        m_settingsData->setspeedunits(QStringLiteral("imperial"));
+        break;
+    default:
+        break;
+    }
+}
+
+void AppSettings::setTempUnitIndex(int index)
+{
+    setValue(QStringLiteral("ui/unitSelector"), index);
+
+    if (!m_settingsData)
+        return;
+
+    switch (index) {
+    case 0:
+        m_settingsData->setunits(QStringLiteral("metric"));
+        break;
+    case 1:
+        m_settingsData->setunits(QStringLiteral("imperial"));
+        break;
+    default:
+        break;
+    }
+}
+
+void AppSettings::setPressureUnitIndex(int index)
+{
+    setValue(QStringLiteral("ui/unitSelector2"), index);
+
+    if (!m_settingsData)
+        return;
+
+    switch (index) {
+    case 0:
+        m_settingsData->setpressureunits(QStringLiteral("metric"));
+        break;
+    case 1:
+        m_settingsData->setpressureunits(QStringLiteral("imperial"));
+        break;
+    default:
+        break;
+    }
+}
+
+void AppSettings::setEcuIndex(int index)
+{
+    if (index < 0 || index >= static_cast<int>(std::size(ECU_DROPDOWN_TO_BACKEND)))
+        return;
+
+    const int backendIndex = ECU_DROPDOWN_TO_BACKEND[index];
+    setECU(backendIndex);
+
+    if (m_connectionData)
+        m_connectionData->setecu(backendIndex);
+}
+
+void AppSettings::setMainSpeedSourceIndex(int index)
+{
+    setValue(QStringLiteral("ui/mainSpeedSource"), index);
+    writeStartupSettings(index);
 }
 
 int AppSettings::getBaudRate()

@@ -370,6 +370,34 @@ QString DiagnosticsProvider::displayTime() const
     return QStringLiteral("%1:%2 %3").arg(h).arg(m, 2, 10, QLatin1Char('0')).arg(ampm);
 }
 
+bool DiagnosticsProvider::pageVisible() const
+{
+    return m_pageVisible;
+}
+
+void DiagnosticsProvider::setPageVisible(bool visible)
+{
+    if (m_pageVisible == visible)
+        return;
+
+    m_pageVisible = visible;
+
+    if (m_pageVisible) {
+        if (!m_systemInfoTimer.isActive())
+            m_systemInfoTimer.start(2000);
+        if (!m_liveSensorTimer.isActive())
+            m_liveSensorTimer.start(1000);
+
+        updateSystemInfo();
+        refreshLiveSensorEntries();
+    } else {
+        m_systemInfoTimer.stop();
+        m_liveSensorTimer.stop();
+    }
+
+    emit pageVisibleChanged();
+}
+
 void DiagnosticsProvider::refreshLiveSensorEntries()
 {
     if (!m_sensorRegistry || !m_propertyRouter)
@@ -582,7 +610,7 @@ QVariantList DiagnosticsProvider::getLiveSensorData() const
         }
         entry[QStringLiteral("rawValue")] = rawValue;
         entry[QStringLiteral("calibratedValue")] = rawValue;
-        entry[QStringLiteral("active")] = (qAbs(rawValue) > 0.0001);
+        entry[QStringLiteral("active")] = sensorMap.value(QStringLiteral("active")).toBool();
         result.append(entry);
     }
 

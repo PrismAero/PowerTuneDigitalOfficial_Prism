@@ -112,6 +112,10 @@ public:
      * Useful for sensor picker dropdowns in overlay configuration UI.
      */
     Q_INVOKABLE QStringList availableProperties() const;
+    Q_INVOKABLE void aliasProperty(const QString &sourceKey, const QString &aliasKey);
+    Q_INVOKABLE void removeAlias(const QString &aliasKey);
+    Q_INVOKABLE bool isAlias(const QString &key) const;
+    Q_INVOKABLE QString resolveAlias(const QString &key) const;
 
 signals:
     /**
@@ -183,6 +187,8 @@ private:
 
     // * Maps property names to their owning model
     QHash<QString, ModelType> m_propertyModelMap;
+    QHash<QString, QString> m_aliases;              // aliasKey -> sourceKey
+    QHash<QString, QStringList> m_reverseAliases;   // sourceKey -> alias keys
 
     /**
      * @struct SignalPropertyInfo

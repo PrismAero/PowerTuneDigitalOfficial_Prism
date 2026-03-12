@@ -87,6 +87,10 @@ SettingsPage {
         mainspeedsource.currentIndex = AppSettings.getValue("ui/mainSpeedSource", 0);
         canbitrateselect.currentIndex = AppSettings.getValue("ui/bitrateSelect", 0);
         Vehicle.setTrip(tripmeter.text);
+        AppSettings.setSpeedUnitIndex(unitSelect1.currentIndex);
+        AppSettings.setTempUnitIndex(unitSelect.currentIndex);
+        AppSettings.setPressureUnitIndex(unitSelect2.currentIndex);
+        AppSettings.setMainSpeedSourceIndex(mainspeedsource.currentIndex);
         settingsLoaded = true;
         autoConnect();
     }
@@ -185,15 +189,13 @@ SettingsPage {
                         property bool initialized: false
                         onCurrentIndexChanged: {
                             if (initialized) {
-                                var backendIdx = ecuBackendMap[currentIndex];
-                                AppSettings.setECU(backendIdx);
-                                Connection.setecu(backendIdx);
+                                AppSettings.setEcuIndex(currentIndex);
                             }
                         }
                         Component.onCompleted: {
                             var stored = AppSettings.getECU();
                             currentIndex = ecuDropdownFromBackend(stored);
-                            Connection.setecu(ecuBackendMap[currentIndex]);
+                            AppSettings.setEcuIndex(currentIndex);
                             initialized = true;
                             autoConnect();
                         }
@@ -212,15 +214,10 @@ SettingsPage {
                         width: parent.width
                         height: parent.height
                         model: [Translator.translate("Metric", Settings.language), Translator.translate("Imperial", Settings.language)]
-                        Component.onCompleted: {
-                            Connect.setSpeedUnits(currentIndex);
-                            updateWeightLabel();
-                        }
                         onCurrentIndexChanged: {
-                            Connect.setSpeedUnits(currentIndex);
                             updateWeightLabel();
                             if (settingsLoaded)
-                                AppSettings.setValue("ui/unitSelector1", currentIndex);
+                                AppSettings.setSpeedUnitIndex(currentIndex);
                         }
                     }
                 }
@@ -232,15 +229,10 @@ SettingsPage {
                         width: parent.width
                         height: parent.height
                         model: [Translator.translate("C", Settings.language), Translator.translate("F", Settings.language)]
-                        Component.onCompleted: {
-                            Connect.setUnits(currentIndex);
-                            updateWeightLabel();
-                        }
                         onCurrentIndexChanged: {
-                            Connect.setUnits(currentIndex);
                             updateWeightLabel();
                             if (settingsLoaded)
-                                AppSettings.setValue("ui/unitSelector", currentIndex);
+                                AppSettings.setTempUnitIndex(currentIndex);
                         }
                     }
                 }
@@ -252,11 +244,9 @@ SettingsPage {
                         width: parent.width
                         height: parent.height
                         model: ["kPa", "PSI"]
-                        Component.onCompleted: Connect.setPressUnits(currentIndex)
                         onCurrentIndexChanged: {
-                            Connect.setPressUnits(currentIndex);
                             if (settingsLoaded)
-                                AppSettings.setValue("ui/unitSelector2", currentIndex);
+                                AppSettings.setPressureUnitIndex(currentIndex);
                         }
                     }
                 }
@@ -414,8 +404,7 @@ SettingsPage {
                         model: ["ECU Speed", "LF Wheel", "RF Wheel", "LR Wheel", "RR Wheel", "GPS", "VR Sensor"]
                         onCurrentIndexChanged: {
                             if (settingsLoaded) {
-                                AppSettings.writeStartupSettings(mainspeedsource.currentIndex);
-                                AppSettings.setValue("ui/mainSpeedSource", currentIndex);
+                                AppSettings.setMainSpeedSourceIndex(currentIndex);
                             }
                         }
                     }

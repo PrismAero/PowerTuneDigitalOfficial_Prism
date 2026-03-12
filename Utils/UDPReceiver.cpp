@@ -188,7 +188,9 @@ udpreceiver::udpreceiver(QObject *parent)
       m_sensor(nullptr),
       m_connection(nullptr),
       m_settings(nullptr)
-{}
+{
+    buildDispatchTables();
+}
 
 udpreceiver::udpreceiver(EngineData *engine, VehicleData *vehicle, GPSData *gps, AnalogInputs *analog,
                          DigitalInputs *digital, ExpanderBoardData *expander, ElectricMotorData *motor,
@@ -206,7 +208,447 @@ udpreceiver::udpreceiver(EngineData *engine, VehicleData *vehicle, GPSData *gps,
       m_sensor(sensor),
       m_connection(connection),
       m_settings(settings)
-{}
+{
+    buildDispatchTables();
+}
+
+void udpreceiver::buildDispatchTables()
+{
+    m_floatDispatchTable.clear();
+    m_stringDispatchTable.clear();
+
+    auto registerFloat = [this](int ident, auto modelMember, auto setter) {
+        m_floatDispatchTable.insert(ident, [this, modelMember, setter](float value) {
+            if (auto *model = this->*modelMember)
+                (model->*setter)(value);
+        });
+    };
+
+    auto registerInt = [this](int ident, auto modelMember, auto setter) {
+        m_floatDispatchTable.insert(ident, [this, modelMember, setter](float value) {
+            if (auto *model = this->*modelMember)
+                (model->*setter)(static_cast<int>(value));
+        });
+    };
+
+    auto registerScaledFloat = [this](int ident, auto modelMember, auto setter, float divisor) {
+        m_floatDispatchTable.insert(ident, [this, modelMember, setter, divisor](float value) {
+            if (auto *model = this->*modelMember)
+                (model->*setter)(value / divisor);
+        });
+    };
+
+    auto registerString = [this](int ident, auto modelMember, auto setter) {
+        m_stringDispatchTable.insert(ident, [this, modelMember, setter](const QString &value) {
+            if (auto *model = this->*modelMember)
+                (model->*setter)(value);
+        });
+    };
+
+    auto registerNoopFloat = [this](int ident) { m_floatDispatchTable.insert(ident, [](float) {}); };
+
+    auto registerNoopString = [this](int ident) { m_stringDispatchTable.insert(ident, [](const QString &) {}); };
+
+    // Vehicle data
+    registerFloat(1, &udpreceiver::m_vehicle, &VehicleData::setaccelpedpos);
+    registerFloat(2, &udpreceiver::m_vehicle, &VehicleData::setAccelTimer);
+    registerFloat(3, &udpreceiver::m_vehicle, &VehicleData::setaccelx);
+    registerFloat(4, &udpreceiver::m_vehicle, &VehicleData::setaccely);
+    registerFloat(5, &udpreceiver::m_vehicle, &VehicleData::setaccelz);
+    registerFloat(27, &udpreceiver::m_vehicle, &VehicleData::setclutchswitchstate);
+    registerFloat(28, &udpreceiver::m_vehicle, &VehicleData::setcompass);
+    registerFloat(32, &udpreceiver::m_vehicle, &VehicleData::setdistancetoempty);
+    registerFloat(106, &udpreceiver::m_vehicle, &VehicleData::setGear);
+    registerFloat(107, &udpreceiver::m_vehicle, &VehicleData::setgearswitch);
+    registerFloat(113, &udpreceiver::m_vehicle, &VehicleData::setlowBeam);
+    registerFloat(114, &udpreceiver::m_vehicle, &VehicleData::setgyrox);
+    registerFloat(115, &udpreceiver::m_vehicle, &VehicleData::setgyroy);
+    registerFloat(116, &udpreceiver::m_vehicle, &VehicleData::setgyroz);
+    registerFloat(117, &udpreceiver::m_vehicle, &VehicleData::sethandbrake);
+    registerFloat(118, &udpreceiver::m_vehicle, &VehicleData::sethighbeam);
+    registerFloat(150, &udpreceiver::m_vehicle, &VehicleData::setleftindicator);
+    registerFloat(160, &udpreceiver::m_vehicle, &VehicleData::setMVSS);
+    registerFloat(168, &udpreceiver::m_vehicle, &VehicleData::setOdo);
+    registerFloat(178, &udpreceiver::m_vehicle, &VehicleData::setrightindicator);
+    registerFloat(191, &udpreceiver::m_vehicle, &VehicleData::setFuelLevel);
+    registerFloat(194, &udpreceiver::m_vehicle, &VehicleData::setSteeringWheelAngle);
+    m_floatDispatchTable.insert(199, [this](float value) {
+        if (m_settings && m_settings->ExternalSpeed() == 0) {
+            if (m_vehicle)
+                m_vehicle->setSpeed(value);
+        }
+    });
+    registerFloat(200, &udpreceiver::m_vehicle, &VehicleData::setSVSS);
+    registerFloat(217, &udpreceiver::m_vehicle, &VehicleData::setTrip);
+    registerFloat(222, &udpreceiver::m_vehicle, &VehicleData::setwheeldiff);
+    registerFloat(223, &udpreceiver::m_vehicle, &VehicleData::setwheelslip);
+    registerFloat(224, &udpreceiver::m_vehicle, &VehicleData::setwheelspdftleft);
+    registerFloat(225, &udpreceiver::m_vehicle, &VehicleData::setwheelspdftright);
+    registerFloat(226, &udpreceiver::m_vehicle, &VehicleData::setwheelspdrearleft);
+    registerFloat(227, &udpreceiver::m_vehicle, &VehicleData::setwheelspdrearright);
+    registerFloat(401, &udpreceiver::m_vehicle, &VehicleData::setundrivenavgspeed);
+    registerFloat(402, &udpreceiver::m_vehicle, &VehicleData::setdrivenavgspeed);
+    registerString(826, &udpreceiver::m_vehicle, &VehicleData::setautogear);
+    registerFloat(864, &udpreceiver::m_vehicle, &VehicleData::setTiretempLF);
+    registerFloat(865, &udpreceiver::m_vehicle, &VehicleData::setTiretempRF);
+    registerFloat(866, &udpreceiver::m_vehicle, &VehicleData::setTiretempLR);
+    registerFloat(867, &udpreceiver::m_vehicle, &VehicleData::setTiretempRR);
+    registerFloat(868, &udpreceiver::m_vehicle, &VehicleData::setTirepresLF);
+    registerFloat(869, &udpreceiver::m_vehicle, &VehicleData::setTirepresRF);
+    registerFloat(870, &udpreceiver::m_vehicle, &VehicleData::setTirepresLR);
+    registerFloat(871, &udpreceiver::m_vehicle, &VehicleData::setTirepresRR);
+
+    // Engine, analog, connection, and related data
+    registerFloat(6, &udpreceiver::m_engine, &EngineData::setAFR);
+    registerFloat(7, &udpreceiver::m_engine, &EngineData::setairtempensor2);
+    registerFloat(8, &udpreceiver::m_vehicle, &VehicleData::setambipress);
+    registerFloat(9, &udpreceiver::m_vehicle, &VehicleData::setambitemp);
+    registerFloat(10, &udpreceiver::m_engine, &EngineData::setantilaglauchswitch);
+    registerFloat(11, &udpreceiver::m_engine, &EngineData::setantilaglaunchon);
+    registerFloat(12, &udpreceiver::m_analog, &AnalogInputs::setauxcalc1);
+    registerFloat(13, &udpreceiver::m_analog, &AnalogInputs::setauxcalc2);
+    registerFloat(14, &udpreceiver::m_analog, &AnalogInputs::setauxcalc3);
+    registerFloat(15, &udpreceiver::m_analog, &AnalogInputs::setauxcalc4);
+    registerFloat(16, &udpreceiver::m_engine, &EngineData::setauxrevlimitswitch);
+    registerFloat(17, &udpreceiver::m_engine, &EngineData::setAUXT);
+    registerFloat(18, &udpreceiver::m_engine, &EngineData::setavfueleconomy);
+    registerFloat(19, &udpreceiver::m_engine, &EngineData::setbattlight);
+    registerFloat(20, &udpreceiver::m_engine, &EngineData::setboostcontrol);
+    registerFloat(21, &udpreceiver::m_engine, &EngineData::setBoostDuty);
+    registerFloat(22, &udpreceiver::m_engine, &EngineData::setBoostPres);
+    registerFloat(23, &udpreceiver::m_engine, &EngineData::setBoosttp);
+    registerFloat(24, &udpreceiver::m_engine, &EngineData::setBoostwg);
+    registerNoopFloat(25);
+    registerFloat(26, &udpreceiver::m_engine, &EngineData::setbrakepress);
+    registerFloat(29, &udpreceiver::m_engine, &EngineData::setcoolantpress);
+    registerFloat(30, &udpreceiver::m_engine, &EngineData::setdecelcut);
+    registerFloat(31, &udpreceiver::m_engine, &EngineData::setdiffoiltemp);
+    registerFloat(33, &udpreceiver::m_engine, &EngineData::setDwell);
+    registerFloat(34, &udpreceiver::m_engine, &EngineData::setegt1);
+    registerFloat(35, &udpreceiver::m_engine, &EngineData::setegt2);
+    registerFloat(36, &udpreceiver::m_engine, &EngineData::setegt3);
+    registerFloat(37, &udpreceiver::m_engine, &EngineData::setegt4);
+    registerFloat(38, &udpreceiver::m_engine, &EngineData::setegt5);
+    registerFloat(39, &udpreceiver::m_engine, &EngineData::setegt6);
+    registerFloat(40, &udpreceiver::m_engine, &EngineData::setegt7);
+    registerFloat(41, &udpreceiver::m_engine, &EngineData::setegt8);
+    registerFloat(42, &udpreceiver::m_engine, &EngineData::setegt9);
+    registerFloat(43, &udpreceiver::m_engine, &EngineData::setegt10);
+    registerFloat(44, &udpreceiver::m_engine, &EngineData::setegt11);
+    registerFloat(45, &udpreceiver::m_engine, &EngineData::setegt12);
+    registerFloat(46, &udpreceiver::m_engine, &EngineData::setEngLoad);
+    registerFloat(47, &udpreceiver::m_engine, &EngineData::setexcamangle1);
+    registerFloat(48, &udpreceiver::m_engine, &EngineData::setexcamangle2);
+
+    // Flags
+    registerFloat(49, &udpreceiver::m_flags, &FlagsData::setFlag1);
+    registerFloat(50, &udpreceiver::m_flags, &FlagsData::setFlag2);
+    registerFloat(51, &udpreceiver::m_flags, &FlagsData::setFlag3);
+    registerFloat(52, &udpreceiver::m_flags, &FlagsData::setFlag4);
+    registerFloat(53, &udpreceiver::m_flags, &FlagsData::setFlag5);
+    registerFloat(54, &udpreceiver::m_flags, &FlagsData::setFlag6);
+    registerFloat(55, &udpreceiver::m_flags, &FlagsData::setFlag7);
+    registerFloat(56, &udpreceiver::m_flags, &FlagsData::setFlag8);
+    registerFloat(57, &udpreceiver::m_flags, &FlagsData::setFlag9);
+    registerFloat(58, &udpreceiver::m_flags, &FlagsData::setFlag10);
+    registerFloat(59, &udpreceiver::m_flags, &FlagsData::setFlag11);
+    registerFloat(60, &udpreceiver::m_flags, &FlagsData::setFlag12);
+    registerFloat(61, &udpreceiver::m_flags, &FlagsData::setFlag13);
+    registerFloat(62, &udpreceiver::m_flags, &FlagsData::setFlag14);
+    registerFloat(63, &udpreceiver::m_flags, &FlagsData::setFlag15);
+    registerFloat(64, &udpreceiver::m_flags, &FlagsData::setFlag16);
+    registerFloat(65, &udpreceiver::m_flags, &FlagsData::setFlag17);
+    registerFloat(66, &udpreceiver::m_flags, &FlagsData::setFlag18);
+    registerFloat(67, &udpreceiver::m_flags, &FlagsData::setFlag19);
+    registerFloat(68, &udpreceiver::m_flags, &FlagsData::setFlag20);
+    registerFloat(69, &udpreceiver::m_flags, &FlagsData::setFlag21);
+    registerFloat(70, &udpreceiver::m_flags, &FlagsData::setFlag22);
+    registerFloat(71, &udpreceiver::m_flags, &FlagsData::setFlag23);
+    registerFloat(72, &udpreceiver::m_flags, &FlagsData::setFlag24);
+    registerFloat(73, &udpreceiver::m_flags, &FlagsData::setFlag25);
+
+    registerFloat(81, &udpreceiver::m_engine, &EngineData::setflatshiftstate);
+    registerFloat(82, &udpreceiver::m_engine, &EngineData::setFuelc);
+    registerFloat(83, &udpreceiver::m_engine, &EngineData::setfuelclevel);
+    registerFloat(84, &udpreceiver::m_engine, &EngineData::setfuelcomposition);
+    registerFloat(85, &udpreceiver::m_engine, &EngineData::setfuelconsrate);
+    registerFloat(86, &udpreceiver::m_engine, &EngineData::setfuelcutperc);
+    registerFloat(87, &udpreceiver::m_engine, &EngineData::setfuelflow);
+    registerFloat(88, &udpreceiver::m_engine, &EngineData::setfuelflowdiff);
+    registerFloat(89, &udpreceiver::m_engine, &EngineData::setfuelflowret);
+    registerFloat(100, &udpreceiver::m_engine, &EngineData::setFuelPress);
+    registerFloat(101, &udpreceiver::m_engine, &EngineData::setFueltemp);
+    registerFloat(102, &udpreceiver::m_engine, &EngineData::setfueltrimlongtbank1);
+    registerFloat(103, &udpreceiver::m_engine, &EngineData::setfueltrimlongtbank2);
+    registerFloat(104, &udpreceiver::m_engine, &EngineData::setfueltrimshorttbank1);
+    registerFloat(105, &udpreceiver::m_engine, &EngineData::setfueltrimshorttbank2);
+    registerNoopFloat(108);
+    registerNoopFloat(109);
+    registerNoopFloat(110);
+    registerNoopFloat(111);
+    registerNoopFloat(112);
+    registerFloat(119, &udpreceiver::m_engine, &EngineData::sethomeccounter);
+    registerFloat(120, &udpreceiver::m_engine, &EngineData::setIdleValue);
+    registerFloat(121, &udpreceiver::m_engine, &EngineData::setIgn);
+    registerFloat(122, &udpreceiver::m_engine, &EngineData::setIgn1);
+    registerFloat(123, &udpreceiver::m_engine, &EngineData::setIgn2);
+    registerFloat(124, &udpreceiver::m_engine, &EngineData::setIgn3);
+    registerFloat(125, &udpreceiver::m_engine, &EngineData::setIgn4);
+    registerFloat(126, &udpreceiver::m_engine, &EngineData::setincamangle1);
+    registerFloat(127, &udpreceiver::m_engine, &EngineData::setincamangle2);
+    registerFloat(128, &udpreceiver::m_engine, &EngineData::setInj);
+    registerFloat(129, &udpreceiver::m_engine, &EngineData::setInj1);
+    registerFloat(130, &udpreceiver::m_engine, &EngineData::setInj2);
+    registerFloat(131, &udpreceiver::m_engine, &EngineData::setInj3);
+    registerFloat(132, &udpreceiver::m_engine, &EngineData::setInj4);
+    registerFloat(133, &udpreceiver::m_engine, &EngineData::setInjDuty);
+    registerFloat(134, &udpreceiver::m_engine, &EngineData::setinjms);
+    registerFloat(135, &udpreceiver::m_engine, &EngineData::setIntaketemp);
+    registerFloat(136, &udpreceiver::m_engine, &EngineData::setIscvduty);
+    registerFloat(137, &udpreceiver::m_engine, &EngineData::setKnock);
+    registerFloat(138, &udpreceiver::m_engine, &EngineData::setknocklevlogged1);
+    registerFloat(139, &udpreceiver::m_engine, &EngineData::setknocklevlogged2);
+    registerFloat(140, &udpreceiver::m_engine, &EngineData::setknockretardbank1);
+    registerFloat(141, &udpreceiver::m_engine, &EngineData::setknockretardbank2);
+    registerFloat(142, &udpreceiver::m_engine, &EngineData::setLAMBDA);
+    registerFloat(143, &udpreceiver::m_engine, &EngineData::setlambda2);
+    registerFloat(144, &udpreceiver::m_engine, &EngineData::setlambda3);
+    registerFloat(145, &udpreceiver::m_engine, &EngineData::setlambda4);
+    registerFloat(146, &udpreceiver::m_engine, &EngineData::setLAMBDATarget);
+    registerFloat(147, &udpreceiver::m_engine, &EngineData::setlaunchcontolfuelenrich);
+    registerFloat(148, &udpreceiver::m_engine, &EngineData::setlaunchctrolignretard);
+    registerFloat(149, &udpreceiver::m_engine, &EngineData::setLeadingign);
+    registerFloat(151, &udpreceiver::m_engine, &EngineData::setlimpmode);
+    registerFloat(152, &udpreceiver::m_engine, &EngineData::setMAF1V);
+    registerFloat(153, &udpreceiver::m_engine, &EngineData::setMAF2V);
+    registerFloat(154, &udpreceiver::m_engine, &EngineData::setMAFactivity);
+    registerFloat(155, &udpreceiver::m_engine, &EngineData::setMAP);
+    registerFloat(156, &udpreceiver::m_engine, &EngineData::setMAP2);
+    registerFloat(157, &udpreceiver::m_engine, &EngineData::setmil);
+    registerFloat(158, &udpreceiver::m_engine, &EngineData::setmissccount);
+    registerFloat(159, &udpreceiver::m_engine, &EngineData::setMoilp);
+    registerFloat(161, &udpreceiver::m_engine, &EngineData::setna1);
+    registerFloat(162, &udpreceiver::m_engine, &EngineData::setna2);
+    registerFloat(163, &udpreceiver::m_engine, &EngineData::setnosactive);
+    registerFloat(164, &udpreceiver::m_engine, &EngineData::setnospress);
+    registerFloat(165, &udpreceiver::m_engine, &EngineData::setnosswitch);
+    registerFloat(166, &udpreceiver::m_engine, &EngineData::setO2volt);
+    registerFloat(167, &udpreceiver::m_engine, &EngineData::setO2volt_2);
+    registerFloat(169, &udpreceiver::m_engine, &EngineData::setoilpres);
+    registerFloat(170, &udpreceiver::m_engine, &EngineData::setoiltemp);
+    registerFloat(171, &udpreceiver::m_engine, &EngineData::setpim);
+    registerFloat(173, &udpreceiver::m_engine, &EngineData::setPower);
+    registerFloat(174, &udpreceiver::m_engine, &EngineData::setPressureV);
+    registerFloat(175, &udpreceiver::m_engine, &EngineData::setPrimaryinp);
+    registerFloat(176, &udpreceiver::m_engine, &EngineData::setrallyantilagswitch);
+    registerFloat(179, &udpreceiver::m_engine, &EngineData::setrpm);
+    registerFloat(181, &udpreceiver::m_engine, &EngineData::setSecinjpulse);
+
+    // Analog inputs and user channels
+    registerFloat(182, &udpreceiver::m_analog, &AnalogInputs::setsens1);
+    registerFloat(183, &udpreceiver::m_analog, &AnalogInputs::setsens2);
+    registerFloat(184, &udpreceiver::m_analog, &AnalogInputs::setsens3);
+    registerFloat(185, &udpreceiver::m_analog, &AnalogInputs::setsens4);
+    registerFloat(186, &udpreceiver::m_analog, &AnalogInputs::setsens5);
+    registerFloat(187, &udpreceiver::m_analog, &AnalogInputs::setsens6);
+    registerFloat(188, &udpreceiver::m_analog, &AnalogInputs::setsens7);
+    registerFloat(189, &udpreceiver::m_analog, &AnalogInputs::setsens8);
+    registerFloat(190, &udpreceiver::m_engine, &EngineData::setgenericoutput1);
+    registerFloat(201, &udpreceiver::m_engine, &EngineData::settargetbstlelkpa);
+    registerFloat(202, &udpreceiver::m_engine, &EngineData::setThrottleV);
+    registerFloat(203, &udpreceiver::m_engine, &EngineData::settimeddutyout1);
+    registerFloat(204, &udpreceiver::m_engine, &EngineData::settimeddutyout2);
+    registerFloat(205, &udpreceiver::m_engine, &EngineData::settimeddutyoutputactive);
+    registerFloat(207, &udpreceiver::m_engine, &EngineData::setTorque);
+    registerFloat(208, &udpreceiver::m_engine, &EngineData::settorqueredcutactive);
+    registerFloat(209, &udpreceiver::m_engine, &EngineData::settorqueredlevelactive);
+    registerFloat(210, &udpreceiver::m_engine, &EngineData::setTPS);
+    registerFloat(211, &udpreceiver::m_engine, &EngineData::setTrailingign);
+    registerFloat(212, &udpreceiver::m_engine, &EngineData::settransientthroactive);
+    registerFloat(213, &udpreceiver::m_engine, &EngineData::settransoiltemp);
+    registerFloat(214, &udpreceiver::m_engine, &EngineData::settriggerccounter);
+    registerFloat(215, &udpreceiver::m_engine, &EngineData::settriggersrsinceasthome);
+    registerFloat(216, &udpreceiver::m_engine, &EngineData::setTRIM);
+    registerFloat(218, &udpreceiver::m_engine, &EngineData::setturborpm);
+    registerInt(219, &udpreceiver::m_connection, &ConnectionData::setecu);
+    registerFloat(220, &udpreceiver::m_engine, &EngineData::setwastegatepress);
+    registerFloat(221, &udpreceiver::m_engine, &EngineData::setWatertemp);
+    registerFloat(228, &udpreceiver::m_engine, &EngineData::setBatteryV);
+    registerFloat(229, &udpreceiver::m_engine, &EngineData::setIntakepress);
+    registerFloat(260, &udpreceiver::m_analog, &AnalogInputs::setAnalog0);
+    registerFloat(261, &udpreceiver::m_analog, &AnalogInputs::setAnalog1);
+    registerFloat(262, &udpreceiver::m_analog, &AnalogInputs::setAnalog2);
+    registerFloat(263, &udpreceiver::m_analog, &AnalogInputs::setAnalog3);
+    registerFloat(264, &udpreceiver::m_analog, &AnalogInputs::setAnalog4);
+    registerFloat(265, &udpreceiver::m_analog, &AnalogInputs::setAnalog5);
+    registerFloat(266, &udpreceiver::m_analog, &AnalogInputs::setAnalog6);
+    registerFloat(267, &udpreceiver::m_analog, &AnalogInputs::setAnalog7);
+    registerFloat(268, &udpreceiver::m_analog, &AnalogInputs::setAnalog8);
+    registerFloat(269, &udpreceiver::m_analog, &AnalogInputs::setAnalog9);
+    registerFloat(270, &udpreceiver::m_analog, &AnalogInputs::setAnalog10);
+    registerFloat(271, &udpreceiver::m_engine, &EngineData::setGearOilPress);
+    registerFloat(275, &udpreceiver::m_engine, &EngineData::setInjDuty2);
+    registerFloat(276, &udpreceiver::m_engine, &EngineData::setInjAngle);
+    registerFloat(278, &udpreceiver::m_engine, &EngineData::setBoostPreskpa);
+    registerFloat(279, &udpreceiver::m_digital, &DigitalInputs::setDigitalInput1);
+    registerFloat(280, &udpreceiver::m_digital, &DigitalInputs::setDigitalInput2);
+    registerFloat(281, &udpreceiver::m_digital, &DigitalInputs::setDigitalInput3);
+    registerFloat(282, &udpreceiver::m_digital, &DigitalInputs::setDigitalInput4);
+    registerFloat(283, &udpreceiver::m_digital, &DigitalInputs::setDigitalInput5);
+    registerFloat(284, &udpreceiver::m_digital, &DigitalInputs::setDigitalInput6);
+    registerFloat(285, &udpreceiver::m_digital, &DigitalInputs::setDigitalInput7);
+    registerFloat(286, &udpreceiver::m_analog, &AnalogInputs::setUserchannel1);
+    registerFloat(287, &udpreceiver::m_analog, &AnalogInputs::setUserchannel2);
+    registerFloat(288, &udpreceiver::m_analog, &AnalogInputs::setUserchannel3);
+    registerFloat(289, &udpreceiver::m_analog, &AnalogInputs::setUserchannel4);
+    registerFloat(290, &udpreceiver::m_engine, &EngineData::settractionControl);
+    registerFloat(291, &udpreceiver::m_analog, &AnalogInputs::setUserchannel5);
+    registerFloat(292, &udpreceiver::m_analog, &AnalogInputs::setUserchannel6);
+    registerFloat(293, &udpreceiver::m_analog, &AnalogInputs::setUserchannel7);
+    registerFloat(294, &udpreceiver::m_analog, &AnalogInputs::setUserchannel8);
+    registerFloat(295, &udpreceiver::m_analog, &AnalogInputs::setUserchannel9);
+    registerFloat(296, &udpreceiver::m_analog, &AnalogInputs::setUserchannel10);
+    registerFloat(297, &udpreceiver::m_analog, &AnalogInputs::setUserchannel11);
+    registerFloat(298, &udpreceiver::m_analog, &AnalogInputs::setUserchannel12);
+
+    // Engine 400 series
+    registerFloat(400, &udpreceiver::m_engine, &EngineData::setigncut);
+    registerFloat(403, &udpreceiver::m_engine, &EngineData::setdsettargetslip);
+    registerFloat(404, &udpreceiver::m_engine, &EngineData::settractionctlpowerlimit);
+    registerFloat(405, &udpreceiver::m_engine, &EngineData::setknockallpeak);
+    registerFloat(406, &udpreceiver::m_engine, &EngineData::setknockcorr);
+    registerFloat(407, &udpreceiver::m_engine, &EngineData::setknocklastcyl);
+    registerFloat(408, &udpreceiver::m_engine, &EngineData::settotalfueltrim);
+    registerFloat(409, &udpreceiver::m_engine, &EngineData::settotaligncomp);
+    registerFloat(410, &udpreceiver::m_engine, &EngineData::setegthighest);
+    registerFloat(411, &udpreceiver::m_engine, &EngineData::setcputempecu);
+    registerFloat(412, &udpreceiver::m_engine, &EngineData::seterrorcodecount);
+    registerFloat(413, &udpreceiver::m_engine, &EngineData::setlostsynccount);
+    registerFloat(414, &udpreceiver::m_engine, &EngineData::setegtdiff);
+    registerFloat(415, &udpreceiver::m_engine, &EngineData::setactiveboosttable);
+    registerFloat(416, &udpreceiver::m_engine, &EngineData::setactivetunetable);
+
+    // String payloads
+    registerString(800, &udpreceiver::m_sensor, &SensorData::setSensorString1);
+    registerString(801, &udpreceiver::m_sensor, &SensorData::setSensorString2);
+    registerString(802, &udpreceiver::m_sensor, &SensorData::setSensorString3);
+    registerString(803, &udpreceiver::m_sensor, &SensorData::setSensorString4);
+    registerString(804, &udpreceiver::m_sensor, &SensorData::setSensorString5);
+    registerString(805, &udpreceiver::m_sensor, &SensorData::setSensorString6);
+    registerString(806, &udpreceiver::m_sensor, &SensorData::setSensorString7);
+    registerString(807, &udpreceiver::m_sensor, &SensorData::setSensorString8);
+    registerString(808, &udpreceiver::m_flags, &FlagsData::setFlagString1);
+    registerString(809, &udpreceiver::m_flags, &FlagsData::setFlagString2);
+    registerString(810, &udpreceiver::m_flags, &FlagsData::setFlagString3);
+    registerString(811, &udpreceiver::m_flags, &FlagsData::setFlagString4);
+    registerString(812, &udpreceiver::m_flags, &FlagsData::setFlagString5);
+    registerString(813, &udpreceiver::m_flags, &FlagsData::setFlagString6);
+    registerString(814, &udpreceiver::m_flags, &FlagsData::setFlagString7);
+    registerString(815, &udpreceiver::m_flags, &FlagsData::setFlagString8);
+    registerString(816, &udpreceiver::m_flags, &FlagsData::setFlagString9);
+    registerString(817, &udpreceiver::m_flags, &FlagsData::setFlagString10);
+    registerString(818, &udpreceiver::m_flags, &FlagsData::setFlagString11);
+    registerString(819, &udpreceiver::m_flags, &FlagsData::setFlagString12);
+    registerString(820, &udpreceiver::m_flags, &FlagsData::setFlagString13);
+    registerString(821, &udpreceiver::m_flags, &FlagsData::setFlagString14);
+    registerString(822, &udpreceiver::m_flags, &FlagsData::setFlagString15);
+    registerString(823, &udpreceiver::m_flags, &FlagsData::setFlagString16);
+    registerNoopString(824);
+    registerString(825, &udpreceiver::m_connection, &ConnectionData::setError);
+
+    // Remaining engine and motor data
+    registerInt(827, &udpreceiver::m_engine, &EngineData::setoilpressurelamp);
+    registerInt(828, &udpreceiver::m_engine, &EngineData::setovertempalarm);
+    registerInt(829, &udpreceiver::m_engine, &EngineData::setalternatorfail);
+    registerFloat(830, &udpreceiver::m_engine, &EngineData::setturborpm2);
+    registerInt(831, &udpreceiver::m_engine, &EngineData::setAuxTemp1);
+    registerFloat(832, &udpreceiver::m_motor, &ElectricMotorData::setIGBTPhaseATemp);
+    registerFloat(833, &udpreceiver::m_motor, &ElectricMotorData::setIGBTPhaseBTemp);
+    registerFloat(834, &udpreceiver::m_motor, &ElectricMotorData::setIGBTPhaseCTemp);
+    registerFloat(835, &udpreceiver::m_motor, &ElectricMotorData::setGateDriverTemp);
+    registerFloat(836, &udpreceiver::m_motor, &ElectricMotorData::setControlBoardTemp);
+    registerFloat(837, &udpreceiver::m_motor, &ElectricMotorData::setRtdTemp1);
+    registerFloat(838, &udpreceiver::m_motor, &ElectricMotorData::setRtdTemp2);
+    registerFloat(839, &udpreceiver::m_motor, &ElectricMotorData::setRtdTemp3);
+    registerFloat(840, &udpreceiver::m_motor, &ElectricMotorData::setRtdTemp4);
+    registerFloat(841, &udpreceiver::m_motor, &ElectricMotorData::setRtdTemp5);
+    registerFloat(842, &udpreceiver::m_motor, &ElectricMotorData::setEMotorTemperature);
+    registerFloat(843, &udpreceiver::m_motor, &ElectricMotorData::setTorqueShudder);
+    registerFloat(844, &udpreceiver::m_motor, &ElectricMotorData::setDigInput1FowardSw);
+    registerFloat(845, &udpreceiver::m_motor, &ElectricMotorData::setDigInput2ReverseSw);
+    registerFloat(846, &udpreceiver::m_motor, &ElectricMotorData::setDigInput3BrakeSw);
+    registerFloat(847, &udpreceiver::m_motor, &ElectricMotorData::setDigInput4RegenDisableSw);
+    registerFloat(848, &udpreceiver::m_motor, &ElectricMotorData::setDigInput5IgnSw);
+    registerFloat(849, &udpreceiver::m_motor, &ElectricMotorData::setDigInput6StartSw);
+    registerFloat(850, &udpreceiver::m_motor, &ElectricMotorData::setDigInput7Bool);
+    registerFloat(851, &udpreceiver::m_motor, &ElectricMotorData::setDigInput8Bool);
+    registerFloat(852, &udpreceiver::m_motor, &ElectricMotorData::setEMotorAngle);
+    registerFloat(853, &udpreceiver::m_motor, &ElectricMotorData::setEMotorSpeed);
+    registerFloat(854, &udpreceiver::m_motor, &ElectricMotorData::setElectricalOutFreq);
+    registerFloat(855, &udpreceiver::m_motor, &ElectricMotorData::setDeltaResolverFiltered);
+    registerFloat(856, &udpreceiver::m_motor, &ElectricMotorData::setPhaseACurrent);
+    registerFloat(857, &udpreceiver::m_motor, &ElectricMotorData::setPhaseBCurrent);
+    registerFloat(858, &udpreceiver::m_motor, &ElectricMotorData::setPhaseCCurrent);
+    registerFloat(859, &udpreceiver::m_motor, &ElectricMotorData::setDCBusCurrent);
+    registerFloat(860, &udpreceiver::m_motor, &ElectricMotorData::setDCBusVoltage);
+    registerFloat(861, &udpreceiver::m_motor, &ElectricMotorData::setOutputVoltage);
+    registerFloat(862, &udpreceiver::m_motor, &ElectricMotorData::setVABvdVoltage);
+    registerFloat(863, &udpreceiver::m_motor, &ElectricMotorData::setVBCvqVoltage);
+    registerFloat(900, &udpreceiver::m_digital, &DigitalInputs::setEXDigitalInput1);
+    registerFloat(901, &udpreceiver::m_digital, &DigitalInputs::setEXDigitalInput2);
+    registerFloat(902, &udpreceiver::m_digital, &DigitalInputs::setEXDigitalInput3);
+    registerFloat(903, &udpreceiver::m_digital, &DigitalInputs::setEXDigitalInput4);
+    registerFloat(904, &udpreceiver::m_digital, &DigitalInputs::setEXDigitalInput5);
+    registerFloat(905, &udpreceiver::m_digital, &DigitalInputs::setEXDigitalInput6);
+    registerFloat(906, &udpreceiver::m_digital, &DigitalInputs::setEXDigitalInput7);
+    registerFloat(907, &udpreceiver::m_digital, &DigitalInputs::setEXDigitalInput8);
+    registerScaledFloat(908, &udpreceiver::m_expander, &ExpanderBoardData::setEXAnalogInput0, 1000.0f);
+    registerScaledFloat(909, &udpreceiver::m_expander, &ExpanderBoardData::setEXAnalogInput1, 1000.0f);
+    registerScaledFloat(910, &udpreceiver::m_expander, &ExpanderBoardData::setEXAnalogInput2, 1000.0f);
+    registerScaledFloat(911, &udpreceiver::m_expander, &ExpanderBoardData::setEXAnalogInput3, 1000.0f);
+    registerScaledFloat(912, &udpreceiver::m_expander, &ExpanderBoardData::setEXAnalogInput4, 1000.0f);
+    registerScaledFloat(913, &udpreceiver::m_expander, &ExpanderBoardData::setEXAnalogInput5, 1000.0f);
+    registerScaledFloat(914, &udpreceiver::m_expander, &ExpanderBoardData::setEXAnalogInput6, 1000.0f);
+    registerScaledFloat(915, &udpreceiver::m_expander, &ExpanderBoardData::setEXAnalogInput7, 1000.0f);
+    registerFloat(916, &udpreceiver::m_engine, &EngineData::setAFRcyl1);
+    registerFloat(917, &udpreceiver::m_engine, &EngineData::setAFRcyl2);
+    registerFloat(918, &udpreceiver::m_engine, &EngineData::setAFRcyl3);
+    registerFloat(919, &udpreceiver::m_engine, &EngineData::setAFRcyl4);
+    registerFloat(920, &udpreceiver::m_engine, &EngineData::setAFRcyl5);
+    registerFloat(921, &udpreceiver::m_engine, &EngineData::setAFRcyl6);
+    registerFloat(922, &udpreceiver::m_engine, &EngineData::setAFRcyl7);
+    registerFloat(923, &udpreceiver::m_engine, &EngineData::setAFRcyl8);
+    registerFloat(925, &udpreceiver::m_engine, &EngineData::setAFRLEFTBANKTARGET);
+    registerFloat(926, &udpreceiver::m_engine, &EngineData::setAFRRIGHTBANKTARGET);
+    registerFloat(927, &udpreceiver::m_engine, &EngineData::setAFRLEFTBANKACTUAL);
+    registerFloat(928, &udpreceiver::m_engine, &EngineData::setAFRRIGHTBANKACTUAL);
+    registerFloat(929, &udpreceiver::m_engine, &EngineData::setBOOSTOFFSET);
+    registerFloat(930, &udpreceiver::m_engine, &EngineData::setREVLIM3STEP);
+    registerFloat(931, &udpreceiver::m_engine, &EngineData::setREVLIM2STEP);
+    registerFloat(932, &udpreceiver::m_engine, &EngineData::setREVLIMGIGHSIDE);
+    registerFloat(933, &udpreceiver::m_engine, &EngineData::setREVLIMBOURNOUT);
+    registerFloat(934, &udpreceiver::m_engine, &EngineData::setLEFTBANKO2CORR);
+    registerFloat(935, &udpreceiver::m_engine, &EngineData::setRIGHTBANKO2CORR);
+    registerFloat(936, &udpreceiver::m_engine, &EngineData::setTRACTIONCTRLOFFSET);
+    registerFloat(937, &udpreceiver::m_engine, &EngineData::setDRIVESHAFTOFFSET);
+    registerFloat(938, &udpreceiver::m_engine, &EngineData::setTCCOMMAND);
+    registerFloat(939, &udpreceiver::m_engine, &EngineData::setFSLCOMMAND);
+    registerFloat(940, &udpreceiver::m_engine, &EngineData::setFSLINDEX);
+    registerFloat(941, &udpreceiver::m_engine, &EngineData::setPANVAC);
+    registerFloat(942, &udpreceiver::m_engine, &EngineData::setCyl1_O2_Corr);
+    registerFloat(943, &udpreceiver::m_engine, &EngineData::setCyl2_O2_Corr);
+    registerFloat(944, &udpreceiver::m_engine, &EngineData::setCyl3_O2_Corr);
+    registerFloat(945, &udpreceiver::m_engine, &EngineData::setCyl4_O2_Corr);
+    registerFloat(946, &udpreceiver::m_engine, &EngineData::setCyl5_O2_Corr);
+    registerFloat(947, &udpreceiver::m_engine, &EngineData::setCyl6_O2_Corr);
+    registerFloat(948, &udpreceiver::m_engine, &EngineData::setCyl7_O2_Corr);
+    registerFloat(949, &udpreceiver::m_engine, &EngineData::setCyl8_O2_Corr);
+    registerInt(950, &udpreceiver::m_engine, &EngineData::setRotaryTrimpot1);
+    registerInt(951, &udpreceiver::m_engine, &EngineData::setRotaryTrimpot2);
+    registerInt(952, &udpreceiver::m_engine, &EngineData::setRotaryTrimpot3);
+    registerInt(953, &udpreceiver::m_engine, &EngineData::setCalibrationSelect);
+    registerFloat(999, &udpreceiver::m_digital, &DigitalInputs::setfrequencyDIEX1);
+}
 
 void udpreceiver::startreceiver()
 {
@@ -245,1630 +687,17 @@ void udpreceiver::processPendingDatagrams()
         QStringList list = raw.split(",");
         if (list.size() < 2)
             continue;
-        int ident = list[0].toInt();
-        float Value = list[1].toFloat();
+        const int ident = list[0].toInt();
+        const QString &rawValue = list[1];
+        const float value = rawValue.toFloat();
 
-        switch (ident) {
-        // * ==================== VEHICLE DATA (1-5, 27-28, 32, 106-107, 113-119, 150, 160, 168, 178, 194, 199-200, 217,
-        // 222-227, 401-402, 826, 864-871) ====================
-        case 1:
-            if (m_vehicle)
-                m_vehicle->setaccelpedpos(Value);
-            break;
-        case 2:
-            if (m_vehicle)
-                m_vehicle->setAccelTimer(Value);
-            break;
-        case 3:
-            if (m_vehicle)
-                m_vehicle->setaccelx(Value);
-            break;
-        case 4:
-            if (m_vehicle)
-                m_vehicle->setaccely(Value);
-            break;
-        case 5:
-            if (m_vehicle)
-                m_vehicle->setaccelz(Value);
-            break;
-        case 27:
-            if (m_vehicle)
-                m_vehicle->setclutchswitchstate(Value);
-            break;
-        case 28:
-            if (m_vehicle)
-                m_vehicle->setcompass(Value);
-            break;
-        case 32:
-            if (m_vehicle)
-                m_vehicle->setdistancetoempty(Value);
-            break;
-        case 106:
-            if (m_vehicle)
-                m_vehicle->setGear(Value);
-            break;
-        case 107:
-            if (m_vehicle)
-                m_vehicle->setgearswitch(Value);
-            break;
-        case 113:
-            if (m_vehicle)
-                m_vehicle->setlowBeam(Value);
-            break;
-        case 114:
-            if (m_vehicle)
-                m_vehicle->setgyrox(Value);
-            break;
-        case 115:
-            if (m_vehicle)
-                m_vehicle->setgyroy(Value);
-            break;
-        case 116:
-            if (m_vehicle)
-                m_vehicle->setgyroz(Value);
-            break;
-        case 117:
-            if (m_vehicle)
-                m_vehicle->sethandbrake(Value);
-            break;
-        case 118:
-            if (m_vehicle)
-                m_vehicle->sethighbeam(Value);
-            break;
-        case 150:
-            if (m_vehicle)
-                m_vehicle->setleftindicator(Value);
-            break;
-        case 160:
-            if (m_vehicle)
-                m_vehicle->setMVSS(Value);
-            break;
-        case 168:
-            if (m_vehicle)
-                m_vehicle->setOdo(Value);
-            break;
-        case 178:
-            if (m_vehicle)
-                m_vehicle->setrightindicator(Value);
-            break;
-        case 191:
-            if (m_vehicle)
-                m_vehicle->setFuelLevel(Value);
-            break;
-        case 194:
-            if (m_vehicle)
-                m_vehicle->setSteeringWheelAngle(Value);
-            break;
-        case 199:
-            // ! Speed has conditional logic based on ExternalSpeed setting
-            if (m_settings && m_settings->ExternalSpeed() == 0) {
-                if (m_vehicle)
-                    m_vehicle->setSpeed(Value);
-            }
-            break;
-        case 200:
-            if (m_vehicle)
-                m_vehicle->setSVSS(Value);
-            break;
-        case 217:
-            if (m_vehicle)
-                m_vehicle->setTrip(Value);
-            break;
-        case 222:
-            if (m_vehicle)
-                m_vehicle->setwheeldiff(Value);
-            break;
-        case 223:
-            if (m_vehicle)
-                m_vehicle->setwheelslip(Value);
-            break;
-        case 224:
-            if (m_vehicle)
-                m_vehicle->setwheelspdftleft(Value);
-            break;
-        case 225:
-            if (m_vehicle)
-                m_vehicle->setwheelspdftright(Value);
-            break;
-        case 226:
-            if (m_vehicle)
-                m_vehicle->setwheelspdrearleft(Value);
-            break;
-        case 227:
-            if (m_vehicle)
-                m_vehicle->setwheelspdrearright(Value);
-            break;
-        case 401:
-            if (m_vehicle)
-                m_vehicle->setundrivenavgspeed(Value);
-            break;
-        case 402:
-            if (m_vehicle)
-                m_vehicle->setdrivenavgspeed(Value);
-            break;
-        case 826:
-            if (m_vehicle)
-                m_vehicle->setautogear(list[1]);
-            break;
-        case 864:
-            if (m_vehicle)
-                m_vehicle->setTiretempLF(Value);
-            break;
-        case 865:
-            if (m_vehicle)
-                m_vehicle->setTiretempRF(Value);
-            break;
-        case 866:
-            if (m_vehicle)
-                m_vehicle->setTiretempLR(Value);
-            break;
-        case 867:
-            if (m_vehicle)
-                m_vehicle->setTiretempRR(Value);
-            break;
-        case 868:
-            if (m_vehicle)
-                m_vehicle->setTirepresLF(Value);
-            break;
-        case 869:
-            if (m_vehicle)
-                m_vehicle->setTirepresRF(Value);
-            break;
-        case 870:
-            if (m_vehicle)
-                m_vehicle->setTirepresLR(Value);
-            break;
-        case 871:
-            if (m_vehicle)
-                m_vehicle->setTirepresRR(Value);
-            break;
-
-        // * ==================== ENGINE DATA ====================
-        case 6:
-            if (m_engine)
-                m_engine->setAFR(Value);
-            break;
-        case 7:
-            if (m_engine)
-                m_engine->setairtempensor2(Value);
-            break;
-        case 8:
-            if (m_vehicle)
-                m_vehicle->setambipress(Value);
-            break;
-        case 9:
-            if (m_vehicle)
-                m_vehicle->setambitemp(Value);
-            break;
-        case 10:
-            if (m_engine)
-                m_engine->setantilaglauchswitch(Value);
-            break;
-        case 11:
-            if (m_engine)
-                m_engine->setantilaglaunchon(Value);
-            break;
-        case 12:
-            if (m_analog)
-                m_analog->setauxcalc1(Value);
-            break;
-        case 13:
-            if (m_analog)
-                m_analog->setauxcalc2(Value);
-            break;
-        case 14:
-            if (m_analog)
-                m_analog->setauxcalc3(Value);
-            break;
-        case 15:
-            if (m_analog)
-                m_analog->setauxcalc4(Value);
-            break;
-        case 16:
-            if (m_engine)
-                m_engine->setauxrevlimitswitch(Value);
-            break;
-        case 17:
-            if (m_engine)
-                m_engine->setAUXT(Value);
-            break;
-        case 18:
-            if (m_engine)
-                m_engine->setavfueleconomy(Value);
-            break;
-        case 19:
-            if (m_engine)
-                m_engine->setbattlight(Value);
-            break;
-        case 20:
-            if (m_engine)
-                m_engine->setboostcontrol(Value);
-            break;
-        case 21:
-            if (m_engine)
-                m_engine->setBoostDuty(Value);
-            break;
-        case 22:
-            if (m_engine)
-                m_engine->setBoostPres(Value);
-            break;
-        case 23:
-            if (m_engine)
-                m_engine->setBoosttp(Value);
-            break;
-        case 24:
-            if (m_engine)
-                m_engine->setBoostwg(Value);
-            break;
-        case 25:
-            // ! Brake pedal state - currently not implemented
-            break;
-        case 26:
-            if (m_engine)
-                m_engine->setbrakepress(Value);
-            break;
-        case 29:
-            if (m_engine)
-                m_engine->setcoolantpress(Value);
-            break;
-        case 30:
-            if (m_engine)
-                m_engine->setdecelcut(Value);
-            break;
-        case 31:
-            if (m_engine)
-                m_engine->setdiffoiltemp(Value);
-            break;
-        case 33:
-            if (m_engine)
-                m_engine->setDwell(Value);
-            break;
-        case 34:
-            if (m_engine)
-                m_engine->setegt1(Value);
-            break;
-        case 35:
-            if (m_engine)
-                m_engine->setegt2(Value);
-            break;
-        case 36:
-            if (m_engine)
-                m_engine->setegt3(Value);
-            break;
-        case 37:
-            if (m_engine)
-                m_engine->setegt4(Value);
-            break;
-        case 38:
-            if (m_engine)
-                m_engine->setegt5(Value);
-            break;
-        case 39:
-            if (m_engine)
-                m_engine->setegt6(Value);
-            break;
-        case 40:
-            if (m_engine)
-                m_engine->setegt7(Value);
-            break;
-        case 41:
-            if (m_engine)
-                m_engine->setegt8(Value);
-            break;
-        case 42:
-            if (m_engine)
-                m_engine->setegt9(Value);
-            break;
-        case 43:
-            if (m_engine)
-                m_engine->setegt10(Value);
-            break;
-        case 44:
-            if (m_engine)
-                m_engine->setegt11(Value);
-            break;
-        case 45:
-            if (m_engine)
-                m_engine->setegt12(Value);
-            break;
-        case 46:
-            if (m_engine)
-                m_engine->setEngLoad(Value);
-            break;
-        case 47:
-            if (m_engine)
-                m_engine->setexcamangle1(Value);
-            break;
-        case 48:
-            if (m_engine)
-                m_engine->setexcamangle2(Value);
-            break;
-
-        // * ==================== FLAGS DATA (49-73) ====================
-        case 49:
-            if (m_flags)
-                m_flags->setFlag1(Value);
-            break;
-        case 50:
-            if (m_flags)
-                m_flags->setFlag2(Value);
-            break;
-        case 51:
-            if (m_flags)
-                m_flags->setFlag3(Value);
-            break;
-        case 52:
-            if (m_flags)
-                m_flags->setFlag4(Value);
-            break;
-        case 53:
-            if (m_flags)
-                m_flags->setFlag5(Value);
-            break;
-        case 54:
-            if (m_flags)
-                m_flags->setFlag6(Value);
-            break;
-        case 55:
-            if (m_flags)
-                m_flags->setFlag7(Value);
-            break;
-        case 56:
-            if (m_flags)
-                m_flags->setFlag8(Value);
-            break;
-        case 57:
-            if (m_flags)
-                m_flags->setFlag9(Value);
-            break;
-        case 58:
-            if (m_flags)
-                m_flags->setFlag10(Value);
-            break;
-        case 59:
-            if (m_flags)
-                m_flags->setFlag11(Value);
-            break;
-        case 60:
-            if (m_flags)
-                m_flags->setFlag12(Value);
-            break;
-        case 61:
-            if (m_flags)
-                m_flags->setFlag13(Value);
-            break;
-        case 62:
-            if (m_flags)
-                m_flags->setFlag14(Value);
-            break;
-        case 63:
-            if (m_flags)
-                m_flags->setFlag15(Value);
-            break;
-        case 64:
-            if (m_flags)
-                m_flags->setFlag16(Value);
-            break;
-        case 65:
-            if (m_flags)
-                m_flags->setFlag17(Value);
-            break;
-        case 66:
-            if (m_flags)
-                m_flags->setFlag18(Value);
-            break;
-        case 67:
-            if (m_flags)
-                m_flags->setFlag19(Value);
-            break;
-        case 68:
-            if (m_flags)
-                m_flags->setFlag20(Value);
-            break;
-        case 69:
-            if (m_flags)
-                m_flags->setFlag21(Value);
-            break;
-        case 70:
-            if (m_flags)
-                m_flags->setFlag22(Value);
-            break;
-        case 71:
-            if (m_flags)
-                m_flags->setFlag23(Value);
-            break;
-        case 72:
-            if (m_flags)
-                m_flags->setFlag24(Value);
-            break;
-        case 73:
-            if (m_flags)
-                m_flags->setFlag25(Value);
-            break;
-
-        // * ==================== RESERVED/UNIMPLEMENTED (74-80) ====================
-        case 74:
-        case 75:
-        case 76:
-        case 77:
-        case 78:
-        case 79:
-        case 80:
-            // ! Ignition Angle / Torque Management - not yet implemented
-            break;
-
-        // * ==================== ENGINE DATA CONTINUED ====================
-        case 81:
-            if (m_engine)
-                m_engine->setflatshiftstate(Value);
-            break;
-        case 82:
-            if (m_engine)
-                m_engine->setFuelc(Value);
-            break;
-        case 83:
-            if (m_engine)
-                m_engine->setfuelclevel(Value);
-            break;
-        case 84:
-            if (m_engine)
-                m_engine->setfuelcomposition(Value);
-            break;
-        case 85:
-            if (m_engine)
-                m_engine->setfuelconsrate(Value);
-            break;
-        case 86:
-            if (m_engine)
-                m_engine->setfuelcutperc(Value);
-            break;
-        case 87:
-            if (m_engine)
-                m_engine->setfuelflow(Value);
-            break;
-        case 88:
-            if (m_engine)
-                m_engine->setfuelflowdiff(Value);
-            break;
-        case 89:
-            if (m_engine)
-                m_engine->setfuelflowret(Value);
-            break;
-        case 100:
-            if (m_engine)
-                m_engine->setFuelPress(Value);
-            break;
-        case 101:
-            if (m_engine)
-                m_engine->setFueltemp(Value);
-            break;
-        case 102:
-            if (m_engine)
-                m_engine->setfueltrimlongtbank1(Value);
-            break;
-        case 103:
-            if (m_engine)
-                m_engine->setfueltrimlongtbank2(Value);
-            break;
-        case 104:
-            if (m_engine)
-                m_engine->setfueltrimshorttbank1(Value);
-            break;
-        case 105:
-            if (m_engine)
-                m_engine->setfueltrimshorttbank2(Value);
-            break;
-
-        // * ==================== GPS DATA (108-112) ====================
-        case 108:
-            // ! GPS Altitude - commented out in original
-            break;
-        case 109:
-            // ! GPS Latitude - commented out in original
-            break;
-        case 110:
-            // ! GPS Longitude - commented out in original
-            break;
-        case 111:
-            // ! GPS Speed - disabled for consistency with other GPS idents
-            break;
-        case 112:
-            // ! GPS Time - commented out in original
-            break;
-
-        // * ==================== ENGINE DATA CONTINUED ====================
-        case 119:
-            if (m_engine)
-                m_engine->sethomeccounter(Value);
-            break;
-        case 120:
-            if (m_engine)
-                m_engine->setIdleValue(Value);
-            break;
-        case 121:
-            if (m_engine)
-                m_engine->setIgn(Value);
-            break;
-        case 122:
-            if (m_engine)
-                m_engine->setIgn1(Value);
-            break;
-        case 123:
-            if (m_engine)
-                m_engine->setIgn2(Value);
-            break;
-        case 124:
-            if (m_engine)
-                m_engine->setIgn3(Value);
-            break;
-        case 125:
-            if (m_engine)
-                m_engine->setIgn4(Value);
-            break;
-        case 126:
-            if (m_engine)
-                m_engine->setincamangle1(Value);
-            break;
-        case 127:
-            if (m_engine)
-                m_engine->setincamangle2(Value);
-            break;
-        case 128:
-            if (m_engine)
-                m_engine->setInj(Value);
-            break;
-        case 129:
-            if (m_engine)
-                m_engine->setInj1(Value);
-            break;
-        case 130:
-            if (m_engine)
-                m_engine->setInj2(Value);
-            break;
-        case 131:
-            if (m_engine)
-                m_engine->setInj3(Value);
-            break;
-        case 132:
-            if (m_engine)
-                m_engine->setInj4(Value);
-            break;
-        case 133:
-            if (m_engine)
-                m_engine->setInjDuty(Value);
-            break;
-        case 134:
-            if (m_engine)
-                m_engine->setinjms(Value);
-            break;
-        case 135:
-            if (m_engine)
-                m_engine->setIntaketemp(Value);
-            break;
-        case 136:
-            if (m_engine)
-                m_engine->setIscvduty(Value);
-            break;
-        case 137:
-            if (m_engine)
-                m_engine->setKnock(Value);
-            break;
-        case 138:
-            if (m_engine)
-                m_engine->setknocklevlogged1(Value);
-            break;
-        case 139:
-            if (m_engine)
-                m_engine->setknocklevlogged2(Value);
-            break;
-        case 140:
-            if (m_engine)
-                m_engine->setknockretardbank1(Value);
-            break;
-        case 141:
-            if (m_engine)
-                m_engine->setknockretardbank2(Value);
-            break;
-        case 142:
-            if (m_engine)
-                m_engine->setLAMBDA(Value);
-            break;
-        case 143:
-            if (m_engine)
-                m_engine->setlambda2(Value);
-            break;
-        case 144:
-            if (m_engine)
-                m_engine->setlambda3(Value);
-            break;
-        case 145:
-            if (m_engine)
-                m_engine->setlambda4(Value);
-            break;
-        case 146:
-            if (m_engine)
-                m_engine->setLAMBDATarget(Value);
-            break;
-        case 147:
-            if (m_engine)
-                m_engine->setlaunchcontolfuelenrich(Value);
-            break;
-        case 148:
-            if (m_engine)
-                m_engine->setlaunchctrolignretard(Value);
-            break;
-        case 149:
-            if (m_engine)
-                m_engine->setLeadingign(Value);
-            break;
-        case 151:
-            if (m_engine)
-                m_engine->setlimpmode(Value);
-            break;
-        case 152:
-            if (m_engine)
-                m_engine->setMAF1V(Value);
-            break;
-        case 153:
-            if (m_engine)
-                m_engine->setMAF2V(Value);
-            break;
-        case 154:
-            if (m_engine)
-                m_engine->setMAFactivity(Value);
-            break;
-        case 155:
-            if (m_engine)
-                m_engine->setMAP(Value);
-            break;
-        case 156:
-            if (m_engine)
-                m_engine->setMAP2(Value);
-            break;
-        case 157:
-            if (m_engine)
-                m_engine->setmil(Value);
-            break;
-        case 158:
-            if (m_engine)
-                m_engine->setmissccount(Value);
-            break;
-        case 159:
-            if (m_engine)
-                m_engine->setMoilp(Value);
-            break;
-        case 161:
-            if (m_engine)
-                m_engine->setna1(Value);
-            break;
-        case 162:
-            if (m_engine)
-                m_engine->setna2(Value);
-            break;
-        case 163:
-            if (m_engine)
-                m_engine->setnosactive(Value);
-            break;
-        case 164:
-            if (m_engine)
-                m_engine->setnospress(Value);
-            break;
-        case 165:
-            if (m_engine)
-                m_engine->setnosswitch(Value);
-            break;
-        case 166:
-            if (m_engine)
-                m_engine->setO2volt(Value);
-            break;
-        case 167:
-            if (m_engine)
-                m_engine->setO2volt_2(Value);
-            break;
-        case 169:
-            if (m_engine)
-                m_engine->setoilpres(Value);
-            break;
-        case 170:
-            if (m_engine)
-                m_engine->setoiltemp(Value);
-            break;
-        case 171:
-            if (m_engine)
-                m_engine->setpim(Value);
-            break;
-        case 172:
-            // ! Platform - commented out in original
-            break;
-        case 173:
-            if (m_engine)
-                m_engine->setPower(Value);
-            break;
-        case 174:
-            if (m_engine)
-                m_engine->setPressureV(Value);
-            break;
-        case 175:
-            if (m_engine)
-                m_engine->setPrimaryinp(Value);
-            break;
-        case 176:
-            if (m_engine)
-                m_engine->setrallyantilagswitch(Value);
-            break;
-        case 177:
-            // ! RecvData - commented out in original
-            break;
-        case 179:
-            if (m_engine)
-                m_engine->setrpm(Value);
-            break;
-        case 180:
-            // ! RunStat - commented out in original
-            break;
-        case 181:
-            if (m_engine)
-                m_engine->setSecinjpulse(Value);
-            break;
-
-        // * ==================== ANALOG INPUTS / SENSOR DATA (182-189) ====================
-        case 182:
-            if (m_analog)
-                m_analog->setsens1(Value);
-            break;
-        case 183:
-            if (m_analog)
-                m_analog->setsens2(Value);
-            break;
-        case 184:
-            if (m_analog)
-                m_analog->setsens3(Value);
-            break;
-        case 185:
-            if (m_analog)
-                m_analog->setsens4(Value);
-            break;
-        case 186:
-            if (m_analog)
-                m_analog->setsens5(Value);
-            break;
-        case 187:
-            if (m_analog)
-                m_analog->setsens6(Value);
-            break;
-        case 188:
-            if (m_analog)
-                m_analog->setsens7(Value);
-            break;
-        case 189:
-            if (m_analog)
-                m_analog->setsens8(Value);
-            break;
-
-        // * ==================== ENGINE DATA CONTINUED ====================
-        case 190:
-            if (m_engine)
-                m_engine->setgenericoutput1(Value);
-            break;
-        case 192:
-        case 193:
-            // ! Turbo Timer - not yet implemented
-            break;
-        case 195:
-            // ! Driveshaft RPM - not yet implemented
-            break;
-        case 196:
-        case 197:
-        case 198:
-            // ! NOS Pressure Sensors 2-4 - not yet implemented
-            break;
-        case 201:
-            if (m_engine)
-                m_engine->settargetbstlelkpa(Value);
-            break;
-        case 202:
-            if (m_engine)
-                m_engine->setThrottleV(Value);
-            break;
-        case 203:
-            if (m_engine)
-                m_engine->settimeddutyout1(Value);
-            break;
-        case 204:
-            if (m_engine)
-                m_engine->settimeddutyout2(Value);
-            break;
-        case 205:
-            if (m_engine)
-                m_engine->settimeddutyoutputactive(Value);
-            break;
-        case 206:
-            // ! TimeoutStat - commented out in original
-            break;
-        case 207:
-            if (m_engine)
-                m_engine->setTorque(Value);
-            break;
-        case 208:
-            if (m_engine)
-                m_engine->settorqueredcutactive(Value);
-            break;
-        case 209:
-            if (m_engine)
-                m_engine->settorqueredlevelactive(Value);
-            break;
-        case 210:
-            if (m_engine)
-                m_engine->setTPS(Value);
-            break;
-        case 211:
-            if (m_engine)
-                m_engine->setTrailingign(Value);
-            break;
-        case 212:
-            if (m_engine)
-                m_engine->settransientthroactive(Value);
-            break;
-        case 213:
-            if (m_engine)
-                m_engine->settransoiltemp(Value);
-            break;
-        case 214:
-            if (m_engine)
-                m_engine->settriggerccounter(Value);
-            break;
-        case 215:
-            if (m_engine)
-                m_engine->settriggersrsinceasthome(Value);
-            break;
-        case 216:
-            if (m_engine)
-                m_engine->setTRIM(Value);
-            break;
-        case 218:
-            if (m_engine)
-                m_engine->setturborpm(Value);
-            break;
-        case 219:
-            if (m_connection)
-                m_connection->setecu(static_cast<int>(Value));
-            break;
-        case 220:
-            if (m_engine)
-                m_engine->setwastegatepress(Value);
-            break;
-        case 221:
-            if (m_engine)
-                m_engine->setWatertemp(Value);
-            break;
-        case 228:
-            if (m_engine)
-                m_engine->setBatteryV(Value);
-            break;
-        case 229:
-            if (m_engine)
-                m_engine->setIntakepress(Value);
-            break;
-
-        // * ==================== RESERVED (255, 259) ====================
-        case 255:
-            // ! CAS REF - not implemented
-            break;
-        case 259:
-            // ! AAC Valve - not implemented
-            break;
-
-        // * ==================== ANALOG INPUTS (260-270) ====================
-        case 260:
-            if (m_analog)
-                m_analog->setAnalog0(Value);
-            break;
-        case 261:
-            if (m_analog)
-                m_analog->setAnalog1(Value);
-            break;
-        case 262:
-            if (m_analog)
-                m_analog->setAnalog2(Value);
-            break;
-        case 263:
-            if (m_analog)
-                m_analog->setAnalog3(Value);
-            break;
-        case 264:
-            if (m_analog)
-                m_analog->setAnalog4(Value);
-            break;
-        case 265:
-            if (m_analog)
-                m_analog->setAnalog5(Value);
-            break;
-        case 266:
-            if (m_analog)
-                m_analog->setAnalog6(Value);
-            break;
-        case 267:
-            if (m_analog)
-                m_analog->setAnalog7(Value);
-            break;
-        case 268:
-            if (m_analog)
-                m_analog->setAnalog8(Value);
-            break;
-        case 269:
-            if (m_analog)
-                m_analog->setAnalog9(Value);
-            break;
-        case 270:
-            if (m_analog)
-                m_analog->setAnalog10(Value);
-            break;
-
-        // * ==================== ENGINE DATA CONTINUED ====================
-        case 271:
-            if (m_engine)
-                m_engine->setGearOilPress(Value);
-            break;
-        case 272:
-        case 273:
-        case 274:
-            // ! Injection Stage 3 / MAP N/P - not implemented
-            break;
-        case 275:
-            if (m_engine)
-                m_engine->setInjDuty2(Value);
-            break;
-        case 276:
-            if (m_engine)
-                m_engine->setInjAngle(Value);
-            break;
-        case 277:
-            // ! Catalyst Temp - not implemented
-            break;
-        case 278:
-            if (m_engine)
-                m_engine->setBoostPreskpa(Value);
-            break;
-
-        // * ==================== DIGITAL INPUTS (279-285) ====================
-        case 279:
-            if (m_digital)
-                m_digital->setDigitalInput1(Value);
-            break;
-        case 280:
-            if (m_digital)
-                m_digital->setDigitalInput2(Value);
-            break;
-        case 281:
-            if (m_digital)
-                m_digital->setDigitalInput3(Value);
-            break;
-        case 282:
-            if (m_digital)
-                m_digital->setDigitalInput4(Value);
-            break;
-        case 283:
-            if (m_digital)
-                m_digital->setDigitalInput5(Value);
-            break;
-        case 284:
-            if (m_digital)
-                m_digital->setDigitalInput6(Value);
-            break;
-        case 285:
-            if (m_digital)
-                m_digital->setDigitalInput7(Value);
-            break;
-
-        // * ==================== USER CHANNELS (286-298) ====================
-        case 286:
-            if (m_analog)
-                m_analog->setUserchannel1(Value);
-            break;
-        case 287:
-            if (m_analog)
-                m_analog->setUserchannel2(Value);
-            break;
-        case 288:
-            if (m_analog)
-                m_analog->setUserchannel3(Value);
-            break;
-        case 289:
-            if (m_analog)
-                m_analog->setUserchannel4(Value);
-            break;
-        case 290:
-            if (m_engine)
-                m_engine->settractionControl(Value);
-            break;
-        case 291:
-            if (m_analog)
-                m_analog->setUserchannel5(Value);
-            break;
-        case 292:
-            if (m_analog)
-                m_analog->setUserchannel6(Value);
-            break;
-        case 293:
-            if (m_analog)
-                m_analog->setUserchannel7(Value);
-            break;
-        case 294:
-            if (m_analog)
-                m_analog->setUserchannel8(Value);
-            break;
-        case 295:
-            if (m_analog)
-                m_analog->setUserchannel9(Value);
-            break;
-        case 296:
-            if (m_analog)
-                m_analog->setUserchannel10(Value);
-            break;
-        case 297:
-            if (m_analog)
-                m_analog->setUserchannel11(Value);
-            break;
-        case 298:
-            if (m_analog)
-                m_analog->setUserchannel12(Value);
-            break;
-
-        // * ==================== ENGINE DATA (400 series) ====================
-        case 400:
-            if (m_engine)
-                m_engine->setigncut(Value);
-            break;
-        case 403:
-            if (m_engine)
-                m_engine->setdsettargetslip(Value);
-            break;
-        case 404:
-            if (m_engine)
-                m_engine->settractionctlpowerlimit(Value);
-            break;
-        case 405:
-            if (m_engine)
-                m_engine->setknockallpeak(Value);
-            break;
-        case 406:
-            if (m_engine)
-                m_engine->setknockcorr(Value);
-            break;
-        case 407:
-            if (m_engine)
-                m_engine->setknocklastcyl(Value);
-            break;
-        case 408:
-            if (m_engine)
-                m_engine->settotalfueltrim(Value);
-            break;
-        case 409:
-            if (m_engine)
-                m_engine->settotaligncomp(Value);
-            break;
-        case 410:
-            if (m_engine)
-                m_engine->setegthighest(Value);
-            break;
-        case 411:
-            if (m_engine)
-                m_engine->setcputempecu(Value);
-            break;
-        case 412:
-            if (m_engine)
-                m_engine->seterrorcodecount(Value);
-            break;
-        case 413:
-            if (m_engine)
-                m_engine->setlostsynccount(Value);
-            break;
-        case 414:
-            if (m_engine)
-                m_engine->setegtdiff(Value);
-            break;
-        case 415:
-            if (m_engine)
-                m_engine->setactiveboosttable(Value);
-            break;
-        case 416:
-            if (m_engine)
-                m_engine->setactivetunetable(Value);
-            break;
-
-        // * ==================== SENSOR STRINGS (800-807) ====================
-        case 800:
-            if (m_sensor)
-                m_sensor->setSensorString1(list[1]);
-            break;
-        case 801:
-            if (m_sensor)
-                m_sensor->setSensorString2(list[1]);
-            break;
-        case 802:
-            if (m_sensor)
-                m_sensor->setSensorString3(list[1]);
-            break;
-        case 803:
-            if (m_sensor)
-                m_sensor->setSensorString4(list[1]);
-            break;
-        case 804:
-            if (m_sensor)
-                m_sensor->setSensorString5(list[1]);
-            break;
-        case 805:
-            if (m_sensor)
-                m_sensor->setSensorString6(list[1]);
-            break;
-        case 806:
-            if (m_sensor)
-                m_sensor->setSensorString7(list[1]);
-            break;
-        case 807:
-            if (m_sensor)
-                m_sensor->setSensorString8(list[1]);
-            break;
-
-        // * ==================== FLAG STRINGS (808-823) ====================
-        case 808:
-            if (m_flags)
-                m_flags->setFlagString1(list[1]);
-            break;
-        case 809:
-            if (m_flags)
-                m_flags->setFlagString2(list[1]);
-            break;
-        case 810:
-            if (m_flags)
-                m_flags->setFlagString3(list[1]);
-            break;
-        case 811:
-            if (m_flags)
-                m_flags->setFlagString4(list[1]);
-            break;
-        case 812:
-            if (m_flags)
-                m_flags->setFlagString5(list[1]);
-            break;
-        case 813:
-            if (m_flags)
-                m_flags->setFlagString6(list[1]);
-            break;
-        case 814:
-            if (m_flags)
-                m_flags->setFlagString7(list[1]);
-            break;
-        case 815:
-            if (m_flags)
-                m_flags->setFlagString8(list[1]);
-            break;
-        case 816:
-            if (m_flags)
-                m_flags->setFlagString9(list[1]);
-            break;
-        case 817:
-            if (m_flags)
-                m_flags->setFlagString10(list[1]);
-            break;
-        case 818:
-            if (m_flags)
-                m_flags->setFlagString11(list[1]);
-            break;
-        case 819:
-            if (m_flags)
-                m_flags->setFlagString12(list[1]);
-            break;
-        case 820:
-            if (m_flags)
-                m_flags->setFlagString13(list[1]);
-            break;
-        case 821:
-            if (m_flags)
-                m_flags->setFlagString14(list[1]);
-            break;
-        case 822:
-            if (m_flags)
-                m_flags->setFlagString15(list[1]);
-            break;
-        case 823:
-            if (m_flags)
-                m_flags->setFlagString16(list[1]);
-            break;
-
-        // * ==================== CONNECTION/ERROR DATA (824-829) ====================
-        case 824:
-            // ! Model - commented out in original
-            break;
-        case 825:
-            if (m_connection)
-                m_connection->setError(list[1]);
-            break;
-        case 827:
-            if (m_engine)
-                m_engine->setoilpressurelamp(static_cast<int>(Value));
-            break;
-        case 828:
-            if (m_engine)
-                m_engine->setovertempalarm(static_cast<int>(Value));
-            break;
-        case 829:
-            if (m_engine)
-                m_engine->setalternatorfail(static_cast<int>(Value));
-            break;
-
-        // * ==================== ENGINE DATA CONTINUED (830-831) ====================
-        case 830:
-            if (m_engine)
-                m_engine->setturborpm2(Value);
-            // ! Note: Original code missing break - fallthrough was unintentional
-            break;
-        case 831:
-            if (m_engine)
-                m_engine->setAuxTemp1(static_cast<int>(Value));
-            break;
-
-        // * ==================== ELECTRIC MOTOR DATA (832-863) ====================
-        case 832:
-            if (m_motor)
-                m_motor->setIGBTPhaseATemp(Value);
-            break;
-        case 833:
-            if (m_motor)
-                m_motor->setIGBTPhaseBTemp(Value);
-            break;
-        case 834:
-            if (m_motor)
-                m_motor->setIGBTPhaseCTemp(Value);
-            break;
-        case 835:
-            if (m_motor)
-                m_motor->setGateDriverTemp(Value);
-            break;
-        case 836:
-            if (m_motor)
-                m_motor->setControlBoardTemp(Value);
-            break;
-        case 837:
-            if (m_motor)
-                m_motor->setRtdTemp1(Value);
-            break;
-        case 838:
-            if (m_motor)
-                m_motor->setRtdTemp2(Value);
-            break;
-        case 839:
-            if (m_motor)
-                m_motor->setRtdTemp3(Value);
-            break;
-        case 840:
-            if (m_motor)
-                m_motor->setRtdTemp4(Value);
-            break;
-        case 841:
-            if (m_motor)
-                m_motor->setRtdTemp5(Value);
-            break;
-        case 842:
-            if (m_motor)
-                m_motor->setEMotorTemperature(Value);
-            break;
-        case 843:
-            if (m_motor)
-                m_motor->setTorqueShudder(Value);
-            break;
-        case 844:
-            if (m_motor)
-                m_motor->setDigInput1FowardSw(Value);
-            break;
-        case 845:
-            if (m_motor)
-                m_motor->setDigInput2ReverseSw(Value);
-            break;
-        case 846:
-            if (m_motor)
-                m_motor->setDigInput3BrakeSw(Value);
-            break;
-        case 847:
-            if (m_motor)
-                m_motor->setDigInput4RegenDisableSw(Value);
-            break;
-        case 848:
-            if (m_motor)
-                m_motor->setDigInput5IgnSw(Value);
-            break;
-        case 849:
-            if (m_motor)
-                m_motor->setDigInput6StartSw(Value);
-            break;
-        case 850:
-            if (m_motor)
-                m_motor->setDigInput7Bool(Value);
-            break;
-        case 851:
-            if (m_motor)
-                m_motor->setDigInput8Bool(Value);
-            break;
-        case 852:
-            if (m_motor)
-                m_motor->setEMotorAngle(Value);
-            break;
-        case 853:
-            if (m_motor)
-                m_motor->setEMotorSpeed(Value);
-            break;
-        case 854:
-            if (m_motor)
-                m_motor->setElectricalOutFreq(Value);
-            break;
-        case 855:
-            if (m_motor)
-                m_motor->setDeltaResolverFiltered(Value);
-            break;
-        case 856:
-            if (m_motor)
-                m_motor->setPhaseACurrent(Value);
-            break;
-        case 857:
-            if (m_motor)
-                m_motor->setPhaseBCurrent(Value);
-            break;
-        case 858:
-            if (m_motor)
-                m_motor->setPhaseCCurrent(Value);
-            break;
-        case 859:
-            if (m_motor)
-                m_motor->setDCBusCurrent(Value);
-            break;
-        case 860:
-            if (m_motor)
-                m_motor->setDCBusVoltage(Value);
-            break;
-        case 861:
-            if (m_motor)
-                m_motor->setOutputVoltage(Value);
-            break;
-        case 862:
-            if (m_motor)
-                m_motor->setVABvdVoltage(Value);
-            break;
-        case 863:
-            if (m_motor)
-                m_motor->setVBCvqVoltage(Value);
-            break;
-
-        // * ==================== EXPANDER BOARD DIGITAL INPUTS (900-907) ====================
-        case 900:
-            if (m_digital)
-                m_digital->setEXDigitalInput1(Value);
-            break;
-        case 901:
-            if (m_digital)
-                m_digital->setEXDigitalInput2(Value);
-            break;
-        case 902:
-            if (m_digital)
-                m_digital->setEXDigitalInput3(Value);
-            break;
-        case 903:
-            if (m_digital)
-                m_digital->setEXDigitalInput4(Value);
-            break;
-        case 904:
-            if (m_digital)
-                m_digital->setEXDigitalInput5(Value);
-            break;
-        case 905:
-            if (m_digital)
-                m_digital->setEXDigitalInput6(Value);
-            break;
-        case 906:
-            if (m_digital)
-                m_digital->setEXDigitalInput7(Value);
-            break;
-        case 907:
-            if (m_digital)
-                m_digital->setEXDigitalInput8(Value);
-            break;
-
-        // * ==================== EXPANDER BOARD ANALOG INPUTS (908-915) ====================
-        case 908:
-            if (m_expander)
-                m_expander->setEXAnalogInput0(Value / 1000);
-            break;
-        case 909:
-            if (m_expander)
-                m_expander->setEXAnalogInput1(Value / 1000);
-            break;
-        case 910:
-            if (m_expander)
-                m_expander->setEXAnalogInput2(Value / 1000);
-            break;
-        case 911:
-            if (m_expander)
-                m_expander->setEXAnalogInput3(Value / 1000);
-            break;
-        case 912:
-            if (m_expander)
-                m_expander->setEXAnalogInput4(Value / 1000);
-            break;
-        case 913:
-            if (m_expander)
-                m_expander->setEXAnalogInput5(Value / 1000);
-            break;
-        case 914:
-            if (m_expander)
-                m_expander->setEXAnalogInput6(Value / 1000);
-            break;
-        case 915:
-            if (m_expander)
-                m_expander->setEXAnalogInput7(Value / 1000);
-            break;
-
-        // * ==================== PER-CYLINDER AFR (916-923) ====================
-        case 916:
-            if (m_engine)
-                m_engine->setAFRcyl1(Value);
-            break;
-        case 917:
-            if (m_engine)
-                m_engine->setAFRcyl2(Value);
-            break;
-        case 918:
-            if (m_engine)
-                m_engine->setAFRcyl3(Value);
-            break;
-        case 919:
-            if (m_engine)
-                m_engine->setAFRcyl4(Value);
-            break;
-        case 920:
-            if (m_engine)
-                m_engine->setAFRcyl5(Value);
-            break;
-        case 921:
-            if (m_engine)
-                m_engine->setAFRcyl6(Value);
-            break;
-        case 922:
-            if (m_engine)
-                m_engine->setAFRcyl7(Value);
-            break;
-        case 923:
-            if (m_engine)
-                m_engine->setAFRcyl8(Value);
-            break;
-
-        // * ==================== BIGSTUFF EXTRA (924-953) ====================
-        case 924:
-            // ! Gearoffset - need to add to VehicleData if needed
-            break;
-        case 925:
-            if (m_engine)
-                m_engine->setAFRLEFTBANKTARGET(Value);
-            break;
-        case 926:
-            if (m_engine)
-                m_engine->setAFRRIGHTBANKTARGET(Value);
-            break;
-        case 927:
-            if (m_engine)
-                m_engine->setAFRLEFTBANKACTUAL(Value);
-            break;
-        case 928:
-            if (m_engine)
-                m_engine->setAFRRIGHTBANKACTUAL(Value);
-            break;
-        case 929:
-            if (m_engine)
-                m_engine->setBOOSTOFFSET(Value);
-            break;
-        case 930:
-            if (m_engine)
-                m_engine->setREVLIM3STEP(Value);
-            break;
-        case 931:
-            if (m_engine)
-                m_engine->setREVLIM2STEP(Value);
-            break;
-        case 932:
-            if (m_engine)
-                m_engine->setREVLIMGIGHSIDE(Value);
-            break;
-        case 933:
-            if (m_engine)
-                m_engine->setREVLIMBOURNOUT(Value);
-            break;
-        case 934:
-            if (m_engine)
-                m_engine->setLEFTBANKO2CORR(Value);
-            break;
-        case 935:
-            if (m_engine)
-                m_engine->setRIGHTBANKO2CORR(Value);
-            break;
-        case 936:
-            if (m_engine)
-                m_engine->setTRACTIONCTRLOFFSET(Value);
-            break;
-        case 937:
-            if (m_engine)
-                m_engine->setDRIVESHAFTOFFSET(Value);
-            break;
-        case 938:
-            if (m_engine)
-                m_engine->setTCCOMMAND(Value);
-            break;
-        case 939:
-            if (m_engine)
-                m_engine->setFSLCOMMAND(Value);
-            break;
-        case 940:
-            if (m_engine)
-                m_engine->setFSLINDEX(Value);
-            break;
-        case 941:
-            if (m_engine)
-                m_engine->setPANVAC(Value);
-            break;
-        case 942:
-            if (m_engine)
-                m_engine->setCyl1_O2_Corr(Value);
-            break;
-        case 943:
-            if (m_engine)
-                m_engine->setCyl2_O2_Corr(Value);
-            break;
-        case 944:
-            if (m_engine)
-                m_engine->setCyl3_O2_Corr(Value);
-            break;
-        case 945:
-            if (m_engine)
-                m_engine->setCyl4_O2_Corr(Value);
-            break;
-        case 946:
-            if (m_engine)
-                m_engine->setCyl5_O2_Corr(Value);
-            break;
-        case 947:
-            if (m_engine)
-                m_engine->setCyl6_O2_Corr(Value);
-            break;
-        case 948:
-            if (m_engine)
-                m_engine->setCyl7_O2_Corr(Value);
-            break;
-        case 949:
-            if (m_engine)
-                m_engine->setCyl8_O2_Corr(Value);
-            break;
-        case 950:
-            if (m_engine)
-                m_engine->setRotaryTrimpot1(static_cast<int>(Value));
-            break;
-        case 951:
-            if (m_engine)
-                m_engine->setRotaryTrimpot2(static_cast<int>(Value));
-            break;
-        case 952:
-            if (m_engine)
-                m_engine->setRotaryTrimpot3(static_cast<int>(Value));
-            break;
-        case 953:
-            if (m_engine)
-                m_engine->setCalibrationSelect(static_cast<int>(Value));
-            break;
-
-        // * ==================== FREQUENCY INPUT (999) ====================
-        case 999:
-            if (m_digital)
-                m_digital->setfrequencyDIEX1(Value);
-            break;
-
-        default:
-            break;
+        const auto stringHandler = m_stringDispatchTable.constFind(ident);
+        if (stringHandler != m_stringDispatchTable.constEnd()) {
+            stringHandler.value()(rawValue);
+        } else {
+            const auto floatHandler = m_floatDispatchTable.constFind(ident);
+            if (floatHandler != m_floatDispatchTable.constEnd())
+                floatHandler.value()(value);
         }
 
         if (m_sensorRegistry) {

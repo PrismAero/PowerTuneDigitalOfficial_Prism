@@ -11,11 +11,11 @@ import PowerTune.UI 1.0
 
 SettingsPage {
     id: mainWindow
-    property double rpmfrequencydivider
-
     property int digiValue
     property string digiStringValue
     property int maxBrightnessOnBoot
+    property bool loadingConfig: false
+    property int rpmCheckboxSaveValue: 0
 
     // Unified analog table column widths
     readonly property int enableColW: 65
@@ -49,37 +49,254 @@ SettingsPage {
         return names;
     }
 
-    function applyLinearPreset(presetName, val0vField, val5vField) {
-        if (presetName === "Custom")
+    function analogChannelRefs() {
+        return [
+            { enabled: chEnable0, name: chName0, modeCombo: modeCombo0, linearPreset: linPreset0, ntcPreset: ntcPreset0,
+              val0Field: ex00, val5Field: ex05, ntcToggle: checkan0ntc, divider100: checkan0100, divider1k: checkan01k,
+              steinhartT: [t10, t20, t30], steinhartR: [r10, r20, r30] },
+            { enabled: chEnable1, name: chName1, modeCombo: modeCombo1, linearPreset: linPreset1, ntcPreset: ntcPreset1,
+              val0Field: ex10, val5Field: ex15, ntcToggle: checkan1ntc, divider100: checkan1100, divider1k: checkan11k,
+              steinhartT: [t11, t21, t31], steinhartR: [r11, r21, r31] },
+            { enabled: chEnable2, name: chName2, modeCombo: modeCombo2, linearPreset: linPreset2, ntcPreset: ntcPreset2,
+              val0Field: ex20, val5Field: ex25, ntcToggle: checkan2ntc, divider100: checkan2100, divider1k: checkan21k,
+              steinhartT: [t12, t22, t32], steinhartR: [r12, r22, r32] },
+            { enabled: chEnable3, name: chName3, modeCombo: modeCombo3, linearPreset: linPreset3, ntcPreset: ntcPreset3,
+              val0Field: ex30, val5Field: ex35, ntcToggle: checkan3ntc, divider100: checkan3100, divider1k: checkan31k,
+              steinhartT: [t13, t23, t33], steinhartR: [r13, r23, r33] },
+            { enabled: chEnable4, name: chName4, modeCombo: modeCombo4, linearPreset: linPreset4, ntcPreset: ntcPreset4,
+              val0Field: ex40, val5Field: ex45, ntcToggle: checkan4ntc, divider100: checkan4100, divider1k: checkan41k,
+              steinhartT: [t14, t24, t34], steinhartR: [r14, r24, r34] },
+            { enabled: chEnable5, name: chName5, modeCombo: modeCombo5, linearPreset: linPreset5, ntcPreset: ntcPreset5,
+              val0Field: ex50, val5Field: ex55, ntcToggle: checkan5ntc, divider100: checkan5100, divider1k: checkan51k,
+              steinhartT: [t15, t25, t35], steinhartR: [r15, r25, r35] },
+            { enabled: chEnable6, name: chName6, linearPreset: linPreset6, val0Field: ex60, val5Field: ex65 },
+            { enabled: chEnable7, name: chName7, linearPreset: linPreset7, val0Field: ex70, val5Field: ex75 }
+        ];
+    }
+
+    function digitalChannelItem(index) {
+        return digitalNameRepeater.itemAt(index);
+    }
+
+    function comboIndexForValue(options, value) {
+        for (var i = 0; i < options.length; ++i) {
+            if (String(options[i]) === String(value))
+                return i;
+        }
+        return -1;
+    }
+
+    function setComboSelection(combo, options, value) {
+        var idx = comboIndexForValue(options, value);
+        combo.currentIndex = idx >= 0 ? idx : 0;
+    }
+
+    function stringValue(value, fallback) {
+        return value === undefined || value === null ? fallback : String(value);
+    }
+
+    function buildGearSensorConfig() {
+        return {
+            enabled: gearSensorEnabled.checked,
+            port: gearSensorPort.currentIndex,
+            tolerance: parseFloat(gearTolerance.text),
+            voltageN: parseFloat(gearVoltageN.text),
+            voltageR: parseFloat(gearVoltageR.text),
+            voltage1: parseFloat(gearVoltage1.text),
+            voltage2: parseFloat(gearVoltage2.text),
+            voltage3: parseFloat(gearVoltage3.text),
+            voltage4: parseFloat(gearVoltage4.text),
+            voltage5: parseFloat(gearVoltage5.text),
+            voltage6: parseFloat(gearVoltage6.text)
+        };
+    }
+
+    function buildSpeedSensorConfig() {
+        return {
+            enabled: speedSensorEnabled.checked,
+            sourceType: speedSourceType.currentIndex === 0 ? "analog" : "digital",
+            analogPort: speedAnalogPort.currentIndex,
+            digitalPort: speedDigitalPort.currentIndex,
+            pulsesPerRev: parseFloat(speedPulsesPerRev.text),
+            voltageMultiplier: parseFloat(speedVoltageMultiplier.text),
+            tireCircumference: parseFloat(speedTireCircumference.text),
+            finalDriveRatio: parseFloat(speedFinalDriveRatio.text),
+            unit: speedUnit.currentIndex === 0 ? "MPH" : "KPH"
+        };
+    }
+
+    function buildBoardConfig() {
+        return {
+            selectedValue: digitalExtender.currentIndex,
+            switchValue: maxBrightnessBoot.checked,
+            rpmSource: rpmsourceselector.currentIndex,
+            rpmCanVersion: rpmcanversionselector.currentIndex,
+            cylinderCombobox: cylindercombobox.currentIndex,
+            cylinderComboboxValue: parseFloat(cylindercombobox.currentText),
+            cylinderComboboxV2: cylindercomboboxv2.currentIndex,
+            cylinderComboboxV2Value: parseFloat(cylindercomboboxv2.currentText),
+            cylinderComboboxDi1: cylindercomboboxDi1.currentIndex,
+            rpmcheckbox: rpmCheckboxSaveValue,
+            an7Damping: an7dampingfactor.text,
+            gearSensor: buildGearSensorConfig(),
+            speedSensor: buildSpeedSensorConfig()
+        };
+    }
+
+    function buildChannelConfig(channel) {
+        var ref = analogChannelRefs()[channel];
+        if (!ref)
+            return {};
+
+        var config = {
+            enabled: ref.enabled.checked,
+            name: ref.name.text,
+            linearPreset: ref.linearPreset.currentText,
+            val0v: ref.val0Field.text,
+            val5v: ref.val5Field.text
+        };
+
+        if (channel < 6) {
+            config.ntcEnabled = ref.ntcToggle.checked;
+            config.ntcPreset = ref.ntcPreset.currentText;
+            config.divider100 = ref.divider100.checked;
+            config.divider1k = ref.divider1k.checked;
+            config.steinhartT = [
+                ref.steinhartT[0].text,
+                ref.steinhartT[1].text,
+                ref.steinhartT[2].text
+            ];
+            config.steinhartR = [
+                ref.steinhartR[0].text,
+                ref.steinhartR[1].text,
+                ref.steinhartR[2].text
+            ];
+        }
+
+        return config;
+    }
+
+    function buildAllSettings() {
+        var channels = [];
+        for (var ch = 0; ch < 8; ++ch)
+            channels.push(buildChannelConfig(ch));
+
+        var digitalChannels = [];
+        for (var i = 0; i < 8; ++i) {
+            var item = digitalChannelItem(i);
+            if (!item)
+                continue;
+            digitalChannels.push({
+                enabled: item.enableSwitch.checked,
+                name: item.nameField.text
+            });
+        }
+
+        return {
+            channels: channels,
+            digitalChannels: digitalChannels,
+            board: buildBoardConfig()
+        };
+    }
+
+    function applyChannelConfig(channel, config) {
+        var ref = analogChannelRefs()[channel];
+        if (!ref || !config)
             return;
-        var preset = Calibration.getLinearPreset(presetName);
-        if (preset && preset.name) {
-            val0vField.text = preset.val0v;
-            val5vField.text = preset.val5v;
-            inputs.setInputs();
+
+        ref.enabled.checked = config.enabled !== undefined ? !!config.enabled : true;
+        ref.name.text = stringValue(config.name, "");
+        ref.val0Field.text = stringValue(config.val0v, "0");
+        ref.val5Field.text = stringValue(config.val5v, "5");
+        setComboSelection(ref.linearPreset, linearPresetNames, config.linearPreset || "Custom");
+
+        if (channel < 6) {
+            var ntcEnabled = !!config.ntcEnabled;
+            ref.ntcToggle.checked = ntcEnabled;
+            ref.modeCombo.currentIndex = ntcEnabled ? 1 : 0;
+            ref.divider100.checked = !!config.divider100;
+            ref.divider1k.checked = !!config.divider1k;
+            setComboSelection(ref.ntcPreset, ntcPresetNames, config.ntcPreset || "Custom");
+
+            var steinhartT = config.steinhartT || [];
+            var steinhartR = config.steinhartR || [];
+            for (var i = 0; i < 3; ++i) {
+                ref.steinhartT[i].text = stringValue(steinhartT[i], "0");
+                ref.steinhartR[i].text = stringValue(steinhartR[i], "0");
+            }
         }
     }
 
-    function applyNtcPreset(presetName, t1f, r1f, t2f, r2f, t3f, r3f) {
-        if (presetName === "Custom")
+    function applyDigitalChannelConfig(index, config) {
+        var item = digitalChannelItem(index);
+        if (!item || !config)
             return;
-        var preset = Calibration.getNtcPreset(presetName);
-        if (preset && preset.name) {
-            t1f.text = preset.t1;
-            r1f.text = preset.r1;
-            t2f.text = preset.t2;
-            r2f.text = preset.r2;
-            t3f.text = preset.t3;
-            r3f.text = preset.r3;
-            inputs.setInputs();
-        }
+
+        item.enableSwitch.checked = config.enabled !== undefined ? !!config.enabled : true;
+        item.nameField.text = stringValue(config.name, "");
     }
 
-    function getLinearUnit(presetName) {
-        if (presetName === "Custom")
-            return "";
-        var preset = Calibration.getLinearPreset(presetName);
-        return (preset && preset.unit) ? preset.unit : "";
+    function applyBoardConfig(config) {
+        var board = config || {};
+        digitalExtender.currentIndex = board.selectedValue !== undefined ? board.selectedValue : 0;
+        maxBrightnessBoot.checked = board.switchValue !== undefined ? !!board.switchValue : false;
+        rpmsourceselector.currentIndex = board.rpmSource !== undefined ? board.rpmSource : 0;
+        rpmcanversionselector.currentIndex = board.rpmCanVersion !== undefined ? board.rpmCanVersion : 0;
+        cylindercombobox.currentIndex = board.cylinderCombobox !== undefined ? board.cylinderCombobox : 0;
+        cylindercomboboxv2.currentIndex = board.cylinderComboboxV2 !== undefined ? board.cylinderComboboxV2 : 0;
+        cylindercomboboxDi1.currentIndex = board.cylinderComboboxDi1 !== undefined ? board.cylinderComboboxDi1 : 0;
+        rpmCheckboxSaveValue = board.rpmcheckbox !== undefined ? board.rpmcheckbox : 0;
+        an7dampingfactor.text = stringValue(board.an7Damping, "0");
+
+        var gearConfig = board.gearSensor || {};
+        gearSensorEnabled.checked = gearConfig.enabled === true || gearConfig.enabled === "true";
+        gearSensorPort.currentIndex = Number(gearConfig.port) || 0;
+        gearTolerance.text = stringValue(gearConfig.tolerance, "0.2");
+        gearVoltageN.text = stringValue(gearConfig.voltageN, "0.0");
+        gearVoltageR.text = stringValue(gearConfig.voltageR, "0.5");
+        gearVoltage1.text = stringValue(gearConfig.voltage1, "1.0");
+        gearVoltage2.text = stringValue(gearConfig.voltage2, "1.5");
+        gearVoltage3.text = stringValue(gearConfig.voltage3, "2.0");
+        gearVoltage4.text = stringValue(gearConfig.voltage4, "2.5");
+        gearVoltage5.text = stringValue(gearConfig.voltage5, "3.0");
+        gearVoltage6.text = stringValue(gearConfig.voltage6, "3.5");
+
+        var speedConfig = board.speedSensor || {};
+        speedSensorEnabled.checked = speedConfig.enabled === true || speedConfig.enabled === "true";
+        speedSourceType.currentIndex = speedConfig.sourceType === "digital" ? 1 : 0;
+        speedAnalogPort.currentIndex = Number(speedConfig.analogPort) || 0;
+        speedDigitalPort.currentIndex = Number(speedConfig.digitalPort) || 0;
+        speedPulsesPerRev.text = stringValue(speedConfig.pulsesPerRev, "4.0");
+        speedVoltageMultiplier.text = stringValue(speedConfig.voltageMultiplier, "1.0");
+        speedTireCircumference.text = stringValue(speedConfig.tireCircumference, "2.06");
+        speedFinalDriveRatio.text = stringValue(speedConfig.finalDriveRatio, "1.0");
+        speedUnit.currentIndex = speedConfig.unit === "KPH" ? 1 : 0;
+    }
+
+    function loadAllSettingsFromManager() {
+        var config = ExBoardConfig.loadAllSettings();
+
+        loadingConfig = true;
+        for (var channel = 0; channel < 8; ++channel)
+            applyChannelConfig(channel, config.channels && config.channels[channel] ? config.channels[channel] : {});
+        for (var i = 0; i < 8; ++i)
+            applyDigitalChannelConfig(i, config.digitalChannels && config.digitalChannels[i] ? config.digitalChannels[i] : {});
+        applyBoardConfig(config.board || {});
+        loadingConfig = false;
+
+        inputs.setInputs();
+    }
+
+    function applyLinearPreset(channel, presetName) {
+        ExBoardConfig.applyLinearPreset(channel, presetName);
+        applyChannelConfig(channel, ExBoardConfig.getChannelConfig(channel));
+        inputs.setInputs();
+    }
+
+    function applyNtcPreset(channel, presetName) {
+        ExBoardConfig.applyNtcPreset(channel, presetName);
+        applyChannelConfig(channel, ExBoardConfig.getChannelConfig(channel));
+        inputs.setInputs();
     }
 
     ListModel {
@@ -108,144 +325,6 @@ SettingsPage {
         ListElement {
             text: "Ex Digital Input 8"
         }
-    }
-
-    // Sensor Mapping alias bridge properties (Repeater delegates)
-    property var exan0nameRef: null
-    property var exan1nameRef: null
-    property var exan2nameRef: null
-    property var exan3nameRef: null
-    property var exan4nameRef: null
-    property var exan5nameRef: null
-    property var exan6nameRef: null
-    property var exan7nameRef: null
-    property var exdigi1nameRef: null
-    property var exdigi2nameRef: null
-    property var exdigi3nameRef: null
-    property var exdigi4nameRef: null
-    property var exdigi5nameRef: null
-    property var exdigi6nameRef: null
-    property var exdigi7nameRef: null
-    property var exdigi8nameRef: null
-
-    // Hidden fields for Sensor Mapping Settings alias binding
-    StyledTextField {
-        id: exan0nameField
-        visible: false
-        text: exan0nameRef ? exan0nameRef.text : ""
-        onTextChanged: if (exan0nameRef && exan0nameRef.text !== text)
-            exan0nameRef.text = text
-    }
-    StyledTextField {
-        id: exan1nameField
-        visible: false
-        text: exan1nameRef ? exan1nameRef.text : ""
-        onTextChanged: if (exan1nameRef && exan1nameRef.text !== text)
-            exan1nameRef.text = text
-    }
-    StyledTextField {
-        id: exan2nameField
-        visible: false
-        text: exan2nameRef ? exan2nameRef.text : ""
-        onTextChanged: if (exan2nameRef && exan2nameRef.text !== text)
-            exan2nameRef.text = text
-    }
-    StyledTextField {
-        id: exan3nameField
-        visible: false
-        text: exan3nameRef ? exan3nameRef.text : ""
-        onTextChanged: if (exan3nameRef && exan3nameRef.text !== text)
-            exan3nameRef.text = text
-    }
-    StyledTextField {
-        id: exan4nameField
-        visible: false
-        text: exan4nameRef ? exan4nameRef.text : ""
-        onTextChanged: if (exan4nameRef && exan4nameRef.text !== text)
-            exan4nameRef.text = text
-    }
-    StyledTextField {
-        id: exan5nameField
-        visible: false
-        text: exan5nameRef ? exan5nameRef.text : ""
-        onTextChanged: if (exan5nameRef && exan5nameRef.text !== text)
-            exan5nameRef.text = text
-    }
-    StyledTextField {
-        id: exan6nameField
-        visible: false
-        text: exan6nameRef ? exan6nameRef.text : ""
-        onTextChanged: if (exan6nameRef && exan6nameRef.text !== text)
-            exan6nameRef.text = text
-    }
-    StyledTextField {
-        id: exan7nameField
-        visible: false
-        text: exan7nameRef ? exan7nameRef.text : ""
-        onTextChanged: if (exan7nameRef && exan7nameRef.text !== text)
-            exan7nameRef.text = text
-    }
-    StyledTextField {
-        id: exdigi1nameField
-        visible: false
-        text: exdigi1nameRef ? exdigi1nameRef.text : ""
-        onTextChanged: if (exdigi1nameRef && exdigi1nameRef.text !== text)
-            exdigi1nameRef.text = text
-    }
-    StyledTextField {
-        id: exdigi2nameField
-        visible: false
-        text: exdigi2nameRef ? exdigi2nameRef.text : ""
-        onTextChanged: if (exdigi2nameRef && exdigi2nameRef.text !== text)
-            exdigi2nameRef.text = text
-    }
-    StyledTextField {
-        id: exdigi3nameField
-        visible: false
-        text: exdigi3nameRef ? exdigi3nameRef.text : ""
-        onTextChanged: if (exdigi3nameRef && exdigi3nameRef.text !== text)
-            exdigi3nameRef.text = text
-    }
-    StyledTextField {
-        id: exdigi4nameField
-        visible: false
-        text: exdigi4nameRef ? exdigi4nameRef.text : ""
-        onTextChanged: if (exdigi4nameRef && exdigi4nameRef.text !== text)
-            exdigi4nameRef.text = text
-    }
-    StyledTextField {
-        id: exdigi5nameField
-        visible: false
-        text: exdigi5nameRef ? exdigi5nameRef.text : ""
-        onTextChanged: if (exdigi5nameRef && exdigi5nameRef.text !== text)
-            exdigi5nameRef.text = text
-    }
-    StyledTextField {
-        id: exdigi6nameField
-        visible: false
-        text: exdigi6nameRef ? exdigi6nameRef.text : ""
-        onTextChanged: if (exdigi6nameRef && exdigi6nameRef.text !== text)
-            exdigi6nameRef.text = text
-    }
-    StyledTextField {
-        id: exdigi7nameField
-        visible: false
-        text: exdigi7nameRef ? exdigi7nameRef.text : ""
-        onTextChanged: if (exdigi7nameRef && exdigi7nameRef.text !== text)
-            exdigi7nameRef.text = text
-    }
-    StyledTextField {
-        id: exdigi8nameField
-        visible: false
-        text: exdigi8nameRef ? exdigi8nameRef.text : ""
-        onTextChanged: if (exdigi8nameRef && exdigi8nameRef.text !== text)
-            exdigi8nameRef.text = text
-    }
-
-    // Hidden backward-compat checkbox for rpmcheckboxsave alias
-    StyledCheckBox {
-        id: rpmcheckbox
-        visible: false
     }
 
     // Hidden NTC state checkboxes (driven by mode combos, consumed by writeEXBoardSettings)
@@ -280,179 +359,13 @@ SettingsPage {
         onCheckStateChanged: inputs.setInputs()
     }
 
-    Connections {
-        target: exan0nameRef
-        function onTextChanged() {
-            if (exan0nameField.text !== exan0nameRef.text)
-                exan0nameField.text = exan0nameRef.text;
-        }
-    }
-    Connections {
-        target: exan1nameRef
-        function onTextChanged() {
-            if (exan1nameField.text !== exan1nameRef.text)
-                exan1nameField.text = exan1nameRef.text;
-        }
-    }
-    Connections {
-        target: exan2nameRef
-        function onTextChanged() {
-            if (exan2nameField.text !== exan2nameRef.text)
-                exan2nameField.text = exan2nameRef.text;
-        }
-    }
-    Connections {
-        target: exan3nameRef
-        function onTextChanged() {
-            if (exan3nameField.text !== exan3nameRef.text)
-                exan3nameField.text = exan3nameRef.text;
-        }
-    }
-    Connections {
-        target: exan4nameRef
-        function onTextChanged() {
-            if (exan4nameField.text !== exan4nameRef.text)
-                exan4nameField.text = exan4nameRef.text;
-        }
-    }
-    Connections {
-        target: exan5nameRef
-        function onTextChanged() {
-            if (exan5nameField.text !== exan5nameRef.text)
-                exan5nameField.text = exan5nameRef.text;
-        }
-    }
-    Connections {
-        target: exan6nameRef
-        function onTextChanged() {
-            if (exan6nameField.text !== exan6nameRef.text)
-                exan6nameField.text = exan6nameRef.text;
-        }
-    }
-    Connections {
-        target: exan7nameRef
-        function onTextChanged() {
-            if (exan7nameField.text !== exan7nameRef.text)
-                exan7nameField.text = exan7nameRef.text;
-        }
-    }
-    Connections {
-        target: exdigi1nameRef
-        function onTextChanged() {
-            if (exdigi1nameField.text !== exdigi1nameRef.text)
-                exdigi1nameField.text = exdigi1nameRef.text;
-        }
-    }
-    Connections {
-        target: exdigi2nameRef
-        function onTextChanged() {
-            if (exdigi2nameField.text !== exdigi2nameRef.text)
-                exdigi2nameField.text = exdigi2nameRef.text;
-        }
-    }
-    Connections {
-        target: exdigi3nameRef
-        function onTextChanged() {
-            if (exdigi3nameField.text !== exdigi3nameRef.text)
-                exdigi3nameField.text = exdigi3nameRef.text;
-        }
-    }
-    Connections {
-        target: exdigi4nameRef
-        function onTextChanged() {
-            if (exdigi4nameField.text !== exdigi4nameRef.text)
-                exdigi4nameField.text = exdigi4nameRef.text;
-        }
-    }
-    Connections {
-        target: exdigi5nameRef
-        function onTextChanged() {
-            if (exdigi5nameField.text !== exdigi5nameRef.text)
-                exdigi5nameField.text = exdigi5nameRef.text;
-        }
-    }
-    Connections {
-        target: exdigi6nameRef
-        function onTextChanged() {
-            if (exdigi6nameField.text !== exdigi6nameRef.text)
-                exdigi6nameField.text = exdigi6nameRef.text;
-        }
-    }
-    Connections {
-        target: exdigi7nameRef
-        function onTextChanged() {
-            if (exdigi7nameField.text !== exdigi7nameRef.text)
-                exdigi7nameField.text = exdigi7nameRef.text;
-        }
-    }
-    Connections {
-        target: exdigi8nameRef
-        function onTextChanged() {
-            if (exdigi8nameField.text !== exdigi8nameRef.text)
-                exdigi8nameField.text = exdigi8nameRef.text;
-        }
-    }
-
-    property int rpmCheckboxSaveValue: AppSettings.getValue("ui/exboard/rpmcheckbox", 0)
-    function getRpmCheckboxSaveValue() {
-        return rpmCheckboxSaveValue;
-    }
-
     Item {
         id: inputs
         visible: false
         function setInputs() {
-            AppSettings.writeExternalrpm(rpmsourceselector.currentIndex > 0);
-            AppSettings.writeEXAN7dampingSettings(an7dampingfactor.text);
-            AppSettings.writeEXBoardSettings(ex00.text, ex05.text, ex10.text, ex15.text, ex20.text, ex25.text, ex30.text, ex35.text, ex40.text, ex45.text, ex50.text, ex55.text, ex60.text, ex65.text, ex70.text, ex75.text, checkan0ntc.checkState, checkan1ntc.checkState, checkan2ntc.checkState, checkan3ntc.checkState, checkan4ntc.checkState, checkan5ntc.checkState, checkan0100.checkState, checkan01k.checkState, checkan1100.checkState, checkan11k.checkState, checkan2100.checkState, checkan21k.checkState, checkan3100.checkState, checkan31k.checkState, checkan4100.checkState, checkan41k.checkState, checkan5100.checkState, checkan51k.checkState);
-            AppSettings.writeSteinhartSettings(t10.text, t20.text, t30.text, r10.text, r20.text, r30.text, t11.text, t21.text, t31.text, r11.text, r21.text, r31.text, t12.text, t22.text, t32.text, r12.text, r22.text, r32.text, t13.text, t23.text, t33.text, r13.text, r23.text, r33.text, t14.text, t24.text, t34.text, r14.text, r24.text, r34.text, t15.text, t25.text, t35.text, r15.text, r25.text, r35.text);
-            if (rpmsourceselector.currentIndex === 0) {
-                AppSettings.writeRPMFrequencySettings(0, 0);
-            } else if (rpmsourceselector.currentIndex === 1) {
-                if (rpmcanversionselector.currentIndex == 0) {
-                    AppSettings.writeCylinderSettings(cylindercombobox.textAt(cylindercombobox.currentIndex));
-                }
-                if (rpmcanversionselector.currentIndex == 1) {
-                    var multiplier = Calibration.expanderChannelMultiplier(cylindercomboboxv2.currentIndex);
-                    AppSettings.writeCylinderSettings(cylindercomboboxv2.textAt(cylindercomboboxv2.currentIndex) * multiplier);
-                }
-                AppSettings.writeRPMFrequencySettings(rpmfrequencydivider, 0);
-            } else if (rpmsourceselector.currentIndex === 2) {
-                AppSettings.writeRPMFrequencySettings(rpmfrequencydivider, 1);
-            }
-            AppSettings.setValue("ui/exboard/selectedValue", digitalExtender.currentIndex);
-            AppSettings.setValue("ui/exboard/switchValue", maxBrightnessBoot.checked);
-            AppSettings.setValue("ui/exboard/rpmSource", rpmsourceselector.currentIndex);
-            AppSettings.setValue("ui/exboard/cylinderCombobox", cylindercombobox.currentIndex);
-            AppSettings.setValue("ui/exboard/cylinderComboboxV2", cylindercomboboxv2.currentIndex);
-            AppSettings.setValue("ui/exboard/cylinderComboboxDi1", cylindercomboboxDi1.currentIndex);
-            AppSettings.setValue("ui/exboard/rpmcheckbox", rpmcheckbox.checkState);
-            AppSettings.setValue("ui/exboard/exan0name", exan0nameField.text);
-            AppSettings.setValue("ui/exboard/exan1name", exan1nameField.text);
-            AppSettings.setValue("ui/exboard/exan2name", exan2nameField.text);
-            AppSettings.setValue("ui/exboard/exan3name", exan3nameField.text);
-            AppSettings.setValue("ui/exboard/exan4name", exan4nameField.text);
-            AppSettings.setValue("ui/exboard/exan5name", exan5nameField.text);
-            AppSettings.setValue("ui/exboard/exan6name", exan6nameField.text);
-            AppSettings.setValue("ui/exboard/exan7name", exan7nameField.text);
-            AppSettings.setValue("ui/exboard/exdigi1name", exdigi1nameField.text);
-            AppSettings.setValue("ui/exboard/exdigi2name", exdigi2nameField.text);
-            AppSettings.setValue("ui/exboard/exdigi3name", exdigi3nameField.text);
-            AppSettings.setValue("ui/exboard/exdigi4name", exdigi4nameField.text);
-            AppSettings.setValue("ui/exboard/exdigi5name", exdigi5nameField.text);
-            AppSettings.setValue("ui/exboard/exdigi6name", exdigi6nameField.text);
-            AppSettings.setValue("ui/exboard/exdigi7name", exdigi7nameField.text);
-            AppSettings.setValue("ui/exboard/exdigi8name", exdigi8nameField.text);
-            AppSettings.setValue("ui/exboard/ch0_enabled", chEnable0.checked);
-            AppSettings.setValue("ui/exboard/ch1_enabled", chEnable1.checked);
-            AppSettings.setValue("ui/exboard/ch2_enabled", chEnable2.checked);
-            AppSettings.setValue("ui/exboard/ch3_enabled", chEnable3.checked);
-            AppSettings.setValue("ui/exboard/ch4_enabled", chEnable4.checked);
-            AppSettings.setValue("ui/exboard/ch5_enabled", chEnable5.checked);
-            AppSettings.setValue("ui/exboard/ch6_enabled", chEnable6.checked);
-            AppSettings.setValue("ui/exboard/ch7_enabled", chEnable7.checked);
-            SensorRegistry.refreshExtenderAnalogInputs()
-            SensorRegistry.refreshExtenderDigitalInputs()
+            if (loadingConfig)
+                return;
+            ExBoardConfig.saveAllSettings(buildAllSettings());
         }
     }
 
@@ -460,7 +373,6 @@ SettingsPage {
         id: cylindercalcrpmdi1
         visible: false
         function cylindercalcrpmdi1() {
-            rpmfrequencydivider = Calibration.frequencyDividerForCylinders(cylindercomboboxDi1.currentIndex);
             inputs.setInputs();
         }
     }
@@ -627,7 +539,6 @@ SettingsPage {
                     placeholderText: "AN 0"
                     enabled: chEnable0.checked
                     onEditingFinished: inputs.setInputs()
-                    Component.onCompleted: mainWindow.exan0nameRef = chName0
                 }
                 StyledComboBox {
                     id: modeCombo0
@@ -650,7 +561,7 @@ SettingsPage {
                         font.pixelSize: SettingsTheme.fontStatus
                         visible: !checkan0ntc.checked
                         enabled: chEnable0.checked
-                        onActivated: applyLinearPreset(currentText, ex00, ex05)
+                        onActivated: applyLinearPreset(0, currentText)
                     }
                     StyledComboBox {
                         id: ntcPreset0
@@ -659,7 +570,7 @@ SettingsPage {
                         font.pixelSize: SettingsTheme.fontStatus
                         visible: checkan0ntc.checked
                         enabled: chEnable0.checked
-                        onActivated: applyNtcPreset(currentText, t10, r10, t20, r20, t30, r30)
+                        onActivated: applyNtcPreset(0, currentText)
                     }
                 }
                 Item {
@@ -839,7 +750,6 @@ SettingsPage {
                     placeholderText: "AN 1"
                     enabled: chEnable1.checked
                     onEditingFinished: inputs.setInputs()
-                    Component.onCompleted: mainWindow.exan1nameRef = chName1
                 }
                 StyledComboBox {
                     id: modeCombo1
@@ -862,7 +772,7 @@ SettingsPage {
                         font.pixelSize: SettingsTheme.fontStatus
                         visible: !checkan1ntc.checked
                         enabled: chEnable1.checked
-                        onActivated: applyLinearPreset(currentText, ex10, ex15)
+                        onActivated: applyLinearPreset(1, currentText)
                     }
                     StyledComboBox {
                         id: ntcPreset1
@@ -871,7 +781,7 @@ SettingsPage {
                         font.pixelSize: SettingsTheme.fontStatus
                         visible: checkan1ntc.checked
                         enabled: chEnable1.checked
-                        onActivated: applyNtcPreset(currentText, t11, r11, t21, r21, t31, r31)
+                        onActivated: applyNtcPreset(1, currentText)
                     }
                 }
                 Item {
@@ -1051,7 +961,6 @@ SettingsPage {
                     placeholderText: "AN 2"
                     enabled: chEnable2.checked
                     onEditingFinished: inputs.setInputs()
-                    Component.onCompleted: mainWindow.exan2nameRef = chName2
                 }
                 StyledComboBox {
                     id: modeCombo2
@@ -1074,7 +983,7 @@ SettingsPage {
                         font.pixelSize: SettingsTheme.fontStatus
                         visible: !checkan2ntc.checked
                         enabled: chEnable2.checked
-                        onActivated: applyLinearPreset(currentText, ex20, ex25)
+                        onActivated: applyLinearPreset(2, currentText)
                     }
                     StyledComboBox {
                         id: ntcPreset2
@@ -1083,7 +992,7 @@ SettingsPage {
                         font.pixelSize: SettingsTheme.fontStatus
                         visible: checkan2ntc.checked
                         enabled: chEnable2.checked
-                        onActivated: applyNtcPreset(currentText, t12, r12, t22, r22, t32, r32)
+                        onActivated: applyNtcPreset(2, currentText)
                     }
                 }
                 Item {
@@ -1263,7 +1172,6 @@ SettingsPage {
                     placeholderText: "AN 3"
                     enabled: chEnable3.checked
                     onEditingFinished: inputs.setInputs()
-                    Component.onCompleted: mainWindow.exan3nameRef = chName3
                 }
                 StyledComboBox {
                     id: modeCombo3
@@ -1286,7 +1194,7 @@ SettingsPage {
                         font.pixelSize: SettingsTheme.fontStatus
                         visible: !checkan3ntc.checked
                         enabled: chEnable3.checked
-                        onActivated: applyLinearPreset(currentText, ex30, ex35)
+                        onActivated: applyLinearPreset(3, currentText)
                     }
                     StyledComboBox {
                         id: ntcPreset3
@@ -1295,7 +1203,7 @@ SettingsPage {
                         font.pixelSize: SettingsTheme.fontStatus
                         visible: checkan3ntc.checked
                         enabled: chEnable3.checked
-                        onActivated: applyNtcPreset(currentText, t13, r13, t23, r23, t33, r33)
+                        onActivated: applyNtcPreset(3, currentText)
                     }
                 }
                 Item {
@@ -1475,7 +1383,6 @@ SettingsPage {
                     placeholderText: "AN 4"
                     enabled: chEnable4.checked
                     onEditingFinished: inputs.setInputs()
-                    Component.onCompleted: mainWindow.exan4nameRef = chName4
                 }
                 StyledComboBox {
                     id: modeCombo4
@@ -1498,7 +1405,7 @@ SettingsPage {
                         font.pixelSize: SettingsTheme.fontStatus
                         visible: !checkan4ntc.checked
                         enabled: chEnable4.checked
-                        onActivated: applyLinearPreset(currentText, ex40, ex45)
+                        onActivated: applyLinearPreset(4, currentText)
                     }
                     StyledComboBox {
                         id: ntcPreset4
@@ -1507,7 +1414,7 @@ SettingsPage {
                         font.pixelSize: SettingsTheme.fontStatus
                         visible: checkan4ntc.checked
                         enabled: chEnable4.checked
-                        onActivated: applyNtcPreset(currentText, t14, r14, t24, r24, t34, r34)
+                        onActivated: applyNtcPreset(4, currentText)
                     }
                 }
                 Item {
@@ -1687,7 +1594,6 @@ SettingsPage {
                     placeholderText: "AN 5"
                     enabled: chEnable5.checked
                     onEditingFinished: inputs.setInputs()
-                    Component.onCompleted: mainWindow.exan5nameRef = chName5
                 }
                 StyledComboBox {
                     id: modeCombo5
@@ -1710,7 +1616,7 @@ SettingsPage {
                         font.pixelSize: SettingsTheme.fontStatus
                         visible: !checkan5ntc.checked
                         enabled: chEnable5.checked
-                        onActivated: applyLinearPreset(currentText, ex50, ex55)
+                        onActivated: applyLinearPreset(5, currentText)
                     }
                     StyledComboBox {
                         id: ntcPreset5
@@ -1719,7 +1625,7 @@ SettingsPage {
                         font.pixelSize: SettingsTheme.fontStatus
                         visible: checkan5ntc.checked
                         enabled: chEnable5.checked
-                        onActivated: applyNtcPreset(currentText, t15, r15, t25, r25, t35, r35)
+                        onActivated: applyNtcPreset(5, currentText)
                     }
                 }
                 Item {
@@ -1899,7 +1805,6 @@ SettingsPage {
                     placeholderText: "AN 6"
                     enabled: chEnable6.checked
                     onEditingFinished: inputs.setInputs()
-                    Component.onCompleted: mainWindow.exan6nameRef = chName6
                 }
                 Text {
                     text: "Linear"
@@ -1916,7 +1821,7 @@ SettingsPage {
                     Layout.preferredHeight: SettingsTheme.controlHeight
                     font.pixelSize: SettingsTheme.fontStatus
                     enabled: chEnable6.checked
-                    onActivated: applyLinearPreset(currentText, ex60, ex65)
+                    onActivated: applyLinearPreset(6, currentText)
                 }
                 StyledTextField {
                     id: ex60
@@ -2019,7 +1924,6 @@ SettingsPage {
                     placeholderText: "AN 7"
                     enabled: chEnable7.checked
                     onEditingFinished: inputs.setInputs()
-                    Component.onCompleted: mainWindow.exan7nameRef = chName7
                 }
                 Text {
                     text: "Linear"
@@ -2036,7 +1940,7 @@ SettingsPage {
                     Layout.preferredHeight: SettingsTheme.controlHeight
                     font.pixelSize: SettingsTheme.fontStatus
                     enabled: chEnable7.checked
-                    onActivated: applyLinearPreset(currentText, ex70, ex75)
+                    onActivated: applyLinearPreset(7, currentText)
                 }
                 StyledTextField {
                     id: ex70
@@ -2307,8 +2211,11 @@ SettingsPage {
             }
 
             Repeater {
+                id: digitalNameRepeater
                 model: 8
                 RowLayout {
+                    property alias enableSwitch: diEnableSwitch
+                    property alias nameField: digiNameField
                     Layout.fillWidth: true
                     Layout.preferredHeight: SettingsTheme.controlHeight + 2
                     spacing: 8
@@ -2321,8 +2228,7 @@ SettingsPage {
                         Layout.preferredWidth: enableColW
                         Layout.preferredHeight: SettingsTheme.controlHeight
                         checked: true
-                        onCheckedChanged: AppSettings.setValue("ui/exboard/di" + (index + 1) + "_enabled", checked)
-                        Component.onCompleted: checked = AppSettings.getValue("ui/exboard/di" + (index + 1) + "_enabled", true)
+                        onCheckedChanged: inputs.setInputs()
                     }
 
                     StyledTextField {
@@ -2333,24 +2239,6 @@ SettingsPage {
                         placeholderText: "DI " + (index + 1)
                         enabled: diEnableSwitch.checked
                         onEditingFinished: inputs.setInputs()
-                        Component.onCompleted: {
-                            if (index === 0)
-                                mainWindow.exdigi1nameRef = digiNameField;
-                            else if (index === 1)
-                                mainWindow.exdigi2nameRef = digiNameField;
-                            else if (index === 2)
-                                mainWindow.exdigi3nameRef = digiNameField;
-                            else if (index === 3)
-                                mainWindow.exdigi4nameRef = digiNameField;
-                            else if (index === 4)
-                                mainWindow.exdigi5nameRef = digiNameField;
-                            else if (index === 5)
-                                mainWindow.exdigi6nameRef = digiNameField;
-                            else if (index === 6)
-                                mainWindow.exdigi7nameRef = digiNameField;
-                            else if (index === 7)
-                                mainWindow.exdigi8nameRef = digiNameField;
-                        }
                     }
 
                     Text {
@@ -2525,23 +2413,7 @@ SettingsPage {
             visible: gearSensorEnabled.checked
             text: "Save Gear Config"
             Layout.alignment: Qt.AlignRight
-            onClicked: {
-                var config = {
-                    enabled: gearSensorEnabled.checked,
-                    port: gearSensorPort.currentIndex,
-                    tolerance: parseFloat(gearTolerance.text),
-                    voltageN: parseFloat(gearVoltageN.text),
-                    voltageR: parseFloat(gearVoltageR.text),
-                    voltage1: parseFloat(gearVoltage1.text),
-                    voltage2: parseFloat(gearVoltage2.text),
-                    voltage3: parseFloat(gearVoltage3.text),
-                    voltage4: parseFloat(gearVoltage4.text),
-                    voltage5: parseFloat(gearVoltage5.text),
-                    voltage6: parseFloat(gearVoltage6.text)
-                };
-                AppSettings.writeGearSensorConfig(config);
-                Extender2.setGearVoltageConfig(config);
-            }
+            onClicked: ExBoardConfig.saveAllSettings(buildAllSettings())
         }
     }
 
@@ -2657,194 +2529,16 @@ SettingsPage {
             visible: speedSensorEnabled.checked
             text: "Save Speed Config"
             Layout.alignment: Qt.AlignRight
-            onClicked: {
-                var config = {
-                    enabled: speedSensorEnabled.checked,
-                    sourceType: speedSourceType.currentIndex === 0 ? "analog" : "digital",
-                    analogPort: speedAnalogPort.currentIndex,
-                    digitalPort: speedDigitalPort.currentIndex,
-                    pulsesPerRev: parseFloat(speedPulsesPerRev.text),
-                    voltageMultiplier: parseFloat(speedVoltageMultiplier.text),
-                    tireCircumference: parseFloat(speedTireCircumference.text),
-                    finalDriveRatio: parseFloat(speedFinalDriveRatio.text),
-                    unit: speedUnit.currentIndex === 0 ? "MPH" : "KPH"
-                };
-                AppSettings.writeSpeedSensorConfig(config);
-                Extender2.setSpeedSensorConfig(config);
-            }
+            onClicked: ExBoardConfig.saveAllSettings(buildAllSettings())
         }
     }
 
     Component.onCompleted: {
-        // Load linear calibration values
-        ex00.text = AppSettings.getValue("EXA00", "0");
-        ex05.text = AppSettings.getValue("EXA05", "5");
-        ex10.text = AppSettings.getValue("EXA10", "0");
-        ex15.text = AppSettings.getValue("EXA15", "5");
-        ex20.text = AppSettings.getValue("EXA20", "0");
-        ex25.text = AppSettings.getValue("EXA25", "5");
-        ex30.text = AppSettings.getValue("EXA30", "0");
-        ex35.text = AppSettings.getValue("EXA35", "5");
-        ex40.text = AppSettings.getValue("EXA40", "0");
-        ex45.text = AppSettings.getValue("EXA45", "5");
-        ex50.text = AppSettings.getValue("EXA50", "0");
-        ex55.text = AppSettings.getValue("EXA55", "5");
-        ex60.text = AppSettings.getValue("EXA60", "0");
-        ex65.text = AppSettings.getValue("EXA65", "5");
-        ex70.text = AppSettings.getValue("EXA70", "0");
-        ex75.text = AppSettings.getValue("EXA75", "5");
-
-        // Load NTC checkbox states
-        checkan0ntc.checkState = AppSettings.getValue("steinhartcalc0on", 0);
-        checkan1ntc.checkState = AppSettings.getValue("steinhartcalc1on", 0);
-        checkan2ntc.checkState = AppSettings.getValue("steinhartcalc2on", 0);
-        checkan3ntc.checkState = AppSettings.getValue("steinhartcalc3on", 0);
-        checkan4ntc.checkState = AppSettings.getValue("steinhartcalc4on", 0);
-        checkan5ntc.checkState = AppSettings.getValue("steinhartcalc5on", 0);
-
-        // Load voltage divider states
-        checkan0100.checkState = AppSettings.getValue("AN0R3VAL", 0);
-        checkan01k.checkState = AppSettings.getValue("AN0R4VAL", 0);
-        checkan1100.checkState = AppSettings.getValue("AN1R3VAL", 0);
-        checkan11k.checkState = AppSettings.getValue("AN1R4VAL", 0);
-        checkan2100.checkState = AppSettings.getValue("AN2R3VAL", 0);
-        checkan21k.checkState = AppSettings.getValue("AN2R4VAL", 0);
-        checkan3100.checkState = AppSettings.getValue("AN3R3VAL", 0);
-        checkan31k.checkState = AppSettings.getValue("AN3R4VAL", 0);
-        checkan4100.checkState = AppSettings.getValue("AN4R3VAL", 0);
-        checkan41k.checkState = AppSettings.getValue("AN4R4VAL", 0);
-        checkan5100.checkState = AppSettings.getValue("AN5R3VAL", 0);
-        checkan51k.checkState = AppSettings.getValue("AN5R4VAL", 0);
-
-        // Load rpmcheckbox compat
-        rpmcheckbox.checkState = AppSettings.getValue("ui/exboard/rpmcheckbox", 0);
-
-        // Load AN7 damping
-        an7dampingfactor.text = AppSettings.getValue("AN7Damping", "0");
-
-        // Load Steinhart T/R values
-        t10.text = AppSettings.getValue("T01", "0");
-        t20.text = AppSettings.getValue("T02", "0");
-        t30.text = AppSettings.getValue("T03", "0");
-        r10.text = AppSettings.getValue("R01", "0");
-        r20.text = AppSettings.getValue("R02", "0");
-        r30.text = AppSettings.getValue("R03", "0");
-        t11.text = AppSettings.getValue("T11", "0");
-        t21.text = AppSettings.getValue("T12", "0");
-        t31.text = AppSettings.getValue("T13", "0");
-        r11.text = AppSettings.getValue("R11", "0");
-        r21.text = AppSettings.getValue("R12", "0");
-        r31.text = AppSettings.getValue("R13", "0");
-        t12.text = AppSettings.getValue("T21", "0");
-        t22.text = AppSettings.getValue("T22", "0");
-        t32.text = AppSettings.getValue("T23", "0");
-        r12.text = AppSettings.getValue("R21", "0");
-        r22.text = AppSettings.getValue("R22", "0");
-        r32.text = AppSettings.getValue("R23", "0");
-        t13.text = AppSettings.getValue("T31", "0");
-        t23.text = AppSettings.getValue("T32", "0");
-        t33.text = AppSettings.getValue("T33", "0");
-        r13.text = AppSettings.getValue("R31", "0");
-        r23.text = AppSettings.getValue("R32", "0");
-        r33.text = AppSettings.getValue("R33", "0");
-        t14.text = AppSettings.getValue("T41", "0");
-        t24.text = AppSettings.getValue("T42", "0");
-        t34.text = AppSettings.getValue("T43", "0");
-        r14.text = AppSettings.getValue("R41", "0");
-        r24.text = AppSettings.getValue("R42", "0");
-        r34.text = AppSettings.getValue("R43", "0");
-        t15.text = AppSettings.getValue("T51", "0");
-        t25.text = AppSettings.getValue("T52", "0");
-        t35.text = AppSettings.getValue("T53", "0");
-        r15.text = AppSettings.getValue("R51", "0");
-        r25.text = AppSettings.getValue("R52", "0");
-        r35.text = AppSettings.getValue("R53", "0");
-
-        // Load board configuration
-        digitalExtender.currentIndex = AppSettings.getValue("ui/exboard/selectedValue", 0);
-        maxBrightnessBoot.checked = AppSettings.getValue("ui/exboard/switchValue", false);
-        rpmsourceselector.currentIndex = AppSettings.getValue("ui/exboard/rpmSource", 0);
-        cylindercombobox.currentIndex = AppSettings.getValue("ui/exboard/cylinderCombobox", 0);
-        cylindercomboboxv2.currentIndex = AppSettings.getValue("ui/exboard/cylinderComboboxV2", 0);
-        cylindercomboboxDi1.currentIndex = AppSettings.getValue("ui/exboard/cylinderComboboxDi1", 0);
-
-        // Load channel names via bridge fields
-        exan0nameField.text = AppSettings.getValue("ui/exboard/exan0name", "");
-        exan1nameField.text = AppSettings.getValue("ui/exboard/exan1name", "");
-        exan2nameField.text = AppSettings.getValue("ui/exboard/exan2name", "");
-        exan3nameField.text = AppSettings.getValue("ui/exboard/exan3name", "");
-        exan4nameField.text = AppSettings.getValue("ui/exboard/exan4name", "");
-        exan5nameField.text = AppSettings.getValue("ui/exboard/exan5name", "");
-        exan6nameField.text = AppSettings.getValue("ui/exboard/exan6name", "");
-        exan7nameField.text = AppSettings.getValue("ui/exboard/exan7name", "");
-        exdigi1nameField.text = AppSettings.getValue("ui/exboard/exdigi1name", "");
-        exdigi2nameField.text = AppSettings.getValue("ui/exboard/exdigi2name", "");
-        exdigi3nameField.text = AppSettings.getValue("ui/exboard/exdigi3name", "");
-        exdigi4nameField.text = AppSettings.getValue("ui/exboard/exdigi4name", "");
-        exdigi5nameField.text = AppSettings.getValue("ui/exboard/exdigi5name", "");
-        exdigi6nameField.text = AppSettings.getValue("ui/exboard/exdigi6name", "");
-        exdigi7nameField.text = AppSettings.getValue("ui/exboard/exdigi7name", "");
-        exdigi8nameField.text = AppSettings.getValue("ui/exboard/exdigi8name", "");
-
-        // Load channel enable states (default enabled for backward compatibility)
-        chEnable0.checked = AppSettings.getValue("ui/exboard/ch0_enabled", true);
-        chEnable1.checked = AppSettings.getValue("ui/exboard/ch1_enabled", true);
-        chEnable2.checked = AppSettings.getValue("ui/exboard/ch2_enabled", true);
-        chEnable3.checked = AppSettings.getValue("ui/exboard/ch3_enabled", true);
-        chEnable4.checked = AppSettings.getValue("ui/exboard/ch4_enabled", true);
-        chEnable5.checked = AppSettings.getValue("ui/exboard/ch5_enabled", true);
-        chEnable6.checked = AppSettings.getValue("ui/exboard/ch6_enabled", true);
-        chEnable7.checked = AppSettings.getValue("ui/exboard/ch7_enabled", true);
-
-        // Set mode combos from NTC checkbox states
-        modeCombo0.currentIndex = checkan0ntc.checked ? 1 : 0;
-        modeCombo1.currentIndex = checkan1ntc.checked ? 1 : 0;
-        modeCombo2.currentIndex = checkan2ntc.checked ? 1 : 0;
-        modeCombo3.currentIndex = checkan3ntc.checked ? 1 : 0;
-        modeCombo4.currentIndex = checkan4ntc.checked ? 1 : 0;
-        modeCombo5.currentIndex = checkan5ntc.checked ? 1 : 0;
-
-        // Load gear sensor config
-        var gearConfig = AppSettings.readGearSensorConfig();
-        if (gearConfig.enabled !== undefined) {
-            gearSensorEnabled.checked = gearConfig.enabled === true || gearConfig.enabled === "true";
-            gearSensorPort.currentIndex = Number(gearConfig.port) || 0;
-            gearTolerance.text = String(gearConfig.tolerance || "0.2");
-            gearVoltageN.text = String(gearConfig.voltageN || "0.0");
-            gearVoltageR.text = String(gearConfig.voltageR || "0.5");
-            gearVoltage1.text = String(gearConfig.voltage1 || "1.0");
-            gearVoltage2.text = String(gearConfig.voltage2 || "1.5");
-            gearVoltage3.text = String(gearConfig.voltage3 || "2.0");
-            gearVoltage4.text = String(gearConfig.voltage4 || "2.5");
-            gearVoltage5.text = String(gearConfig.voltage5 || "3.0");
-            gearVoltage6.text = String(gearConfig.voltage6 || "3.5");
-            if (gearSensorEnabled.checked) {
-                Extender2.setGearVoltageConfig(gearConfig);
-            }
-        }
-
-        // Load speed sensor config
-        var speedConfig = AppSettings.readSpeedSensorConfig();
-        if (speedConfig.enabled !== undefined) {
-            speedSensorEnabled.checked = speedConfig.enabled === true || speedConfig.enabled === "true";
-            speedSourceType.currentIndex = speedConfig.sourceType === "digital" ? 1 : 0;
-            speedAnalogPort.currentIndex = Number(speedConfig.analogPort) || 0;
-            speedDigitalPort.currentIndex = Number(speedConfig.digitalPort) || 0;
-            speedPulsesPerRev.text = String(speedConfig.pulsesPerRev || "4.0");
-            speedVoltageMultiplier.text = String(speedConfig.voltageMultiplier || "1.0");
-            speedTireCircumference.text = String(speedConfig.tireCircumference || "2.06");
-            speedFinalDriveRatio.text = String(speedConfig.finalDriveRatio || "1.0");
-            speedUnit.currentIndex = speedConfig.unit === "KPH" ? 1 : 0;
-            if (speedSensorEnabled.checked) {
-                Extender2.setSpeedSensorConfig(speedConfig);
-            }
-        }
-
-        inputs.setInputs();
+        loadAllSettingsFromManager();
     }
 
     function executeOnBootAction() {
-        if (AppSettings.getValue("ui/exboard/switchValue", false)) {
+        if (maxBrightnessBoot.checked) {
             maxBrightnessOnBoot = 1;
         }
     }

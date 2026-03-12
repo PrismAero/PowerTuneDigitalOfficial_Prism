@@ -32,6 +32,11 @@ public:
     Q_INVOKABLE void setValue(const QString &key, const QVariant &value);
     Q_INVOKABLE QVariant getValue(const QString &key, const QVariant &defaultValue = QVariant()) const;
     Q_INVOKABLE void sync();
+    Q_INVOKABLE void setSpeedUnitIndex(int index);
+    Q_INVOKABLE void setTempUnitIndex(int index);
+    Q_INVOKABLE void setPressureUnitIndex(int index);
+    Q_INVOKABLE void setEcuIndex(int index);
+    Q_INVOKABLE void setMainSpeedSourceIndex(int index);
 
     Q_INVOKABLE int getBaudRate();
     Q_INVOKABLE void setBaudRate(const int &arg);

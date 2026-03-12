@@ -16,6 +16,9 @@ SettingsPage {
     readonly property int _statusRowSpacing: 2
     readonly property int _statusLabelWidth: 100
 
+    Component.onCompleted: Diagnostics.setPageVisible(true)
+    Component.onDestruction: Diagnostics.setPageVisible(false)
+
     ListModel {
         id: logLevelModel
         ListElement {
@@ -838,7 +841,7 @@ SettingsPage {
                     }
                 }
                 Text {
-                    text: model.customName !== undefined ? model.customName : ""
+                    text: model.label !== undefined ? model.label : ""
                     font.pixelSize: SettingsTheme.fontCaption
                     font.family: SettingsTheme.fontFamily
                     color: SettingsTheme.textSecondary
