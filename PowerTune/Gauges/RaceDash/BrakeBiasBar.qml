@@ -77,6 +77,7 @@ Item {
         height: 19
         radius: 9
         gradient: Gradient {
+            orientation: Gradient.Horizontal
             GradientStop { position: 0.0; color: "#FF0909" }
             GradientStop { position: 0.5; color: "#1ED033" }
             GradientStop { position: 1.0; color: "#FF0909" }
@@ -87,7 +88,7 @@ Item {
         id: biasPointer
         width: 3
         height: 30
-        color: "#FFFFFF"
+        color: '#ff0000'
         anchors.bottom: biasTrack.bottom
         x: biasTrack.x + progress * biasTrack.width - width / 2
     }
@@ -96,7 +97,7 @@ Item {
         width: 8
         height: 8
         radius: 4
-        color: "#FFFFFF"
+        color: '#ff0000'
         anchors.horizontalCenter: biasPointer.horizontalCenter
         anchors.bottom: parent.bottom
     }
