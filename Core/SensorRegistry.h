@@ -99,11 +99,11 @@ public:
      * @param category Category filter (empty string = all)
      * @return List of sensor maps with keys: key, displayName, category, unit, source, active
      */
-    Q_INVOKABLE QVariantList; getSensorsByCategory(const QString &category = QString(), bool activeOnly = false) const;
-    Q_INVOKABLE QVariantList; getActiveSensors() const;
-    Q_INVOKABLE QStringList; sensorDisplayNames(const QString &category = QString(), bool activeOnly = false) const;
-    Q_INVOKABLE QStringList; sensorKeys(const QString &category = QString(), bool activeOnly = false) const;
-    Q_INVOKABLE int; indexOfSensorKey(const QString &key, const QString &category = QString()) const;
+    Q_INVOKABLE QVariantList getSensorsByCategory(const QString &category = QString(), bool activeOnly = false) const;
+    Q_INVOKABLE QVariantList getActiveSensors() const;
+    Q_INVOKABLE QStringList sensorDisplayNames(const QString &category = QString(), bool activeOnly = false) const;
+    Q_INVOKABLE QStringList sensorKeys(const QString &category = QString(), bool activeOnly = false) const;
+    Q_INVOKABLE int indexOfSensorKey(const QString &key, const QString &category = QString()) const;
 
     /**
      * @brief Check from QML if a sensor key is available.

@@ -22,84 +22,98 @@ SettingsPage {
 
     function ecuDropdownFromBackend(backendIdx) {
         for (var i = 0; i < ecuBackendMap.length; i++) {
-            if (ecuBackendMap[i] === backendIdx) return i
+            if (ecuBackendMap[i] === backendIdx)
+                return i;
         }
-        return 0
+        return 0;
     }
 
     function autoConnect() {
         if (connectButton.enabled === false) {
-            connectEcu()
-            ecuSelect.enabled = false
-            disconnectButton.enabled = true
+            connectEcu();
+            ecuSelect.enabled = false;
+            disconnectButton.enabled = true;
         }
     }
 
     function updateWeightLabel() {
         if (unitSelect.currentIndex === 0)
-            weightRow.label = Translator.translate("Weight", Settings.language) + " kg"
+            weightRow.label = Translator.translate("Weight", Settings.language) + " kg";
         if (unitSelect.currentIndex === 1)
-            weightRow.label = Translator.translate("Weight", Settings.language) + " lbs"
+            weightRow.label = Translator.translate("Weight", Settings.language) + " lbs";
     }
 
     function toggleDataLogger() {
         if (loggerswitch.checked) {
-            loggerActive = true
-            Logger.startLog(logfilenameSelect.text)
+            loggerActive = true;
+            Logger.startLog(logfilenameSelect.text);
         } else {
-            loggerActive = false
-            Logger.stopLog()
+            loggerActive = false;
+            Logger.stopLog();
         }
     }
 
     function connectEcu() {
-        Connect.setOdometer(odometer.text)
-        Connect.setWeight(weight.text)
-        var backendIdx = ecuBackendMap[ecuSelect.currentIndex]
-        Connect.openConnection("", backendIdx, baseadresstext.text, shiftlightbaseadresstext.text)
-        connected = 1
+        Connect.setOdometer(odometer.text);
+        Connect.setWeight(weight.text);
+        var backendIdx = ecuBackendMap[ecuSelect.currentIndex];
+        Connect.openConnection("", backendIdx, baseadresstext.text, shiftlightbaseadresstext.text);
+        connected = 1;
     }
 
     function disconnectEcu() {
-        Connect.closeConnection()
-        connected = 0
+        Connect.closeConnection();
+        connected = 0;
     }
 
     function triggerWarning() {
     }
 
     function applyLanguage() {
-        AppSettings.writeLanguage(languageselect.currentIndex)
+        AppSettings.writeLanguage(languageselect.currentIndex);
     }
 
     Component.onCompleted: {
-        connectButton.enabled = AppSettings.getValue("ui/connectAtStartup", false)
-        weight.text = AppSettings.getValue("ui/vehicleWeight", "0")
-        unitSelect1.currentIndex = AppSettings.getValue("ui/unitSelector1", 0)
-        unitSelect.currentIndex = AppSettings.getValue("ui/unitSelector", 0)
-        unitSelect2.currentIndex = AppSettings.getValue("ui/unitSelector2", 0)
-        odometer.text = AppSettings.getValue("ui/odometer", "0")
-        tripmeter.text = AppSettings.getValue("ui/tripmeter", "0")
-        baseadresstext.text = AppSettings.getValue("ui/extenderCanBase", "")
-        shiftlightbaseadresstext.text = AppSettings.getValue("ui/shiftLightCanBase", "")
-        languageselect.currentIndex = AppSettings.getValue("Language", 0)
-        mainspeedsource.currentIndex = AppSettings.getValue("ui/mainSpeedSource", 0)
-        canbitrateselect.currentIndex = AppSettings.getValue("ui/bitrateSelect", 0)
-        Vehicle.setTrip(tripmeter.text)
-        settingsLoaded = true
-        autoConnect()
+        connectButton.enabled = AppSettings.getValue("ui/connectAtStartup", false);
+        weight.text = AppSettings.getValue("ui/vehicleWeight", "0");
+        unitSelect1.currentIndex = AppSettings.getValue("ui/unitSelector1", 0);
+        unitSelect.currentIndex = AppSettings.getValue("ui/unitSelector", 0);
+        unitSelect2.currentIndex = AppSettings.getValue("ui/unitSelector2", 0);
+        odometer.text = AppSettings.getValue("ui/odometer", "0");
+        tripmeter.text = AppSettings.getValue("ui/tripmeter", "0");
+        baseadresstext.text = AppSettings.getValue("ui/extenderCanBase", "");
+        shiftlightbaseadresstext.text = AppSettings.getValue("ui/shiftLightCanBase", "");
+        languageselect.currentIndex = AppSettings.getValue("Language", 0);
+        mainspeedsource.currentIndex = AppSettings.getValue("ui/mainSpeedSource", 0);
+        canbitrateselect.currentIndex = AppSettings.getValue("ui/bitrateSelect", 0);
+        Vehicle.setTrip(tripmeter.text);
+        settingsLoaded = true;
+        autoConnect();
     }
 
     Connections {
         target: Vehicle
-        function onOdoChanged() { odometer.text = Vehicle.Odo.toFixed(3) }
-        function onTripChanged() { tripmeter.text = Vehicle.Trip.toFixed(3) }
+        function onOdoChanged() {
+            odometer.text = Vehicle.Odo.toFixed(3);
+        }
+        function onTripChanged() {
+            tripmeter.text = Vehicle.Trip.toFixed(3);
+        }
     }
     Connections {
         target: Engine
-        function onWatertempChanged() { if (Engine.Watertemp > Settings.waterwarn) triggerWarning() }
-        function onRpmChanged() { if (Engine.rpm > Settings.rpmwarn) triggerWarning() }
-        function onKnockChanged() { if (Engine.Knock > Settings.knockwarn) triggerWarning() }
+        function onWatertempChanged() {
+            if (Engine.Watertemp > Settings.waterwarn)
+                triggerWarning();
+        }
+        function onRpmChanged() {
+            if (Engine.rpm > Settings.rpmwarn)
+                triggerWarning();
+        }
+        function onKnockChanged() {
+            if (Engine.Knock > Settings.knockwarn)
+                triggerWarning();
+        }
     }
 
     RowLayout {
@@ -122,12 +136,13 @@ SettingsPage {
                     StyledButton {
                         id: connectButton
                         text: Translator.translate("Connect", Settings.language)
-                        onEnabledChanged: if (settingsLoaded) AppSettings.setValue("ui/connectAtStartup", enabled)
+                        onEnabledChanged: if (settingsLoaded)
+                            AppSettings.setValue("ui/connectAtStartup", enabled)
                         onClicked: {
-                            connectEcu()
-                            connectButton.enabled = false
-                            ecuSelect.enabled = false
-                            disconnectButton.enabled = true
+                            connectEcu();
+                            connectButton.enabled = false;
+                            ecuSelect.enabled = false;
+                            disconnectButton.enabled = true;
                         }
                     }
                     StyledButton {
@@ -136,10 +151,10 @@ SettingsPage {
                         primary: false
                         enabled: false
                         onClicked: {
-                            connectButton.enabled = true
-                            disconnectButton.enabled = false
-                            ecuSelect.enabled = true
-                            disconnectEcu()
+                            connectButton.enabled = true;
+                            disconnectButton.enabled = false;
+                            ecuSelect.enabled = true;
+                            disconnectEcu();
                         }
                     }
                 }
@@ -151,9 +166,11 @@ SettingsPage {
                         height: parent.height
                         statusText: Diagnostics.canStatusText
                         status: {
-                            if (Diagnostics.canStatusText === "Active") return "connected"
-                            if (Diagnostics.canStatusText === "Waiting") return "pending"
-                            return "disconnected"
+                            if (Diagnostics.canStatusText === "Active")
+                                return "connected";
+                            if (Diagnostics.canStatusText === "Waiting")
+                                return "pending";
+                            return "disconnected";
                         }
                     }
                 }
@@ -168,17 +185,17 @@ SettingsPage {
                         property bool initialized: false
                         onCurrentIndexChanged: {
                             if (initialized) {
-                                var backendIdx = ecuBackendMap[currentIndex]
-                                AppSettings.setECU(backendIdx)
-                                Connection.setecu(backendIdx)
+                                var backendIdx = ecuBackendMap[currentIndex];
+                                AppSettings.setECU(backendIdx);
+                                Connection.setecu(backendIdx);
                             }
                         }
                         Component.onCompleted: {
-                            var stored = AppSettings.getECU()
-                            currentIndex = ecuDropdownFromBackend(stored)
-                            Connection.setecu(ecuBackendMap[currentIndex])
-                            initialized = true
-                            autoConnect()
+                            var stored = AppSettings.getECU();
+                            currentIndex = ecuDropdownFromBackend(stored);
+                            Connection.setecu(ecuBackendMap[currentIndex]);
+                            initialized = true;
+                            autoConnect();
                         }
                     }
                 }
@@ -196,13 +213,14 @@ SettingsPage {
                         height: parent.height
                         model: [Translator.translate("Metric", Settings.language), Translator.translate("Imperial", Settings.language)]
                         Component.onCompleted: {
-                            Connect.setSpeedUnits(currentIndex)
-                            updateWeightLabel()
+                            Connect.setSpeedUnits(currentIndex);
+                            updateWeightLabel();
                         }
                         onCurrentIndexChanged: {
-                            Connect.setSpeedUnits(currentIndex)
-                            updateWeightLabel()
-                            if (settingsLoaded) AppSettings.setValue("ui/unitSelector1", currentIndex)
+                            Connect.setSpeedUnits(currentIndex);
+                            updateWeightLabel();
+                            if (settingsLoaded)
+                                AppSettings.setValue("ui/unitSelector1", currentIndex);
                         }
                     }
                 }
@@ -215,13 +233,14 @@ SettingsPage {
                         height: parent.height
                         model: [Translator.translate("C", Settings.language), Translator.translate("F", Settings.language)]
                         Component.onCompleted: {
-                            Connect.setUnits(currentIndex)
-                            updateWeightLabel()
+                            Connect.setUnits(currentIndex);
+                            updateWeightLabel();
                         }
                         onCurrentIndexChanged: {
-                            Connect.setUnits(currentIndex)
-                            updateWeightLabel()
-                            if (settingsLoaded) AppSettings.setValue("ui/unitSelector", currentIndex)
+                            Connect.setUnits(currentIndex);
+                            updateWeightLabel();
+                            if (settingsLoaded)
+                                AppSettings.setValue("ui/unitSelector", currentIndex);
                         }
                     }
                 }
@@ -235,8 +254,9 @@ SettingsPage {
                         model: ["kPa", "PSI"]
                         Component.onCompleted: Connect.setPressUnits(currentIndex)
                         onCurrentIndexChanged: {
-                            Connect.setPressUnits(currentIndex)
-                            if (settingsLoaded) AppSettings.setValue("ui/unitSelector2", currentIndex)
+                            Connect.setPressUnits(currentIndex);
+                            if (settingsLoaded)
+                                AppSettings.setValue("ui/unitSelector2", currentIndex);
                         }
                     }
                 }
@@ -274,7 +294,8 @@ SettingsPage {
                         height: parent.height
                         text: "0"
                         inputMethodHints: Qt.ImhFormattedNumbersOnly
-                        onTextChanged: if (settingsLoaded) AppSettings.setValue("ui/odometer", text)
+                        onTextChanged: if (settingsLoaded)
+                            AppSettings.setValue("ui/odometer", text)
                     }
                 }
 
@@ -295,7 +316,8 @@ SettingsPage {
                         Layout.preferredHeight: SettingsTheme.controlHeight
                         text: "0"
                         readOnly: true
-                        onTextChanged: if (settingsLoaded) AppSettings.setValue("ui/tripmeter", text)
+                        onTextChanged: if (settingsLoaded)
+                            AppSettings.setValue("ui/tripmeter", text)
                     }
                     StyledButton {
                         text: Translator.translate("Trip Reset", Settings.language)
@@ -317,7 +339,8 @@ SettingsPage {
                         width: parent.width
                         height: parent.height
                         model: ["250 kbit/s", "500 kbit/s", "1 Mbit/s"]
-                        onCurrentIndexChanged: if (settingsLoaded) AppSettings.setValue("ui/bitrateSelect", currentIndex)
+                        onCurrentIndexChanged: if (settingsLoaded)
+                            AppSettings.setValue("ui/bitrateSelect", currentIndex)
                     }
                 }
 
@@ -351,8 +374,8 @@ SettingsPage {
                         model: ["ECU Speed", "LF Wheel", "RF Wheel", "LR Wheel", "RR Wheel", "GPS", "VR Sensor"]
                         onCurrentIndexChanged: {
                             if (settingsLoaded) {
-                                AppSettings.writeStartupSettings(mainspeedsource.currentIndex)
-                                AppSettings.setValue("ui/mainSpeedSource", currentIndex)
+                                AppSettings.writeStartupSettings(mainspeedsource.currentIndex);
+                                AppSettings.setValue("ui/mainSpeedSource", currentIndex);
                             }
                         }
                     }
@@ -361,8 +384,8 @@ SettingsPage {
                 StyledButton {
                     text: Translator.translate("Apply Startup", Settings.language)
                     onClicked: {
-                        Connect.daemonstartup(genericCanDaemonIndex)
-                        Connect.canbitratesetup(canbitrateselect.currentIndex)
+                        Connect.daemonstartup(genericCanDaemonIndex);
+                        Connect.canbitratesetup(canbitrateselect.currentIndex);
                     }
                 }
             }
@@ -426,7 +449,10 @@ SettingsPage {
                         enabled: connectButton.enabled
                         placeholderText: "1024"
                         inputMethodHints: Qt.ImhFormattedNumbersOnly
-                        validator: IntValidator { bottom: 0; top: 4000 }
+                        validator: IntValidator {
+                            bottom: 0
+                            top: 4000
+                        }
                         onTextChanged: hexstring = parseInt(baseadresstext.text) || 0
                         onEditingFinished: AppSettings.setValue("ui/extenderCanBase", text)
                     }
@@ -439,7 +465,10 @@ SettingsPage {
                     }
                 }
 
-                Item { height: SettingsTheme.contentSpacing / 2; Layout.fillWidth: true }
+                Item {
+                    height: SettingsTheme.contentSpacing / 2
+                    Layout.fillWidth: true
+                }
 
                 Text {
                     text: "Shiftlight CAN"
@@ -465,7 +494,10 @@ SettingsPage {
                         enabled: connectButton.enabled
                         placeholderText: "1024"
                         inputMethodHints: Qt.ImhFormattedNumbersOnly
-                        validator: IntValidator { bottom: 0; top: 4000 }
+                        validator: IntValidator {
+                            bottom: 0
+                            top: 4000
+                        }
                         onTextChanged: hexstring2 = parseInt(shiftlightbaseadresstext.text) || 0
                         onEditingFinished: AppSettings.setValue("ui/shiftLightCanBase", text)
                     }
@@ -498,9 +530,10 @@ SettingsPage {
                     Layout.fillWidth: true
                     model: ["English", "Deutsch", "\u65E5\u672C\u8A9E", "Espanol"]
                     onCurrentIndexChanged: {
-                        applyLanguage()
-                        updateWeightLabel()
-                        if (settingsLoaded) AppSettings.setValue("Language", currentIndex)
+                        applyLanguage();
+                        updateWeightLabel();
+                        if (settingsLoaded)
+                            AppSettings.setValue("Language", currentIndex);
                     }
                 }
             }
@@ -540,5 +573,4 @@ SettingsPage {
             }
         }
     }
-
 }

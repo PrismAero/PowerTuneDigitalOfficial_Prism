@@ -728,7 +728,7 @@ SettingsPage {
                     Layout.preferredWidth: 80
                 }
                 Text {
-                    text: model.rawValue !== undefined ? Number(model.rawValue).toFixed(3) : ""
+                    text: model.rawVoltage !== undefined ? Number(model.rawVoltage).toFixed(3) : ""
                     font.pixelSize: SettingsTheme.fontCaption
                     font.family: SettingsTheme.fontFamily
                     color: SettingsTheme.textSecondary

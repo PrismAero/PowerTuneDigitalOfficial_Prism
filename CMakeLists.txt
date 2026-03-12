@@ -174,9 +174,6 @@ qt_policy(SET QTP0004 OLD)
     set_source_files_properties(PowerTune/Utils/Translator.qml PROPERTIES
         QT_QML_SINGLETON_TYPE TRUE
     )
-    set_source_files_properties(PowerTune/Gauges/Shared/DatasourceService.qml PROPERTIES
-        QT_QML_SINGLETON_TYPE TRUE
-    )
     set_source_files_properties(PowerTune/Dashboard/DashboardTheme.qml PROPERTIES
         QT_QML_SINGLETON_TYPE TRUE
     )
