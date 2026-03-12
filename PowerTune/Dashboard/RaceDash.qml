@@ -34,7 +34,7 @@ Item {
                 testLoopEnabled: false,
                 testLoopDuration: 1800,
                 arcColorStart: "#8F4D17",
-                arcColorMid: "#FF8A00",
+                arcColorMid: "",
                 arcColorMidPos: 0.65,
                 arcColorEnd: "#B00000",
                 warningEnabled: false,

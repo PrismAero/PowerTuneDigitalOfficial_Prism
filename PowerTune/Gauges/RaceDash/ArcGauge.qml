@@ -27,7 +27,12 @@ Item {
     property bool testLoopEnabled: config.testLoopEnabled === true || config.testLoopEnabled === "true"
     property int testLoopDuration: config.testLoopDuration !== undefined ? Number(config.testLoopDuration) : 1800
     property string arcColorStart: config.arcColorStart !== undefined ? config.arcColorStart : (shapeMode === "speedSvg" ? "#7A0D0D" : "#8F4D17")
-    property string arcColorMid: config.arcColorMid !== undefined ? config.arcColorMid : (shapeMode === "speedSvg" ? "#E11B1B" : "#FF8A00")
+    property string arcColorMid: {
+        var raw = config.arcColorMid !== undefined ? config.arcColorMid : (shapeMode === "speedSvg" ? "#E11B1B" : "#FF8A00")
+        if (raw === "" || raw === "0" || raw === "none" || raw === "transparent")
+            return ""
+        return raw
+    }
     property real arcColorMidPos: config.arcColorMidPos !== undefined ? Number(config.arcColorMidPos) : 0.65
     property string arcColorEnd: config.arcColorEnd !== undefined ? config.arcColorEnd : (shapeMode === "speedSvg" ? "#B00000" : "#B00000")
     property real valueOffsetY: config.valueOffsetY !== undefined ? Number(config.valueOffsetY) : (shapeMode === "speedSvg" ? 62 : 94)
