@@ -33,30 +33,34 @@ class VehicleData;
 class ConnectionData;
 class SteinhartCalculator;
 class SensorRegistry;
+class DiagnosticsProvider;
 
 static constexpr int EX_ANALOG_CHANNELS = 8;
 
-struct ChannelCalibration {
+struct ChannelCalibration
+{
     qreal val0v = 0.0;
     qreal val5v = 5.0;
     bool ntcEnabled = false;
 };
 
-struct GearVoltageConfig {
+struct GearVoltageConfig
+{
     bool enabled = false;
-    int port = 0;           // Which EXAnalog port (0-7)
-    double tolerance = 0.2; // Voltage tolerance +/-
-    double voltageN = 0.0;  // Neutral
-    double voltageR = 0.5;  // Reverse
-    double voltage1 = 1.0;  // 1st gear
-    double voltage2 = 1.5;  // 2nd
-    double voltage3 = 2.0;  // 3rd
-    double voltage4 = 2.5;  // 4th
-    double voltage5 = 3.0;  // 5th
-    double voltage6 = 3.5;  // 6th
+    int port = 0;            // Which EXAnalog port (0-7)
+    double tolerance = 0.2;  // Voltage tolerance +/-
+    double voltageN = 0.0;   // Neutral
+    double voltageR = 0.5;   // Reverse
+    double voltage1 = 1.0;   // 1st gear
+    double voltage2 = 1.5;   // 2nd
+    double voltage3 = 2.0;   // 3rd
+    double voltage4 = 2.5;   // 4th
+    double voltage5 = 3.0;   // 5th
+    double voltage6 = 3.5;   // 6th
 };
 
-struct SpeedSensorConfig {
+struct SpeedSensorConfig
+{
     bool enabled = false;
     QString sourceType = "analog";  // "analog" or "digital"
     int analogPort = 0;
@@ -85,6 +89,7 @@ public:
 
     void setSteinhartCalculator(SteinhartCalculator *calc);
     void setSensorRegistry(SensorRegistry *reg) { m_sensorRegistry = reg; }
+    void setDiagnosticsProvider(DiagnosticsProvider *diag) { m_diagnosticsProvider = diag; }
     void connectCalibrationSignals();
 
     Q_INVOKABLE void setGearVoltageConfig(const QVariantMap &config);
@@ -118,6 +123,7 @@ private:
     ConnectionData *m_connectionData;
     SteinhartCalculator *m_steinhartCalc = nullptr;
     SensorRegistry *m_sensorRegistry = nullptr;
+    DiagnosticsProvider *m_diagnosticsProvider = nullptr;
 
     double pkgpayload[8];
     struct payload

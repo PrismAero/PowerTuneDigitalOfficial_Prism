@@ -16,14 +16,14 @@
 #ifndef DIAGNOSTICSPROVIDER_H
 #define DIAGNOSTICSPROVIDER_H
 
+#include <QDateTime>
+#include <QElapsedTimer>
 #include <QObject>
-#include <QVariantList>
-#include <QVariantMap>
 #include <QString>
 #include <QStringList>
 #include <QTimer>
-#include <QElapsedTimer>
-#include <QDateTime>
+#include <QVariantList>
+#include <QVariantMap>
 
 class SensorRegistry;
 class PropertyRouter;
@@ -126,6 +126,12 @@ class DiagnosticsProvider : public QObject
 
     /// Current minimum log level: 0=DEBUG, 1=INFO, 2=WARN, 3=ERROR
     Q_PROPERTY(int logLevel READ logLevel WRITE setLogLevel NOTIFY logLevelChanged)
+
+    // -- CAN Frame Capture --
+
+    Q_PROPERTY(QVariantList canFrameBuffer READ canFrameBuffer NOTIFY canFrameBufferChanged)
+    Q_PROPERTY(bool canCaptureEnabled READ canCaptureEnabled WRITE setCanCaptureEnabled NOTIFY canCaptureEnabledChanged)
+    Q_PROPERTY(QString canIdFilter READ canIdFilter WRITE setCanIdFilter NOTIFY canIdFilterChanged)
 
 public:
     /**
@@ -354,6 +360,19 @@ public:
      */
     Q_INVOKABLE void clearLog();
 
+    // -- CAN Frame Capture --
+
+    QVariantList canFrameBuffer() const;
+    bool canCaptureEnabled() const;
+    void setCanCaptureEnabled(bool enabled);
+    QString canIdFilter() const;
+    void setCanIdFilter(const QString &filter);
+
+    Q_INVOKABLE void resetCanErrors();
+    Q_INVOKABLE void clearCanFrameBuffer();
+
+    void recordCanFrame(quint32 id, const QByteArray &payload);
+
     // -- CAN tracking (called from UDPReceiver/connect) --
 
     /**
@@ -404,6 +423,15 @@ signals:
 
     /// Emitted when showAllSensors filter changes
     void showAllSensorsChanged();
+
+    /// Emitted when CAN frame buffer changes
+    void canFrameBufferChanged();
+
+    /// Emitted when CAN capture state changes
+    void canCaptureEnabledChanged();
+
+    /// Emitted when CAN ID filter changes
+    void canIdFilterChanged();
 
     /// Emitted when log buffer is modified
     void logChanged();
@@ -466,14 +494,15 @@ private:
     SensorRegistry *m_sensorRegistry = nullptr;
     PropertyRouter *m_propertyRouter = nullptr;
 
-    struct LogEntry {
-        int level;       // 0=DEBUG, 1=INFO, 2=WARN, 3=ERROR
-        QString text;    // Formatted "[HH:mm:ss] [LEVEL] message"
+    struct LogEntry
+    {
+        int level;     // 0=DEBUG, 1=INFO, 2=WARN, 3=ERROR
+        QString text;  // Formatted "[HH:mm:ss] [LEVEL] message"
     };
 
     QList<LogEntry> m_logEntries;
-    QStringList m_logMessages;   // cached formatted strings for QML
-    int m_logLevel = 0;          // minimum level to display (0=all)
+    QStringList m_logMessages;  // cached formatted strings for QML
+    int m_logLevel = 0;         // minimum level to display (0=all)
     static constexpr int MAX_LOG_ENTRIES = 500;
 
     void rebuildLogCache();
@@ -481,6 +510,19 @@ private:
     // Live sensor table
     QVariantList m_liveSensorEntries;
     bool m_showAllSensors = true;
+
+    // CAN frame capture
+    struct CapturedCanFrame
+    {
+        quint32 frameId;
+        QByteArray payload;
+        qint64 timestamp;
+    };
+    QVector<CapturedCanFrame> m_canFrameRing;
+    int m_canFrameWritePos = 0;
+    bool m_canCaptureEnabled = false;
+    QString m_canIdFilter;
+    static constexpr int MAX_CAN_FRAMES = 500;
 
     // Timers
     QTimer m_systemInfoTimer;  // 2-second interval for system info
@@ -516,4 +558,4 @@ private:
     static void qtMessageHandler(QtMsgType type, const QMessageLogContext &context, const QString &msg);
 };
 
-#endif // DIAGNOSTICSPROVIDER_H
+#endif  // DIAGNOSTICSPROVIDER_H

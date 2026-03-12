@@ -9,18 +9,20 @@
 
 #include "Extender.h"
 
+#include "../Core/Models/ConnectionData.h"
 #include "../Core/Models/DigitalInputs.h"
-#include "../Core/Models/ExpanderBoardData.h"
 #include "../Core/Models/EngineData.h"
+#include "../Core/Models/ExpanderBoardData.h"
 #include "../Core/Models/SettingsData.h"
 #include "../Core/Models/VehicleData.h"
-#include "../Core/Models/ConnectionData.h"
+#include "../Core/DiagnosticsProvider.h"
 #include "../Core/SensorRegistry.h"
 #include "../Utils/SteinhartCalculator.h"
 
 #include <QDebug>
 #include <QVector>
 #include <QtEndian>
+
 #include <cmath>
 
 
@@ -30,34 +32,28 @@ static constexpr int HZ_AVERAGE_WINDOW = 10;
 
 
 Extender::Extender(QObject *parent)
-    : QObject(parent)
-    , m_digitalInputs(nullptr)
-    , m_expanderBoardData(nullptr)
-    , m_engineData(nullptr)
-    , m_settingsData(nullptr)
-    , m_vehicleData(nullptr)
-    , m_connectionData(nullptr)
-    , m_hzAverage(HZ_AVERAGE_WINDOW, 0)
-{
-}
+    : QObject(parent),
+      m_digitalInputs(nullptr),
+      m_expanderBoardData(nullptr),
+      m_engineData(nullptr),
+      m_settingsData(nullptr),
+      m_vehicleData(nullptr),
+      m_connectionData(nullptr),
+      m_hzAverage(HZ_AVERAGE_WINDOW, 0)
+{}
 
-Extender::Extender(DigitalInputs *digitalInputs,
-                   ExpanderBoardData *expanderBoardData,
-                   EngineData *engineData,
-                   SettingsData *settingsData,
-                   VehicleData *vehicleData,
-                   ConnectionData *connectionData,
+Extender::Extender(DigitalInputs *digitalInputs, ExpanderBoardData *expanderBoardData, EngineData *engineData,
+                   SettingsData *settingsData, VehicleData *vehicleData, ConnectionData *connectionData,
                    QObject *parent)
-    : QObject(parent)
-    , m_digitalInputs(digitalInputs)
-    , m_expanderBoardData(expanderBoardData)
-    , m_engineData(engineData)
-    , m_settingsData(settingsData)
-    , m_vehicleData(vehicleData)
-    , m_connectionData(connectionData)
-    , m_hzAverage(HZ_AVERAGE_WINDOW, 0)
-{
-}
+    : QObject(parent),
+      m_digitalInputs(digitalInputs),
+      m_expanderBoardData(expanderBoardData),
+      m_engineData(engineData),
+      m_settingsData(settingsData),
+      m_vehicleData(vehicleData),
+      m_connectionData(connectionData),
+      m_hzAverage(HZ_AVERAGE_WINDOW, 0)
+{}
 
 Extender::~Extender() {}
 
@@ -71,22 +67,22 @@ void Extender::connectCalibrationSignals()
     if (!m_expanderBoardData)
         return;
 
-    connect(m_expanderBoardData, &ExpanderBoardData::EXAnalogInput0Changed,
-            this, [this](qreal v) { applyCalibration(0, v); });
-    connect(m_expanderBoardData, &ExpanderBoardData::EXAnalogInput1Changed,
-            this, [this](qreal v) { applyCalibration(1, v); });
-    connect(m_expanderBoardData, &ExpanderBoardData::EXAnalogInput2Changed,
-            this, [this](qreal v) { applyCalibration(2, v); });
-    connect(m_expanderBoardData, &ExpanderBoardData::EXAnalogInput3Changed,
-            this, [this](qreal v) { applyCalibration(3, v); });
-    connect(m_expanderBoardData, &ExpanderBoardData::EXAnalogInput4Changed,
-            this, [this](qreal v) { applyCalibration(4, v); });
-    connect(m_expanderBoardData, &ExpanderBoardData::EXAnalogInput5Changed,
-            this, [this](qreal v) { applyCalibration(5, v); });
-    connect(m_expanderBoardData, &ExpanderBoardData::EXAnalogInput6Changed,
-            this, [this](qreal v) { applyCalibration(6, v); });
-    connect(m_expanderBoardData, &ExpanderBoardData::EXAnalogInput7Changed,
-            this, [this](qreal v) { applyCalibration(7, v); });
+    connect(m_expanderBoardData, &ExpanderBoardData::EXAnalogInput0Changed, this,
+            [this](qreal v) { applyCalibration(0, v); });
+    connect(m_expanderBoardData, &ExpanderBoardData::EXAnalogInput1Changed, this,
+            [this](qreal v) { applyCalibration(1, v); });
+    connect(m_expanderBoardData, &ExpanderBoardData::EXAnalogInput2Changed, this,
+            [this](qreal v) { applyCalibration(2, v); });
+    connect(m_expanderBoardData, &ExpanderBoardData::EXAnalogInput3Changed, this,
+            [this](qreal v) { applyCalibration(3, v); });
+    connect(m_expanderBoardData, &ExpanderBoardData::EXAnalogInput4Changed, this,
+            [this](qreal v) { applyCalibration(4, v); });
+    connect(m_expanderBoardData, &ExpanderBoardData::EXAnalogInput5Changed, this,
+            [this](qreal v) { applyCalibration(5, v); });
+    connect(m_expanderBoardData, &ExpanderBoardData::EXAnalogInput6Changed, this,
+            [this](qreal v) { applyCalibration(6, v); });
+    connect(m_expanderBoardData, &ExpanderBoardData::EXAnalogInput7Changed, this,
+            [this](qreal v) { applyCalibration(7, v); });
 }
 
 void Extender::setChannelCalibration(int channel, qreal val0v, qreal val5v, bool ntcEnabled)
@@ -117,14 +113,30 @@ void Extender::applyCalibration(int channel, qreal voltage)
     }
 
     switch (channel) {
-    case 0: m_expanderBoardData->setEXAnalogCalc0(calibrated); break;
-    case 1: m_expanderBoardData->setEXAnalogCalc1(calibrated); break;
-    case 2: m_expanderBoardData->setEXAnalogCalc2(calibrated); break;
-    case 3: m_expanderBoardData->setEXAnalogCalc3(calibrated); break;
-    case 4: m_expanderBoardData->setEXAnalogCalc4(calibrated); break;
-    case 5: m_expanderBoardData->setEXAnalogCalc5(calibrated); break;
-    case 6: m_expanderBoardData->setEXAnalogCalc6(calibrated); break;
-    case 7: m_expanderBoardData->setEXAnalogCalc7(calibrated); break;
+    case 0:
+        m_expanderBoardData->setEXAnalogCalc0(calibrated);
+        break;
+    case 1:
+        m_expanderBoardData->setEXAnalogCalc1(calibrated);
+        break;
+    case 2:
+        m_expanderBoardData->setEXAnalogCalc2(calibrated);
+        break;
+    case 3:
+        m_expanderBoardData->setEXAnalogCalc3(calibrated);
+        break;
+    case 4:
+        m_expanderBoardData->setEXAnalogCalc4(calibrated);
+        break;
+    case 5:
+        m_expanderBoardData->setEXAnalogCalc5(calibrated);
+        break;
+    case 6:
+        m_expanderBoardData->setEXAnalogCalc6(calibrated);
+        break;
+    case 7:
+        m_expanderBoardData->setEXAnalogCalc7(calibrated);
+        break;
     }
 }
 
@@ -152,15 +164,32 @@ void Extender::setGearVoltageConfig(const QVariantMap &config)
         int port = m_gearConfig.port;
         auto connectGearSignal = [this, port]() {
             switch (port) {
-            case 0: return connect(m_expanderBoardData, &ExpanderBoardData::EXAnalogInput0Changed, this, &Extender::onGearPortVoltageChanged);
-            case 1: return connect(m_expanderBoardData, &ExpanderBoardData::EXAnalogInput1Changed, this, &Extender::onGearPortVoltageChanged);
-            case 2: return connect(m_expanderBoardData, &ExpanderBoardData::EXAnalogInput2Changed, this, &Extender::onGearPortVoltageChanged);
-            case 3: return connect(m_expanderBoardData, &ExpanderBoardData::EXAnalogInput3Changed, this, &Extender::onGearPortVoltageChanged);
-            case 4: return connect(m_expanderBoardData, &ExpanderBoardData::EXAnalogInput4Changed, this, &Extender::onGearPortVoltageChanged);
-            case 5: return connect(m_expanderBoardData, &ExpanderBoardData::EXAnalogInput5Changed, this, &Extender::onGearPortVoltageChanged);
-            case 6: return connect(m_expanderBoardData, &ExpanderBoardData::EXAnalogInput6Changed, this, &Extender::onGearPortVoltageChanged);
-            case 7: return connect(m_expanderBoardData, &ExpanderBoardData::EXAnalogInput7Changed, this, &Extender::onGearPortVoltageChanged);
-            default: return QMetaObject::Connection();
+            case 0:
+                return connect(m_expanderBoardData, &ExpanderBoardData::EXAnalogInput0Changed, this,
+                               &Extender::onGearPortVoltageChanged);
+            case 1:
+                return connect(m_expanderBoardData, &ExpanderBoardData::EXAnalogInput1Changed, this,
+                               &Extender::onGearPortVoltageChanged);
+            case 2:
+                return connect(m_expanderBoardData, &ExpanderBoardData::EXAnalogInput2Changed, this,
+                               &Extender::onGearPortVoltageChanged);
+            case 3:
+                return connect(m_expanderBoardData, &ExpanderBoardData::EXAnalogInput3Changed, this,
+                               &Extender::onGearPortVoltageChanged);
+            case 4:
+                return connect(m_expanderBoardData, &ExpanderBoardData::EXAnalogInput4Changed, this,
+                               &Extender::onGearPortVoltageChanged);
+            case 5:
+                return connect(m_expanderBoardData, &ExpanderBoardData::EXAnalogInput5Changed, this,
+                               &Extender::onGearPortVoltageChanged);
+            case 6:
+                return connect(m_expanderBoardData, &ExpanderBoardData::EXAnalogInput6Changed, this,
+                               &Extender::onGearPortVoltageChanged);
+            case 7:
+                return connect(m_expanderBoardData, &ExpanderBoardData::EXAnalogInput7Changed, this,
+                               &Extender::onGearPortVoltageChanged);
+            default:
+                return QMetaObject::Connection();
             }
         };
         m_gearConnection = connectGearSignal();
@@ -169,19 +198,17 @@ void Extender::setGearVoltageConfig(const QVariantMap &config)
 
 int Extender::voltageToGear(double voltage) const
 {
-    if (!m_gearConfig.enabled) return -2;
+    if (!m_gearConfig.enabled)
+        return -2;
 
-    struct GearEntry { int gear; double targetV; };
-    GearEntry entries[] = {
-        { 0, m_gearConfig.voltageN },
-        {-1, m_gearConfig.voltageR },
-        { 1, m_gearConfig.voltage1 },
-        { 2, m_gearConfig.voltage2 },
-        { 3, m_gearConfig.voltage3 },
-        { 4, m_gearConfig.voltage4 },
-        { 5, m_gearConfig.voltage5 },
-        { 6, m_gearConfig.voltage6 }
+    struct GearEntry
+    {
+        int gear;
+        double targetV;
     };
+    GearEntry entries[] = {{0, m_gearConfig.voltageN}, {-1, m_gearConfig.voltageR}, {1, m_gearConfig.voltage1},
+                           {2, m_gearConfig.voltage2}, {3, m_gearConfig.voltage3},  {4, m_gearConfig.voltage4},
+                           {5, m_gearConfig.voltage5}, {6, m_gearConfig.voltage6}};
 
     double bestDelta = m_gearConfig.tolerance + 1.0;
     int bestGear = -2;
@@ -198,19 +225,37 @@ int Extender::voltageToGear(double voltage) const
 
 void Extender::onGearPortVoltageChanged()
 {
-    if (!m_gearConfig.enabled || !m_expanderBoardData) return;
+    if (!m_gearConfig.enabled || !m_expanderBoardData)
+        return;
 
     double voltage = 0.0;
     switch (m_gearConfig.port) {
-    case 0: voltage = m_expanderBoardData->EXAnalogInput0(); break;
-    case 1: voltage = m_expanderBoardData->EXAnalogInput1(); break;
-    case 2: voltage = m_expanderBoardData->EXAnalogInput2(); break;
-    case 3: voltage = m_expanderBoardData->EXAnalogInput3(); break;
-    case 4: voltage = m_expanderBoardData->EXAnalogInput4(); break;
-    case 5: voltage = m_expanderBoardData->EXAnalogInput5(); break;
-    case 6: voltage = m_expanderBoardData->EXAnalogInput6(); break;
-    case 7: voltage = m_expanderBoardData->EXAnalogInput7(); break;
-    default: return;
+    case 0:
+        voltage = m_expanderBoardData->EXAnalogInput0();
+        break;
+    case 1:
+        voltage = m_expanderBoardData->EXAnalogInput1();
+        break;
+    case 2:
+        voltage = m_expanderBoardData->EXAnalogInput2();
+        break;
+    case 3:
+        voltage = m_expanderBoardData->EXAnalogInput3();
+        break;
+    case 4:
+        voltage = m_expanderBoardData->EXAnalogInput4();
+        break;
+    case 5:
+        voltage = m_expanderBoardData->EXAnalogInput5();
+        break;
+    case 6:
+        voltage = m_expanderBoardData->EXAnalogInput6();
+        break;
+    case 7:
+        voltage = m_expanderBoardData->EXAnalogInput7();
+        break;
+    default:
+        return;
     }
 
     int gear = voltageToGear(voltage);
@@ -240,29 +285,47 @@ void Extender::setSpeedSensorConfig(const QVariantMap &config)
             int port = m_speedConfig.analogPort;
             auto connectSpeedSignal = [this, port]() {
                 switch (port) {
-                case 0: return connect(m_expanderBoardData, &ExpanderBoardData::EXAnalogInput0Changed, this, &Extender::onSpeedSourceChanged);
-                case 1: return connect(m_expanderBoardData, &ExpanderBoardData::EXAnalogInput1Changed, this, &Extender::onSpeedSourceChanged);
-                case 2: return connect(m_expanderBoardData, &ExpanderBoardData::EXAnalogInput2Changed, this, &Extender::onSpeedSourceChanged);
-                case 3: return connect(m_expanderBoardData, &ExpanderBoardData::EXAnalogInput3Changed, this, &Extender::onSpeedSourceChanged);
-                case 4: return connect(m_expanderBoardData, &ExpanderBoardData::EXAnalogInput4Changed, this, &Extender::onSpeedSourceChanged);
-                case 5: return connect(m_expanderBoardData, &ExpanderBoardData::EXAnalogInput5Changed, this, &Extender::onSpeedSourceChanged);
-                case 6: return connect(m_expanderBoardData, &ExpanderBoardData::EXAnalogInput6Changed, this, &Extender::onSpeedSourceChanged);
-                case 7: return connect(m_expanderBoardData, &ExpanderBoardData::EXAnalogInput7Changed, this, &Extender::onSpeedSourceChanged);
-                default: return QMetaObject::Connection();
+                case 0:
+                    return connect(m_expanderBoardData, &ExpanderBoardData::EXAnalogInput0Changed, this,
+                                   &Extender::onSpeedSourceChanged);
+                case 1:
+                    return connect(m_expanderBoardData, &ExpanderBoardData::EXAnalogInput1Changed, this,
+                                   &Extender::onSpeedSourceChanged);
+                case 2:
+                    return connect(m_expanderBoardData, &ExpanderBoardData::EXAnalogInput2Changed, this,
+                                   &Extender::onSpeedSourceChanged);
+                case 3:
+                    return connect(m_expanderBoardData, &ExpanderBoardData::EXAnalogInput3Changed, this,
+                                   &Extender::onSpeedSourceChanged);
+                case 4:
+                    return connect(m_expanderBoardData, &ExpanderBoardData::EXAnalogInput4Changed, this,
+                                   &Extender::onSpeedSourceChanged);
+                case 5:
+                    return connect(m_expanderBoardData, &ExpanderBoardData::EXAnalogInput5Changed, this,
+                                   &Extender::onSpeedSourceChanged);
+                case 6:
+                    return connect(m_expanderBoardData, &ExpanderBoardData::EXAnalogInput6Changed, this,
+                                   &Extender::onSpeedSourceChanged);
+                case 7:
+                    return connect(m_expanderBoardData, &ExpanderBoardData::EXAnalogInput7Changed, this,
+                                   &Extender::onSpeedSourceChanged);
+                default:
+                    return QMetaObject::Connection();
                 }
             };
             m_speedConnection = connectSpeedSignal();
         } else if (m_digitalInputs) {
             // Digital mode: connect to frequencyDIEX1Changed (currently only DI1 has frequency)
-            m_speedConnection = connect(m_digitalInputs, &DigitalInputs::frequencyDIEX1Changed,
-                                        this, &Extender::onSpeedSourceChanged);
+            m_speedConnection =
+                connect(m_digitalInputs, &DigitalInputs::frequencyDIEX1Changed, this, &Extender::onSpeedSourceChanged);
         }
     }
 }
 
 void Extender::onSpeedSourceChanged()
 {
-    if (!m_speedConfig.enabled || !m_expanderBoardData) return;
+    if (!m_speedConfig.enabled || !m_expanderBoardData)
+        return;
 
     double speed = 0.0;
 
@@ -270,15 +333,32 @@ void Extender::onSpeedSourceChanged()
         // Get raw voltage from the configured analog port
         double voltage = 0.0;
         switch (m_speedConfig.analogPort) {
-        case 0: voltage = m_expanderBoardData->EXAnalogInput0(); break;
-        case 1: voltage = m_expanderBoardData->EXAnalogInput1(); break;
-        case 2: voltage = m_expanderBoardData->EXAnalogInput2(); break;
-        case 3: voltage = m_expanderBoardData->EXAnalogInput3(); break;
-        case 4: voltage = m_expanderBoardData->EXAnalogInput4(); break;
-        case 5: voltage = m_expanderBoardData->EXAnalogInput5(); break;
-        case 6: voltage = m_expanderBoardData->EXAnalogInput6(); break;
-        case 7: voltage = m_expanderBoardData->EXAnalogInput7(); break;
-        default: break;
+        case 0:
+            voltage = m_expanderBoardData->EXAnalogInput0();
+            break;
+        case 1:
+            voltage = m_expanderBoardData->EXAnalogInput1();
+            break;
+        case 2:
+            voltage = m_expanderBoardData->EXAnalogInput2();
+            break;
+        case 3:
+            voltage = m_expanderBoardData->EXAnalogInput3();
+            break;
+        case 4:
+            voltage = m_expanderBoardData->EXAnalogInput4();
+            break;
+        case 5:
+            voltage = m_expanderBoardData->EXAnalogInput5();
+            break;
+        case 6:
+            voltage = m_expanderBoardData->EXAnalogInput6();
+            break;
+        case 7:
+            voltage = m_expanderBoardData->EXAnalogInput7();
+            break;
+        default:
+            break;
         }
         speed = voltage * m_speedConfig.voltageMultiplier;
     } else {
@@ -287,9 +367,8 @@ void Extender::onSpeedSourceChanged()
         if (m_speedConfig.pulsesPerRev > 0.0) {
             double wheelRPM = frequency / m_speedConfig.pulsesPerRev;
             double wheelSpeedMPS = wheelRPM * m_speedConfig.tireCircumference / 60.0;
-            double corrected = (m_speedConfig.finalDriveRatio > 0.0)
-                                   ? wheelSpeedMPS / m_speedConfig.finalDriveRatio
-                                   : wheelSpeedMPS;
+            double corrected =
+                (m_speedConfig.finalDriveRatio > 0.0) ? wheelSpeedMPS / m_speedConfig.finalDriveRatio : wheelSpeedMPS;
 
             if (m_speedConfig.unit == "MPH")
                 speed = corrected * 2.23694;
@@ -365,8 +444,10 @@ void Extender::readyToRead()
         if (m_connectionData) {
             m_connectionData->setcan(list);
         }
-        // CAN frame forwarded to ConnectionData for CanMonitor
-        // Can Monitor end
+        if (m_diagnosticsProvider) {
+            m_diagnosticsProvider->recordCanFrame(
+                static_cast<quint32>(frame.frameId()), frame.payload());
+        }
         // Just for testing  start
         QString view;
         if (frame.frameType() == QCanBusFrame::ErrorFrame)
@@ -417,9 +498,8 @@ void Extender::readyToRead()
                     for (int i = 0; i < HZ_AVERAGE_WINDOW; i++) {
                         m_avgHz += m_hzAverage[i];
                     }
-                    m_digitalInputs->setfrequencyDIEX1(
-                        qRound((m_avgHz / HZ_AVERAGE_WINDOW) * 16.6 * 60) /
-                        m_digitalInputs->RPMFrequencyDividerDi1());
+                    m_digitalInputs->setfrequencyDIEX1(qRound((m_avgHz / HZ_AVERAGE_WINDOW) * 16.6 * 60) /
+                                                       m_digitalInputs->RPMFrequencyDividerDi1());
                 }
             }
             if (m_sensorRegistry) {
@@ -452,8 +532,8 @@ void Extender::readyToRead()
                     m_sensorRegistry->markCanSensorActive(QStringLiteral("EXAnalogInput%1").arg(i));
             }
         }
-        if (frame.frameId() == m_address5 && m_engineData && m_settingsData &&
-            (m_engineData->Cylinders() / 2) != 0 && m_settingsData->Externalrpm() == 1) {
+        if (frame.frameId() == m_address5 && m_engineData && m_settingsData && (m_engineData->Cylinders() / 2) != 0 &&
+            m_settingsData->Externalrpm() == 1) {
             m_engineData->setrpm(qRound((pkgpayload[0] * 4) / (m_engineData->Cylinders() / 2)));
         }
     }

@@ -18,10 +18,22 @@ SettingsPage {
 
     ListModel {
         id: logLevelModel
-        ListElement { label: "All";   level: 0 }
-        ListElement { label: "Info";  level: 1 }
-        ListElement { label: "Warn";  level: 2 }
-        ListElement { label: "Error"; level: 3 }
+        ListElement {
+            label: "All"
+            level: 0
+        }
+        ListElement {
+            label: "Info"
+            level: 1
+        }
+        ListElement {
+            label: "Warn"
+            level: 2
+        }
+        ListElement {
+            label: "Error"
+            level: 3
+        }
     }
 
     // * TOP ROW: System Information + Connection Status (compact)
@@ -51,14 +63,10 @@ SettingsPage {
                         Layout.preferredWidth: root._statusLabelWidth
                     }
                     Text {
-                        text: Diagnostics.cpuTemperatureAvailable
-                              ? Diagnostics.cpuTemperature.toFixed(1) + " C"
-                              : "N/A"
+                        text: Diagnostics.cpuTemperatureAvailable ? Diagnostics.cpuTemperature.toFixed(1) + " C" : "N/A"
                         font.pixelSize: SettingsTheme.fontStatus
                         font.family: SettingsTheme.fontFamily
-                        color: Diagnostics.cpuTemperatureAvailable
-                               ? SettingsTheme.textPrimary
-                               : SettingsTheme.textDisabled
+                        color: Diagnostics.cpuTemperatureAvailable ? SettingsTheme.textPrimary : SettingsTheme.textDisabled
                         Layout.fillWidth: true
                     }
                 }
@@ -217,9 +225,11 @@ SettingsPage {
                         radius: SettingsTheme.statusDotSize / 2
                         Layout.alignment: Qt.AlignVCenter
                         color: {
-                            if (Diagnostics.canStatusText === "Active") return SettingsTheme.success
-                            if (Diagnostics.canStatusText === "Waiting") return SettingsTheme.warning
-                            return SettingsTheme.error
+                            if (Diagnostics.canStatusText === "Active")
+                                return SettingsTheme.success;
+                            if (Diagnostics.canStatusText === "Waiting")
+                                return SettingsTheme.warning;
+                            return SettingsTheme.error;
                         }
                     }
                     Text {
@@ -228,9 +238,11 @@ SettingsPage {
                         font.family: SettingsTheme.fontFamily
                         Layout.fillWidth: true
                         color: {
-                            if (Diagnostics.canStatusText === "Active") return SettingsTheme.success
-                            if (Diagnostics.canStatusText === "Waiting") return SettingsTheme.warning
-                            return SettingsTheme.error
+                            if (Diagnostics.canStatusText === "Active")
+                                return SettingsTheme.success;
+                            if (Diagnostics.canStatusText === "Waiting")
+                                return SettingsTheme.warning;
+                            return SettingsTheme.error;
                         }
                     }
                 }
@@ -378,8 +390,7 @@ SettingsPage {
     // Bottom row height = available - topRow height - sectionSpacing between rows.
     RowLayout {
         Layout.fillWidth: true
-        Layout.preferredHeight: root.height - (SettingsTheme.pageMargin * 2)
-                                - topRow.height - SettingsTheme.sectionSpacing
+        Layout.preferredHeight: root.height - (SettingsTheme.pageMargin * 2) - topRow.height - SettingsTheme.sectionSpacing
         spacing: SettingsTheme.sectionSpacing
 
         // * Live Sensor Data Table
@@ -489,6 +500,12 @@ SettingsPage {
                         anchors.rightMargin: SettingsTheme.contentSpacing / 2
                         spacing: SettingsTheme.contentSpacing
 
+                        Rectangle {
+                            width: SettingsTheme.statusDotSize
+                            height: SettingsTheme.statusDotSize
+                            radius: SettingsTheme.statusDotSize / 2
+                            color: modelData.active ? SettingsTheme.success : SettingsTheme.textDisabled
+                        }
                         Text {
                             text: modelData.name
                             font.pixelSize: SettingsTheme.fontCaption
@@ -509,7 +526,7 @@ SettingsPage {
                             font.pixelSize: SettingsTheme.fontCaption
                             font.family: SettingsTheme.fontFamily
                             font.weight: Font.DemiBold
-                            color: Math.abs(modelData.value) > 0.001 ? SettingsTheme.success : SettingsTheme.textDisabled
+                            color: modelData.active ? SettingsTheme.success : SettingsTheme.textDisabled
                             Layout.fillWidth: true
                         }
                         Text {
@@ -523,8 +540,7 @@ SettingsPage {
                 }
 
                 ScrollBar.vertical: ScrollBar {
-                    policy: sensorListView.contentHeight > sensorListView.height
-                            ? ScrollBar.AsNeeded : ScrollBar.AlwaysOff
+                    policy: sensorListView.contentHeight > sensorListView.height ? ScrollBar.AsNeeded : ScrollBar.AlwaysOff
                 }
             }
         }
@@ -539,7 +555,9 @@ SettingsPage {
                 Layout.fillWidth: true
                 spacing: SettingsTheme.contentSpacing
 
-                Item { Layout.fillWidth: true }
+                Item {
+                    Layout.fillWidth: true
+                }
 
                 Repeater {
                     model: logLevelModel
@@ -625,11 +643,419 @@ SettingsPage {
                     }
 
                     onCountChanged: {
-                        Qt.callLater(function() {
-                            logListView.positionViewAtEnd()
-                        })
+                        Qt.callLater(function () {
+                            logListView.positionViewAtEnd();
+                        });
                     }
                 }
+            }
+        }
+    }
+
+    // * ANALOG INPUTS DIAGNOSTICS
+    SettingsSection {
+        id: analogSection
+        title: "Analog Inputs"
+        collapsible: true
+        collapsed: true
+        Layout.fillWidth: true
+
+        Timer {
+            interval: 1000
+            running: !analogSection.collapsed
+            repeat: true
+            triggeredOnStart: true
+            onTriggered: analogDiagModel.refresh()
+        }
+
+        ListModel {
+            id: analogDiagModel
+            function refresh() {
+                clear();
+                var data = Diagnostics.getAnalogInputDiagnostics();
+                for (var i = 0; i < data.length; i++)
+                    append(data[i]);
+            }
+        }
+
+        RowLayout {
+            Layout.fillWidth: true
+            spacing: SettingsTheme.contentSpacing
+            Text {
+                text: "Channel"
+                font.pixelSize: SettingsTheme.fontCaption
+                font.weight: Font.DemiBold
+                font.family: SettingsTheme.fontFamily
+                color: SettingsTheme.accent
+                Layout.preferredWidth: 80
+            }
+            Text {
+                text: "Raw (V)"
+                font.pixelSize: SettingsTheme.fontCaption
+                font.weight: Font.DemiBold
+                font.family: SettingsTheme.fontFamily
+                color: SettingsTheme.accent
+                Layout.preferredWidth: 80
+            }
+            Text {
+                text: "Calibrated"
+                font.pixelSize: SettingsTheme.fontCaption
+                font.weight: Font.DemiBold
+                font.family: SettingsTheme.fontFamily
+                color: SettingsTheme.accent
+                Layout.fillWidth: true
+            }
+            Text {
+                text: "Unit"
+                font.pixelSize: SettingsTheme.fontCaption
+                font.weight: Font.DemiBold
+                font.family: SettingsTheme.fontFamily
+                color: SettingsTheme.accent
+                Layout.preferredWidth: 60
+            }
+        }
+
+        Repeater {
+            model: analogDiagModel
+            delegate: RowLayout {
+                Layout.fillWidth: true
+                spacing: SettingsTheme.contentSpacing
+                Text {
+                    text: model.channel !== undefined ? model.channel : ""
+                    font.pixelSize: SettingsTheme.fontCaption
+                    font.family: SettingsTheme.fontFamily
+                    color: SettingsTheme.textPrimary
+                    Layout.preferredWidth: 80
+                }
+                Text {
+                    text: model.rawValue !== undefined ? Number(model.rawValue).toFixed(3) : ""
+                    font.pixelSize: SettingsTheme.fontCaption
+                    font.family: SettingsTheme.fontFamily
+                    color: SettingsTheme.textSecondary
+                    Layout.preferredWidth: 80
+                }
+                Text {
+                    text: model.calibratedValue !== undefined ? Number(model.calibratedValue).toFixed(3) : ""
+                    font.pixelSize: SettingsTheme.fontCaption
+                    font.family: SettingsTheme.fontFamily
+                    font.weight: Font.DemiBold
+                    color: SettingsTheme.success
+                    Layout.fillWidth: true
+                }
+                Text {
+                    text: model.unit !== undefined ? model.unit : ""
+                    font.pixelSize: SettingsTheme.fontCaption
+                    font.family: SettingsTheme.fontFamily
+                    color: SettingsTheme.textSecondary
+                    Layout.preferredWidth: 60
+                }
+            }
+        }
+    }
+
+    // * DIGITAL INPUTS DIAGNOSTICS
+    SettingsSection {
+        id: digitalSection
+        title: "Digital Inputs"
+        collapsible: true
+        collapsed: true
+        Layout.fillWidth: true
+
+        Timer {
+            interval: 1000
+            running: !digitalSection.collapsed
+            repeat: true
+            triggeredOnStart: true
+            onTriggered: digitalDiagModel.refresh()
+        }
+
+        ListModel {
+            id: digitalDiagModel
+            function refresh() {
+                clear();
+                var ecu = Diagnostics.getDigitalInputDiagnostics();
+                for (var i = 0; i < ecu.length; i++)
+                    append(ecu[i]);
+                var ext = Diagnostics.getExtenderDigitalDiagnostics();
+                for (var j = 0; j < ext.length; j++)
+                    append(ext[j]);
+            }
+        }
+
+        RowLayout {
+            Layout.fillWidth: true
+            spacing: SettingsTheme.contentSpacing
+            Text {
+                text: "Channel"
+                font.pixelSize: SettingsTheme.fontCaption
+                font.weight: Font.DemiBold
+                font.family: SettingsTheme.fontFamily
+                color: SettingsTheme.accent
+                Layout.preferredWidth: 120
+            }
+            Text {
+                text: "State"
+                font.pixelSize: SettingsTheme.fontCaption
+                font.weight: Font.DemiBold
+                font.family: SettingsTheme.fontFamily
+                color: SettingsTheme.accent
+                Layout.preferredWidth: 80
+            }
+            Text {
+                text: "Name"
+                font.pixelSize: SettingsTheme.fontCaption
+                font.weight: Font.DemiBold
+                font.family: SettingsTheme.fontFamily
+                color: SettingsTheme.accent
+                Layout.fillWidth: true
+            }
+        }
+
+        Repeater {
+            model: digitalDiagModel
+            delegate: RowLayout {
+                Layout.fillWidth: true
+                spacing: SettingsTheme.contentSpacing
+                Text {
+                    text: model.channel !== undefined ? model.channel : ""
+                    font.pixelSize: SettingsTheme.fontCaption
+                    font.family: SettingsTheme.fontFamily
+                    color: SettingsTheme.textPrimary
+                    Layout.preferredWidth: 120
+                }
+                Rectangle {
+                    Layout.preferredWidth: 80
+                    Layout.preferredHeight: 20
+                    radius: 4
+                    color: model.state ? SettingsTheme.success : SettingsTheme.textDisabled
+                    Text {
+                        anchors.centerIn: parent
+                        text: model.state ? "ON" : "OFF"
+                        font.pixelSize: 12
+                        font.family: SettingsTheme.fontFamily
+                        font.weight: Font.Bold
+                        color: SettingsTheme.textPrimary
+                    }
+                }
+                Text {
+                    text: model.customName !== undefined ? model.customName : ""
+                    font.pixelSize: SettingsTheme.fontCaption
+                    font.family: SettingsTheme.fontFamily
+                    color: SettingsTheme.textSecondary
+                    Layout.fillWidth: true
+                }
+            }
+        }
+    }
+
+    // * EXTENDER BOARD DIAGNOSTICS
+    SettingsSection {
+        id: extenderSection
+        title: "Extender Board"
+        collapsible: true
+        collapsed: true
+        Layout.fillWidth: true
+
+        Timer {
+            interval: 1000
+            running: !extenderSection.collapsed
+            repeat: true
+            triggeredOnStart: true
+            onTriggered: extenderDiagModel.refresh()
+        }
+
+        ListModel {
+            id: extenderDiagModel
+            function refresh() {
+                clear();
+                var data = Diagnostics.getExpanderBoardDiagnostics();
+                for (var i = 0; i < data.length; i++)
+                    append(data[i]);
+            }
+        }
+
+        RowLayout {
+            Layout.fillWidth: true
+            spacing: SettingsTheme.contentSpacing
+            Text {
+                text: "Channel"
+                font.pixelSize: SettingsTheme.fontCaption
+                font.weight: Font.DemiBold
+                font.family: SettingsTheme.fontFamily
+                color: SettingsTheme.accent
+                Layout.preferredWidth: 80
+            }
+            Text {
+                text: "Raw (V)"
+                font.pixelSize: SettingsTheme.fontCaption
+                font.weight: Font.DemiBold
+                font.family: SettingsTheme.fontFamily
+                color: SettingsTheme.accent
+                Layout.preferredWidth: 80
+            }
+            Text {
+                text: "Calibrated"
+                font.pixelSize: SettingsTheme.fontCaption
+                font.weight: Font.DemiBold
+                font.family: SettingsTheme.fontFamily
+                color: SettingsTheme.accent
+                Layout.fillWidth: true
+            }
+            Text {
+                text: "Unit"
+                font.pixelSize: SettingsTheme.fontCaption
+                font.weight: Font.DemiBold
+                font.family: SettingsTheme.fontFamily
+                color: SettingsTheme.accent
+                Layout.preferredWidth: 60
+            }
+            Text {
+                text: "NTC"
+                font.pixelSize: SettingsTheme.fontCaption
+                font.weight: Font.DemiBold
+                font.family: SettingsTheme.fontFamily
+                color: SettingsTheme.accent
+                Layout.preferredWidth: 40
+            }
+        }
+
+        Repeater {
+            model: extenderDiagModel
+            delegate: RowLayout {
+                Layout.fillWidth: true
+                spacing: SettingsTheme.contentSpacing
+                Text {
+                    text: model.channel !== undefined ? model.channel : ""
+                    font.pixelSize: SettingsTheme.fontCaption
+                    font.family: SettingsTheme.fontFamily
+                    color: SettingsTheme.textPrimary
+                    Layout.preferredWidth: 80
+                }
+                Text {
+                    text: model.rawVoltage !== undefined ? Number(model.rawVoltage).toFixed(3) : ""
+                    font.pixelSize: SettingsTheme.fontCaption
+                    font.family: SettingsTheme.fontFamily
+                    color: SettingsTheme.textSecondary
+                    Layout.preferredWidth: 80
+                }
+                Text {
+                    text: model.calibratedValue !== undefined ? Number(model.calibratedValue).toFixed(3) : ""
+                    font.pixelSize: SettingsTheme.fontCaption
+                    font.family: SettingsTheme.fontFamily
+                    font.weight: Font.DemiBold
+                    color: SettingsTheme.success
+                    Layout.fillWidth: true
+                }
+                Text {
+                    text: model.unit !== undefined ? model.unit : ""
+                    font.pixelSize: SettingsTheme.fontCaption
+                    font.family: SettingsTheme.fontFamily
+                    color: SettingsTheme.textSecondary
+                    Layout.preferredWidth: 60
+                }
+                Text {
+                    text: model.ntcEnabled ? "Yes" : "No"
+                    font.pixelSize: SettingsTheme.fontCaption
+                    font.family: SettingsTheme.fontFamily
+                    color: model.ntcEnabled ? SettingsTheme.accent : SettingsTheme.textDisabled
+                    Layout.preferredWidth: 40
+                }
+            }
+        }
+    }
+
+    // * CAN MESSAGE VIEWER
+    SettingsSection {
+        id: canSection
+        title: "CAN Messages"
+        collapsible: true
+        collapsed: true
+        Layout.fillWidth: true
+
+        RowLayout {
+            Layout.fillWidth: true
+            spacing: SettingsTheme.contentSpacing
+
+            StyledSwitch {
+                id: canCaptureToggle
+                checked: Diagnostics.canCaptureEnabled
+                onCheckedChanged: Diagnostics.canCaptureEnabled = checked
+            }
+            Text {
+                text: canCaptureToggle.checked ? "Capturing" : "Stopped"
+                font.pixelSize: SettingsTheme.fontCaption
+                font.family: SettingsTheme.fontFamily
+                color: canCaptureToggle.checked ? SettingsTheme.success : SettingsTheme.textSecondary
+            }
+
+            Item { Layout.fillWidth: true }
+
+            StyledTextField {
+                Layout.preferredWidth: 140
+                placeholderText: "Filter CAN ID (hex)"
+                text: Diagnostics.canIdFilter
+                onTextChanged: Diagnostics.canIdFilter = text
+                inputMethodHints: Qt.ImhNoPredictiveText
+            }
+
+            StyledButton {
+                text: "Clear"
+                primary: false
+                onClicked: Diagnostics.clearCanFrameBuffer()
+            }
+            StyledButton {
+                text: "Reset Errors"
+                primary: false
+                onClicked: Diagnostics.resetCanErrors()
+            }
+        }
+
+        RowLayout {
+            Layout.fillWidth: true
+            spacing: SettingsTheme.contentSpacing
+            Text { text: "ID"; font.pixelSize: SettingsTheme.fontCaption; font.weight: Font.DemiBold; font.family: SettingsTheme.fontFamily; color: SettingsTheme.accent; Layout.preferredWidth: 80 }
+            Text { text: "Len"; font.pixelSize: SettingsTheme.fontCaption; font.weight: Font.DemiBold; font.family: SettingsTheme.fontFamily; color: SettingsTheme.accent; Layout.preferredWidth: 30 }
+            Text { text: "Payload (hex)"; font.pixelSize: SettingsTheme.fontCaption; font.weight: Font.DemiBold; font.family: SettingsTheme.fontFamily; color: SettingsTheme.accent; Layout.fillWidth: true }
+            Text { text: "ASCII"; font.pixelSize: SettingsTheme.fontCaption; font.weight: Font.DemiBold; font.family: SettingsTheme.fontFamily; color: SettingsTheme.accent; Layout.preferredWidth: 80 }
+        }
+
+        Rectangle {
+            Layout.fillWidth: true
+            height: SettingsTheme.borderWidth
+            color: SettingsTheme.border
+        }
+
+        ListView {
+            id: canFrameList
+            Layout.fillWidth: true
+            Layout.preferredHeight: 300
+            clip: true
+            model: Diagnostics.canFrameBuffer
+            spacing: 1
+
+            delegate: Rectangle {
+                required property var modelData
+                required property int index
+                width: canFrameList.width
+                height: 28
+                color: index % 2 === 0 ? SettingsTheme.surface : SettingsTheme.background
+
+                RowLayout {
+                    anchors.fill: parent
+                    anchors.leftMargin: 4
+                    anchors.rightMargin: 4
+                    spacing: SettingsTheme.contentSpacing
+
+                    Text { text: modelData.id; font.pixelSize: SettingsTheme.fontCaption; font.family: SettingsTheme.fontFamilyMono; color: SettingsTheme.accent; Layout.preferredWidth: 80 }
+                    Text { text: modelData.length; font.pixelSize: SettingsTheme.fontCaption; font.family: SettingsTheme.fontFamilyMono; color: SettingsTheme.textSecondary; Layout.preferredWidth: 30 }
+                    Text { text: modelData.payload; font.pixelSize: SettingsTheme.fontCaption; font.family: SettingsTheme.fontFamilyMono; color: SettingsTheme.textPrimary; Layout.fillWidth: true }
+                    Text { text: modelData.ascii; font.pixelSize: SettingsTheme.fontCaption; font.family: SettingsTheme.fontFamilyMono; color: SettingsTheme.textDisabled; Layout.preferredWidth: 80 }
+                }
+            }
+
+            ScrollBar.vertical: ScrollBar {
+                policy: canFrameList.contentHeight > canFrameList.height
+                        ? ScrollBar.AsNeeded : ScrollBar.AlwaysOff
             }
         }
     }
@@ -645,8 +1071,8 @@ SettingsPage {
 
             StyledSwitch {
                 checked: {
-                    var v = AppSettings.getValue("debug/arcFullSweep", false)
-                    return v === true || v === "true"
+                    var v = AppSettings.getValue("debug/arcFullSweep", false);
+                    return v === true || v === "true";
                 }
                 onCheckedChanged: AppSettings.setValue("debug/arcFullSweep", checked)
             }

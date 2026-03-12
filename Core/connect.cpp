@@ -55,7 +55,6 @@
 #include <QVector>
 
 
-
 int ecu;      // 0=apex, 1=adaptronic;2= OBD; 3= Dicktator ECU
 int logging;  // 0 Logging off , 1 Logging to file
 int connectclicked = 0;
@@ -143,10 +142,11 @@ Connect::Connect(QObject *parent)
     m_sensorRegistry = new SensorRegistry(this);
     m_udpreceiver->setSensorRegistry(m_sensorRegistry);
     m_extender->setSensorRegistry(m_sensorRegistry);
-    // * Phase 8: Create DiagnosticsProvider and wire to SensorRegistry
+    // * Phase 8: Create DiagnosticsProvider and wire to SensorRegistry + Extender
     m_diagnosticsProvider = new DiagnosticsProvider(this);
     m_diagnosticsProvider->setSensorRegistry(m_sensorRegistry);
     m_diagnosticsProvider->setPropertyRouter(m_propertyRouter);
+    m_extender->setDiagnosticsProvider(m_diagnosticsProvider);
     m_overlayConfigManager = new OverlayConfigManager(this);
     m_shiftIndicatorHelper = new ShiftIndicatorHelper(this);
     m_canFrameModel = new CanFrameModel(m_connectionData, m_extender, this);

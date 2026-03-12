@@ -9,23 +9,25 @@
  */
 
 #include "DiagnosticsProvider.h"
+
 #include "PropertyRouter.h"
 #include "SensorRegistry.h"
 
+#include <QDebug>
 #include <QFile>
 #include <QRegularExpression>
 #include <QTextStream>
 #include <QTime>
-#include <QDebug>
 
 #ifdef Q_OS_MACOS
-#include <mach/mach.h>
-#include <mach/mach_host.h>
+    #include <mach/mach.h>
+    #include <mach/mach_host.h>
 #endif
 
 #ifdef Q_OS_LINUX
-#include <QProcess>
-#include <sys/statvfs.h>
+    #include <QProcess>
+
+    #include <sys/statvfs.h>
 #endif
 
 DiagnosticsProvider *DiagnosticsProvider::s_instance = nullptr;
@@ -37,17 +39,25 @@ void DiagnosticsProvider::qtMessageHandler(QtMsgType type, const QMessageLogCont
 
     QString level;
     switch (type) {
-    case QtDebugMsg:    level = QStringLiteral("DEBUG"); break;
-    case QtInfoMsg:     level = QStringLiteral("INFO");  break;
-    case QtWarningMsg:  level = QStringLiteral("WARN");  break;
-    case QtCriticalMsg: level = QStringLiteral("ERROR"); break;
-    case QtFatalMsg:    level = QStringLiteral("FATAL"); break;
+    case QtDebugMsg:
+        level = QStringLiteral("DEBUG");
+        break;
+    case QtInfoMsg:
+        level = QStringLiteral("INFO");
+        break;
+    case QtWarningMsg:
+        level = QStringLiteral("WARN");
+        break;
+    case QtCriticalMsg:
+        level = QStringLiteral("ERROR");
+        break;
+    case QtFatalMsg:
+        level = QStringLiteral("FATAL");
+        break;
     }
 
     if (s_instance) {
-        QMetaObject::invokeMethod(s_instance, [=]() {
-            s_instance->addLogMessage(level, msg);
-        }, Qt::QueuedConnection);
+        QMetaObject::invokeMethod(s_instance, [=]() { s_instance->addLogMessage(level, msg); }, Qt::QueuedConnection);
     }
 
     if (s_previousHandler)
@@ -56,8 +66,7 @@ void DiagnosticsProvider::qtMessageHandler(QtMsgType type, const QMessageLogCont
         fprintf(stderr, "[%s] %s\n", level.toUtf8().constData(), msg.toUtf8().constData());
 }
 
-DiagnosticsProvider::DiagnosticsProvider(QObject *parent)
-    : QObject(parent)
+DiagnosticsProvider::DiagnosticsProvider(QObject *parent) : QObject(parent)
 {
     s_instance = this;
     s_previousHandler = qInstallMessageHandler(qtMessageHandler);
@@ -95,8 +104,7 @@ void DiagnosticsProvider::setSensorRegistry(SensorRegistry *registry)
 {
     m_sensorRegistry = registry;
     if (m_sensorRegistry) {
-        connect(m_sensorRegistry, &SensorRegistry::sensorsChanged,
-                this, &DiagnosticsProvider::sensorDataChanged);
+        connect(m_sensorRegistry, &SensorRegistry::sensorsChanged, this, &DiagnosticsProvider::sensorDataChanged);
     }
 }
 
@@ -357,74 +365,37 @@ QString DiagnosticsProvider::displayTime() const
     int m = now.minute();
     QString ampm = h >= 12 ? QStringLiteral("Pm") : QStringLiteral("Am");
     h = h % 12;
-    if (h == 0) h = 12;
+    if (h == 0)
+        h = 12;
     return QStringLiteral("%1:%2 %3").arg(h).arg(m, 2, 10, QLatin1Char('0')).arg(ampm);
 }
 
 void DiagnosticsProvider::refreshLiveSensorEntries()
 {
-    struct SensorDef {
-        const char *name;
-        const char *source;
-        const char *key;
-        const char *unit;
-    };
+    if (!m_sensorRegistry || !m_propertyRouter)
+        return;
 
-    static const SensorDef sensors[] = {
-        {"RPM",           "Engine",   "rpm",             "rpm"},
-        {"Speed",         "Vehicle",  "speed",           "km/h"},
-        {"Water Temp",    "Engine",   "Watertemp",       "C"},
-        {"Intake Temp",   "Engine",   "Intaketemp",      "C"},
-        {"Boost",         "Engine",   "BoostPres",       "kPa"},
-        {"MAP",           "Engine",   "MAP",             "kPa"},
-        {"TPS",           "Engine",   "TPS",             "%"},
-        {"Inj Duty",      "Engine",   "InjDuty",         "%"},
-        {"Ignition",      "Engine",   "Ign",             "deg"},
-        {"AFR",           "Engine",   "AFR",             ""},
-        {"Knock",         "Engine",   "Knock",           ""},
-        {"Battery",       "Engine",   "BatteryV",        "V"},
-        {"Oil Pressure",  "Engine",   "oilpres",         "kPa"},
-        {"Oil Temp",      "Engine",   "oiltemp",         "C"},
-        {"Fuel Pressure", "Engine",   "FuelPress",       "kPa"},
-        {"Gear",          "Vehicle",  "Gear",            ""},
-        {"Odometer",      "Vehicle",  "Odo",             "km"},
-        {"EX AN 0",       "Expander", "EXAnalogInput0",  "V"},
-        {"EX AN 1",       "Expander", "EXAnalogInput1",  "V"},
-        {"EX AN 2",       "Expander", "EXAnalogInput2",  "V"},
-        {"EX AN 3",       "Expander", "EXAnalogInput3",  "V"},
-        {"EX AN 4",       "Expander", "EXAnalogInput4",  "V"},
-        {"EX AN 5",       "Expander", "EXAnalogInput5",  "V"},
-        {"EX AN 6",       "Expander", "EXAnalogInput6",  "V"},
-        {"EX AN 7",       "Expander", "EXAnalogInput7",  "V"},
-        {"Analog 0",      "ECU",      "Analog0",         "V"},
-        {"Analog 1",      "ECU",      "Analog1",         "V"},
-        {"Analog 2",      "ECU",      "Analog2",         "V"},
-        {"Analog 3",      "ECU",      "Analog3",         "V"},
-        {"Analog 4",      "ECU",      "Analog4",         "V"},
-        {"EX Digi 1",     "Expander", "EXDigitalInput1", ""},
-        {"EX Digi 2",     "Expander", "EXDigitalInput2", ""},
-        {"EX Digi 3",     "Expander", "EXDigitalInput3", ""},
-        {"EX Digi 4",     "Expander", "EXDigitalInput4", ""},
-        {"EX Digi 5",     "Expander", "EXDigitalInput5", ""},
-        {"EX Digi 6",     "Expander", "EXDigitalInput6", ""},
-        {"EX Digi 7",     "Expander", "EXDigitalInput7", ""},
-        {"EX Digi 8",     "Expander", "EXDigitalInput8", ""},
-    };
-
+    const QVariantList allSensors = m_sensorRegistry->availableSensors();
     QVariantList entries;
-    for (const auto &s : sensors) {
-        double value = 0.0;
-        if (m_propertyRouter && m_propertyRouter->hasProperty(QLatin1String(s.key)))
-            value = m_propertyRouter->getValue(QLatin1String(s.key)).toDouble();
 
-        if (!m_showAllSensors && qAbs(value) < 0.001)
+    for (const QVariant &v : allSensors) {
+        const QVariantMap sensor = v.toMap();
+        const QString key = sensor.value(QStringLiteral("key")).toString();
+        const bool active = sensor.value(QStringLiteral("active")).toBool();
+
+        if (!m_showAllSensors && !active)
             continue;
 
+        double value = 0.0;
+        if (m_propertyRouter->hasProperty(key))
+            value = m_propertyRouter->getValue(key).toDouble();
+
         QVariantMap entry;
-        entry[QStringLiteral("name")] = QLatin1String(s.name);
-        entry[QStringLiteral("source")] = QLatin1String(s.source);
+        entry[QStringLiteral("name")] = sensor.value(QStringLiteral("displayName"));
+        entry[QStringLiteral("source")] = sensor.value(QStringLiteral("category"));
         entry[QStringLiteral("value")] = value;
-        entry[QStringLiteral("unit")] = QLatin1String(s.unit);
+        entry[QStringLiteral("unit")] = sensor.value(QStringLiteral("unit"));
+        entry[QStringLiteral("active")] = active;
         entries.append(entry);
     }
 
@@ -432,6 +403,101 @@ void DiagnosticsProvider::refreshLiveSensorEntries()
     emit liveSensorEntriesChanged();
 }
 
+// -- CAN Frame Capture --
+
+void DiagnosticsProvider::recordCanFrame(quint32 id, const QByteArray &payload)
+{
+    if (!m_canCaptureEnabled)
+        return;
+
+    CapturedCanFrame frame;
+    frame.frameId = id;
+    frame.payload = payload;
+    frame.timestamp = QDateTime::currentMSecsSinceEpoch();
+
+    if (m_canFrameRing.size() < MAX_CAN_FRAMES) {
+        m_canFrameRing.append(frame);
+    } else {
+        m_canFrameRing[m_canFrameWritePos] = frame;
+        m_canFrameWritePos = (m_canFrameWritePos + 1) % MAX_CAN_FRAMES;
+    }
+    emit canFrameBufferChanged();
+}
+
+QVariantList DiagnosticsProvider::canFrameBuffer() const
+{
+    QVariantList result;
+    const quint32 filterVal = m_canIdFilter.isEmpty() ? 0 : m_canIdFilter.toUInt(nullptr, 16);
+
+    int count = m_canFrameRing.size();
+    for (int i = 0; i < count; ++i) {
+        int idx = (count < MAX_CAN_FRAMES) ? i : (m_canFrameWritePos + i) % MAX_CAN_FRAMES;
+        const auto &f = m_canFrameRing[idx];
+
+        if (!m_canIdFilter.isEmpty() && f.frameId != filterVal)
+            continue;
+
+        QVariantMap map;
+        map[QStringLiteral("timestamp")] = f.timestamp;
+        map[QStringLiteral("id")] = QStringLiteral("0x%1").arg(f.frameId, 0, 16).toUpper();
+        map[QStringLiteral("length")] = f.payload.size();
+
+        QStringList hexBytes;
+        for (int b = 0; b < f.payload.size(); ++b)
+            hexBytes.append(
+                QStringLiteral("%1").arg(static_cast<quint8>(f.payload[b]), 2, 16, QLatin1Char('0')).toUpper());
+        map[QStringLiteral("payload")] = hexBytes.join(QStringLiteral(" "));
+
+        QString ascii;
+        for (int b = 0; b < f.payload.size(); ++b) {
+            char c = f.payload[b];
+            ascii.append((c >= 32 && c <= 126) ? QChar(c) : QChar('.'));
+        }
+        map[QStringLiteral("ascii")] = ascii;
+        result.append(map);
+    }
+    return result;
+}
+
+bool DiagnosticsProvider::canCaptureEnabled() const
+{
+    return m_canCaptureEnabled;
+}
+
+void DiagnosticsProvider::setCanCaptureEnabled(bool enabled)
+{
+    if (m_canCaptureEnabled != enabled) {
+        m_canCaptureEnabled = enabled;
+        emit canCaptureEnabledChanged();
+    }
+}
+
+QString DiagnosticsProvider::canIdFilter() const
+{
+    return m_canIdFilter;
+}
+
+void DiagnosticsProvider::setCanIdFilter(const QString &filter)
+{
+    if (m_canIdFilter != filter) {
+        m_canIdFilter = filter;
+        emit canIdFilterChanged();
+        emit canFrameBufferChanged();
+    }
+}
+
+void DiagnosticsProvider::resetCanErrors()
+{
+    m_canErrorCount = 0;
+    emit canStatusChanged();
+}
+
+void DiagnosticsProvider::clearCanFrameBuffer()
+{
+    m_canFrameRing.clear();
+    m_canFrameWritePos = 0;
+    emit canFrameBufferChanged();
+}
 
 // ---------------------------------------------------------------------------
 // Log accessors
@@ -666,10 +732,14 @@ QVariantList DiagnosticsProvider::getExtenderDigitalDiagnostics() const
 void DiagnosticsProvider::addLogMessage(const QString &level, const QString &message)
 {
     int levelInt = 1;
-    if (level == QLatin1String("DEBUG"))      levelInt = 0;
-    else if (level == QLatin1String("INFO"))  levelInt = 1;
-    else if (level == QLatin1String("WARN"))  levelInt = 2;
-    else if (level == QLatin1String("ERROR") || level == QLatin1String("FATAL")) levelInt = 3;
+    if (level == QLatin1String("DEBUG"))
+        levelInt = 0;
+    else if (level == QLatin1String("INFO"))
+        levelInt = 1;
+    else if (level == QLatin1String("WARN"))
+        levelInt = 2;
+    else if (level == QLatin1String("ERROR") || level == QLatin1String("FATAL"))
+        levelInt = 3;
 
     QString timestamp = QDateTime::currentDateTime().toString(QStringLiteral("hh:mm:ss"));
     QString text = QStringLiteral("[%1] [%2] %3").arg(timestamp, level, message);
@@ -720,8 +790,7 @@ void DiagnosticsProvider::recordCanMessage()
 void DiagnosticsProvider::recordCanError()
 {
     ++m_canErrorCount;
-    addLogMessage(QStringLiteral("ERROR"),
-                  QStringLiteral("CAN error #%1").arg(m_canErrorCount));
+    addLogMessage(QStringLiteral("ERROR"), QStringLiteral("CAN error #%1").arg(m_canErrorCount));
     emit canStatusChanged();
 }
 
@@ -738,8 +807,7 @@ void DiagnosticsProvider::setCanStatus(bool connected, const QString &daemon)
         m_canConnected = connected;
         m_daemonName = daemon;
         if (connected) {
-            addLogMessage(QStringLiteral("INFO"),
-                          QStringLiteral("CAN connected (daemon: %1)").arg(daemon));
+            addLogMessage(QStringLiteral("INFO"), QStringLiteral("CAN connected (daemon: %1)").arg(daemon));
         } else {
             m_lastCanMsgTimeValid = false;
             addLogMessage(QStringLiteral("WARN"), QStringLiteral("CAN disconnected"));
@@ -757,8 +825,7 @@ void DiagnosticsProvider::setCanStatus(bool connected, const QString &daemon)
  *
  * Updates all connection fields and emits connectionChanged.
  */
-void DiagnosticsProvider::setConnectionInfo(bool connected, const QString &port,
-                                            int baudRate, const QString &type)
+void DiagnosticsProvider::setConnectionInfo(bool connected, const QString &port, int baudRate, const QString &type)
 {
     m_serialConnected = connected;
     m_serialPort = port;
@@ -896,9 +963,7 @@ double DiagnosticsProvider::readMemoryUsage() const
     vm_statistics64_data_t vmStats;
     mach_msg_type_number_t count = HOST_VM_INFO64_COUNT;
 
-    kern_return_t result = host_statistics64(host, HOST_VM_INFO64,
-                                             reinterpret_cast<host_info64_t>(&vmStats),
-                                             &count);
+    kern_return_t result = host_statistics64(host, HOST_VM_INFO64, reinterpret_cast<host_info64_t>(&vmStats), &count);
     if (result != KERN_SUCCESS) {
         return 0.0;
     }
@@ -939,7 +1004,8 @@ double DiagnosticsProvider::readCpuLoadAverage() const
         if (!parts.isEmpty()) {
             bool ok = false;
             double avg1 = parts.at(0).toDouble(&ok);
-            if (ok) return avg1;
+            if (ok)
+                return avg1;
         }
     }
     return 0.0;
@@ -982,12 +1048,19 @@ void DiagnosticsProvider::readMemoryAbsolute(double &usedMB, double &totalMB) co
         QString line = in.readLine();
         if (line.startsWith(QStringLiteral("MemTotal:"))) {
             QStringList parts = line.split(QRegularExpression(QStringLiteral("\\s+")));
-            if (parts.size() >= 2) { memTotalKB = parts.at(1).toDouble(); foundTotal = true; }
+            if (parts.size() >= 2) {
+                memTotalKB = parts.at(1).toDouble();
+                foundTotal = true;
+            }
         } else if (line.startsWith(QStringLiteral("MemAvailable:"))) {
             QStringList parts = line.split(QRegularExpression(QStringLiteral("\\s+")));
-            if (parts.size() >= 2) { memAvailKB = parts.at(1).toDouble(); foundAvail = true; }
+            if (parts.size() >= 2) {
+                memAvailKB = parts.at(1).toDouble();
+                foundAvail = true;
+            }
         }
-        if (foundTotal && foundAvail) break;
+        if (foundTotal && foundAvail)
+            break;
     }
     memFile.close();
     totalMB = memTotalKB / 1024.0;
@@ -996,9 +1069,12 @@ void DiagnosticsProvider::readMemoryAbsolute(double &usedMB, double &totalMB) co
     mach_port_t host = mach_host_self();
     vm_statistics64_data_t vmStats;
     mach_msg_type_number_t count = HOST_VM_INFO64_COUNT;
-    kern_return_t result = host_statistics64(host, HOST_VM_INFO64,
-                                             reinterpret_cast<host_info64_t>(&vmStats), &count);
-    if (result != KERN_SUCCESS) { usedMB = 0.0; totalMB = 0.0; return; }
+    kern_return_t result = host_statistics64(host, HOST_VM_INFO64, reinterpret_cast<host_info64_t>(&vmStats), &count);
+    if (result != KERN_SUCCESS) {
+        usedMB = 0.0;
+        totalMB = 0.0;
+        return;
+    }
     vm_size_t pageSize = 0;
     host_page_size(host, &pageSize);
     uint64_t active = static_cast<uint64_t>(vmStats.active_count) * pageSize;
