@@ -42,7 +42,6 @@ set(CORE_SOURCES
     Core/dashboard.cpp
     Core/appsettings.cpp
     Core/PropertyRouter.cpp
-    Core/RaceArcItem.cpp
     Core/SensorRegistry.cpp
     Core/DiagnosticsProvider.cpp
     Core/Models/UIState.cpp
@@ -66,7 +65,6 @@ set(CORE_HEADERS
     Core/dashboard.h
     Core/appsettings.h
     Core/PropertyRouter.h
-    Core/RaceArcItem.h
     Core/SensorRegistry.h
     Core/DiagnosticsProvider.h
     Core/Models/UIState.h
@@ -286,16 +284,31 @@ qt_policy(SET QTP0004 OLD)
         URI PowerTune.Gauges.RaceDash
         VERSION 1.0
         IMPORTS PowerTune.UI PowerTune.Gauges.Shared
+        SOURCES
+            PowerTune/Gauges/RaceDash/geohelpers/RaceArcItem.cpp
+            PowerTune/Gauges/RaceDash/geohelpers/RaceArcItem.h
         QML_FILES
             PowerTune/Gauges/RaceDash/ArcGauge.qml
+            PowerTune/Gauges/RaceDash/ArcAlertMarker.qml
+            PowerTune/Gauges/RaceDash/GaugeReadout.qml
             PowerTune/Gauges/RaceDash/ShiftIndicator.qml
             PowerTune/Gauges/RaceDash/SensorCard.qml
             PowerTune/Gauges/RaceDash/StatusBox.qml
             PowerTune/Gauges/RaceDash/BrakeBiasBar.qml
             PowerTune/Gauges/RaceDash/BottomStatusBar.qml
             PowerTune/Gauges/RaceDash/GearIndicator.qml
+            PowerTune/Gauges/RaceDash/TachCluster.qml
+            PowerTune/Gauges/RaceDash/SpeedCluster.qml
         RESOURCE_PREFIX /qt/qml
         OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/qt/qml/PowerTune/Gauges/RaceDash
+    )
+    target_link_libraries(GaugesRaceDashLib PRIVATE
+        Qt6::Gui
+        Qt6::Qml
+        Qt6::Quick
+    )
+    target_include_directories(GaugesRaceDashLib PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/PowerTune/Gauges/RaceDash/geohelpers
     )
     
     # * PrismPT.Dashboard module - User dashboard canvas and panels

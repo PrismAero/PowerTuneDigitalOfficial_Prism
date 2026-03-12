@@ -131,7 +131,7 @@ QVariantMap OverlayConfigManager::getConfigForPopup(const QString &overlayId, co
 
     QSettings appSettings(ORG_NAME, APP_NAME);
 
-    if (configType == QLatin1String("tachGroup")) {
+    if (configType == QLatin1String("tachGroup") || configType == QLatin1String("tachCluster")) {
         double maxRpm = cfg.value(QStringLiteral("maxValue"), 0.0).toDouble();
         if (maxRpm <= 0.0) {
             maxRpm = appSettings.value(QStringLiteral("Max RPM"), 10000).toDouble();
@@ -168,7 +168,7 @@ void OverlayConfigManager::saveConfigFromPopup(const QString &overlayId, const Q
         cfg[QStringLiteral("sensorKey")] = fields.value(QStringLiteral("sensorKey"));
         cfg[QStringLiteral("label")] = fields.value(QStringLiteral("label"));
         cfg[QStringLiteral("threshold")] = fields.value(QStringLiteral("threshold"));
-    } else if (configType == QLatin1String("tachGroup")) {
+    } else if (configType == QLatin1String("tachGroup") || configType == QLatin1String("tachCluster")) {
         cfg[QStringLiteral("sensorKey")] = fields.value(QStringLiteral("sensorKey"));
         cfg[QStringLiteral("minValue")] = fields.value(QStringLiteral("minValue"));
         cfg[QStringLiteral("maxValue")] = fields.value(QStringLiteral("maxValue"));
@@ -176,17 +176,36 @@ void OverlayConfigManager::saveConfigFromPopup(const QString &overlayId, const Q
         cfg[QStringLiteral("arcColorStart")] = fields.value(QStringLiteral("arcColorStart"));
         cfg[QStringLiteral("arcColorEnd")] = fields.value(QStringLiteral("arcColorEnd"));
         cfg[QStringLiteral("gearKey")] = fields.value(QStringLiteral("gearKey"));
+        cfg[QStringLiteral("gearTextColor")] = fields.value(QStringLiteral("gearTextColor"));
+        cfg[QStringLiteral("gearFontSize")] = fields.value(QStringLiteral("gearFontSize"));
+        cfg[QStringLiteral("suffixFontSize")] = fields.value(QStringLiteral("suffixFontSize"));
+        cfg[QStringLiteral("gearOffsetX")] = fields.value(QStringLiteral("gearOffsetX"));
+        cfg[QStringLiteral("gearOffsetY")] = fields.value(QStringLiteral("gearOffsetY"));
+        cfg[QStringLiteral("gearWidth")] = fields.value(QStringLiteral("gearWidth"));
+        cfg[QStringLiteral("gearHeight")] = fields.value(QStringLiteral("gearHeight"));
+        cfg[QStringLiteral("readoutStep")] = fields.value(QStringLiteral("readoutStep"));
+        cfg[QStringLiteral("readoutOffsetX")] = fields.value(QStringLiteral("readoutOffsetX"));
+        cfg[QStringLiteral("readoutOffsetY")] = fields.value(QStringLiteral("readoutOffsetY"));
+        cfg[QStringLiteral("readoutValueScale")] = fields.value(QStringLiteral("readoutValueScale"));
+        cfg[QStringLiteral("readoutUnitScale")] = fields.value(QStringLiteral("readoutUnitScale"));
+        cfg[QStringLiteral("readoutTextColor")] = fields.value(QStringLiteral("readoutTextColor"));
         cfg[QStringLiteral("shiftPoint")] = fields.value(QStringLiteral("shiftPoint"));
         cfg[QStringLiteral("shiftCount")] = fields.value(QStringLiteral("shiftCount"));
         cfg[QStringLiteral("shiftPattern")] = fields.value(QStringLiteral("shiftPattern"));
         cfg[QStringLiteral("decimals")] = fields.value(QStringLiteral("decimals"));
-    } else if (configType == QLatin1String("speedGroup")) {
+    } else if (configType == QLatin1String("speedGroup") || configType == QLatin1String("speedCluster")) {
         cfg[QStringLiteral("sensorKey")] = fields.value(QStringLiteral("sensorKey"));
         cfg[QStringLiteral("minValue")] = fields.value(QStringLiteral("minValue"));
         cfg[QStringLiteral("maxValue")] = fields.value(QStringLiteral("maxValue"));
         cfg[QStringLiteral("unit")] = fields.value(QStringLiteral("unit"));
         cfg[QStringLiteral("arcColorStart")] = fields.value(QStringLiteral("arcColorStart"));
         cfg[QStringLiteral("arcColorEnd")] = fields.value(QStringLiteral("arcColorEnd"));
+        cfg[QStringLiteral("readoutStep")] = fields.value(QStringLiteral("readoutStep"));
+        cfg[QStringLiteral("readoutOffsetX")] = fields.value(QStringLiteral("readoutOffsetX"));
+        cfg[QStringLiteral("readoutOffsetY")] = fields.value(QStringLiteral("readoutOffsetY"));
+        cfg[QStringLiteral("readoutValueScale")] = fields.value(QStringLiteral("readoutValueScale"));
+        cfg[QStringLiteral("readoutUnitScale")] = fields.value(QStringLiteral("readoutUnitScale"));
+        cfg[QStringLiteral("readoutTextColor")] = fields.value(QStringLiteral("readoutTextColor"));
         cfg[QStringLiteral("decimals")] = fields.value(QStringLiteral("decimals"));
     } else if (configType == QLatin1String("staticText")) {
         cfg[QStringLiteral("text")] = fields.value(QStringLiteral("text"));
@@ -231,7 +250,7 @@ QVariantMap OverlayConfigManager::getOverlayProperties(const QString &overlayId)
         result[QStringLiteral("sensorKey")] = strVal(QStringLiteral("sensorKey"), QStringLiteral("DigitalInput2"));
         result[QStringLiteral("label")] = strVal(QStringLiteral("label"), QStringLiteral("Digital 2:"));
         result[QStringLiteral("threshold")] = dblVal(QStringLiteral("threshold"), 0.5);
-    } else if (overlayId == QLatin1String("tachGroup")) {
+    } else if (overlayId == QLatin1String("tachGroup") || overlayId == QLatin1String("tachCluster")) {
         double defMax = appSettings.value(QStringLiteral("Max RPM"), 10000).toDouble();
         if (defMax <= 0.0) defMax = 10000.0;
         double s1 = appSettings.value(QStringLiteral("Shift Light1"), 3000).toDouble();
@@ -244,17 +263,36 @@ QVariantMap OverlayConfigManager::getOverlayProperties(const QString &overlayId)
         result[QStringLiteral("arcColorStart")] = strVal(QStringLiteral("arcColorStart"), QStringLiteral("#E88A1A"));
         result[QStringLiteral("arcColorEnd")] = strVal(QStringLiteral("arcColorEnd"), QStringLiteral("#C45A00"));
         result[QStringLiteral("gearKey")] = strVal(QStringLiteral("gearKey"), QStringLiteral("Gear"));
+        result[QStringLiteral("gearTextColor")] = strVal(QStringLiteral("gearTextColor"), QStringLiteral("#FFFFFF"));
+        result[QStringLiteral("gearFontSize")] = dblVal(QStringLiteral("gearFontSize"), 140.013);
+        result[QStringLiteral("suffixFontSize")] = dblVal(QStringLiteral("suffixFontSize"), 52.505);
+        result[QStringLiteral("gearOffsetX")] = dblVal(QStringLiteral("gearOffsetX"), 21.5);
+        result[QStringLiteral("gearOffsetY")] = dblVal(QStringLiteral("gearOffsetY"), -76.0);
+        result[QStringLiteral("gearWidth")] = dblVal(QStringLiteral("gearWidth"), 168.0);
+        result[QStringLiteral("gearHeight")] = dblVal(QStringLiteral("gearHeight"), 117.0);
+        result[QStringLiteral("readoutStep")] = dblVal(QStringLiteral("readoutStep"), 1.0);
+        result[QStringLiteral("readoutOffsetX")] = dblVal(QStringLiteral("readoutOffsetX"), 0.0);
+        result[QStringLiteral("readoutOffsetY")] = dblVal(QStringLiteral("readoutOffsetY"), 94.0);
+        result[QStringLiteral("readoutValueScale")] = dblVal(QStringLiteral("readoutValueScale"), 0.213);
+        result[QStringLiteral("readoutUnitScale")] = dblVal(QStringLiteral("readoutUnitScale"), 0.076);
+        result[QStringLiteral("readoutTextColor")] = strVal(QStringLiteral("readoutTextColor"), QStringLiteral("#FFFFFF"));
         result[QStringLiteral("shiftPoint")] = dblVal(QStringLiteral("shiftPoint"), defShift);
         result[QStringLiteral("shiftCount")] = intVal(QStringLiteral("shiftCount"), 11);
         result[QStringLiteral("shiftPattern")] = strVal(QStringLiteral("shiftPattern"), QStringLiteral("center-out"));
         result[QStringLiteral("decimals")] = intVal(QStringLiteral("decimals"), 0);
-    } else if (overlayId == QLatin1String("speedGroup")) {
+    } else if (overlayId == QLatin1String("speedGroup") || overlayId == QLatin1String("speedCluster")) {
         result[QStringLiteral("sensorKey")] = strVal(QStringLiteral("sensorKey"), QStringLiteral("speed"));
         result[QStringLiteral("minValue")] = dblVal(QStringLiteral("minValue"), 0.0);
         result[QStringLiteral("maxValue")] = dblVal(QStringLiteral("maxValue"), 200.0);
         result[QStringLiteral("unit")] = strVal(QStringLiteral("unit"), QStringLiteral("MPH"));
         result[QStringLiteral("arcColorStart")] = strVal(QStringLiteral("arcColorStart"), QStringLiteral("#AA1111"));
         result[QStringLiteral("arcColorEnd")] = strVal(QStringLiteral("arcColorEnd"), QStringLiteral("#880000"));
+        result[QStringLiteral("readoutStep")] = dblVal(QStringLiteral("readoutStep"), 1.0);
+        result[QStringLiteral("readoutOffsetX")] = dblVal(QStringLiteral("readoutOffsetX"), 0.0);
+        result[QStringLiteral("readoutOffsetY")] = dblVal(QStringLiteral("readoutOffsetY"), 62.0);
+        result[QStringLiteral("readoutValueScale")] = dblVal(QStringLiteral("readoutValueScale"), 0.213);
+        result[QStringLiteral("readoutUnitScale")] = dblVal(QStringLiteral("readoutUnitScale"), 0.076);
+        result[QStringLiteral("readoutTextColor")] = strVal(QStringLiteral("readoutTextColor"), QStringLiteral("#FFFFFF"));
         result[QStringLiteral("decimals")] = intVal(QStringLiteral("decimals"), 0);
     } else if (overlayId == QLatin1String("bottomBar")) {
         result[QStringLiteral("text")] = strVal(QStringLiteral("text"), QStringLiteral("Cardinal Racing"));
