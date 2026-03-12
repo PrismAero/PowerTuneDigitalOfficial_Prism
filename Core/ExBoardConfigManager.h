@@ -2,6 +2,8 @@
 #define EXBOARDCONFIGMANAGER_H
 
 #include <QObject>
+#include <QString>
+#include <QStringList>
 #include <QVariantMap>
 
 class AppSettings;
