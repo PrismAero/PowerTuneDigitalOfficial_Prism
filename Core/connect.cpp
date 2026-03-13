@@ -824,15 +824,16 @@ void Connect::update()
 {
     if (m_diagnosticsProvider)
         m_diagnosticsProvider->addLogMessage(QStringLiteral("INFO"), QStringLiteral("System update initiated"));
-    QProcess *p = new QProcess(this);
 
-    if (p) {
-        p->setEnvironment(QProcess::systemEnvironment());
-        p->setProcessChannelMode(QProcess::MergedChannels);
-        p->start("/home/pi/src/updatePowerTune.sh", QStringList() << "echo" << "hye");
-        p->waitForStarted();
+    if (m_diagnosticsProvider) {
+        m_diagnosticsProvider->addLogMessage(
+            QStringLiteral("WARN"),
+            QStringLiteral("In-app update is unavailable: no updater script is configured in this repository"));
+    }
 
-        connect(p, &QProcess::readyReadStandardOutput, this, &Connect::processOutput);
+    if (m_connectionData) {
+        m_connectionData->setSerialStat(
+            QStringLiteral("Update unavailable: use the documented CMake/Yocto deployment workflow"));
     }
 }
 

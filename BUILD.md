@@ -22,16 +22,24 @@ an Ubuntu 22.04 build server.
 
 ## 1. Local Development Build (macOS)
 
-Prerequisites: Qt 6.x installed via the Qt online installer, CMake 3.16+.
+Preferred local preset flow:
+
+```sh
+cmake --preset macos-homebrew
+cmake --build --preset macos-homebrew
+```
+
+This configures and builds the app into `build/macos-homebrew/`.
+
+Prerequisites: Qt 6.x available on the machine and CMake 3.16+.
 
 ```sh
 cd /path/to/PowerTuneDigitalOfficial_Prism
-mkdir -p build && cd build
-cmake .. -DCMAKE_BUILD_TYPE=Debug
-cmake --build . --parallel
+cmake -S . -B build/macos-homebrew -DCMAKE_BUILD_TYPE=Debug -DCMAKE_PREFIX_PATH=/opt/homebrew
+cmake --build build/macos-homebrew --parallel
 ```
 
-The resulting binary is `build/PowerTuneQMLGui.app/Contents/MacOS/PowerTuneQMLGui`.
+The preset build output is `build/macos-homebrew/PowerTuneQMLGui.app/Contents/MacOS/PowerTuneQMLGui`.
 
 This build is for UI development, QML iteration, and testing only. It does not
 produce an ARM binary.
@@ -173,7 +181,7 @@ The build is configured in `build-powertune/conf/local.conf`:
 | CAN | MCP2515 via SPI (`can0` at 1Mbps) |
 | App path | `/opt/PowerTune/PowerTuneQMLGui` |
 | App log | `/var/log/powertune.log` |
-| Settings | `/home/root/.config/PowerTuneQML/` |
+| Settings | `/home/root/.config/PowerTune/PowerTune.conf` |
 
 ### 3.2 Quick Deploy (Binary Only)
 

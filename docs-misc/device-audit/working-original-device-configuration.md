@@ -1,5 +1,11 @@
 # PowerTune Device Configuration Audit
 
+This document is a point-in-time snapshot of a specific deployed device image.
+It is useful for device forensics and platform comparison, but it is not the
+authoritative reference for the current application structure, build system, or
+runtime naming used by this repository. For current app architecture, use
+`docs-misc/PROJECT_REFERENCE.md` and `BUILD.md`.
+
 **Date**: 2026-03-04
 **Device IP**: 192.168.15.129
 **Access**: ssh root@192.168.15.129 (passwordless)

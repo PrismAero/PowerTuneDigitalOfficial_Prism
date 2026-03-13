@@ -1,6 +1,6 @@
 # CMakeLists.txt for PowerTune Digital Dashboard
-# This CMake configuration mirrors the qmake .pro file and provides modern CMake support
-# for IDE tooling, clangd integration, and cross-platform builds.
+# Primary Qt 6 CMake build configuration for IDE tooling, local development,
+# and cross-platform builds.
 
 cmake_minimum_required(VERSION 3.16)
 

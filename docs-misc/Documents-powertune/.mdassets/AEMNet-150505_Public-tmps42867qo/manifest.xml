@@ -1,0 +1,634 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document xmlns="https://any2md.dev/manifest/v1">
+  <meta>
+    <device>AEMNet 150505_Public</device>
+    <title>AEMNet 150505_Public tmps42867qo</title>
+    <source>/Users/kaiwybornyprismaero/Projects/PT-Prism-Advanced/PowerTuneDigitalOfficial_Prism/docs-misc/Documents-powertune/AEMNet 150505_Public.pdf</source>
+    <sourceHash algo="sha256">4adbeb438b0278bd2c487c081144c44fb0682c2573250b15250bd1e3763e8150</sourceHash>
+    <pageCount>10</pageCount>
+    <profile></profile>
+    <converterVersion>1.3.0</converterVersion>
+    <createdAt>2026-03-13T04:04:06Z</createdAt>
+    <outputFile>AEMNet-150505_Public-tmps42867qo.md</outputFile>
+  </meta>
+  <images count="29">
+    <image id="figure-1" type="figure" page="1">
+      <filename>AEMNet 150505_Public-figure-1.png</filename>
+      <caption></caption>
+      <width>471</width>
+      <height>174</height>
+      <hash algo="sha256">e0610e9d0760a87688d66dacf65a39d0ec036f97173f36f2f564cc81bc83a776</hash>
+    </image>
+    <image id="figure-2" type="figure" page="1">
+      <filename>AEMNet 150505_Public-figure-2.png</filename>
+      <caption></caption>
+      <width>370</width>
+      <height>175</height>
+      <hash algo="sha256">7d45475ea01f93f32221c6c4fc965444dcfc1a97e18c3181972e009a2fb408a6</hash>
+    </image>
+    <image id="figure-3" type="figure" page="1">
+      <filename>AEMNet 150505_Public-figure-3.png</filename>
+      <caption></caption>
+      <width>473</width>
+      <height>172</height>
+      <hash algo="sha256">e62c3f806c5078821dbe07ab98ac985da96bf70a30ea690e3a2f7743898f6ee1</hash>
+    </image>
+    <image id="figure-4" type="figure" page="1">
+      <filename>AEMNet 150505_Public-figure-4.png</filename>
+      <caption></caption>
+      <width>472</width>
+      <height>174</height>
+      <hash algo="sha256">e595dd1aee7cd731de268917196af869aa2a2bdd41c4ece3a7aa325aedb63209</hash>
+    </image>
+    <image id="figure-5" type="figure" page="1">
+      <filename>AEMNet 150505_Public-figure-5.png</filename>
+      <caption></caption>
+      <width>471</width>
+      <height>171</height>
+      <hash algo="sha256">513160b1bef52a7a48b79379b0018c15b11753efc2ea2304afcda1f8dce990b0</hash>
+    </image>
+    <image id="figure-6" type="figure" page="1">
+      <filename>AEMNet 150505_Public-figure-6.png</filename>
+      <caption></caption>
+      <width>371</width>
+      <height>172</height>
+      <hash algo="sha256">e8511d7470f996543af862568d564442160889fb0e9ff1bff698cce7f6542ff8</hash>
+    </image>
+    <image id="figure-7" type="figure" page="1">
+      <filename>AEMNet 150505_Public-figure-7.png</filename>
+      <caption></caption>
+      <width>371</width>
+      <height>172</height>
+      <hash algo="sha256">1b983ae5f708aafd5607ff74968552cd219da93a9d2fb152f3244c3d61fe4cfc</hash>
+    </image>
+    <image id="figure-8" type="figure" page="1">
+      <filename>AEMNet 150505_Public-figure-8.png</filename>
+      <caption></caption>
+      <width>369</width>
+      <height>245</height>
+      <hash algo="sha256">721cde74646cc2a38ef2739e6326d26a3b8a40d3908b5fd47a7139ce8ee8d799</hash>
+    </image>
+    <image id="figure-9" type="figure" page="1">
+      <filename>AEMNet 150505_Public-figure-9.png</filename>
+      <caption></caption>
+      <width>371</width>
+      <height>173</height>
+      <hash algo="sha256">5b33f6eddb44341a1fd15a6ddf53126a83510655270fdf0aeea52699813e1e4d</hash>
+    </image>
+    <image id="figure-10" type="figure" page="1">
+      <filename>AEMNet 150505_Public-figure-10.png</filename>
+      <caption></caption>
+      <width>470</width>
+      <height>244</height>
+      <hash algo="sha256">be95975036e6a7dd5272d89bd7e612b89aaf3108e04e673fc3ee9f254806dd0d</hash>
+    </image>
+    <image id="figure-11" type="figure" page="1">
+      <filename>AEMNet 150505_Public-figure-11.png</filename>
+      <caption></caption>
+      <width>351</width>
+      <height>174</height>
+      <hash algo="sha256">42405ae8a4ce3562f4fc4bbf70c0769175480c393eff7bf95132a5b33ac854ab</hash>
+    </image>
+    <image id="figure-12" type="figure" page="1">
+      <filename>AEMNet 150505_Public-figure-12.png</filename>
+      <caption></caption>
+      <width>351</width>
+      <height>172</height>
+      <hash algo="sha256">755dde82761de16977dd2ac05d1b716df2431800179cb1718fb6d937a9cb6a13</hash>
+    </image>
+    <image id="figure-13" type="figure" page="1">
+      <filename>AEMNet 150505_Public-figure-13.png</filename>
+      <caption></caption>
+      <width>351</width>
+      <height>173</height>
+      <hash algo="sha256">4b89448f11f9af8e992a708a36730168f8c44d504eb583843ba6888a5c1d5929</hash>
+    </image>
+    <image id="figure-14" type="figure" page="1">
+      <filename>AEMNet 150505_Public-figure-14.png</filename>
+      <caption></caption>
+      <width>351</width>
+      <height>173</height>
+      <hash algo="sha256">224b245f99cb0f2e983888b250ccdedbf7ae056d2dfc490122d7994891402e14</hash>
+    </image>
+    <image id="figure-15" type="figure" page="1">
+      <filename>AEMNet 150505_Public-figure-15.png</filename>
+      <caption></caption>
+      <width>351</width>
+      <height>245</height>
+      <hash algo="sha256">d73c4ca4e992f7a53384e4b027a4dcb4835aba072489764882f9e6bd107f44f2</hash>
+    </image>
+    <image id="figure-16" type="figure" page="2">
+      <filename>AEMNet 150505_Public-figure-16.png</filename>
+      <caption></caption>
+      <width>470</width>
+      <height>172</height>
+      <hash algo="sha256">7e7fd45fb9bd5019dac716cbc94e1df0f49427b6c2ac03361a2aa1c884bc6ac8</hash>
+    </image>
+    <image id="figure-17" type="figure" page="2">
+      <filename>AEMNet 150505_Public-figure-17.png</filename>
+      <caption></caption>
+      <width>469</width>
+      <height>274</height>
+      <hash algo="sha256">c27fc944f01689bb130685b0999030ccd065524df83bee380d660a83b9829149</hash>
+    </image>
+    <image id="figure-18" type="figure" page="2">
+      <filename>AEMNet 150505_Public-figure-18.png</filename>
+      <caption></caption>
+      <width>350</width>
+      <height>174</height>
+      <hash algo="sha256">9ad22f16cb96b3064630766e20294b1abae8f23e7e88162c4b955a22dfde2059</hash>
+    </image>
+    <image id="figure-19" type="figure" page="2">
+      <filename>AEMNet 150505_Public-figure-19.png</filename>
+      <caption></caption>
+      <width>367</width>
+      <height>275</height>
+      <hash algo="sha256">9709ce26579593a79163af10feb3039d42219366f8b05fde8fd80f71492e3e4a</hash>
+    </image>
+    <image id="figure-20" type="figure" page="2">
+      <filename>AEMNet 150505_Public-figure-20.png</filename>
+      <caption></caption>
+      <width>368</width>
+      <height>174</height>
+      <hash algo="sha256">81674a5c29a0f10f749ed5676f7fd445d10bcb43aa49d8769136dae452fabba7</hash>
+    </image>
+    <image id="figure-21" type="figure" page="2">
+      <filename>AEMNet 150505_Public-figure-21.png</filename>
+      <caption></caption>
+      <width>366</width>
+      <height>171</height>
+      <hash algo="sha256">0451a3d3e5b5184c2f40517b053cdcdac4d17a36f9ddf241c86c8634db6c57ff</hash>
+    </image>
+    <image id="figure-22" type="figure" page="3">
+      <filename>AEMNet 150505_Public-figure-22.png</filename>
+      <caption></caption>
+      <width>366</width>
+      <height>171</height>
+      <hash algo="sha256">7a188c6cd1b427bc837d0d6137415a958ab668d2f3f7abf3732daafd21fccf0d</hash>
+    </image>
+    <image id="figure-23" type="figure" page="4">
+      <filename>AEMNet 150505_Public-figure-23.png</filename>
+      <caption></caption>
+      <width>1134</width>
+      <height>178</height>
+      <hash algo="sha256">8df57b5df9b5de6ad28c4a64af0b9c427d5f1c735788765d7161b3d8e3d7588c</hash>
+    </image>
+    <image id="figure-24" type="figure" page="4">
+      <filename>AEMNet 150505_Public-figure-24.png</filename>
+      <caption></caption>
+      <width>1132</width>
+      <height>179</height>
+      <hash algo="sha256">521e091831f9c4627ab806602b64be0c9f94595c15faa68825ab2b33bd1bf604</hash>
+    </image>
+    <image id="figure-25" type="figure" page="4">
+      <filename>AEMNet 150505_Public-figure-25.png</filename>
+      <caption></caption>
+      <width>1132</width>
+      <height>174</height>
+      <hash algo="sha256">7f178a2ad5c77a62d5c9f038844dd1b70337e5097dbd130b639e83bcf4a3218a</hash>
+    </image>
+    <image id="figure-26" type="figure" page="4">
+      <filename>AEMNet 150505_Public-figure-26.png</filename>
+      <caption></caption>
+      <width>1135</width>
+      <height>177</height>
+      <hash algo="sha256">ec4d1472c40f93eed5edb13d6e8e77287f8d8e77dae7f1f90a2951bb384922b5</hash>
+    </image>
+    <image id="figure-27" type="figure" page="5">
+      <filename>AEMNet 150505_Public-figure-27.png</filename>
+      <caption></caption>
+      <width>470</width>
+      <height>373</height>
+      <hash algo="sha256">7050d15e57fa79b05fb52d517cf544e4639cf7e8d307fa55c43aa3128b9c53e7</hash>
+    </image>
+    <image id="figure-28" type="figure" page="8">
+      <filename>AEMNet 150505_Public-figure-28.png</filename>
+      <caption></caption>
+      <width>470</width>
+      <height>245</height>
+      <hash algo="sha256">c884ab91e43d37c1062b9668b04115cf2ed3d40b0b312011bebad9fa925ed97b</hash>
+    </image>
+    <image id="figure-29" type="figure" page="8">
+      <filename>AEMNet 150505_Public-figure-29.png</filename>
+      <caption></caption>
+      <width>369</width>
+      <height>244</height>
+      <hash algo="sha256">53dab152c937aba55a0c80dfb85109215a9ce62a935c925d8b4053d26af90f34</hash>
+    </image>
+  </images>
+  <sections count="51">
+    <section id="20ms-continuous-50hz" level="2">
+      <heading>20ms continuous (50hz)</heading>
+      <startLine>22</startLine>
+      <endLine>39</endLine>
+      <wordCount>234</wordCount>
+      <tokenEstimate>305</tokenEstimate>
+      <contentTypes>text,table</contentTypes>
+    </section>
+    <section id="message-id-0x01f0a001" level="2">
+      <heading>Message ID: 0x01F0A001</heading>
+      <startLine>40</startLine>
+      <endLine>41</endLine>
+      <wordCount>0</wordCount>
+      <tokenEstimate>0</tokenEstimate>
+      <contentTypes></contentTypes>
+    </section>
+    <section id="sources-aem-v2-amp-ems-4-30-6xxx" level="2">
+      <heading>Sources: AEM V2 &amp;amp; EMS -4 (30 -6XXX)</heading>
+      <startLine>42</startLine>
+      <endLine>60</endLine>
+      <wordCount>169</wordCount>
+      <tokenEstimate>220</tokenEstimate>
+      <contentTypes>text,table</contentTypes>
+    </section>
+    <section id="message-id-0x01f0a002" level="2">
+      <heading>Message ID: 0x01F0A002</heading>
+      <startLine>61</startLine>
+      <endLine>62</endLine>
+      <wordCount>0</wordCount>
+      <tokenEstimate>0</tokenEstimate>
+      <contentTypes></contentTypes>
+    </section>
+    <section id="sources-aem-v2-amp-ems-4-30-6xxx" level="2">
+      <heading>Sources: AEM V2 &amp;amp; EMS -4 (30 -6XXX)</heading>
+      <startLine>63</startLine>
+      <endLine>64</endLine>
+      <wordCount>0</wordCount>
+      <tokenEstimate>0</tokenEstimate>
+      <contentTypes></contentTypes>
+    </section>
+    <section id="20ms-continuous-50hz" level="2">
+      <heading>20ms continuous (50hz)</heading>
+      <startLine>65</startLine>
+      <endLine>99</endLine>
+      <wordCount>97</wordCount>
+      <tokenEstimate>127</tokenEstimate>
+      <contentTypes>text,table,list</contentTypes>
+    </section>
+    <section id="20ms-continuous-50hz" level="2">
+      <heading>20ms continuous (50hz)</heading>
+      <startLine>100</startLine>
+      <endLine>105</endLine>
+      <wordCount>8</wordCount>
+      <tokenEstimate>11</tokenEstimate>
+      <contentTypes>text,list</contentTypes>
+    </section>
+    <section id="si-units-c-kpa-kph-lambda" level="2">
+      <heading>SI Units ( C / kPa / kph / Lambda )</heading>
+      <startLine>106</startLine>
+      <endLine>117</endLine>
+      <wordCount>11</wordCount>
+      <tokenEstimate>15</tokenEstimate>
+      <contentTypes>text,list</contentTypes>
+    </section>
+    <section id="si-units-c-kpa-kph-lambda" level="2">
+      <heading>SI Units ( C / kPa / kph / Lambda )</heading>
+      <startLine>118</startLine>
+      <endLine>134</endLine>
+      <wordCount>242</wordCount>
+      <tokenEstimate>315</tokenEstimate>
+      <contentTypes>text,table</contentTypes>
+    </section>
+    <section id="message-id-0x01f0a004" level="2">
+      <heading>Message ID: 0x01F0A004</heading>
+      <startLine>135</startLine>
+      <endLine>136</endLine>
+      <wordCount>0</wordCount>
+      <tokenEstimate>0</tokenEstimate>
+      <contentTypes></contentTypes>
+    </section>
+    <section id="sources-infinity-ems-30-71xx-v96-1-and-later" level="2">
+      <heading>Sources: Infinity EMS (30 -71XX) V96.1 and Later</heading>
+      <startLine>137</startLine>
+      <endLine>138</endLine>
+      <wordCount>0</wordCount>
+      <tokenEstimate>0</tokenEstimate>
+      <contentTypes></contentTypes>
+    </section>
+    <section id="20ms-continuous-50hz" level="2">
+      <heading>20ms continuous (50hz)</heading>
+      <startLine>139</startLine>
+      <endLine>140</endLine>
+      <wordCount>0</wordCount>
+      <tokenEstimate>0</tokenEstimate>
+      <contentTypes></contentTypes>
+    </section>
+    <section id="si-units-c-kpa-kph-lambda" level="2">
+      <heading>SI Units ( C / kPa / kph / Lambda )</heading>
+      <startLine>141</startLine>
+      <endLine>163</endLine>
+      <wordCount>398</wordCount>
+      <tokenEstimate>518</tokenEstimate>
+      <contentTypes>text,table</contentTypes>
+    </section>
+    <section id="si-units-c-kpa-kph-lambda" level="2">
+      <heading>SI Units ( C / kPa / kph / Lambda )</heading>
+      <startLine>164</startLine>
+      <endLine>175</endLine>
+      <wordCount>43</wordCount>
+      <tokenEstimate>56</tokenEstimate>
+      <contentTypes>text</contentTypes>
+    </section>
+    <section id="us-units-f-psi-mph-afr" level="2">
+      <heading>US Units ( F / PSI / MPH / AFR )</heading>
+      <startLine>176</startLine>
+      <endLine>179</endLine>
+      <wordCount>7</wordCount>
+      <tokenEstimate>10</tokenEstimate>
+      <contentTypes>text</contentTypes>
+    </section>
+    <section id="us-units-f-psi-mph-afr" level="2">
+      <heading>US Units ( F / PSI / MPH / AFR )</heading>
+      <startLine>180</startLine>
+      <endLine>183</endLine>
+      <wordCount>7</wordCount>
+      <tokenEstimate>10</tokenEstimate>
+      <contentTypes>text</contentTypes>
+    </section>
+    <section id="us-units-f-psi-mph-afr" level="2">
+      <heading>US Units ( F / PSI / MPH / AFR )</heading>
+      <startLine>184</startLine>
+      <endLine>187</endLine>
+      <wordCount>7</wordCount>
+      <tokenEstimate>10</tokenEstimate>
+      <contentTypes>text</contentTypes>
+    </section>
+    <section id="us-units-f-psi-mph-afr" level="2">
+      <heading>US Units ( F / PSI / MPH / AFR )</heading>
+      <startLine>188</startLine>
+      <endLine>208</endLine>
+      <wordCount>285</wordCount>
+      <tokenEstimate>371</tokenEstimate>
+      <contentTypes>text,table</contentTypes>
+    </section>
+    <section id="message-id-0x01f0a005" level="2">
+      <heading>Message ID: 0x01F0A005</heading>
+      <startLine>209</startLine>
+      <endLine>210</endLine>
+      <wordCount>0</wordCount>
+      <tokenEstimate>0</tokenEstimate>
+      <contentTypes></contentTypes>
+    </section>
+    <section id="sources-infinity-ems-30-71xx-v96-1-and-later" level="2">
+      <heading>Sources: Infinity EMS (30 -71XX) V96.1 and Later</heading>
+      <startLine>211</startLine>
+      <endLine>212</endLine>
+      <wordCount>0</wordCount>
+      <tokenEstimate>0</tokenEstimate>
+      <contentTypes></contentTypes>
+    </section>
+    <section id="20ms-continuous-50hz" level="2">
+      <heading>20ms continuous (50hz)</heading>
+      <startLine>213</startLine>
+      <endLine>467</endLine>
+      <wordCount>1836</wordCount>
+      <tokenEstimate>2387</tokenEstimate>
+      <contentTypes>text,table</contentTypes>
+    </section>
+    <section id="message-id-0x01f0a00b-sources-infinity-ems-30-71xx-v96-1-and-later-with-boost-co" level="2">
+      <heading>Message ID: 0x01F0A00B Sources: Infinity EMS (30 -71XX) V96.1 and Later, with Boost control enabled</heading>
+      <startLine>468</startLine>
+      <endLine>469</endLine>
+      <wordCount>0</wordCount>
+      <tokenEstimate>0</tokenEstimate>
+      <contentTypes></contentTypes>
+    </section>
+    <section id="40ms-continuous-25hz" level="2">
+      <heading>40ms continuous (25hz)</heading>
+      <startLine>470</startLine>
+      <endLine>506</endLine>
+      <wordCount>250</wordCount>
+      <tokenEstimate>325</tokenEstimate>
+      <contentTypes>text,table</contentTypes>
+    </section>
+    <section id="message-id-0x01f0a00d-sources-infinity-ems-30-71xx-v96-1-and-later-with-dbw-cont" level="2">
+      <heading>Message ID: 0x01F0A00D Sources: Infinity EMS (30 -71XX) V96.1 and Later, with DBW control enabled</heading>
+      <startLine>507</startLine>
+      <endLine>550</endLine>
+      <wordCount>795</wordCount>
+      <tokenEstimate>1034</tokenEstimate>
+      <contentTypes>text,table</contentTypes>
+    </section>
+    <section id="message-id-0x01f0a010" level="2">
+      <heading>Message ID: 0x01F0A010</heading>
+      <startLine>551</startLine>
+      <endLine>552</endLine>
+      <wordCount>0</wordCount>
+      <tokenEstimate>0</tokenEstimate>
+      <contentTypes></contentTypes>
+    </section>
+    <section id="sources-infinity-ems-30-71xx-v96-1-and-later-with-traction-control-enabled" level="2">
+      <heading>Sources: Infinity EMS (30 -71XX) V96.1 and Later, with Traction control enabled</heading>
+      <startLine>553</startLine>
+      <endLine>554</endLine>
+      <wordCount>0</wordCount>
+      <tokenEstimate>0</tokenEstimate>
+      <contentTypes></contentTypes>
+    </section>
+    <section id="20ms-continuous-50hz" level="2">
+      <heading>20ms continuous (50hz)</heading>
+      <startLine>555</startLine>
+      <endLine>600</endLine>
+      <wordCount>478</wordCount>
+      <tokenEstimate>622</tokenEstimate>
+      <contentTypes>text,table</contentTypes>
+    </section>
+    <section id="message-id-0x01f0a011-sources-infinity-ems-30-71xx-v96-1-and-later-with-traction" level="2">
+      <heading>Message ID: 0x01F0A011 Sources: Infinity EMS (30 -71XX) V96.1 and Later, with Traction control enabled</heading>
+      <startLine>601</startLine>
+      <endLine>602</endLine>
+      <wordCount>0</wordCount>
+      <tokenEstimate>0</tokenEstimate>
+      <contentTypes></contentTypes>
+    </section>
+    <section id="20ms-continuous-50hz" level="2">
+      <heading>20ms continuous (50hz)</heading>
+      <startLine>603</startLine>
+      <endLine>811</endLine>
+      <wordCount>301</wordCount>
+      <tokenEstimate>392</tokenEstimate>
+      <contentTypes>text,table,list</contentTypes>
+    </section>
+    <section id="sources-infinity-ems-30-71xx-v96-1-and-later-with-knock-control-enabled" level="2">
+      <heading>Sources: Infinity EMS (30 -71XX) V96.1 and Later, with Knock control enabled</heading>
+      <startLine>812</startLine>
+      <endLine>823</endLine>
+      <wordCount>13</wordCount>
+      <tokenEstimate>17</tokenEstimate>
+      <contentTypes>text</contentTypes>
+    </section>
+    <section id="sources-infinity-ems-30-71xx-v96-1-and-later-with-extended-knock-control-enabled" level="2">
+      <heading>Sources: Infinity EMS (30 -71XX) V96.1 and Later, with Extended Knock control enabled</heading>
+      <startLine>824</startLine>
+      <endLine>877</endLine>
+      <wordCount>32</wordCount>
+      <tokenEstimate>42</tokenEstimate>
+      <contentTypes>text</contentTypes>
+    </section>
+    <section id="message-id-0x0000001f-sources-aem-4-channel-uego-p-n-30-2340-set-on-mode-1-30-23" level="2">
+      <heading>Message ID: 0x0000001F Sources: AEM 4 Channel UEGO (P/N 30 -2340) set on MODE 1 30 -2340N is the same except 11 bit messages headers and at 1 mBit/sec bus speed</heading>
+      <startLine>878</startLine>
+      <endLine>930</endLine>
+      <wordCount>205</wordCount>
+      <tokenEstimate>267</tokenEstimate>
+      <contentTypes>text,table</contentTypes>
+    </section>
+    <section id="message-id-0x00000020-sources-aem-4-channel-uego-p-n-30-2340-set-on-mode-2-30-23" level="2">
+      <heading>Message ID: 0x00000020 Sources: AEM 4 Channel UEGO (P/N 30 -2340) set on MODE 2 30 -2340N is the same except 11 bit messages headers and at 1 mBit/sec bus speed</heading>
+      <startLine>931</startLine>
+      <endLine>971</endLine>
+      <wordCount>193</wordCount>
+      <tokenEstimate>251</tokenEstimate>
+      <contentTypes>text,table</contentTypes>
+    </section>
+    <section id="message-id-0x00000021-sources-aem-4-channel-uego-p-n-30-2340-set-on-mode-3" level="2">
+      <heading>Message ID: 0x00000021 Sources: AEM 4 Channel UEGO (P/N 30 -2340) set on MODE 3</heading>
+      <startLine>972</startLine>
+      <endLine>973</endLine>
+      <wordCount>0</wordCount>
+      <tokenEstimate>0</tokenEstimate>
+      <contentTypes></contentTypes>
+    </section>
+    <section id="30-2340n-is-the-same-except-11-bit-messages-headers-and-at-1-mbit-sec-bus-speed" level="2">
+      <heading>30 -2340N is the same except 11 bit messages headers and at 1 mBit/sec bus speed</heading>
+      <startLine>974</startLine>
+      <endLine>1158</endLine>
+      <wordCount>266</wordCount>
+      <tokenEstimate>346</tokenEstimate>
+      <contentTypes>text,table,list</contentTypes>
+    </section>
+    <section id="message-id-0x00000022" level="2">
+      <heading>Message ID: 0x00000022</heading>
+      <startLine>1159</startLine>
+      <endLine>1164</endLine>
+      <wordCount>12</wordCount>
+      <tokenEstimate>16</tokenEstimate>
+      <contentTypes>text</contentTypes>
+    </section>
+    <section id="30-2340n-is-the-same-except-11-bit-messages-headers-and-at-1-mbit-sec-bus-speed" level="2">
+      <heading>30 -2340N is the same except 11 bit messages headers and at 1 mBit/sec bus speed</heading>
+      <startLine>1165</startLine>
+      <endLine>1166</endLine>
+      <wordCount>0</wordCount>
+      <tokenEstimate>0</tokenEstimate>
+      <contentTypes></contentTypes>
+    </section>
+    <section id="10ms-continuous-100hz" level="2">
+      <heading>10ms continuous (100hz)</heading>
+      <startLine>1167</startLine>
+      <endLine>1179</endLine>
+      <wordCount>179</wordCount>
+      <tokenEstimate>233</tokenEstimate>
+      <contentTypes>text,table</contentTypes>
+    </section>
+    <section id="message-id-0x00000023" level="2">
+      <heading>Message ID: 0x00000023</heading>
+      <startLine>1180</startLine>
+      <endLine>1191</endLine>
+      <wordCount>16</wordCount>
+      <tokenEstimate>21</tokenEstimate>
+      <contentTypes>text,list</contentTypes>
+    </section>
+    <section id="10ms-continuous-100hz" level="2">
+      <heading>10ms continuous (100hz)</heading>
+      <startLine>1192</startLine>
+      <endLine>1486</endLine>
+      <wordCount>333</wordCount>
+      <tokenEstimate>433</tokenEstimate>
+      <contentTypes>text,table,list</contentTypes>
+    </section>
+    <section id="10ms-continuous-100hz" level="2">
+      <heading>10ms continuous (100hz)</heading>
+      <startLine>1487</startLine>
+      <endLine>1528</endLine>
+      <wordCount>26</wordCount>
+      <tokenEstimate>34</tokenEstimate>
+      <contentTypes>text,list</contentTypes>
+    </section>
+    <section id="10ms-continuous-100hz" level="2">
+      <heading>10ms continuous (100hz)</heading>
+      <startLine>1529</startLine>
+      <endLine>1656</endLine>
+      <wordCount>669</wordCount>
+      <tokenEstimate>870</tokenEstimate>
+      <contentTypes>text,table,list</contentTypes>
+    </section>
+    <section id="si-units-c-kpa-kph-lambda" level="2">
+      <heading>SI Units ( C / kPa / kph / Lambda )</heading>
+      <startLine>1657</startLine>
+      <endLine>1696</endLine>
+      <wordCount>20</wordCount>
+      <tokenEstimate>26</tokenEstimate>
+      <contentTypes>text</contentTypes>
+    </section>
+    <section id="us-units-f-psi-mph-afr" level="2">
+      <heading>US Units ( F / PSI / MPH / AFR )</heading>
+      <startLine>1697</startLine>
+      <endLine>1772</endLine>
+      <wordCount>38</wordCount>
+      <tokenEstimate>50</tokenEstimate>
+      <contentTypes>text</contentTypes>
+    </section>
+    <section id="message-id-0x00000027-sources-aem-wideband-failsafe-gauge-p-n-30-4900" level="2">
+      <heading>Message ID: 0x00000027 Sources: AEM Wideband Failsafe Gauge (P/N 30 -4900)</heading>
+      <startLine>1773</startLine>
+      <endLine>1809</endLine>
+      <wordCount>188</wordCount>
+      <tokenEstimate>245</tokenEstimate>
+      <contentTypes>text,table</contentTypes>
+    </section>
+    <section id="message-id-0x00000028-sources-aem-wideband-failsafe-gauge-p-n-30-4900" level="2">
+      <heading>Message ID: 0x00000028 Sources: AEM Wideband Failsafe Gauge (P/N 30 -4900)</heading>
+      <startLine>1810</startLine>
+      <endLine>1874</endLine>
+      <wordCount>204</wordCount>
+      <tokenEstimate>266</tokenEstimate>
+      <contentTypes>text,table</contentTypes>
+    </section>
+    <section id="message-id-0x000001af-sources-aem-4-channel-uego-p-n-30-2340-set-on-mode-1-30-23" level="2">
+      <heading>Message ID: 0x000001AF Sources: AEM 4 Channel UEGO (P/N 30 -2340) set on MODE 1 30 -2340N is the same except 11 bit messages headers and at 1 mBit/sec bus speed</heading>
+      <startLine>1875</startLine>
+      <endLine>1968</endLine>
+      <wordCount>1538</wordCount>
+      <tokenEstimate>2000</tokenEstimate>
+      <contentTypes>text,table</contentTypes>
+    </section>
+    <section id="message-id-0x000001b0-sources-aem-4-channel-uego-p-n-30-2340-set-on-mode-2-30-23" level="2">
+      <heading>Message ID: 0x000001B0 Sources: AEM 4 Channel UEGO (P/N 30 -2340) set on MODE 2 30 -2340N is the same except 11 bit messages headers and at 1 mBit/sec bus speed</heading>
+      <startLine>1969</startLine>
+      <endLine>2115</endLine>
+      <wordCount>1556</wordCount>
+      <tokenEstimate>2023</tokenEstimate>
+      <contentTypes>text,table</contentTypes>
+    </section>
+    <section id="message-id-0x000001b1-sources-aem-4-channel-uego-p-n-30-2340-set-on-mode-3-30-23" level="2">
+      <heading>Message ID: 0x000001B1 Sources: AEM 4 Channel UEGO (P/N 30 -2340) set on MODE 3 30 -2340N is the same except 11 bit messages headers and at 1 mBit/sec bus speed</heading>
+      <startLine>2116</startLine>
+      <endLine>2374</endLine>
+      <wordCount>3154</wordCount>
+      <tokenEstimate>4101</tokenEstimate>
+      <contentTypes>text,table,list</contentTypes>
+    </section>
+    <section id="message-id-0x000001b3-sources-aem-4-channel-uego-p-n-30-2340-set-on-mode-5-30-23" level="2">
+      <heading>Message ID: 0x000001B3 Sources: AEM 4 Channel UEGO (P/N 30 -2340) set on MODE 5 30 -2340N is the same except 11 bit messages headers and at 1 mBit/sec bus speed</heading>
+      <startLine>2375</startLine>
+      <endLine>2490</endLine>
+      <wordCount>1534</wordCount>
+      <tokenEstimate>1995</tokenEstimate>
+      <contentTypes>text,table</contentTypes>
+    </section>
+    <section id="message-id-0x000001b4-sources-aem-4-channel-uego-p-n-30-2340-set-on-mode-6-30-23" level="2">
+      <heading>Message ID: 0x000001B4 Sources: AEM 4 Channel UEGO (P/N 30 -2340) set on MODE 6 30 -2340N is the same except 11 bit messages headers and at 1 mBit/sec bus speed</heading>
+      <startLine>2491</startLine>
+      <endLine>2640</endLine>
+      <wordCount>2675</wordCount>
+      <tokenEstimate>3478</tokenEstimate>
+      <contentTypes>text,table</contentTypes>
+    </section>
+  </sections>
+  <conversion>
+    <sourceHash algo="sha256">4adbeb438b0278bd2c487c081144c44fb0682c2573250b15250bd1e3763e8150</sourceHash>
+    <optionsHash algo="sha256"></optionsHash>
+    <convertedAt>2026-03-13T04:04:06Z</convertedAt>
+  </conversion>
+</document>
