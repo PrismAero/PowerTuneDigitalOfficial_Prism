@@ -45,6 +45,8 @@ set(CORE_SOURCES
     Core/SensorRegistry.cpp
     Core/DiagnosticsProvider.cpp
     Core/ExBoardConfigManager.cpp
+    Core/ScreenControlService.cpp
+    Core/DashboardLockService.cpp
     Core/OverlayConfigDefaults.cpp
     Core/Models/UIState.cpp
     Core/Models/EngineData.cpp
@@ -70,6 +72,8 @@ set(CORE_HEADERS
     Core/SensorRegistry.h
     Core/DiagnosticsProvider.h
     Core/ExBoardConfigManager.h
+    Core/ScreenControlService.h
+    Core/DashboardLockService.h
     Core/OverlayConfigDefaults.h
     Core/Models/UIState.h
     Core/Models/DataModels.h
@@ -254,6 +258,7 @@ qt_policy(SET QTP0004 OLD)
         VERSION 1.0
         QML_FILES
             PowerTune/Settings/MainSettings.qml
+            PowerTune/Settings/DisplaySettings.qml
             PowerTune/Settings/DashSelector.qml
             PowerTune/Settings/DashSelectorWidget.qml
             PowerTune/Settings/VehicleRPMSettings.qml

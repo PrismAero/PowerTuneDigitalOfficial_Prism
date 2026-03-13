@@ -31,12 +31,14 @@
 #include "../Utils/UDPReceiver.h"
 #include "../Utils/wifiscanner.h"
 #include "DiagnosticsProvider.h"
+#include "DashboardLockService.h"
 #include "ExBoardConfigManager.h"
 #include "Models/CanFrameModel.h"
 #include "Models/DataModels.h"
 #include "Models/UIState.h"
 #include "OverlayConfigDefaults.h"
 #include "PropertyRouter.h"
+#include "ScreenControlService.h"
 #include "SensorRegistry.h"
 #include "appsettings.h"
 #include "dashboard.h"
@@ -58,6 +60,16 @@
 
 
 // File-scope globals migrated to Connect class members (Phase 5.3)
+
+bool Connect::hasDdcBrightness() const
+{
+    return m_screenControlService && m_screenControlService->isDdc();
+}
+
+bool Connect::hasBrightnessControl() const
+{
+    return m_screenControlService && m_screenControlService->hasBrightnessControl();
+}
 
 Connect::Connect(QObject *parent)
     : QObject(parent),
@@ -84,7 +96,9 @@ Connect::Connect(QObject *parent)
       m_steinhartCalc(nullptr),
       m_calibrationHelper(nullptr),
       m_sensorRegistry(nullptr),
-      m_diagnosticsProvider(nullptr)
+      m_diagnosticsProvider(nullptr),
+      m_screenControlService(nullptr),
+      m_dashboardLockService(nullptr)
 
 {
     m_dashBoard = new DashBoard(this);
@@ -148,6 +162,13 @@ Connect::Connect(QObject *parent)
     m_exBoardConfigManager->setAppSettings(m_appSettings);
     m_exBoardConfigManager->setCalibrationHelper(m_calibrationHelper);
     m_exBoardConfigManager->setSensorRegistry(m_sensorRegistry);
+    m_screenControlService = new ScreenControlService(this);
+    m_screenControlService->setAppSettings(m_appSettings);
+    m_screenControlService->setUIState(m_uiState);
+    m_screenControlService->setExBoardConfigManager(m_exBoardConfigManager);
+    m_dashboardLockService = new DashboardLockService(this);
+    m_dashboardLockService->setAppSettings(m_appSettings);
+    m_dashboardLockService->initialize();
     m_overlayConfigDefaults = new OverlayConfigDefaults(this);
     m_overlayConfigDefaults->setAppSettings(m_appSettings);
     // m_wifiscanner = new WifScanner(this);
@@ -205,6 +226,8 @@ Connect::Connect(QObject *parent)
     engine->rootContext()->setContextProperty("ShiftHelper", m_shiftIndicatorHelper);
     engine->rootContext()->setContextProperty("CanMonitorModel", m_canFrameModel);
     engine->rootContext()->setContextProperty("ExBoardConfig", m_exBoardConfigManager);
+    engine->rootContext()->setContextProperty("ScreenControl", m_screenControlService);
+    engine->rootContext()->setContextProperty("DashboardLock", m_dashboardLockService);
     engine->rootContext()->setContextProperty("OverlayDefaults", m_overlayConfigDefaults);
     m_appSettings->setExtender(m_extender);
     m_appSettings->setSteinhartCalculator(m_steinhartCalc);
@@ -217,6 +240,7 @@ Connect::Connect(QObject *parent)
     m_sensorRegistry->refreshEcuDigitalInputs();
 
     checkifraspberrypi();
+    m_screenControlService->restoreStartupBrightness();
 }
 
 
@@ -262,31 +286,21 @@ void Connect::setrpm(const int &dash1, const int &dash2, const int &dash3)
 }
 void Connect::checkifraspberrypi()
 {
-    static const QString sysfsPath = QStringLiteral("/sys/class/backlight/rpi_backlight/brightness");
-
-    if (QFileInfo::exists(sysfsPath)) {
-        QFile inputFile(sysfsPath);
-        if (inputFile.open(QIODevice::ReadOnly)) {
-            QTextStream in(&inputFile);
-            bool ok;
-            int val = in.readLine().toInt(&ok);
-            if (ok)
-                m_uiState->setBrightness(val);
-            inputFile.close();
-        }
-        m_uiState->setscreen(true);
-        m_brightnessMethod = BrightnessMethod::Sysfs;
+    if (!m_screenControlService) {
+        m_uiState->setscreen(false);
+        m_brightnessMethod = BrightnessMethod::None;
         return;
     }
 
-    if (QFileInfo::exists(QStringLiteral("/usr/bin/ddcutil"))) {
-        m_uiState->setscreen(true);
+    m_screenControlService->detectBackend();
+    m_uiState->setscreen(m_screenControlService->hasBrightnessControl());
+
+    if (m_screenControlService->isDdc())
         m_brightnessMethod = BrightnessMethod::DdcUtil;
-        return;
-    }
-
-    m_uiState->setscreen(false);
-    m_brightnessMethod = BrightnessMethod::None;
+    else if (m_screenControlService->hasBrightnessControl())
+        m_brightnessMethod = BrightnessMethod::Sysfs;
+    else
+        m_brightnessMethod = BrightnessMethod::None;
 }
 void Connect::readavailabledashfiles()
 {
@@ -364,25 +378,8 @@ void Connect::readDashSetup(int index)
 
 void Connect::setSreenbrightness(const int &brightness)
 {
-    switch (m_brightnessMethod) {
-    case BrightnessMethod::DdcUtil: {
-        QString val = QString::number(brightness);
-        QProcess::execute(QStringLiteral("ddcutil"), {QStringLiteral("setvcp"), QStringLiteral("10"), val,
-                                                      QStringLiteral("12"), val, QStringLiteral("13"), val});
-        break;
-    }
-    case BrightnessMethod::Sysfs: {
-        QFile f(QStringLiteral("/sys/class/backlight/rpi_backlight/brightness"));
-        if (f.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
-            QTextStream out(&f);
-            out << brightness;
-            f.close();
-        }
-        break;
-    }
-    case BrightnessMethod::None:
-        break;
-    }
+    if (m_screenControlService)
+        m_screenControlService->applyHardwareBrightness(brightness);
 }
 void Connect::setSpeedUnits(const int &units1)
 {

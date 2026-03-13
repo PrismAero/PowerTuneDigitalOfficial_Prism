@@ -280,6 +280,7 @@ QVariantMap ExBoardConfigManager::loadBoardConfig() const
         m_appSettings->getValue(QStringLiteral("ui/exboard/cylinderComboboxDi1"), 0);
     cfg[QStringLiteral("rpmcheckbox")] = m_appSettings->getValue(QStringLiteral("ui/exboard/rpmcheckbox"), 0);
     cfg[QStringLiteral("an7Damping")] = m_appSettings->getValue(QStringLiteral("AN7Damping"), QStringLiteral("0"));
+    cfg[QStringLiteral("brightness")] = loadBrightnessConfig();
     cfg[QStringLiteral("gearSensor")] = m_appSettings->readGearSensorConfig();
     cfg[QStringLiteral("speedSensor")] = m_appSettings->readSpeedSensorConfig();
     return cfg;
@@ -313,6 +314,9 @@ void ExBoardConfigManager::saveBoardConfig(const QVariantMap &config)
     m_appSettings->writeEXAN7dampingSettings(merged.value(QStringLiteral("an7Damping"), 0).toInt());
     m_appSettings->writeExternalrpm(rpmSource > 0);
 
+    if (merged.contains(QStringLiteral("brightness")))
+        saveBrightnessConfig(merged.value(QStringLiteral("brightness")).toMap());
+
     if (rpmSource == 0) {
         m_appSettings->writeRPMFrequencySettings(0.0, 0);
     } else if (rpmSource == 1) {
@@ -340,6 +344,72 @@ void ExBoardConfigManager::saveBoardConfig(const QVariantMap &config)
         m_appSettings->writeGearSensorConfig(merged.value(QStringLiteral("gearSensor")).toMap());
     if (merged.contains(QStringLiteral("speedSensor")))
         m_appSettings->writeSpeedSensorConfig(merged.value(QStringLiteral("speedSensor")).toMap());
+
+    emit configChanged();
+}
+
+QVariantMap ExBoardConfigManager::loadBrightnessConfig() const
+{
+    if (!m_appSettings)
+        return {};
+
+    QVariantMap cfg;
+    cfg[QStringLiteral("manualEnabled")] =
+        m_appSettings->getValue(QStringLiteral("ui/exboard/brightness/manualEnabled"), true).toBool();
+    cfg[QStringLiteral("discreteEnabled")] =
+        m_appSettings->getValue(QStringLiteral("ui/exboard/brightness/discreteEnabled"), false).toBool();
+    cfg[QStringLiteral("canIoEnabled")] =
+        m_appSettings->getValue(QStringLiteral("ui/exboard/brightness/canIoEnabled"), false).toBool();
+    cfg[QStringLiteral("analogEnabled")] =
+        m_appSettings->getValue(QStringLiteral("ui/exboard/brightness/analogEnabled"), false).toBool();
+    cfg[QStringLiteral("headlightChannel")] =
+        m_appSettings->getValue(QStringLiteral("ui/exboard/brightness/headlightChannel"),
+                                m_appSettings->getValue(QStringLiteral("ui/exboard/selectedValue"), 0))
+            .toInt();
+    cfg[QStringLiteral("analogChannel")] =
+        m_appSettings->getValue(QStringLiteral("ui/exboard/brightness/analogChannel"), 0).toInt();
+    cfg[QStringLiteral("globalMaxPercent")] = m_appSettings->readGlobalBrightnessPercent();
+    return cfg;
+}
+
+void ExBoardConfigManager::saveBrightnessConfig(const QVariantMap &config)
+{
+    if (!m_appSettings)
+        return;
+
+    const QVariantMap current = loadBrightnessConfig();
+    const bool manualEnabled = config.value(QStringLiteral("manualEnabled"),
+                                            current.value(QStringLiteral("manualEnabled"), true))
+                                   .toBool();
+    const bool discreteEnabled = config.value(QStringLiteral("discreteEnabled"),
+                                              current.value(QStringLiteral("discreteEnabled"), false))
+                                     .toBool();
+    const bool canIoEnabled = config.value(QStringLiteral("canIoEnabled"),
+                                           current.value(QStringLiteral("canIoEnabled"), false))
+                                  .toBool();
+    const bool analogEnabled = config.value(QStringLiteral("analogEnabled"),
+                                            current.value(QStringLiteral("analogEnabled"), false))
+                                   .toBool();
+    const int headlightChannel = qBound(0, config.value(QStringLiteral("headlightChannel"),
+                                                        current.value(QStringLiteral("headlightChannel"), 0))
+                                               .toInt(),
+                                        kDigitalChannels - 1);
+    const int analogChannel = qBound(0, config.value(QStringLiteral("analogChannel"),
+                                                     current.value(QStringLiteral("analogChannel"), 0))
+                                            .toInt(),
+                                     kAnalogChannels - 1);
+    const int globalMaxPercent = qBound(0, config.value(QStringLiteral("globalMaxPercent"),
+                                                        current.value(QStringLiteral("globalMaxPercent"), 100))
+                                               .toInt(),
+                                        100);
+
+    m_appSettings->setValue(QStringLiteral("ui/exboard/brightness/manualEnabled"), manualEnabled);
+    m_appSettings->setValue(QStringLiteral("ui/exboard/brightness/discreteEnabled"), discreteEnabled);
+    m_appSettings->setValue(QStringLiteral("ui/exboard/brightness/canIoEnabled"), canIoEnabled);
+    m_appSettings->setValue(QStringLiteral("ui/exboard/brightness/analogEnabled"), analogEnabled);
+    m_appSettings->setValue(QStringLiteral("ui/exboard/brightness/headlightChannel"), headlightChannel);
+    m_appSettings->setValue(QStringLiteral("ui/exboard/brightness/analogChannel"), analogChannel);
+    m_appSettings->writeGlobalBrightnessPercent(globalMaxPercent);
 }
 
 QStringList ExBoardConfigManager::channelNames() const

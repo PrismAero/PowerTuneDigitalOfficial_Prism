@@ -10,47 +10,7 @@ import Prism.Keyboard 1.0
 ApplicationWindow {
     id: window
 
-    property int currentBrightness: isDdc ? 50 : 175
-    property int digitalInput1: Digital ? Digital.EXDigitalInput1 : 0
-    property int digitalInput2: Digital ? Digital.EXDigitalInput2 : 0
-    property int digitalInput3: Digital ? Digital.EXDigitalInput3 : 0
-    property int digitalInput4: Digital ? Digital.EXDigitalInput4 : 0
-    property int digitalInput5: Digital ? Digital.EXDigitalInput5 : 0
-    property int digitalInput6: Digital ? Digital.EXDigitalInput6 : 0
-    property int digitalInput7: Digital ? Digital.EXDigitalInput7 : 0
-    property int digitalInput8: Digital ? Digital.EXDigitalInput8 : 0
-    readonly property bool isDdc: Connect.hasDdcBrightness
-    property bool settingsLoaded: false
-
-    function adjustBrightness(delta) {
-        var step = isDdc ? 25 : 50;
-        var min = isDdc ? 0 : 25;
-        var max = isDdc ? 75 : 250;
-        var next = currentBrightness + (delta * step);
-        applyBrightness(Math.max(min, Math.min(max, next)));
-    }
-
-    function applyBrightness(val) {
-        currentBrightness = val;
-        Connect.setSreenbrightness(val);
-        AppSettings.writebrightnessettings(val);
-    }
-
-    function handleDigitalBrightness() {
-        if (custom.maxBrightnessOnBoot !== 1)
-            return;
-        var inputs = [digitalInput1, digitalInput2, digitalInput3, digitalInput4, digitalInput5, digitalInput6,
-                      digitalInput7, digitalInput8];
-        var current = inputs[custom.digiValue];
-        if (current === 1)
-            applyBrightness(0);
-        else if (current === 0)
-            applyBrightness(isDdc ? 60 : 235);
-    }
-
-    function showBrightnessPopup() {
-        popUpLoader.visible = true;
-    }
+    property bool showUnlockAnimation: false
 
     color: "black"
     height: 720
@@ -61,29 +21,8 @@ ApplicationWindow {
     width: 1600
 
     Component.onCompleted: {
-        popUpLoader.enabled = AppSettings.getValue("ui/brightnessPopupEnabled", true);
-        settingsLoaded = true;
-        popUpLoader.sourceComponent = Qt.createComponent("BrightnessPopUp.qml");
-        custom.executeOnBootAction();
-        handleDigitalBrightness();
-    }
-    onDigitalInput1Changed: handleDigitalBrightness()
-    onDigitalInput2Changed: handleDigitalBrightness()
-    onDigitalInput3Changed: handleDigitalBrightness()
-    onDigitalInput4Changed: handleDigitalBrightness()
-    onDigitalInput5Changed: handleDigitalBrightness()
-    onDigitalInput6Changed: handleDigitalBrightness()
-    onDigitalInput7Changed: handleDigitalBrightness()
-    onDigitalInput8Changed: handleDigitalBrightness()
-
-    Timer {
-        interval: 1200
-        running: true
-
-        onTriggered: {
-            if (custom.maxBrightnessOnBoot === 1)
-                applyBrightness(isDdc ? 75 : 250);
-        }
+        if (popUpLoader.active)
+            popUpLoader.visible = true;
     }
 
     SwipeView {
@@ -92,7 +31,7 @@ ApplicationWindow {
         anchors.bottomMargin: prismKeyboard.visibleHeight
         anchors.fill: parent
         currentIndex: 0
-        interactive: UI.draggable === 0
+        interactive: UI.draggable === 0 && DashboardLock.swipeAllowed
 
         Loader {
             id: firstPageLoader
@@ -129,25 +68,19 @@ ApplicationWindow {
         }
     }
 
-    ExBoardAnalog {
-        id: custom
-
-        visible: false
-    }
-
     Loader {
         id: popUpLoader
 
+        active: ScreenControl.shouldShowPopupOnStartup()
         anchors.right: parent.right
+        source: active ? Qt.resolvedUrl("BrightnessPopUp.qml") : ""
         visible: false
         width: window.width * 0.15
 
-        Component.onCompleted: {
-            if (popUpLoader.enabled)
+        onItemChanged: {
+            if (item)
                 visible = true;
         }
-        onEnabledChanged: if (settingsLoaded)
-                              AppSettings.setValue("ui/brightnessPopupEnabled", enabled)
     }
 
     PageIndicator {
@@ -157,12 +90,188 @@ ApplicationWindow {
         anchors.horizontalCenter: parent.horizontalCenter
         count: dashView.count
         currentIndex: dashView.currentIndex
+        visible: !DashboardLock.lockoutEnabled || DashboardLock.sessionUnlocked
     }
 
     PrismKeyboard {
         id: prismKeyboard
 
         parent: Overlay.overlay
+    }
+
+    Rectangle {
+        anchors.fill: parent
+        color: "#28000000"
+        visible: DashboardLock.lockoutEnabled && (DashboardLock.unlocking || showUnlockAnimation)
+        z: 20
+
+        Item {
+            anchors.centerIn: parent
+            height: 312
+            opacity: showUnlockAnimation ? 1.0 : 0.98
+            scale: showUnlockAnimation ? 1.0 : 0.97
+            width: 280
+
+            Behavior on opacity {
+                NumberAnimation {
+                    duration: 220
+                    easing.type: Easing.OutQuad
+                }
+            }
+            Behavior on scale {
+                NumberAnimation {
+                    duration: 260
+                    easing.type: Easing.OutBack
+                }
+            }
+
+            Rectangle {
+                anchors.fill: parent
+                border.color: showUnlockAnimation ? "#66A5D6A7" : "#334FC3F7"
+                border.width: 1
+                color: "#B0101010"
+                radius: 28
+            }
+
+            Canvas {
+                id: unlockProgressCanvas
+
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.top: parent.top
+                anchors.topMargin: 28
+                height: 168
+                width: 168
+
+                onPaint: {
+                    var ctx = getContext("2d");
+                    var lineWidth = 10;
+                    var radius = (width - lineWidth) / 2;
+                    var cx = width / 2;
+                    var cy = height / 2;
+                    var startAngle = -Math.PI / 2;
+                    var progress = showUnlockAnimation ? 1 : (DashboardLock.holdProgressPercent / 100);
+
+                    ctx.reset();
+                    ctx.lineCap = "round";
+
+                    ctx.beginPath();
+                    ctx.strokeStyle = "rgba(255,255,255,0.18)";
+                    ctx.lineWidth = lineWidth;
+                    ctx.arc(cx, cy, radius, 0, Math.PI * 2, false);
+                    ctx.stroke();
+
+                    ctx.beginPath();
+                    ctx.strokeStyle = showUnlockAnimation ? "#4CAF50" : "#4FC3F7";
+                    ctx.lineWidth = lineWidth;
+                    ctx.arc(cx, cy, radius, startAngle, startAngle + (Math.PI * 2 * progress), false);
+                    ctx.stroke();
+                }
+
+                Connections {
+                    function onHoldProgressPercentChanged() {
+                        unlockProgressCanvas.requestPaint();
+                    }
+
+                    function onUnlockingChanged() {
+                        unlockProgressCanvas.requestPaint();
+                    }
+
+                    target: DashboardLock
+                }
+
+                Connections {
+                    function onShowUnlockAnimationChanged() {
+                        unlockProgressCanvas.requestPaint();
+                    }
+
+                    target: window
+                }
+
+                onVisibleChanged: requestPaint()
+            }
+
+            MaterialIcon {
+                anchors.centerIn: unlockProgressCanvas
+                icon: showUnlockAnimation ? "lock_open" : "lock"
+                iconColor: showUnlockAnimation ? "#4CAF50" : "white"
+                iconSize: 38
+            }
+
+            Text {
+                id: unlockTitle
+
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.top: unlockProgressCanvas.bottom
+                anchors.topMargin: 20
+                color: "white"
+                font.family: SettingsTheme.fontFamily
+                font.pixelSize: 22
+                font.weight: Font.DemiBold
+                horizontalAlignment: Text.AlignHCenter
+                text: showUnlockAnimation ? "Unlocked" : "Unlocking Dashboard"
+                width: parent.width - 32
+            }
+
+            Text {
+                id: unlockSubtitle
+
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.top: unlockTitle.bottom
+                anchors.topMargin: 8
+                color: showUnlockAnimation ? "#C8E6C9" : "#CFD8DC"
+                font.family: SettingsTheme.fontFamily
+                font.pixelSize: 15
+                horizontalAlignment: Text.AlignHCenter
+                text: showUnlockAnimation ? "Settings available until reboot" : "Hold either bottom corner"
+                width: parent.width - 32
+            }
+
+            Text {
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.top: unlockSubtitle.bottom
+                anchors.topMargin: 4
+                color: showUnlockAnimation ? "#A5D6A7" : "#90CAF9"
+                font.family: SettingsTheme.fontFamily
+                font.pixelSize: 13
+                horizontalAlignment: Text.AlignHCenter
+                text: showUnlockAnimation ? "Swipe access restored" : (DashboardLock.holdProgressPercent + "% complete")
+                width: parent.width - 32
+            }
+        }
+    }
+
+    Rectangle {
+        anchors.bottom: parent.bottom
+        anchors.left: parent.left
+        color: "transparent"
+        height: 120
+        visible: DashboardLock.lockoutEnabled && !DashboardLock.sessionUnlocked
+        width: 120
+        z: 21
+
+        MouseArea {
+            anchors.fill: parent
+            onCanceled: DashboardLock.cancelUnlockHold()
+            onPressed: DashboardLock.beginUnlockHold()
+            onReleased: DashboardLock.cancelUnlockHold()
+        }
+    }
+
+    Rectangle {
+        anchors.bottom: parent.bottom
+        anchors.right: parent.right
+        color: "transparent"
+        height: 120
+        visible: DashboardLock.lockoutEnabled && !DashboardLock.sessionUnlocked
+        width: 120
+        z: 21
+
+        MouseArea {
+            anchors.fill: parent
+            onCanceled: DashboardLock.cancelUnlockHold()
+            onPressed: DashboardLock.beginUnlockHold()
+            onReleased: DashboardLock.cancelUnlockHold()
+        }
     }
 
     Connections {
@@ -180,5 +289,30 @@ ApplicationWindow {
         }
 
         target: window
+    }
+
+    Connections {
+        function onSwipeAllowedChanged(allowed) {
+            if (!allowed && dashView.currentIndex === dashView.count - 1)
+                dashView.currentIndex = 0;
+        }
+
+        function onSessionUnlockedChanged(unlocked) {
+            if (unlocked && DashboardLock.lockoutEnabled) {
+                showUnlockAnimation = true;
+                unlockAnimationTimer.restart();
+            }
+        }
+
+        target: DashboardLock
+    }
+
+    Timer {
+        id: unlockAnimationTimer
+
+        interval: 1600
+        repeat: false
+
+        onTriggered: showUnlockAnimation = false
     }
 }

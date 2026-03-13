@@ -30,6 +30,10 @@ Rectangle {
         }
 
         ListElement {
+            title: "Display"
+        }
+
+        ListElement {
             title: "Dash Sel."
         }
 
@@ -109,24 +113,28 @@ Rectangle {
                 visible: stackLayout.currentIndex === 0
             }
 
-            DashSelector {
+            DisplaySettings {
                 visible: stackLayout.currentIndex === 1
             }
 
-            VehicleRPMSettings {
+            DashSelector {
                 visible: stackLayout.currentIndex === 2
             }
 
-            ExBoardAnalog {
+            VehicleRPMSettings {
                 visible: stackLayout.currentIndex === 3
             }
 
-            NetworkSettings {
+            ExBoardAnalog {
                 visible: stackLayout.currentIndex === 4
             }
 
-            DiagnosticsSettings {
+            NetworkSettings {
                 visible: stackLayout.currentIndex === 5
+            }
+
+            DiagnosticsSettings {
+                visible: stackLayout.currentIndex === 6
             }
         }
     }

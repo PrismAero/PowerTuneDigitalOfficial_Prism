@@ -66,17 +66,21 @@ class ShiftIndicatorHelper;
 class CanFrameModel;
 class ExBoardConfigManager;
 class OverlayConfigDefaults;
+class ScreenControlService;
+class DashboardLockService;
 
 class Connect : public QObject
 {
     Q_OBJECT
     Q_PROPERTY(QStringList portsNames READ portsNames WRITE setPortsNames NOTIFY sig_portsNamesChanged)
     Q_PROPERTY(bool hasDdcBrightness READ hasDdcBrightness CONSTANT)
+    Q_PROPERTY(bool hasBrightnessControl READ hasBrightnessControl CONSTANT)
 
 public:
     enum class BrightnessMethod { None, Sysfs, DdcUtil };
 
-    bool hasDdcBrightness() const { return m_brightnessMethod == BrightnessMethod::DdcUtil; }
+    bool hasDdcBrightness() const;
+    bool hasBrightnessControl() const;
 
     ~Connect() override;
     explicit Connect(QObject *parent = nullptr);
@@ -172,6 +176,8 @@ private:
     CanFrameModel *m_canFrameModel;
     ExBoardConfigManager *m_exBoardConfigManager;
     OverlayConfigDefaults *m_overlayConfigDefaults;
+    ScreenControlService *m_screenControlService;
+    DashboardLockService *m_dashboardLockService;
     BrightnessMethod m_brightnessMethod = BrightnessMethod::None;
 
     int m_ecu = 0;

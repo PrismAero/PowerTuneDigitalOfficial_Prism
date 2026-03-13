@@ -1,6 +1,5 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
-import com.powertune 1.0
 import PowerTune.UI 1.0
 import PowerTune.Utils 1.0
 
@@ -51,9 +50,7 @@ Rectangle {
             }
 
             onClicked: {
-                var val = Connect.hasDdcBrightness ? 10 : 25;
-                Connect.setSreenbrightness(val);
-                AppSettings.writebrightnessettings(val);
+                ScreenControl.applyNightPreset();
                 dismiss();
             }
         }
@@ -77,9 +74,7 @@ Rectangle {
             }
 
             onClicked: {
-                var val = Connect.hasDdcBrightness ? 75 : 255;
-                Connect.setSreenbrightness(val);
-                AppSettings.writebrightnessettings(val);
+                ScreenControl.applyDayPreset();
                 dismiss();
             }
         }

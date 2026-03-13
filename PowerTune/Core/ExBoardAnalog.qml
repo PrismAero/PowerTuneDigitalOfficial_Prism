@@ -15,9 +15,9 @@ SettingsPage {
     // True when any NTC-capable channel is in NTC mode; shows extra calibration columns
     readonly property bool anyNtcActive: checkan0ntc.checked || checkan1ntc.checked || checkan2ntc.checked
                                          || checkan3ntc.checked || checkan4ntc.checked || checkan5ntc.checked
+    property var analogChannelModel: ["Ex Analog Input 1", "Ex Analog Input 2", "Ex Analog Input 3",
+        "Ex Analog Input 4", "Ex Analog Input 5", "Ex Analog Input 6", "Ex Analog Input 7", "Ex Analog Input 8"]
     readonly property int calibColW: 90
-    property string digiStringValue
-    property int digiValue
     readonly property int divCheckColW: 45
 
     // Unified analog table column widths
@@ -33,7 +33,6 @@ SettingsPage {
     }
     readonly property int liveVColW: 75
     property bool loadingConfig: false
-    property int maxBrightnessOnBoot
     readonly property int modeColW: 120
     readonly property int nameColW: 120
     property var ntcPresetNames: {
@@ -153,8 +152,16 @@ SettingsPage {
 
     function applyBoardConfig(config) {
         var board = config || {};
-        digitalExtender.currentIndex = board.selectedValue !== undefined ? board.selectedValue : 0;
-        maxBrightnessBoot.checked = board.switchValue !== undefined ? !!board.switchValue : false;
+        var brightnessConfig = board.brightness || {};
+        digitalExtender.currentIndex = brightnessConfig.headlightChannel !== undefined ? brightnessConfig.headlightChannel
+                                                                                       : (board.selectedValue !== undefined ? board.selectedValue : 0);
+        brightnessManualEnabled.checked = brightnessConfig.manualEnabled !== undefined ? !!brightnessConfig.manualEnabled : true;
+        discreteBrightnessEnabled.checked =
+                brightnessConfig.discreteEnabled !== undefined ? !!brightnessConfig.discreteEnabled
+                                                               : (board.switchValue !== undefined ? !!board.switchValue : false);
+        canIoBrightnessEnabled.checked = brightnessConfig.canIoEnabled !== undefined ? !!brightnessConfig.canIoEnabled : false;
+        analogBrightnessEnabled.checked = brightnessConfig.analogEnabled !== undefined ? !!brightnessConfig.analogEnabled : false;
+        analogBrightnessChannel.currentIndex = brightnessConfig.analogChannel !== undefined ? brightnessConfig.analogChannel : 0;
         rpmsourceselector.currentIndex = board.rpmSource !== undefined ? board.rpmSource : 0;
         rpmcanversionselector.currentIndex = board.rpmCanVersion !== undefined ? board.rpmCanVersion : 0;
         cylindercombobox.currentIndex = board.cylinderCombobox !== undefined ? board.cylinderCombobox : 0;
@@ -263,7 +270,7 @@ SettingsPage {
     function buildBoardConfig() {
         return {
             selectedValue: digitalExtender.currentIndex,
-            switchValue: maxBrightnessBoot.checked,
+            switchValue: discreteBrightnessEnabled.checked || canIoBrightnessEnabled.checked,
             rpmSource: rpmsourceselector.currentIndex,
             rpmCanVersion: rpmcanversionselector.currentIndex,
             cylinderCombobox: cylindercombobox.currentIndex,
@@ -273,8 +280,21 @@ SettingsPage {
             cylinderComboboxDi1: cylindercomboboxDi1.currentIndex,
             rpmcheckbox: rpmCheckboxSaveValue,
             an7Damping: an7dampingfactor.text,
+            brightness: buildBrightnessConfig(),
             gearSensor: buildGearSensorConfig(),
             speedSensor: buildSpeedSensorConfig()
+        };
+    }
+
+    function buildBrightnessConfig() {
+        return {
+            manualEnabled: brightnessManualEnabled.checked,
+            discreteEnabled: discreteBrightnessEnabled.checked,
+            canIoEnabled: canIoBrightnessEnabled.checked,
+            analogEnabled: analogBrightnessEnabled.checked,
+            headlightChannel: digitalExtender.currentIndex,
+            analogChannel: analogBrightnessChannel.currentIndex,
+            globalMaxPercent: AppSettings.readGlobalBrightnessPercent()
         };
     }
 
@@ -343,12 +363,6 @@ SettingsPage {
 
     function digitalChannelItem(index) {
         return digitalNameRepeater.itemAt(index);
-    }
-
-    function executeOnBootAction() {
-        if (maxBrightnessBoot.checked) {
-            maxBrightnessOnBoot = 1;
-        }
     }
 
     function loadAllSettingsFromManager() {
@@ -2752,7 +2766,72 @@ SettingsPage {
             }
 
             SettingsRow {
+                description: "Future runtime source toggle"
+                label: "On-Screen Brightness"
+
+                Component.onCompleted: children[0].Layout.preferredWidth = parent.boardConfigLabelW
+
+                StyledSwitch {
+                    id: brightnessManualEnabled
+
+                    Layout.preferredWidth: 100
+                    text: checked ? "On" : "Off"
+
+                    onCheckedChanged: inputs.setInputs()
+                }
+            }
+
+            SettingsRow {
+                description: "Future runtime source toggle"
+                label: "Discrete Brightness Source"
+
+                Component.onCompleted: children[0].Layout.preferredWidth = parent.boardConfigLabelW
+
+                StyledSwitch {
+                    id: discreteBrightnessEnabled
+
+                    Layout.preferredWidth: 100
+                    text: checked ? "On" : "Off"
+
+                    onCheckedChanged: inputs.setInputs()
+                }
+            }
+
+            SettingsRow {
+                description: "Future runtime source toggle"
+                label: "CAN/IO Brightness Source"
+
+                Component.onCompleted: children[0].Layout.preferredWidth = parent.boardConfigLabelW
+
+                StyledSwitch {
+                    id: canIoBrightnessEnabled
+
+                    Layout.preferredWidth: 100
+                    text: checked ? "On" : "Off"
+
+                    onCheckedChanged: inputs.setInputs()
+                }
+            }
+
+            SettingsRow {
+                description: "Future runtime source toggle"
+                label: "Analog Brightness Source"
+
+                Component.onCompleted: children[0].Layout.preferredWidth = parent.boardConfigLabelW
+
+                StyledSwitch {
+                    id: analogBrightnessEnabled
+
+                    Layout.preferredWidth: 100
+                    text: checked ? "On" : "Off"
+
+                    onCheckedChanged: inputs.setInputs()
+                }
+            }
+
+            SettingsRow {
                 label: "Headlight Channel"
+                visible: discreteBrightnessEnabled.checked || canIoBrightnessEnabled.checked
 
                 Component.onCompleted: children[0].Layout.preferredWidth = parent.boardConfigLabelW
 
@@ -2763,26 +2842,21 @@ SettingsPage {
                     Layout.preferredWidth: 200
                     model: comboBoxModel
                     textRole: "text"
-
-                    onCurrentIndexChanged: {
-                        digiValue = currentIndex;
-                        digiStringValue = "Ex Digital Input " + (currentIndex + 1);
-                    }
                 }
             }
 
             SettingsRow {
-                label: "CAN/IO Brightness"
+                label: "Analog Brightness Channel"
+                visible: analogBrightnessEnabled.checked
 
                 Component.onCompleted: children[0].Layout.preferredWidth = parent.boardConfigLabelW
 
-                StyledSwitch {
-                    id: maxBrightnessBoot
+                StyledComboBox {
+                    id: analogBrightnessChannel
 
-                    Layout.preferredWidth: 100
-                    text: checked ? "On" : "Off"
-
-                    onCheckedChanged: inputs.setInputs()
+                    Layout.preferredHeight: SettingsTheme.controlHeight
+                    Layout.preferredWidth: 200
+                    model: analogChannelModel
                 }
             }
         }

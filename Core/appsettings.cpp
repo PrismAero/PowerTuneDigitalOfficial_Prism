@@ -523,6 +523,68 @@ void AppSettings::writebrightnessettings(const int &Brightness)
     }
 }
 
+int AppSettings::readDisplayBrightnessPercent() const
+{
+    return qBound(0, getValue(QStringLiteral("ui/displayBrightnessPercent"), 100).toInt(), 100);
+}
+
+void AppSettings::writeDisplayBrightnessPercent(int percent)
+{
+    setValue(QStringLiteral("ui/displayBrightnessPercent"), qBound(0, percent, 100));
+}
+
+int AppSettings::readGlobalBrightnessPercent() const
+{
+    return qBound(0, getValue(QStringLiteral("ui/globalMaxBrightnessPercent"), 100).toInt(), 100);
+}
+
+void AppSettings::writeGlobalBrightnessPercent(int percent)
+{
+    setValue(QStringLiteral("ui/globalMaxBrightnessPercent"), qBound(0, percent, 100));
+}
+
+void AppSettings::writeBrightnessDayPreset(int percent)
+{
+    setValue(QStringLiteral("ui/brightnessDayPreset"), qBound(0, percent, 100));
+}
+
+void AppSettings::writeBrightnessNightPreset(int percent)
+{
+    setValue(QStringLiteral("ui/brightnessNightPreset"), qBound(0, percent, 100));
+}
+
+bool AppSettings::readBrightnessPopupEnabled() const
+{
+    return getValue(QStringLiteral("ui/brightnessPopupEnabled"), false).toBool();
+}
+
+void AppSettings::writeBrightnessPopupEnabled(bool enabled)
+{
+    setValue(QStringLiteral("ui/brightnessPopupEnabled"), enabled);
+}
+
+QString AppSettings::readLastBrightnessPreset() const
+{
+    const QString preset = getValue(QStringLiteral("ui/brightnessLastPreset"), QStringLiteral("day")).toString();
+    return preset == QLatin1String("night") ? preset : QStringLiteral("day");
+}
+
+void AppSettings::writeLastBrightnessPreset(const QString &preset)
+{
+    setValue(QStringLiteral("ui/brightnessLastPreset"),
+             preset == QLatin1String("night") ? QStringLiteral("night") : QStringLiteral("day"));
+}
+
+bool AppSettings::readDashboardLockEnabled() const
+{
+    return getValue(QStringLiteral("ui/dashboardLockEnabled"), false).toBool();
+}
+
+void AppSettings::writeDashboardLockEnabled(bool enabled)
+{
+    setValue(QStringLiteral("ui/dashboardLockEnabled"), enabled);
+}
+
 void AppSettings::writeStartupSettings(const int &ExternalSpeed)
 {
     setValue("ExternalSpeed", ExternalSpeed);

@@ -36,6 +36,8 @@ public:
 
     Q_INVOKABLE QVariantMap loadBoardConfig() const;
     Q_INVOKABLE void saveBoardConfig(const QVariantMap &config);
+    Q_INVOKABLE QVariantMap loadBrightnessConfig() const;
+    Q_INVOKABLE void saveBrightnessConfig(const QVariantMap &config);
 
     Q_INVOKABLE QStringList channelNames() const;
     Q_INVOKABLE QStringList digitalChannelNames() const;

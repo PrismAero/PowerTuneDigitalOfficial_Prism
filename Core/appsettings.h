@@ -94,6 +94,18 @@ public:
     Q_INVOKABLE void writeCountrySettings(const QString &Country);
     Q_INVOKABLE void writeTrackSettings(const QString &Track);
     Q_INVOKABLE void writebrightnessettings(const int &Brightness);
+    Q_INVOKABLE int readDisplayBrightnessPercent() const;
+    Q_INVOKABLE void writeDisplayBrightnessPercent(int percent);
+    Q_INVOKABLE int readGlobalBrightnessPercent() const;
+    Q_INVOKABLE void writeGlobalBrightnessPercent(int percent);
+    Q_INVOKABLE void writeBrightnessDayPreset(int percent);
+    Q_INVOKABLE void writeBrightnessNightPreset(int percent);
+    Q_INVOKABLE bool readBrightnessPopupEnabled() const;
+    Q_INVOKABLE void writeBrightnessPopupEnabled(bool enabled);
+    Q_INVOKABLE QString readLastBrightnessPreset() const;
+    Q_INVOKABLE void writeLastBrightnessPreset(const QString &preset);
+    Q_INVOKABLE bool readDashboardLockEnabled() const;
+    Q_INVOKABLE void writeDashboardLockEnabled(bool enabled);
     Q_INVOKABLE void writeRPMFrequencySettings(const qreal &Divider, const int &DI1isRPM);
     Q_INVOKABLE void writeExternalrpm(const int checked);
     Q_INVOKABLE void writeLanguage(const int Language);
