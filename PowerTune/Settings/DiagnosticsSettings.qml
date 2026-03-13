@@ -4,436 +4,1245 @@ import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
 import PowerTune.Settings 1.0
+import PowerTune.UI 1.0
 
-Item {
+SettingsPage {
     id: root
-    anchors.fill: parent
 
-    readonly property color panelBg: "#1e1e3a"
-    readonly property color panelBorder: "#2a2a4a"
-    readonly property color pageBg: "#1a1a2e"
-    readonly property color accentColor: "#009688"
-    readonly property color textPrimary: "#FFFFFF"
-    readonly property color textSecondary: "#B0B0B0"
-    readonly property color errorColor: "#ff1744"
-    readonly property color connectedColor: "#00c853"
-    readonly property color disconnectedColor: "#ff1744"
-    readonly property color consoleBg: "#0d0d1a"
-    readonly property color consoleText: "#00ff88"
+    readonly property int _statusLabelWidth: 100
 
-    property bool showAllSensors: true
+    // Compact status row height and spacing for the read-only top sections
+    readonly property int _statusRowHeight: 22
+    readonly property int _statusRowSpacing: 2
+    property bool showAllSensors: Diagnostics.showAllSensors
+
+    Component.onCompleted: Diagnostics.setPageVisible(true)
+    Component.onDestruction: Diagnostics.setPageVisible(false)
 
     ListModel {
-        id: liveDataModel
-    }
+        id: logLevelModel
 
-    Timer {
-        id: liveDataTimer
-        interval: 1000
-        running: true
-        repeat: true
-        triggeredOnStart: true
-        onTriggered: refreshLiveData()
-    }
+        ListElement {
+            label: "All"
+            level: 0
+        }
 
-    function refreshLiveData() {
-        liveDataModel.clear()
-        var entries = [
-            { name: "RPM",            source: "Engine",   value: Engine ? Engine.rpm : 0,                     unit: "rpm" },
-            { name: "Speed",          source: "Vehicle",  value: Vehicle ? Vehicle.speed : 0,                 unit: "km/h" },
-            { name: "Water Temp",     source: "Engine",   value: Engine ? Engine.Watertemp : 0,               unit: "C" },
-            { name: "Intake Temp",    source: "Engine",   value: Engine ? Engine.Intaketemp : 0,              unit: "C" },
-            { name: "Boost",          source: "Engine",   value: Engine ? Engine.BoostPres : 0,               unit: "kPa" },
-            { name: "MAP",            source: "Engine",   value: Engine ? Engine.MAP : 0,                     unit: "kPa" },
-            { name: "TPS",            source: "Engine",   value: Engine ? Engine.TPS : 0,                     unit: "%" },
-            { name: "Inj Duty",       source: "Engine",   value: Engine ? Engine.InjDuty : 0,                 unit: "%" },
-            { name: "Ignition",       source: "Engine",   value: Engine ? Engine.Ign : 0,                     unit: "deg" },
-            { name: "AFR",            source: "Engine",   value: Engine ? Engine.AFR : 0,                     unit: "" },
-            { name: "Knock",          source: "Engine",   value: Engine ? Engine.Knock : 0,                   unit: "" },
-            { name: "Battery",        source: "Engine",   value: Engine ? Engine.BatteryV : 0,                unit: "V" },
-            { name: "Oil Pressure",   source: "Engine",   value: Engine ? Engine.oilpres : 0,                 unit: "kPa" },
-            { name: "Oil Temp",       source: "Engine",   value: Engine ? Engine.oiltemp : 0,                 unit: "C" },
-            { name: "Fuel Pressure",  source: "Engine",   value: Engine ? Engine.FuelPress : 0,               unit: "kPa" },
-            { name: "Gear",           source: "Vehicle",  value: Vehicle ? Vehicle.Gear : 0,                  unit: "" },
-            { name: "Odometer",       source: "Vehicle",  value: Vehicle ? Vehicle.Odo : 0,                   unit: "km" },
-            { name: "EX AN 0",        source: "Expander", value: Expander ? Expander.EXAnalogInput0 : 0,      unit: "V" },
-            { name: "EX AN 1",        source: "Expander", value: Expander ? Expander.EXAnalogInput1 : 0,      unit: "V" },
-            { name: "EX AN 2",        source: "Expander", value: Expander ? Expander.EXAnalogInput2 : 0,      unit: "V" },
-            { name: "EX AN 3",        source: "Expander", value: Expander ? Expander.EXAnalogInput3 : 0,      unit: "V" },
-            { name: "EX AN 4",        source: "Expander", value: Expander ? Expander.EXAnalogInput4 : 0,      unit: "V" },
-            { name: "EX AN 5",        source: "Expander", value: Expander ? Expander.EXAnalogInput5 : 0,      unit: "V" },
-            { name: "EX AN 6",        source: "Expander", value: Expander ? Expander.EXAnalogInput6 : 0,      unit: "V" },
-            { name: "EX AN 7",        source: "Expander", value: Expander ? Expander.EXAnalogInput7 : 0,      unit: "V" },
-            { name: "Analog 0",       source: "ECU",      value: Analog ? Analog.Analog0 : 0,                 unit: "V" },
-            { name: "Analog 1",       source: "ECU",      value: Analog ? Analog.Analog1 : 0,                 unit: "V" },
-            { name: "Analog 2",       source: "ECU",      value: Analog ? Analog.Analog2 : 0,                 unit: "V" },
-            { name: "Analog 3",       source: "ECU",      value: Analog ? Analog.Analog3 : 0,                 unit: "V" },
-            { name: "Analog 4",       source: "ECU",      value: Analog ? Analog.Analog4 : 0,                 unit: "V" },
-            { name: "EX Digi 1",      source: "Expander", value: Expander ? Expander.EXDigitalInput1 : 0,     unit: "" },
-            { name: "EX Digi 2",      source: "Expander", value: Expander ? Expander.EXDigitalInput2 : 0,     unit: "" },
-            { name: "EX Digi 3",      source: "Expander", value: Expander ? Expander.EXDigitalInput3 : 0,     unit: "" },
-            { name: "EX Digi 4",      source: "Expander", value: Expander ? Expander.EXDigitalInput4 : 0,     unit: "" },
-            { name: "EX Digi 5",      source: "Expander", value: Expander ? Expander.EXDigitalInput5 : 0,     unit: "" },
-            { name: "EX Digi 6",      source: "Expander", value: Expander ? Expander.EXDigitalInput6 : 0,     unit: "" },
-            { name: "EX Digi 7",      source: "Expander", value: Expander ? Expander.EXDigitalInput7 : 0,     unit: "" },
-            { name: "EX Digi 8",      source: "Expander", value: Expander ? Expander.EXDigitalInput8 : 0,     unit: "" }
-        ]
-        for (var i = 0; i < entries.length; i++) {
-            if (showAllSensors || Math.abs(entries[i].value) > 0.001) {
-                liveDataModel.append(entries[i])
-            }
+        ListElement {
+            label: "Info"
+            level: 1
+        }
+
+        ListElement {
+            label: "Warn"
+            level: 2
+        }
+
+        ListElement {
+            label: "Error"
+            level: 3
         }
     }
 
-    Rectangle {
-        anchors.fill: parent
-        color: pageBg
-    }
+    // * TOP ROW: System Information + Connection Status (compact)
+    RowLayout {
+        id: topRow
 
-    ColumnLayout {
-        anchors.fill: parent
-        anchors.margins: 8
-        spacing: 8
+        Layout.fillWidth: true
+        spacing: SettingsTheme.sectionSpacing
 
-        // * TOP ROW: System + Connection
-        RowLayout {
+        SettingsSection {
             Layout.fillWidth: true
-            Layout.preferredHeight: 230
-            spacing: 8
+            title: "System Information"
 
-            Rectangle {
+            ColumnLayout {
                 Layout.fillWidth: true
-                Layout.fillHeight: true
-                color: panelBg
-                radius: 6
-                border.color: panelBorder
-                border.width: 1
+                spacing: root._statusRowSpacing
 
-                ColumnLayout {
-                    anchors.fill: parent
-                    anchors.margins: 10
-                    spacing: 4
+                // CPU Temp
+                RowLayout {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: root._statusRowHeight
+                    spacing: SettingsTheme.contentSpacing
 
                     Text {
-                        text: "System"
-                        font.pixelSize: 18; font.weight: Font.Bold; font.family: "Lato"
-                        color: accentColor
+                        Layout.preferredWidth: root._statusLabelWidth
+                        color: SettingsTheme.textSecondary
+                        font.family: SettingsTheme.fontFamily
+                        font.pixelSize: SettingsTheme.fontStatus
+                        text: "CPU Temp"
                     }
-                    Rectangle { Layout.fillWidth: true; height: 1; color: "#3D3D3D" }
 
-                    RowLayout {
+                    Text {
                         Layout.fillWidth: true
-                        Text { text: "CPU Temp"; font.pixelSize: 15; font.family: "Lato"; color: textSecondary; Layout.preferredWidth: 140 }
-                        Text { text: Diagnostics.cpuTemperature.toFixed(1) + " C"; font.pixelSize: 15; font.family: "Lato"; color: textPrimary }
+                        color: Diagnostics.cpuTemperatureAvailable ? SettingsTheme.textPrimary :
+                                                                     SettingsTheme.textDisabled
+                        font.family: SettingsTheme.fontFamily
+                        font.pixelSize: SettingsTheme.fontStatus
+                        text: Diagnostics.cpuTemperatureAvailable ? Diagnostics.cpuTemperature.toFixed(1) + " C" : "N/A"
                     }
-                    RowLayout {
-                        Layout.fillWidth: true
-                        Text { text: "CPU Load"; font.pixelSize: 15; font.family: "Lato"; color: textSecondary; Layout.preferredWidth: 140 }
-                        Text { text: Diagnostics.cpuLoadAverage.toFixed(2); font.pixelSize: 15; font.family: "Lato"; color: textPrimary }
-                    }
-                    RowLayout {
-                        Layout.fillWidth: true
-                        Text { text: "RAM"; font.pixelSize: 15; font.family: "Lato"; color: textSecondary; Layout.preferredWidth: 140 }
-                        Text { text: Diagnostics.memoryUsedMB.toFixed(0) + " / " + Diagnostics.memoryTotalMB.toFixed(0) + " MB (" + Diagnostics.memoryUsagePercent.toFixed(1) + "%)"; font.pixelSize: 15; font.family: "Lato"; color: textPrimary }
-                    }
-                    RowLayout {
-                        Layout.fillWidth: true
-                        Text { text: "Disk"; font.pixelSize: 15; font.family: "Lato"; color: textSecondary; Layout.preferredWidth: 140 }
-                        Text { text: Diagnostics.diskUsagePercent.toFixed(1) + "% used"; font.pixelSize: 15; font.family: "Lato"; color: textPrimary }
-                    }
-                    RowLayout {
-                        Layout.fillWidth: true
-                        Text { text: "Uptime"; font.pixelSize: 15; font.family: "Lato"; color: textSecondary; Layout.preferredWidth: 140 }
-                        Text { text: Diagnostics.uptime; font.pixelSize: 15; font.family: "Lato"; color: textPrimary }
-                    }
-                    RowLayout {
-                        Layout.fillWidth: true
-                        Text { text: "Platform"; font.pixelSize: 15; font.family: "Lato"; color: textSecondary; Layout.preferredWidth: 140 }
-                        Text { text: Connection ? Connection.Platform : "Unknown"; font.pixelSize: 15; font.family: "Lato"; color: textPrimary }
-                    }
-                    RowLayout {
-                        Layout.fillWidth: true
-                        Text { text: "Sensors"; font.pixelSize: 15; font.family: "Lato"; color: textSecondary; Layout.preferredWidth: 140 }
-                        Text { text: Diagnostics.activeSensorCount + " / " + Diagnostics.totalSensorCount; font.pixelSize: 15; font.family: "Lato"; color: textPrimary }
-                    }
-                    Item { Layout.fillHeight: true }
                 }
-            }
 
-            Rectangle {
-                Layout.fillWidth: true
-                Layout.fillHeight: true
-                color: panelBg
-                radius: 6
-                border.color: panelBorder
-                border.width: 1
-
-                ColumnLayout {
-                    anchors.fill: parent
-                    anchors.margins: 10
-                    spacing: 4
+                // CPU Load
+                RowLayout {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: root._statusRowHeight
+                    spacing: SettingsTheme.contentSpacing
 
                     Text {
-                        text: "Connection"
-                        font.pixelSize: 18; font.weight: Font.Bold; font.family: "Lato"
-                        color: accentColor
+                        Layout.preferredWidth: root._statusLabelWidth
+                        color: SettingsTheme.textSecondary
+                        font.family: SettingsTheme.fontFamily
+                        font.pixelSize: SettingsTheme.fontStatus
+                        text: "CPU Load"
                     }
-                    Rectangle { Layout.fillWidth: true; height: 1; color: "#3D3D3D" }
 
-                    RowLayout {
+                    Text {
                         Layout.fillWidth: true
-                        Text { text: "CAN Status"; font.pixelSize: 15; font.family: "Lato"; color: textSecondary; Layout.preferredWidth: 140 }
-                        Rectangle {
-                            width: 10; height: 10; radius: 5
-                            color: {
-                                if (Diagnostics.canStatusText === "Active") return connectedColor
-                                if (Diagnostics.canStatusText === "Waiting") return "#FF9800"
-                                return disconnectedColor
-                            }
-                        }
-                        Text {
-                            text: Diagnostics.canStatusText
-                            font.pixelSize: 15; font.family: "Lato"
-                            color: {
-                                if (Diagnostics.canStatusText === "Active") return connectedColor
-                                if (Diagnostics.canStatusText === "Waiting") return "#FF9800"
-                                return disconnectedColor
-                            }
-                        }
+                        color: SettingsTheme.textPrimary
+                        font.family: SettingsTheme.fontFamily
+                        font.pixelSize: SettingsTheme.fontStatus
+                        text: Diagnostics.cpuLoadAverage.toFixed(2)
                     }
-                    RowLayout {
+                }
+
+                // RAM
+                RowLayout {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: root._statusRowHeight
+                    spacing: SettingsTheme.contentSpacing
+
+                    Text {
+                        Layout.preferredWidth: root._statusLabelWidth
+                        color: SettingsTheme.textSecondary
+                        font.family: SettingsTheme.fontFamily
+                        font.pixelSize: SettingsTheme.fontStatus
+                        text: "RAM"
+                    }
+
+                    Text {
                         Layout.fillWidth: true
-                        Text { text: "Daemon"; font.pixelSize: 15; font.family: "Lato"; color: textSecondary; Layout.preferredWidth: 140 }
-                        Text { text: Diagnostics.daemonName; font.pixelSize: 15; font.family: "Lato"; color: textPrimary }
+                        color: SettingsTheme.textPrimary
+                        font.family: SettingsTheme.fontFamily
+                        font.pixelSize: SettingsTheme.fontStatus
+                        text: Diagnostics.memoryUsedMB.toFixed(0) + " / " + Diagnostics.memoryTotalMB.toFixed(0) + " MB ("
+                              + Diagnostics.memoryUsagePercent.toFixed(1) + "%)"
                     }
-                    RowLayout {
+                }
+
+                // Disk
+                RowLayout {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: root._statusRowHeight
+                    spacing: SettingsTheme.contentSpacing
+
+                    Text {
+                        Layout.preferredWidth: root._statusLabelWidth
+                        color: SettingsTheme.textSecondary
+                        font.family: SettingsTheme.fontFamily
+                        font.pixelSize: SettingsTheme.fontStatus
+                        text: "Disk"
+                    }
+
+                    Text {
                         Layout.fillWidth: true
-                        Text { text: "CAN Rate"; font.pixelSize: 15; font.family: "Lato"; color: textSecondary; Layout.preferredWidth: 140 }
-                        Text { text: Diagnostics.canMessageRate + " msg/s"; font.pixelSize: 15; font.family: "Lato"; color: textPrimary }
+                        color: SettingsTheme.textPrimary
+                        font.family: SettingsTheme.fontFamily
+                        font.pixelSize: SettingsTheme.fontStatus
+                        text: Diagnostics.diskUsagePercent.toFixed(1) + "% used"
                     }
-                    RowLayout {
+                }
+
+                // Uptime
+                RowLayout {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: root._statusRowHeight
+                    spacing: SettingsTheme.contentSpacing
+
+                    Text {
+                        Layout.preferredWidth: root._statusLabelWidth
+                        color: SettingsTheme.textSecondary
+                        font.family: SettingsTheme.fontFamily
+                        font.pixelSize: SettingsTheme.fontStatus
+                        text: "Uptime"
+                    }
+
+                    Text {
                         Layout.fillWidth: true
-                        Text { text: "CAN Total"; font.pixelSize: 15; font.family: "Lato"; color: textSecondary; Layout.preferredWidth: 140 }
-                        Text { text: Diagnostics.canTotalMessages + " msgs | " + Diagnostics.canErrorCount + " errors"; font.pixelSize: 15; font.family: "Lato"; color: Diagnostics.canErrorCount > 0 ? errorColor : textPrimary }
+                        color: SettingsTheme.textPrimary
+                        font.family: SettingsTheme.fontFamily
+                        font.pixelSize: SettingsTheme.fontStatus
+                        text: Diagnostics.uptime
                     }
-                    RowLayout {
+                }
+
+                // Platform
+                RowLayout {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: root._statusRowHeight
+                    spacing: SettingsTheme.contentSpacing
+
+                    Text {
+                        Layout.preferredWidth: root._statusLabelWidth
+                        color: SettingsTheme.textSecondary
+                        font.family: SettingsTheme.fontFamily
+                        font.pixelSize: SettingsTheme.fontStatus
+                        text: "Platform"
+                    }
+
+                    Text {
                         Layout.fillWidth: true
-                        Text { text: "Serial"; font.pixelSize: 15; font.family: "Lato"; color: textSecondary; Layout.preferredWidth: 140 }
-                        Rectangle { width: 10; height: 10; radius: 5; color: Diagnostics.serialConnected ? connectedColor : disconnectedColor }
-                        Text { text: Diagnostics.serialPort + " @ " + Diagnostics.serialBaudRate; font.pixelSize: 15; font.family: "Lato"; color: textPrimary }
+                        color: SettingsTheme.textPrimary
+                        font.family: SettingsTheme.fontFamily
+                        font.pixelSize: SettingsTheme.fontStatus
+                        text: Connection ? Connection.Platform : "Unknown"
                     }
-                    RowLayout {
+                }
+
+                // Sensors
+                RowLayout {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: root._statusRowHeight
+                    spacing: SettingsTheme.contentSpacing
+
+                    Text {
+                        Layout.preferredWidth: root._statusLabelWidth
+                        color: SettingsTheme.textSecondary
+                        font.family: SettingsTheme.fontFamily
+                        font.pixelSize: SettingsTheme.fontStatus
+                        text: "Sensors"
+                    }
+
+                    Text {
                         Layout.fillWidth: true
-                        Text { text: "Type"; font.pixelSize: 15; font.family: "Lato"; color: textSecondary; Layout.preferredWidth: 140 }
-                        Text { text: Diagnostics.connectionType; font.pixelSize: 15; font.family: "Lato"; color: textPrimary }
+                        color: SettingsTheme.textPrimary
+                        font.family: SettingsTheme.fontFamily
+                        font.pixelSize: SettingsTheme.fontStatus
+                        text: Diagnostics.activeSensorCount + " / " + Diagnostics.totalSensorCount
                     }
-                    RowLayout {
-                        Layout.fillWidth: true
-                        Text { text: "Time"; font.pixelSize: 15; font.family: "Lato"; color: textSecondary; Layout.preferredWidth: 140 }
-                        Text { text: Diagnostics.systemTime; font.pixelSize: 15; font.family: "Lato"; color: textPrimary }
-                    }
-                    Item { Layout.fillHeight: true }
                 }
             }
         }
 
-        // * BOTTOM ROW: Live Data Table + System Log
-        RowLayout {
+        SettingsSection {
             Layout.fillWidth: true
-            Layout.fillHeight: true
-            Layout.minimumHeight: 300
-            spacing: 8
+            title: "Connection"
 
-            // * Live Sensor Data Table (60%)
-            Rectangle {
-                Layout.preferredWidth: 900
-                Layout.fillHeight: true
-                color: panelBg
-                radius: 6
-                border.color: panelBorder
-                border.width: 1
-
-                ColumnLayout {
-                    anchors.fill: parent
-                    anchors.margins: 10
-                    spacing: 4
-
-                    RowLayout {
-                        Layout.fillWidth: true
-                        Text {
-                            text: "Live Sensor Data"
-                            font.pixelSize: 18; font.weight: Font.Bold; font.family: "Lato"
-                            color: accentColor
-                            Layout.fillWidth: true
-                        }
-                        Text {
-                            text: liveDataModel.count + " sensors"
-                            font.pixelSize: 14; font.family: "Lato"
-                            color: textSecondary
-                        }
-                        Rectangle {
-                            width: 100; height: 28; radius: 4
-                            color: toggleArea.pressed ? "#3D3D3D" : "#2a2a4a"
-                            border.color: "#3D3D3D"; border.width: 1
-                            Text {
-                                anchors.centerIn: parent
-                                text: showAllSensors ? "Show Active" : "Show All"
-                                font.pixelSize: 13; font.family: "Lato"; color: textPrimary
-                            }
-                            MouseArea {
-                                id: toggleArea
-                                anchors.fill: parent
-                                onClicked: { showAllSensors = !showAllSensors; refreshLiveData() }
-                            }
-                        }
-                    }
-
-                    Rectangle { Layout.fillWidth: true; height: 1; color: "#3D3D3D" }
-
-                    RowLayout {
-                        Layout.fillWidth: true
-                        spacing: 4
-                        Text { text: "Name"; font.pixelSize: 14; font.weight: Font.DemiBold; font.family: "Lato"; color: accentColor; Layout.preferredWidth: 160 }
-                        Text { text: "Source"; font.pixelSize: 14; font.weight: Font.DemiBold; font.family: "Lato"; color: accentColor; Layout.preferredWidth: 100 }
-                        Text { text: "Live Value"; font.pixelSize: 14; font.weight: Font.DemiBold; font.family: "Lato"; color: accentColor; Layout.fillWidth: true }
-                        Text { text: "Unit"; font.pixelSize: 14; font.weight: Font.DemiBold; font.family: "Lato"; color: accentColor; Layout.preferredWidth: 60 }
-                    }
-
-                    Rectangle { Layout.fillWidth: true; height: 1; color: panelBorder }
-
-                    ListView {
-                        id: sensorListView
-                        Layout.fillWidth: true
-                        Layout.fillHeight: true
-                        clip: true
-                        model: liveDataModel
-                        spacing: 1
-
-                        delegate: Rectangle {
-                            width: sensorListView.width
-                            height: 28
-                            color: index % 2 === 0 ? "#1e1e3a" : "#1a1a2e"
-
-                            RowLayout {
-                                anchors.fill: parent
-                                anchors.leftMargin: 4
-                                anchors.rightMargin: 4
-                                spacing: 4
-
-                                Text {
-                                    text: model.name
-                                    font.pixelSize: 14; font.family: "Lato"
-                                    color: textPrimary
-                                    Layout.preferredWidth: 160
-                                    elide: Text.ElideRight
-                                }
-                                Text {
-                                    text: model.source
-                                    font.pixelSize: 14; font.family: "Lato"
-                                    color: textSecondary
-                                    Layout.preferredWidth: 100
-                                }
-                                Text {
-                                    text: typeof model.value === "number" ? model.value.toFixed(model.unit === "" ? 0 : 3) : String(model.value)
-                                    font.pixelSize: 14; font.family: "Lato"
-                                    font.weight: Font.DemiBold
-                                    color: Math.abs(model.value) > 0.001 ? "#4CAF50" : "#606060"
-                                    Layout.fillWidth: true
-                                }
-                                Text {
-                                    text: model.unit
-                                    font.pixelSize: 14; font.family: "Lato"
-                                    color: textSecondary
-                                    Layout.preferredWidth: 60
-                                }
-                            }
-                        }
-
-                        ScrollBar.vertical: ScrollBar {
-                            policy: sensorListView.contentHeight > sensorListView.height
-                                    ? ScrollBar.AsNeeded : ScrollBar.AlwaysOff
-                        }
-                    }
-                }
-            }
-
-            // * System Log (40%)
-            Rectangle {
+            ColumnLayout {
                 Layout.fillWidth: true
-                Layout.fillHeight: true
-                color: panelBg
-                radius: 6
-                border.color: panelBorder
-                border.width: 1
+                spacing: root._statusRowSpacing
 
-                ColumnLayout {
-                    anchors.fill: parent
-                    anchors.margins: 10
-                    spacing: 4
+                // CAN Status
+                RowLayout {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: root._statusRowHeight
+                    spacing: SettingsTheme.contentSpacing
 
-                    RowLayout {
-                        Layout.fillWidth: true
-
-                        Text {
-                            text: "System Log"
-                            font.pixelSize: 18; font.weight: Font.Bold; font.family: "Lato"
-                            color: accentColor
-                            Layout.fillWidth: true
-                        }
-
-                        Rectangle {
-                            width: 60; height: 28; radius: 4
-                            color: clearArea.pressed ? "#3D3D3D" : "#2a2a4a"
-                            border.color: "#3D3D3D"; border.width: 1
-                            Text {
-                                anchors.centerIn: parent
-                                text: "Clear"
-                                font.pixelSize: 14; font.family: "Lato"; color: textPrimary
-                            }
-                            MouseArea {
-                                id: clearArea
-                                anchors.fill: parent
-                                onClicked: Diagnostics.clearLog()
-                            }
-                        }
+                    Text {
+                        Layout.preferredWidth: root._statusLabelWidth
+                        color: SettingsTheme.textSecondary
+                        font.family: SettingsTheme.fontFamily
+                        font.pixelSize: SettingsTheme.fontStatus
+                        text: "CAN Status"
                     }
-
-                    Rectangle { Layout.fillWidth: true; height: 1; color: "#3D3D3D" }
 
                     Rectangle {
+                        Layout.alignment: Qt.AlignVCenter
+                        color: {
+                            if (Diagnostics.canStatusText === "Active")
+                                return SettingsTheme.success;
+                            if (Diagnostics.canStatusText === "Waiting")
+                                return SettingsTheme.warning;
+                            return SettingsTheme.error;
+                        }
+                        height: SettingsTheme.statusDotSize
+                        radius: SettingsTheme.statusDotSize / 2
+                        width: SettingsTheme.statusDotSize
+                    }
+
+                    Text {
                         Layout.fillWidth: true
-                        Layout.fillHeight: true
-                        color: consoleBg
-                        radius: 4
+                        color: {
+                            if (Diagnostics.canStatusText === "Active")
+                                return SettingsTheme.success;
+                            if (Diagnostics.canStatusText === "Waiting")
+                                return SettingsTheme.warning;
+                            return SettingsTheme.error;
+                        }
+                        font.family: SettingsTheme.fontFamily
+                        font.pixelSize: SettingsTheme.fontStatus
+                        text: Diagnostics.canStatusText
+                    }
+                }
 
-                        ListView {
-                            id: logListView
-                            anchors.fill: parent
-                            anchors.margins: 6
-                            clip: true
-                            model: Diagnostics.logMessages
-                            spacing: 1
+                // Daemon
+                RowLayout {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: root._statusRowHeight
+                    spacing: SettingsTheme.contentSpacing
 
-                            delegate: Text {
-                                width: logListView.width
-                                text: modelData
-                                font.pixelSize: 14; font.family: "Courier New"
-                                color: consoleText
-                                wrapMode: Text.WrapAnywhere
-                            }
+                    Text {
+                        Layout.preferredWidth: root._statusLabelWidth
+                        color: SettingsTheme.textSecondary
+                        font.family: SettingsTheme.fontFamily
+                        font.pixelSize: SettingsTheme.fontStatus
+                        text: "Daemon"
+                    }
 
-                            ScrollBar.vertical: ScrollBar {
-                                policy: ScrollBar.AsNeeded
-                            }
+                    Text {
+                        Layout.fillWidth: true
+                        color: SettingsTheme.textPrimary
+                        font.family: SettingsTheme.fontFamily
+                        font.pixelSize: SettingsTheme.fontStatus
+                        text: Diagnostics.daemonName
+                    }
+                }
 
-                            onCountChanged: {
-                                Qt.callLater(function() {
-                                    logListView.positionViewAtEnd()
-                                })
-                            }
+                // CAN Rate
+                RowLayout {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: root._statusRowHeight
+                    spacing: SettingsTheme.contentSpacing
+
+                    Text {
+                        Layout.preferredWidth: root._statusLabelWidth
+                        color: SettingsTheme.textSecondary
+                        font.family: SettingsTheme.fontFamily
+                        font.pixelSize: SettingsTheme.fontStatus
+                        text: "CAN Rate"
+                    }
+
+                    Text {
+                        Layout.fillWidth: true
+                        color: SettingsTheme.textPrimary
+                        font.family: SettingsTheme.fontFamily
+                        font.pixelSize: SettingsTheme.fontStatus
+                        text: Diagnostics.canMessageRate + " msg/s"
+                    }
+                }
+
+                // CAN Total
+                RowLayout {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: root._statusRowHeight
+                    spacing: SettingsTheme.contentSpacing
+
+                    Text {
+                        Layout.preferredWidth: root._statusLabelWidth
+                        color: SettingsTheme.textSecondary
+                        font.family: SettingsTheme.fontFamily
+                        font.pixelSize: SettingsTheme.fontStatus
+                        text: "CAN Total"
+                    }
+
+                    Text {
+                        Layout.fillWidth: true
+                        color: Diagnostics.canErrorCount > 0 ? SettingsTheme.error : SettingsTheme.textPrimary
+                        font.family: SettingsTheme.fontFamily
+                        font.pixelSize: SettingsTheme.fontStatus
+                        text: Diagnostics.canTotalMessages + " msgs | " + Diagnostics.canErrorCount + " errors"
+                    }
+                }
+
+                // Serial
+                RowLayout {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: root._statusRowHeight
+                    spacing: SettingsTheme.contentSpacing
+
+                    Text {
+                        Layout.preferredWidth: root._statusLabelWidth
+                        color: SettingsTheme.textSecondary
+                        font.family: SettingsTheme.fontFamily
+                        font.pixelSize: SettingsTheme.fontStatus
+                        text: "Serial"
+                    }
+
+                    Rectangle {
+                        Layout.alignment: Qt.AlignVCenter
+                        color: Diagnostics.serialConnected ? SettingsTheme.success : SettingsTheme.error
+                        height: SettingsTheme.statusDotSize
+                        radius: SettingsTheme.statusDotSize / 2
+                        width: SettingsTheme.statusDotSize
+                    }
+
+                    Text {
+                        Layout.fillWidth: true
+                        color: SettingsTheme.textPrimary
+                        font.family: SettingsTheme.fontFamily
+                        font.pixelSize: SettingsTheme.fontStatus
+                        text: Diagnostics.serialPort + " @ " + Diagnostics.serialBaudRate
+                    }
+                }
+
+                // Type
+                RowLayout {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: root._statusRowHeight
+                    spacing: SettingsTheme.contentSpacing
+
+                    Text {
+                        Layout.preferredWidth: root._statusLabelWidth
+                        color: SettingsTheme.textSecondary
+                        font.family: SettingsTheme.fontFamily
+                        font.pixelSize: SettingsTheme.fontStatus
+                        text: "Type"
+                    }
+
+                    Text {
+                        Layout.fillWidth: true
+                        color: SettingsTheme.textPrimary
+                        font.family: SettingsTheme.fontFamily
+                        font.pixelSize: SettingsTheme.fontStatus
+                        text: Diagnostics.connectionType
+                    }
+                }
+
+                // Time
+                RowLayout {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: root._statusRowHeight
+                    spacing: SettingsTheme.contentSpacing
+
+                    Text {
+                        Layout.preferredWidth: root._statusLabelWidth
+                        color: SettingsTheme.textSecondary
+                        font.family: SettingsTheme.fontFamily
+                        font.pixelSize: SettingsTheme.fontStatus
+                        text: "Time"
+                    }
+
+                    Text {
+                        Layout.fillWidth: true
+                        color: SettingsTheme.textPrimary
+                        font.family: SettingsTheme.fontFamily
+                        font.pixelSize: SettingsTheme.fontStatus
+                        text: Diagnostics.systemTime
+                    }
+                }
+            }
+        }
+    }
+
+    // * BOTTOM ROW: Live Sensor Data + System Log
+    // Height is calculated to fill remaining viewport space below the top row.
+    // root.height = SettingsPage Rectangle height (fills available area).
+    // Available content height = root.height - pageMargin*2 (ScrollView margins).
+    // Bottom row height = available - topRow height - sectionSpacing between rows.
+    RowLayout {
+        Layout.fillWidth: true
+        Layout.preferredHeight: root.height - (SettingsTheme.pageMargin * 2) - topRow.height
+                                - SettingsTheme.sectionSpacing
+
+        spacing: SettingsTheme.sectionSpacing
+
+        // * Live Sensor Data Table
+        SettingsSection {
+            Layout.fillHeight: true
+            Layout.fillWidth: true
+            title: "Live Sensor Data"
+
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: SettingsTheme.contentSpacing
+
+                Text {
+                    Layout.fillWidth: true
+                    color: SettingsTheme.textSecondary
+                    font.family: SettingsTheme.fontFamily
+                    font.pixelSize: SettingsTheme.fontCaption
+                    text: Diagnostics.liveSensorEntries.length + " sensors"
+                }
+
+                Rectangle {
+                    Layout.preferredHeight: SettingsTheme.controlHeight
+                    Layout.preferredWidth: 120
+                    border.color: SettingsTheme.border
+                    border.width: SettingsTheme.borderWidth
+                    color: toggleArea.pressed ? SettingsTheme.surfacePressed : SettingsTheme.controlBg
+                    radius: SettingsTheme.radiusSmall
+
+                    Text {
+                        anchors.centerIn: parent
+                        color: SettingsTheme.textPrimary
+                        font.family: SettingsTheme.fontFamily
+                        font.pixelSize: SettingsTheme.fontCaption
+                        text: showAllSensors ? "Show Active" : "Show All"
+                    }
+
+                    MouseArea {
+                        id: toggleArea
+
+                        anchors.fill: parent
+
+                        onClicked: Diagnostics.showAllSensors = !Diagnostics.showAllSensors
+                    }
+                }
+            }
+
+            // * Table Header
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: SettingsTheme.contentSpacing
+
+                Text {
+                    Layout.preferredWidth: 160
+                    color: SettingsTheme.accent
+                    font.family: SettingsTheme.fontFamily
+                    font.pixelSize: SettingsTheme.fontCaption
+                    font.weight: Font.DemiBold
+                    text: "Name"
+                }
+
+                Text {
+                    Layout.preferredWidth: 100
+                    color: SettingsTheme.accent
+                    font.family: SettingsTheme.fontFamily
+                    font.pixelSize: SettingsTheme.fontCaption
+                    font.weight: Font.DemiBold
+                    text: "Source"
+                }
+
+                Text {
+                    Layout.fillWidth: true
+                    color: SettingsTheme.accent
+                    font.family: SettingsTheme.fontFamily
+                    font.pixelSize: SettingsTheme.fontCaption
+                    font.weight: Font.DemiBold
+                    text: "Live Value"
+                }
+
+                Text {
+                    Layout.preferredWidth: 60
+                    color: SettingsTheme.accent
+                    font.family: SettingsTheme.fontFamily
+                    font.pixelSize: SettingsTheme.fontCaption
+                    font.weight: Font.DemiBold
+                    text: "Unit"
+                }
+            }
+
+            Rectangle {
+                Layout.fillWidth: true
+                color: SettingsTheme.border
+                height: SettingsTheme.borderWidth
+            }
+
+            ListView {
+                id: sensorListView
+
+                Layout.fillHeight: true
+                Layout.fillWidth: true
+                clip: true
+                model: Diagnostics.liveSensorEntries
+                spacing: 1
+
+                ScrollBar.vertical: ScrollBar {
+                    policy: sensorListView.contentHeight > sensorListView.height ? ScrollBar.AsNeeded :
+                                                                                   ScrollBar.AlwaysOff
+                }
+                delegate: Rectangle {
+                    required property int index
+                    required property var modelData
+
+                    color: index % 2 === 0 ? SettingsTheme.surface : SettingsTheme.background
+                    height: 32
+                    width: sensorListView.width
+
+                    RowLayout {
+                        anchors.fill: parent
+                        anchors.leftMargin: SettingsTheme.contentSpacing / 2
+                        anchors.rightMargin: SettingsTheme.contentSpacing / 2
+                        spacing: SettingsTheme.contentSpacing
+
+                        Rectangle {
+                            color: modelData.active ? SettingsTheme.success : SettingsTheme.textDisabled
+                            height: SettingsTheme.statusDotSize
+                            radius: SettingsTheme.statusDotSize / 2
+                            width: SettingsTheme.statusDotSize
+                        }
+
+                        Text {
+                            Layout.preferredWidth: 160
+                            color: SettingsTheme.textPrimary
+                            elide: Text.ElideRight
+                            font.family: SettingsTheme.fontFamily
+                            font.pixelSize: SettingsTheme.fontCaption
+                            text: modelData.name
+                        }
+
+                        Text {
+                            Layout.preferredWidth: 100
+                            color: SettingsTheme.textSecondary
+                            font.family: SettingsTheme.fontFamily
+                            font.pixelSize: SettingsTheme.fontCaption
+                            text: modelData.source
+                        }
+
+                        Text {
+                            Layout.fillWidth: true
+                            color: modelData.active ? SettingsTheme.success : SettingsTheme.textDisabled
+                            font.family: SettingsTheme.fontFamily
+                            font.pixelSize: SettingsTheme.fontCaption
+                            font.weight: Font.DemiBold
+                            text: modelData.unit === "" ? Number(modelData.value).toFixed(0) : Number(
+                                                              modelData.value).toFixed(3)
+                        }
+
+                        Text {
+                            Layout.preferredWidth: 60
+                            color: SettingsTheme.textSecondary
+                            font.family: SettingsTheme.fontFamily
+                            font.pixelSize: SettingsTheme.fontCaption
+                            text: modelData.unit
                         }
                     }
                 }
+            }
+        }
+
+        // * System Log
+        SettingsSection {
+            Layout.fillHeight: true
+            Layout.fillWidth: true
+            title: "System Log"
+
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: SettingsTheme.contentSpacing
+
+                Item {
+                    Layout.fillWidth: true
+                }
+
+                Repeater {
+                    model: logLevelModel
+
+                    Rectangle {
+                        Layout.preferredHeight: SettingsTheme.controlHeight
+                        Layout.preferredWidth: 60
+                        border.color: Diagnostics.logLevel === model.level ? SettingsTheme.accent : SettingsTheme.border
+                        border.width: SettingsTheme.borderWidth
+                        color: Diagnostics.logLevel === model.level ? SettingsTheme.accent : SettingsTheme.controlBg
+                        radius: SettingsTheme.radiusSmall
+
+                        Text {
+                            anchors.centerIn: parent
+                            color: Diagnostics.logLevel === model.level ? SettingsTheme.textPrimary :
+                                                                          SettingsTheme.textSecondary
+                            font.family: SettingsTheme.fontFamily
+                            font.pixelSize: SettingsTheme.fontCaption
+                            text: model.label
+                        }
+
+                        MouseArea {
+                            anchors.fill: parent
+
+                            onClicked: Diagnostics.logLevel = model.level
+                        }
+                    }
+                }
+
+                Rectangle {
+                    Layout.preferredHeight: SettingsTheme.controlHeight
+                    Layout.preferredWidth: 60
+                    border.color: SettingsTheme.border
+                    border.width: SettingsTheme.borderWidth
+                    color: clearArea.pressed ? SettingsTheme.surfacePressed : SettingsTheme.controlBg
+                    radius: SettingsTheme.radiusSmall
+
+                    Text {
+                        anchors.centerIn: parent
+                        color: SettingsTheme.textPrimary
+                        font.family: SettingsTheme.fontFamily
+                        font.pixelSize: SettingsTheme.fontCaption
+                        text: "Clear"
+                    }
+
+                    MouseArea {
+                        id: clearArea
+
+                        anchors.fill: parent
+
+                        onClicked: Diagnostics.clearLog()
+                    }
+                }
+            }
+
+            Rectangle {
+                Layout.fillHeight: true
+                Layout.fillWidth: true
+                color: SettingsTheme.consoleBg
+                radius: SettingsTheme.radiusSmall
+
+                ListView {
+                    id: logListView
+
+                    anchors.fill: parent
+                    anchors.margins: SettingsTheme.radiusSmall
+                    clip: true
+                    model: Diagnostics.filteredLogMessages
+                    spacing: 1
+
+                    ScrollBar.vertical: ScrollBar {
+                        policy: ScrollBar.AsNeeded
+                    }
+                    delegate: Text {
+                        color: {
+                            if (modelData.indexOf("[ERROR]") !== -1 || modelData.indexOf("[FATAL]") !== -1)
+                                return SettingsTheme.error;
+                            if (modelData.indexOf("[WARN]") !== -1)
+                                return SettingsTheme.warning;
+                            if (modelData.indexOf("[DEBUG]") !== -1)
+                                return SettingsTheme.textDisabled;
+                            return SettingsTheme.consoleText;
+                        }
+                        font.family: SettingsTheme.fontFamilyMono
+                        font.pixelSize: SettingsTheme.fontCaption
+                        text: modelData
+                        width: logListView.width
+                        wrapMode: Text.WrapAnywhere
+                    }
+
+                    onCountChanged: {
+                        Qt.callLater(function () {
+                            logListView.positionViewAtEnd();
+                        });
+                    }
+                }
+            }
+        }
+    }
+
+    // * ANALOG INPUTS DIAGNOSTICS
+    SettingsSection {
+        id: analogSection
+
+        Layout.fillWidth: true
+        collapsed: true
+        collapsible: true
+        title: "Analog Inputs"
+
+        Timer {
+            interval: 1000
+            repeat: true
+            running: !analogSection.collapsed
+            triggeredOnStart: true
+
+            onTriggered: analogDiagModel.refresh()
+        }
+
+        ListModel {
+            id: analogDiagModel
+
+            function refresh() {
+                clear();
+                var data = Diagnostics.getAnalogInputDiagnostics();
+                for (var i = 0; i < data.length; i++)
+                    append(data[i]);
+            }
+        }
+
+        RowLayout {
+            Layout.fillWidth: true
+            spacing: SettingsTheme.contentSpacing
+
+            Text {
+                Layout.preferredWidth: 80
+                color: SettingsTheme.accent
+                font.family: SettingsTheme.fontFamily
+                font.pixelSize: SettingsTheme.fontCaption
+                font.weight: Font.DemiBold
+                text: "Channel"
+            }
+
+            Text {
+                Layout.preferredWidth: 80
+                color: SettingsTheme.accent
+                font.family: SettingsTheme.fontFamily
+                font.pixelSize: SettingsTheme.fontCaption
+                font.weight: Font.DemiBold
+                text: "Raw (V)"
+            }
+
+            Text {
+                Layout.fillWidth: true
+                color: SettingsTheme.accent
+                font.family: SettingsTheme.fontFamily
+                font.pixelSize: SettingsTheme.fontCaption
+                font.weight: Font.DemiBold
+                text: "Calibrated"
+            }
+
+            Text {
+                Layout.preferredWidth: 60
+                color: SettingsTheme.accent
+                font.family: SettingsTheme.fontFamily
+                font.pixelSize: SettingsTheme.fontCaption
+                font.weight: Font.DemiBold
+                text: "Unit"
+            }
+        }
+
+        Repeater {
+            model: analogDiagModel
+
+            delegate: RowLayout {
+                Layout.fillWidth: true
+                spacing: SettingsTheme.contentSpacing
+
+                Text {
+                    Layout.preferredWidth: 80
+                    color: SettingsTheme.textPrimary
+                    font.family: SettingsTheme.fontFamily
+                    font.pixelSize: SettingsTheme.fontCaption
+                    text: model.channel !== undefined ? model.channel : ""
+                }
+
+                Text {
+                    Layout.preferredWidth: 80
+                    color: SettingsTheme.textSecondary
+                    font.family: SettingsTheme.fontFamily
+                    font.pixelSize: SettingsTheme.fontCaption
+                    text: model.rawVoltage !== undefined ? Number(model.rawVoltage).toFixed(3) : ""
+                }
+
+                Text {
+                    Layout.fillWidth: true
+                    color: SettingsTheme.success
+                    font.family: SettingsTheme.fontFamily
+                    font.pixelSize: SettingsTheme.fontCaption
+                    font.weight: Font.DemiBold
+                    text: model.calibratedValue !== undefined ? Number(model.calibratedValue).toFixed(3) : ""
+                }
+
+                Text {
+                    Layout.preferredWidth: 60
+                    color: SettingsTheme.textSecondary
+                    font.family: SettingsTheme.fontFamily
+                    font.pixelSize: SettingsTheme.fontCaption
+                    text: model.unit !== undefined ? model.unit : ""
+                }
+            }
+        }
+    }
+
+    // * DIGITAL INPUTS DIAGNOSTICS
+    SettingsSection {
+        id: digitalSection
+
+        Layout.fillWidth: true
+        collapsed: true
+        collapsible: true
+        title: "Digital Inputs"
+
+        Timer {
+            interval: 1000
+            repeat: true
+            running: !digitalSection.collapsed
+            triggeredOnStart: true
+
+            onTriggered: digitalDiagModel.refresh()
+        }
+
+        ListModel {
+            id: digitalDiagModel
+
+            function refresh() {
+                clear();
+                var ecu = Diagnostics.getDigitalInputDiagnostics();
+                for (var i = 0; i < ecu.length; i++)
+                    append(ecu[i]);
+                var ext = Diagnostics.getExtenderDigitalDiagnostics();
+                for (var j = 0; j < ext.length; j++)
+                    append(ext[j]);
+            }
+        }
+
+        RowLayout {
+            Layout.fillWidth: true
+            spacing: SettingsTheme.contentSpacing
+
+            Text {
+                Layout.preferredWidth: 120
+                color: SettingsTheme.accent
+                font.family: SettingsTheme.fontFamily
+                font.pixelSize: SettingsTheme.fontCaption
+                font.weight: Font.DemiBold
+                text: "Channel"
+            }
+
+            Text {
+                Layout.preferredWidth: 80
+                color: SettingsTheme.accent
+                font.family: SettingsTheme.fontFamily
+                font.pixelSize: SettingsTheme.fontCaption
+                font.weight: Font.DemiBold
+                text: "State"
+            }
+
+            Text {
+                Layout.fillWidth: true
+                color: SettingsTheme.accent
+                font.family: SettingsTheme.fontFamily
+                font.pixelSize: SettingsTheme.fontCaption
+                font.weight: Font.DemiBold
+                text: "Name"
+            }
+        }
+
+        Repeater {
+            model: digitalDiagModel
+
+            delegate: RowLayout {
+                Layout.fillWidth: true
+                spacing: SettingsTheme.contentSpacing
+
+                Text {
+                    Layout.preferredWidth: 120
+                    color: SettingsTheme.textPrimary
+                    font.family: SettingsTheme.fontFamily
+                    font.pixelSize: SettingsTheme.fontCaption
+                    text: model.channel !== undefined ? model.channel : ""
+                }
+
+                Rectangle {
+                    Layout.preferredHeight: 20
+                    Layout.preferredWidth: 80
+                    color: model.state ? SettingsTheme.success : SettingsTheme.textDisabled
+                    radius: 4
+
+                    Text {
+                        anchors.centerIn: parent
+                        color: SettingsTheme.textPrimary
+                        font.family: SettingsTheme.fontFamily
+                        font.pixelSize: 12
+                        font.weight: Font.Bold
+                        text: model.state ? "ON" : "OFF"
+                    }
+                }
+
+                Text {
+                    Layout.fillWidth: true
+                    color: SettingsTheme.textSecondary
+                    font.family: SettingsTheme.fontFamily
+                    font.pixelSize: SettingsTheme.fontCaption
+                    text: model.label !== undefined ? model.label : ""
+                }
+            }
+        }
+    }
+
+    // * EXTENDER BOARD DIAGNOSTICS
+    SettingsSection {
+        id: extenderSection
+
+        Layout.fillWidth: true
+        collapsed: true
+        collapsible: true
+        title: "Extender Board"
+
+        Timer {
+            interval: 1000
+            repeat: true
+            running: !extenderSection.collapsed
+            triggeredOnStart: true
+
+            onTriggered: extenderDiagModel.refresh()
+        }
+
+        ListModel {
+            id: extenderDiagModel
+
+            function refresh() {
+                clear();
+                var data = Diagnostics.getExpanderBoardDiagnostics();
+                for (var i = 0; i < data.length; i++)
+                    append(data[i]);
+            }
+        }
+
+        RowLayout {
+            Layout.fillWidth: true
+            spacing: SettingsTheme.contentSpacing
+
+            Text {
+                Layout.preferredWidth: 80
+                color: SettingsTheme.accent
+                font.family: SettingsTheme.fontFamily
+                font.pixelSize: SettingsTheme.fontCaption
+                font.weight: Font.DemiBold
+                text: "Channel"
+            }
+
+            Text {
+                Layout.preferredWidth: 80
+                color: SettingsTheme.accent
+                font.family: SettingsTheme.fontFamily
+                font.pixelSize: SettingsTheme.fontCaption
+                font.weight: Font.DemiBold
+                text: "Raw (V)"
+            }
+
+            Text {
+                Layout.fillWidth: true
+                color: SettingsTheme.accent
+                font.family: SettingsTheme.fontFamily
+                font.pixelSize: SettingsTheme.fontCaption
+                font.weight: Font.DemiBold
+                text: "Calibrated"
+            }
+
+            Text {
+                Layout.preferredWidth: 60
+                color: SettingsTheme.accent
+                font.family: SettingsTheme.fontFamily
+                font.pixelSize: SettingsTheme.fontCaption
+                font.weight: Font.DemiBold
+                text: "Unit"
+            }
+
+            Text {
+                Layout.preferredWidth: 40
+                color: SettingsTheme.accent
+                font.family: SettingsTheme.fontFamily
+                font.pixelSize: SettingsTheme.fontCaption
+                font.weight: Font.DemiBold
+                text: "NTC"
+            }
+        }
+
+        Repeater {
+            model: extenderDiagModel
+
+            delegate: RowLayout {
+                Layout.fillWidth: true
+                spacing: SettingsTheme.contentSpacing
+
+                Text {
+                    Layout.preferredWidth: 80
+                    color: SettingsTheme.textPrimary
+                    font.family: SettingsTheme.fontFamily
+                    font.pixelSize: SettingsTheme.fontCaption
+                    text: model.channel !== undefined ? model.channel : ""
+                }
+
+                Text {
+                    Layout.preferredWidth: 80
+                    color: SettingsTheme.textSecondary
+                    font.family: SettingsTheme.fontFamily
+                    font.pixelSize: SettingsTheme.fontCaption
+                    text: model.rawVoltage !== undefined ? Number(model.rawVoltage).toFixed(3) : ""
+                }
+
+                Text {
+                    Layout.fillWidth: true
+                    color: SettingsTheme.success
+                    font.family: SettingsTheme.fontFamily
+                    font.pixelSize: SettingsTheme.fontCaption
+                    font.weight: Font.DemiBold
+                    text: model.calibratedValue !== undefined ? Number(model.calibratedValue).toFixed(3) : ""
+                }
+
+                Text {
+                    Layout.preferredWidth: 60
+                    color: SettingsTheme.textSecondary
+                    font.family: SettingsTheme.fontFamily
+                    font.pixelSize: SettingsTheme.fontCaption
+                    text: model.unit !== undefined ? model.unit : ""
+                }
+
+                Text {
+                    Layout.preferredWidth: 40
+                    color: model.ntcEnabled ? SettingsTheme.accent : SettingsTheme.textDisabled
+                    font.family: SettingsTheme.fontFamily
+                    font.pixelSize: SettingsTheme.fontCaption
+                    text: model.ntcEnabled ? "Yes" : "No"
+                }
+            }
+        }
+    }
+
+    // * CAN MESSAGE VIEWER
+    SettingsSection {
+        id: canSection
+
+        Layout.fillWidth: true
+        collapsed: true
+        collapsible: true
+        title: "CAN Messages"
+
+        RowLayout {
+            Layout.fillWidth: true
+            spacing: SettingsTheme.contentSpacing
+
+            StyledSwitch {
+                id: canCaptureToggle
+
+                checked: Diagnostics.canCaptureEnabled
+
+                onCheckedChanged: Diagnostics.canCaptureEnabled = checked
+            }
+
+            Text {
+                color: canCaptureToggle.checked ? SettingsTheme.success : SettingsTheme.textSecondary
+                font.family: SettingsTheme.fontFamily
+                font.pixelSize: SettingsTheme.fontCaption
+                text: canCaptureToggle.checked ? "Capturing" : "Stopped"
+            }
+
+            Item {
+                Layout.fillWidth: true
+            }
+
+            StyledTextField {
+                Layout.preferredWidth: 140
+                inputMethodHints: Qt.ImhNoPredictiveText
+                placeholderText: "Filter CAN ID (hex)"
+                text: Diagnostics.canIdFilter
+
+                onTextChanged: Diagnostics.canIdFilter = text
+            }
+
+            StyledButton {
+                primary: false
+                text: "Clear"
+
+                onClicked: Diagnostics.clearCanFrameBuffer()
+            }
+
+            StyledButton {
+                primary: false
+                text: "Reset Errors"
+
+                onClicked: Diagnostics.resetCanErrors()
+            }
+        }
+
+        RowLayout {
+            Layout.fillWidth: true
+            spacing: SettingsTheme.contentSpacing
+
+            Text {
+                Layout.preferredWidth: 80
+                color: SettingsTheme.accent
+                font.family: SettingsTheme.fontFamily
+                font.pixelSize: SettingsTheme.fontCaption
+                font.weight: Font.DemiBold
+                text: "ID"
+            }
+
+            Text {
+                Layout.preferredWidth: 30
+                color: SettingsTheme.accent
+                font.family: SettingsTheme.fontFamily
+                font.pixelSize: SettingsTheme.fontCaption
+                font.weight: Font.DemiBold
+                text: "Len"
+            }
+
+            Text {
+                Layout.fillWidth: true
+                color: SettingsTheme.accent
+                font.family: SettingsTheme.fontFamily
+                font.pixelSize: SettingsTheme.fontCaption
+                font.weight: Font.DemiBold
+                text: "Payload (hex)"
+            }
+
+            Text {
+                Layout.preferredWidth: 80
+                color: SettingsTheme.accent
+                font.family: SettingsTheme.fontFamily
+                font.pixelSize: SettingsTheme.fontCaption
+                font.weight: Font.DemiBold
+                text: "ASCII"
+            }
+        }
+
+        Rectangle {
+            Layout.fillWidth: true
+            color: SettingsTheme.border
+            height: SettingsTheme.borderWidth
+        }
+
+        ListView {
+            id: canFrameList
+
+            Layout.fillWidth: true
+            Layout.preferredHeight: 300
+            clip: true
+            model: Diagnostics.canFrameBuffer
+            spacing: 1
+
+            ScrollBar.vertical: ScrollBar {
+                policy: canFrameList.contentHeight > canFrameList.height ? ScrollBar.AsNeeded : ScrollBar.AlwaysOff
+            }
+            delegate: Rectangle {
+                required property int index
+                required property var modelData
+
+                color: index % 2 === 0 ? SettingsTheme.surface : SettingsTheme.background
+                height: 28
+                width: canFrameList.width
+
+                RowLayout {
+                    anchors.fill: parent
+                    anchors.leftMargin: 4
+                    anchors.rightMargin: 4
+                    spacing: SettingsTheme.contentSpacing
+
+                    Text {
+                        Layout.preferredWidth: 80
+                        color: SettingsTheme.accent
+                        font.family: SettingsTheme.fontFamilyMono
+                        font.pixelSize: SettingsTheme.fontCaption
+                        text: modelData.id
+                    }
+
+                    Text {
+                        Layout.preferredWidth: 30
+                        color: SettingsTheme.textSecondary
+                        font.family: SettingsTheme.fontFamilyMono
+                        font.pixelSize: SettingsTheme.fontCaption
+                        text: modelData.length
+                    }
+
+                    Text {
+                        Layout.fillWidth: true
+                        color: SettingsTheme.textPrimary
+                        font.family: SettingsTheme.fontFamilyMono
+                        font.pixelSize: SettingsTheme.fontCaption
+                        text: modelData.payload
+                    }
+
+                    Text {
+                        Layout.preferredWidth: 80
+                        color: SettingsTheme.textDisabled
+                        font.family: SettingsTheme.fontFamilyMono
+                        font.pixelSize: SettingsTheme.fontCaption
+                        text: modelData.ascii
+                    }
+                }
+            }
+        }
+    }
+
+    // * DEBUG TOOLS
+    SettingsSection {
+        Layout.fillWidth: true
+        title: "Debug Tools"
+
+        SettingsRow {
+            description: "Force all arc gauges to 100% fill for alignment verification"
+            label: "Full Arc Sweep"
+
+            StyledSwitch {
+                checked: {
+                    var v = AppSettings.getValue("debug/arcFullSweep", false);
+                    return v === true || v === "true";
+                }
+
+                onCheckedChanged: AppSettings.setValue("debug/arcFullSweep", checked)
             }
         }
     }

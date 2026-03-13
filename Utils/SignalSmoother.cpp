@@ -6,21 +6,13 @@
  */
 
 #include "SignalSmoother.h"
+
 #include <algorithm>
 
-SignalSmoother::SignalSmoother(QObject *parent)
-    : QObject(parent)
-    , m_windowSize(1)
-    , m_sum(0.0)
-    , m_average(0.0)
-{
-}
+SignalSmoother::SignalSmoother(QObject *parent) : QObject(parent), m_windowSize(1), m_sum(0.0), m_average(0.0) {}
 
 SignalSmoother::SignalSmoother(int windowSize, QObject *parent)
-    : QObject(parent)
-    , m_windowSize(std::max(1, windowSize))
-    , m_sum(0.0)
-    , m_average(0.0)
+    : QObject(parent), m_windowSize(std::max(1, windowSize)), m_sum(0.0), m_average(0.0)
 {
     m_buffer.reserve(m_windowSize);
 }

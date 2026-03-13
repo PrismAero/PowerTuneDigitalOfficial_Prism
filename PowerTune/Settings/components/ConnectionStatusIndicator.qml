@@ -8,62 +8,90 @@ Rectangle {
     id: root
 
     property string label: "Status"
-    property string statusText: "Unknown"
     property string status: "unknown" // "connected", "disconnected", "pending", "unknown"
 
-    implicitWidth: 200
-    implicitHeight: 44
-    radius: 8
-    color: "#2D2D2D"
+    property string statusText: "Unknown"
+
     border.color: {
         switch (root.status) {
-            case "connected": return "#4CAF50"
-            case "disconnected": return "#F44336"
-            case "pending": return "#FF9800"
-            default: return "#3D3D3D"
+        case "connected":
+            return SettingsTheme.success;
+        case "disconnected":
+            return SettingsTheme.error;
+        case "pending":
+            return SettingsTheme.warning;
+        default:
+            return SettingsTheme.border;
         }
     }
     border.width: 2
+    color: SettingsTheme.controlBg
+    implicitHeight: SettingsTheme.controlHeight
+    implicitWidth: 200
+    radius: SettingsTheme.radiusSmall
 
-    Behavior on border.color { ColorAnimation { duration: 200 } }
+    Behavior on border.color {
+        ColorAnimation {
+            duration: 200
+        }
+    }
 
     RowLayout {
+        anchors.bottomMargin: 0
         anchors.fill: parent
-        anchors.margins: 12
+        anchors.leftMargin: 12
+        anchors.rightMargin: 12
+        anchors.topMargin: 0
         spacing: 8
 
         // * Status indicator dot
         Rectangle {
-            width: 12
-            height: 12
-            radius: 6
             color: {
                 switch (root.status) {
-                    case "connected": return "#4CAF50"
-                    case "disconnected": return "#F44336"
-                    case "pending": return "#FF9800"
-                    default: return "#707070"
+                case "connected":
+                    return SettingsTheme.success;
+                case "disconnected":
+                    return SettingsTheme.error;
+                case "pending":
+                    return SettingsTheme.warning;
+                default:
+                    return SettingsTheme.textPlaceholder;
+                }
+            }
+            height: SettingsTheme.statusDotSize
+            radius: SettingsTheme.statusDotSize / 2
+            width: SettingsTheme.statusDotSize
+
+            Behavior on color {
+                ColorAnimation {
+                    duration: 200
                 }
             }
 
-            Behavior on color { ColorAnimation { duration: 200 } }
-
             // * Pulse animation for pending state
             SequentialAnimation on opacity {
-                running: root.status === "pending"
                 loops: Animation.Infinite
-                NumberAnimation { to: 0.4; duration: 500 }
-                NumberAnimation { to: 1.0; duration: 500 }
+                running: root.status === "pending"
+
+                NumberAnimation {
+                    duration: 500
+                    to: 0.4
+                }
+
+                NumberAnimation {
+                    duration: 500
+                    to: 1.0
+                }
             }
         }
 
         Text {
-            text: root.statusText
-            font.pixelSize: 18
-            font.family: "Lato"
-            color: "#FFFFFF"
             Layout.fillWidth: true
+            color: SettingsTheme.textPrimary
             elide: Text.ElideRight
+            font.family: SettingsTheme.fontFamily
+            font.pixelSize: SettingsTheme.fontControl
+            text: root.statusText
             verticalAlignment: Text.AlignVCenter
         }
     }

@@ -2,6 +2,8 @@
 #define APPSETTINGS_H
 
 #include <QObject>
+#include <QVariant>
+#include <QVariantMap>
 
 class DashBoard;
 class SettingsData;
@@ -12,6 +14,8 @@ class ExpanderBoardData;
 class EngineData;
 class ConnectionData;
 class DigitalInputs;
+class Extender;
+class SteinhartCalculator;
 
 class AppSettings : public QObject
 {
@@ -22,10 +26,17 @@ public:
     explicit AppSettings(QObject *parent = nullptr);
     explicit AppSettings(DashBoard *dashboard, QObject *parent = nullptr);
     explicit AppSettings(DashBoard *dashboard, SettingsData *settingsData, UIState *uiState, VehicleData *vehicleData,
-                         AnalogInputs *analogInputs, ExpanderBoardData *expanderBoardData,
-                         EngineData *engineData, ConnectionData *connectionData,
-                         DigitalInputs *digitalInputs, QObject *parent = nullptr);
+                         AnalogInputs *analogInputs, ExpanderBoardData *expanderBoardData, EngineData *engineData,
+                         ConnectionData *connectionData, DigitalInputs *digitalInputs, QObject *parent = nullptr);
 
+    Q_INVOKABLE void setValue(const QString &key, const QVariant &value);
+    Q_INVOKABLE QVariant getValue(const QString &key, const QVariant &defaultValue = QVariant()) const;
+    Q_INVOKABLE void sync();
+    Q_INVOKABLE void setSpeedUnitIndex(int index);
+    Q_INVOKABLE void setTempUnitIndex(int index);
+    Q_INVOKABLE void setPressureUnitIndex(int index);
+    Q_INVOKABLE void setEcuIndex(int index);
+    Q_INVOKABLE void setMainSpeedSourceIndex(int index);
 
     Q_INVOKABLE int getBaudRate();
     Q_INVOKABLE void setBaudRate(const int &arg);
@@ -43,7 +54,6 @@ public:
     Q_INVOKABLE void setInterface(const int &arg);
     Q_INVOKABLE int getLogging();
     Q_INVOKABLE void setLogging(const int &arg);
-    Q_INVOKABLE void writeMainSettings();
     Q_INVOKABLE void writeSelectedDashSettings(int numberofdashes);
     Q_INVOKABLE void externalspeedconnectionstatus(int connected);
     Q_INVOKABLE void externalspeedport(const QString &port);
@@ -84,6 +94,18 @@ public:
     Q_INVOKABLE void writeCountrySettings(const QString &Country);
     Q_INVOKABLE void writeTrackSettings(const QString &Track);
     Q_INVOKABLE void writebrightnessettings(const int &Brightness);
+    Q_INVOKABLE int readDisplayBrightnessPercent() const;
+    Q_INVOKABLE void writeDisplayBrightnessPercent(int percent);
+    Q_INVOKABLE int readGlobalBrightnessPercent() const;
+    Q_INVOKABLE void writeGlobalBrightnessPercent(int percent);
+    Q_INVOKABLE void writeBrightnessDayPreset(int percent);
+    Q_INVOKABLE void writeBrightnessNightPreset(int percent);
+    Q_INVOKABLE bool readBrightnessPopupEnabled() const;
+    Q_INVOKABLE void writeBrightnessPopupEnabled(bool enabled);
+    Q_INVOKABLE QString readLastBrightnessPreset() const;
+    Q_INVOKABLE void writeLastBrightnessPreset(const QString &preset);
+    Q_INVOKABLE bool readDashboardLockEnabled() const;
+    Q_INVOKABLE void writeDashboardLockEnabled(bool enabled);
     Q_INVOKABLE void writeRPMFrequencySettings(const qreal &Divider, const int &DI1isRPM);
     Q_INVOKABLE void writeExternalrpm(const int checked);
     Q_INVOKABLE void writeLanguage(const int Language);
@@ -91,11 +113,25 @@ public:
     Q_INVOKABLE void writeDaemonLicenseKey(const QString &DaemonLicenseKey);
     Q_INVOKABLE void writeHolleyProductID(const QString &HolleyProductID);
     Q_INVOKABLE QString getDaemonActivationKey();
+    void setExtender(Extender *extender);
+    void setSteinhartCalculator(SteinhartCalculator *calc);
     Q_INVOKABLE void readandApplySettings();
 
+    // * Expander board sensor configs (gear position, speed)
+    Q_INVOKABLE void writeGearSensorConfig(const QVariantMap &config);
+    Q_INVOKABLE QVariantMap readGearSensorConfig();
+    Q_INVOKABLE void writeSpeedSensorConfig(const QVariantMap &config);
+    Q_INVOKABLE QVariantMap readSpeedSensorConfig();
+
+    Q_INVOKABLE void writeDashboardConfig(int index, const QString &bgPicture, const QString &bgColor);
+    Q_INVOKABLE QVariantMap loadDashboardConfig(int index) const;
+
+    // Overlay config persistence (per-dashboard, per-overlay instance)
+    Q_INVOKABLE void saveOverlayConfig(const QString &dashboardId, const QString &overlayId, const QVariantMap &config);
+    Q_INVOKABLE QVariantMap loadOverlayConfig(const QString &dashboardId, const QString &overlayId);
+    Q_INVOKABLE void removeOverlayConfig(const QString &dashboardId, const QString &overlayId);
+
 private:
-    void setValue(const QString &key, const QVariant &value);
-    QVariant getValue(const QString &key);
     DashBoard *m_dashboard;
     SettingsData *m_settingsData;
     UIState *m_uiState;
@@ -105,6 +141,8 @@ private:
     EngineData *m_engineData;
     ConnectionData *m_connectionData;
     DigitalInputs *m_digitalInputs;
+    Extender *m_extender = nullptr;
+    SteinhartCalculator *m_steinhartCalc = nullptr;
 };
 
 #endif  // APPSETTINGS_H

@@ -4,17 +4,16 @@ import QtQuick 2.15
 Item {
     id: qwertyLayout
 
-    property bool shiftActive: false
-
-    signal keyPressed(string value)
-    signal backspacePressed()
-    signal enterPressed()
-    signal switchLayout()
-
     // Calculate key dimensions based on available width
-    property real keySpacing: 4
+    property real keySpacing: KeyboardTheme.keySpacing
+    property real rowHeight: Math.max((height - keySpacing * 3) / 4, KeyboardTheme.controlHeight)
+    property bool shiftActive: false
     property real standardKeyWidth: (width - keySpacing * 9) / 10
-    property real rowHeight: (height - keySpacing * 3) / 4
+
+    signal backspacePressed
+    signal enterPressed
+    signal keyPressed(string value)
+    signal switchLayout
 
     Column {
         anchors.fill: parent
@@ -22,113 +21,136 @@ Item {
 
         // Row 1: q w e r t y u i o p (10 keys)
         Row {
-            spacing: qwertyLayout.keySpacing
             anchors.horizontalCenter: parent.horizontalCenter
+            spacing: qwertyLayout.keySpacing
 
             Repeater {
                 model: ["q", "w", "e", "r", "t", "y", "u", "i", "o", "p"]
+
                 KeyButton {
-                    text: qwertyLayout.shiftActive ? modelData.toUpperCase() : modelData
-                    keyValue: qwertyLayout.shiftActive ? modelData.toUpperCase() : modelData
-                    width: qwertyLayout.standardKeyWidth
                     height: qwertyLayout.rowHeight
-                    onKeyPressed: function(value) { qwertyLayout.keyPressed(value) }
+                    keyValue: qwertyLayout.shiftActive ? modelData.toUpperCase() : modelData
+                    text: qwertyLayout.shiftActive ? modelData.toUpperCase() : modelData
+                    width: qwertyLayout.standardKeyWidth
+
+                    onKeyPressed: function (value) {
+                        qwertyLayout.keyPressed(value);
+                    }
                 }
             }
         }
 
         // Row 2: a s d f g h j k l (9 keys, centered)
         Row {
-            spacing: qwertyLayout.keySpacing
             anchors.horizontalCenter: parent.horizontalCenter
+            spacing: qwertyLayout.keySpacing
 
             Repeater {
                 model: ["a", "s", "d", "f", "g", "h", "j", "k", "l"]
+
                 KeyButton {
-                    text: qwertyLayout.shiftActive ? modelData.toUpperCase() : modelData
-                    keyValue: qwertyLayout.shiftActive ? modelData.toUpperCase() : modelData
-                    width: qwertyLayout.standardKeyWidth
                     height: qwertyLayout.rowHeight
-                    onKeyPressed: function(value) { qwertyLayout.keyPressed(value) }
+                    keyValue: qwertyLayout.shiftActive ? modelData.toUpperCase() : modelData
+                    text: qwertyLayout.shiftActive ? modelData.toUpperCase() : modelData
+                    width: qwertyLayout.standardKeyWidth
+
+                    onKeyPressed: function (value) {
+                        qwertyLayout.keyPressed(value);
+                    }
                 }
             }
         }
 
         // Row 3: Shift z x c v b n m Backspace (9 keys)
         Row {
-            spacing: qwertyLayout.keySpacing
             anchors.horizontalCenter: parent.horizontalCenter
+            spacing: qwertyLayout.keySpacing
 
             KeyButton {
-                text: "Shift"
-                keyValue: "shift"
-                fontSize: 12
-                width: qwertyLayout.standardKeyWidth
                 height: qwertyLayout.rowHeight
+                iconName: qwertyLayout.shiftActive ? "keyboard_capslock" : "shift"
+                iconSize: 18
                 isAccent: qwertyLayout.shiftActive
+                keyValue: "shift"
+                width: qwertyLayout.standardKeyWidth
+
                 onKeyPressed: qwertyLayout.shiftActive = !qwertyLayout.shiftActive
             }
 
             Repeater {
                 model: ["z", "x", "c", "v", "b", "n", "m"]
+
                 KeyButton {
-                    text: qwertyLayout.shiftActive ? modelData.toUpperCase() : modelData
-                    keyValue: qwertyLayout.shiftActive ? modelData.toUpperCase() : modelData
-                    width: qwertyLayout.standardKeyWidth
                     height: qwertyLayout.rowHeight
-                    onKeyPressed: function(value) { qwertyLayout.keyPressed(value) }
+                    keyValue: qwertyLayout.shiftActive ? modelData.toUpperCase() : modelData
+                    text: qwertyLayout.shiftActive ? modelData.toUpperCase() : modelData
+                    width: qwertyLayout.standardKeyWidth
+
+                    onKeyPressed: function (value) {
+                        qwertyLayout.keyPressed(value);
+                    }
                 }
             }
 
             KeyButton {
-                text: "<--"
-                keyValue: "backspace"
-                isDestructive: true
-                repeatEnabled: true
-                fontSize: 12
-                width: qwertyLayout.standardKeyWidth
                 height: qwertyLayout.rowHeight
+                iconName: "backspace"
+                iconSize: 18
+                isDestructive: true
+                keyValue: "backspace"
+                repeatEnabled: true
+                width: qwertyLayout.standardKeyWidth
+
                 onKeyPressed: qwertyLayout.backspacePressed()
             }
         }
 
         // Row 4: 123 Space . Done
         Row {
-            spacing: qwertyLayout.keySpacing
             anchors.horizontalCenter: parent.horizontalCenter
+            spacing: qwertyLayout.keySpacing
 
             KeyButton {
-                text: "123"
-                keyValue: "switchLayout"
-                fontSize: 14
-                width: qwertyLayout.standardKeyWidth * 1.5
                 height: qwertyLayout.rowHeight
+                iconName: "pin"
+                iconSize: 18
+                keyValue: "switchLayout"
+                width: qwertyLayout.standardKeyWidth * 1.5
+
                 onKeyPressed: qwertyLayout.switchLayout()
             }
 
             KeyButton {
-                text: " "
-                keyValue: " "
-                // Space bar takes remaining width: total - (123 key + . key + Done key + 3 spacings)
-                width: qwertyLayout.width - (qwertyLayout.standardKeyWidth * 1.5) - (qwertyLayout.standardKeyWidth) - (qwertyLayout.standardKeyWidth * 1.5) - (qwertyLayout.keySpacing * 3)
                 height: qwertyLayout.rowHeight
-                onKeyPressed: function(value) { qwertyLayout.keyPressed(value) }
+                keyValue: " "
+                text: " "
+                // Space bar takes remaining width: total - (123 key + . key + Done key + 3 spacings)
+                width: qwertyLayout.width - (qwertyLayout.standardKeyWidth * 1.5) - (qwertyLayout.standardKeyWidth) - (
+                           qwertyLayout.standardKeyWidth * 1.5) - (qwertyLayout.keySpacing * 3)
+
+                onKeyPressed: function (value) {
+                    qwertyLayout.keyPressed(value);
+                }
             }
 
             KeyButton {
+                height: qwertyLayout.rowHeight
                 text: "."
                 width: qwertyLayout.standardKeyWidth
-                height: qwertyLayout.rowHeight
-                onKeyPressed: function(value) { qwertyLayout.keyPressed(value) }
+
+                onKeyPressed: function (value) {
+                    qwertyLayout.keyPressed(value);
+                }
             }
 
             KeyButton {
-                text: "Done"
-                keyValue: "enter"
-                isAccent: true
-                fontSize: 14
-                width: qwertyLayout.standardKeyWidth * 1.5
                 height: qwertyLayout.rowHeight
+                iconName: "check"
+                iconSize: 20
+                isAccent: true
+                keyValue: "enter"
+                width: qwertyLayout.standardKeyWidth * 1.5
+
                 onKeyPressed: qwertyLayout.enterPressed()
             }
         }

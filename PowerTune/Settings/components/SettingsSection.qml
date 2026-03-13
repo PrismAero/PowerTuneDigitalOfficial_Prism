@@ -7,59 +7,68 @@ import QtQuick.Layouts 1.15
 Rectangle {
     id: root
 
-    property string title: ""
-    property bool collapsible: false
+    readonly property int _inset: SettingsTheme.sectionPadding + SettingsTheme.borderWidth
     property bool collapsed: false
+    property bool collapsible: false
     default property alias content: contentColumn.data
+    property string title: ""
 
     Layout.fillWidth: true
-    implicitHeight: collapsed ? headerRow.height + 24 : headerRow.height + contentColumn.height + 36
-    color: "#1E1E2E"
-    radius: 8
-    border.color: "#2D2D4E"
-    border.width: 1
+    border.color: SettingsTheme.border
+    border.width: SettingsTheme.borderWidth
+    color: SettingsTheme.surface
+    implicitHeight: collapsed ? headerRow.height + (_inset * 2) : headerRow.height + contentColumn.height + (_inset
+                                                                                                             * 2) + (SettingsTheme.contentSpacing
+                                                                                                                     * 2)
+    radius: SettingsTheme.radiusLarge
 
     Behavior on implicitHeight {
-        NumberAnimation { duration: 200; easing.type: Easing.OutQuad }
+        NumberAnimation {
+            duration: 200
+            easing.type: Easing.OutQuad
+        }
     }
 
     ColumnLayout {
         anchors.fill: parent
-        anchors.margins: 12
-        spacing: 8
+        anchors.margins: root._inset
+        spacing: SettingsTheme.contentSpacing
 
         RowLayout {
             id: headerRow
+
             Layout.fillWidth: true
             spacing: 8
 
             Text {
-                text: root.title
-                font.pixelSize: 20
-                font.weight: Font.Bold
-                font.family: "Lato"
-                color: "#009688"
                 Layout.fillWidth: true
+                color: SettingsTheme.accent
+                font.family: SettingsTheme.fontFamily
+                font.pixelSize: SettingsTheme.fontSectionTitle
+                font.weight: Font.Bold
+                text: root.title
             }
 
             // * Collapse button (optional)
             Rectangle {
-                visible: root.collapsible
-                width: 32
+                color: collapseArea.pressed ? SettingsTheme.surfacePressed : "transparent"
                 height: 32
                 radius: 16
-                color: collapseArea.pressed ? "#3D3D3D" : "transparent"
+                visible: root.collapsible
+                width: 32
 
                 Text {
                     anchors.centerIn: parent
-                    text: root.collapsed ? "▼" : "▲"
+                    color: SettingsTheme.textSecondary
                     font.pixelSize: 14
-                    color: "#B0B0B0"
+                    text: root.collapsed ? "v" : "^"
                 }
 
                 MouseArea {
                     id: collapseArea
+
                     anchors.fill: parent
+
                     onClicked: root.collapsed = !root.collapsed
                 }
             }
@@ -68,20 +77,23 @@ Rectangle {
         // * Divider line
         Rectangle {
             Layout.fillWidth: true
-            height: 1
-            color: "#3D3D3D"
+            color: SettingsTheme.border
+            height: SettingsTheme.borderWidth
             visible: !root.collapsed
         }
 
         ColumnLayout {
             id: contentColumn
+
             Layout.fillWidth: true
-            spacing: 8
-            visible: !root.collapsed
             opacity: root.collapsed ? 0 : 1
+            spacing: SettingsTheme.contentSpacing
+            visible: !root.collapsed
 
             Behavior on opacity {
-                NumberAnimation { duration: 150 }
+                NumberAnimation {
+                    duration: 150
+                }
             }
         }
     }

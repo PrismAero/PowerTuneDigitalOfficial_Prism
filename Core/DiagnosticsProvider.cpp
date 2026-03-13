@@ -9,50 +9,87 @@
  */
 
 #include "DiagnosticsProvider.h"
+
+#include "PropertyRouter.h"
 #include "SensorRegistry.h"
 
+#include <QDebug>
 #include <QFile>
 #include <QRegularExpression>
 #include <QTextStream>
-#include <QDebug>
+#include <QTime>
 
 #ifdef Q_OS_MACOS
-#include <QProcess>
-#include <mach/mach.h>
-#include <mach/mach_host.h>
+    #include <mach/mach.h>
+    #include <mach/mach_host.h>
 #endif
 
 #ifdef Q_OS_LINUX
-#include <QProcess>
-#include <sys/statvfs.h>
+    #include <QProcess>
+
+    #include <sys/statvfs.h>
 #endif
 
+DiagnosticsProvider *DiagnosticsProvider::s_instance = nullptr;
+QtMessageHandler DiagnosticsProvider::s_previousHandler = nullptr;
 
-/**
- * @brief Construct a DiagnosticsProvider.
- * @param parent Parent QObject
- *
- * Initializes the uptime timer and starts periodic polling for system info (2s)
- * and CAN message rate calculation (1s).
- */
-DiagnosticsProvider::DiagnosticsProvider(QObject *parent)
-    : QObject(parent)
+void DiagnosticsProvider::qtMessageHandler(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
-    // Start uptime tracking
+    Q_UNUSED(context)
+
+    QString level;
+    switch (type) {
+    case QtDebugMsg:
+        level = QStringLiteral("DEBUG");
+        break;
+    case QtInfoMsg:
+        level = QStringLiteral("INFO");
+        break;
+    case QtWarningMsg:
+        level = QStringLiteral("WARN");
+        break;
+    case QtCriticalMsg:
+        level = QStringLiteral("ERROR");
+        break;
+    case QtFatalMsg:
+        level = QStringLiteral("FATAL");
+        break;
+    }
+
+    if (s_instance) {
+        QMetaObject::invokeMethod(s_instance, [=]() { s_instance->addLogMessage(level, msg); }, Qt::QueuedConnection);
+    }
+
+    if (s_previousHandler)
+        s_previousHandler(type, context, msg);
+    else
+        fprintf(stderr, "[%s] %s\n", level.toUtf8().constData(), msg.toUtf8().constData());
+}
+
+DiagnosticsProvider::DiagnosticsProvider(QObject *parent) : QObject(parent)
+{
+    s_instance = this;
+    s_previousHandler = qInstallMessageHandler(qtMessageHandler);
+
     m_uptimeTimer.start();
 
-    // System info polling every 2 seconds
     connect(&m_systemInfoTimer, &QTimer::timeout, this, &DiagnosticsProvider::updateSystemInfo);
     m_systemInfoTimer.start(2000);
 
-    // CAN rate calculation every 1 second
     connect(&m_canRateTimer, &QTimer::timeout, this, &DiagnosticsProvider::updateCanRate);
     m_canRateTimer.start(1000);
 
-    // Initial system info read
+    connect(&m_liveSensorTimer, &QTimer::timeout, this, &DiagnosticsProvider::refreshLiveSensorEntries);
+    m_liveSensorTimer.start(1000);
+
     updateSystemInfo();
 
     addLogMessage(QStringLiteral("INFO"), QStringLiteral("Diagnostics provider initialized"));
+}
+
+DiagnosticsProvider *DiagnosticsProvider::instance()
+{
+    return s_instance;
 }
 
 
@@ -67,9 +104,13 @@ void DiagnosticsProvider::setSensorRegistry(SensorRegistry *registry)
 {
     m_sensorRegistry = registry;
     if (m_sensorRegistry) {
-        connect(m_sensorRegistry, &SensorRegistry::sensorsChanged,
-                this, &DiagnosticsProvider::sensorDataChanged);
+        connect(m_sensorRegistry, &SensorRegistry::sensorsChanged, this, &DiagnosticsProvider::sensorDataChanged);
     }
+}
+
+void DiagnosticsProvider::setPropertyRouter(PropertyRouter *router)
+{
+    m_propertyRouter = router;
 }
 
 
@@ -79,11 +120,16 @@ void DiagnosticsProvider::setSensorRegistry(SensorRegistry *registry)
 
 /**
  * @brief Get the current CPU temperature.
- * @return Temperature in Celsius, or 0.0 if unavailable
+ * @return Temperature in Celsius; only meaningful when cpuTemperatureAvailable() is true
  */
 double DiagnosticsProvider::cpuTemperature() const
 {
     return m_cpuTemp;
+}
+
+bool DiagnosticsProvider::cpuTemperatureAvailable() const
+{
+    return m_cpuTempAvailable;
 }
 
 /**
@@ -290,16 +336,239 @@ int DiagnosticsProvider::totalSensorCount() const
 
 
 // ---------------------------------------------------------------------------
+// Live Sensor Table
+// ---------------------------------------------------------------------------
+
+QVariantList DiagnosticsProvider::liveSensorEntries() const
+{
+    return m_liveSensorEntries;
+}
+
+bool DiagnosticsProvider::showAllSensors() const
+{
+    return m_showAllSensors;
+}
+
+void DiagnosticsProvider::setShowAllSensors(bool showAll)
+{
+    if (m_showAllSensors != showAll) {
+        m_showAllSensors = showAll;
+        emit showAllSensorsChanged();
+        refreshLiveSensorEntries();
+    }
+}
+
+QString DiagnosticsProvider::displayTime() const
+{
+    QTime now = QTime::currentTime();
+    int h = now.hour();
+    int m = now.minute();
+    QString ampm = h >= 12 ? QStringLiteral("Pm") : QStringLiteral("Am");
+    h = h % 12;
+    if (h == 0)
+        h = 12;
+    return QStringLiteral("%1:%2 %3").arg(h).arg(m, 2, 10, QLatin1Char('0')).arg(ampm);
+}
+
+bool DiagnosticsProvider::pageVisible() const
+{
+    return m_pageVisible;
+}
+
+void DiagnosticsProvider::setPageVisible(bool visible)
+{
+    if (m_pageVisible == visible)
+        return;
+
+    m_pageVisible = visible;
+
+    if (m_pageVisible) {
+        if (!m_systemInfoTimer.isActive())
+            m_systemInfoTimer.start(2000);
+        if (!m_liveSensorTimer.isActive())
+            m_liveSensorTimer.start(1000);
+
+        updateSystemInfo();
+        refreshLiveSensorEntries();
+    } else {
+        m_systemInfoTimer.stop();
+        m_liveSensorTimer.stop();
+    }
+
+    emit pageVisibleChanged();
+}
+
+void DiagnosticsProvider::refreshLiveSensorEntries()
+{
+    if (!m_sensorRegistry || !m_propertyRouter)
+        return;
+
+    const QVariantList allSensors = m_sensorRegistry->availableSensors();
+    QVariantList entries;
+
+    for (const QVariant &v : allSensors) {
+        const QVariantMap sensor = v.toMap();
+        const QString key = sensor.value(QStringLiteral("key")).toString();
+        const bool active = sensor.value(QStringLiteral("active")).toBool();
+
+        if (!m_showAllSensors && !active)
+            continue;
+
+        double value = 0.0;
+        if (m_propertyRouter->hasProperty(key))
+            value = m_propertyRouter->getValue(key).toDouble();
+
+        QVariantMap entry;
+        entry[QStringLiteral("name")] = sensor.value(QStringLiteral("displayName"));
+        entry[QStringLiteral("source")] = sensor.value(QStringLiteral("category"));
+        entry[QStringLiteral("value")] = value;
+        entry[QStringLiteral("unit")] = sensor.value(QStringLiteral("unit"));
+        entry[QStringLiteral("active")] = active;
+        entries.append(entry);
+    }
+
+    m_liveSensorEntries = entries;
+    emit liveSensorEntriesChanged();
+}
+
+// -- CAN Frame Capture --
+
+void DiagnosticsProvider::recordCanFrame(quint32 id, const QByteArray &payload)
+{
+    if (!m_canCaptureEnabled)
+        return;
+
+    CapturedCanFrame frame;
+    frame.frameId = id;
+    frame.payload = payload;
+    frame.timestamp = QDateTime::currentMSecsSinceEpoch();
+
+    if (m_canFrameRing.size() < MAX_CAN_FRAMES) {
+        m_canFrameRing.append(frame);
+    } else {
+        m_canFrameRing[m_canFrameWritePos] = frame;
+        m_canFrameWritePos = (m_canFrameWritePos + 1) % MAX_CAN_FRAMES;
+    }
+    emit canFrameBufferChanged();
+}
+
+QVariantList DiagnosticsProvider::canFrameBuffer() const
+{
+    QVariantList result;
+    const quint32 filterVal = m_canIdFilter.isEmpty() ? 0 : m_canIdFilter.toUInt(nullptr, 16);
+
+    int count = m_canFrameRing.size();
+    for (int i = 0; i < count; ++i) {
+        int idx = (count < MAX_CAN_FRAMES) ? i : (m_canFrameWritePos + i) % MAX_CAN_FRAMES;
+        const auto &f = m_canFrameRing[idx];
+
+        if (!m_canIdFilter.isEmpty() && f.frameId != filterVal)
+            continue;
+
+        QVariantMap map;
+        map[QStringLiteral("timestamp")] = f.timestamp;
+        map[QStringLiteral("id")] = QStringLiteral("0x%1").arg(f.frameId, 0, 16).toUpper();
+        map[QStringLiteral("length")] = f.payload.size();
+
+        QStringList hexBytes;
+        for (int b = 0; b < f.payload.size(); ++b)
+            hexBytes.append(
+                QStringLiteral("%1").arg(static_cast<quint8>(f.payload[b]), 2, 16, QLatin1Char('0')).toUpper());
+        map[QStringLiteral("payload")] = hexBytes.join(QStringLiteral(" "));
+
+        QString ascii;
+        for (int b = 0; b < f.payload.size(); ++b) {
+            char c = f.payload[b];
+            ascii.append((c >= 32 && c <= 126) ? QChar(c) : QChar('.'));
+        }
+        map[QStringLiteral("ascii")] = ascii;
+        result.append(map);
+    }
+    return result;
+}
+
+bool DiagnosticsProvider::canCaptureEnabled() const
+{
+    return m_canCaptureEnabled;
+}
+
+void DiagnosticsProvider::setCanCaptureEnabled(bool enabled)
+{
+    if (m_canCaptureEnabled != enabled) {
+        m_canCaptureEnabled = enabled;
+        emit canCaptureEnabledChanged();
+    }
+}
+
+QString DiagnosticsProvider::canIdFilter() const
+{
+    return m_canIdFilter;
+}
+
+void DiagnosticsProvider::setCanIdFilter(const QString &filter)
+{
+    if (m_canIdFilter != filter) {
+        m_canIdFilter = filter;
+        emit canIdFilterChanged();
+        emit canFrameBufferChanged();
+    }
+}
+
+void DiagnosticsProvider::resetCanErrors()
+{
+    m_canErrorCount = 0;
+    emit canStatusChanged();
+}
+
+void DiagnosticsProvider::clearCanFrameBuffer()
+{
+    m_canFrameRing.clear();
+    m_canFrameWritePos = 0;
+    emit canFrameBufferChanged();
+}
+
+// ---------------------------------------------------------------------------
 // Log accessors
 // ---------------------------------------------------------------------------
 
-/**
- * @brief Get the log message buffer.
- * @return List of log strings, newest first
- */
 QStringList DiagnosticsProvider::logMessages() const
 {
     return m_logMessages;
+}
+
+QStringList DiagnosticsProvider::filteredLogMessages() const
+{
+    if (m_logLevel <= 0)
+        return m_logMessages;
+
+    QStringList filtered;
+    for (const auto &entry : m_logEntries) {
+        if (entry.level >= m_logLevel)
+            filtered.append(entry.text);
+    }
+    return filtered;
+}
+
+int DiagnosticsProvider::logLevel() const
+{
+    return m_logLevel;
+}
+
+void DiagnosticsProvider::setLogLevel(int level)
+{
+    if (m_logLevel != level) {
+        m_logLevel = level;
+        emit logLevelChanged();
+        emit logChanged();
+    }
+}
+
+void DiagnosticsProvider::rebuildLogCache()
+{
+    m_logMessages.clear();
+    m_logMessages.reserve(m_logEntries.size());
+    for (const auto &entry : m_logEntries)
+        m_logMessages.append(entry.text);
 }
 
 
@@ -320,22 +589,28 @@ QVariantList DiagnosticsProvider::getLiveSensorData() const
 {
     QVariantList result;
 
-    if (!m_sensorRegistry) {
+    if (!m_sensorRegistry)
         return result;
-    }
 
     const QVariantList sensors = m_sensorRegistry->availableSensors();
     for (const QVariant &v : sensors) {
         QVariantMap sensorMap = v.toMap();
+        QString key = sensorMap.value(QStringLiteral("key"), QString()).toString();
+
         QVariantMap entry;
-        entry[QStringLiteral("key")] = sensorMap.value(QStringLiteral("key"));
-        entry[QStringLiteral("displayName")] = sensorMap.value(QStringLiteral("displayName"));
-        entry[QStringLiteral("unit")] = sensorMap.value(QStringLiteral("unit"));
-        entry[QStringLiteral("source")] = sensorMap.value(QStringLiteral("source"));
-        entry[QStringLiteral("active")] = sensorMap.value(QStringLiteral("active"));
-        // TODO: Wire rawValue and calibratedValue via PropertyRouter when integration is complete
-        entry[QStringLiteral("rawValue")] = 0.0;
-        entry[QStringLiteral("calibratedValue")] = 0.0;
+        entry[QStringLiteral("key")] = key;
+        entry[QStringLiteral("displayName")] = sensorMap.value(QStringLiteral("displayName"), QString()).toString();
+        entry[QStringLiteral("unit")] = sensorMap.value(QStringLiteral("unit"), QString()).toString();
+        entry[QStringLiteral("source")] = sensorMap.value(QStringLiteral("source"), QString()).toString();
+
+        double rawValue = 0.0;
+        if (m_propertyRouter && !key.isEmpty() && m_propertyRouter->hasProperty(key)) {
+            QVariant val = m_propertyRouter->getValue(key);
+            rawValue = val.toDouble();
+        }
+        entry[QStringLiteral("rawValue")] = rawValue;
+        entry[QStringLiteral("calibratedValue")] = rawValue;
+        entry[QStringLiteral("active")] = sensorMap.value(QStringLiteral("active")).toBool();
         result.append(entry);
     }
 
@@ -355,15 +630,27 @@ QVariantList DiagnosticsProvider::getAnalogInputDiagnostics() const
     QVariantList result;
 
     for (int i = 0; i <= 10; ++i) {
+        QString rawKey = QStringLiteral("Analog%1").arg(i);
+        QString calcKey = QStringLiteral("AnalogCalc%1").arg(i);
+
+        double rawVoltage = 0.0;
+        double calibrated = 0.0;
+
+        if (m_propertyRouter) {
+            if (m_propertyRouter->hasProperty(rawKey))
+                rawVoltage = m_propertyRouter->getValue(rawKey).toDouble();
+            if (m_propertyRouter->hasProperty(calcKey))
+                calibrated = m_propertyRouter->getValue(calcKey).toDouble();
+        }
+
         QVariantMap entry;
         entry[QStringLiteral("channel")] = i;
-        entry[QStringLiteral("label")] = QStringLiteral("Analog%1").arg(i);
-        // TODO: Wire rawVoltage from AnalogInputs model when integration is complete
-        entry[QStringLiteral("rawVoltage")] = 0.0;
-        entry[QStringLiteral("calibratedValue")] = 0.0;
+        entry[QStringLiteral("label")] = rawKey;
+        entry[QStringLiteral("rawVoltage")] = rawVoltage;
+        entry[QStringLiteral("calibratedValue")] = calibrated;
         entry[QStringLiteral("presetName")] = QString();
         entry[QStringLiteral("unit")] = QStringLiteral("V");
-        entry[QStringLiteral("configured")] = false;
+        entry[QStringLiteral("configured")] = (qAbs(rawVoltage) > 0.001 || qAbs(calibrated) > 0.001);
         result.append(entry);
     }
 
@@ -383,12 +670,17 @@ QVariantList DiagnosticsProvider::getDigitalInputDiagnostics() const
     QVariantList result;
 
     for (int i = 1; i <= 7; ++i) {
+        QString key = QStringLiteral("DigitalInput%1").arg(i);
+
+        bool state = false;
+        if (m_propertyRouter && m_propertyRouter->hasProperty(key))
+            state = m_propertyRouter->getValue(key).toBool();
+
         QVariantMap entry;
         entry[QStringLiteral("channel")] = i;
-        entry[QStringLiteral("label")] = QStringLiteral("DigitalInput%1").arg(i);
-        // TODO: Wire state from DigitalInputs model when integration is complete
-        entry[QStringLiteral("state")] = false;
-        entry[QStringLiteral("configured")] = false;
+        entry[QStringLiteral("label")] = key;
+        entry[QStringLiteral("state")] = state;
+        entry[QStringLiteral("configured")] = state;
         result.append(entry);
     }
 
@@ -408,15 +700,27 @@ QVariantList DiagnosticsProvider::getExpanderBoardDiagnostics() const
     QVariantList result;
 
     for (int i = 0; i <= 7; ++i) {
+        QString rawKey = QStringLiteral("EXAnalogInput%1").arg(i);
+        QString calcKey = QStringLiteral("EXAnalogCalc%1").arg(i);
+
+        double rawVoltage = 0.0;
+        double calibrated = 0.0;
+
+        if (m_propertyRouter) {
+            if (m_propertyRouter->hasProperty(rawKey))
+                rawVoltage = m_propertyRouter->getValue(rawKey).toDouble();
+            if (m_propertyRouter->hasProperty(calcKey))
+                calibrated = m_propertyRouter->getValue(calcKey).toDouble();
+        }
+
         QVariantMap entry;
         entry[QStringLiteral("channel")] = i;
-        entry[QStringLiteral("label")] = QStringLiteral("EXAnalogInput%1").arg(i);
-        // TODO: Wire rawVoltage from ExpanderBoardData model when integration is complete
-        entry[QStringLiteral("rawVoltage")] = 0.0;
-        entry[QStringLiteral("calibratedValue")] = 0.0;
+        entry[QStringLiteral("label")] = rawKey;
+        entry[QStringLiteral("rawVoltage")] = rawVoltage;
+        entry[QStringLiteral("calibratedValue")] = calibrated;
         entry[QStringLiteral("presetName")] = QString();
         entry[QStringLiteral("unit")] = QStringLiteral("V");
-        entry[QStringLiteral("configured")] = false;
+        entry[QStringLiteral("configured")] = (qAbs(rawVoltage) > 0.001 || qAbs(calibrated) > 0.001);
         result.append(entry);
     }
 
@@ -436,47 +740,53 @@ QVariantList DiagnosticsProvider::getExtenderDigitalDiagnostics() const
     QVariantList result;
 
     for (int i = 1; i <= 8; ++i) {
+        QString key = QStringLiteral("EXDigitalInput%1").arg(i);
+
+        bool state = false;
+        if (m_propertyRouter && m_propertyRouter->hasProperty(key))
+            state = m_propertyRouter->getValue(key).toBool();
+
         QVariantMap entry;
         entry[QStringLiteral("channel")] = i;
-        entry[QStringLiteral("label")] = QStringLiteral("EXDigitalInput%1").arg(i);
-        // TODO: Wire state from ExpanderBoardData model when integration is complete
-        entry[QStringLiteral("state")] = false;
-        entry[QStringLiteral("configured")] = false;
+        entry[QStringLiteral("label")] = key;
+        entry[QStringLiteral("state")] = state;
+        entry[QStringLiteral("configured")] = state;
         result.append(entry);
     }
 
     return result;
 }
 
-/**
- * @brief Add a log message to the circular buffer.
- * @param level Log level: "INFO", "WARN", "ERROR"
- * @param message The log message text
- *
- * Prepends a timestamped entry "[HH:mm:ss] [LEVEL] message" to the buffer.
- * If the buffer exceeds MAX_LOG_ENTRIES, the oldest entry is removed.
- */
 void DiagnosticsProvider::addLogMessage(const QString &level, const QString &message)
 {
+    int levelInt = 1;
+    if (level == QLatin1String("DEBUG"))
+        levelInt = 0;
+    else if (level == QLatin1String("INFO"))
+        levelInt = 1;
+    else if (level == QLatin1String("WARN"))
+        levelInt = 2;
+    else if (level == QLatin1String("ERROR") || level == QLatin1String("FATAL"))
+        levelInt = 3;
+
     QString timestamp = QDateTime::currentDateTime().toString(QStringLiteral("hh:mm:ss"));
-    QString entry = QStringLiteral("[%1] [%2] %3").arg(timestamp, level, message);
+    QString text = QStringLiteral("[%1] [%2] %3").arg(timestamp, level, message);
 
-    m_logMessages.prepend(entry);
+    LogEntry entry{levelInt, text};
+    m_logEntries.prepend(entry);
+    m_logMessages.prepend(text);
 
-    while (m_logMessages.size() > MAX_LOG_ENTRIES) {
+    while (m_logEntries.size() > MAX_LOG_ENTRIES) {
+        m_logEntries.removeLast();
         m_logMessages.removeLast();
     }
 
     emit logChanged();
 }
 
-/**
- * @brief Clear the log buffer.
- *
- * Removes all entries and emits logChanged.
- */
 void DiagnosticsProvider::clearLog()
 {
+    m_logEntries.clear();
     m_logMessages.clear();
     emit logChanged();
 }
@@ -508,8 +818,7 @@ void DiagnosticsProvider::recordCanMessage()
 void DiagnosticsProvider::recordCanError()
 {
     ++m_canErrorCount;
-    addLogMessage(QStringLiteral("ERROR"),
-                  QStringLiteral("CAN error #%1").arg(m_canErrorCount));
+    addLogMessage(QStringLiteral("ERROR"), QStringLiteral("CAN error #%1").arg(m_canErrorCount));
     emit canStatusChanged();
 }
 
@@ -526,8 +835,7 @@ void DiagnosticsProvider::setCanStatus(bool connected, const QString &daemon)
         m_canConnected = connected;
         m_daemonName = daemon;
         if (connected) {
-            addLogMessage(QStringLiteral("INFO"),
-                          QStringLiteral("CAN connected (daemon: %1)").arg(daemon));
+            addLogMessage(QStringLiteral("INFO"), QStringLiteral("CAN connected (daemon: %1)").arg(daemon));
         } else {
             m_lastCanMsgTimeValid = false;
             addLogMessage(QStringLiteral("WARN"), QStringLiteral("CAN disconnected"));
@@ -545,8 +853,7 @@ void DiagnosticsProvider::setCanStatus(bool connected, const QString &daemon)
  *
  * Updates all connection fields and emits connectionChanged.
  */
-void DiagnosticsProvider::setConnectionInfo(bool connected, const QString &port,
-                                            int baudRate, const QString &type)
+void DiagnosticsProvider::setConnectionInfo(bool connected, const QString &port, int baudRate, const QString &type)
 {
     m_serialConnected = connected;
     m_serialPort = port;
@@ -567,7 +874,9 @@ void DiagnosticsProvider::setConnectionInfo(bool connected, const QString &port,
  */
 void DiagnosticsProvider::updateSystemInfo()
 {
-    m_cpuTemp = readCpuTemperature();
+    bool tempAvail = false;
+    m_cpuTemp = readCpuTemperature(tempAvail);
+    m_cpuTempAvailable = tempAvail;
     m_memoryUsage = readMemoryUsage();
     m_cpuLoadAvg = readCpuLoadAverage();
     m_diskUsage = readDiskUsage();
@@ -599,13 +908,15 @@ void DiagnosticsProvider::updateCanRate()
  *
  * On Linux (Raspberry Pi): reads /sys/class/thermal/thermal_zone0/temp
  * and divides by 1000 to get Celsius.
- * On macOS: attempts sysctl but typically returns 0.0 as macOS does not
- * expose CPU temperature through standard APIs.
+ * On all other platforms: no reliable thermal API exists; returns 0.0
+ * and sets available=false.
  *
+ * @param[out] available Set to true only when a real Celsius reading was obtained
  * @return Temperature in Celsius, or 0.0 if unavailable
  */
-double DiagnosticsProvider::readCpuTemperature() const
+double DiagnosticsProvider::readCpuTemperature(bool &available) const
 {
+    available = false;
 #ifdef Q_OS_LINUX
     QFile tempFile(QStringLiteral("/sys/class/thermal/thermal_zone0/temp"));
     if (tempFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
@@ -616,25 +927,8 @@ double DiagnosticsProvider::readCpuTemperature() const
         bool ok = false;
         double milliCelsius = line.toDouble(&ok);
         if (ok) {
+            available = true;
             return milliCelsius / 1000.0;
-        }
-    }
-    return 0.0;
-#elif defined(Q_OS_MACOS)
-    // macOS does not expose CPU temperature via standard APIs.
-    // sysctl machdep.xcpm.cpu_thermal_level returns a level, not temperature.
-    // Return 0.0 as a placeholder.
-    QProcess proc;
-    proc.start(QStringLiteral("sysctl"), QStringList() << QStringLiteral("-n") << QStringLiteral("machdep.xcpm.cpu_thermal_level"));
-    proc.waitForFinished(500);
-    if (proc.exitCode() == 0) {
-        QString output = QString::fromUtf8(proc.readAllStandardOutput()).trimmed();
-        bool ok = false;
-        double level = output.toDouble(&ok);
-        if (ok) {
-            // This is a thermal level (0-100), not actual temperature
-            // Return as-is for diagnostic display
-            return level;
         }
     }
     return 0.0;
@@ -697,9 +991,7 @@ double DiagnosticsProvider::readMemoryUsage() const
     vm_statistics64_data_t vmStats;
     mach_msg_type_number_t count = HOST_VM_INFO64_COUNT;
 
-    kern_return_t result = host_statistics64(host, HOST_VM_INFO64,
-                                             reinterpret_cast<host_info64_t>(&vmStats),
-                                             &count);
+    kern_return_t result = host_statistics64(host, HOST_VM_INFO64, reinterpret_cast<host_info64_t>(&vmStats), &count);
     if (result != KERN_SUCCESS) {
         return 0.0;
     }
@@ -740,7 +1032,8 @@ double DiagnosticsProvider::readCpuLoadAverage() const
         if (!parts.isEmpty()) {
             bool ok = false;
             double avg1 = parts.at(0).toDouble(&ok);
-            if (ok) return avg1;
+            if (ok)
+                return avg1;
         }
     }
     return 0.0;
@@ -783,12 +1076,19 @@ void DiagnosticsProvider::readMemoryAbsolute(double &usedMB, double &totalMB) co
         QString line = in.readLine();
         if (line.startsWith(QStringLiteral("MemTotal:"))) {
             QStringList parts = line.split(QRegularExpression(QStringLiteral("\\s+")));
-            if (parts.size() >= 2) { memTotalKB = parts.at(1).toDouble(); foundTotal = true; }
+            if (parts.size() >= 2) {
+                memTotalKB = parts.at(1).toDouble();
+                foundTotal = true;
+            }
         } else if (line.startsWith(QStringLiteral("MemAvailable:"))) {
             QStringList parts = line.split(QRegularExpression(QStringLiteral("\\s+")));
-            if (parts.size() >= 2) { memAvailKB = parts.at(1).toDouble(); foundAvail = true; }
+            if (parts.size() >= 2) {
+                memAvailKB = parts.at(1).toDouble();
+                foundAvail = true;
+            }
         }
-        if (foundTotal && foundAvail) break;
+        if (foundTotal && foundAvail)
+            break;
     }
     memFile.close();
     totalMB = memTotalKB / 1024.0;
@@ -797,9 +1097,12 @@ void DiagnosticsProvider::readMemoryAbsolute(double &usedMB, double &totalMB) co
     mach_port_t host = mach_host_self();
     vm_statistics64_data_t vmStats;
     mach_msg_type_number_t count = HOST_VM_INFO64_COUNT;
-    kern_return_t result = host_statistics64(host, HOST_VM_INFO64,
-                                             reinterpret_cast<host_info64_t>(&vmStats), &count);
-    if (result != KERN_SUCCESS) { usedMB = 0.0; totalMB = 0.0; return; }
+    kern_return_t result = host_statistics64(host, HOST_VM_INFO64, reinterpret_cast<host_info64_t>(&vmStats), &count);
+    if (result != KERN_SUCCESS) {
+        usedMB = 0.0;
+        totalMB = 0.0;
+        return;
+    }
     vm_size_t pageSize = 0;
     host_page_size(host, &pageSize);
     uint64_t active = static_cast<uint64_t>(vmStats.active_count) * pageSize;

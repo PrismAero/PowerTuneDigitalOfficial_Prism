@@ -19,9 +19,8 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
-# * Find Qt packages - supports both Qt5 and Qt6
-find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS
+# * Find Qt 6 packages
+find_package(Qt6 REQUIRED COMPONENTS
     Core
     Gui
     Qml
@@ -31,26 +30,11 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS
     SerialBus
 )
 
-# * Qt6-specific: Qt5Compat for GraphicalEffects and other Qt5 modules
-if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
-    find_package(Qt6 COMPONENTS Core5Compat QUIET)
-    if(Qt6Core5Compat_FOUND)
-        set(Qt6Qt5Compat_FOUND TRUE)
-        message(STATUS "Qt5Compat (Core5Compat) found - GraphicalEffects available")
-    else()
-        message(WARNING "Qt5Compat not found - some graphical effects may not work")
-    endif()
-    
-    # * ShaderTools for Qt6 effects
-    find_package(Qt6 COMPONENTS ShaderTools QUIET)
-endif()
+# * Optional ShaderTools - kept available for future Qt 6 effects
+find_package(Qt6 COMPONENTS ShaderTools QUIET)
 
-# * Optional: ddcutil support (Linux display brightness control)
-option(FORCE_DDCUTIL "Force enable ddcutil support for DDC/CI brightness control" OFF)
-if(FORCE_DDCUTIL OR EXISTS "/usr/lib/libddcutil.so.4")
-    add_compile_definitions(HAVE_DDCUTIL)
-    message(STATUS "DDC/CI brightness control enabled (ddcutil)")
-endif()
+# Brightness control is detected at runtime via Connect::checkifraspberrypi().
+# ddcutil (or sysfs backlight) presence is probed on startup -- no compile-time flag needed.
 
 # * Source files - Core
 set(CORE_SOURCES
@@ -60,6 +44,10 @@ set(CORE_SOURCES
     Core/PropertyRouter.cpp
     Core/SensorRegistry.cpp
     Core/DiagnosticsProvider.cpp
+    Core/ExBoardConfigManager.cpp
+    Core/ScreenControlService.cpp
+    Core/DashboardLockService.cpp
+    Core/OverlayConfigDefaults.cpp
     Core/Models/UIState.cpp
     Core/Models/EngineData.cpp
     Core/Models/VehicleData.cpp
@@ -73,6 +61,7 @@ set(CORE_SOURCES
     Core/Models/SensorData.cpp
     Core/Models/ConnectionData.cpp
     Core/Models/SettingsData.cpp
+    Core/Models/CanFrameModel.cpp
 )
 
 set(CORE_HEADERS
@@ -82,6 +71,10 @@ set(CORE_HEADERS
     Core/PropertyRouter.h
     Core/SensorRegistry.h
     Core/DiagnosticsProvider.h
+    Core/ExBoardConfigManager.h
+    Core/ScreenControlService.h
+    Core/DashboardLockService.h
+    Core/OverlayConfigDefaults.h
     Core/Models/UIState.h
     Core/Models/DataModels.h
     Core/Models/EngineData.h
@@ -96,6 +89,7 @@ set(CORE_HEADERS
     Core/Models/SensorData.h
     Core/Models/ConnectionData.h
     Core/Models/SettingsData.h
+    Core/Models/CanFrameModel.h
 )
 
 # * Source files - Hardware interfaces
@@ -119,6 +113,8 @@ set(UTILS_SOURCES
     Utils/shcalc.cpp
     Utils/textprogressbar.cpp
     Utils/UDPReceiver.cpp
+    Utils/OverlayConfigManager.cpp
+    Utils/ShiftIndicatorHelper.cpp
     Utils/wifiscanner.cpp
 )
 
@@ -133,6 +129,8 @@ set(UTILS_HEADERS
     Utils/shcalc.h
     Utils/textprogressbar.h
     Utils/UDPReceiver.h
+    Utils/OverlayConfigManager.h
+    Utils/ShiftIndicatorHelper.h
     Utils/wifiscanner.h
 )
 
@@ -150,26 +148,12 @@ set(PROJECT_HEADERS
     ${UTILS_HEADERS}
 )
 
-# * QML Resource file
-set(QML_RESOURCES
-    qml.qrc
-)
-
 # * Create executable
-if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
-    qt_add_executable(${PROJECT_NAME}
-        MANUAL_FINALIZATION
-        ${PROJECT_SOURCES}
-        ${PROJECT_HEADERS}
-        ${QML_RESOURCES}
-    )
-else()
-    add_executable(${PROJECT_NAME}
-        ${PROJECT_SOURCES}
-        ${PROJECT_HEADERS}
-        ${QML_RESOURCES}
-    )
-endif()
+qt_add_executable(${PROJECT_NAME}
+    MANUAL_FINALIZATION
+    ${PROJECT_SOURCES}
+    ${PROJECT_HEADERS}
+)
 
 # * Include directories
 target_include_directories(${PROJECT_NAME} PRIVATE
@@ -181,45 +165,30 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 
 # * Link Qt libraries
 target_link_libraries(${PROJECT_NAME} PRIVATE
-    Qt${QT_VERSION_MAJOR}::Core
-    Qt${QT_VERSION_MAJOR}::Gui
-    Qt${QT_VERSION_MAJOR}::Qml
-    Qt${QT_VERSION_MAJOR}::Quick
-    Qt${QT_VERSION_MAJOR}::QuickControls2
-    Qt${QT_VERSION_MAJOR}::Network
-    Qt${QT_VERSION_MAJOR}::SerialBus
+    Qt6::Core
+    Qt6::Gui
+    Qt6::Qml
+    Qt6::Quick
+    Qt6::QuickControls2
+    Qt6::Network
+    Qt6::SerialBus
 )
 
-# * Link Qt5Compat for GraphicalEffects (Qt6 only)
-if(${QT_VERSION_MAJOR} GREATER_EQUAL 6 AND Qt6Qt5Compat_FOUND)
-    target_link_libraries(${PROJECT_NAME} PRIVATE
-        Qt6::Core5Compat
-    )
-endif()
-
-# * PowerTune QML Sub-Modules (Qt6 only)
+# * PowerTune QML Sub-Modules
 # * Provides organized imports: PowerTune.Core, PowerTune.Settings, PowerTune.Gauges, PowerTune.Utils
-if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
-    # * Suppress Qt policy warning about qmldir files
-    qt_policy(SET QTP0004 OLD)
+qt_policy(SET QTP0004 OLD)
     
     # * Define singletons
     set_source_files_properties(PowerTune/Utils/Translator.qml PROPERTIES
         QT_QML_SINGLETON_TYPE TRUE
     )
-    set_source_files_properties(PowerTune/Gauges/Shared/GaugeFactory.qml PROPERTIES
-        QT_QML_SINGLETON_TYPE TRUE
-    )
-    set_source_files_properties(PowerTune/Gauges/Shared/DatasourceService.qml PROPERTIES
-        QT_QML_SINGLETON_TYPE TRUE
-    )
-    set_source_files_properties(PowerTune/Gauges/Shared/GaugeTheme.qml PROPERTIES
-        QT_QML_SINGLETON_TYPE TRUE
-    )
-    set_source_files_properties(PowerTune/UI/Theme.qml PROPERTIES
-        QT_QML_SINGLETON_TYPE TRUE
-    )
     set_source_files_properties(PowerTune/Dashboard/DashboardTheme.qml PROPERTIES
+        QT_QML_SINGLETON_TYPE TRUE
+    )
+    set_source_files_properties(PowerTune/Settings/components/SettingsTheme.qml PROPERTIES
+        QT_QML_SINGLETON_TYPE TRUE
+    )
+    set_source_files_properties(Prism/Keyboard/KeyboardTheme.qml PROPERTIES
         QT_QML_SINGLETON_TYPE TRUE
     )
     
@@ -228,12 +197,11 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_library(PowerTuneCoreLib STATIC)
     qt_add_library(PowerTuneUiLib STATIC)
     qt_add_library(PowerTuneSettingsLib STATIC)
-    qt_add_library(GaugesCoreLib STATIC)
-    qt_add_library(GaugesStylesLib STATIC)
-    qt_add_library(GaugesWidgetsLib STATIC)
     qt_add_library(GaugesSharedLib STATIC)
+    qt_add_library(GaugesRaceDashLib STATIC)
     qt_add_library(PrismPTDashboardLib STATIC)
     qt_add_library(PrismKeyboardLib STATIC)
+
     
     # * PowerTune.Utils module - Translator singleton and icon utilities
     qt_add_qml_module(PowerTuneUtilsLib
@@ -255,9 +223,8 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         QML_FILES
             PowerTune/Core/Main.qml
             PowerTune/Core/Intro.qml
-            PowerTune/Core/SerialSettings.qml
+            PowerTune/Core/SettingsManager.qml
             PowerTune/Core/ExBoardAnalog.qml
-            PowerTune/Core/AnalogInputs.qml
             PowerTune/Core/BrightnessPopUp.qml
         RESOURCE_PREFIX /qt/qml
         OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/qt/qml/PowerTune/Core
@@ -268,7 +235,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         URI PowerTune.UI
         VERSION 1.0
         QML_FILES
-            PowerTune/UI/Theme.qml
+            PowerTune/Settings/components/SettingsTheme.qml
             PowerTune/Settings/components/SettingsPage.qml
             PowerTune/Settings/components/SettingsSection.qml
             PowerTune/Settings/components/SettingsRow.qml
@@ -277,7 +244,10 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
             PowerTune/Settings/components/StyledSwitch.qml
             PowerTune/Settings/components/StyledTextField.qml
             PowerTune/Settings/components/StyledCheckBox.qml
+            PowerTune/Settings/components/StyledSpinBox.qml
+            PowerTune/Settings/components/StyledColorPicker.qml
             PowerTune/Settings/components/ConnectionStatusIndicator.qml
+            PowerTune/Settings/components/SensorPicker.qml
         RESOURCE_PREFIX /qt/qml
         OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/qt/qml/PowerTune/UI
     )
@@ -288,14 +258,9 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         VERSION 1.0
         QML_FILES
             PowerTune/Settings/MainSettings.qml
+            PowerTune/Settings/DisplaySettings.qml
             PowerTune/Settings/DashSelector.qml
             PowerTune/Settings/DashSelectorWidget.qml
-            PowerTune/Settings/SenseHatSettings.qml
-            PowerTune/Settings/WarnGearSettings.qml
-            PowerTune/Settings/SpeedSettings.qml
-            PowerTune/Settings/AnalogSettings.qml
-            PowerTune/Settings/RPMSettings.qml
-            PowerTune/Settings/StartupSettings.qml
             PowerTune/Settings/VehicleRPMSettings.qml
             PowerTune/Settings/NetworkSettings.qml
             PowerTune/Settings/CanMonitor.qml
@@ -306,89 +271,61 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/qt/qml/PowerTune/Settings
     )
     
-    # * PowerTune.Gauges.Core module - Base gauge primitives
-    qt_add_qml_module(GaugesCoreLib
-        URI PowerTune.Gauges.Core
-        VERSION 1.0
-        QML_FILES
-            PowerTune/Gauges/Core/CircularGauge.qml
-            PowerTune/Gauges/Core/CircularGaugeStyle.qml
-            PowerTune/Gauges/Core/Gauge.qml
-            PowerTune/Gauges/Core/GaugeStyle.qml
-        RESOURCE_PREFIX /qt/qml
-        OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/qt/qml/PowerTune/Gauges/Core
-    )
-    
-    # * PowerTune.Gauges.Styles module - Gauge visual styles
-    qt_add_qml_module(GaugesStylesLib
-        URI PowerTune.Gauges.Styles
-        VERSION 1.0
-        QML_FILES
-            PowerTune/Gauges/Styles/DashboardGaugeStyle.qml
-            PowerTune/Gauges/Styles/NormalGaugeStyle.qml
-            PowerTune/Gauges/Styles/TachometerStyle.qml
-            PowerTune/Gauges/Styles/RPMBarStyle1.qml
-            PowerTune/Gauges/Styles/AiMGaugeStyle.qml
-        RESOURCE_PREFIX /qt/qml
-        OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/qt/qml/PowerTune/Gauges/Styles
-    )
-    
-    # * PowerTune.Gauges.Widgets module - User-facing gauge widgets
-    qt_add_qml_module(GaugesWidgetsLib
-        URI PowerTune.Gauges.Widgets
-        VERSION 1.0
-        QML_FILES
-            PowerTune/Gauges/Widgets/RoundGauge.qml
-            PowerTune/Gauges/Widgets/SquareGauge.qml
-            PowerTune/Gauges/Widgets/BarGauge.qml
-            PowerTune/Gauges/Widgets/RPMBar.qml
-            PowerTune/Gauges/Widgets/ShiftLights.qml
-            PowerTune/Gauges/Widgets/NumericCell.qml
-            PowerTune/Gauges/Widgets/GearIndicator.qml
-            PowerTune/Gauges/Widgets/ModernRoundGauge.qml
-            PowerTune/Gauges/Widgets/AiMArcGauge.qml
-            PowerTune/Gauges/Widgets/MyTextLabel.qml
-            PowerTune/Gauges/Widgets/AiMSpeedTach.qml
-            PowerTune/Gauges/Widgets/AiMGearIndicator.qml
-            PowerTune/Gauges/Widgets/AiMInfoCell.qml
-            PowerTune/Gauges/Widgets/AiMStatusBar.qml
-        RESOURCE_PREFIX /qt/qml
-        OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/qt/qml/PowerTune/Gauges/Widgets
-    )
-    
-    # * PowerTune.Gauges.Shared module - Shared helpers, factories, singletons
+    # * PowerTune.Gauges.Shared module - Shared helpers, datasources, singletons
     qt_add_qml_module(GaugesSharedLib
         URI PowerTune.Gauges.Shared
         VERSION 1.0
         QML_FILES
-            PowerTune/Gauges/Shared/ColorList.qml
-            PowerTune/Gauges/Shared/DatasourcesList.qml
-            PowerTune/Gauges/Shared/DatasourceService.qml
-            PowerTune/Gauges/Shared/GaugeFactory.qml
             PowerTune/Gauges/Shared/Warning.qml
             PowerTune/Gauges/Shared/WarningLoader.qml
-            PowerTune/Gauges/Shared/GaugeMouseHandler.qml
-            PowerTune/Gauges/Shared/NumericStepper.qml
-            PowerTune/Gauges/Shared/ColorComboBox.qml
-            PowerTune/Gauges/Shared/DatasourceComboBox.qml
-            PowerTune/Gauges/Shared/FontComboBox.qml
-            PowerTune/Gauges/Shared/GaugeConfigMenu.qml
-            PowerTune/Gauges/Shared/GaugeTheme.qml
+            PowerTune/Gauges/Shared/WarningFlashTimer.qml
         RESOURCE_PREFIX /qt/qml
         OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/qt/qml/PowerTune/Gauges/Shared
+    )
+
+    # * PowerTune.Gauges.RaceDash module - Race dash live widgets
+    qt_add_qml_module(GaugesRaceDashLib
+        URI PowerTune.Gauges.RaceDash
+        VERSION 1.0
+        IMPORTS PowerTune.UI PowerTune.Gauges.Shared
+        SOURCES
+            PowerTune/Gauges/RaceDash/geohelpers/RaceArcItem.cpp
+            PowerTune/Gauges/RaceDash/geohelpers/RaceArcItem.h
+        QML_FILES
+            PowerTune/Gauges/RaceDash/ArcGauge.qml
+            PowerTune/Gauges/RaceDash/ArcAlertMarker.qml
+            PowerTune/Gauges/RaceDash/GaugeReadout.qml
+            PowerTune/Gauges/RaceDash/ShiftIndicator.qml
+            PowerTune/Gauges/RaceDash/SensorCard.qml
+            PowerTune/Gauges/RaceDash/StatusBox.qml
+            PowerTune/Gauges/RaceDash/BrakeBiasBar.qml
+            PowerTune/Gauges/RaceDash/BottomStatusBar.qml
+            PowerTune/Gauges/RaceDash/GearIndicator.qml
+            PowerTune/Gauges/RaceDash/TachCluster.qml
+            PowerTune/Gauges/RaceDash/SpeedCluster.qml
+        RESOURCE_PREFIX /qt/qml
+        OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/qt/qml/PowerTune/Gauges/RaceDash
+    )
+    target_link_libraries(GaugesRaceDashLib PRIVATE
+        Qt6::Gui
+        Qt6::Qml
+        Qt6::Quick
+    )
+    target_include_directories(GaugesRaceDashLib PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/PowerTune/Gauges/RaceDash/geohelpers
     )
     
     # * PrismPT.Dashboard module - User dashboard canvas and panels
     qt_add_qml_module(PrismPTDashboardLib
         URI PrismPT.Dashboard
         VERSION 1.0
+        IMPORTS PowerTune.UI PowerTune.Gauges.Shared PowerTune.Gauges.RaceDash
         QML_FILES
             PowerTune/Dashboard/DashboardTheme.qml
             PowerTune/Dashboard/UserDashboard.qml
-            PowerTune/Dashboard/GaugeCreationMenu.qml
-            PowerTune/Dashboard/ColorSelectionPanel.qml
-            PowerTune/Dashboard/BackgroundSettingsPanel.qml
-            PowerTune/Dashboard/AiMRaceDash.qml
+            PowerTune/Dashboard/RaceDash.qml
+            PowerTune/Dashboard/DraggableOverlay.qml
+            PowerTune/Dashboard/OverlayConfigPopup.qml
         RESOURCE_PREFIX /qt/qml
         OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/qt/qml/PrismPT/Dashboard
     )
@@ -398,6 +335,8 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         URI Prism.Keyboard
         VERSION 1.0
         QML_FILES
+            Prism/Keyboard/KeyboardTheme.qml
+            Prism/Keyboard/KeyIcon.qml
             Prism/Keyboard/KeyButton.qml
             Prism/Keyboard/NumericPad.qml
             Prism/Keyboard/QwertyLayout.qml
@@ -406,20 +345,86 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/qt/qml/Prism/Keyboard
     )
     
+    # * Static assets (graphics, fonts) - embedded directly into the executable
+    qt_add_resources(${PROJECT_NAME} "resources"
+        PREFIX /
+        FILES
+            Resources/fonts/MaterialSymbolsOutlined.ttf
+            Resources/fonts/HyperspaceRaceVariable.otf
+            Resources/fonts/Lato-Regular.ttf
+            Resources/fonts/Lato-Bold.ttf
+            Resources/fonts/Lato-Italic.ttf
+            Resources/fonts/Lato-BoldItalic.ttf
+            Resources/fonts/Lato-Light.ttf
+            Resources/fonts/Lato-LightItalic.ttf
+            Resources/fonts/Lato-Thin.ttf
+            Resources/fonts/Lato-ThinItalic.ttf
+            Resources/fonts/Lato-Black.ttf
+            Resources/fonts/Lato-BlackItalic.ttf
+            Resources/fonts/JetBrainsMono-Regular.ttf
+            Resources/graphics/Logo.png
+            Resources/graphics/brightness.png
+            Resources/graphics/brightnessIncrease.png
+            Resources/graphics/brightnessDecrease.png
+            Resources/graphics/contactQR.png
+            Resources/graphics/facebookQR.png
+            Resources/graphics/instagramQR.png
+            Resources/graphics/userManualQR.png
+            Resources/graphics/warrantyQR.png
+            Resources/graphics/Tacho_Mitte.png
+            Resources/graphics/vertrevcanvas.png
+            Resources/graphics/next.png
+            Resources/graphics/pause.png
+            Resources/graphics/play.png
+            Resources/graphics/previous.png
+            Resources/graphics/ledgreen.png
+            Resources/graphics/ledoff.png
+            Resources/graphics/ledred.png
+            Resources/graphics/ledyellow.png
+            Resources/graphics/RPM_BG.png
+            Resources/graphics/RPM_Fill.png
+            Resources/graphics/empty.png
+            Resources/graphics/fill.png
+            Resources/graphics/fueltechempty.png
+            Resources/graphics/fueltechfill.png
+            Resources/graphics/Racedash.png
+            Resources/graphics/Racedash800x480.png
+            Resources/graphics/Racedash_AiM.png
+            Resources/graphics/needle.svg
+            Resources/graphics/RoungGaugeRing.png
+            Resources/graphics/green_Light.png
+            Resources/graphics/Indicator_left.png
+            Resources/graphics/Indicator_left_off.png
+            Resources/graphics/Indicator_right.png
+            Resources/graphics/Indicator_right_off.png
+            Resources/graphics/MainDash.png
+            Resources/graphics/MainDashBlue.png
+            Resources/graphics/MainDashnew.png
+            Resources/graphics/SelectStategif.png
+            Resources/graphics/StateGIF.gif
+            Resources/graphics/rotary.gif
+            Resources/graphics/selectStateImage.png
+            Resources/graphics/slectImage.png
+            Resources/graphics/test.png
+            Resources/graphics/Flags/ae.png
+            Resources/graphics/Flags/de.png
+            Resources/graphics/Flags/es.png
+            Resources/graphics/Flags/fr.png
+            Resources/graphics/Flags/jp.png
+            Resources/graphics/Flags/us.png
+    )
+
     # * Link all QML modules to main executable
     target_link_libraries(${PROJECT_NAME} PRIVATE
         PowerTuneUtilsLibplugin
         PowerTuneCoreLibplugin
         PowerTuneUiLibplugin
         PowerTuneSettingsLibplugin
-        GaugesCoreLibplugin
-        GaugesStylesLibplugin
-        GaugesWidgetsLibplugin
         GaugesSharedLibplugin
+        GaugesRaceDashLibplugin
         PrismPTDashboardLibplugin
         PrismKeyboardLibplugin
     )
-endif()
 
 # * QML Import paths for Qt Creator and Qt Design Studio
 set(QML_IMPORT_PATH
@@ -427,10 +432,8 @@ set(QML_IMPORT_PATH
     "${CMAKE_CURRENT_SOURCE_DIR}/PowerTune/Core"
     "${CMAKE_CURRENT_SOURCE_DIR}/PowerTune/Settings"
     "${CMAKE_CURRENT_SOURCE_DIR}/PowerTune/UI"
-    "${CMAKE_CURRENT_SOURCE_DIR}/PowerTune/Gauges/Core"
-    "${CMAKE_CURRENT_SOURCE_DIR}/PowerTune/Gauges/Styles"
-    "${CMAKE_CURRENT_SOURCE_DIR}/PowerTune/Gauges/Widgets"
     "${CMAKE_CURRENT_SOURCE_DIR}/PowerTune/Gauges/Shared"
+    "${CMAKE_CURRENT_SOURCE_DIR}/PowerTune/Gauges/RaceDash"
     "${CMAKE_CURRENT_SOURCE_DIR}/PowerTune/Utils"
     "${CMAKE_CURRENT_SOURCE_DIR}/PowerTune/Dashboard"
     CACHE STRING "Qt Creator/Design Studio QML import paths"

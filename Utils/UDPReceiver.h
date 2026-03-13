@@ -11,7 +11,11 @@
 #ifndef UDPRECEIVER_H
 #define UDPRECEIVER_H
 
+#include <QHash>
 #include <QObject>
+#include <QString>
+
+#include <functional>
 
 // * Forward declarations
 class QUdpSocket;
@@ -26,6 +30,7 @@ class FlagsData;
 class SensorData;
 class ConnectionData;
 class SettingsData;
+class SensorRegistry;
 
 class udpreceiver : public QObject
 {
@@ -49,22 +54,15 @@ public:
      * @param settings Settings data model (for ExternalSpeed check)
      * @param parent Parent QObject
      */
-    explicit udpreceiver(
-        EngineData *engine,
-        VehicleData *vehicle,
-        GPSData *gps,
-        AnalogInputs *analog,
-        DigitalInputs *digital,
-        ExpanderBoardData *expander,
-        ElectricMotorData *motor,
-        FlagsData *flags,
-        SensorData *sensor,
-        ConnectionData *connection,
-        SettingsData *settings,
-        QObject *parent = nullptr
-    );
+    explicit udpreceiver(EngineData *engine, VehicleData *vehicle, GPSData *gps, AnalogInputs *analog,
+                         DigitalInputs *digital, ExpanderBoardData *expander, ElectricMotorData *motor,
+                         FlagsData *flags, SensorData *sensor, ConnectionData *connection, SettingsData *settings,
+                         QObject *parent = nullptr);
 
 private:
+    using FloatHandler = std::function<void(float)>;
+    using StringHandler = std::function<void(const QString &)>;
+
     // * Model pointers
     EngineData *m_engine = nullptr;
     VehicleData *m_vehicle = nullptr;
@@ -79,6 +77,17 @@ private:
     SettingsData *m_settings = nullptr;
 
     QUdpSocket *udpSocket = nullptr;
+    SensorRegistry *m_sensorRegistry = nullptr;
+
+    QHash<int, FloatHandler> m_floatDispatchTable;
+    QHash<int, StringHandler> m_stringDispatchTable;
+
+    static const QHash<int, QString> s_identToSensorKey;
+    static QHash<int, QString> buildIdentToSensorKeyMap();
+    void buildDispatchTables();
+
+public:
+    void setSensorRegistry(SensorRegistry *reg) { m_sensorRegistry = reg; }
 
 public slots:
     void processPendingDatagrams();

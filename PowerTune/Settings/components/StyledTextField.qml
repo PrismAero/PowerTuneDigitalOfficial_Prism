@@ -4,33 +4,35 @@ import QtQuick.Controls 2.15
 TextField {
     id: root
 
-    implicitWidth: Math.max(120, contentWidth + leftPadding + rightPadding + 20)
-    implicitHeight: Math.max(48, font.pixelSize + topPadding + bottomPadding)
-    font.pixelSize: 22
-    font.family: "Lato"
-    color: "#FFFFFF"
-    placeholderTextColor: "#707070"
-    verticalAlignment: Text.AlignVCenter
-    leftPadding: 16
-    rightPadding: 16
-    topPadding: 12
-    bottomPadding: 12
+    bottomPadding: 4
+    color: SettingsTheme.textPrimary
+    font.family: SettingsTheme.fontFamily
+    font.pixelSize: SettingsTheme.fontControl
+    implicitHeight: SettingsTheme.controlHeight
+    implicitWidth: Math.max(SettingsTheme.textFieldMinWidth, contentWidth + leftPadding + rightPadding + 20)
+    leftPadding: 12
+    placeholderTextColor: SettingsTheme.textPlaceholder
+    rightPadding: 12
+    selectedTextColor: SettingsTheme.textPrimary
+    selectionColor: SettingsTheme.accent
+    topPadding: 4
+    verticalAlignment: TextInput.AlignVCenter
 
     background: Rectangle {
-        color: "#2D2D2D"
-        radius: 8
-        border.color: root.activeFocus ? "#009688" : (root.hovered ? "#505050" : "#3D3D3D")
-        border.width: root.activeFocus ? 2 : 1
+        border.color: root.activeFocus ? SettingsTheme.accent : SettingsTheme.border
+        border.width: root.activeFocus ? 2 : SettingsTheme.borderWidth
+        color: SettingsTheme.controlBg
+        radius: SettingsTheme.radiusSmall
 
-        Behavior on border.color { ColorAnimation { duration: 150 } }
+        Behavior on border.color {
+            ColorAnimation {
+                duration: 150
+            }
+        }
     }
-
-    selectionColor: "#009688"
-    selectedTextColor: "#FFFFFF"
-
     cursorDelegate: Rectangle {
+        color: SettingsTheme.accent
         visible: root.cursorVisible
-        color: "#009688"
         width: 2
     }
 }

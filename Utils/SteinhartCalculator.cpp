@@ -7,11 +7,12 @@
  */
 
 #include "SteinhartCalculator.h"
+
 #include <QDebug>
+
 #include <cmath>
 
-SteinhartCalculator::SteinhartCalculator(QObject *parent)
-    : QObject(parent)
+SteinhartCalculator::SteinhartCalculator(QObject *parent) : QObject(parent)
 {
     // * Initialize all channels as disabled and uncalibrated
     for (int i = 0; i < MAX_CHANNELS; ++i) {
@@ -23,8 +24,7 @@ SteinhartCalculator::SteinhartCalculator(QObject *parent)
     }
 }
 
-void SteinhartCalculator::calibrateChannel(int channel, qreal T1, qreal T2, qreal T3,
-                                           qreal R1, qreal R2, qreal R3)
+void SteinhartCalculator::calibrateChannel(int channel, qreal T1, qreal T2, qreal T3, qreal R1, qreal R2, qreal R3)
 {
     if (channel < 0 || channel >= MAX_CHANNELS) {
         qWarning() << "SteinhartCalculator: Invalid channel" << channel;
@@ -55,7 +55,8 @@ void SteinhartCalculator::calibrateChannel(int channel, qreal T1, qreal T2, qrea
     m_coefficients[channel].C = C;
     m_coefficients[channel].isCalibrated = true;
 
-    qDebug() << "SteinhartCalculator: Channel" << channel << "calibrated with A=" << static_cast<double>(A) << "B=" << static_cast<double>(B) << "C=" << static_cast<double>(C);
+    qDebug() << "SteinhartCalculator: Channel" << channel << "calibrated with A=" << static_cast<double>(A)
+             << "B=" << static_cast<double>(B) << "C=" << static_cast<double>(C);
 }
 
 void SteinhartCalculator::setVoltageDividerParams(int channel, qreal r3Value, qreal r4Value)
@@ -127,7 +128,7 @@ qreal SteinhartCalculator::resistanceToTemperature(int channel, qreal resistance
         return std::nan("");
     }
 
-    const auto& coeff = m_coefficients[channel];
+    const auto &coeff = m_coefficients[channel];
 
     // * Steinhart-Hart equation: 1/T = A + B*ln(R) + C*ln(R)^3
     // * T is in Kelvin, we return Celsius

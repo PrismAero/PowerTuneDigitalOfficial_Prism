@@ -1,58 +1,155 @@
 #include "appsettings.h"
 
-#include "dashboard.h"
+#include "../Hardware/Extender.h"
+#include "../Utils/SteinhartCalculator.h"
 #include "Models/DataModels.h"
+#include "dashboard.h"
 
 #include <QDebug>
 #include <QNetworkInterface>
 #include <QSettings>
 
+#include <iterator>
+
+static const char *ORG_NAME = "PowerTune";
+static const char *APP_NAME = "PowerTune";
+static constexpr int ECU_DROPDOWN_TO_BACKEND[] = {5, 0, 4};
+
 AppSettings::AppSettings(QObject *parent)
-    : QObject(parent)
-    , m_dashboard(nullptr)
-    , m_settingsData(nullptr)
-    , m_uiState(nullptr)
-    , m_vehicleData(nullptr)
-    , m_analogInputs(nullptr)
-    , m_expanderBoardData(nullptr)
-    , m_engineData(nullptr)
-    , m_connectionData(nullptr)
-    , m_digitalInputs(nullptr)
-{
-}
+    : QObject(parent),
+      m_dashboard(nullptr),
+      m_settingsData(nullptr),
+      m_uiState(nullptr),
+      m_vehicleData(nullptr),
+      m_analogInputs(nullptr),
+      m_expanderBoardData(nullptr),
+      m_engineData(nullptr),
+      m_connectionData(nullptr),
+      m_digitalInputs(nullptr)
+{}
 
 AppSettings::AppSettings(DashBoard *dashboard, QObject *parent)
-    : QObject(parent)
-    , m_dashboard(dashboard)
-    , m_settingsData(nullptr)
-    , m_uiState(nullptr)
-    , m_vehicleData(nullptr)
-    , m_analogInputs(nullptr)
-    , m_expanderBoardData(nullptr)
-    , m_engineData(nullptr)
-    , m_connectionData(nullptr)
-    , m_digitalInputs(nullptr)
-{
-}
+    : QObject(parent),
+      m_dashboard(dashboard),
+      m_settingsData(nullptr),
+      m_uiState(nullptr),
+      m_vehicleData(nullptr),
+      m_analogInputs(nullptr),
+      m_expanderBoardData(nullptr),
+      m_engineData(nullptr),
+      m_connectionData(nullptr),
+      m_digitalInputs(nullptr)
+{}
 
 AppSettings::AppSettings(DashBoard *dashboard, SettingsData *settingsData, UIState *uiState, VehicleData *vehicleData,
-                         AnalogInputs *analogInputs, ExpanderBoardData *expanderBoardData,
-                         EngineData *engineData, ConnectionData *connectionData,
-                         DigitalInputs *digitalInputs, QObject *parent)
-    : QObject(parent)
-    , m_dashboard(dashboard)
-    , m_settingsData(settingsData)
-    , m_uiState(uiState)
-    , m_vehicleData(vehicleData)
-    , m_analogInputs(analogInputs)
-    , m_expanderBoardData(expanderBoardData)
-    , m_engineData(engineData)
-    , m_connectionData(connectionData)
-    , m_digitalInputs(digitalInputs)
-{
-}
+                         AnalogInputs *analogInputs, ExpanderBoardData *expanderBoardData, EngineData *engineData,
+                         ConnectionData *connectionData, DigitalInputs *digitalInputs, QObject *parent)
+    : QObject(parent),
+      m_dashboard(dashboard),
+      m_settingsData(settingsData),
+      m_uiState(uiState),
+      m_vehicleData(vehicleData),
+      m_analogInputs(analogInputs),
+      m_expanderBoardData(expanderBoardData),
+      m_engineData(engineData),
+      m_connectionData(connectionData),
+      m_digitalInputs(digitalInputs)
+{}
 
 AppSettings::~AppSettings() = default;
+
+void AppSettings::setValue(const QString &key, const QVariant &value)
+{
+    QSettings settings(ORG_NAME, APP_NAME, this);
+    settings.setValue(key, value);
+}
+
+QVariant AppSettings::getValue(const QString &key, const QVariant &defaultValue) const
+{
+    QSettings settings(ORG_NAME, APP_NAME);
+    return settings.value(key, defaultValue);
+}
+
+void AppSettings::sync()
+{
+    QSettings settings(ORG_NAME, APP_NAME, this);
+    settings.sync();
+}
+
+void AppSettings::setSpeedUnitIndex(int index)
+{
+    setValue(QStringLiteral("ui/unitSelector1"), index);
+
+    if (!m_settingsData)
+        return;
+
+    switch (index) {
+    case 0:
+        m_settingsData->setspeedunits(QStringLiteral("metric"));
+        break;
+    case 1:
+        m_settingsData->setspeedunits(QStringLiteral("imperial"));
+        break;
+    default:
+        break;
+    }
+}
+
+void AppSettings::setTempUnitIndex(int index)
+{
+    setValue(QStringLiteral("ui/unitSelector"), index);
+
+    if (!m_settingsData)
+        return;
+
+    switch (index) {
+    case 0:
+        m_settingsData->setunits(QStringLiteral("metric"));
+        break;
+    case 1:
+        m_settingsData->setunits(QStringLiteral("imperial"));
+        break;
+    default:
+        break;
+    }
+}
+
+void AppSettings::setPressureUnitIndex(int index)
+{
+    setValue(QStringLiteral("ui/unitSelector2"), index);
+
+    if (!m_settingsData)
+        return;
+
+    switch (index) {
+    case 0:
+        m_settingsData->setpressureunits(QStringLiteral("metric"));
+        break;
+    case 1:
+        m_settingsData->setpressureunits(QStringLiteral("imperial"));
+        break;
+    default:
+        break;
+    }
+}
+
+void AppSettings::setEcuIndex(int index)
+{
+    if (index < 0 || index >= static_cast<int>(std::size(ECU_DROPDOWN_TO_BACKEND)))
+        return;
+
+    const int backendIndex = ECU_DROPDOWN_TO_BACKEND[index];
+    setECU(backendIndex);
+
+    if (m_connectionData)
+        m_connectionData->setecu(backendIndex);
+}
+
+void AppSettings::setMainSpeedSourceIndex(int index)
+{
+    setValue(QStringLiteral("ui/mainSpeedSource"), index);
+    writeStartupSettings(index);
+}
 
 int AppSettings::getBaudRate()
 {
@@ -132,23 +229,6 @@ int AppSettings::getLogging()
 void AppSettings::setLogging(const int &arg)
 {
     setValue("serial/Logging", arg);
-}
-
-void AppSettings::setValue(const QString &key, const QVariant &value)
-{
-    QSettings settings("PowerTuneQML", "PowerTuneDash", this);
-    settings.setValue(key, value);
-}
-
-QVariant AppSettings::getValue(const QString &key)
-{
-    QSettings settings("PowerTuneQML", "PowerTuneDash", this);
-    return settings.value(key);
-}
-
-void AppSettings::writeMainSettings()
-{
-    // To be implemented later
 }
 
 void AppSettings::writeSelectedDashSettings(int numberofdashes)
@@ -247,9 +327,6 @@ void AppSettings::writeAnalogSettings(const qreal &A00, const qreal &A05, const 
     setValue("AN95", A95);
     setValue("AN100", A100);
     setValue("AN105", A105);
-
-    // Analog input configuration is stored in QSettings
-    // Individual analog values are set via UDPReceiver/ECU directly to AnalogInputs model
 }
 
 void AppSettings::writeRPMSettings(const int &mxrpm, const int &shift1, const int &shift2, const int &shift3,
@@ -316,8 +393,34 @@ void AppSettings::writeEXBoardSettings(const qreal &EXA00, const qreal &EXA05, c
     setValue("AN5R3VAL", AN5R3VAL);
     setValue("AN5R4VAL", AN5R4VAL);
 
-    // Expander board configuration is stored in QSettings
-    // Individual values are set via Extender directly to ExpanderBoardData model
+    if (m_extender) {
+        const qreal v0v[] = {EXA00, EXA10, EXA20, EXA30, EXA40, EXA50, EXA60, EXA70};
+        const qreal v5v[] = {EXA05, EXA15, EXA25, EXA35, EXA45, EXA55, EXA65, EXA75};
+        const int ntcFlags[] = {steinhartcalc0on,
+                                steinhartcalc1on,
+                                steinhartcalc2on,
+                                steinhartcalc3on,
+                                steinhartcalc4on,
+                                steinhartcalc5on,
+                                0,
+                                0};
+        for (int ch = 0; ch < EX_ANALOG_CHANNELS; ++ch) {
+            m_extender->setChannelCalibration(ch, v0v[ch], v5v[ch], ntcFlags[ch] != 0);
+        }
+    }
+
+    if (m_steinhartCalc) {
+        const int ntcOn[] = {steinhartcalc0on, steinhartcalc1on, steinhartcalc2on,
+                             steinhartcalc3on, steinhartcalc4on, steinhartcalc5on};
+        const int r3Vals[] = {AN0R3VAL, AN1R3VAL, AN2R3VAL, AN3R3VAL, AN4R3VAL, AN5R3VAL};
+        const int r4Vals[] = {AN0R4VAL, AN1R4VAL, AN2R4VAL, AN3R4VAL, AN4R4VAL, AN5R4VAL};
+        for (int ch = 0; ch < SteinhartCalculator::MAX_CHANNELS; ++ch) {
+            m_steinhartCalc->setChannelEnabled(ch, ntcOn[ch] != 0);
+            qreal r3 = (r3Vals[ch] != 0) ? 100.0 : 0.0;
+            qreal r4 = (r4Vals[ch] != 0) ? 1000.0 : 0.0;
+            m_steinhartCalc->setVoltageDividerParams(ch, r3, r4);
+        }
+    }
 }
 
 void AppSettings::writeEXAN7dampingSettings(const int &AN7damping)
@@ -375,7 +478,17 @@ void AppSettings::writeSteinhartSettings(const qreal &T01, const qreal &T02, con
     setValue("R52", R52);
     setValue("R53", R53);
 
-    // Steinhart coefficients are stored in QSettings and used by SteinhartCalculator
+    if (m_steinhartCalc) {
+        const qreal T[][3] = {{T01, T02, T03}, {T11, T12, T13}, {T21, T22, T23},
+                              {T31, T32, T33}, {T41, T42, T43}, {T51, T52, T53}};
+        const qreal R[][3] = {{R01, R02, R03}, {R11, R12, R13}, {R21, R22, R23},
+                              {R31, R32, R33}, {R41, R42, R43}, {R51, R52, R53}};
+        for (int ch = 0; ch < SteinhartCalculator::MAX_CHANNELS; ++ch) {
+            if (R[ch][0] > 0 && R[ch][1] > 0 && R[ch][2] > 0) {
+                m_steinhartCalc->calibrateChannel(ch, T[ch][0], T[ch][1], T[ch][2], R[ch][0], R[ch][1], R[ch][2]);
+            }
+        }
+    }
 }
 
 void AppSettings::writeCylinderSettings(const qreal &Cylinders)
@@ -408,6 +521,68 @@ void AppSettings::writebrightnessettings(const int &Brightness)
     if (m_uiState) {
         m_uiState->setBrightness(Brightness);
     }
+}
+
+int AppSettings::readDisplayBrightnessPercent() const
+{
+    return qBound(0, getValue(QStringLiteral("ui/displayBrightnessPercent"), 100).toInt(), 100);
+}
+
+void AppSettings::writeDisplayBrightnessPercent(int percent)
+{
+    setValue(QStringLiteral("ui/displayBrightnessPercent"), qBound(0, percent, 100));
+}
+
+int AppSettings::readGlobalBrightnessPercent() const
+{
+    return qBound(0, getValue(QStringLiteral("ui/globalMaxBrightnessPercent"), 100).toInt(), 100);
+}
+
+void AppSettings::writeGlobalBrightnessPercent(int percent)
+{
+    setValue(QStringLiteral("ui/globalMaxBrightnessPercent"), qBound(0, percent, 100));
+}
+
+void AppSettings::writeBrightnessDayPreset(int percent)
+{
+    setValue(QStringLiteral("ui/brightnessDayPreset"), qBound(0, percent, 100));
+}
+
+void AppSettings::writeBrightnessNightPreset(int percent)
+{
+    setValue(QStringLiteral("ui/brightnessNightPreset"), qBound(0, percent, 100));
+}
+
+bool AppSettings::readBrightnessPopupEnabled() const
+{
+    return getValue(QStringLiteral("ui/brightnessPopupEnabled"), false).toBool();
+}
+
+void AppSettings::writeBrightnessPopupEnabled(bool enabled)
+{
+    setValue(QStringLiteral("ui/brightnessPopupEnabled"), enabled);
+}
+
+QString AppSettings::readLastBrightnessPreset() const
+{
+    const QString preset = getValue(QStringLiteral("ui/brightnessLastPreset"), QStringLiteral("day")).toString();
+    return preset == QLatin1String("night") ? preset : QStringLiteral("day");
+}
+
+void AppSettings::writeLastBrightnessPreset(const QString &preset)
+{
+    setValue(QStringLiteral("ui/brightnessLastPreset"),
+             preset == QLatin1String("night") ? QStringLiteral("night") : QStringLiteral("day"));
+}
+
+bool AppSettings::readDashboardLockEnabled() const
+{
+    return getValue(QStringLiteral("ui/dashboardLockEnabled"), false).toBool();
+}
+
+void AppSettings::writeDashboardLockEnabled(bool enabled)
+{
+    setValue(QStringLiteral("ui/dashboardLockEnabled"), enabled);
 }
 
 void AppSettings::writeStartupSettings(const int &ExternalSpeed)
@@ -482,9 +657,127 @@ void AppSettings::writeLanguage(const int Language)
     }
 }
 
+void AppSettings::writeDashboardConfig(int index, const QString &bgPicture, const QString &bgColor)
+{
+    QString prefix = QString("dashboard_%1/").arg(index);
+    setValue(prefix + "backgroundPicture", bgPicture);
+    setValue(prefix + "backgroundColor", bgColor);
+}
+
+QVariantMap AppSettings::loadDashboardConfig(int index) const
+{
+    QString prefix = QString("dashboard_%1/").arg(index);
+    QVariantMap config;
+    config["backgroundPicture"] = getValue(prefix + "backgroundPicture", "");
+    config["backgroundColor"] = getValue(prefix + "backgroundColor", "#000000");
+    return config;
+}
+
+void AppSettings::saveOverlayConfig(const QString &dashboardId, const QString &overlayId, const QVariantMap &config)
+{
+    QSettings settings(ORG_NAME, APP_NAME);
+    const QString prefix = QStringLiteral("overlay/%1/%2/").arg(dashboardId, overlayId);
+    for (auto it = config.constBegin(); it != config.constEnd(); ++it) {
+        settings.setValue(prefix + it.key(), it.value());
+    }
+}
+
+QVariantMap AppSettings::loadOverlayConfig(const QString &dashboardId, const QString &overlayId)
+{
+    QSettings settings(ORG_NAME, APP_NAME);
+    QVariantMap config;
+    settings.beginGroup(QStringLiteral("overlay/%1/%2").arg(dashboardId, overlayId));
+    const QStringList keys = settings.childKeys();
+    for (const QString &key : keys) {
+        config.insert(key, settings.value(key));
+    }
+    settings.endGroup();
+    return config;
+}
+
+void AppSettings::removeOverlayConfig(const QString &dashboardId, const QString &overlayId)
+{
+    QSettings settings(ORG_NAME, APP_NAME);
+    settings.beginGroup(QStringLiteral("overlay/%1/%2").arg(dashboardId, overlayId));
+    settings.remove(QString());
+    settings.endGroup();
+}
+
+// * Expander board sensor config persistence
+
+void AppSettings::writeGearSensorConfig(const QVariantMap &config)
+{
+    static const char *prefix = "ui/exboard/gearSensor/";
+    const QStringList keys = {"enabled",  "port",     "tolerance", "voltageN", "voltageR", "voltage1",
+                              "voltage2", "voltage3", "voltage4",  "voltage5", "voltage6"};
+    for (const QString &key : keys) {
+        if (config.contains(key))
+            setValue(QString(prefix) + key, config.value(key));
+    }
+    if (m_extender)
+        m_extender->setGearVoltageConfig(config);
+}
+
+QVariantMap AppSettings::readGearSensorConfig()
+{
+    static const char *prefix = "ui/exboard/gearSensor/";
+    QVariantMap config;
+    config["enabled"] = getValue(QString(prefix) + "enabled", false);
+    config["port"] = getValue(QString(prefix) + "port", 0);
+    config["tolerance"] = getValue(QString(prefix) + "tolerance", 0.2);
+    config["voltageN"] = getValue(QString(prefix) + "voltageN", 0.0);
+    config["voltageR"] = getValue(QString(prefix) + "voltageR", 0.5);
+    config["voltage1"] = getValue(QString(prefix) + "voltage1", 1.0);
+    config["voltage2"] = getValue(QString(prefix) + "voltage2", 1.5);
+    config["voltage3"] = getValue(QString(prefix) + "voltage3", 2.0);
+    config["voltage4"] = getValue(QString(prefix) + "voltage4", 2.5);
+    config["voltage5"] = getValue(QString(prefix) + "voltage5", 3.0);
+    config["voltage6"] = getValue(QString(prefix) + "voltage6", 3.5);
+    return config;
+}
+
+void AppSettings::writeSpeedSensorConfig(const QVariantMap &config)
+{
+    static const char *prefix = "ui/exboard/speedSensor/";
+    const QStringList keys = {"enabled",           "sourceType",      "analogPort",
+                              "digitalPort",       "pulsesPerRev",    "voltageMultiplier",
+                              "tireCircumference", "finalDriveRatio", "unit"};
+    for (const QString &key : keys) {
+        if (config.contains(key))
+            setValue(QString(prefix) + key, config.value(key));
+    }
+    if (m_extender)
+        m_extender->setSpeedSensorConfig(config);
+}
+
+QVariantMap AppSettings::readSpeedSensorConfig()
+{
+    static const char *prefix = "ui/exboard/speedSensor/";
+    QVariantMap config;
+    config["enabled"] = getValue(QString(prefix) + "enabled", false);
+    config["sourceType"] = getValue(QString(prefix) + "sourceType", "analog");
+    config["analogPort"] = getValue(QString(prefix) + "analogPort", 0);
+    config["digitalPort"] = getValue(QString(prefix) + "digitalPort", 0);
+    config["pulsesPerRev"] = getValue(QString(prefix) + "pulsesPerRev", 4.0);
+    config["voltageMultiplier"] = getValue(QString(prefix) + "voltageMultiplier", 1.0);
+    config["tireCircumference"] = getValue(QString(prefix) + "tireCircumference", 2.06);
+    config["finalDriveRatio"] = getValue(QString(prefix) + "finalDriveRatio", 1.0);
+    config["unit"] = getValue(QString(prefix) + "unit", "MPH");
+    return config;
+}
+
+void AppSettings::setExtender(Extender *extender)
+{
+    m_extender = extender;
+}
+
+void AppSettings::setSteinhartCalculator(SteinhartCalculator *calc)
+{
+    m_steinhartCalc = calc;
+}
+
 void AppSettings::readandApplySettings()
 {
-    // RPM settings
     if (m_settingsData) {
         m_settingsData->setmaxRPM(getValue("Max RPM").toInt());
         m_settingsData->setrpmStage1(getValue("Shift Light1").toInt());
@@ -494,7 +787,6 @@ void AppSettings::readandApplySettings()
         m_settingsData->setsmootexAnalogInput7(getValue("AN7Damping").toInt());
     }
 
-    // Warning thresholds
     if (m_settingsData) {
         qreal waterwarn = getValue("waterwarn").toReal();
         m_settingsData->setwaterwarn(static_cast<int>(waterwarn <= 0 ? 400 : waterwarn));
@@ -511,12 +803,10 @@ void AppSettings::readandApplySettings()
         m_settingsData->setgearcalcactivation(getValue("gercalactive").toInt());
     }
 
-    // Lambda multiplier
     if (m_engineData) {
         m_engineData->setLambdamultiply(getValue("lambdamultiply").toReal());
     }
 
-    // Gear calculation settings
     if (m_settingsData) {
         m_settingsData->setgearcalc1(static_cast<int>(getValue("valgear1").toReal()));
         m_settingsData->setgearcalc2(static_cast<int>(getValue("valgear2").toReal()));
@@ -526,34 +816,28 @@ void AppSettings::readandApplySettings()
         m_settingsData->setgearcalc6(static_cast<int>(getValue("valgear6").toReal()));
     }
 
-    // Cylinder count
     if (m_engineData) {
         m_engineData->setCylinders(getValue("Cylinders").toReal());
     }
 
-    // External speed setting
     if (m_settingsData) {
         m_settingsData->setExternalSpeed(getValue("ExternalSpeed").toInt());
     }
 
-    // Country and track
     if (m_settingsData) {
         m_settingsData->setCBXCountrysave(getValue("Country").toString());
         m_settingsData->setCBXTracksave(getValue("Track").toString());
     }
 
-    // Brightness
     if (m_uiState) {
         m_uiState->setBrightness(getValue("Brightness").toInt());
     }
 
-    // RPM frequency settings
     if (m_digitalInputs) {
         m_digitalInputs->setRPMFrequencyDividerDi1(getValue("RPMFrequencyDivider").toReal());
         m_digitalInputs->setDI1RPMEnabled(getValue("DI1RPMEnabled").toInt());
     }
 
-    // Speed settings
     if (m_settingsData) {
         qreal speedPercent = getValue("Speedcorrection").toReal();
         m_settingsData->setspeedpercent(speedPercent <= 0 ? 1 : speedPercent);
@@ -562,20 +846,81 @@ void AppSettings::readandApplySettings()
         m_settingsData->setpulsespermile(pulsesPerMile <= 0 ? 100000 : pulsesPerMile);
     }
 
-    // External RPM setting
     if (m_settingsData) {
         m_settingsData->setExternalrpm(getValue("ExternalRPM").toInt());
     }
 
-    // External speed connection
     if (m_connectionData) {
         m_connectionData->setexternalspeedconnectionrequest(getValue("externalspeedconnect").toInt());
         m_connectionData->setexternalspeedport(getValue("externalspeedport").toString());
     }
 
-    // Daemon and product IDs (moved to ConnectionData)
     if (m_connectionData) {
         m_connectionData->setdaemonlicense(getValue("DaemonLicenseKey").toString());
         m_connectionData->setholleyproductid(getValue("HolleyProductID").toString());
+    }
+
+    // Restore per-channel linear calibration values and NTC flags into the Extender
+    if (m_extender) {
+        const QString val0vKeys[] = {"EXA00", "EXA10", "EXA20", "EXA30", "EXA40", "EXA50", "EXA60", "EXA70"};
+        const QString val5vKeys[] = {"EXA05", "EXA15", "EXA25", "EXA35", "EXA45", "EXA55", "EXA65", "EXA75"};
+        const QString ntcKeys[] = {"steinhartcalc0on",
+                                   "steinhartcalc1on",
+                                   "steinhartcalc2on",
+                                   "steinhartcalc3on",
+                                   "steinhartcalc4on",
+                                   "steinhartcalc5on",
+                                   "",
+                                   ""};
+
+        for (int ch = 0; ch < EX_ANALOG_CHANNELS; ++ch) {
+            qreal v0 = getValue(val0vKeys[ch], 0.0).toReal();
+            qreal v5 = getValue(val5vKeys[ch], 5.0).toReal();
+            bool ntc = (ch < 6) ? (getValue(ntcKeys[ch], 0).toInt() != 0) : false;
+            m_extender->setChannelCalibration(ch, v0, v5, ntc);
+        }
+    }
+
+    // Restore Steinhart-Hart calibration coefficients and voltage divider jumper settings
+    if (m_steinhartCalc) {
+        const QString tKeys[][3] = {{"T01", "T02", "T03"}, {"T11", "T12", "T13"}, {"T21", "T22", "T23"},
+                                    {"T31", "T32", "T33"}, {"T41", "T42", "T43"}, {"T51", "T52", "T53"}};
+        const QString rKeys[][3] = {{"R01", "R02", "R03"}, {"R11", "R12", "R13"}, {"R21", "R22", "R23"},
+                                    {"R31", "R32", "R33"}, {"R41", "R42", "R43"}, {"R51", "R52", "R53"}};
+        const QString r3Keys[] = {"AN0R3VAL", "AN1R3VAL", "AN2R3VAL", "AN3R3VAL", "AN4R3VAL", "AN5R3VAL"};
+        const QString r4Keys[] = {"AN0R4VAL", "AN1R4VAL", "AN2R4VAL", "AN3R4VAL", "AN4R4VAL", "AN5R4VAL"};
+        const QString ntcOnKeys[] = {"steinhartcalc0on", "steinhartcalc1on", "steinhartcalc2on",
+                                     "steinhartcalc3on", "steinhartcalc4on", "steinhartcalc5on"};
+
+        for (int ch = 0; ch < SteinhartCalculator::MAX_CHANNELS; ++ch) {
+            bool ntcOn = getValue(ntcOnKeys[ch], 0).toInt() != 0;
+            m_steinhartCalc->setChannelEnabled(ch, ntcOn);
+
+            qreal t1 = getValue(tKeys[ch][0]).toReal();
+            qreal t2 = getValue(tKeys[ch][1]).toReal();
+            qreal t3 = getValue(tKeys[ch][2]).toReal();
+            qreal r1 = getValue(rKeys[ch][0]).toReal();
+            qreal r2 = getValue(rKeys[ch][1]).toReal();
+            qreal r3 = getValue(rKeys[ch][2]).toReal();
+
+            if (r1 > 0 && r2 > 0 && r3 > 0) {
+                m_steinhartCalc->calibrateChannel(ch, t1, t2, t3, r1, r2, r3);
+            }
+
+            int r3Jumper = getValue(r3Keys[ch], 0).toInt();
+            int r4Jumper = getValue(r4Keys[ch], 0).toInt();
+            qreal r3Val = (r3Jumper != 0) ? 100.0 : 0.0;
+            qreal r4Val = (r4Jumper != 0) ? 1000.0 : 0.0;
+            m_steinhartCalc->setVoltageDividerParams(ch, r3Val, r4Val);
+        }
+    }
+
+    // Restore expander board gear and speed sensor configs into the Extender
+    if (m_extender) {
+        QVariantMap gearConfig = readGearSensorConfig();
+        m_extender->setGearVoltageConfig(gearConfig);
+
+        QVariantMap speedConfig = readSpeedSensorConfig();
+        m_extender->setSpeedSensorConfig(speedConfig);
     }
 }

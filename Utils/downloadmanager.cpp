@@ -155,7 +155,7 @@ void DownloadManager::startNextDownload()
 
     // prepare the output
     printf("Downloading %s...\n", url.toEncoded().constData());
-    setDownloadFilename(("Downloading %s...\n", url.toEncoded().constData()));
+    setDownloadFilename(QStringLiteral("Downloading %1...\n").arg(QString::fromUtf8(url.toEncoded())));
     downloadTimer.start();
 }
 

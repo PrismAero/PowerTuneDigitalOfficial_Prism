@@ -5,10 +5,7 @@
 
 #include "SettingsData.h"
 
-SettingsData::SettingsData(QObject *parent)
-    : QObject(parent)
-{
-}
+SettingsData::SettingsData(QObject *parent) : QObject(parent) {}
 
 // * Setters - Units
 void SettingsData::setunits(const QString &units)

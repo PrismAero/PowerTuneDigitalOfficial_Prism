@@ -5,10 +5,7 @@
 
 #include "SensorData.h"
 
-SensorData::SensorData(QObject *parent)
-    : QObject(parent)
-{
-}
+SensorData::SensorData(QObject *parent) : QObject(parent) {}
 
 // * Setters - Raw sensor voltages
 void SensorData::setsens1(qreal sens1)

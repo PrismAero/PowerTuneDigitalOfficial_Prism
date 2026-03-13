@@ -8,40 +8,48 @@ Switch {
 
     property string label: ""
 
-    height: 48
-    font.pixelSize: 22
-    font.family: "Lato"
-
-    indicator: Rectangle {
-        implicitWidth: 56
-        implicitHeight: 28
-        x: root.leftPadding
-        y: parent.height / 2 - height / 2
-        radius: 14
-        color: root.checked ? "#009688" : "#3D3D3D"
-        border.color: root.checked ? "#00796B" : "#505050"
-        border.width: 1
-
-        Behavior on color { ColorAnimation { duration: 150 } }
-
-        Rectangle {
-            x: root.checked ? parent.width - width - 4 : 4
-            y: 4
-            width: 20
-            height: 20
-            radius: 10
-            color: "#FFFFFF"
-
-            Behavior on x { NumberAnimation { duration: 150; easing.type: Easing.OutQuad } }
-        }
-    }
+    font.family: SettingsTheme.fontFamily
+    font.pixelSize: SettingsTheme.fontControl
+    height: SettingsTheme.controlHeight
 
     contentItem: Text {
-        text: root.label !== "" ? root.label : root.text
+        color: SettingsTheme.textPrimary
         font: root.font
-        opacity: root.enabled ? 1.0 : 0.5
-        color: "#FFFFFF"
-        verticalAlignment: Text.AlignVCenter
         leftPadding: root.indicator.width + 12
+        opacity: root.enabled ? 1.0 : 0.5
+        text: root.label !== "" ? root.label : root.text
+        verticalAlignment: Text.AlignVCenter
+    }
+    indicator: Rectangle {
+        border.color: root.checked ? SettingsTheme.accentPressed : SettingsTheme.border
+        border.width: SettingsTheme.borderWidth
+        color: root.checked ? SettingsTheme.accent : SettingsTheme.controlBg
+        implicitHeight: SettingsTheme.switchTrackHeight
+        implicitWidth: SettingsTheme.switchTrackWidth
+        radius: SettingsTheme.switchTrackHeight / 2
+        x: root.leftPadding
+        y: parent.height / 2 - height / 2
+
+        Behavior on color {
+            ColorAnimation {
+                duration: 150
+            }
+        }
+
+        Rectangle {
+            color: SettingsTheme.textPrimary
+            height: SettingsTheme.switchKnobSize
+            radius: SettingsTheme.switchKnobSize / 2
+            width: SettingsTheme.switchKnobSize
+            x: root.checked ? parent.width - width - 3 : 3
+            y: (parent.height - height) / 2
+
+            Behavior on x {
+                NumberAnimation {
+                    duration: 150
+                    easing.type: Easing.OutQuad
+                }
+            }
+        }
     }
 }

@@ -10,14 +10,16 @@
  */
 
 #include "CalibrationHelper.h"
+
 #include "SteinhartCalculator.h"
+
 #include <QDebug>
+
 #include <algorithm>
 #include <cmath>
 
 CalibrationHelper::CalibrationHelper(SteinhartCalculator *steinhartCalc, QObject *parent)
-    : QObject(parent)
-    , m_steinhartCalc(steinhartCalc)
+    : QObject(parent), m_steinhartCalc(steinhartCalc)
 {
     initLinearPresets();
     initNtcPresets();
@@ -39,18 +41,18 @@ void CalibrationHelper::initLinearPresets()
 {
     m_linearPresets = {
         // name, val0v, val5v, unit, minVoltage, maxVoltage
-        {QStringLiteral("Custom"),                0,   5,   QStringLiteral("V"),    0.0, 5.0},
-        {QStringLiteral("0-100 PSI Pressure"),    0,   100, QStringLiteral("PSI"),  0.5, 4.5},
-        {QStringLiteral("0-150 PSI Pressure"),    0,   150, QStringLiteral("PSI"),  0.5, 4.5},
-        {QStringLiteral("0-200 PSI Pressure"),    0,   200, QStringLiteral("PSI"),  0.5, 4.5},
-        {QStringLiteral("0-5 Bar Pressure"),      0,   5,   QStringLiteral("Bar"),  0.5, 4.5},
-        {QStringLiteral("0-10 Bar Pressure"),     0,   10,  QStringLiteral("Bar"),  0.5, 4.5},
-        {QStringLiteral("0-100% Wideband O2"),    0,   100, QStringLiteral("%"),    0.0, 5.0},
-        {QStringLiteral("0-1V Narrowband O2"),    0,   1,   QStringLiteral("V"),    0.0, 5.0},
-        {QStringLiteral("GM 1-Bar MAP"),          10,  105, QStringLiteral("kPa"),  0.2, 4.8},
-        {QStringLiteral("GM 2-Bar MAP"),          10,  210, QStringLiteral("kPa"),  0.2, 4.8},
-        {QStringLiteral("GM 3-Bar MAP"),          10,  315, QStringLiteral("kPa"),  0.2, 4.8},
-        {QStringLiteral("AEM 3.5 Bar MAP"),       0,   350, QStringLiteral("kPa"),  0.5, 4.5},
+        {QStringLiteral("Custom"), 0, 5, QStringLiteral("V"), 0.0, 5.0},
+        {QStringLiteral("0-100 PSI Pressure"), 0, 100, QStringLiteral("PSI"), 0.5, 4.5},
+        {QStringLiteral("0-150 PSI Pressure"), 0, 150, QStringLiteral("PSI"), 0.5, 4.5},
+        {QStringLiteral("0-200 PSI Pressure"), 0, 200, QStringLiteral("PSI"), 0.5, 4.5},
+        {QStringLiteral("0-5 Bar Pressure"), 0, 5, QStringLiteral("Bar"), 0.5, 4.5},
+        {QStringLiteral("0-10 Bar Pressure"), 0, 10, QStringLiteral("Bar"), 0.5, 4.5},
+        {QStringLiteral("0-100% Wideband O2"), 0, 100, QStringLiteral("%"), 0.0, 5.0},
+        {QStringLiteral("0-1V Narrowband O2"), 0, 1, QStringLiteral("V"), 0.0, 5.0},
+        {QStringLiteral("GM 1-Bar MAP"), 10, 105, QStringLiteral("kPa"), 0.2, 4.8},
+        {QStringLiteral("GM 2-Bar MAP"), 10, 210, QStringLiteral("kPa"), 0.2, 4.8},
+        {QStringLiteral("GM 3-Bar MAP"), 10, 315, QStringLiteral("kPa"), 0.2, 4.8},
+        {QStringLiteral("AEM 3.5 Bar MAP"), 0, 350, QStringLiteral("kPa"), 0.5, 4.5},
     };
 }
 
@@ -66,12 +68,12 @@ void CalibrationHelper::initNtcPresets()
 {
     m_ntcPresets = {
         // name, t1, r1, t2, r2, t3, r3, minVoltage, maxVoltage
-        {QStringLiteral("Custom"),                    5,    2000,    25,   4000,   45,    7000,  0.0, 5.0},
-        {QStringLiteral("10K NTC (B=3950)"),         -20,   97070,   25,   10000,  100,   680,   0.0, 5.0},
-        {QStringLiteral("2.2K NTC"),                 -20,   21370,   25,   2200,   100,   150,   0.0, 5.0},
-        {QStringLiteral("Bosch NTC (0280130039)"),   -10,   9397,    25,   2500,   80,    323,   0.0, 5.0},
-        {QStringLiteral("GM Coolant Temp"),          -40,   100700,  25,   2238,   120,   72,    0.0, 5.0},
-        {QStringLiteral("AEM 30-2012 Water Temp"),    0,    5896,    50,   811,    100,   177,   0.0, 5.0},
+        {QStringLiteral("Custom"), 5, 2000, 25, 4000, 45, 7000, 0.0, 5.0},
+        {QStringLiteral("10K NTC (B=3950)"), -20, 97070, 25, 10000, 100, 680, 0.0, 5.0},
+        {QStringLiteral("2.2K NTC"), -20, 21370, 25, 2200, 100, 150, 0.0, 5.0},
+        {QStringLiteral("Bosch NTC (0280130039)"), -10, 9397, 25, 2500, 80, 323, 0.0, 5.0},
+        {QStringLiteral("GM Coolant Temp"), -40, 100700, 25, 2238, 120, 72, 0.0, 5.0},
+        {QStringLiteral("AEM 30-2012 Water Temp"), 0, 5896, 50, 811, 100, 177, 0.0, 5.0},
     };
 }
 
@@ -85,10 +87,10 @@ QVariantList CalibrationHelper::linearPresets() const
     result.reserve(m_linearPresets.size());
     for (const auto &p : m_linearPresets) {
         QVariantMap map;
-        map[QStringLiteral("name")]       = p.name;
-        map[QStringLiteral("val0v")]      = p.val0v;
-        map[QStringLiteral("val5v")]      = p.val5v;
-        map[QStringLiteral("unit")]       = p.unit;
+        map[QStringLiteral("name")] = p.name;
+        map[QStringLiteral("val0v")] = p.val0v;
+        map[QStringLiteral("val5v")] = p.val5v;
+        map[QStringLiteral("unit")] = p.unit;
         map[QStringLiteral("minVoltage")] = p.minVoltage;
         map[QStringLiteral("maxVoltage")] = p.maxVoltage;
         result.append(map);
@@ -103,13 +105,16 @@ QVariantList CalibrationHelper::linearPresets() const
  */
 QVariantMap CalibrationHelper::getLinearPreset(const QString &name) const
 {
+    if (name.isEmpty())
+        return {};
+
     for (const auto &p : m_linearPresets) {
         if (p.name == name) {
             QVariantMap map;
-            map[QStringLiteral("name")]       = p.name;
-            map[QStringLiteral("val0v")]      = p.val0v;
-            map[QStringLiteral("val5v")]      = p.val5v;
-            map[QStringLiteral("unit")]       = p.unit;
+            map[QStringLiteral("name")] = p.name;
+            map[QStringLiteral("val0v")] = p.val0v;
+            map[QStringLiteral("val5v")] = p.val5v;
+            map[QStringLiteral("unit")] = p.unit;
             map[QStringLiteral("minVoltage")] = p.minVoltage;
             map[QStringLiteral("maxVoltage")] = p.maxVoltage;
             return map;
@@ -148,6 +153,9 @@ qreal CalibrationHelper::calculateLinearValue(qreal voltage, qreal val0v, qreal 
  */
 double CalibrationHelper::calculateLinearValueScaled(const QString &presetName, double rawVoltage)
 {
+    if (presetName.isEmpty())
+        return 0.0;
+
     for (const auto &p : m_linearPresets) {
         if (p.name == presetName) {
             double normalized = normalizeVoltage(rawVoltage, p.minVoltage, p.maxVoltage);
@@ -189,6 +197,9 @@ double CalibrationHelper::normalizeVoltage(double rawVoltage, double sensorMin, 
  */
 double CalibrationHelper::getPresetMinVoltage(const QString &presetName)
 {
+    if (presetName.isEmpty())
+        return 0.0;
+
     for (const auto &p : m_linearPresets) {
         if (p.name == presetName) {
             return p.minVoltage;
@@ -213,6 +224,9 @@ double CalibrationHelper::getPresetMinVoltage(const QString &presetName)
  */
 double CalibrationHelper::getPresetMaxVoltage(const QString &presetName)
 {
+    if (presetName.isEmpty())
+        return 5.0;
+
     for (const auto &p : m_linearPresets) {
         if (p.name == presetName) {
             return p.maxVoltage;
@@ -242,6 +256,9 @@ double CalibrationHelper::getPresetMaxVoltage(const QString &presetName)
  */
 double CalibrationHelper::getLinearPresetValueAt0V(const QString &presetName) const
 {
+    if (presetName.isEmpty())
+        return 0.0;
+
     for (const auto &p : m_linearPresets) {
         if (p.name == presetName) {
             return p.val0v;
@@ -262,6 +279,9 @@ double CalibrationHelper::getLinearPresetValueAt0V(const QString &presetName) co
  */
 double CalibrationHelper::getLinearPresetValueAt5V(const QString &presetName) const
 {
+    if (presetName.isEmpty())
+        return 0.0;
+
     for (const auto &p : m_linearPresets) {
         if (p.name == presetName) {
             return p.val5v;
@@ -282,6 +302,9 @@ double CalibrationHelper::getLinearPresetValueAt5V(const QString &presetName) co
  */
 QString CalibrationHelper::getLinearPresetUnit(const QString &presetName) const
 {
+    if (presetName.isEmpty())
+        return {};
+
     for (const auto &p : m_linearPresets) {
         if (p.name == presetName) {
             return p.unit;
@@ -349,13 +372,13 @@ QVariantList CalibrationHelper::ntcPresets() const
     result.reserve(m_ntcPresets.size());
     for (const auto &p : m_ntcPresets) {
         QVariantMap map;
-        map[QStringLiteral("name")]       = p.name;
-        map[QStringLiteral("t1")]         = p.t1;
-        map[QStringLiteral("r1")]         = p.r1;
-        map[QStringLiteral("t2")]         = p.t2;
-        map[QStringLiteral("r2")]         = p.r2;
-        map[QStringLiteral("t3")]         = p.t3;
-        map[QStringLiteral("r3")]         = p.r3;
+        map[QStringLiteral("name")] = p.name;
+        map[QStringLiteral("t1")] = p.t1;
+        map[QStringLiteral("r1")] = p.r1;
+        map[QStringLiteral("t2")] = p.t2;
+        map[QStringLiteral("r2")] = p.r2;
+        map[QStringLiteral("t3")] = p.t3;
+        map[QStringLiteral("r3")] = p.r3;
         map[QStringLiteral("minVoltage")] = p.minVoltage;
         map[QStringLiteral("maxVoltage")] = p.maxVoltage;
         result.append(map);
@@ -370,16 +393,19 @@ QVariantList CalibrationHelper::ntcPresets() const
  */
 QVariantMap CalibrationHelper::getNtcPreset(const QString &name) const
 {
+    if (name.isEmpty())
+        return {};
+
     for (const auto &p : m_ntcPresets) {
         if (p.name == name) {
             QVariantMap map;
-            map[QStringLiteral("name")]       = p.name;
-            map[QStringLiteral("t1")]         = p.t1;
-            map[QStringLiteral("r1")]         = p.r1;
-            map[QStringLiteral("t2")]         = p.t2;
-            map[QStringLiteral("r2")]         = p.r2;
-            map[QStringLiteral("t3")]         = p.t3;
-            map[QStringLiteral("r3")]         = p.r3;
+            map[QStringLiteral("name")] = p.name;
+            map[QStringLiteral("t1")] = p.t1;
+            map[QStringLiteral("r1")] = p.r1;
+            map[QStringLiteral("t2")] = p.t2;
+            map[QStringLiteral("r2")] = p.r2;
+            map[QStringLiteral("t3")] = p.t3;
+            map[QStringLiteral("r3")] = p.r3;
             map[QStringLiteral("minVoltage")] = p.minVoltage;
             map[QStringLiteral("maxVoltage")] = p.maxVoltage;
             return map;
@@ -406,10 +432,8 @@ QVariantMap CalibrationHelper::getNtcPreset(const QString &name) const
  * @param r3 Resistance at t3 (Ohms)
  * @return Temperature in Celsius, NaN on error
  */
-qreal CalibrationHelper::calculateTemperature(qreal resistance,
-                                              qreal t1, qreal r1,
-                                              qreal t2, qreal r2,
-                                              qreal t3, qreal r3) const
+qreal CalibrationHelper::calculateTemperature(qreal resistance, qreal t1, qreal r1, qreal t2, qreal r2, qreal t3,
+                                              qreal r3) const
 {
     if (!m_steinhartCalc) {
         qWarning() << "CalibrationHelper: No SteinhartCalculator available";
@@ -502,7 +526,7 @@ QVariantMap CalibrationHelper::voltageDividerInfo(bool jumper100ohm, bool jumper
     // * Estimate measurable NTC range from practical ADC voltage limits
     // * At V=0.1V (near ground): Rntc = Rdiv * (5.0 - 0.1) / 0.1 = Rdiv * 49
     // * At V=4.9V (near Vcc):    Rntc = Rdiv * (5.0 - 4.9) / 4.9 = Rdiv * 0.0204
-    constexpr qreal V_LOW  = 0.1;
+    constexpr qreal V_LOW = 0.1;
     constexpr qreal V_HIGH = 4.9;
     qreal maxR = resistance * (VCC - V_LOW) / V_LOW;
     qreal minR = resistance * (VCC - V_HIGH) / V_HIGH;
@@ -520,9 +544,9 @@ QVariantMap CalibrationHelper::voltageDividerInfo(bool jumper100ohm, bool jumper
     }
 
     QVariantMap info;
-    info[QStringLiteral("resistance")]    = resistance;
+    info[QStringLiteral("resistance")] = resistance;
     info[QStringLiteral("minResistance")] = minR;
     info[QStringLiteral("maxResistance")] = maxR;
-    info[QStringLiteral("description")]   = desc;
+    info[QStringLiteral("description")] = desc;
     return info;
 }

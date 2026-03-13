@@ -20,8 +20,8 @@
 
 #include <QMap>
 #include <QObject>
-#include <QStringList>
 #include <QString>
+#include <QStringList>
 #include <QTimer>
 #include <QVariantList>
 #include <QVariantMap>
@@ -48,15 +48,15 @@ public:
      * @brief Identifies where a sensor's data originates.
      */
     enum class SensorSource {
-        DaemonUDP,          ///< ECU data via daemon UDP (port 45454) - includes engine data,
-                            ///< ECU-reported analog channels (Analog0-10), and
-                            ///< ECU-reported digital inputs (DigitalInput1-7)
-        ExtenderAnalog,     ///< Extender board analog inputs via CAN (EXAnalogInput0-7)
-        ExtenderDigital,    ///< Extender board digital inputs via CAN (EXDigitalInput1-8)
-        GPS,                ///< GPS hardware (serial NMEA)
-        SenseHat,           ///< SenseHat sensors (accelerometer, gyroscope, compass,
-                            ///< ambient temperature, ambient pressure)
-        Computed            ///< Values derived from other sensors
+        DaemonUDP,        ///< ECU data via daemon UDP (port 45454) - includes engine data,
+                          ///< ECU-reported analog channels (Analog0-10), and
+                          ///< ECU-reported digital inputs (DigitalInput1-7)
+        ExtenderAnalog,   ///< Extender board analog inputs via CAN (EXAnalogInput0-7)
+        ExtenderDigital,  ///< Extender board digital inputs via CAN (EXDigitalInput1-8)
+        GPS,              ///< GPS hardware (serial NMEA)
+        SenseHat,         ///< SenseHat sensors (accelerometer, gyroscope, compass,
+                          ///< ambient temperature, ambient pressure)
+        Computed          ///< Values derived from other sensors
     };
     Q_ENUM(SensorSource)
 
@@ -70,9 +70,8 @@ public:
      * @param unit Unit string (e.g., "rpm", "psi", "V")
      * @param source Where this sensor data comes from
      */
-    void registerSensor(const QString &key, const QString &displayName,
-                        const QString &category, const QString &unit,
-                        SensorSource source);
+    void registerSensor(const QString &key, const QString &displayName, const QString &category, const QString &unit,
+                        SensorSource source, int decimals = 2, double maxValue = 100.0, double stepSize = 1.0);
 
     /**
      * @brief Unregister a sensor (e.g., when analog input is unconfigured).
@@ -100,7 +99,11 @@ public:
      * @param category Category filter (empty string = all)
      * @return List of sensor maps with keys: key, displayName, category, unit, source, active
      */
-    Q_INVOKABLE QVariantList getSensorsByCategory(const QString &category = QString()) const;
+    Q_INVOKABLE QVariantList getSensorsByCategory(const QString &category = QString(), bool activeOnly = false) const;
+    Q_INVOKABLE QVariantList getActiveSensors() const;
+    Q_INVOKABLE QStringList sensorDisplayNames(const QString &category = QString(), bool activeOnly = false) const;
+    Q_INVOKABLE QStringList sensorKeys(const QString &category = QString(), bool activeOnly = false) const;
+    Q_INVOKABLE int indexOfSensorKey(const QString &key, const QString &category = QString()) const;
 
     /**
      * @brief Check from QML if a sensor key is available.
@@ -122,6 +125,11 @@ public:
      * @return Unit string or empty string if not found
      */
     Q_INVOKABLE QString getUnit(const QString &key) const;
+    Q_INVOKABLE int getDecimals(const QString &key) const;
+    Q_INVOKABLE double getMaxValue(const QString &key) const;
+    Q_INVOKABLE double getStepSize(const QString &key) const;
+    Q_INVOKABLE void updateSensorMetadata(const QString &key, const QString &unit, int decimals, double maxValue,
+                                          double stepSize);
 
     /**
      * @brief Register ECU-reported analog voltage channels via daemon UDP.
@@ -209,18 +217,22 @@ private:
     /**
      * @brief Internal representation of a registered sensor.
      */
-    struct SensorEntry {
+    struct SensorEntry
+    {
         QString key;
         QString displayName;
         QString category;
         QString unit;
         SensorSource source;
-        bool active = true;         ///< For DaemonUDP sensors: true if data received recently
-        qint64 lastActiveTimestamp = 0; ///< msecsSinceEpoch of last markCanSensorActive call
+        bool active = true;              ///< For DaemonUDP sensors: true if data received recently
+        qint64 lastActiveTimestamp = 0;  ///< msecsSinceEpoch of last markCanSensorActive call
+        int decimals = 2;
+        double maxValue = 100.0;
+        double stepSize = 1.0;
     };
 
     QMap<QString, SensorEntry> m_sensors;
-    QTimer m_canTimeoutTimer; ///< Periodically check for stale DaemonUDP sensors
+    QTimer m_canTimeoutTimer;  ///< Periodically check for stale DaemonUDP sensors
 
     /**
      * @brief Register built-in sensors that are always available (GPS, SenseHat).
@@ -241,9 +253,9 @@ private:
     QVariantMap entryToVariantMap(const SensorEntry &entry) const;
 
     /**
-     * @brief Timer callback to mark DaemonUDP sensors as inactive if no data received in 10 seconds.
+     * @brief Timer callback to mark non-Computed sensors as inactive if no data received in 10 seconds.
      */
     void checkCanTimeouts();
 };
 
-#endif // SENSORREGISTRY_H
+#endif  // SENSORREGISTRY_H

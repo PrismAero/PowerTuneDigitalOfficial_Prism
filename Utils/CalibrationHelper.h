@@ -207,10 +207,8 @@ public:
      * @param r3 Calibration resistance 3 (Ohms)
      * @return Temperature in Celsius, or NaN on error
      */
-    Q_INVOKABLE qreal calculateTemperature(qreal resistance,
-                                           qreal t1, qreal r1,
-                                           qreal t2, qreal r2,
-                                           qreal t3, qreal r3) const;
+    Q_INVOKABLE qreal calculateTemperature(qreal resistance, qreal t1, qreal r1, qreal t2, qreal r2, qreal t3,
+                                           qreal r3) const;
 
     // -----------------------------------------------------------------------
     // Voltage Divider Calculations
@@ -276,7 +274,8 @@ private:
     /**
      * @brief Internal struct for storing linear sensor preset data
      */
-    struct LinearPreset {
+    struct LinearPreset
+    {
         QString name;
         qreal val0v;
         qreal val5v;
@@ -288,7 +287,8 @@ private:
     /**
      * @brief Internal struct for storing NTC thermistor preset data
      */
-    struct NtcPreset {
+    struct NtcPreset
+    {
         QString name;
         qreal t1;
         qreal r1;
@@ -315,4 +315,4 @@ private:
     void initNtcPresets();
 };
 
-#endif // CALIBRATIONHELPER_H
+#endif  // CALIBRATIONHELPER_H

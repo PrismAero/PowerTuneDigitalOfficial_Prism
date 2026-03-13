@@ -1,0 +1,20 @@
+import QtQuick
+
+Timer {
+    id: root
+
+    property bool active: false
+    property bool flashEnabled: true
+    property int flashRate: 200
+    property bool phase: false
+
+    interval: flashRate / 2
+    repeat: true
+    running: active && flashEnabled
+
+    onActiveChanged: if (!active)
+                         phase = false
+    onRunningChanged: if (!running)
+                          phase = false
+    onTriggered: phase = !phase
+}

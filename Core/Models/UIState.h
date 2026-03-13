@@ -29,7 +29,8 @@ class UIState : public QObject
     Q_PROPERTY(int draggable READ draggable WRITE setdraggable NOTIFY draggableChanged)
     Q_PROPERTY(QStringList maindashsetup READ maindashsetup WRITE setmaindashsetup NOTIFY maindashsetupChanged)
     Q_PROPERTY(QStringList dashfiles READ dashfiles WRITE setdashfiles NOTIFY dashfilesChanged)
-    Q_PROPERTY(QStringList backroundpictures READ backroundpictures WRITE setbackroundpictures NOTIFY backroundpicturesChanged)
+    Q_PROPERTY(
+        QStringList backroundpictures READ backroundpictures WRITE setbackroundpictures NOTIFY backroundpicturesChanged)
     Q_PROPERTY(int Brightness READ Brightness WRITE setBrightness NOTIFY brightnessChanged)
     Q_PROPERTY(int Visibledashes READ Visibledashes WRITE setVisibledashes NOTIFY VisibledashesChanged)
     Q_PROPERTY(bool screen READ screen WRITE setscreen NOTIFY screenChanged)

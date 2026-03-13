@@ -8,64 +8,75 @@ CheckBox {
 
     property string label: ""
 
-    height: 44
-    font.pixelSize: 20
-    font.family: "Lato"
+    font.family: SettingsTheme.fontFamily
+    font.pixelSize: SettingsTheme.fontControl
+    height: SettingsTheme.controlHeight
 
+    contentItem: Text {
+        color: SettingsTheme.textPrimary
+        font: root.font
+        leftPadding: root.indicator.width + 12
+        opacity: root.enabled ? 1.0 : 0.5
+        text: root.label !== "" ? root.label : root.text
+        verticalAlignment: Text.AlignVCenter
+    }
     indicator: Rectangle {
-        implicitWidth: 28
-        implicitHeight: 28
+        border.color: root.checked ? SettingsTheme.accentPressed : SettingsTheme.border
+        border.width: root.checked ? 2 : SettingsTheme.borderWidth
+        color: root.checked ? SettingsTheme.accent : SettingsTheme.controlBg
+        implicitHeight: SettingsTheme.checkBoxSize
+        implicitWidth: SettingsTheme.checkBoxSize
+        radius: SettingsTheme.radiusSmall
         x: root.leftPadding
         y: parent.height / 2 - height / 2
-        radius: 6
-        color: root.checked ? "#009688" : "#2D2D2D"
-        border.color: root.checked ? "#00796B" : (root.hovered ? "#505050" : "#3D3D3D")
-        border.width: root.checked ? 2 : 1
 
-        Behavior on color { ColorAnimation { duration: 150 } }
-        Behavior on border.color { ColorAnimation { duration: 150 } }
+        Behavior on border.color {
+            ColorAnimation {
+                duration: 150
+            }
+        }
+        Behavior on color {
+            ColorAnimation {
+                duration: 150
+            }
+        }
 
         // * Checkmark icon drawn with two rotated rectangles
         Item {
             anchors.centerIn: parent
-            width: 16
-            height: 16
+            height: 20
             opacity: root.checked ? 1.0 : 0.0
+            width: 20
 
-            Behavior on opacity { NumberAnimation { duration: 150 } }
+            Behavior on opacity {
+                NumberAnimation {
+                    duration: 150
+                }
+            }
 
             // * Short leg of checkmark
             Rectangle {
-                x: 1
-                y: 8
-                width: 7
-                height: 2.5
+                color: SettingsTheme.textPrimary
+                height: 3
                 radius: 1
-                color: "#FFFFFF"
                 rotation: 45
                 transformOrigin: Item.Left
+                width: 9
+                x: 1
+                y: 10
             }
 
             // * Long leg of checkmark
             Rectangle {
-                x: 5
-                y: 11
-                width: 12
-                height: 2.5
+                color: SettingsTheme.textPrimary
+                height: 3
                 radius: 1
-                color: "#FFFFFF"
                 rotation: -45
                 transformOrigin: Item.Left
+                width: 15
+                x: 6
+                y: 14
             }
         }
-    }
-
-    contentItem: Text {
-        text: root.label !== "" ? root.label : root.text
-        font: root.font
-        opacity: root.enabled ? 1.0 : 0.5
-        color: "#FFFFFF"
-        verticalAlignment: Text.AlignVCenter
-        leftPadding: root.indicator.width + 12
     }
 }

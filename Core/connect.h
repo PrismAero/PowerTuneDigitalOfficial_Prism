@@ -60,13 +60,28 @@ class CalibrationHelper;
 class SensorRegistry;
 // * Phase 8: Diagnostics provider
 class DiagnosticsProvider;
+// * Overlay configuration persistence
+class OverlayConfigManager;
+class ShiftIndicatorHelper;
+class CanFrameModel;
+class ExBoardConfigManager;
+class OverlayConfigDefaults;
+class ScreenControlService;
+class DashboardLockService;
 
 class Connect : public QObject
 {
     Q_OBJECT
     Q_PROPERTY(QStringList portsNames READ portsNames WRITE setPortsNames NOTIFY sig_portsNamesChanged)
+    Q_PROPERTY(bool hasDdcBrightness READ hasDdcBrightness CONSTANT)
+    Q_PROPERTY(bool hasBrightnessControl READ hasBrightnessControl CONSTANT)
 
 public:
+    enum class BrightnessMethod { None, Sysfs, DdcUtil };
+
+    bool hasDdcBrightness() const;
+    bool hasBrightnessControl() const;
+
     ~Connect() override;
     explicit Connect(QObject *parent = nullptr);
     Q_INVOKABLE void saveDashtoFile(const QString &filename, const QString &dashstring);
@@ -101,17 +116,7 @@ public:
     Q_INVOKABLE void LiveReqMsgOBD(const QString &obdpids);
     Q_INVOKABLE void daemonstartup(const int &daemon);
     Q_INVOKABLE void canbitratesetup(const int &cansetting);
-    Q_INVOKABLE void LiveReqMsg(const int &val1, const int &val2, const int &val3, const int &val4, const int &val5,
-                                const int &val6, const int &val7, const int &val8, const int &val9, const int &val10,
-                                const int &val11, const int &val12, const int &val13, const int &val14,
-                                const int &val15, const int &val16, const int &val17, const int &val18,
-                                const int &val19, const int &val20, const int &val21, const int &val22,
-                                const int &val23, const int &val24, const int &val25, const int &val26,
-                                const int &val27, const int &val28, const int &val29, const int &val30,
-                                const int &val31, const int &val32, const int &val33, const int &val34,
-                                const int &val35, const int &val36, const int &val37, const int &val38,
-                                const int &val39, const int &val40, const int &val41, const int &val42,
-                                const int &val43, const int &val44, const int &val45);
+    Q_INVOKABLE void LiveReqMsg(const QVariantList &values);
     Q_INVOKABLE void openConnection(const QString &portName, const int &ecuSelect, const int &canbase,
                                     const int &rpmcanbase);
     Q_INVOKABLE void closeConnection();
@@ -165,6 +170,25 @@ private:
     SensorRegistry *m_sensorRegistry;
     // * Phase 8: Diagnostics provider
     DiagnosticsProvider *m_diagnosticsProvider;
+    // * Overlay configuration persistence
+    OverlayConfigManager *m_overlayConfigManager;
+    ShiftIndicatorHelper *m_shiftIndicatorHelper;
+    CanFrameModel *m_canFrameModel;
+    ExBoardConfigManager *m_exBoardConfigManager;
+    OverlayConfigDefaults *m_overlayConfigDefaults;
+    ScreenControlService *m_screenControlService;
+    DashboardLockService *m_dashboardLockService;
+    BrightnessMethod m_brightnessMethod = BrightnessMethod::None;
+
+    int m_ecu = 0;
+    int m_logging = 0;
+    int m_connectClicked = 0;
+    int m_canBaseAddress = 0;
+    int m_rpmCanBaseAddress = 0;
+    QByteArray m_checksumHex;
+    QByteArray m_recvChecksumHex;
+    QString m_selectedPort;
+    QVector<QString> m_dashFilenames{3};
 
 
 signals:

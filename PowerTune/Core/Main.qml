@@ -1,648 +1,318 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Window 2.15
-import Qt.labs.settings 1.0
 import com.powertune 1.0
 import PowerTune.Core 1.0
+import PowerTune.UI 1.0
 import PowerTune.Utils 1.0
 import Prism.Keyboard 1.0
 
-
-
 ApplicationWindow {
-    id:window
-    visible: true
+    id: window
 
-    // * Fixed size for development - 1600x720 target resolution
-    width: 1600
-    height: 720
-    minimumWidth: 1600
-    minimumHeight: 720
-    title: qsTr("PowerTune ") + Connection.Platform
+    property bool showUnlockAnimation: false
+
     color: "black"
-
-    property int brightnessIncrease: 175
-    property int ddcUtilBrightnessIncrease: 50
-
-    property int digitalInput1: (Expander && Expander.EXDigitalInput1 !== undefined) ? Expander.EXDigitalInput1 : 0
-    property int digitalInput2: (Expander && Expander.EXDigitalInput2 !== undefined) ? Expander.EXDigitalInput2 : 0
-    property int digitalInput3: (Expander && Expander.EXDigitalInput3 !== undefined) ? Expander.EXDigitalInput3 : 0
-    property int digitalInput4: (Expander && Expander.EXDigitalInput4 !== undefined) ? Expander.EXDigitalInput4 : 0
-    property int digitalInput5: (Expander && Expander.EXDigitalInput5 !== undefined) ? Expander.EXDigitalInput5 : 0
-    property int digitalInput6: (Expander && Expander.EXDigitalInput6 !== undefined) ? Expander.EXDigitalInput6 : 0
-    property int digitalInput7: (Expander && Expander.EXDigitalInput7 !== undefined) ? Expander.EXDigitalInput7 : 0
-    property int digitalInput8: (Expander && Expander.EXDigitalInput8 !== undefined) ? Expander.EXDigitalInput8 : 0
-
-    Settings{
-        id: appSettings
-        property alias sampleActionEnabled: popUpLoader.enabled
-
-    }
+    height: 720
+    minimumHeight: 720
+    minimumWidth: 1600
+    title: qsTr("PowerTune ") + Connection.Platform
+    visible: true
+    width: 1600
 
     Component.onCompleted: {
-        popUpLoader.sourceComponent = Qt.createComponent("BrightnessPopUp.qml")
-        custom.executeOnBootAction()
-        if(Qt.platform.os === "linux" && HAVE_DDCUTIL){
-            ddcutilDigitalLoop()
-        }else{
-            digitalLoop()
-        }
+        if (popUpLoader.active)
+            popUpLoader.visible = true;
     }
-
-
-
-    Connections{
-            target: UI
-            function onBrightnessChanged() {
-                brightness.value = UI.Brightness
-            }
-    }
-
-    Item {
-        id: name
-        Component.onCompleted: Connect.checkifraspberrypi()
-    }
-
 
     SwipeView {
         id: dashView
 
-        currentIndex: 0
-        // * Disable swiping when in edit mode (UI.draggable === 1)
-        interactive: UI.draggable === 0
-
-        onCurrentIndexChanged: {
-            if (dashView.currentIndex != 0){
-               // //console.log("Object Closed")
-            }
-        }
-
-        anchors.fill: parent
         anchors.bottomMargin: prismKeyboard.visibleHeight
-        //Component.onCompleted: Connect.readavailabledashfiles()
+        anchors.fill: parent
+        currentIndex: 0
+        interactive: UI.draggable === 0 && DashboardLock.swipeAllowed
 
         Loader {
             id: firstPageLoader
-            // * Default dashboard - shows Intro until user configures via DashSelector
+
             source: Qt.resolvedUrl("Intro.qml")
         }
 
         Loader {
             id: secondPageLoader
+
             active: UI.Visibledashes > 1
             source: ""
-
         }
+
         Loader {
             id: thirdPageLoader
-            active: UI.Visibledashes > 2;
+
+            active: UI.Visibledashes > 2
             source: ""
         }
-        
+
         Loader {
             id: fourthPageLoader
-            active: UI.Visibledashes > 3;
+
+            active: UI.Visibledashes > 3
             source: ""
         }
 
         Item {
-            id:lastPage
-            SerialSettings{}
+            id: lastPage
 
-        }
-
-    }
-    // For future use
-    ExBoardAnalog{
-        id:custom
-        visible:false
-    }
-
-    Item {
-        id: mysettings
-
-        Text
-        {
-            text: custom.getRpmCheckboxSaveValue()
-        }
-        visible:false
-    }
-
-    Button {
-        id: btnfinaliseupdate
-        visible: false
-
-       text: custom.getRpmCheckboxSaveValue()
-        width: window.width / 1.5
-        height: window.height / 1.5
-        font.pixelSize: window.width / 20
-        anchors.centerIn: parent
-
-        onClicked: {
-
-            btnfinaliseupdate.text = "Please wait for reboot..."
+            SettingsManager {
+            }
         }
     }
 
     Loader {
         id: popUpLoader
-        visible: false
-        enabled: appSettings.sampleActionEnabled
+
+        active: ScreenControl.shouldShowPopupOnStartup()
         anchors.right: parent.right
+        source: active ? Qt.resolvedUrl("BrightnessPopUp.qml") : ""
+        visible: false
         width: window.width * 0.15
-        //anchors.verticalCenter: parent.verticalCenter
-        Component.onCompleted: {
-            if(popUpLoader.enabled){
-                visible = true
-            }
-           // //console.log("Brightness Loaded")
+
+        onItemChanged: {
+            if (item)
+                visible = true;
         }
     }
-
-    Drawer {
-        id: drawerpopup
-
-        width: window.width
-        height: 0.5 * window.height
-        edge: Qt.TopEdge
-        background: Rectangle {
-            color: "grey"
-            opacity: 0.8
-            Rectangle {
-                x: parent.width - 3
-                width: 1
-                height: parent.height
-                color: "black"
-            }
-        }
-
-
-        Grid {
-            id :row1
-            rows: 2
-            columns: 1
-            topPadding: window.width / 40
-            spacing: window.width / 30
-            anchors.top: drawerpopup.top
-            anchors.left:parent.left
-            Button {
-                id: btntripreset
-                text: "Trip Reset"
-                font.family: "Eurostile"
-                font.bold: true
-                width: window.width / 13
-                height: window.width / 13
-                font.pixelSize: window.width / 100
-                Component.onCompleted: {
-                    if(window.width == 800){
-                        btntripreset.width = window.width / 10
-                        btntripreset.height = window.width / 10
-                        btntripreset.font.pixelSize = window.width / 70
-
-                    }
-                }
-                onClicked: {Calculations.resettrip()}
-                background: Rectangle {
-                    radius: window.width / 10
-                    opacity: enabled ? 1 : 0.3
-                    color: btntripreset.down ? "darkgrey" : "grey"
-                    border.color: btntripreset.down ? "grey" : "darkgrey"
-                    border.width: window.width / 200
-                        }
-            }
-
-            Button {
-                id: btnshutdown
-                text: "Shutdown"
-                font.family: "Eurostile"
-                font.bold: true
-                width: window.width / 13
-                height: window.width / 13
-                font.pixelSize: window.width / 100
-                Component.onCompleted: {
-                    if(window.width == 800){
-                        btnshutdown.width = window.width / 10
-                        btnshutdown.height = window.width / 10
-                        btnshutdown.font.pixelSize = window.width / 70
-                    }
-                }
-
-                onClicked: {Connect.shutdown();}
-                background: Rectangle {
-                            //color: "red"
-                            radius: window.width / 10
-                            opacity: enabled ? 1 : 0.3
-                            color: btnshutdown.down ? "darkred" : "red"
-                            border.color: btnshutdown.down ? "red" : "darkred"
-                            border.width: window.width / 200
-                        }
-            }
-
-
-        }
-         Grid {
-             id :row2
-             rows: 1
-             columns: 2
-             spacing: window.width /50
-             topPadding: 40
-             anchors.top: row3.bottom
-             anchors.topMargin: drawerpopup.height/30
-             anchors.horizontalCenter: parent.horizontalCenter
-             visible: UI.screen
-             Image {
-                 height: window.height /15
-                 width:height
-                 id: brightnessimage
-                 source: "qrc:/Resources/graphics/brightness.png"
-             }
-         Slider {
-             id:brightness
-             width: window.width / 3
-             height: window.height /15
-             stepSize: 5
-             topPadding: 10
-             from: 20
-             to: 255
-             value: UI.Brightness
-
-             onValueChanged: {
-                      Connect.setSreenbrightness(brightness.value);
-                      AppSettings.writebrightnessettings(brightness.value);
-                      }
-             // Conditional assignment of 'from' and 'to' properties
-             Component.onCompleted: {
-                 if(window.width > 800){
-                     row2.visible = false
-                     brightness.visible = false
-                 }
-
-                 // Check if HAVE_DDCUTIL is defined
-                 if (Qt.platform.os === "linux" && HAVE_DDCUTIL) {
-                     from = 0;  // Adjust based on your requirements
-                     to = 100;  // Adjust based on your requirements
-                 } else {
-                     from = 20;  // Default values if HAVE_DDCUTIL is not defined
-                     to = 255;  // Default values if HAVE_DDCUTIL is not defined
-                 }
-             }
-         }
-     }
-
-         Grid{
-             id :row4
-             rows: 2
-             columns: 1
-             topPadding: window.width / 40
-             spacing: window.width / 30
-             anchors.top: drawerpopup.top
-             anchors.right: parent.right
-             Row{
-                 Button {
-                     id: plusBrightness
-                     font.family: "Eurostile"
-                     font.bold: true
-                     width: window.width / 13
-                     height: window.width / 13
-                     font.pixelSize: window.width / 30
-                     Component.onCompleted: {
-                         if(window.width == 800){
-                             plusBrightness.width = window.width / 10
-                             plusBrightness.height = window.width / 10
-                         }
-                     }
-                     onClicked: {
-                         if (Qt.platform.os === "linux" && HAVE_DDCUTIL) {
-                             ddcUtilBrightnessIncrease += 25;  // increase by 10% every time button is pressed
-                             if(ddcUtilBrightnessIncrease > 75){ //if the variable goes above 100 bring it back down
-                                 ddcUtilBrightnessIncrease = 75
-                             }
-
-                             Connect.setSreenbrightness(ddcUtilBrightnessIncrease); // set the brightness with the new value
-                             AppSettings.writebrightnessettings(ddcUtilBrightnessIncrease);
-                         }else{
-                             brightnessIncrease += 50
-                             if(brightnessIncrease > 250){ //if the variable goes above 250 bring it back down
-                                 brightnessIncrease = 250
-                             }
-
-                             Connect.setSreenbrightness(brightnessIncrease); // set the brightness with the new value
-                             AppSettings.writebrightnessettings(brightnessIncrease);
-                         }
-                     }
-                     background: Rectangle {
-                                 //color: "red"
-                                 radius: window.width / 10
-                                 opacity: enabled ? 1 : 0.3
-                                 color: plusBrightness.down ? "darkgrey" : "grey"
-                                 border.color: plusBrightness.down ? "grey" : "darkgrey"
-                                 border.width: window.width / 200
-                             }
-                    Image{
-                        source: "qrc:/Resources/graphics/brightnessIncrease.png"
-                        //anchors.fill: plusBrightness
-                        width: plusBrightness.width
-                        height: plusBrightness.height
-                        anchors.centerIn: plusBrightness
-                        }
-                     }
-                 }
-
-             Row{
-                 Button {
-                     id: minusBrightness
-                     font.family: "Eurostile"
-                     font.bold: true
-                     width: window.width / 13
-                     height: window.width / 13
-                     font.pixelSize: window.width / 30
-                     Component.onCompleted: {
-                         if(window.width == 800){
-                             minusBrightness.width = window.width / 10
-                             minusBrightness.height = window.width / 10
-                         }
-                     }
-
-                     onClicked: {
-                         if (Qt.platform.os === "linux" && HAVE_DDCUTIL) {
-                             ddcUtilBrightnessIncrease -= 25;  // increase by 10% every time button is pressed
-                             if(ddcUtilBrightnessIncrease < 0){ //if the variable goes above 100 bring it back down
-                                 ddcUtilBrightnessIncrease = 0
-                             }
-
-                             Connect.setSreenbrightness(ddcUtilBrightnessIncrease); // set the brightness with the new value
-                             AppSettings.writebrightnessettings(ddcUtilBrightnessIncrease);
-                         }else{
-                             brightnessIncrease -= 50
-                             if(brightnessIncrease < 25){ //if the variable goes above 250 bring it back down
-                                 brightnessIncrease = 25
-                             }
-
-                             Connect.setSreenbrightness(brightnessIncrease); // set the brightness with the new value
-                             AppSettings.writebrightnessettings(brightnessIncrease);
-                         }
-                     }
-                     background: Rectangle {
-                         radius: window.width / 10
-                         opacity: enabled ? 1 : 0.3
-                         color: minusBrightness.down ? "darkgrey" : "grey"
-                         border.color: minusBrightness.down ? "grey" : "darkgrey"
-                         border.width: window.width / 200
-                         }
-                    Image{
-                        source: "qrc:/Resources/graphics/brightnessDecrease.png"
-                        //anchors.fill: plusBrightness
-                        width: minusBrightness.width
-                        height: minusBrightness.height
-                        anchors.centerIn: minusBrightness
-                        }
-                     }
-                 }
-             }
-
-        Grid{
-            id:row3
-            columns: 1
-            spacing: window.width /160
-            anchors.top: drawerpopup.top
-            //anchors.right: drawerpopup.right
-            anchors.topMargin: drawerpopup.height/30
-            anchors.horizontalCenter: parent.horizontalCenter
-
-            Row{
-
-                Rectangle {
-                    id: switchRectangle
-                    width: window.width / 4
-                    height: window.width / 10
-                    color: "transparent"
-                    Text {
-                        id: switchText
-                        leftPadding: 70
-                        text: "Brightness Pop Up at Boot"
-                        anchors.centerIn: parent
-                        color: "black"
-                        font.family: "Eurostile"
-                        font.bold: true
-                        font.pixelSize: window.width / 70
-                        Component.onCompleted: {
-                            if(window.width == 800){
-                                switchText.font.pixelSize = 15
-                                switchRectangle.width = window.width / 2.8
-                            }
-                        }
-                    }
-                }
-
-                Switch {
-                    id: disablePopUp
-                    text:  "On"
-                    //leftPadding: 40
-                    font.family: "Eurostile"
-                    font.bold: true
-                    width: window.width / 7
-                    height: window.width / 10
-                    font.pixelSize: window.width / 70
-                    //align.left: switchText.rightMargin
-                    Component.onCompleted: {
-                        if(window.width == 800){
-                            disablePopUp.font.pixelSize = 15
-                            //disablePopUp.leftPadding = 70
-                        }
-
-                        if(popUpLoader.enabled){
-                            disablePopUp.text = "On"
-                        }else{
-                           disablePopUp.text = "Off"
-                        }
-                    }
-                    onPositionChanged: {
-                        popUpLoader.enabled = !popUpLoader.enabled;
-                        appSettings.sampleActionEnabled = popUpLoader.enabled //setValue
-                        popUpLoader.visible = false
-                        if(popUpLoader.enabled){
-                            disablePopUp.text = "On"
-                        }else{
-                           disablePopUp.text = "Off"
-                        }
-                    }
-                    contentItem: Text {
-                        leftPadding: disablePopUp.indicator.width + disablePopUp.spacing
-                        text: disablePopUp.text
-                        font: disablePopUp.font
-                        opacity: enabled ? 1.0 : 0.3
-                        //color: disablePopUp.down ? "#17a81a" : "#21be2b"
-                        elide: Text.ElideRight
-                        verticalAlignment: Text.AlignVCenter
-                    }
-                }
-            }
-        }
-    }
-
 
     PageIndicator {
         id: indicator
-        count: dashView.count
-        currentIndex: dashView.currentIndex
+
         anchors.bottom: dashView.bottom
         anchors.horizontalCenter: parent.horizontalCenter
+        count: dashView.count
+        currentIndex: dashView.currentIndex
+        visible: !DashboardLock.lockoutEnabled || DashboardLock.sessionUnlocked
     }
 
-    //Check if any of the EXDigitalInput values have changed and if so run the function.
-    onDigitalInput1Changed: {
-       // //console.log("Digital Input 1 Channel Changed" + digitalInput1)
-        if(Qt.platform.os === "linux" && HAVE_DDCUTIL){
-            ddcutilDigitalLoop()
-        }else{
-            digitalLoop()
+    PrismKeyboard {
+        id: prismKeyboard
+
+        parent: Overlay.overlay
+    }
+
+    Rectangle {
+        anchors.fill: parent
+        color: "#28000000"
+        visible: DashboardLock.lockoutEnabled && (DashboardLock.unlocking || showUnlockAnimation)
+        z: 20
+
+        Item {
+            anchors.centerIn: parent
+            height: 312
+            opacity: showUnlockAnimation ? 1.0 : 0.98
+            scale: showUnlockAnimation ? 1.0 : 0.97
+            width: 280
+
+            Behavior on opacity {
+                NumberAnimation {
+                    duration: 220
+                    easing.type: Easing.OutQuad
+                }
+            }
+            Behavior on scale {
+                NumberAnimation {
+                    duration: 260
+                    easing.type: Easing.OutBack
+                }
+            }
+
+            Rectangle {
+                anchors.fill: parent
+                border.color: showUnlockAnimation ? "#66A5D6A7" : "#334FC3F7"
+                border.width: 1
+                color: "#B0101010"
+                radius: 28
+            }
+
+            Canvas {
+                id: unlockProgressCanvas
+
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.top: parent.top
+                anchors.topMargin: 28
+                height: 168
+                width: 168
+
+                onPaint: {
+                    var ctx = getContext("2d");
+                    var lineWidth = 10;
+                    var radius = (width - lineWidth) / 2;
+                    var cx = width / 2;
+                    var cy = height / 2;
+                    var startAngle = -Math.PI / 2;
+                    var progress = showUnlockAnimation ? 1 : (DashboardLock.holdProgressPercent / 100);
+
+                    ctx.reset();
+                    ctx.lineCap = "round";
+
+                    ctx.beginPath();
+                    ctx.strokeStyle = "rgba(255,255,255,0.18)";
+                    ctx.lineWidth = lineWidth;
+                    ctx.arc(cx, cy, radius, 0, Math.PI * 2, false);
+                    ctx.stroke();
+
+                    ctx.beginPath();
+                    ctx.strokeStyle = showUnlockAnimation ? "#4CAF50" : "#4FC3F7";
+                    ctx.lineWidth = lineWidth;
+                    ctx.arc(cx, cy, radius, startAngle, startAngle + (Math.PI * 2 * progress), false);
+                    ctx.stroke();
+                }
+
+                Connections {
+                    function onHoldProgressPercentChanged() {
+                        unlockProgressCanvas.requestPaint();
+                    }
+
+                    function onUnlockingChanged() {
+                        unlockProgressCanvas.requestPaint();
+                    }
+
+                    target: DashboardLock
+                }
+
+                Connections {
+                    function onShowUnlockAnimationChanged() {
+                        unlockProgressCanvas.requestPaint();
+                    }
+
+                    target: window
+                }
+
+                onVisibleChanged: requestPaint()
+            }
+
+            MaterialIcon {
+                anchors.centerIn: unlockProgressCanvas
+                icon: showUnlockAnimation ? "lock_open" : "lock"
+                iconColor: showUnlockAnimation ? "#4CAF50" : "white"
+                iconSize: 38
+            }
+
+            Text {
+                id: unlockTitle
+
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.top: unlockProgressCanvas.bottom
+                anchors.topMargin: 20
+                color: "white"
+                font.family: SettingsTheme.fontFamily
+                font.pixelSize: 22
+                font.weight: Font.DemiBold
+                horizontalAlignment: Text.AlignHCenter
+                text: showUnlockAnimation ? "Unlocked" : "Unlocking Dashboard"
+                width: parent.width - 32
+            }
+
+            Text {
+                id: unlockSubtitle
+
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.top: unlockTitle.bottom
+                anchors.topMargin: 8
+                color: showUnlockAnimation ? "#C8E6C9" : "#CFD8DC"
+                font.family: SettingsTheme.fontFamily
+                font.pixelSize: 15
+                horizontalAlignment: Text.AlignHCenter
+                text: showUnlockAnimation ? "Settings available until reboot" : "Hold either bottom corner"
+                width: parent.width - 32
+            }
+
+            Text {
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.top: unlockSubtitle.bottom
+                anchors.topMargin: 4
+                color: showUnlockAnimation ? "#A5D6A7" : "#90CAF9"
+                font.family: SettingsTheme.fontFamily
+                font.pixelSize: 13
+                horizontalAlignment: Text.AlignHCenter
+                text: showUnlockAnimation ? "Swipe access restored" : (DashboardLock.holdProgressPercent + "% complete")
+                width: parent.width - 32
+            }
         }
     }
 
-    onDigitalInput2Changed: {
-        if(Qt.platform.os === "linux" && HAVE_DDCUTIL){
-            ddcutilDigitalLoop()
-        }else{
-            digitalLoop()
+    Rectangle {
+        anchors.bottom: parent.bottom
+        anchors.left: parent.left
+        color: "transparent"
+        height: 120
+        visible: DashboardLock.lockoutEnabled && !DashboardLock.sessionUnlocked
+        width: 120
+        z: 21
+
+        MouseArea {
+            anchors.fill: parent
+            onCanceled: DashboardLock.cancelUnlockHold()
+            onPressed: DashboardLock.beginUnlockHold()
+            onReleased: DashboardLock.cancelUnlockHold()
         }
     }
 
-    onDigitalInput3Changed: {
-        if(Qt.platform.os === "linux" && HAVE_DDCUTIL){
-            ddcutilDigitalLoop()
-        }else{
-            digitalLoop()
+    Rectangle {
+        anchors.bottom: parent.bottom
+        anchors.right: parent.right
+        color: "transparent"
+        height: 120
+        visible: DashboardLock.lockoutEnabled && !DashboardLock.sessionUnlocked
+        width: 120
+        z: 21
+
+        MouseArea {
+            anchors.fill: parent
+            onCanceled: DashboardLock.cancelUnlockHold()
+            onPressed: DashboardLock.beginUnlockHold()
+            onReleased: DashboardLock.cancelUnlockHold()
         }
     }
 
-    onDigitalInput4Changed: {
-        if(Qt.platform.os === "linux" && HAVE_DDCUTIL){
-            ddcutilDigitalLoop()
-        }else{
-            digitalLoop()
+    Connections {
+        function onActiveFocusItemChanged() {
+            var item = window.activeFocusItem;
+            if (item && item.hasOwnProperty("text") && item.hasOwnProperty("cursorPosition") && item.hasOwnProperty(
+                        "inputMethodHints") && !item.hasOwnProperty("currentIndex") && (!item.hasOwnProperty(
+                                                                                            "readOnly") ||
+                                                                                        !item.readOnly)) {
+                prismKeyboard.show(item);
+            } else {
+                if (prismKeyboard.visible)
+                    prismKeyboard.hide();
+            }
         }
+
+        target: window
     }
 
-    onDigitalInput5Changed: {
-        if(Qt.platform.os === "linux" && HAVE_DDCUTIL){
-            ddcutilDigitalLoop()
-        }else{
-            digitalLoop()
+    Connections {
+        function onSwipeAllowedChanged(allowed) {
+            if (!allowed && dashView.currentIndex === dashView.count - 1)
+                dashView.currentIndex = 0;
         }
-    }
 
-    onDigitalInput6Changed: {
-        if(Qt.platform.os === "linux" && HAVE_DDCUTIL){
-            ddcutilDigitalLoop()
-        }else{
-            digitalLoop()
+        function onSessionUnlockedChanged(unlocked) {
+            if (unlocked && DashboardLock.lockoutEnabled) {
+                showUnlockAnimation = true;
+                unlockAnimationTimer.restart();
+            }
         }
-    }
 
-    onDigitalInput7Changed: {
-        if(Qt.platform.os === "linux" && HAVE_DDCUTIL){
-            ddcutilDigitalLoop()
-        }else{
-            digitalLoop()
-        }
-    }
-
-    onDigitalInput8Changed: {
-        if(Qt.platform.os === "linux" && HAVE_DDCUTIL){
-            ddcutilDigitalLoop()
-        }else{
-            digitalLoop()
-        }
+        target: DashboardLock
     }
 
     Timer {
-      interval: 1200
-      running: true
-      onTriggered: {
-            if(custom.maxBrightnessOnBoot == 1){
-                if (Qt.platform.os === "linux" && HAVE_DDCUTIL) {
-                  Connect.setSreenbrightness(75);
-                  AppSettings.writebrightnessettings(75);
-                } else {
-                  Connect.setSreenbrightness(250);
-                  AppSettings.writebrightnessettings(250);
-                }
-            }
-        }
+        id: unlockAnimationTimer
+
+        interval: 1600
+        repeat: false
+
+        onTriggered: showUnlockAnimation = false
     }
-
-    function digitalLoop() {
-        const BRIGHTNESS_ON = 235;
-        const BRIGHTNESS_OFF = 0;
-
-        if (custom.maxBrightnessOnBoot !== 1) return; // Exit early if maxBrightnessOnBoot is not active.
-
-        // Dynamically get the relevant digitalInput based on digiValue
-        const digitalInputs = [digitalInput1, digitalInput2, digitalInput3, digitalInput4,
-                               digitalInput5, digitalInput6, digitalInput7, digitalInput8];
-        const currentInput = digitalInputs[custom.digiValue];
-
-        if (currentInput === 1) {
-            // If the input is HIGH, set brightness to OFF
-            Connect.setSreenbrightness(BRIGHTNESS_OFF);
-            AppSettings.writebrightnessettings(BRIGHTNESS_OFF);
-            //console.log(`Brightness Set to 0 for Input ${custom.digiValue + 1}`);
-        } else if (currentInput === 0) {
-            // If the input is LOW, set brightness to ON
-            Connect.setSreenbrightness(BRIGHTNESS_ON);
-            AppSettings.writebrightnessettings(BRIGHTNESS_ON);
-            //console.log(`Brightness Set to ${BRIGHTNESS_ON} for Input ${custom.digiValue + 1}`);
-        }
-    }
-
-    function ddcutilDigitalLoop() {
-        const BRIGHTNESS_ON = 60;
-        const BRIGHTNESS_OFF = 0;
-
-        if (custom.maxBrightnessOnBoot !== 1) return; // Exit early if maxBrightnessOnBoot is not active.
-
-        // Dynamically get the relevant digitalInput based on digiValue
-        const digitalInputs = [digitalInput1, digitalInput2, digitalInput3, digitalInput4,
-                               digitalInput5, digitalInput6, digitalInput7, digitalInput8];
-        const currentInput = digitalInputs[custom.digiValue];
-
-        if (currentInput === 1) {
-            // If the input is HIGH, set brightness to OFF
-            Connect.setSreenbrightness(BRIGHTNESS_OFF);
-            AppSettings.writebrightnessettings(BRIGHTNESS_OFF);
-            //console.log(`Brightness Set to 0 for Input ${custom.digiValue + 1}`);
-        } else if (currentInput === 0) {
-            // If the input is LOW, set brightness to ON
-            Connect.setSreenbrightness(BRIGHTNESS_ON);
-            AppSettings.writebrightnessettings(BRIGHTNESS_ON);
-            //console.log(`Brightness Set to ${BRIGHTNESS_ON} for Input ${custom.digiValue + 1}`);
-        }
-    }
-
-    // * Custom on-screen keyboard (replaces Qt Virtual Keyboard)
-    PrismKeyboard {
-        id: prismKeyboard
-    }
-
-    // * Auto-show/hide keyboard when text input fields gain/lose focus
-    Connections {
-        target: window
-        function onActiveFocusItemChanged() {
-            var item = window.activeFocusItem
-            if (item
-                && item.hasOwnProperty("text")
-                && item.hasOwnProperty("cursorPosition")
-                && item.hasOwnProperty("inputMethodHints")
-                && !item.hasOwnProperty("currentIndex")  // Exclude ComboBox
-                && (!item.hasOwnProperty("readOnly") || !item.readOnly)) {
-                prismKeyboard.show(item)
-            } else {
-                if (prismKeyboard.visible) {
-                    prismKeyboard.hide()
-                }
-            }
-        }
-    }
-    }
-
-
+}

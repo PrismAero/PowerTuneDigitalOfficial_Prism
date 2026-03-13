@@ -9,6 +9,7 @@
  */
 
 #include "dashboard.h"
+
 #include "Models/UIState.h"
 
 /**
@@ -16,13 +17,8 @@
  * @param parent QObject parent for Qt ownership
  */
 DashBoard::DashBoard(QObject *parent)
-    : QObject(parent),
-      m_uiState(nullptr),
-      m_steinhartCalc(nullptr),
-      m_rpmSmoother(nullptr),
-      m_speedSmoother(nullptr)
-{
-}
+    : QObject(parent), m_uiState(nullptr), m_steinhartCalc(nullptr), m_rpmSmoother(nullptr), m_speedSmoother(nullptr)
+{}
 
 /**
  * @brief Sets UIState model pointer for facade forwarding

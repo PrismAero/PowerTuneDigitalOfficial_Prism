@@ -28,18 +28,18 @@ class ConnectionData;
 class SettingsData;
 
 // * Full includes for convenience
-#include "UIState.h"
 #include "AnalogInputs.h"
+#include "ConnectionData.h"
 #include "DigitalInputs.h"
 #include "ElectricMotorData.h"
 #include "EngineData.h"
 #include "ExpanderBoardData.h"
 #include "FlagsData.h"
 #include "GPSData.h"
-#include "TimingData.h"
-#include "VehicleData.h"
 #include "SensorData.h"
-#include "ConnectionData.h"
 #include "SettingsData.h"
+#include "TimingData.h"
+#include "UIState.h"
+#include "VehicleData.h"
 
 #endif  // DATAMODELS_H

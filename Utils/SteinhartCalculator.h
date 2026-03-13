@@ -14,12 +14,14 @@
 #define STEINHARTCALCULATOR_H
 
 #include <QObject>
+
 #include <cmath>
 
 /**
  * @brief Steinhart-Hart coefficients for a single thermistor channel
  */
-struct SteinhartCoefficients {
+struct SteinhartCoefficients
+{
     long double A = 0.0;
     long double B = 0.0;
     long double C = 0.0;
@@ -51,8 +53,7 @@ public:
      * @param R2 Resistance 2 in Ohms at T2
      * @param R3 Resistance 3 in Ohms at T3
      */
-    void calibrateChannel(int channel, qreal T1, qreal T2, qreal T3,
-                          qreal R1, qreal R2, qreal R3);
+    void calibrateChannel(int channel, qreal T1, qreal T2, qreal T3, qreal R1, qreal R2, qreal R3);
 
     /**
      * @brief Set voltage divider circuit parameters for a channel
@@ -138,4 +139,4 @@ private:
     qreal m_totalResistance[MAX_CHANNELS] = {0};
 };
 
-#endif // STEINHARTCALCULATOR_H
+#endif  // STEINHARTCALCULATOR_H

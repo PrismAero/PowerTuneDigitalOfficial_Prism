@@ -2,42 +2,59 @@ import QtQuick 2.15
 
 Item {
     id: genwarning
-   anchors.fill: parent
-    property string warningtext : ""
+
+    property string warningtext: ""
+
+    anchors.fill: parent
+
     Rectangle {
         id: genwarningsquare
+
         anchors.centerIn: parent
+        color: "red"
+        height: parent.height / 1.5
         width: parent.width / 1.5
-        height:parent.height / 1.5
-        color:"red"
+
         SequentialAnimation on color {
             loops: Animation.Infinite
-            ColorAnimation { from: "red"; to: "orange"; duration: 300 }
-            ColorAnimation { from: "orange"; to: "red"; duration: 300 }
+
+            ColorAnimation {
+                duration: 300
+                from: "red"
+                to: "orange"
+            }
+
+            ColorAnimation {
+                duration: 300
+                from: "orange"
+                to: "red"
+            }
         }
 
         Text {
             id: warntxt
-            text: "Warning!!!"
-            font.pixelSize: parent.width / 13 //60
-            anchors.top : parent.top
+
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.top: parent.top
             anchors.topMargin: parent.height / 5
-            anchors.horizontalCenter: genwarningsquare.horizontalCenter
-            font.bold: true
-            font.family: "Eurostile"
             color: "black"
+            font.bold: true
+            font.family: "Lato"
+            font.pixelSize: parent.width / 13
+            text: "Warning!!!"
         }
 
         Text {
-            id : warningtxt
-            text: warningtext
-            font.pixelSize: parent.width / 20// 40
-            anchors.top : warntxt.bottom
+            id: warningtxt
+
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.top: warntxt.bottom
             anchors.topMargin: parent.height / 5
-            anchors.horizontalCenter: genwarningsquare.horizontalCenter
-            font.bold: true
-            font.family: "Eurostile"
             color: "black"
+            font.bold: true
+            font.family: "Lato"
+            font.pixelSize: parent.width / 20
+            text: warningtext
         }
     }
 }

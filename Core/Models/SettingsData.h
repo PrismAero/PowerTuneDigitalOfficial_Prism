@@ -48,7 +48,8 @@ class SettingsData : public QObject
     Q_PROPERTY(int smoothspeed READ smoothspeed WRITE setsmoothspeed NOTIFY smoothspeedChanged)
 
     // * Gear calculation parameters
-    Q_PROPERTY(int gearcalcactivation READ gearcalcactivation WRITE setgearcalcactivation NOTIFY gearcalcactivationChanged)
+    Q_PROPERTY(
+        int gearcalcactivation READ gearcalcactivation WRITE setgearcalcactivation NOTIFY gearcalcactivationChanged)
     Q_PROPERTY(int gearcalc1 READ gearcalc1 WRITE setgearcalc1 NOTIFY gearcalc1Changed)
     Q_PROPERTY(int gearcalc2 READ gearcalc2 WRITE setgearcalc2 NOTIFY gearcalc2Changed)
     Q_PROPERTY(int gearcalc3 READ gearcalc3 WRITE setgearcalc3 NOTIFY gearcalc3Changed)
@@ -74,7 +75,8 @@ class SettingsData : public QObject
     // * daemonlicense/holleyproductid moved to ConnectionData
 
     // * Additional smoothing
-    Q_PROPERTY(int smootexAnalogInput7 READ smootexAnalogInput7 WRITE setsmootexAnalogInput7 NOTIFY smootexAnalogInput7Changed)
+    Q_PROPERTY(
+        int smootexAnalogInput7 READ smootexAnalogInput7 WRITE setsmootexAnalogInput7 NOTIFY smootexAnalogInput7Changed)
 
 public:
     explicit SettingsData(QObject *parent = nullptr);
