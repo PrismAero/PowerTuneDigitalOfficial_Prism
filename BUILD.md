@@ -42,7 +42,20 @@ cmake --build build/macos-homebrew --parallel
 The preset build output is `build/macos-homebrew/PowerTuneQMLGui.app/Contents/MacOS/PowerTuneQMLGui`.
 
 This build is for UI development, QML iteration, and testing only. It does not
-produce an ARM binary.
+produce an ARM Linux binary for the target device.
+
+## 1.1 Yocto Host On A Mac
+
+Full Yocto image builds still require a Linux host. On Apple Silicon macOS, the
+supported path is:
+
+1. run Ubuntu 22.04 on the Mac in a VM
+2. clone the Yocto layer stack inside that Linux guest
+3. run `Scripts/bootstrap-yocto-ubuntu.sh` inside the Linux guest
+4. build `powertune-app` or the full `powertune-image` from there
+
+The Mac remains the control machine for packaging source, deploying prebuilt
+binaries, collecting backups, and reading logs from the target over SSH.
 
 ## 2. Cross-Compile Build (Yocto on Build Server)
 
@@ -183,23 +196,35 @@ The build is configured in `build-powertune/conf/local.conf`:
 | App log | `/var/log/powertune.log` |
 | Settings | `/home/root/.config/PowerTune/PowerTune.conf` |
 
-### 3.2 Quick Deploy (Binary Only)
+### 3.2 Mac-Driven Deployment Scripts
 
-After building the app with Yocto (Section 2.5), deploy just the binary:
+All normal target operations should be driven from the Mac, not by logging into
+the target manually.
+
+The target is resolved from `remotessh.login` by the helper scripts.
 
 ```sh
-# From the build server
-BINARY=~/powertune-yocto/build-powertune/tmp/work/cortexa7t2hf-neon-vfpv4-poky-linux-gnueabi/powertune-app/1.0-r0/image/opt/PowerTune/PowerTuneQMLGui
+# Back up the current target deployment to target-backups/
+./Scripts/backup-target-state.sh
 
-# Stop the running app on the Pi
-ssh root@192.168.15.129 "/etc/init.d/powertune stop"
+# Tail the target app log from the Mac
+./Scripts/tail-target-log.sh
 
-# Copy the new binary
-scp "$BINARY" root@192.168.15.129:/opt/PowerTune/PowerTuneQMLGui
+# Check current can0 state, app log, and CAN traffic sample
+./Scripts/check-target-can.sh
 
-# Restart
-ssh root@192.168.15.129 "/etc/init.d/powertune start"
+# Deploy the repo-managed init/runtime files and disable legacy startdaemon.sh
+./Scripts/deploy-target-runtime.sh
+
+# Deploy a prebuilt ARM binary only
+./Scripts/deploy-prebuilt-binary.sh /absolute/path/to/PowerTuneQMLGui
+
+# Full native-CAN deploy: runtime files + binary + post-check
+./Scripts/deploy-native-can-target.sh /absolute/path/to/PowerTuneQMLGui
 ```
+
+These scripts use SSH and SCP under the hood, but all actions are initiated from
+the Mac terminal.
 
 ### 3.3 Full Image Flash
 
@@ -217,10 +242,15 @@ sync
 The app starts automatically at boot via SysVinit:
 
 - **Init script**: `/etc/init.d/powertune` (installed at priority 99)
-- **CAN daemon**: `/home/pi/startdaemon.sh` brings up `can0` and starts `Generic`
+- Legacy deployed images may still contain `/home/pi/startdaemon.sh` and the
+  `Generic` daemon.
+- The target native-CAN runtime direction is for the app to own `can0` startup
+  and EX communication directly.
+- `Scripts/deploy-target-runtime.sh` installs the repo-managed init script and
+  disables the legacy `startdaemon.sh` bootstrap on the target.
 - **Recovery**: If `PowerTuneQMLGui` fails to launch, `/home/pi/Recovery/Recovery` is started
 
-Manual control:
+Manual control, if needed:
 
 ```sh
 ssh root@192.168.15.129

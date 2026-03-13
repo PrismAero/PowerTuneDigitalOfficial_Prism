@@ -12,7 +12,6 @@ SettingsPage {
     property int connected: 0
     property int currentLanguage: (Settings && Settings.language !== undefined) ? Settings.language : 0
     readonly property var ecuBackendMap: [5, 0, 4]
-    readonly property int genericCanDaemonIndex: 40
     property int hexstring: 0
     property int hexstring2: 0
     readonly property bool isExtenderOnly: ecuBackendMap[ecuSelect.currentIndex] === 5
@@ -432,19 +431,7 @@ SettingsPage {
 
             SettingsSection {
                 Layout.fillWidth: true
-                title: Translator.translate("Daemon / Startup", Settings.language)
-                visible: !isExtenderOnly
-
-                SettingsRow {
-                    label: Translator.translate("Daemon", Settings.language)
-
-                    StyledComboBox {
-                        enabled: false
-                        height: parent.height
-                        model: ["Generic CAN"]
-                        width: parent.width
-                    }
-                }
+                title: Translator.translate("Startup", Settings.language)
 
                 SettingsRow {
                     label: Translator.translate("Speed Source", Settings.language)
@@ -465,12 +452,9 @@ SettingsPage {
                 }
 
                 StyledButton {
-                    text: Translator.translate("Apply Startup", Settings.language)
+                    text: Translator.translate("Apply CAN Settings", Settings.language)
 
-                    onClicked: {
-                        Connect.daemonstartup(genericCanDaemonIndex);
-                        Connect.canbitratesetup(canbitrateselect.currentIndex);
-                    }
+                    onClicked: Connect.canbitratesetup(canbitrateselect.currentIndex)
                 }
             }
 

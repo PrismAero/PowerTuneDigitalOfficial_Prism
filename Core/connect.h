@@ -68,6 +68,9 @@ class ExBoardConfigManager;
 class OverlayConfigDefaults;
 class ScreenControlService;
 class DashboardLockService;
+class CanStartupManager;
+class CanTransport;
+class CanManager;
 
 class Connect : public QObject
 {
@@ -114,7 +117,6 @@ public:
     Q_INVOKABLE void checkReg();
     Q_INVOKABLE void checkOBDReg();
     Q_INVOKABLE void LiveReqMsgOBD(const QString &obdpids);
-    Q_INVOKABLE void daemonstartup(const int &daemon);
     Q_INVOKABLE void canbitratesetup(const int &cansetting);
     Q_INVOKABLE void LiveReqMsg(const QVariantList &values);
     Q_INVOKABLE void openConnection(const QString &portName, const int &ecuSelect, const int &canbase,
@@ -128,13 +130,15 @@ public:
     Q_INVOKABLE void candump();
     Q_INVOKABLE void minicom();
     Q_INVOKABLE void RequestLicence();
-    Q_INVOKABLE void restartDaemon();
 
 
 public:
     QStringList portsNames() const { return m_portsNames; }
 
 private:
+    int canBitrateForSelection(int selection) const;
+    bool startActiveCanModule();
+
     DashBoard *m_dashBoard;
     AppSettings *m_appSettings;
     udpreceiver *m_udpreceiver;
@@ -178,6 +182,9 @@ private:
     OverlayConfigDefaults *m_overlayConfigDefaults;
     ScreenControlService *m_screenControlService;
     DashboardLockService *m_dashboardLockService;
+    CanStartupManager *m_canStartupManager;
+    CanTransport *m_canTransport;
+    CanManager *m_canManager;
     BrightnessMethod m_brightnessMethod = BrightnessMethod::None;
 
     int m_ecu = 0;
@@ -195,7 +202,6 @@ signals:
     void sig_portsNamesChanged(QStringList portsNames);
 
 public slots:
-    void updatefinished(int exitCode, QProcess::ExitStatus exitStatus);
     void setPortsNames(QStringList portsNames)
     {
         if (m_portsNames == portsNames)

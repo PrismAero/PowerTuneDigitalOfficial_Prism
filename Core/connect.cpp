@@ -21,6 +21,9 @@
 
 #include "connect.h"
 
+#include "../Can/CanManager.h"
+#include "../Can/CanStartupManager.h"
+#include "../Can/CanTransport.h"
 #include "../Hardware/Extender.h"
 #include "../Utils/Calculations.h"
 #include "../Utils/CalibrationHelper.h"
@@ -98,7 +101,10 @@ Connect::Connect(QObject *parent)
       m_sensorRegistry(nullptr),
       m_diagnosticsProvider(nullptr),
       m_screenControlService(nullptr),
-      m_dashboardLockService(nullptr)
+      m_dashboardLockService(nullptr),
+      m_canStartupManager(nullptr),
+      m_canTransport(nullptr),
+      m_canManager(nullptr)
 
 {
     m_dashBoard = new DashBoard(this);
@@ -141,6 +147,11 @@ Connect::Connect(QObject *parent)
     // * Phase 4: Extender now writes directly to domain models
     m_extender = new Extender(m_digitalInputs, m_expanderBoardData, m_engineData, m_settingsData, m_vehicleData,
                               m_connectionData, this);
+    m_canStartupManager = new CanStartupManager(this);
+    m_canTransport = new CanTransport(this);
+    m_canManager = new CanManager(this);
+    m_canManager->setTransport(m_canTransport);
+    m_canManager->registerModule(m_extender);
     // * Phase 6: Create SteinhartCalculator, wire into Extender, connect calibration signals
     m_steinhartCalc = new SteinhartCalculator(this);
     m_extender->setSteinhartCalculator(m_steinhartCalc);
@@ -155,6 +166,22 @@ Connect::Connect(QObject *parent)
     m_diagnosticsProvider->setSensorRegistry(m_sensorRegistry);
     m_diagnosticsProvider->setPropertyRouter(m_propertyRouter);
     m_extender->setDiagnosticsProvider(m_diagnosticsProvider);
+    connect(m_canStartupManager, &CanStartupManager::startupFailed, this, [this](const QString &reason) {
+        if (m_diagnosticsProvider) {
+            m_diagnosticsProvider->addLogMessage(QStringLiteral("ERROR"), reason);
+            m_diagnosticsProvider->recordCanError();
+        }
+    });
+    connect(m_canTransport, &CanTransport::errorOccurred, this, [this](const QString &message) {
+        if (m_diagnosticsProvider) {
+            m_diagnosticsProvider->addLogMessage(QStringLiteral("ERROR"), message);
+            m_diagnosticsProvider->recordCanError();
+        }
+    });
+    connect(m_canManager, &CanManager::activationFailed, this, [this](const QString &reason) {
+        if (m_diagnosticsProvider)
+            m_diagnosticsProvider->addLogMessage(QStringLiteral("ERROR"), reason);
+    });
     m_overlayConfigManager = new OverlayConfigManager(this);
     m_shiftIndicatorHelper = new ShiftIndicatorHelper(this);
     m_canFrameModel = new CanFrameModel(m_connectionData, m_extender, this);
@@ -541,172 +568,41 @@ void Connect::LiveReqMsgOBD(const QString &obdpids)
     reboot();
 }
 
-static const QHash<int, QString> s_daemonMap = {
-    {0, ""},
-    {1, "./Haltechd"},
-    {2, "./Linkd"},
-    {3, "./Microtechd"},
-    {4, "./Consult /dev/ttyUSB0"},
-    {5, "./M800ADLSet1d"},
-    {6, "./OBD /dev/ttyUSB0"},
-    {7, "./Hondatad"},
-    {8, "./AdaptronicCANd"},
-    {9, "./MotecM1d"},
-    {10, "./AEMV2d"},
-    {11, "./AudiB7d"},
-    {12, "./BRZFRS86d"},
-    {13, "./EMUCANd"},
-    {14, "./AudiB8d"},
-    {15, "./Emtrond"},
-    {16, "./Holleyd"},
-    {17, "./MaxxECUd"},
-    {18, "./FordBarraFGMK1CAN"},
-    {19, "./FordBarraFGMK1CANOBD"},
-    {20, "./FordBarraBXCAN"},
-    {21, "./FordBarraBXCANOBD"},
-    {22, "./FordBarraFG2xCAN"},
-    {23, "./FordBarraFG2XCANOBD"},
-    {24, "./EVOXCAN"},
-    {25, "./BlackboxM3"},
-    {26, "./NISSAN370Z"},
-    {27, "./GMCANd"},
-    {28, "./NISSAN350Z"},
-    {29, "./MegasquirtCan"},
-    {30, "./EMSCAN"},
-    {31, "./WRX2012"},
-    {32, "./M800ADLSet3d"},
-    {33, "./Testdaemon"},
-    {34, "./ecoboost"},
-    {35, "./Emerald"},
-    {36, "./WolfEMS"},
-    {37, "./GMCANOBD"},
-    {38, ""},
-    {39, "./HondataS300"},
-    {40, "./genericcan"},
-    {41, "./ME13"},
-    {42, "./FTCAN20"},
-    {43, "./Delta"},
-    {44, "./BigNET"},
-    {45, "./BigNETLamda"},
-    {46, "./R35"},
-    {47, "./Prado"},
-    {48, "./WRX2016"},
-    {49, "./LifeRacing"},
-    {50, "./DTAFast"},
-    {51, "./ProEFI"},
-    {52, "./TeslaSDU"},
-    {53, "./NeuroBasic"},
-    {54, "./GR_Yaris"},
-    {55, "./SyvecsS7"},
-    {56, "./Rsport"},
-    {57, "./Generic"},
-    {58, "./Edelbrock"},
-    {59, "./Boostec"},
-    {60, "./HEFI"},
-};
-
-void Connect::daemonstartup(const int &daemon)
-{
-    auto it = s_daemonMap.constFind(daemon);
-    const QString daemonstart = (it != s_daemonMap.constEnd()) ? it.value() : QString();
-
-
-    QString fileName = "/home/pi/startdaemon.sh";  // This will be the correct path on pi
-    // QString fileName = "startdaemon.sh";//for testing on windows
-    QFile mFile(fileName);
-
-    if (daemonstart == "./Consult /dev/ttyUSB0") {
-        qDebug() << "Consult Selected";
-        mFile.open(QIODevice::ReadWrite | QIODevice::Truncate | QIODevice::Text);
-        QTextStream out(&mFile);
-        out << "#!/bin/sh" << Qt::endl
-            << "sudo ifdown can0" << Qt::endl
-            << "sudo ifup can0" << Qt::endl
-            << "#PLMS Consult Cable drivers" << Qt::endl
-            << "sudo modprobe ftdi_sio" << Qt::endl
-            << "sudo sh -c 'echo \"0403 c7d9\" > /sys/bus/usb-serial/drivers/ftdi_sio/new_id'" << Qt::endl
-            << "sleep 1.5" << Qt::endl
-            << "cd /home/pi/daemons" << Qt::endl
-            << daemonstart << Qt::endl;
-        mFile.close();
-    } else {
-        qDebug() << "No Consult Selected";
-        mFile.open(QIODevice::ReadWrite | QIODevice::Truncate | QIODevice::Text);
-        QTextStream out(&mFile);
-        out << "#!/bin/sh" << Qt::endl
-            << "sudo ifdown can0" << Qt::endl
-            << "sudo ifup can0" << Qt::endl
-            << "cd /home/pi/daemons" << Qt::endl
-            << daemonstart << Qt::endl;
-        mFile.close();
-    }
-}
-
 void Connect::canbitratesetup(const int &cansetting)
 {
-    QString canbitrate;
-    switch (cansetting) {
-    case 0:
-        canbitrate = "250000";
-        break;
-    case 1:
-        canbitrate = "500000";
-        break;
-    case 2:
-        canbitrate = "1000000";
-        break;
-    }
-    QString fileName = "/etc/network/interfaces";
-    QFile mFile(fileName);
-    mFile.open(QIODevice::ReadWrite | QIODevice::Truncate | QIODevice::Text);
+    if (m_appSettings)
+        m_appSettings->setValue(QStringLiteral("ui/bitrateSelect"), cansetting);
 
-    QString path = "/etc/wpa_supplicant/";
-
-    if (QFileInfo::exists(path)) {
-        QTextStream out(&mFile);
-        out << "# interfaces(5) file used by ifup(8) and ifdown(8)" << Qt::endl
-            << "# Please note that this file is written to be used with dhcpcd" << Qt::endl
-            << "# For static IP, consult /etc/dhcpcd.conf and 'man dhcpcd.conf'" << Qt::endl
-            << "# Include files from /etc/network/interfaces.d:" << Qt::endl
-            << "source-directory /etc/network/interfaces.d" << Qt::endl
-            << "#Automatically start CAN Interface" << Qt::endl
-            << "auto can0" << Qt::endl
-            << "iface can0 can static" << Qt::endl
-            << "bitrate " << canbitrate << Qt::endl;
-    } else {
-        // Custo Yocto image
-
-        QTextStream out(&mFile);
-        out << "#!/bin/sh" << Qt::endl
-            << "# /etc/network/interfaces -- configuration file for ifup(8), ifdown(8)" << Qt::endl
-            << "# The loopback interface" << Qt::endl
-            << "auto lo" << Qt::endl
-            << "iface lo inet loopback" << Qt::endl
-            << "# Wireless interfaces" << Qt::endl
-            << "auto wlan0" << Qt::endl
-            << "    iface wlan0 inet dhcp" << Qt::endl
-            << "    hostname PowerTuneDigital" << Qt::endl
-            << "    wireless_mode managed" << Qt::endl
-            << "   wireless_essid any" << Qt::endl
-            << "   wpa-driver wext" << Qt::endl
-            << "    wpa-conf /etc/wpa_supplicant.conf" << Qt::endl
-            << "    iface atml0 inet dhcp" << Qt::endl
-            << "# Wired or wireless interfaces" << Qt::endl
-            << "auto eth0" << Qt::endl
-            << "    iface eth0 inet dhcp" << Qt::endl
-            << "# Automatically start CAN Interface" << Qt::endl
-            << "    auto can0" << Qt::endl
-            << "   iface can0 inet manual" << Qt::endl
-            << "    pre-up /sbin/ip link set can0 type can bitrate " << canbitrate << Qt::endl
-            << "    up /sbin/ifconfig can0 up" << Qt::endl
-            << "    down /sbin/ifconfig can0 down" << Qt::endl;
+    const int bitrate = canBitrateForSelection(cansetting);
+    if (bitrate <= 0) {
+        if (m_connectionData)
+            m_connectionData->setSerialStat(QStringLiteral("Unsupported CAN bitrate selection"));
+        return;
     }
 
+    if (!m_canTransport || !m_canTransport->isConnected()) {
+        if (m_connectionData)
+            m_connectionData->setSerialStat(QStringLiteral("CAN bitrate saved and will apply on next connection"));
+        if (m_diagnosticsProvider) {
+            m_diagnosticsProvider->addLogMessage(QStringLiteral("INFO"),
+                                                 QStringLiteral("Saved CAN bitrate %1 for next startup").arg(bitrate));
+        }
+        return;
+    }
 
-    mFile.close();
+    if (m_canManager)
+        m_canManager->deactivateModule();
+    if (m_canTransport)
+        m_canTransport->close();
 
-    // Reboot the PI for settings to take Effect
-    reboot();
+    if (!startActiveCanModule()) {
+        if (m_connectionData)
+            m_connectionData->setSerialStat(QStringLiteral("Failed to apply CAN bitrate %1").arg(bitrate));
+        return;
+    }
+
+    if (m_connectionData)
+        m_connectionData->setSerialStat(QStringLiteral("Applied CAN bitrate %1").arg(bitrate));
 }
 
 
@@ -804,20 +700,90 @@ void Connect::openConnection(const QString &portName, const int &ecuSelect, cons
         m_diagnosticsProvider->addLogMessage(
             QStringLiteral("INFO"),
             QStringLiteral("Opening connection (ECU=%1, CAN base=%2)").arg(ecuSelect).arg(canbase));
-        m_diagnosticsProvider->setCanStatus(true, QStringLiteral("Generic CAN"));
+        m_diagnosticsProvider->setCanStatus(false, QString());
     }
 
-    m_extender->openCAN(m_canBaseAddress, m_rpmCanBaseAddress);
-    m_udpreceiver->startreceiver();
+    if (!startActiveCanModule()) {
+        if (m_connectionData)
+            m_connectionData->setSerialStat(QStringLiteral("Native CAN startup failed"));
+        return;
+    }
+
+    if (m_diagnosticsProvider) {
+        m_diagnosticsProvider->setCanStatus(true, QStringLiteral("EX Board CAN"));
+        m_diagnosticsProvider->setConnectionInfo(false, QString(), 0, QStringLiteral("CAN"));
+    }
+
+    if (m_connectionData)
+        m_connectionData->setSerialStat(QStringLiteral("Native CAN active"));
 }
 void Connect::closeConnection()
 {
+    if (m_canManager)
+        m_canManager->deactivateModule();
+    if (m_canTransport)
+        m_canTransport->close();
+
     if (m_diagnosticsProvider) {
         m_diagnosticsProvider->addLogMessage(QStringLiteral("INFO"), QStringLiteral("Connection closed"));
         m_diagnosticsProvider->setCanStatus(false, QString());
     }
     m_calculations->stop();
     m_udpreceiver->closeConnection();
+}
+
+int Connect::canBitrateForSelection(int selection) const
+{
+    switch (selection) {
+    case 0:
+        return 250000;
+    case 1:
+        return 500000;
+    case 2:
+        return 1000000;
+    default:
+        return 0;
+    }
+}
+
+bool Connect::startActiveCanModule()
+{
+    if (!m_canStartupManager || !m_canTransport || !m_canManager)
+        return false;
+
+    if (!m_canManager->hasModule(m_ecu)) {
+        if (m_diagnosticsProvider) {
+            m_diagnosticsProvider->addLogMessage(
+                QStringLiteral("ERROR"),
+                QStringLiteral("ECU backend %1 does not have a native CAN module in this phase").arg(m_ecu));
+        }
+        return false;
+    }
+
+    const int bitrateSelection = m_appSettings ? m_appSettings->getValue(QStringLiteral("ui/bitrateSelect"), 2).toInt() : 2;
+    const int bitrate = canBitrateForSelection(bitrateSelection);
+    if (bitrate <= 0) {
+        if (m_diagnosticsProvider)
+            m_diagnosticsProvider->addLogMessage(QStringLiteral("ERROR"), QStringLiteral("Invalid CAN bitrate setting"));
+        return false;
+    }
+
+    if (!m_canStartupManager->prepareInterface(QStringLiteral("can0"), bitrate))
+        return false;
+
+    m_canTransport->setInterfaceName(QStringLiteral("can0"));
+    if (!m_canTransport->open())
+        return false;
+
+    const QVariantMap moduleConfig = {{QStringLiteral("canBaseId"), m_canBaseAddress},
+                                      {QStringLiteral("rpmBaseId"), m_rpmCanBaseAddress}};
+
+    if (!m_canManager->activateModule(m_ecu, moduleConfig)) {
+        m_canTransport->close();
+        return false;
+    }
+
+    return true;
 }
 
 void Connect::update()
@@ -924,20 +890,6 @@ void Connect::processOutput()
     m_connectionData->setSerialStat(output);
 }
 
-void Connect::updatefinished(int exitCode, QProcess::ExitStatus exitStatus)
-{
-    // qDebug() << "code" <<exitCode;
-    // qDebug() << "status" <<exitStatus;
-    QString fileName = "/home/pi/build/PowertuneQMLGui";
-    QFile file(fileName);
-    if (QFileInfo::exists(fileName)) {
-        m_connectionData->setSerialStat("Update Successful");
-        file.close();
-    } else {
-        m_connectionData->setSerialStat("Update Unsuccessful");
-    }
-}
-
 void Connect::RequestLicence()
 {
     QProcess *process = new QProcess(this);
@@ -959,15 +911,3 @@ void Connect::RequestLicence()
     }
 }
 
-
-void Connect::restartDaemon()
-{
-    if (m_diagnosticsProvider)
-        m_diagnosticsProvider->addLogMessage(QStringLiteral("INFO"), QStringLiteral("Daemon restart initiated"));
-    QProcess *process = new QProcess(this);
-    QString program = "/home/pi/startdaemon.sh";
-    QStringList arguments;
-
-    process->start(program, arguments);
-    connect(process, &QProcess::readyReadStandardOutput, this, &Connect::processOutput);
-}

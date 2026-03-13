@@ -92,6 +92,21 @@ set(CORE_HEADERS
     Core/Models/CanFrameModel.h
 )
 
+set(CAN_SOURCES
+    Can/CanStartupManager.cpp
+    Can/CanTransport.cpp
+    Can/CanManager.cpp
+    Can/Protocols/ExBoardCan.cpp
+)
+
+set(CAN_HEADERS
+    Can/CanInterface.h
+    Can/CanStartupManager.h
+    Can/CanTransport.h
+    Can/CanManager.h
+    Can/Protocols/ExBoardCan.h
+)
+
 # * Source files - Hardware interfaces
 set(HARDWARE_SOURCES
     Hardware/Extender.cpp
@@ -138,12 +153,14 @@ set(UTILS_HEADERS
 set(PROJECT_SOURCES
     main.cpp
     ${CORE_SOURCES}
+    ${CAN_SOURCES}
     ${HARDWARE_SOURCES}
     ${UTILS_SOURCES}
 )
 
 set(PROJECT_HEADERS
     ${CORE_HEADERS}
+    ${CAN_HEADERS}
     ${HARDWARE_HEADERS}
     ${UTILS_HEADERS}
 )
@@ -158,6 +175,7 @@ qt_add_executable(${PROJECT_NAME}
 # * Include directories
 target_include_directories(${PROJECT_NAME} PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}/Can
     ${CMAKE_CURRENT_SOURCE_DIR}/Core
     ${CMAKE_CURRENT_SOURCE_DIR}/Hardware
     ${CMAKE_CURRENT_SOURCE_DIR}/Utils

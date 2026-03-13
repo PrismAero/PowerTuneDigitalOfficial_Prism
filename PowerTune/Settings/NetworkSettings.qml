@@ -155,34 +155,13 @@ SettingsPage {
                 Layout.fillWidth: true
                 title: Translator.translate("System Actions", Settings.language)
 
-                RowLayout {
-                    spacing: SettingsTheme.sectionPadding
-
-                    StyledButton {
-                        id: updateBtn
-
-                        text: Translator.translate("Update", Settings.language)
-
-                        onClicked: {
-                            Diagnostics.addLogMessage("INFO", "System update initiated");
-                            consoleText.append("[System] Update initiated...");
-                            Connect.update();
-                            updateBtn.enabled = false;
-                        }
-                    }
-
-                    StyledButton {
-                        id: develtest
-
-                        primary: false
-                        text: Translator.translate("Restart daemon", Settings.language)
-
-                        onClicked: {
-                            Diagnostics.addLogMessage("INFO", "Daemon restart initiated");
-                            consoleText.append("[System] Restarting daemon...");
-                            Connect.restartDaemon();
-                        }
-                    }
+                Text {
+                    Layout.fillWidth: true
+                    color: SettingsTheme.textSecondary
+                    font.family: SettingsTheme.fontFamily
+                    font.pixelSize: SettingsTheme.fontCaption
+                    wrapMode: Text.WordWrap
+                    text: "App updates and service restarts are now handled by the external deployment workflow. Use the local deploy scripts to copy a prebuilt binary to the target and inspect logs over SSH."
                 }
             }
 

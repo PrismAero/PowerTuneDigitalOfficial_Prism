@@ -115,6 +115,7 @@ reference_sourcecode/
 
 # Device backup (too large for git)
 device-backup/
+target-backups/
 
 # Remote SSH credentials
 remotessh.login
