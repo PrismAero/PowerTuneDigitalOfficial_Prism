@@ -33,7 +33,9 @@ sudo apt-get install -y \
     xterm \
     zstd \
     file \
-    locales
+    locales \
+    lz4 \
+    liblz4-tool
 
 sudo locale-gen en_US.UTF-8
 sudo update-locale LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8

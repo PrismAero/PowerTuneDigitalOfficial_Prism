@@ -1,0 +1,56 @@
+# Machine
+MACHINE = "raspberrypi4"
+
+# Distro
+DISTRO = "poky"
+
+# Init system: SysVinit
+DISTRO_FEATURES:append = " sysvinit"
+DISTRO_FEATURES_BACKFILL_CONSIDERED:append = " systemd"
+VIRTUAL-RUNTIME_init_manager = "sysvinit"
+VIRTUAL-RUNTIME_initscripts = "initscripts"
+
+# GPU memory 256MB
+GPU_MEM = "256"
+
+# Graphics: VC4 KMS/DRM (no X11, no Wayland)
+DISTRO_FEATURES:remove = "x11 wayland"
+DISTRO_FEATURES:append = " opengl"
+
+# Enable VC4 graphics driver
+MACHINE_FEATURES:append = " vc4graphics"
+
+# Qt EGLFS with GBM/KMS, libinput, xkbcommon
+PACKAGECONFIG:append:pn-qtbase = " eglfs gbm kms libinput xkbcommon"
+
+# Qt serialbus and serialport
+PACKAGECONFIG:append:pn-qtserialbus = " socketcan"
+
+# CAN bus support
+KERNEL_MODULE_AUTOLOAD:append = " can can-raw can-bcm mcp251x spi-bcm2835"
+
+# Image format
+IMAGE_FSTYPES = "wic wic.bz2"
+
+# CMake flags for powertune-app
+EXTRA_OECMAKE:pn-powertune-app = "-DCMAKE_BUILD_TYPE=Release -DFORCE_DDCUTIL=ON"
+
+# Parallel build
+BB_NUMBER_THREADS ?= "${@oe.utils.cpu_count()}"
+PARALLEL_MAKE ?= "-j ${@oe.utils.cpu_count()}"
+
+# Download directory (shared across builds)
+DL_DIR ?= "${TOPDIR}/../downloads"
+
+# Shared state cache
+SSTATE_DIR ?= "${TOPDIR}/../sstate-cache"
+
+# Tmp directory
+TMPDIR = "${TOPDIR}/tmp"
+
+# Accept all license types for closed-source recipes
+LICENSE_FLAGS_ACCEPTED = "commercial"
+
+# Package manager for runtime updates
+PACKAGE_CLASSES = "package_ipk"
+EXTRA_IMAGE_FEATURES = "package-management"
