@@ -482,6 +482,12 @@ void ExBoardCan::onFrameReceived(const QCanBusFrame &frame)
         if (m_sensorRegistry) {
             for (int i = 1; i <= 8; ++i)
                 m_sensorRegistry->markCanSensorActive(QStringLiteral("EXDigitalInput%1").arg(i));
+            if (m_rpmSource == 2)
+                m_sensorRegistry->markCanSensorActive(QStringLiteral("frequencyDIEX1"));
+            if (m_speedConfig.enabled)
+                m_sensorRegistry->markCanSensorActive(QStringLiteral("EXSpeed"));
+            if (m_gearConfig.enabled)
+                m_sensorRegistry->markCanSensorActive(QStringLiteral("EXGear"));
         }
     }
 
@@ -493,8 +499,10 @@ void ExBoardCan::onFrameReceived(const QCanBusFrame &frame)
             m_expanderBoardData->setEXAnalogInput3(pkgpayload[3] * 0.001);
         }
         if (m_sensorRegistry) {
-            for (int i = 0; i <= 3; ++i)
+            for (int i = 0; i <= 3; ++i) {
                 m_sensorRegistry->markCanSensorActive(QStringLiteral("EXAnalogInput%1").arg(i));
+                m_sensorRegistry->markCanSensorActive(QStringLiteral("EXAnalogCalc%1").arg(i));
+            }
         }
     }
 
@@ -506,8 +514,10 @@ void ExBoardCan::onFrameReceived(const QCanBusFrame &frame)
             m_expanderBoardData->setEXAnalogInput7(pkgpayload[3] * 0.001);
         }
         if (m_sensorRegistry) {
-            for (int i = 4; i <= 7; ++i)
+            for (int i = 4; i <= 7; ++i) {
                 m_sensorRegistry->markCanSensorActive(QStringLiteral("EXAnalogInput%1").arg(i));
+                m_sensorRegistry->markCanSensorActive(QStringLiteral("EXAnalogCalc%1").arg(i));
+            }
         }
     }
 

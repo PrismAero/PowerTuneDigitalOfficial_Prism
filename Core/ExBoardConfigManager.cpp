@@ -647,3 +647,36 @@ void ExBoardConfigManager::syncChannelSensorMetadata(int channel) const
     m_sensorRegistry->updateSensorMetadata(QStringLiteral("EXAnalogCalc%1").arg(channel), metadata.unit,
                                            metadata.decimals, metadata.maxValue, metadata.stepSize);
 }
+
+QVariantMap ExBoardConfigManager::getDifferentialSensorConfig() const
+{
+    if (!m_appSettings)
+        return {};
+
+    QVariantMap cfg;
+    cfg[QStringLiteral("enabled")] = m_appSettings->getValue(QStringLiteral("ui/exboard/diffSensor_enabled"), false).toBool();
+    cfg[QStringLiteral("channelA")] = m_appSettings->getValue(QStringLiteral("ui/exboard/diffSensor_channelA"), 0).toInt();
+    cfg[QStringLiteral("channelB")] = m_appSettings->getValue(QStringLiteral("ui/exboard/diffSensor_channelB"), 1).toInt();
+    cfg[QStringLiteral("formula")] = m_appSettings->getValue(QStringLiteral("ui/exboard/diffSensor_formula"), QStringLiteral("percentage")).toString();
+    cfg[QStringLiteral("offset")] = m_appSettings->getValue(QStringLiteral("ui/exboard/diffSensor_offset"), 0.0).toDouble();
+    return cfg;
+}
+
+void ExBoardConfigManager::saveDifferentialSensorConfig(const QVariantMap &config)
+{
+    if (!m_appSettings)
+        return;
+
+    if (config.contains(QStringLiteral("enabled")))
+        m_appSettings->setValue(QStringLiteral("ui/exboard/diffSensor_enabled"), config.value(QStringLiteral("enabled")));
+    if (config.contains(QStringLiteral("channelA")))
+        m_appSettings->setValue(QStringLiteral("ui/exboard/diffSensor_channelA"), config.value(QStringLiteral("channelA")));
+    if (config.contains(QStringLiteral("channelB")))
+        m_appSettings->setValue(QStringLiteral("ui/exboard/diffSensor_channelB"), config.value(QStringLiteral("channelB")));
+    if (config.contains(QStringLiteral("formula")))
+        m_appSettings->setValue(QStringLiteral("ui/exboard/diffSensor_formula"), config.value(QStringLiteral("formula")));
+    if (config.contains(QStringLiteral("offset")))
+        m_appSettings->setValue(QStringLiteral("ui/exboard/diffSensor_offset"), config.value(QStringLiteral("offset")));
+
+    emit configChanged();
+}

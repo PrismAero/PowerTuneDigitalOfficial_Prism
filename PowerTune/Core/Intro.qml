@@ -9,15 +9,20 @@ Rectangle {
     color: "black"
 
     Image {
+        id: introLogo
+
+        anchors.centerIn: parent
         fillMode: Image.PreserveAspectFit
         height: parent.height
-        // * Use bundled logo, fallback to Linux path for Pi deployment
-        source: {
-            if (Qt.platform.os === "linux") {
-                return "file:///home/pi/Logo/Logo.png";
-            }
-            return "qrc:/Resources/graphics/Logo.png";
-        }
         width: parent.width
+
+        // Use the bundled resource first so the default page still renders
+        // even if the external deployment asset is missing or unreadable.
+        source: "qrc:/Resources/graphics/Logo.png"
+
+        onStatusChanged: {
+            if (status === Image.Error && source !== "file:///home/pi/Logo/Logo.png")
+                source = "file:///home/pi/Logo/Logo.png";
+        }
     }
 }

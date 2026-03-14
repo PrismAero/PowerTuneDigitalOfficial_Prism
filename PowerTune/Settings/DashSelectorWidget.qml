@@ -54,7 +54,7 @@ Rectangle {
             Layout.fillWidth: true
             Layout.preferredHeight: SettingsTheme.controlHeight
             font.pixelSize: SettingsTheme.fontControl
-            model: ["User Dash 1", "User Dash 2", "User Dash 3", "Racedash", "CAN Monitor"]
+            model: ["Racedash"]
 
             onCurrentIndexChanged: {
                 linkedLoader.source = dashselector.getDashByIndex(currentIndex);

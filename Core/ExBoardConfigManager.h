@@ -42,6 +42,9 @@ public:
     Q_INVOKABLE QStringList channelNames() const;
     Q_INVOKABLE QStringList digitalChannelNames() const;
 
+    Q_INVOKABLE QVariantMap getDifferentialSensorConfig() const;
+    Q_INVOKABLE void saveDifferentialSensorConfig(const QVariantMap &config);
+
 signals:
     void configChanged();
 

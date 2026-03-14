@@ -64,6 +64,7 @@ class DiagnosticsProvider;
 class OverlayConfigManager;
 class ShiftIndicatorHelper;
 class CanFrameModel;
+class DifferentialSensorCalc;
 class ExBoardConfigManager;
 class OverlayConfigDefaults;
 class ScreenControlService;
@@ -178,6 +179,7 @@ private:
     OverlayConfigManager *m_overlayConfigManager;
     ShiftIndicatorHelper *m_shiftIndicatorHelper;
     CanFrameModel *m_canFrameModel;
+    DifferentialSensorCalc *m_differentialSensorCalc;
     ExBoardConfigManager *m_exBoardConfigManager;
     OverlayConfigDefaults *m_overlayConfigDefaults;
     ScreenControlService *m_screenControlService;

@@ -25,6 +25,7 @@
 #include <QVariantList>
 #include <QVariantMap>
 
+class AppSettings;
 class SensorRegistry;
 class PropertyRouter;
 
@@ -157,6 +158,12 @@ public:
      * @param router Pointer to the PropertyRouter instance
      */
     void setPropertyRouter(class PropertyRouter *router);
+
+    /**
+     * @brief Set the AppSettings reference for reading configuration values.
+     * @param settings Pointer to the AppSettings instance
+     */
+    void setAppSettings(AppSettings *settings);
 
     // -- System Info accessors --
 
@@ -496,9 +503,10 @@ private:
     QString m_serialPort;
     int m_serialBaudRate = 0;
 
-    // Sensor registry and property router references
+    // Sensor registry, property router, and settings references
     SensorRegistry *m_sensorRegistry = nullptr;
     PropertyRouter *m_propertyRouter = nullptr;
+    AppSettings *m_appSettings = nullptr;
 
     struct LogEntry
     {

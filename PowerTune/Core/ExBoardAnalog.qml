@@ -173,6 +173,14 @@ SettingsPage {
                 font.family: SettingsTheme.fontFamily
                 font.pixelSize: SettingsTheme.fontStatus
             }
+
+            Text {
+                visible: diffSensorPopup.diffConfig && diffSensorPopup.diffConfig.enabled === true
+                text: "Diff: " + Expander.differentialSensor.toFixed(2)
+                color: SettingsTheme.textPrimary
+                font.family: SettingsTheme.fontFamily
+                font.pixelSize: SettingsTheme.fontStatus
+            }
         }
     }
 
@@ -206,6 +214,12 @@ SettingsPage {
                 primary: false
                 text: "Speed Sensor"
                 onClicked: root.openPopup(speedSensorPopup)
+            }
+
+            StyledButton {
+                primary: false
+                text: "Diff Sensor"
+                onClicked: root.openPopup(diffSensorPopup)
             }
 
             Item { Layout.fillWidth: true }
@@ -651,6 +665,16 @@ SettingsPage {
             bc.speedSensor = config;
             root.boardConfig = bc;
             root.saveAllSettings();
+        }
+    }
+
+    DiffSensorConfigPopup {
+        id: diffSensorPopup
+        diffConfig: ExBoardConfig.getDifferentialSensorConfig()
+
+        onSaved: function(config) {
+            ExBoardConfig.saveDifferentialSensorConfig(config);
+            diffSensorPopup.diffConfig = config;
         }
     }
 }

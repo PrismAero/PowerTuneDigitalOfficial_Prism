@@ -45,6 +45,7 @@ set(CORE_SOURCES
     Core/PropertyRouter.cpp
     Core/SensorRegistry.cpp
     Core/DiagnosticsProvider.cpp
+    Core/DifferentialSensorCalc.cpp
     Core/ExBoardConfigManager.cpp
     Core/ScreenControlService.cpp
     Core/DashboardLockService.cpp
@@ -72,6 +73,7 @@ set(CORE_HEADERS
     Core/PropertyRouter.h
     Core/SensorRegistry.h
     Core/DiagnosticsProvider.h
+    Core/DifferentialSensorCalc.h
     Core/ExBoardConfigManager.h
     Core/ScreenControlService.h
     Core/DashboardLockService.h
@@ -247,6 +249,7 @@ qt_policy(SET QTP0004 OLD)
             PowerTune/Core/AnalogChannelConfigPopup.qml
             PowerTune/Core/BoardConfigSection.qml
             PowerTune/Core/DigitalInputsSection.qml
+            PowerTune/Core/DiffSensorConfigPopup.qml
             PowerTune/Core/GearSensorConfigPopup.qml
             PowerTune/Core/SpeedSensorConfigPopup.qml
             PowerTune/Core/BrightnessPopUp.qml

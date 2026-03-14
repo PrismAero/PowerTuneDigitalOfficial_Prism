@@ -35,6 +35,7 @@
 #include "../Utils/wifiscanner.h"
 #include "DiagnosticsProvider.h"
 #include "DashboardLockService.h"
+#include "DifferentialSensorCalc.h"
 #include "ExBoardConfigManager.h"
 #include "Models/CanFrameModel.h"
 #include "Models/DataModels.h"
@@ -165,6 +166,7 @@ Connect::Connect(QObject *parent)
     m_diagnosticsProvider = new DiagnosticsProvider(this);
     m_diagnosticsProvider->setSensorRegistry(m_sensorRegistry);
     m_diagnosticsProvider->setPropertyRouter(m_propertyRouter);
+    m_diagnosticsProvider->setAppSettings(m_appSettings);
     m_extender->setDiagnosticsProvider(m_diagnosticsProvider);
     connect(m_canStartupManager, &CanStartupManager::startupFailed, this, [this](const QString &reason) {
         if (m_diagnosticsProvider) {
@@ -189,6 +191,24 @@ Connect::Connect(QObject *parent)
     m_exBoardConfigManager->setAppSettings(m_appSettings);
     m_exBoardConfigManager->setCalibrationHelper(m_calibrationHelper);
     m_exBoardConfigManager->setSensorRegistry(m_sensorRegistry);
+    m_differentialSensorCalc = new DifferentialSensorCalc(this);
+    m_differentialSensorCalc->setExpanderBoardData(m_expanderBoardData);
+    m_differentialSensorCalc->setSensorRegistry(m_sensorRegistry);
+    {
+        const QVariantMap diffCfg = m_exBoardConfigManager->getDifferentialSensorConfig();
+        const QString formulaStr = diffCfg.value(QStringLiteral("formula"), QStringLiteral("percentage")).toString();
+        DifferentialSensorCalc::Formula formula = DifferentialSensorCalc::Percentage;
+        if (formulaStr == QLatin1String("differential"))
+            formula = DifferentialSensorCalc::Differential;
+        else if (formulaStr == QLatin1String("ratio"))
+            formula = DifferentialSensorCalc::Ratio;
+        m_differentialSensorCalc->configure(
+            diffCfg.value(QStringLiteral("enabled"), false).toBool(),
+            diffCfg.value(QStringLiteral("channelA"), 0).toInt(),
+            diffCfg.value(QStringLiteral("channelB"), 1).toInt(),
+            formula,
+            diffCfg.value(QStringLiteral("offset"), 0.0).toDouble());
+    }
     m_screenControlService = new ScreenControlService(this);
     m_screenControlService->setAppSettings(m_appSettings);
     m_screenControlService->setUIState(m_uiState);

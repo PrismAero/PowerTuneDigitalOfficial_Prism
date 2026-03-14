@@ -35,7 +35,7 @@ ApplicationWindow {
         Loader {
             id: firstPageLoader
 
-            source: Qt.resolvedUrl("Intro.qml")
+            source: "qrc:/qt/qml/PrismPT/Dashboard/PowerTune/Dashboard/RaceDash.qml"
         }
 
         Loader {
@@ -325,6 +325,8 @@ ApplicationWindow {
 
         Connections {
             function onFinished() {
+                bootSplashLoader.visible = false;
+                bootSplashLoader.source = "";
                 bootSplashLoader.active = false;
             }
 

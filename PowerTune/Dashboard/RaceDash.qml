@@ -11,101 +11,8 @@ Item {
     property string dashboardId: "racedash"
     property var overlayConfigs: ({})
 
-    function defaultClusterConfig(id) {
-        if (id === "tachCluster") {
-            return {
-                shapeMode: "tachSvg",
-                sensorKey: "RPMFrequencyDividerDi1",
-                minValue: 0,
-                maxValue: AppSettings.getValue("Max RPM", 15000),
-                unit: "RPM",
-                decimals: 0,
-                overlaySize: DashboardTheme.defaultTachSize,
-                startAngle: 225,
-                endAngle: 56,
-                arcWidth: 0.32,
-                arcScale: 1,
-                arcOffsetX: 0,
-                arcOffsetY: 0,
-                minimumVisibleFraction: 0,
-                startTaper: 0.18,
-                endTaper: 0.18,
-                testLoopEnabled: false,
-                testLoopDuration: 1800,
-                arcColorStart: "#8F4D17",
-                arcColorMid: "",
-                arcColorMidPos: 0.65,
-                arcColorEnd: "#B00000",
-                warningEnabled: false,
-                warningThreshold: AppSettings.getValue("Shift Light1", 3000),
-                warningColor: "#FF0000",
-                warningFlash: true,
-                warningFlashRate: 200,
-                readoutTextColor: "#FFFFFF",
-                readoutStep: 100,
-                readoutOffsetX: 0,
-                readoutOffsetY: 50,
-                readoutValueScale: 0.213,
-                readoutUnitScale: 0.076,
-                unitOffsetX: 34,
-                unitOffsetY: -2,
-                readoutSpacing: -2,
-                gearKey: "Gear",
-                gearTextColor: "#FFFFFF",
-                gearFontSize: 160,
-                suffixFontSize: 52.505,
-                gearOffsetX: 0,
-                gearOffsetY: -85,
-                gearWidth: 168,
-                gearHeight: 117
-            };
-        }
-
-        if (id === "speedCluster") {
-            return {
-                shapeMode: "speedSvg",
-                sensorKey: "speed",
-                minValue: 0,
-                maxValue: 220,
-                unit: "MPH",
-                decimals: 0,
-                overlaySize: DashboardTheme.defaultSpeedSize,
-                startAngle: 225,
-                endAngle: 400,
-                arcWidth: 0.32,
-                arcScale: 1,
-                arcOffsetX: 0,
-                arcOffsetY: 0,
-                minimumVisibleFraction: 0,
-                startTaper: 0.28,
-                endTaper: 0.24,
-                testLoopEnabled: false,
-                testLoopDuration: 1800,
-                arcColorStart: "#7A0D0D",
-                arcColorMid: "#E11B1B",
-                arcColorMidPos: 0.62,
-                arcColorEnd: "#B00000",
-                warningEnabled: false,
-                warningThreshold: 0,
-                warningColor: "#FF0000",
-                warningFlash: true,
-                warningFlashRate: 200,
-                readoutTextColor: "#FFFFFF",
-                readoutStep: 10,
-                readoutOffsetX: 0,
-                readoutOffsetY: 0,
-                readoutValueScale: 0.213,
-                readoutUnitScale: 0.076,
-                unitOffsetX: 14,
-                unitOffsetY: -2,
-                readoutSpacing: -1
-            };
-        }
-
-        return {};
-    }
-
-    function loadOverlayConfig(id, defaults, legacyIds) {
+    function loadOverlayConfig(id, legacyIds) {
+        var defaults = OverlayDefaults.defaultsFor(id);
         var loaded = AppSettings.loadOverlayConfig(dashboardId, id);
         var merged = {};
         for (var key in defaults)
@@ -118,21 +25,12 @@ Item {
                 mergeConfig(merged, legacyLoaded);
             }
         }
-        return normalizeClusterConfig(id, merged);
+        return merged;
     }
 
     function mergeConfig(target, source) {
         for (var key in source)
             target[key] = source[key];
-    }
-
-    function normalizeClusterConfig(id, merged) {
-        if (id === "tachCluster") {
-            merged.shapeMode = "tachSvg";
-        } else if (id === "speedCluster") {
-            merged.shapeMode = "speedSvg";
-        }
-        return merged;
     }
 
     function objectHasKeys(obj) {
@@ -143,56 +41,15 @@ Item {
 
     function refreshConfigs() {
         overlayConfigs = {
-            tachCluster: loadOverlayConfig("tachCluster", defaultClusterConfig("tachCluster"), ["tachGroup",
-                                                                                                "gearIndicator"]),
-            speedCluster: loadOverlayConfig("speedCluster", defaultClusterConfig("speedCluster"), ["speedGroup"]),
-            shiftIndicator: loadOverlayConfig("shiftIndicator", {
-                                                  sensorKey: "rpm",
-                                                  maxValue: AppSettings.getValue("Max RPM", 10000),
-                                                  shiftPoint: AppSettings.getValue("Shift Light1", 3000) / Math.max(1,
-                                                                                                                    AppSettings.getValue(
-                                                                                                                        "Max RPM",
-                                                                                                                        10000)),
-                                                  shiftCount: 11,
-                                                  shiftPattern: "center-out"
-                                              }),
-            waterTemp: loadOverlayConfig("waterTemp", {
-                                             sensorKey: "Watertemp",
-                                             label: "Water Temp",
-                                             unit: "F°",
-                                             decimals: 2
-                                         }),
-            oilPressure: loadOverlayConfig("oilPressure", {
-                                               sensorKey: "oilpres",
-                                               label: "Oil Pressure",
-                                               unit: "PSI",
-                                               decimals: 2
-                                           }),
-            statusRow0: loadOverlayConfig("statusRow0", {
-                                              sensorKey: "DigitalInput1",
-                                              label: "Fuel Pump:",
-                                              threshold: 0.5,
-                                              onColor: "#1ED033",
-                                              offColor: "#FF0909"
-                                          }),
-            statusRow1: loadOverlayConfig("statusRow1", {
-                                              sensorKey: "DigitalInput2",
-                                              label: "Cooling Fan:",
-                                              threshold: 0.5,
-                                              onColor: "#1ED033",
-                                              offColor: "#FF0909"
-                                          }),
-            brakeBias: loadOverlayConfig("brakeBias", {
-                                             sensorKey: "brakeBias",
-                                             leftLabel: "RWD",
-                                             rightLabel: "FWD",
-                                             minValue: 0,
-                                             maxValue: 100
-                                         }),
-            bottomBar: loadOverlayConfig("bottomBar", {
-                                             text: "Cardinal Racing",
-                                             timeEnabled: true
-                                         })
+            tachCluster: loadOverlayConfig("tachCluster", ["tachGroup", "gearIndicator"]),
+            speedCluster: loadOverlayConfig("speedCluster", ["speedGroup"]),
+            shiftIndicator: loadOverlayConfig("shiftIndicator"),
+            waterTemp: loadOverlayConfig("waterTemp"),
+            oilPressure: loadOverlayConfig("oilPressure"),
+            statusRow0: loadOverlayConfig("statusRow0"),
+            statusRow1: loadOverlayConfig("statusRow1"),
+            brakeBias: loadOverlayConfig("brakeBias"),
+            bottomBar: loadOverlayConfig("bottomBar")
         };
     }
 
@@ -310,7 +167,7 @@ Item {
         x: DashboardTheme.defaultShiftX
         y: DashboardTheme.defaultShiftY
 
-        onConfigRequested: overlayPopup.openFor(overlayId, configType)
+        onConfigRequested: function(overlayId, configType) { overlayPopup.openFor(overlayId, configType); }
 
         ShiftIndicator {
             anchors.fill: parent
@@ -328,7 +185,7 @@ Item {
         x: DashboardTheme.defaultTachX
         y: DashboardTheme.defaultTachY
 
-        onConfigRequested: overlayPopup.openFor(overlayId, configType)
+        onConfigRequested: function(overlayId, configType) { overlayPopup.openFor(overlayId, configType); }
 
         TachCluster {
             anchors.fill: parent
@@ -346,7 +203,7 @@ Item {
         x: DashboardTheme.defaultSpeedX
         y: DashboardTheme.defaultSpeedY
 
-        onConfigRequested: overlayPopup.openFor(overlayId, configType)
+        onConfigRequested: function(overlayId, configType) { overlayPopup.openFor(overlayId, configType); }
 
         SpeedCluster {
             anchors.fill: parent
@@ -362,7 +219,7 @@ Item {
         x: DashboardTheme.defaultWaterTempX
         y: DashboardTheme.defaultWaterTempY
 
-        onConfigRequested: overlayPopup.openFor(overlayId, configType)
+        onConfigRequested: function(overlayId, configType) { overlayPopup.openFor(overlayId, configType); }
 
         SensorCard {
             anchors.fill: parent
@@ -378,7 +235,7 @@ Item {
         x: DashboardTheme.defaultOilPressureX
         y: DashboardTheme.defaultOilPressureY
 
-        onConfigRequested: overlayPopup.openFor(overlayId, configType)
+        onConfigRequested: function(overlayId, configType) { overlayPopup.openFor(overlayId, configType); }
 
         SensorCard {
             anchors.fill: parent
@@ -394,7 +251,7 @@ Item {
         x: DashboardTheme.defaultStatusRow0X
         y: DashboardTheme.defaultStatusRow0Y
 
-        onConfigRequested: overlayPopup.openFor(overlayId, configType)
+        onConfigRequested: function(overlayId, configType) { overlayPopup.openFor(overlayId, configType); }
 
         StatusBox {
             anchors.fill: parent
@@ -410,7 +267,7 @@ Item {
         x: DashboardTheme.defaultStatusRow1X
         y: DashboardTheme.defaultStatusRow1Y
 
-        onConfigRequested: overlayPopup.openFor(overlayId, configType)
+        onConfigRequested: function(overlayId, configType) { overlayPopup.openFor(overlayId, configType); }
 
         StatusBox {
             anchors.fill: parent
@@ -426,7 +283,7 @@ Item {
         x: DashboardTheme.defaultBrakeBiasX
         y: DashboardTheme.defaultBrakeBiasY
 
-        onConfigRequested: overlayPopup.openFor(overlayId, configType)
+        onConfigRequested: function(overlayId, configType) { overlayPopup.openFor(overlayId, configType); }
 
         BrakeBiasBar {
             anchors.fill: parent
@@ -442,7 +299,7 @@ Item {
         x: DashboardTheme.defaultBottomBarX
         y: DashboardTheme.defaultBottomBarY
 
-        onConfigRequested: overlayPopup.openFor(overlayId, configType)
+        onConfigRequested: function(overlayId, configType) { overlayPopup.openFor(overlayId, configType); }
 
         BottomStatusBar {
             anchors.fill: parent

@@ -410,6 +410,21 @@ void SensorRegistry::refreshExtenderAnalogInputs()
         m_sensors.insert(gearEntry.key, gearEntry);
     }
 
+    const bool diffEnabled = settings.value(QStringLiteral("ui/exboard/diffSensor_enabled"), false).toBool();
+    if (diffEnabled && !m_sensors.contains(QStringLiteral("differentialSensor"))) {
+        SensorEntry diffEntry;
+        diffEntry.key = QStringLiteral("differentialSensor");
+        diffEntry.displayName = QStringLiteral("Differential Sensor");
+        diffEntry.category = QStringLiteral("Calculated");
+        diffEntry.unit = QString();
+        diffEntry.source = SensorSource::Computed;
+        diffEntry.active = false;
+        diffEntry.decimals = 2;
+        diffEntry.maxValue = 100.0;
+        diffEntry.stepSize = 1.0;
+        m_sensors.insert(diffEntry.key, diffEntry);
+    }
+
     emit sensorsChanged();
 }
 

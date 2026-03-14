@@ -34,19 +34,7 @@ SettingsPage {
     }
 
     function getDashByIndex(index) {
-        switch (index) {
-        case 0:
-            return "qrc:/qt/qml/PrismPT/Dashboard/PowerTune/Dashboard/UserDashboard.qml";
-        case 1:
-            return "qrc:/qt/qml/PrismPT/Dashboard/PowerTune/Dashboard/UserDashboard.qml";
-        case 2:
-            return "qrc:/qt/qml/PrismPT/Dashboard/PowerTune/Dashboard/UserDashboard.qml";
-        case 3:
-            return "qrc:/qt/qml/PrismPT/Dashboard/PowerTune/Dashboard/RaceDash.qml";
-        case 4:
-            return Qt.resolvedUrl("CanMonitor.qml");
-        }
-        return "";
+        return "qrc:/qt/qml/PrismPT/Dashboard/PowerTune/Dashboard/RaceDash.qml";
     }
 
     function getDashIndex(comboIndex) {
@@ -54,21 +42,22 @@ SettingsPage {
     }
 
     Component.onCompleted: {
-        dash1.currentIndex = AppSettings.getValue("ui/dashSelect1", 0);
-        dash2.currentIndex = AppSettings.getValue("ui/dashSelect2", 0);
-        dash3.currentIndex = AppSettings.getValue("ui/dashSelect3", 0);
-        dash4.currentIndex = AppSettings.getValue("ui/dashSelect4", 0);
-        numberofdashes.currentIndex = AppSettings.getValue("ui/dashCount", 0);
-        if (numberofdashes.currentIndex >= 0) {
-            adremove();
-            firstPageLoader.source = getDashByIndex(dash1.currentIndex);
-            if (dash2.currentIndex >= 0)
-                secondPageLoader.source = getDashByIndex(dash2.currentIndex);
-            if (dash3.currentIndex >= 0)
-                thirdPageLoader.source = getDashByIndex(dash3.currentIndex);
-            if (dash4.currentIndex >= 0)
-                fourthPageLoader.source = getDashByIndex(dash4.currentIndex);
-        }
+        dash1.currentIndex = 0;
+        dash2.currentIndex = 0;
+        dash3.currentIndex = 0;
+        dash4.currentIndex = 0;
+        numberofdashes.currentIndex = 0;
+        adremove();
+        firstPageLoader.source = getDashByIndex(0);
+        secondPageLoader.source = getDashByIndex(0);
+        thirdPageLoader.source = getDashByIndex(0);
+        fourthPageLoader.source = getDashByIndex(0);
+        AppSettings.writeSelectedDashSettings(1);
+        AppSettings.setValue("ui/dashCount", 0);
+        AppSettings.setValue("ui/dashSelect1", 0);
+        AppSettings.setValue("ui/dashSelect2", 0);
+        AppSettings.setValue("ui/dashSelect3", 0);
+        AppSettings.setValue("ui/dashSelect4", 0);
         settingsLoaded = true;
     }
 

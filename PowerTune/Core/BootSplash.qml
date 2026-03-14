@@ -8,6 +8,15 @@ Rectangle {
 
     anchors.fill: parent
     color: "black"
+    property bool finishStarted: false
+
+    function beginFinish() {
+        if (finishStarted)
+            return;
+        finishStarted = true;
+        finishTimer.stop();
+        fadeOut.start();
+    }
 
     VideoOutput {
         id: videoOutput
@@ -25,16 +34,34 @@ Rectangle {
         onMediaStatusChanged: {
             if (mediaStatus === MediaPlayer.InvalidMedia
                     || mediaStatus === MediaPlayer.NoMedia) {
-                fadeOut.start();
+                splash.beginFinish();
+            } else if ((mediaStatus === MediaPlayer.LoadedMedia
+                        || mediaStatus === MediaPlayer.BufferedMedia)
+                       && duration > 0) {
+                finishTimer.interval = duration + 500;
+                finishTimer.restart();
             }
         }
 
         onPlaybackStateChanged: {
             if (playbackState === MediaPlayer.StoppedState
                     && mediaStatus === MediaPlayer.EndOfMedia) {
-                fadeOut.start();
+                splash.beginFinish();
             }
         }
+
+        onPositionChanged: {
+            if (duration > 0 && position >= duration - 120)
+                splash.beginFinish();
+        }
+    }
+
+    Timer {
+        id: finishTimer
+        interval: 8000
+        repeat: false
+
+        onTriggered: splash.beginFinish()
     }
 
     OpacityAnimator {
@@ -48,5 +75,8 @@ Rectangle {
         onFinished: splash.finished()
     }
 
-    Component.onCompleted: mediaPlayer.play()
+    Component.onCompleted: {
+        finishTimer.start();
+        mediaPlayer.play();
+    }
 }
