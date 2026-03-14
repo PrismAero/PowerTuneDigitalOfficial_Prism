@@ -10,6 +10,7 @@ inherit qt6-cmake
 DEPENDS = " \
     qtbase \
     qtdeclarative \
+    qtdeclarative-native \
     qtserialbus \
     qtserialport \
     qtsvg \
