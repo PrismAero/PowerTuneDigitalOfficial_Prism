@@ -1,57 +1,43 @@
 #!/bin/sh
 ### BEGIN INIT INFO
 # Provides:          powertune
-# Required-Start:    $local_fs $network $syslog
-# Required-Stop:     $local_fs $network $syslog
+# Required-Start:    $local_fs $network
+# Required-Stop:     $local_fs $network
 # Default-Start:     2 3 4 5
 # Default-Stop:      0 1 6
-# Description:       PowerTune Digital Dashboard
+# Description:       PowerTune Digital Dashboard (administrative control)
 ### END INIT INFO
 
-export HOME=/home/root
-export LC_ALL=en_US.utf8
-export QT_QPA_EGLFS_HIDECURSOR=1
-export QT_QPA_EGLFS_ALWAYS_SET_MODE=1
-export QT_QPA_EGLFS_KMS_ATOMIC=1
-export QT_QPA_PLATFORM=eglfs
-export QT_QPA_EGLFS_KMS_CONFIG=/opt/PowerTune/kms-config.json
+# The app is launched by init(8) via the inittab respawn entry for
+# /opt/PowerTune/powertune-launcher.  This init.d script provides
+# administrative stop/restart control for development and deployment.
 
-APP_DIR=/opt/PowerTune
-APP_BIN=${APP_DIR}/PowerTuneQMLGui
-APP_LOG=/var/log/powertune.log
+MAINT_FLAG=/tmp/powertune-maintenance
 
 case "$1" in
     start)
-        echo "Starting PowerTune..."
-
-        if [ -f /tmp/splash.pid ]; then
-            SPID=$(cat /tmp/splash.pid)
-            while kill -0 "$SPID" 2>/dev/null; do
-                sleep 0.2
-            done
-            rm -f /tmp/splash.pid
-        fi
-
-        cd "${APP_DIR}" || exit 1
-        if [ -x "${APP_BIN}" ]; then
-            "${APP_BIN}" -platform eglfs > "${APP_LOG}" 2>&1 &
-        else
-            echo "PowerTuneQMLGui not found at ${APP_BIN}"
-            exit 1
-        fi
+        rm -f "${MAINT_FLAG}"
+        echo "PowerTune will start on next respawn cycle."
         ;;
     stop)
-        echo "Stopping PowerTune..."
+        touch "${MAINT_FLAG}"
         killall PowerTuneQMLGui 2>/dev/null || true
-        killall Generic 2>/dev/null || true
+        echo "PowerTune stopped (maintenance mode)."
         ;;
     restart)
         "$0" stop
-        sleep 1
+        sleep 2
         "$0" start
         ;;
+    status)
+        if pgrep -f PowerTuneQMLGui > /dev/null 2>&1; then
+            echo "PowerTune is running."
+        else
+            echo "PowerTune is not running."
+        fi
+        ;;
     *)
-        echo "Usage: $0 {start|stop|restart}"
+        echo "Usage: $0 {start|stop|restart|status}"
         exit 1
         ;;
 esac

@@ -13,7 +13,7 @@ echo \"== can0 ==\"
 ip -details link show can0 || true
 echo
 echo \"== powertune process ==\"
-ps | grep -E \"PowerTuneQMLGui|Generic\" | grep -v grep || true
+ps | grep PowerTuneQMLGui | grep -v grep || true
 echo
 echo \"== last app log lines ==\"
 tail -n 80 /var/log/powertune.log 2>/dev/null || true

@@ -1,56 +1,116 @@
-# Machine
+# =============================================================================
+# PowerTune Digital - Yocto Scarthgap Build Configuration
+# Target: Raspberry Pi 4 (32-bit armv7l)
+# Qt: 6.8.x with EGLFS/DRM/KMS
+# =============================================================================
+
+# --- Machine ---
 MACHINE = "raspberrypi4"
 
-# Distro
+# --- Distro ---
 DISTRO = "poky"
 
-# Init system: SysVinit
-DISTRO_FEATURES:append = " sysvinit"
-DISTRO_FEATURES_BACKFILL_CONSIDERED:append = " systemd"
-VIRTUAL-RUNTIME_init_manager = "sysvinit"
-VIRTUAL-RUNTIME_initscripts = "initscripts"
+# --- Distro features ---
+DISTRO_FEATURES:append = " opengl wifi bluetooth"
+DISTRO_FEATURES:remove = "x11 wayland pulseaudio"
 
-# GPU memory 256MB
+# --- Package management (ipk is lightweight) ---
+PACKAGE_CLASSES = "package_ipk"
+
+# --- Parallel build ---
+BB_NUMBER_THREADS = "${@oe.utils.cpu_count()}"
+PARALLEL_MAKE = "-j ${@oe.utils.cpu_count()}"
+
+# --- Download / sstate directories ---
+DL_DIR = "${TOPDIR}/../downloads"
+SSTATE_DIR = "${TOPDIR}/../sstate-cache"
+
+# --- Accept all licenses for firmware / codecs ---
+LICENSE_FLAGS_ACCEPTED = "commercial synaptics-killswitch"
+
+# --- Init system: SysVinit ---
+INIT_MANAGER = "sysvinit"
+
+# =============================================================================
+# Raspberry Pi 4 Hardware Configuration
+# =============================================================================
+
+# --- GPU memory: 256MB ---
 GPU_MEM = "256"
 
-# Graphics: VC4 KMS/DRM (no X11, no Wayland)
-DISTRO_FEATURES:remove = "x11 wayland"
-DISTRO_FEATURES:append = " opengl"
+# --- Enable SPI (for MCP2515 CAN controller) ---
+ENABLE_SPI_BUS = "1"
 
-# Enable VC4 graphics driver
-MACHINE_FEATURES:append = " vc4graphics"
+# --- Enable I2C ---
+ENABLE_I2C = "1"
 
-# Qt EGLFS with GBM/KMS, libinput, xkbcommon
+# --- Enable UART (for GPS on ttyAMA0) ---
+ENABLE_UART = "1"
+
+# --- DRM/KMS VC4 graphics driver ---
+DISABLE_VC4GRAPHICS = "0"
+VC4DTBO = "vc4-kms-v3d"
+
+# --- Extra config.txt entries for CAN, Bluetooth disable, boot speed ---
+RPI_EXTRA_CONFIG = "\n\
+# CAN bus via MCP2515 on SPI\n\
+dtoverlay=mcp2515-can0,oscillator=16000000,interrupt=25\n\
+\n\
+# Disable Bluetooth to free up UART for GPS\n\
+dtoverlay=disable-bt\n\
+\n\
+# Allow dual framebuffers\n\
+max_framebuffers=2\n\
+\n\
+# Turbo at boot for faster startup\n\
+initial_turbo=20\n\
+\n\
+# Disable splash and boot delay\n\
+disable_splash=1\n\
+boot_delay=0\n\
+\n\
+# Disable overscan\n\
+disable_overscan=1\n\
+"
+
+# --- Silent boot, IPv6 disabled at kernel level ---
+CMDLINE:append = " logo.nologo loglevel=0 vt.global_cursor_default=0 quiet ipv6.disable=1"
+
+# =============================================================================
+# Qt6 EGLFS Configuration
+# =============================================================================
+
+# --- Enable EGLFS with GBM/KMS, disable X11/XCB ---
 PACKAGECONFIG:append:pn-qtbase = " eglfs gbm kms libinput xkbcommon"
+PACKAGECONFIG:remove:pn-qtbase = "x11 xcb tests"
 
-# Qt serialbus and serialport
+# --- SocketCAN support for QtSerialBus ---
 PACKAGECONFIG:append:pn-qtserialbus = " socketcan"
 
-# CAN bus support
+# --- Qt6 quick compiler for QML bytecode caching ---
+PACKAGECONFIG:append:pn-qtdeclarative = " qmlcachegen"
+
+# --- CAN bus kernel modules ---
 KERNEL_MODULE_AUTOLOAD:append = " can can-raw can-bcm mcp251x spi-bcm2835"
 
-# Image format
+# =============================================================================
+# Performance Optimizations
+# =============================================================================
+
+# --- Image extra space (512MB for user data, dashboards, logs) ---
+IMAGE_ROOTFS_EXTRA_SPACE = "524288"
+
+# --- No kernel debug, smaller image ---
+EXTRA_IMAGE_FEATURES = "debug-tweaks"
+
+# --- Image format ---
 IMAGE_FSTYPES = "wic wic.bz2"
 
-# CMake flags for powertune-app
-EXTRA_OECMAKE:pn-powertune-app = "-DCMAKE_BUILD_TYPE=Release -DFORCE_DDCUTIL=ON"
+# --- Keep build artifacts for powertune-app ---
+INHERIT += "rm_work"
+RM_WORK_EXCLUDE += "powertune-app powertune-image"
 
-# Parallel build
-BB_NUMBER_THREADS ?= "${@oe.utils.cpu_count()}"
-PARALLEL_MAKE ?= "-j ${@oe.utils.cpu_count()}"
+# --- Misc ---
+CONF_VERSION = "2"
 
-# Download directory (shared across builds)
-DL_DIR ?= "${TOPDIR}/../downloads"
-
-# Shared state cache
-SSTATE_DIR ?= "${TOPDIR}/../sstate-cache"
-
-# Tmp directory
-TMPDIR = "${TOPDIR}/tmp"
-
-# Accept all license types for closed-source recipes
-LICENSE_FLAGS_ACCEPTED = "commercial"
-
-# Package manager for runtime updates
-PACKAGE_CLASSES = "package_ipk"
-EXTRA_IMAGE_FEATURES = "package-management"
+PACKAGECONFIG:remove:pn-gstreamer1.0-plugins-bad = "vulkan"

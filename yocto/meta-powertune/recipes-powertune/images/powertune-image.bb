@@ -3,31 +3,45 @@ LICENSE = "CLOSED"
 
 inherit core-image
 
-IMAGE_INSTALL:append = " \
-    powertune-app \
-    powertune-config \
-    powertune-fonts \
+IMAGE_FEATURES += "ssh-server-openssh"
+
+IMAGE_INSTALL = " \
+    packagegroup-core-boot \
+    kernel-modules \
+    \
+    qtbase \
+    qtbase-plugins \
+    qtdeclarative \
+    qtdeclarative-qmlplugins \
+    qt5compat \
+    qt5compat-qmlplugins \
+    qtserialbus \
+    qtsvg \
+    qtsvg-plugins \
+    qtshadertools \
+    \
+    mesa-megadriver \
+    libdrm \
+    libinput \
+    libxkbcommon \
+    \
     can-utils \
     iproute2 \
+    wpa-supplicant \
+    openssh \
     openssh-sftp-server \
-    openssh-sshd \
-    openssh-ssh \
-    ntp \
-    tzdata \
-    liberation-fonts \
-"
-
-IMAGE_FEATURES:append = " \
-    ssh-server-openssh \
-    package-management \
+    \
+    procps \
+    \
+    openssl-compat-1.1 \
+    powertune-config \
+    powertune-launcher \
+    powertune-daemons \
+    powertune-fonts \
+    powertune-app \
 "
 
 IMAGE_ROOTFS_EXTRA_SPACE = "524288"
 
-WKS_FILE = "sdimage-raspberrypi.wks"
 IMAGE_FSTYPES = "wic wic.bz2"
-
-DISTRO_FEATURES:append = " sysvinit"
-DISTRO_FEATURES_BACKFILL_CONSIDERED:append = " systemd"
-VIRTUAL-RUNTIME_init_manager = "sysvinit"
-VIRTUAL-RUNTIME_initscripts = "initscripts"
+WKS_FILE = "sdimage-raspberrypi.wks"

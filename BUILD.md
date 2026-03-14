@@ -172,7 +172,7 @@ The build is configured in `build-powertune/conf/local.conf`:
 
 | Property | Value |
 |----------|-------|
-| Host | `192.168.15.129` |
+| Host | `192.168.15.183` |
 | User | `root` (passwordless SSH) |
 | Board | Raspberry Pi 4 Model B (BCM2711, ARMv7 32-bit) |
 | OS | Poky (Yocto) with SysVinit |
@@ -224,32 +224,44 @@ sudo dd if=powertune-image-raspberrypi4.rootfs.wic of=/dev/sdX bs=4M status=prog
 sync
 ```
 
-### 3.4 Init System and Runtime
+### 3.4 Boot Sequence and App Launch
 
-The app starts automatically at boot via SysVinit:
+The device is a dedicated appliance. There is no login prompt, no bootsplash
+script, and no chain of shell-script wrappers.
 
-- **Init script**: `/etc/init.d/powertune` (installed at priority 99)
-- Legacy deployed images may still contain `/home/pi/startdaemon.sh` and the
-  `Generic` daemon.
-- The target native-CAN runtime direction is for the app to own `can0` startup
-  and EX communication directly.
-- `Scripts/deploy-target-runtime.sh` installs the repo-managed init script and
-  disables the legacy `startdaemon.sh` bootstrap on the target.
-- **Recovery**: If `PowerTuneQMLGui` fails to launch, `/home/pi/Recovery/Recovery` is started
+**Boot chain:**
 
-Manual control, if needed:
+```
+kernel -> init(8) -> rc scripts (networking, sshd) -> powertune-launcher (inittab respawn) -> PowerTuneQMLGui
+```
+
+- **`/opt/PowerTune/powertune-launcher`**: A compiled C binary that sets the
+  required Qt/EGLFS environment variables, redirects stdout/stderr to the log
+  file, and `exec()`'s PowerTuneQMLGui. No shell is involved.
+- **inittab respawn**: init(8) automatically restarts the launcher (and
+  therefore the app) if it exits or crashes.
+- **Maintenance mode**: To stop the app for deployment, a flag file
+  `/tmp/powertune-maintenance` gates the launcher. When the flag is present
+  the launcher sleeps and exits, and init keeps retrying every few seconds.
+  Removing the flag lets the app start on the next cycle.
+- **CAN bus**: Brought up by the networking init script via
+  `/etc/network/interfaces` (`auto can0`). The app's `CanStartupManager`
+  verifies the interface state at runtime.
+- **IPv6**: Disabled at three levels: kernel cmdline (`ipv6.disable=1`),
+  sysctl (`/etc/sysctl.d/99-no-ipv6.conf`), and interfaces (IPv4-only).
+
+Administrative control via SSH:
 
 ```sh
-ssh root@192.168.15.129
-
-/etc/init.d/powertune stop      # Stop the app and daemons
-/etc/init.d/powertune start     # Start the app and daemons
-/etc/init.d/powertune restart   # Restart everything
+/etc/init.d/powertune stop      # Enter maintenance mode, kill app
+/etc/init.d/powertune start     # Exit maintenance mode, init respawns app
+/etc/init.d/powertune restart   # stop + start
+/etc/init.d/powertune status    # Check if running
 
 tail -f /var/log/powertune.log  # Watch app output
 ```
 
-### 3.5 Environment Variables (set by init script)
+### 3.5 Environment Variables (set by powertune-launcher)
 
 ```sh
 QT_QPA_PLATFORM=eglfs
