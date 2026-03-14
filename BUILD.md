@@ -44,54 +44,6 @@ The preset build output is `build/macos-homebrew/PowerTuneQMLGui.app/Contents/Ma
 This build is for UI development, QML iteration, and testing only. It does not
 produce an ARM Linux binary for the target device.
 
-## 1.1 Yocto Host On A Mac
-
-Full Yocto image builds still require a Linux host. On Apple Silicon macOS, the
-supported path is an Ubuntu 22.04 VM hosted locally on the Mac.
-
-This repo now includes a Multipass-based setup flow:
-
-```sh
-# Create or start the Ubuntu 22.04 VM, mount this repo into it,
-# and install the base Yocto host dependencies
-./Scripts/setup-multipass-yocto-vm.sh
-
-# Open an interactive shell in the VM
-./Scripts/multipass-yocto-shell.sh
-
-# Run a single command inside the mounted repo in the VM
-./Scripts/multipass-yocto-exec.sh 'uname -a'
-```
-
-Default VM settings:
-
-| Property | Default |
-|----------|---------|
-| VM name | `powertune-yocto` |
-| Release | `Ubuntu 22.04` |
-| CPU | `6` |
-| Memory | `8G` |
-| Disk | `120G` |
-| Repo mount | `/workspace/PowerTuneDigitalOfficial_Prism` |
-
-These can be overridden when launching the setup script:
-
-```sh
-POWERTUNE_VM_CPUS=4 \
-POWERTUNE_VM_MEM=10G \
-POWERTUNE_VM_DISK=150G \
-./Scripts/setup-multipass-yocto-vm.sh
-```
-
-After the VM is ready:
-
-1. clone the Yocto layer stack inside that Linux guest, typically into `~/powertune-yocto`
-2. source `poky/oe-init-build-env build-powertune`
-3. build `powertune-app` or the full `powertune-image`
-
-The Mac remains the control machine for packaging source, deploying prebuilt
-binaries, collecting backups, and reading logs from the target over SSH.
-
 ## 2. Cross-Compile Build (Yocto on Build Server)
 
 ### 2.1 Build Server Access
