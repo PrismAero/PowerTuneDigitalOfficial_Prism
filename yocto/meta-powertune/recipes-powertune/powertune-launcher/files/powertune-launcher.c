@@ -43,6 +43,7 @@ static const struct env_pair qt_env[] = {
     { "QT_QPA_EGLFS_KMS_ATOMIC",    "1"                        },
     { "QT_QPA_EGLFS_KMS_CONFIG",    APP_DIR "/kms-config.json" },
     { "QML_DISK_CACHE",              "1"                        },
+    { "QT_MEDIA_BACKEND",            "ffmpeg"                   },
     { NULL, NULL }
 };
 

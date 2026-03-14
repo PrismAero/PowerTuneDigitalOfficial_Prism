@@ -34,6 +34,7 @@ do_install() {
 
     install -d ${D}/opt/PowerTune
     install -m 0644 ${WORKDIR}/kms-config.json ${D}/opt/PowerTune/kms-config.json
+
 }
 
 FILES:${PN} = " \

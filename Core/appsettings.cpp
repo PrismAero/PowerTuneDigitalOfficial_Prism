@@ -405,7 +405,9 @@ void AppSettings::writeEXBoardSettings(const qreal &EXA00, const qreal &EXA05, c
                                 0,
                                 0};
         for (int ch = 0; ch < EX_ANALOG_CHANNELS; ++ch) {
-            m_extender->setChannelCalibration(ch, v0v[ch], v5v[ch], ntcFlags[ch] != 0);
+            const qreal minV = getValue(QStringLiteral("ui/exboard/ch%1_minVoltage").arg(ch), 0.0).toDouble();
+            const qreal maxV = getValue(QStringLiteral("ui/exboard/ch%1_maxVoltage").arg(ch), 5.0).toDouble();
+            m_extender->setChannelCalibration(ch, v0v[ch], v5v[ch], ntcFlags[ch] != 0, minV, maxV);
         }
     }
 
@@ -644,9 +646,15 @@ void AppSettings::writeRPMFrequencySettings(const qreal &Divider, const int &DI1
 void AppSettings::writeExternalrpm(const int checked)
 {
     setValue("ExternalRPM", checked);
-    if (m_settingsData) {
+    if (m_settingsData)
         m_settingsData->setExternalrpm(checked);
-    }
+}
+
+void AppSettings::writeRpmSource(int source)
+{
+    setValue("ui/exboard/rpmSourceValue", source);
+    if (m_extender)
+        m_extender->setRpmSource(source);
 }
 
 void AppSettings::writeLanguage(const int Language)
@@ -716,6 +724,8 @@ void AppSettings::writeGearSensorConfig(const QVariantMap &config)
     }
     if (m_extender)
         m_extender->setGearVoltageConfig(config);
+    if (m_settingsData)
+        m_settingsData->setGearSourceExpander(config.value(QStringLiteral("enabled"), false).toBool());
 }
 
 QVariantMap AppSettings::readGearSensorConfig()
@@ -846,9 +856,10 @@ void AppSettings::readandApplySettings()
         m_settingsData->setpulsespermile(pulsesPerMile <= 0 ? 100000 : pulsesPerMile);
     }
 
-    if (m_settingsData) {
+    if (m_settingsData)
         m_settingsData->setExternalrpm(getValue("ExternalRPM").toInt());
-    }
+    if (m_extender)
+        m_extender->setRpmSource(getValue("ui/exboard/rpmSourceValue", 0).toInt());
 
     if (m_connectionData) {
         m_connectionData->setexternalspeedconnectionrequest(getValue("externalspeedconnect").toInt());
@@ -916,11 +927,15 @@ void AppSettings::readandApplySettings()
     }
 
     // Restore expander board gear and speed sensor configs into the Extender
-    if (m_extender) {
+    {
         QVariantMap gearConfig = readGearSensorConfig();
-        m_extender->setGearVoltageConfig(gearConfig);
+        if (m_extender)
+            m_extender->setGearVoltageConfig(gearConfig);
+        if (m_settingsData)
+            m_settingsData->setGearSourceExpander(gearConfig.value(QStringLiteral("enabled"), false).toBool());
 
         QVariantMap speedConfig = readSpeedSensorConfig();
-        m_extender->setSpeedSensorConfig(speedConfig);
+        if (m_extender)
+            m_extender->setSpeedSensorConfig(speedConfig);
     }
 }

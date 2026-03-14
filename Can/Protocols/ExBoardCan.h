@@ -28,6 +28,8 @@ struct ChannelCalibration
 {
     qreal val0v = 0.0;
     qreal val5v = 5.0;
+    qreal minVoltage = 0.0;
+    qreal maxVoltage = 5.0;
     bool ntcEnabled = false;
 };
 
@@ -92,10 +94,13 @@ public:
     Q_INVOKABLE void setSpeedSensorConfig(const QVariantMap &config);
     SpeedSensorConfig speedSensorConfig() const { return m_speedConfig; }
 
+    Q_INVOKABLE void setRpmSource(int source);
+
 public slots:
     void openCAN(const int &extenderBaseId, const int &rpmBaseId);
     void closeConnection();
-    Q_INVOKABLE void setChannelCalibration(int channel, qreal val0v, qreal val5v, bool ntcEnabled);
+    Q_INVOKABLE void setChannelCalibration(int channel, qreal val0v, qreal val5v, bool ntcEnabled,
+                                              qreal minVoltage = 0.0, qreal maxVoltage = 5.0);
 
 signals:
     void baseIdsChanged();
@@ -145,8 +150,10 @@ private:
     ChannelCalibration m_calibration[EX_ANALOG_CHANNELS];
     GearVoltageConfig m_gearConfig;
     SpeedSensorConfig m_speedConfig;
+    int m_rpmSource = 0;
     QMetaObject::Connection m_gearConnection;
     QMetaObject::Connection m_speedConnection;
+    QMetaObject::Connection m_rpmConnection;
 };
 
 #endif  // EXBOARDCAN_H

@@ -11,7 +11,6 @@ ApplicationWindow {
     id: window
 
     property bool showUnlockAnimation: false
-
     color: "black"
     height: 720
     minimumHeight: 720
@@ -314,5 +313,22 @@ ApplicationWindow {
         repeat: false
 
         onTriggered: showUnlockAnimation = false
+    }
+
+    Loader {
+        id: bootSplashLoader
+
+        active: true
+        anchors.fill: parent
+        source: Qt.resolvedUrl("BootSplash.qml")
+        z: 100
+
+        Connections {
+            function onFinished() {
+                bootSplashLoader.active = false;
+            }
+
+            target: bootSplashLoader.item
+        }
     }
 }

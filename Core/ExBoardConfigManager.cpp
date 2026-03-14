@@ -181,6 +181,10 @@ QVariantMap ExBoardConfigManager::getChannelConfig(int channel) const
     cfg[QStringLiteral("val5v")] = m_appSettings->getValue(s_linearKeys[channel][1], QStringLiteral("5")).toString();
     cfg[QStringLiteral("linearPreset")] =
         m_appSettings->getValue(s_linearPresetKeys[channel], QStringLiteral("Custom")).toString();
+    cfg[QStringLiteral("minVoltage")] =
+        m_appSettings->getValue(QStringLiteral("ui/exboard/ch%1_minVoltage").arg(channel), QStringLiteral("0.0")).toString();
+    cfg[QStringLiteral("maxVoltage")] =
+        m_appSettings->getValue(QStringLiteral("ui/exboard/ch%1_maxVoltage").arg(channel), QStringLiteral("5.0")).toString();
 
     if (channel < kNtcChannels) {
         cfg[QStringLiteral("ntcEnabled")] = m_appSettings->getValue(s_ntcOnKeys[channel], false).toBool();
@@ -228,6 +232,8 @@ void ExBoardConfigManager::applyLinearPreset(int channel, const QString &presetN
         if (!preset.isEmpty()) {
             config[QStringLiteral("val0v")] = preset.value(QStringLiteral("val0v")).toString();
             config[QStringLiteral("val5v")] = preset.value(QStringLiteral("val5v")).toString();
+            config[QStringLiteral("minVoltage")] = preset.value(QStringLiteral("minVoltage"), QStringLiteral("0.0")).toString();
+            config[QStringLiteral("maxVoltage")] = preset.value(QStringLiteral("maxVoltage"), QStringLiteral("5.0")).toString();
         }
     }
 
@@ -313,6 +319,7 @@ void ExBoardConfigManager::saveBoardConfig(const QVariantMap &config)
     m_appSettings->setValue(QStringLiteral("ui/exboard/rpmcheckbox"), merged.value(QStringLiteral("rpmcheckbox"), 0));
     m_appSettings->writeEXAN7dampingSettings(merged.value(QStringLiteral("an7Damping"), 0).toInt());
     m_appSettings->writeExternalrpm(rpmSource > 0);
+    m_appSettings->writeRpmSource(rpmSource);
 
     if (merged.contains(QStringLiteral("brightness")))
         saveBrightnessConfig(merged.value(QStringLiteral("brightness")).toMap());
@@ -460,6 +467,10 @@ void ExBoardConfigManager::saveChannelConfigInternal(int channel, const QVariant
         m_appSettings->setValue(s_linearKeys[channel][1], config.value(QStringLiteral("val5v")));
     if (config.contains(QStringLiteral("linearPreset")))
         m_appSettings->setValue(s_linearPresetKeys[channel], config.value(QStringLiteral("linearPreset")));
+    if (config.contains(QStringLiteral("minVoltage")))
+        m_appSettings->setValue(QStringLiteral("ui/exboard/ch%1_minVoltage").arg(channel), config.value(QStringLiteral("minVoltage")));
+    if (config.contains(QStringLiteral("maxVoltage")))
+        m_appSettings->setValue(QStringLiteral("ui/exboard/ch%1_maxVoltage").arg(channel), config.value(QStringLiteral("maxVoltage")));
 
     if (channel < kNtcChannels) {
         if (config.contains(QStringLiteral("ntcEnabled")))

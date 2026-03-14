@@ -19,6 +19,11 @@ IMAGE_INSTALL = " \
     qtsvg \
     qtsvg-plugins \
     qtshadertools \
+    qtmultimedia \
+    \
+    gstreamer1.0-plugins-base \
+    gstreamer1.0-plugins-good \
+    gstreamer1.0-plugins-bad \
     \
     mesa-megadriver \
     libdrm \
@@ -38,6 +43,12 @@ IMAGE_INSTALL = " \
     powertune-fonts \
     powertune-app \
 "
+
+silence_banner_and_bootsplash() {
+    printf '#!/bin/sh\nexit 0\n' > ${IMAGE_ROOTFS}${sysconfdir}/init.d/banner.sh
+    rm -f ${IMAGE_ROOTFS}${sysconfdir}/rcS.d/S40bootsplash
+}
+ROOTFS_POSTPROCESS_COMMAND:append = " silence_banner_and_bootsplash;"
 
 IMAGE_ROOTFS_EXTRA_SPACE = "524288"
 

@@ -53,6 +53,11 @@ VC4DTBO = "vc4-kms-v3d"
 
 # --- Extra config.txt entries for CAN, Bluetooth disable, boot speed ---
 RPI_EXTRA_CONFIG = "\n\
+# Waveshare 10.4in 1600x720 HDMI display - custom timings required\n\
+hdmi_group=2\n\
+hdmi_mode=87\n\
+hdmi_timings=1600 0 80 32 112 720 0 30 3 33 0 0 0 60 0 87000000 0\n\
+\n\
 # CAN bus via MCP2515 on SPI\n\
 dtoverlay=mcp2515-can0,oscillator=16000000,interrupt=25\n\
 \n\
@@ -74,7 +79,7 @@ disable_overscan=1\n\
 "
 
 # --- Silent boot, IPv6 disabled at kernel level ---
-CMDLINE:append = " logo.nologo loglevel=0 vt.global_cursor_default=0 quiet ipv6.disable=1"
+CMDLINE:append = " logo.nologo loglevel=0 vt.global_cursor_default=0 consoleblank=0 fbcon=map:2 quiet ipv6.disable=1"
 
 # =============================================================================
 # Qt6 EGLFS Configuration
@@ -89,6 +94,9 @@ PACKAGECONFIG:append:pn-qtserialbus = " socketcan"
 
 # --- Qt6 quick compiler for QML bytecode caching ---
 PACKAGECONFIG:append:pn-qtdeclarative = " qmlcachegen"
+
+# --- Qt Multimedia with GStreamer backend for boot splash video ---
+PACKAGECONFIG:append:pn-qtmultimedia = " gstreamer"
 
 # --- CAN bus kernel modules ---
 KERNEL_MODULE_AUTOLOAD:append = " can can-raw can-bcm mcp251x spi-bcm2835"

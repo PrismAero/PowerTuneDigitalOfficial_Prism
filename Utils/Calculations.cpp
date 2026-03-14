@@ -260,7 +260,7 @@ void calculations::calculate()
     }
 
     // Dragracing Calculations END
-    if (m_settingsData->gearcalcactivation() == 1) {
+    if (m_settingsData->gearcalcactivation() == 1 && !m_settingsData->gearSourceExpander()) {
         // Gear Calculation borrowed from Raspexi big thanks to Jacob Donley
         int N = m_engineData->rpm() / (m_vehicleData->speed() == 0.0 ? 0.01 : m_vehicleData->speed());
         int CurrentGear =

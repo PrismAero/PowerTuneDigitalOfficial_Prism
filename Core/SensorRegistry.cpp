@@ -336,59 +336,78 @@ void SensorRegistry::refreshEcuAnalogChannels()
  */
 void SensorRegistry::refreshExtenderAnalogInputs()
 {
-    // Remove existing ExtenderAnalog entries
     QStringList toRemove;
     for (auto it = m_sensors.constBegin(); it != m_sensors.constEnd(); ++it) {
-        if (it->source == SensorSource::ExtenderAnalog) {
+        if (it->source == SensorSource::ExtenderAnalog)
             toRemove.append(it.key());
-        }
     }
-    for (const QString &key : toRemove) {
+    for (const QString &key : toRemove)
         m_sensors.remove(key);
-    }
 
     QSettings settings(QStringLiteral("PowerTune"), QStringLiteral("PowerTune"));
 
-    // Register EXAnalogInput0 through EXAnalogInput7
     for (int i = 0; i <= 7; ++i) {
-        const QString key = QStringLiteral("EXAnalogInput%1").arg(i);
+        const bool enabled = settings.value(QStringLiteral("ui/exboard/ch%1_enabled").arg(i), true).toBool();
         const QString customName = settings.value(QStringLiteral("ui/exboard/exan%1name").arg(i)).toString();
-        const QString displayName = customName.isEmpty() ? QStringLiteral("EX Analog %1").arg(i)
-                                                         : QStringLiteral("EX AN %1: %2").arg(i).arg(customName);
+        if (!enabled || customName.trimmed().isEmpty())
+            continue;
 
-        SensorEntry entry;
-        entry.key = key;
-        entry.displayName = displayName;
-        entry.category = QStringLiteral("Extender Board");
-        entry.unit = QStringLiteral("V");
-        entry.source = SensorSource::ExtenderAnalog;
-        entry.active = false;
-        entry.lastActiveTimestamp = 0;
-        entry.decimals = 3;
-        entry.maxValue = 5.0;
-        entry.stepSize = 0.1;
-        m_sensors.insert(key, entry);
+        const QString rawKey = QStringLiteral("EXAnalogInput%1").arg(i);
+        SensorEntry rawEntry;
+        rawEntry.key = rawKey;
+        rawEntry.displayName = QStringLiteral("EX AN %1: %2").arg(i).arg(customName);
+        rawEntry.category = QStringLiteral("Extender Board");
+        rawEntry.unit = QStringLiteral("V");
+        rawEntry.source = SensorSource::ExtenderAnalog;
+        rawEntry.active = false;
+        rawEntry.lastActiveTimestamp = 0;
+        rawEntry.decimals = 3;
+        rawEntry.maxValue = 5.0;
+        rawEntry.stepSize = 0.1;
+        m_sensors.insert(rawKey, rawEntry);
+
+        const QString calcKey = QStringLiteral("EXAnalogCalc%1").arg(i);
+        SensorEntry calcEntry;
+        calcEntry.key = calcKey;
+        calcEntry.displayName = QStringLiteral("EX AN Calc %1: %2").arg(i).arg(customName);
+        calcEntry.category = QStringLiteral("Extender Board");
+        calcEntry.unit = QString();
+        calcEntry.source = SensorSource::ExtenderAnalog;
+        calcEntry.active = false;
+        calcEntry.lastActiveTimestamp = 0;
+        calcEntry.decimals = 2;
+        calcEntry.maxValue = 100.0;
+        calcEntry.stepSize = 1.0;
+        m_sensors.insert(calcKey, calcEntry);
     }
 
-    // Register calibrated/calculated extender analog channels
-    for (int i = 0; i <= 7; ++i) {
-        const QString key = QStringLiteral("EXAnalogCalc%1").arg(i);
-        const QString customName = settings.value(QStringLiteral("ui/exboard/exan%1name").arg(i)).toString();
-        const QString displayName = customName.isEmpty() ? QStringLiteral("EX Analog Calc %1").arg(i)
-                                                         : QStringLiteral("EX AN Calc %1: %2").arg(i).arg(customName);
-
-        SensorEntry entry;
-        entry.key = key;
-        entry.displayName = displayName;
-        entry.category = QStringLiteral("Extender Board");
-        entry.unit = QString();
-        entry.source = SensorSource::ExtenderAnalog;
-        entry.active = false;
-        entry.lastActiveTimestamp = 0;
-        entry.decimals = 2;
-        entry.maxValue = 100.0;
-        entry.stepSize = 1.0;
-        m_sensors.insert(key, entry);
+    const bool speedEnabled = settings.value(QStringLiteral("ui/exboard/gearSensor/enabled"), false).toBool();
+    if (speedEnabled && !m_sensors.contains(QStringLiteral("EXSpeed"))) {
+        SensorEntry speedEntry;
+        speedEntry.key = QStringLiteral("EXSpeed");
+        speedEntry.displayName = QStringLiteral("EX Speed");
+        speedEntry.category = QStringLiteral("Extender Board");
+        speedEntry.unit = QStringLiteral("km/h");
+        speedEntry.source = SensorSource::ExtenderAnalog;
+        speedEntry.active = false;
+        speedEntry.decimals = 1;
+        speedEntry.maxValue = 300.0;
+        speedEntry.stepSize = 1.0;
+        m_sensors.insert(speedEntry.key, speedEntry);
+    }
+    const bool gearEnabled = settings.value(QStringLiteral("ui/exboard/gearSensor/enabled"), false).toBool();
+    if (gearEnabled && !m_sensors.contains(QStringLiteral("EXGear"))) {
+        SensorEntry gearEntry;
+        gearEntry.key = QStringLiteral("EXGear");
+        gearEntry.displayName = QStringLiteral("EX Gear");
+        gearEntry.category = QStringLiteral("Extender Board");
+        gearEntry.unit = QString();
+        gearEntry.source = SensorSource::ExtenderAnalog;
+        gearEntry.active = false;
+        gearEntry.decimals = 0;
+        gearEntry.maxValue = 7.0;
+        gearEntry.stepSize = 1.0;
+        m_sensors.insert(gearEntry.key, gearEntry);
     }
 
     emit sensorsChanged();
@@ -446,23 +465,27 @@ void SensorRegistry::refreshEcuDigitalInputs()
  */
 void SensorRegistry::refreshExtenderDigitalInputs()
 {
-    // Remove existing ExtenderDigital entries
     QStringList toRemove;
     for (auto it = m_sensors.constBegin(); it != m_sensors.constEnd(); ++it) {
-        if (it->source == SensorSource::ExtenderDigital) {
+        if (it->source == SensorSource::ExtenderDigital)
             toRemove.append(it.key());
-        }
     }
-    for (const QString &key : toRemove) {
+    for (const QString &key : toRemove)
         m_sensors.remove(key);
-    }
 
     QSettings settings(QStringLiteral("PowerTune"), QStringLiteral("PowerTune"));
 
-    // Register EXDigitalInput1 through EXDigitalInput8 (1-indexed per reference)
+    const int rpmSource = settings.value(QStringLiteral("ui/exboard/rpmSource"), 0).toInt();
+
     for (int i = 1; i <= 8; ++i) {
-        const QString key = QStringLiteral("EXDigitalInput%1").arg(i);
+        const bool enabled = settings.value(QStringLiteral("ui/exboard/di%1_enabled").arg(i), true).toBool();
         const QString customName = settings.value(QStringLiteral("ui/exboard/exdigi%1name").arg(i)).toString();
+
+        const bool isTachSource = (i == 1 && rpmSource == 2);
+        if (!enabled || (customName.trimmed().isEmpty() && !isTachSource))
+            continue;
+
+        const QString key = QStringLiteral("EXDigitalInput%1").arg(i);
         const QString displayName = customName.isEmpty() ? QStringLiteral("EX Digital %1").arg(i)
                                                          : QStringLiteral("EX Digi %1: %2").arg(i).arg(customName);
 
@@ -478,6 +501,20 @@ void SensorRegistry::refreshExtenderDigitalInputs()
         entry.maxValue = 1.0;
         entry.stepSize = 1.0;
         m_sensors.insert(key, entry);
+    }
+
+    if (rpmSource == 2) {
+        SensorEntry freqEntry;
+        freqEntry.key = QStringLiteral("frequencyDIEX1");
+        freqEntry.displayName = QStringLiteral("EX Tach RPM");
+        freqEntry.category = QStringLiteral("Extender Board");
+        freqEntry.unit = QStringLiteral("rpm");
+        freqEntry.source = SensorSource::ExtenderDigital;
+        freqEntry.active = false;
+        freqEntry.decimals = 0;
+        freqEntry.maxValue = 10000.0;
+        freqEntry.stepSize = 100.0;
+        m_sensors.insert(freqEntry.key, freqEntry);
     }
 
     emit sensorsChanged();

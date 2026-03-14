@@ -28,6 +28,7 @@ find_package(Qt6 REQUIRED COMPONENTS
     QuickControls2
     Network
     SerialBus
+    Multimedia
 )
 
 # * Optional ShaderTools - kept available for future Qt 6 effects
@@ -125,7 +126,6 @@ set(UTILS_SOURCES
     Utils/SignalSmoother.cpp
     Utils/downloadmanager.cpp
     Utils/ParseGithubData.cpp
-    Utils/shcalc.cpp
     Utils/textprogressbar.cpp
     Utils/UDPReceiver.cpp
     Utils/OverlayConfigManager.cpp
@@ -141,7 +141,6 @@ set(UTILS_HEADERS
     Utils/SignalSmoother.h
     Utils/downloadmanager.h
     Utils/ParseGithubData.h
-    Utils/shcalc.h
     Utils/textprogressbar.h
     Utils/UDPReceiver.h
     Utils/OverlayConfigManager.h
@@ -190,6 +189,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     Qt6::QuickControls2
     Qt6::Network
     Qt6::SerialBus
+    Qt6::Multimedia
 )
 
 # * PowerTune QML Sub-Modules
@@ -241,8 +241,14 @@ qt_policy(SET QTP0004 OLD)
         QML_FILES
             PowerTune/Core/Main.qml
             PowerTune/Core/Intro.qml
+            PowerTune/Core/BootSplash.qml
             PowerTune/Core/SettingsManager.qml
             PowerTune/Core/ExBoardAnalog.qml
+            PowerTune/Core/AnalogChannelConfigPopup.qml
+            PowerTune/Core/BoardConfigSection.qml
+            PowerTune/Core/DigitalInputsSection.qml
+            PowerTune/Core/GearSensorConfigPopup.qml
+            PowerTune/Core/SpeedSensorConfigPopup.qml
             PowerTune/Core/BrightnessPopUp.qml
         RESOURCE_PREFIX /qt/qml
         OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/qt/qml/PowerTune/Core

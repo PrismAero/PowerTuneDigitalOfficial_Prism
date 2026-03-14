@@ -13,6 +13,7 @@
 
 #include <QtEndian>
 
+#include <algorithm>
 #include <cmath>
 
 static constexpr int STATUS_MASK = 128;
@@ -120,7 +121,8 @@ void ExBoardCan::closeConnection()
     detachTransport();
 }
 
-void ExBoardCan::setChannelCalibration(int channel, qreal val0v, qreal val5v, bool ntcEnabled)
+void ExBoardCan::setChannelCalibration(int channel, qreal val0v, qreal val5v, bool ntcEnabled,
+                                       qreal minVoltage, qreal maxVoltage)
 {
     if (channel < 0 || channel >= EX_ANALOG_CHANNELS)
         return;
@@ -128,6 +130,8 @@ void ExBoardCan::setChannelCalibration(int channel, qreal val0v, qreal val5v, bo
     m_calibration[channel].val0v = val0v;
     m_calibration[channel].val5v = val5v;
     m_calibration[channel].ntcEnabled = ntcEnabled;
+    m_calibration[channel].minVoltage = minVoltage;
+    m_calibration[channel].maxVoltage = (maxVoltage > minVoltage) ? maxVoltage : minVoltage + 0.001;
 }
 
 void ExBoardCan::applyCalibration(int channel, qreal voltage)
@@ -145,7 +149,12 @@ void ExBoardCan::applyCalibration(int channel, qreal voltage)
                 calibrated = 0.0;
         }
     } else {
-        calibrated = cal.val0v + (voltage / 5.0) * (cal.val5v - cal.val0v);
+        const qreal range = cal.maxVoltage - cal.minVoltage;
+        if (range > 0.0) {
+            const qreal clamped = std::clamp(voltage, cal.minVoltage, cal.maxVoltage);
+            const qreal normalized = (clamped - cal.minVoltage) / range;
+            calibrated = cal.val0v + normalized * (cal.val5v - cal.val0v);
+        }
     }
 
     switch (channel) {
@@ -294,7 +303,10 @@ void ExBoardCan::onGearPortVoltageChanged()
         return;
     }
 
-    m_expanderBoardData->setEXGear(voltageToGear(voltage));
+    const int gear = voltageToGear(voltage);
+    m_expanderBoardData->setEXGear(gear);
+    if (m_vehicleData && gear >= -1)
+        m_vehicleData->setGear(gear);
 }
 
 void ExBoardCan::setSpeedSensorConfig(const QVariantMap &config)
@@ -421,8 +433,10 @@ void ExBoardCan::onFrameReceived(const QCanBusFrame &frame)
 
     if (m_connectionData)
         m_connectionData->setcan({canid, payloadHex});
-    if (m_diagnosticsProvider)
+    if (m_diagnosticsProvider) {
         m_diagnosticsProvider->recordCanFrame(static_cast<quint32>(frame.frameId()), frame.payload());
+        m_diagnosticsProvider->recordCanMessage();
+    }
 
     QByteArray splitpayload = frame.payload();
     if (splitpayload.size() < 8)
@@ -498,7 +512,22 @@ void ExBoardCan::onFrameReceived(const QCanBusFrame &frame)
     }
 
     if (frame.frameId() == m_address5 && m_engineData && m_settingsData && (m_engineData->Cylinders() / 2) != 0 &&
-        m_settingsData->Externalrpm() == 1) {
+        m_rpmSource == 1) {
         m_engineData->setrpm(qRound((pkgpayload[0] * 4) / (m_engineData->Cylinders() / 2)));
+    }
+}
+
+void ExBoardCan::setRpmSource(int source)
+{
+    if (m_rpmConnection)
+        disconnect(m_rpmConnection);
+
+    m_rpmSource = source;
+
+    if (source == 2 && m_digitalInputs && m_engineData) {
+        m_rpmConnection = connect(m_digitalInputs, &DigitalInputs::frequencyDIEX1Changed, this, [this]() {
+            if (m_engineData)
+                m_engineData->setrpm(qRound(m_digitalInputs->frequencyDIEX1()));
+        });
     }
 }

@@ -64,7 +64,7 @@ QVariantMap OverlayConfigDefaults::tachClusterDefaults() const
     }
 
     return {
-        {QStringLiteral("sensorKey"), QStringLiteral("RPMFrequencyDividerDi1")},
+        {QStringLiteral("sensorKey"), QStringLiteral("rpm")},
         {QStringLiteral("minValue"), 0.0},
         {QStringLiteral("maxValue"), maxRpm},
         {QStringLiteral("overlaySize"), 575.051},
@@ -166,7 +166,7 @@ QVariantMap OverlayConfigDefaults::shiftIndicatorDefaults() const
         shiftLight = m_appSettings->getValue(QStringLiteral("Shift Light1"), 3000).toDouble();
 
     return {
-        {QStringLiteral("sensorKey"), QStringLiteral("RPMFrequencyDividerDi1")},
+        {QStringLiteral("sensorKey"), QStringLiteral("rpm")},
         {QStringLiteral("overlaySize"), 200.0},
         {QStringLiteral("warningThreshold"), shiftLight},
         {QStringLiteral("shiftPoint"), 0.75},

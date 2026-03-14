@@ -10,10 +10,10 @@ Popup {
     property string arcColorMid: "#FF8A00"
     property real arcColorMidPos: 0.65
     property string arcColorStart: "#8F4D17"
-    property real arcOffsetX: 5
+    property real arcOffsetX: 0
     property real arcOffsetY: 0
-    property real arcScale: 0.945
-    property real arcWidth: 0.285
+    property real arcScale: 1
+    property real arcWidth: 0.325
     property string configType: ""
     property var currentConfig: ({})
     property string dashboardId: "racedash"
@@ -67,7 +67,7 @@ Popup {
 
     // Value range
     property real minValue: 0
-    property real minimumVisibleFraction: 0.08
+    property real minimumVisibleFraction: 0
     property string normalColor: "#FFFFFF"
     property string offColor: "#FF0909"
     property string onColor: "#1ED033"
@@ -516,10 +516,11 @@ Popup {
             Layout.topMargin: 10
             ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
             clip: true
+            contentWidth: availableWidth
 
             ColumnLayout {
                 spacing: 10
-                width: scrollArea.availableWidth
+                width: scrollArea.contentWidth
 
                 // ============================================================
                 // DATA SOURCE SECTION

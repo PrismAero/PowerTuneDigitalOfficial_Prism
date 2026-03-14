@@ -197,6 +197,14 @@ void SettingsData::setExternalrpm(int Externalrpm)
     emit ExternalrpmChanged(m_Externalrpm);
 }
 
+void SettingsData::setGearSourceExpander(bool enabled)
+{
+    if (m_gearSourceExpander == enabled)
+        return;
+    m_gearSourceExpander = enabled;
+    emit gearSourceExpanderChanged(m_gearSourceExpander);
+}
+
 // * Setters - Speed configuration
 void SettingsData::setspeedpercent(qreal speedpercent)
 {
