@@ -33,10 +33,8 @@ IMAGE_INSTALL = " \
     \
     procps \
     \
-    openssl-compat-1.1 \
     powertune-config \
     powertune-launcher \
-    powertune-daemons \
     powertune-fonts \
     powertune-app \
 "
