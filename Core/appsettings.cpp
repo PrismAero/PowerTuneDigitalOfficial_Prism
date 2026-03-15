@@ -1,23 +1,19 @@
 #include "appsettings.h"
 
+#include "AppConstants.h"
 #include "../Hardware/Extender.h"
 #include "../Utils/SteinhartCalculator.h"
 #include "Models/DataModels.h"
-#include "dashboard.h"
 
 #include <QDebug>
-#include <QNetworkInterface>
 #include <QSettings>
 
 #include <iterator>
 
-static const char *ORG_NAME = "PowerTune";
-static const char *APP_NAME = "PowerTune";
 static constexpr int ECU_DROPDOWN_TO_BACKEND[] = {5, 0, 4};
 
 AppSettings::AppSettings(QObject *parent)
     : QObject(parent),
-      m_dashboard(nullptr),
       m_settingsData(nullptr),
       m_uiState(nullptr),
       m_vehicleData(nullptr),
@@ -25,27 +21,19 @@ AppSettings::AppSettings(QObject *parent)
       m_expanderBoardData(nullptr),
       m_engineData(nullptr),
       m_connectionData(nullptr),
-      m_digitalInputs(nullptr)
-{}
+      m_digitalInputs(nullptr),
+      m_settings(AppConstants::ORG_NAME, AppConstants::APP_NAME)
+{
+    m_syncTimer.setSingleShot(true);
+    m_syncTimer.setInterval(500);
+    connect(&m_syncTimer, &QTimer::timeout, this, &AppSettings::flushToDisk);
+    preloadCache();
+}
 
-AppSettings::AppSettings(DashBoard *dashboard, QObject *parent)
+AppSettings::AppSettings(SettingsData *settingsData, UIState *uiState, VehicleData *vehicleData, AnalogInputs *analogInputs,
+                         ExpanderBoardData *expanderBoardData, EngineData *engineData, ConnectionData *connectionData,
+                         DigitalInputs *digitalInputs, QObject *parent)
     : QObject(parent),
-      m_dashboard(dashboard),
-      m_settingsData(nullptr),
-      m_uiState(nullptr),
-      m_vehicleData(nullptr),
-      m_analogInputs(nullptr),
-      m_expanderBoardData(nullptr),
-      m_engineData(nullptr),
-      m_connectionData(nullptr),
-      m_digitalInputs(nullptr)
-{}
-
-AppSettings::AppSettings(DashBoard *dashboard, SettingsData *settingsData, UIState *uiState, VehicleData *vehicleData,
-                         AnalogInputs *analogInputs, ExpanderBoardData *expanderBoardData, EngineData *engineData,
-                         ConnectionData *connectionData, DigitalInputs *digitalInputs, QObject *parent)
-    : QObject(parent),
-      m_dashboard(dashboard),
       m_settingsData(settingsData),
       m_uiState(uiState),
       m_vehicleData(vehicleData),
@@ -53,27 +41,68 @@ AppSettings::AppSettings(DashBoard *dashboard, SettingsData *settingsData, UISta
       m_expanderBoardData(expanderBoardData),
       m_engineData(engineData),
       m_connectionData(connectionData),
-      m_digitalInputs(digitalInputs)
-{}
+      m_digitalInputs(digitalInputs),
+      m_settings(AppConstants::ORG_NAME, AppConstants::APP_NAME)
+{
+    m_syncTimer.setSingleShot(true);
+    m_syncTimer.setInterval(500);
+    connect(&m_syncTimer, &QTimer::timeout, this, &AppSettings::flushToDisk);
+    preloadCache();
+}
 
 AppSettings::~AppSettings() = default;
 
 void AppSettings::setValue(const QString &key, const QVariant &value)
 {
-    QSettings settings(ORG_NAME, APP_NAME, this);
-    settings.setValue(key, value);
+    const auto existing = m_cache.constFind(key);
+    if (existing != m_cache.constEnd() && existing.value() == value)
+        return;
+
+    m_cache.insert(key, value);
+    m_settings.setValue(key, value);
+    m_dirty = true;
+    scheduleSync();
 }
 
 QVariant AppSettings::getValue(const QString &key, const QVariant &defaultValue) const
 {
-    QSettings settings(ORG_NAME, APP_NAME);
-    return settings.value(key, defaultValue);
+    auto cached = m_cache.constFind(key);
+    if (cached != m_cache.constEnd())
+        return cached.value();
+
+    const QVariant value = m_settings.value(key, defaultValue);
+    m_cache.insert(key, value);
+    return value;
 }
 
 void AppSettings::sync()
 {
-    QSettings settings(ORG_NAME, APP_NAME, this);
-    settings.sync();
+    m_syncTimer.stop();
+    flushToDisk();
+}
+
+void AppSettings::preloadCache()
+{
+    if (m_cacheLoaded)
+        return;
+
+    const QStringList keys = m_settings.allKeys();
+    for (const QString &key : keys)
+        m_cache.insert(key, m_settings.value(key));
+    m_cacheLoaded = true;
+}
+
+void AppSettings::scheduleSync()
+{
+    m_syncTimer.start();
+}
+
+void AppSettings::flushToDisk()
+{
+    if (!m_dirty)
+        return;
+    m_settings.sync();
+    m_dirty = false;
 }
 
 void AppSettings::setSpeedUnitIndex(int index)
@@ -425,6 +454,47 @@ void AppSettings::writeEXBoardSettings(const qreal &EXA00, const qreal &EXA05, c
     }
 }
 
+void AppSettings::applyEXBoardCalibration(const QVariantList &channels)
+{
+    if (!m_extender && !m_steinhartCalc)
+        return;
+
+    const int channelCount = qMin(channels.size(), EX_ANALOG_CHANNELS);
+    for (int ch = 0; ch < channelCount; ++ch) {
+        const QVariantMap channel = channels.at(ch).toMap();
+        const qreal val0 = channel.value(QStringLiteral("val0v"), 0.0).toDouble();
+        const qreal val5 = channel.value(QStringLiteral("val5v"), 5.0).toDouble();
+        const qreal minVoltage = channel.value(QStringLiteral("minVoltage"), 0.0).toDouble();
+        const qreal maxVoltage = channel.value(QStringLiteral("maxVoltage"), 5.0).toDouble();
+        const bool ntcEnabled = channel.value(QStringLiteral("ntcEnabled"), false).toBool();
+
+        if (m_extender)
+            m_extender->setChannelCalibration(ch, val0, val5, ntcEnabled, minVoltage, maxVoltage);
+
+        if (!m_steinhartCalc || ch >= SteinhartCalculator::MAX_CHANNELS)
+            continue;
+
+        m_steinhartCalc->setChannelEnabled(ch, ntcEnabled);
+
+        const QVariantList steinhartT = channel.value(QStringLiteral("steinhartT")).toList();
+        const QVariantList steinhartR = channel.value(QStringLiteral("steinhartR")).toList();
+        if (steinhartT.size() >= 3 && steinhartR.size() >= 3) {
+            const qreal t1 = steinhartT.at(0).toDouble();
+            const qreal t2 = steinhartT.at(1).toDouble();
+            const qreal t3 = steinhartT.at(2).toDouble();
+            const qreal r1 = steinhartR.at(0).toDouble();
+            const qreal r2 = steinhartR.at(1).toDouble();
+            const qreal r3 = steinhartR.at(2).toDouble();
+            if (r1 > 0 && r2 > 0 && r3 > 0)
+                m_steinhartCalc->calibrateChannel(ch, t1, t2, t3, r1, r2, r3);
+        }
+
+        const qreal divider100 = channel.value(QStringLiteral("divider100"), false).toBool() ? 100.0 : 0.0;
+        const qreal divider1k = channel.value(QStringLiteral("divider1k"), false).toBool() ? 1000.0 : 0.0;
+        m_steinhartCalc->setVoltageDividerParams(ch, divider100, divider1k);
+    }
+}
+
 void AppSettings::writeEXAN7dampingSettings(const int &AN7damping)
 {
     setValue("AN7Damping", AN7damping);
@@ -595,44 +665,6 @@ void AppSettings::writeStartupSettings(const int &ExternalSpeed)
     }
 }
 
-void AppSettings::writeDaemonLicenseKey(const QString &DaemonLicenseKey)
-{
-    setValue("DaemonLicenseKey", DaemonLicenseKey);
-    if (m_connectionData) {
-        m_connectionData->setdaemonlicense(DaemonLicenseKey);
-    }
-}
-
-void AppSettings::writeHolleyProductID(const QString &HolleyProductID)
-{
-    setValue("HolleyProductID", HolleyProductID);
-    if (m_connectionData) {
-        m_connectionData->setholleyproductid(HolleyProductID);
-    }
-}
-
-QString AppSettings::getDaemonActivationKey()
-{
-    QNetworkInterface interface = QNetworkInterface::interfaceFromName("eth0");
-    QString mac = interface.hardwareAddress();
-    QStringList parts = mac.split(":");
-    if (parts.size() == 6) {
-        bool ok;
-        int octet3 = parts[3].toInt(&ok, 16);
-        int octet4 = parts[4].toInt(&ok, 16);
-        int octet5 = parts[5].toInt(&ok, 16);
-
-        if (ok) {
-            QString strOctet3 = QString("%1").arg(octet3, 3, 10, QChar('0'));
-            QString strOctet4 = QString("%1").arg(octet4, 3, 10, QChar('0'));
-            QString strOctet5 = QString("%1").arg(octet5, 3, 10, QChar('0'));
-
-            return strOctet3 + "-" + strOctet4 + "-" + strOctet5;
-        }
-    }
-    return "000-000-000";
-}
-
 void AppSettings::writeRPMFrequencySettings(const qreal &Divider, const int &DI1isRPM)
 {
     setValue("RPMFrequencyDivider", Divider);
@@ -683,32 +715,67 @@ QVariantMap AppSettings::loadDashboardConfig(int index) const
 
 void AppSettings::saveOverlayConfig(const QString &dashboardId, const QString &overlayId, const QVariantMap &config)
 {
-    QSettings settings(ORG_NAME, APP_NAME);
     const QString prefix = QStringLiteral("overlay/%1/%2/").arg(dashboardId, overlayId);
     for (auto it = config.constBegin(); it != config.constEnd(); ++it) {
-        settings.setValue(prefix + it.key(), it.value());
+        const QString fullKey = prefix + it.key();
+        m_settings.setValue(fullKey, it.value());
+        m_cache.insert(fullKey, it.value());
     }
+    m_dirty = true;
+    scheduleSync();
 }
 
 QVariantMap AppSettings::loadOverlayConfig(const QString &dashboardId, const QString &overlayId)
 {
-    QSettings settings(ORG_NAME, APP_NAME);
     QVariantMap config;
-    settings.beginGroup(QStringLiteral("overlay/%1/%2").arg(dashboardId, overlayId));
-    const QStringList keys = settings.childKeys();
+    const QString group = QStringLiteral("overlay/%1/%2").arg(dashboardId, overlayId);
+    m_settings.beginGroup(group);
+    const QStringList keys = m_settings.childKeys();
     for (const QString &key : keys) {
-        config.insert(key, settings.value(key));
+        const QVariant value = m_settings.value(key);
+        config.insert(key, value);
+        m_cache.insert(group + QLatin1Char('/') + key, value);
     }
-    settings.endGroup();
+    m_settings.endGroup();
     return config;
+}
+
+QVariantMap AppSettings::loadOverlayConfigs(const QString &dashboardId, const QStringList &overlayIds)
+{
+    QVariantMap allConfigs;
+    for (const QString &overlayId : overlayIds) {
+        QVariantMap config;
+        const QString group = QStringLiteral("overlay/%1/%2").arg(dashboardId, overlayId);
+        m_settings.beginGroup(group);
+        const QStringList keys = m_settings.childKeys();
+        for (const QString &key : keys) {
+            const QVariant value = m_settings.value(key);
+            config.insert(key, value);
+            m_cache.insert(group + QLatin1Char('/') + key, value);
+        }
+        m_settings.endGroup();
+        allConfigs.insert(overlayId, config);
+    }
+    return allConfigs;
 }
 
 void AppSettings::removeOverlayConfig(const QString &dashboardId, const QString &overlayId)
 {
-    QSettings settings(ORG_NAME, APP_NAME);
-    settings.beginGroup(QStringLiteral("overlay/%1/%2").arg(dashboardId, overlayId));
-    settings.remove(QString());
-    settings.endGroup();
+    const QString group = QStringLiteral("overlay/%1/%2").arg(dashboardId, overlayId);
+    m_settings.beginGroup(group);
+    m_settings.remove(QString());
+    m_settings.endGroup();
+
+    for (auto it = m_cache.begin(); it != m_cache.end();) {
+        if (it.key().startsWith(group + QLatin1Char('/'))) {
+            it = m_cache.erase(it);
+        } else {
+            ++it;
+        }
+    }
+
+    m_dirty = true;
+    scheduleSync();
 }
 
 // * Expander board sensor config persistence
@@ -864,11 +931,6 @@ void AppSettings::readandApplySettings()
     if (m_connectionData) {
         m_connectionData->setexternalspeedconnectionrequest(getValue("externalspeedconnect").toInt());
         m_connectionData->setexternalspeedport(getValue("externalspeedport").toString());
-    }
-
-    if (m_connectionData) {
-        m_connectionData->setdaemonlicense(getValue("DaemonLicenseKey").toString());
-        m_connectionData->setholleyproductid(getValue("HolleyProductID").toString());
     }
 
     // Restore per-channel linear calibration values and NTC flags into the Extender

@@ -30,14 +30,11 @@
 #include <QTimer>
 
 
-class DashBoard;
 class datalogger;
 class calculations;
 class AppSettings;
-class udpreceiver;
 class WifiScanner;
 class Extender;
-// * Data Models (Phase 2 & 3 - Modularization)
 class UIState;
 class EngineData;
 class VehicleData;
@@ -45,23 +42,15 @@ class GPSData;
 class AnalogInputs;
 class DigitalInputs;
 class ExpanderBoardData;
-class ElectricMotorData;
-class FlagsData;
 class TimingData;
-class SensorData;
 class ConnectionData;
 class SettingsData;
-// * PropertyRouter for dynamic QML property access
 class PropertyRouter;
-// * Phase 6: Sensor calibration
 class SteinhartCalculator;
 class CalibrationHelper;
-// * Phase 7: Sensor registry
 class SensorRegistry;
-// * Phase 8: Diagnostics provider
 class DiagnosticsProvider;
-// * Overlay configuration persistence
-class OverlayConfigManager;
+class OverlayPositionManager;
 class ShiftIndicatorHelper;
 class CanFrameModel;
 class DifferentialSensorCalc;
@@ -115,11 +104,7 @@ public:
     Q_INVOKABLE void setOdometer(const qreal &Odometer);
     Q_INVOKABLE void qmlTreeviewclicked(const QModelIndex &index);
     Q_INVOKABLE void clear() const;
-    Q_INVOKABLE void checkReg();
-    Q_INVOKABLE void checkOBDReg();
-    Q_INVOKABLE void LiveReqMsgOBD(const QString &obdpids);
     Q_INVOKABLE void canbitratesetup(const int &cansetting);
-    Q_INVOKABLE void LiveReqMsg(const QVariantList &values);
     Q_INVOKABLE void openConnection(const QString &portName, const int &ecuSelect, const int &canbase,
                                     const int &rpmcanbase);
     Q_INVOKABLE void closeConnection();
@@ -128,9 +113,6 @@ public:
     Q_INVOKABLE void shutdown();
     Q_INVOKABLE void reboot();
     Q_INVOKABLE void turnscreen();
-    Q_INVOKABLE void candump();
-    Q_INVOKABLE void minicom();
-    Q_INVOKABLE void RequestLicence();
 
 
 public:
@@ -140,14 +122,11 @@ private:
     int canBitrateForSelection(int selection) const;
     bool startActiveCanModule();
 
-    DashBoard *m_dashBoard;
     AppSettings *m_appSettings;
-    udpreceiver *m_udpreceiver;
     datalogger *m_datalogger;
     calculations *m_calculations;
     QStringList m_portsNames;
     QStringList *m_ecuList;
-    QProcess process;
     QFileSystemModel *dirModel;
     QFileSystemModel *fileModel;
     WifiScanner *m_wifiscanner;
@@ -160,23 +139,15 @@ private:
     AnalogInputs *m_analogInputs;
     DigitalInputs *m_digitalInputs;
     ExpanderBoardData *m_expanderBoardData;
-    ElectricMotorData *m_electricMotorData;
-    FlagsData *m_flagsData;
     TimingData *m_timingData;
-    SensorData *m_sensorData;
     ConnectionData *m_connectionData;
     SettingsData *m_settingsData;
-    // * PropertyRouter for dynamic QML property access
     PropertyRouter *m_propertyRouter;
-    // * Phase 6: Sensor calibration helpers
     SteinhartCalculator *m_steinhartCalc;
     CalibrationHelper *m_calibrationHelper;
-    // * Phase 7: Sensor registry
     SensorRegistry *m_sensorRegistry;
-    // * Phase 8: Diagnostics provider
     DiagnosticsProvider *m_diagnosticsProvider;
-    // * Overlay configuration persistence
-    OverlayConfigManager *m_overlayConfigManager;
+    OverlayPositionManager *m_overlayConfigManager;
     ShiftIndicatorHelper *m_shiftIndicatorHelper;
     CanFrameModel *m_canFrameModel;
     DifferentialSensorCalc *m_differentialSensorCalc;
@@ -212,7 +183,6 @@ public slots:
         m_portsNames = portsNames;
         emit sig_portsNamesChanged(portsNames);
     }
-    void processOutput();
 };
 
 

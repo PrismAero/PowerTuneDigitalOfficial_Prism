@@ -118,6 +118,8 @@ SettingsPage {
     }
 
     Component.onCompleted: {
+        if (settingsLoaded)
+            return;
         connectButton.enabled = AppSettings.getValue("ui/connectAtStartup", false);
         weight.text = AppSettings.getValue("ui/vehicleWeight", "0");
         unitSelect1.currentIndex = AppSettings.getValue("ui/unitSelector1", 0);
@@ -152,18 +154,8 @@ SettingsPage {
     }
 
     Connections {
-        function onKnockChanged() {
-            if (Engine.Knock > Settings.knockwarn)
-                triggerWarning();
-        }
-
         function onRpmChanged() {
             if (Engine.rpm > Settings.rpmwarn)
-                triggerWarning();
-        }
-
-        function onWatertempChanged() {
-            if (Engine.Watertemp > Settings.waterwarn)
                 triggerWarning();
         }
 

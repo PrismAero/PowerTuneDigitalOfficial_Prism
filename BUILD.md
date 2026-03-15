@@ -20,6 +20,67 @@ an Ubuntu 22.04 build server.
                            + full image build            PowerTuneQMLGui
 ```
 
+## Architecture Changes (Settings Performance Overhaul)
+
+### QSettings Caching (Phase 1)
+- AppSettings now uses an in-memory `QHash<QString, QVariant>` cache with deferred disk writes via a 500ms single-shot QTimer
+- All getValue() calls are O(1) hash lookups; all keys are preloaded at startup
+- Single `m_settings` QSettings member replaces per-call construction
+
+### Lazy Tab Loading (Phase 4)
+- SettingsManager.qml uses Loader components for on-demand tab loading
+- Only the active tab is instantiated; unloaded when switching away
+- Eliminates 6 unnecessary Component.onCompleted cascades
+
+### Signal Coalescing (Phase 3)
+- SensorRegistry uses deferred emission via single-shot timer to batch sensorsChanged() signals
+- SensorPicker.qml debounces refresh calls with a 50ms timer
+
+### Removed Legacy Systems
+- **UDP Receiver**: `Utils/UDPReceiver.cpp/.h` deleted - the legacy daemon UDP telemetry on port 45454 has been removed
+- **Daemon Infrastructure**: All daemon binary support removed from connect.cpp (checkReg, checkOBDReg, LiveReqMsg, candump, etc.)
+- **Daemon License System**: writeDaemonLicenseKey, writeHolleyProductID, getDaemonActivationKey removed from AppSettings
+- **Daemon Properties**: daemonlicense, holleyproductid, supportedReg removed from ConnectionData
+- **DaemonUDP Sensor Source**: Removed from SensorRegistry enum and all associated registration methods
+
+### Removed Files
+- `Utils/shcalc.cpp/.h` - replaced by SteinhartCalculator
+- `Utils/SignalSmoother.cpp/.h` - never instantiated
+- `Core/dashboard.cpp/.h` - empty facade, replaced by direct model access
+- `Core/Models/SensorData.cpp/.h` - all properties were UDP-only
+- `Core/Models/FlagsData.cpp/.h` - all properties were UDP-only
+- `Core/Models/ElectricMotorData.cpp/.h` - all properties were UDP-only
+- `Utils/textprogressbar.cpp/.h` - inlined into DownloadManager
+- `Utils/ParseGithubData.cpp/.h` - inlined into DownloadManager
+- `Utils/UDPReceiver.cpp/.h` - legacy UDP telemetry
+
+### Domain Model Gutting (Phase 14)
+- **EngineData**: 157 -> 5 properties (rpm, Power, Torque, Cylinders, Lambdamultiply)
+- **VehicleData**: 81 -> 5 properties (Gear, GearCalculation, Odo, Trip, Weight)
+- **DigitalInputs**: Removed DigitalInput1-7 (daemon-only), kept EXDigitalInput1-8 + frequency + DI1RPM config
+- **AnalogInputs**: All 46 properties removed (empty shell for future CAN/ECU analog support)
+- **GPSData**: All 10 properties removed (empty shell for future GPS hardware integration)
+- **TimingData**: All 18 properties retained (actively used by Calculations)
+
+### OverlayConfigManager -> OverlayPositionManager
+- Renamed to reflect reduced responsibility (positions and lock state only)
+- 7 unused methods removed (~200 lines of dead code)
+
+### Shared Constants
+- `Core/AppConstants.h` created with ORG_NAME/APP_NAME constants
+- Replaces duplicated string literals across appsettings.cpp, OverlayPositionManager.cpp, SensorRegistry.cpp
+
+### Calculations Speed Source Migration
+- `Calculations.cpp` now uses `ExpanderBoardData::EXSpeed()` instead of the removed `VehicleData::speed()`
+- Virtual dyno (Power/Torque from accelerometer) removed since `VehicleData::accely()` no longer exists
+
+### Active/Inactive Sensor Architecture
+- SensorRegistry is the single source of truth for sensor active state
+- PropertyRouter respects SensorRegistry active state (returns 0 for inactive sensors)
+- DiagnosticsProvider uses SensorRegistry for active/total sensor counts
+- SensorPicker defaults to "active" filter mode
+- CAN timeout of 10 seconds marks stale sensors as inactive
+
 ## 1. Local Development Build (macOS)
 
 Preferred local preset flow:
@@ -92,47 +153,38 @@ The `powertune-app` recipe builds from a source tarball located at:
 To update it with the latest code from the development machine:
 
 ```sh
-# On the Mac: stage a clean source tree and create the tarball
+# On the Mac: package the active working tree exactly as used in deployment
 cd /path/to/PowerTuneDigitalOfficial_Prism
+./Scripts/package-source-tarball.sh
 
-rm -rf /tmp/powertune-src && mkdir /tmp/powertune-src
-rsync -a \
-    --exclude='.git' --exclude='build' --exclude='build-*' \
-    --exclude='.cache' --exclude='docs-misc' --exclude='plans' \
-    --exclude='agent-transcripts' --exclude='.cursor' --exclude='node_modules' \
-    --exclude='.DS_Store' --exclude='.memory' --exclude='.kilocode' \
-    --exclude='.vscode' --exclude='.clangd' --exclude='.clang-tidy' \
-    --exclude='.clang-format' --exclude='.qmllint.ini' --exclude='.github' \
-    ./ /tmp/powertune-src/
-
-cd /tmp && tar czf /tmp/powertune-src.tar.gz powertune-src
-
-# Transfer to build server
+# Upload the tarball to the build server recipe files directory
 scp /tmp/powertune-src.tar.gz \
-    kai_admin@192.168.15.205:~/powertune-yocto/meta-powertune/recipes-powertune/powertune-app/files/
+    kai_admin@192.168.15.205:~/powertune-yocto/meta-powertune/recipes-powertune/powertune-app/files/powertune-src.tar.gz
 ```
+
+`Scripts/package-source-tarball.sh` stages `/tmp/powertune-src/` with `rsync` and excludes:
+`.git`, `build`, `build-*`, `.cache`, `.cursor`, `docs-misc`, `node_modules`,
+`.DS_Store`, `.memory`, `.kilocode`, `.vscode`, `compile_commands.json`, and
+`target-backups`.
 
 ### 2.5 Building the App Only
 
 To rebuild just the PowerTune app binary (fastest iteration):
 
 ```sh
-ssh kai_admin@192.168.15.205
-
-cd ~/powertune-yocto
-source poky/oe-init-build-env build-powertune
-
-# Clean previous build state for the app recipe
-bitbake -c cleansstate powertune-app
-
-# Rebuild only the app
-bitbake powertune-app
+# Run directly from the Mac
+ssh kai_admin@192.168.15.205 '
+    cd ~/powertune-yocto &&
+    source poky/oe-init-build-env build-powertune 2>/dev/null &&
+    bitbake -c cleansstate powertune-app &&
+    bitbake powertune-app
+'
 ```
 
 The cross-compiled binary will be at:
 
 ```
-~/powertune-yocto/build-powertune/tmp/work/cortexa7t2hf-neon-vfpv4-poky-linux-gnueabi/powertune-app/1.0-r0/image/opt/PowerTune/PowerTuneQMLGui
+~/powertune-yocto/build-powertune/tmp/work/cortexa7t2hf-neon-vfpv4-poky-linux-gnueabi/powertune-app/1.0/image/opt/PowerTune/PowerTuneQMLGui
 ```
 
 ### 2.6 Building the Full Image
@@ -213,7 +265,168 @@ The target is resolved from `remotessh.login` by the helper scripts.
 These scripts use SSH and SCP under the hood, but all actions are initiated from
 the Mac terminal.
 
-### 3.3 Full Image Flash
+### 3.3 Exact Active Code -> Server -> Target Flow
+
+This is the exact flow used during active development when deploying the current
+working tree without flashing a new SD card image.
+
+#### 3.3.1 Zip the active code on the Mac
+
+```sh
+cd /path/to/PowerTuneDigitalOfficial_Prism
+./Scripts/package-source-tarball.sh
+```
+
+This creates:
+
+```sh
+/tmp/powertune-src.tar.gz
+```
+
+#### 3.3.2 Send the tarball to the build server
+
+```sh
+scp /tmp/powertune-src.tar.gz \
+    kai_admin@192.168.15.205:~/powertune-yocto/meta-powertune/recipes-powertune/powertune-app/files/powertune-src.tar.gz
+```
+
+#### 3.3.3 Build the app on the build server
+
+```sh
+ssh kai_admin@192.168.15.205 '
+    cd ~/powertune-yocto &&
+    source poky/oe-init-build-env build-powertune 2>/dev/null &&
+    bitbake -c cleansstate powertune-app &&
+    bitbake powertune-app
+'
+```
+
+#### 3.3.4 Download the fresh ARM binary from the build server
+
+```sh
+scp \
+    kai_admin@192.168.15.205:~/powertune-yocto/build-powertune/tmp/work/cortexa7t2hf-neon-vfpv4-poky-linux-gnueabi/powertune-app/1.0/image/opt/PowerTune/PowerTuneQMLGui \
+    /tmp/PowerTuneQMLGui
+```
+
+#### 3.3.5 Send the binary to the target
+
+```sh
+scp /tmp/PowerTuneQMLGui root@192.168.15.183:/tmp/PowerTuneQMLGui.new
+```
+
+#### 3.3.6 Safely deploy it on the target
+
+Use maintenance mode so init respawn does not fight the deploy:
+
+```sh
+ssh -p 22 -o StrictHostKeyChecking=no root@192.168.15.183 "
+    touch /tmp/powertune-maintenance
+    killall -9 PowerTuneQMLGui 2>/dev/null || true
+    killall -9 powertune-launcher 2>/dev/null || true
+    sleep 2
+    cp /tmp/PowerTuneQMLGui.new /opt/PowerTune/PowerTuneQMLGui
+    chmod 0755 /opt/PowerTune/PowerTuneQMLGui
+    rm -f /tmp/PowerTuneQMLGui.new
+    sync
+    rm -f /tmp/powertune-maintenance
+"
+```
+
+Then verify the target respawned the app:
+
+```sh
+ssh -p 22 -o StrictHostKeyChecking=no root@192.168.15.183 \
+    "ps | grep PowerTuneQMLGui | grep -v grep || true"
+```
+
+#### 3.3.7 Partial build and deploy
+
+Use this path when only the app binary changed and you do not need a full image
+rebuild.
+
+Build only the app recipe on the build server:
+
+```sh
+cd /path/to/PowerTuneDigitalOfficial_Prism
+./Scripts/package-source-tarball.sh
+
+scp /tmp/powertune-src.tar.gz \
+    kai_admin@192.168.15.205:~/powertune-yocto/meta-powertune/recipes-powertune/powertune-app/files/powertune-src.tar.gz
+
+ssh kai_admin@192.168.15.205 '
+    cd ~/powertune-yocto &&
+    source poky/oe-init-build-env build-powertune 2>/dev/null &&
+    bitbake -c cleansstate powertune-app &&
+    bitbake powertune-app
+'
+```
+
+Download the rebuilt ARM binary:
+
+```sh
+scp \
+    kai_admin@192.168.15.205:~/powertune-yocto/build-powertune/tmp/work/cortexa7t2hf-neon-vfpv4-poky-linux-gnueabi/powertune-app/1.0/image/opt/PowerTune/PowerTuneQMLGui \
+    /tmp/PowerTuneQMLGui
+```
+
+Device management commands for a safe partial deploy:
+
+```sh
+# Enter maintenance mode and stop the UI
+ssh -p 22 -o StrictHostKeyChecking=no root@192.168.15.183 \
+    "/etc/init.d/powertune stop"
+
+# Or, if you need the low-level manual path:
+ssh -p 22 -o StrictHostKeyChecking=no root@192.168.15.183 \
+    "touch /tmp/powertune-maintenance && killall -9 PowerTuneQMLGui 2>/dev/null || true && killall -9 powertune-launcher 2>/dev/null || true"
+
+# Upload the rebuilt binary
+scp /tmp/PowerTuneQMLGui root@192.168.15.183:/tmp/PowerTuneQMLGui.new
+
+# Install it atomically on the target
+ssh -p 22 -o StrictHostKeyChecking=no root@192.168.15.183 "
+    cp /tmp/PowerTuneQMLGui.new /opt/PowerTune/PowerTuneQMLGui &&
+    chmod 0755 /opt/PowerTune/PowerTuneQMLGui &&
+    rm -f /tmp/PowerTuneQMLGui.new &&
+    sync
+"
+
+# Leave maintenance mode and let init respawn the app
+ssh -p 22 -o StrictHostKeyChecking=no root@192.168.15.183 \
+    "/etc/init.d/powertune start"
+
+# Or the low-level manual equivalent:
+ssh -p 22 -o StrictHostKeyChecking=no root@192.168.15.183 \
+    "rm -f /tmp/powertune-maintenance"
+```
+
+Verify the partial deploy:
+
+```sh
+ssh -p 22 -o StrictHostKeyChecking=no root@192.168.15.183 \
+    "/etc/init.d/powertune status"
+
+ssh -p 22 -o StrictHostKeyChecking=no root@192.168.15.183 \
+    "ps | grep PowerTuneQMLGui | grep -v grep || true"
+
+ssh -p 22 -o StrictHostKeyChecking=no root@192.168.15.183 \
+    "sed -n '1,120p' /var/log/powertune.log 2>/dev/null || true"
+```
+
+Use a full image rebuild only when changing Yocto recipes, launcher/runtime
+files, boot configuration, init scripts, or other rootfs-level assets.
+
+Notes:
+
+- Do not use `telinit 1` for normal deployment. It can drop networking and kill
+  the SSH session before recovery steps run.
+- The safe iteration loop is: package source -> upload tarball -> build
+  `powertune-app` -> download `PowerTuneQMLGui` -> deploy under maintenance mode.
+- When the target login file is stale, use explicit SSH targets such as
+  `root@192.168.15.183`.
+
+### 3.4 Full Image Flash
 
 To flash the complete WIC image to an SD card:
 
@@ -224,7 +437,7 @@ sudo dd if=powertune-image-raspberrypi4.rootfs.wic of=/dev/sdX bs=4M status=prog
 sync
 ```
 
-### 3.4 Boot Sequence and App Launch
+### 3.5 Boot Sequence and App Launch
 
 The device is a dedicated appliance. There is no login prompt, no bootsplash
 script, and no chain of shell-script wrappers.
@@ -261,7 +474,7 @@ Administrative control via SSH:
 tail -f /var/log/powertune.log  # Watch app output
 ```
 
-### 3.5 Environment Variables (set by powertune-launcher)
+### 3.6 Environment Variables (set by powertune-launcher)
 
 ```sh
 QT_QPA_PLATFORM=eglfs
@@ -273,7 +486,7 @@ QML_DISK_CACHE=1
 LC_ALL=en_US.utf8
 ```
 
-### 3.6 KMS Configuration
+### 3.7 KMS Configuration
 
 `/opt/PowerTune/kms-config.json`:
 

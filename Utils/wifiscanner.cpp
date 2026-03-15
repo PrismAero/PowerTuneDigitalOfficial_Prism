@@ -17,20 +17,26 @@ QStringList result;
 QString eth0ip;
 QString wlanip;
 
-WifiScanner::WifiScanner(QObject *parent) : QObject(parent), m_connectionData(nullptr) {}
+WifiScanner::WifiScanner(QObject *parent) : QObject(parent), m_connectionData(nullptr)
+{
+    m_statusTimer.setInterval(3000);
+    connect(&m_statusTimer, &QTimer::timeout, this, &WifiScanner::getconnectionStatus);
+}
 
 
 WifiScanner::WifiScanner(ConnectionData *connectionData, QObject *parent)
     : QObject(parent), m_connectionData(connectionData)
-{}
+{
+    m_statusTimer.setInterval(3000);
+    connect(&m_statusTimer, &QTimer::timeout, this, &WifiScanner::getconnectionStatus);
+}
 
 
 void WifiScanner::initializeWifiscanner()
 {
-    QTimer *timer = new QTimer(this);
-    connect(timer, &QTimer::timeout, this, &WifiScanner::getconnectionStatus);
-    timer->start(3000);                  // Check the status of the connection every 3 Seconds to
-    WifiScanner::getconnectionStatus();  // Temporay measure
+    if (!m_statusTimer.isActive())
+        m_statusTimer.start();
+    WifiScanner::getconnectionStatus();
 
     result.clear();
     QString raw;
@@ -46,12 +52,21 @@ void WifiScanner::initializeWifiscanner()
         raw.remove(0, 1);  // Remove the white space before the SSID
         result += raw;
     }
-    m_connectionData->setwifi(result);  // Pass on wifi name list to QML Combobox
+    if (m_connectionData)
+        m_connectionData->setwifi(result);  // Pass on wifi name list to QML Combobox
+}
+
+void WifiScanner::shutdownWifiscanner()
+{
+    m_statusTimer.stop();
 }
 
 
 void WifiScanner::getconnectionStatus()
 {
+    if (!m_connectionData)
+        return;
+
     // displays the wlan0 and eth0 IP adresses
     // Check IP Adresses direcly via QT
     // qDebug()<< "TIMER";

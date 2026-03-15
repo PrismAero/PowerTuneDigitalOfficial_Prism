@@ -104,7 +104,7 @@ QVariantMap OverlayConfigDefaults::speedClusterDefaults() const
 {
     return {
         {QStringLiteral("shapeMode"), QStringLiteral("speedSvg")},
-        {QStringLiteral("sensorKey"), QStringLiteral("speed")},
+        {QStringLiteral("sensorKey"), QStringLiteral("EXSpeed")},
         {QStringLiteral("unit"), QStringLiteral("MPH")},
         {QStringLiteral("decimals"), 0},
         {QStringLiteral("minValue"), 0.0},
@@ -165,7 +165,7 @@ QVariantMap OverlayConfigDefaults::shiftIndicatorDefaults() const
 QVariantMap OverlayConfigDefaults::waterTempDefaults() const
 {
     return {
-        {QStringLiteral("sensorKey"), QStringLiteral("Watertemp")},
+        {QStringLiteral("sensorKey"), QStringLiteral("EXAnalogCalc0")},
         {QStringLiteral("label"), QStringLiteral("Water Temp")},
         {QStringLiteral("unit"), QStringLiteral("F\u00B0")},
         {QStringLiteral("decimals"), 2},
@@ -175,7 +175,7 @@ QVariantMap OverlayConfigDefaults::waterTempDefaults() const
 QVariantMap OverlayConfigDefaults::oilPressureDefaults() const
 {
     return {
-        {QStringLiteral("sensorKey"), QStringLiteral("oilpres")},
+        {QStringLiteral("sensorKey"), QStringLiteral("EXAnalogCalc1")},
         {QStringLiteral("label"), QStringLiteral("Oil Pressure")},
         {QStringLiteral("unit"), QStringLiteral("PSI")},
         {QStringLiteral("decimals"), 2},
@@ -197,7 +197,7 @@ QVariantMap OverlayConfigDefaults::statusRowBaseDefaults() const
 QVariantMap OverlayConfigDefaults::statusRow0Defaults() const
 {
     QVariantMap defs = statusRowBaseDefaults();
-    defs[QStringLiteral("sensorKey")] = QStringLiteral("DigitalInput1");
+    defs[QStringLiteral("sensorKey")] = QStringLiteral("EXDigitalInput1");
     defs[QStringLiteral("label")] = QStringLiteral("Fuel Pump:");
     return defs;
 }
@@ -205,7 +205,7 @@ QVariantMap OverlayConfigDefaults::statusRow0Defaults() const
 QVariantMap OverlayConfigDefaults::statusRow1Defaults() const
 {
     QVariantMap defs = statusRowBaseDefaults();
-    defs[QStringLiteral("sensorKey")] = QStringLiteral("DigitalInput2");
+    defs[QStringLiteral("sensorKey")] = QStringLiteral("EXDigitalInput2");
     defs[QStringLiteral("label")] = QStringLiteral("Cooling Fan:");
     return defs;
 }
@@ -239,6 +239,8 @@ QVariantMap OverlayConfigDefaults::sensorCardDefaults() const
         {QStringLiteral("warningEnabled"), false},
         {QStringLiteral("warningThreshold"), 0.0},
         {QStringLiteral("warningColor"), QStringLiteral("#FF0000")},
+        {QStringLiteral("warningFlash"), true},
+        {QStringLiteral("warningFlashRate"), 200},
         {QStringLiteral("warningDirection"), QStringLiteral("above")},
         {QStringLiteral("normalColor"), QStringLiteral("#FFFFFF")},
     };

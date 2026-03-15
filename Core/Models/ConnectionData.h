@@ -44,7 +44,6 @@ class ConnectionData : public QObject
 
     // * ECU status
     Q_PROPERTY(int ecu READ ecu WRITE setecu NOTIFY ecuChanged)
-    Q_PROPERTY(int supportedReg READ supportedReg WRITE setsupportedReg NOTIFY supportedRegChanged)
 
     // * Error state
     Q_PROPERTY(QString Error READ Error WRITE setError NOTIFY ErrorChanged)
@@ -57,10 +56,6 @@ class ConnectionData : public QObject
 
     // * Media path
     Q_PROPERTY(QString musicpath READ musicpath WRITE setmusicpath NOTIFY musicpathChanged)
-
-    // * Daemon/License
-    Q_PROPERTY(QString daemonlicense READ daemonlicense WRITE setdaemonlicense NOTIFY daemonlicenseChanged)
-    Q_PROPERTY(QString holleyproductid READ holleyproductid WRITE setholleyproductid NOTIFY holleyproductidChanged)
 
 public:
     explicit ConnectionData(QObject *parent = nullptr);
@@ -85,7 +80,6 @@ public:
 
     // * Getters - ECU status
     int ecu() const { return m_ecu; }
-    int supportedReg() const { return m_supportedReg; }
 
     // * Getters - Error state
     QString Error() const { return m_Error; }
@@ -96,10 +90,6 @@ public:
 
     // * Getters - Media path
     QString musicpath() const { return m_musicpath; }
-
-    // * Getters - Daemon/License
-    QString daemonlicense() const { return m_daemonlicense; }
-    QString holleyproductid() const { return m_holleyproductid; }
 
 public slots:
     // * Setters - Serial status
@@ -122,7 +112,6 @@ public slots:
 
     // * Setters - ECU status
     void setecu(int ecu);
-    void setsupportedReg(int supportedReg);
 
     // * Setters - Error state
     void setError(const QString &Error);
@@ -133,10 +122,6 @@ public slots:
 
     // * Setters - Media path
     void setmusicpath(const QString &musicpath);
-
-    // * Setters - Daemon/License
-    void setdaemonlicense(const QString &daemonlicense);
-    void setholleyproductid(const QString &holleyproductid);
 
 signals:
     // * Signals - Serial status
@@ -159,7 +144,6 @@ signals:
 
     // * Signals - ECU status
     void ecuChanged(int ecu);
-    void supportedRegChanged(int supportedReg);
 
     // * Signals - Error state
     void ErrorChanged(const QString &Error);
@@ -170,10 +154,6 @@ signals:
 
     // * Signals - Media path
     void musicpathChanged(const QString &musicpath);
-
-    // * Signals - Daemon/License
-    void daemonlicenseChanged(const QString &daemonlicense);
-    void holleyproductidChanged(const QString &holleyproductid);
 
 private:
     // * Serial status
@@ -196,7 +176,6 @@ private:
 
     // * ECU status
     int m_ecu = 0;
-    int m_supportedReg = 0;
 
     // * Error state
     QString m_Error;
@@ -208,9 +187,6 @@ private:
     // * Media path
     QString m_musicpath;
 
-    // * Daemon/License
-    QString m_daemonlicense;
-    QString m_holleyproductid;
 };
 
 #endif  // CONNECTIONDATA_H

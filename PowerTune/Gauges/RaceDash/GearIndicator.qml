@@ -4,7 +4,7 @@ Item {
     id: root
 
     property var config: ({})
-    property real gearFontSize: config.gearFontSize !== undefined ? Number(config.gearFontSize) : 140.013
+    property real gearFontSize: config.gearFontSize !== undefined ? Number(config.gearFontSize) : 160.0
     property string gearKey: config.gearKey !== undefined ? config.gearKey : "Gear"
     property color gearTextColor: config.gearTextColor !== undefined ? config.gearTextColor : "#FFFFFF"
     property real liveGear: 0

@@ -14,7 +14,7 @@ Item {
         return Math.max(0, Math.min(1, (liveValue - minValue) / (maxValue - minValue)));
     }
     property string rightLabel: config.rightLabel !== undefined ? config.rightLabel : "FWD"
-    property string sensorKey: config.sensorKey !== undefined ? config.sensorKey : ""
+    property string sensorKey: config.sensorKey !== undefined ? config.sensorKey : "differentialSensor"
 
     function readValue() {
         if (!sensorKey || !PropertyRouter || !PropertyRouter.hasProperty(sensorKey))

@@ -38,33 +38,33 @@ ApplicationWindow {
             source: "qrc:/qt/qml/PrismPT/Dashboard/PowerTune/Dashboard/RaceDash.qml"
         }
 
-        Loader {
-            id: secondPageLoader
-
-            active: UI.Visibledashes > 1
-            source: ""
-        }
-
-        Loader {
-            id: thirdPageLoader
-
-            active: UI.Visibledashes > 2
-            source: ""
-        }
-
-        Loader {
-            id: fourthPageLoader
-
-            active: UI.Visibledashes > 3
-            source: ""
-        }
-
         Item {
             id: lastPage
 
             SettingsManager {
             }
         }
+    }
+
+    Loader {
+        id: secondPageLoader
+
+        active: source !== ""
+        source: ""
+    }
+
+    Loader {
+        id: thirdPageLoader
+
+        active: source !== ""
+        source: ""
+    }
+
+    Loader {
+        id: fourthPageLoader
+
+        active: source !== ""
+        source: ""
     }
 
     Loader {

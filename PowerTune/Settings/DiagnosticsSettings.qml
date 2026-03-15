@@ -16,7 +16,10 @@ SettingsPage {
     readonly property int _statusRowSpacing: 2
     property bool showAllSensors: Diagnostics.showAllSensors
 
-    Component.onCompleted: Diagnostics.setPageVisible(true)
+    Component.onCompleted: {
+        Diagnostics.activate()
+        Diagnostics.setPageVisible(true)
+    }
     Component.onDestruction: Diagnostics.setPageVisible(false)
 
     ListModel {

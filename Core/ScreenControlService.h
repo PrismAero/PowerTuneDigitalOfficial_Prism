@@ -2,6 +2,7 @@
 #define SCREENCONTROLSERVICE_H
 
 #include <QObject>
+#include <QProcess>
 #include <QString>
 #include <QTimer>
 
@@ -73,6 +74,7 @@ signals:
 
 private slots:
     void onOverrideTimeout();
+    void onDdcProbeFinished(int exitCode, QProcess::ExitStatus status);
 
 private:
     int clampPercent(int percent) const;
@@ -93,6 +95,7 @@ private:
     int m_currentBrightnessPercent = 100;
     bool m_presetControlsVisible = false;
     QTimer m_overrideTimer;
+    QProcess *m_ddcProbe = nullptr;
 };
 
 #endif  // SCREENCONTROLSERVICE_H

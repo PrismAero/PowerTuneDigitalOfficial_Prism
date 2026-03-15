@@ -29,13 +29,11 @@ class GPSData;
 class AnalogInputs;
 class DigitalInputs;
 class ExpanderBoardData;
-class ElectricMotorData;
-class FlagsData;
-class SensorData;
 class ConnectionData;
 class SettingsData;
 class TimingData;
 class UIState;
+class SensorRegistry;
 
 /**
  * @class PropertyRouter
@@ -63,9 +61,8 @@ class PropertyRouter : public QObject
 
 public:
     explicit PropertyRouter(EngineData *engine, VehicleData *vehicle, GPSData *gps, AnalogInputs *analog,
-                            DigitalInputs *digital, ExpanderBoardData *expander, ElectricMotorData *motor,
-                            FlagsData *flags, SensorData *sensor, ConnectionData *connection, SettingsData *settings,
-                            TimingData *timing, UIState *ui, QObject *parent = nullptr);
+                            DigitalInputs *digital, ExpanderBoardData *expander, ConnectionData *connection,
+                            SettingsData *settings, TimingData *timing, UIState *ui, QObject *parent = nullptr);
 
     /**
      * @brief Get a property value by name from the appropriate model
@@ -100,10 +97,14 @@ public:
      * Useful for sensor picker dropdowns in overlay configuration UI.
      */
     Q_INVOKABLE QStringList availableProperties() const;
+    Q_INVOKABLE void clearActiveProperties();
     Q_INVOKABLE void aliasProperty(const QString &sourceKey, const QString &aliasKey);
     Q_INVOKABLE void removeAlias(const QString &aliasKey);
     Q_INVOKABLE bool isAlias(const QString &key) const;
     Q_INVOKABLE QString resolveAlias(const QString &key) const;
+    void setSensorRegistry(SensorRegistry *sensorRegistry);
+    void connectModel(QObject *model);
+    void disconnectModel(QObject *model);
 
 signals:
     /**
@@ -129,6 +130,7 @@ private slots:
 private:
     // * Initialize the property to model mappings
     void initializePropertyMappings();
+    void disconnectModelSignals(QObject *model);
 
     /**
      * @brief Connect all NOTIFY signals from a model to onModelPropertyChanged()
@@ -147,13 +149,11 @@ private:
     AnalogInputs *m_analog = nullptr;
     DigitalInputs *m_digital = nullptr;
     ExpanderBoardData *m_expander = nullptr;
-    ElectricMotorData *m_motor = nullptr;
-    FlagsData *m_flags = nullptr;
-    SensorData *m_sensor = nullptr;
     ConnectionData *m_connection = nullptr;
     SettingsData *m_settings = nullptr;
     TimingData *m_timing = nullptr;
     UIState *m_ui = nullptr;
+    SensorRegistry *m_sensorRegistry = nullptr;
 
     // * Property to model enum mapping
     enum class ModelType {
@@ -164,19 +164,19 @@ private:
         Analog,
         Digital,
         Expander,
-        Motor,
-        Flags,
-        Sensor,
         Connection,
         Settings,
         Timing,
         UI
     };
+    QObject *modelForType(ModelType type) const;
 
     // * Maps property names to their owning model
     QHash<QString, ModelType> m_propertyModelMap;
     QHash<QString, QString> m_aliases;             // aliasKey -> sourceKey
     QHash<QString, QStringList> m_reverseAliases;  // sourceKey -> alias keys
+    mutable QSet<QString> m_activeProperties;
+    QSet<QObject *> m_connectedModels;
 
     /**
      * @struct SignalPropertyInfo

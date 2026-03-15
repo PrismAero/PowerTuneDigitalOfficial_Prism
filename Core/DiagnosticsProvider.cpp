@@ -75,22 +75,28 @@ DiagnosticsProvider::DiagnosticsProvider(QObject *parent) : QObject(parent)
     m_uptimeTimer.start();
 
     connect(&m_systemInfoTimer, &QTimer::timeout, this, &DiagnosticsProvider::updateSystemInfo);
-    m_systemInfoTimer.start(2000);
-
     connect(&m_canRateTimer, &QTimer::timeout, this, &DiagnosticsProvider::updateCanRate);
-    m_canRateTimer.start(1000);
-
     connect(&m_liveSensorTimer, &QTimer::timeout, this, &DiagnosticsProvider::refreshLiveSensorEntries);
-    m_liveSensorTimer.start(1000);
-
-    updateSystemInfo();
-
-    addLogMessage(QStringLiteral("INFO"), QStringLiteral("Diagnostics provider initialized"));
+    addLogMessage(QStringLiteral("INFO"), QStringLiteral("Diagnostics provider initialized (idle)"));
 }
 
 DiagnosticsProvider *DiagnosticsProvider::instance()
 {
     return s_instance;
+}
+
+void DiagnosticsProvider::activate()
+{
+    if (m_initialized)
+        return;
+
+    m_initialized = true;
+    m_systemInfoTimer.start(2000);
+    m_canRateTimer.start(1000);
+    m_liveSensorTimer.start(1000);
+    updateSystemInfo();
+    refreshLiveSensorEntries();
+    addLogMessage(QStringLiteral("INFO"), QStringLiteral("Diagnostics polling activated"));
 }
 
 
@@ -313,20 +319,14 @@ int DiagnosticsProvider::serialBaudRate() const
  */
 int DiagnosticsProvider::activeSensorCount() const
 {
-    if (!m_sensorRegistry || !m_propertyRouter)
+    if (!m_sensorRegistry)
         return 0;
 
     int count = 0;
     const QVariantList sensors = m_sensorRegistry->availableSensors();
     for (const QVariant &v : sensors) {
         const QVariantMap map = v.toMap();
-        const QString key = map.value(QStringLiteral("key")).toString();
-        if (key.isEmpty())
-            continue;
-        if (!m_propertyRouter->hasProperty(key))
-            continue;
-        const QVariant val = m_propertyRouter->getValue(key);
-        if (!val.isNull() && val.toDouble() != 0.0)
+        if (map.value(QStringLiteral("active")).toBool())
             ++count;
     }
     return count;
@@ -338,17 +338,9 @@ int DiagnosticsProvider::activeSensorCount() const
  */
 int DiagnosticsProvider::totalSensorCount() const
 {
-    if (!m_sensorRegistry || !m_propertyRouter)
+    if (!m_sensorRegistry)
         return 0;
-
-    int count = 0;
-    const QVariantList sensors = m_sensorRegistry->availableSensors();
-    for (const QVariant &v : sensors) {
-        const QString key = v.toMap().value(QStringLiteral("key")).toString();
-        if (!key.isEmpty() && m_propertyRouter->hasProperty(key))
-            ++count;
-    }
-    return count;
+    return m_sensorRegistry->availableSensors().size();
 }
 
 
@@ -429,10 +421,8 @@ void DiagnosticsProvider::refreshLiveSensorEntries()
         if (key.isEmpty() || !m_propertyRouter->hasProperty(key))
             continue;
 
-        const QVariant val = m_propertyRouter->getValue(key);
-        const bool hasLiveData = !val.isNull() && val.toDouble() != 0.0;
         const bool registryActive = sensor.value(QStringLiteral("active")).toBool();
-        const bool active = hasLiveData || registryActive;
+        const bool active = registryActive;
 
         if (!m_showAllSensors && !active)
             continue;
@@ -440,7 +430,7 @@ void DiagnosticsProvider::refreshLiveSensorEntries()
         QVariantMap entry;
         entry[QStringLiteral("name")] = sensor.value(QStringLiteral("displayName"));
         entry[QStringLiteral("source")] = sensor.value(QStringLiteral("category"));
-        entry[QStringLiteral("value")] = val.toDouble();
+        entry[QStringLiteral("value")] = m_propertyRouter->getValue(key).toDouble();
         entry[QStringLiteral("unit")] = sensor.value(QStringLiteral("unit"));
         entry[QStringLiteral("active")] = active;
         entries.append(entry);
@@ -621,7 +611,6 @@ QVariantList DiagnosticsProvider::getLiveSensorData() const
         const QVariant val = m_propertyRouter->getValue(key);
         const double rawValue = val.toDouble();
         const bool registryActive = sensorMap.value(QStringLiteral("active")).toBool();
-        const bool hasLiveData = !val.isNull() && rawValue != 0.0;
 
         QVariantMap entry;
         entry[QStringLiteral("key")] = key;
@@ -630,81 +619,21 @@ QVariantList DiagnosticsProvider::getLiveSensorData() const
         entry[QStringLiteral("source")] = sensorMap.value(QStringLiteral("source")).toString();
         entry[QStringLiteral("rawValue")] = rawValue;
         entry[QStringLiteral("calibratedValue")] = rawValue;
-        entry[QStringLiteral("active")] = hasLiveData || registryActive;
+        entry[QStringLiteral("active")] = registryActive;
         result.append(entry);
     }
 
     return result;
 }
 
-/**
- * @brief Returns diagnostic information for ECU-reported analog input channels.
- *
- * Provides raw ADC voltage and calibration data for Analog0 through Analog10
- * (0-indexed, 11 channels total) received via daemon UDP.
- *
- * @return QVariantList containing diagnostic entries for each analog input channel.
- */
 QVariantList DiagnosticsProvider::getAnalogInputDiagnostics() const
 {
-    QVariantList result;
-
-    for (int i = 0; i <= 10; ++i) {
-        QString rawKey = QStringLiteral("Analog%1").arg(i);
-        QString calcKey = QStringLiteral("AnalogCalc%1").arg(i);
-
-        double rawVoltage = 0.0;
-        double calibrated = 0.0;
-
-        if (m_propertyRouter) {
-            if (m_propertyRouter->hasProperty(rawKey))
-                rawVoltage = m_propertyRouter->getValue(rawKey).toDouble();
-            if (m_propertyRouter->hasProperty(calcKey))
-                calibrated = m_propertyRouter->getValue(calcKey).toDouble();
-        }
-
-        QVariantMap entry;
-        entry[QStringLiteral("channel")] = i;
-        entry[QStringLiteral("label")] = rawKey;
-        entry[QStringLiteral("rawVoltage")] = rawVoltage;
-        entry[QStringLiteral("calibratedValue")] = calibrated;
-        entry[QStringLiteral("presetName")] = QString();
-        entry[QStringLiteral("unit")] = QStringLiteral("V");
-        entry[QStringLiteral("configured")] = (qAbs(rawVoltage) > 0.001 || qAbs(calibrated) > 0.001);
-        result.append(entry);
-    }
-
-    return result;
+    return getExpanderBoardDiagnostics();
 }
 
-/**
- * @brief Returns diagnostic information for daemon-reported digital inputs.
- *
- * Provides state and configuration data for DigitalInput1 through
- * DigitalInput7 (7 channels total) received via daemon UDP.
- *
- * @return QVariantList containing diagnostic entries for each digital input channel.
- */
 QVariantList DiagnosticsProvider::getDigitalInputDiagnostics() const
 {
-    QVariantList result;
-
-    for (int i = 1; i <= 7; ++i) {
-        QString key = QStringLiteral("DigitalInput%1").arg(i);
-
-        bool state = false;
-        if (m_propertyRouter && m_propertyRouter->hasProperty(key))
-            state = m_propertyRouter->getValue(key).toBool();
-
-        QVariantMap entry;
-        entry[QStringLiteral("channel")] = i;
-        entry[QStringLiteral("label")] = key;
-        entry[QStringLiteral("state")] = state;
-        entry[QStringLiteral("configured")] = state;
-        result.append(entry);
-    }
-
-    return result;
+    return getExtenderDigitalDiagnostics();
 }
 
 /**
@@ -825,7 +754,7 @@ void DiagnosticsProvider::clearLog()
 
 
 // ---------------------------------------------------------------------------
-// CAN tracking methods (called from UDPReceiver/connect)
+// CAN tracking methods (called from ExBoardCan/connect)
 // ---------------------------------------------------------------------------
 
 /**

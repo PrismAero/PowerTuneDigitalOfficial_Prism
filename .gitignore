@@ -122,3 +122,6 @@ remotessh.login
 
 # Yocto source tarball (generated per-build, scp'd to build server)
 yocto/meta-powertune/recipes-powertune/powertune-app/files/powertune-src.tar.gz
+
+# Prebuilt ARM binary (cross-compiled, too large for git)
+PowerTuneQMLGui

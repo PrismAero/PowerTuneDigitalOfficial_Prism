@@ -7,7 +7,7 @@ Rectangle {
 
     property string categoryFilter: ""
     property bool expanded: false
-    property string filterMode: "all"
+    property string filterMode: "active"
     property string searchText: ""
     property string selectedKey: ""
 
@@ -88,10 +88,20 @@ Rectangle {
         id: filteredModel
     }
 
+    Timer {
+        id: sensorsChangedDebounce
+        interval: 50
+        repeat: false
+        onTriggered: {
+            if (root.expanded)
+                root.refresh()
+        }
+    }
+
     Connections {
         function onSensorsChanged() {
             if (root.expanded)
-                root.refresh();
+                sensorsChangedDebounce.restart();
         }
 
         target: SensorRegistry

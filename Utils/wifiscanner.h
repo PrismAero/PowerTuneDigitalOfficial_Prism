@@ -30,6 +30,7 @@ public:
     QStringList WiFisList;
 
     Q_INVOKABLE void initializeWifiscanner();
+    Q_INVOKABLE void shutdownWifiscanner();
     Q_INVOKABLE void setwifi(const QString &country, const QString &ssid1, const QString &psk1, const QString &ssid2,
                              const QString &psk2);
 
@@ -40,6 +41,7 @@ private:
     QStandardItemModel *listModel = nullptr;
     ConnectionData *m_connectionData = nullptr;
     QProcess *process = nullptr;
+    QTimer m_statusTimer;
 };
 
 #endif  // WIFISCANNER_H

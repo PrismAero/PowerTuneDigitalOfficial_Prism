@@ -159,7 +159,7 @@ void ExBoardConfigManager::saveAllSettings(const QVariantMap &config)
             m_appSettings->setValue(s_digitalNameKeys[i], digitalNames.at(i).toString());
     }
 
-    applyAnalogRuntimeSettings();
+    applyAnalogRuntimeSettings(channels);
 
     const QVariantMap board = config.value(QStringLiteral("board")).toMap();
     if (!board.isEmpty())
@@ -214,7 +214,11 @@ void ExBoardConfigManager::saveChannelConfig(int channel, const QVariantMap &con
         return;
 
     saveChannelConfigInternal(channel, config);
-    applyAnalogRuntimeSettings();
+    QVariantList channels;
+    channels.reserve(kAnalogChannels);
+    for (int ch = 0; ch < kAnalogChannels; ++ch)
+        channels.append(getChannelConfig(ch));
+    applyAnalogRuntimeSettings(channels);
     refreshSensorRegistry();
     emit configChanged();
 }
@@ -238,7 +242,11 @@ void ExBoardConfigManager::applyLinearPreset(int channel, const QString &presetN
     }
 
     saveChannelConfigInternal(channel, config);
-    applyAnalogRuntimeSettings();
+    QVariantList channels;
+    channels.reserve(kAnalogChannels);
+    for (int ch = 0; ch < kAnalogChannels; ++ch)
+        channels.append(getChannelConfig(ch));
+    applyAnalogRuntimeSettings(channels);
     refreshSensorRegistry();
     emit configChanged();
 }
@@ -264,7 +272,11 @@ void ExBoardConfigManager::applyNtcPreset(int channel, const QString &presetName
     }
 
     saveChannelConfigInternal(channel, config);
-    applyAnalogRuntimeSettings();
+    QVariantList channels;
+    channels.reserve(kAnalogChannels);
+    for (int ch = 0; ch < kAnalogChannels; ++ch)
+        channels.append(getChannelConfig(ch));
+    applyAnalogRuntimeSettings(channels);
     refreshSensorRegistry();
     emit configChanged();
 }
@@ -297,42 +309,57 @@ void ExBoardConfigManager::saveBoardConfig(const QVariantMap &config)
     if (!m_appSettings)
         return;
 
-    QVariantMap merged = loadBoardConfig();
-    for (auto it = config.constBegin(); it != config.constEnd(); ++it)
-        merged[it.key()] = it.value();
+    const auto valueOrStored = [this, &config](const QString &configKey, const QString &storageKey,
+                                               const QVariant &defaultValue) {
+        if (config.contains(configKey))
+            return config.value(configKey);
+        return m_appSettings->getValue(storageKey, defaultValue);
+    };
 
-    const int rpmSource = merged.value(QStringLiteral("rpmSource"), 0).toInt();
-    const int rpmCanVersion = merged.value(QStringLiteral("rpmCanVersion"), 0).toInt();
+    const int rpmSource =
+        valueOrStored(QStringLiteral("rpmSource"), QStringLiteral("ui/exboard/rpmSource"), 0).toInt();
+    const int rpmCanVersion =
+        valueOrStored(QStringLiteral("rpmCanVersion"), QStringLiteral("ui/exboard/rpmCanVersion"), 0).toInt();
 
     m_appSettings->setValue(QStringLiteral("ui/exboard/selectedValue"),
-                            merged.value(QStringLiteral("selectedValue"), 0));
+                            valueOrStored(QStringLiteral("selectedValue"), QStringLiteral("ui/exboard/selectedValue"), 0));
     m_appSettings->setValue(QStringLiteral("ui/exboard/switchValue"),
-                            merged.value(QStringLiteral("switchValue"), false));
+                            valueOrStored(QStringLiteral("switchValue"), QStringLiteral("ui/exboard/switchValue"), false));
     m_appSettings->setValue(QStringLiteral("ui/exboard/rpmSource"), rpmSource);
     m_appSettings->setValue(QStringLiteral("ui/exboard/rpmCanVersion"), rpmCanVersion);
     m_appSettings->setValue(QStringLiteral("ui/exboard/cylinderCombobox"),
-                            merged.value(QStringLiteral("cylinderCombobox"), 0));
+                            valueOrStored(QStringLiteral("cylinderCombobox"),
+                                          QStringLiteral("ui/exboard/cylinderCombobox"), 0));
     m_appSettings->setValue(QStringLiteral("ui/exboard/cylinderComboboxV2"),
-                            merged.value(QStringLiteral("cylinderComboboxV2"), 0));
+                            valueOrStored(QStringLiteral("cylinderComboboxV2"),
+                                          QStringLiteral("ui/exboard/cylinderComboboxV2"), 0));
     m_appSettings->setValue(QStringLiteral("ui/exboard/cylinderComboboxDi1"),
-                            merged.value(QStringLiteral("cylinderComboboxDi1"), 0));
-    m_appSettings->setValue(QStringLiteral("ui/exboard/rpmcheckbox"), merged.value(QStringLiteral("rpmcheckbox"), 0));
-    m_appSettings->writeEXAN7dampingSettings(merged.value(QStringLiteral("an7Damping"), 0).toInt());
+                            valueOrStored(QStringLiteral("cylinderComboboxDi1"),
+                                          QStringLiteral("ui/exboard/cylinderComboboxDi1"), 0));
+    m_appSettings->setValue(QStringLiteral("ui/exboard/rpmcheckbox"),
+                            valueOrStored(QStringLiteral("rpmcheckbox"), QStringLiteral("ui/exboard/rpmcheckbox"), 0));
+    m_appSettings->writeEXAN7dampingSettings(
+        valueOrStored(QStringLiteral("an7Damping"), QStringLiteral("AN7Damping"), 0).toInt());
     m_appSettings->writeExternalrpm(rpmSource > 0);
     m_appSettings->writeRpmSource(rpmSource);
 
-    if (merged.contains(QStringLiteral("brightness")))
-        saveBrightnessConfig(merged.value(QStringLiteral("brightness")).toMap());
+    if (config.contains(QStringLiteral("brightness")))
+        saveBrightnessConfig(config.value(QStringLiteral("brightness")).toMap());
 
     if (rpmSource == 0) {
         m_appSettings->writeRPMFrequencySettings(0.0, 0);
     } else if (rpmSource == 1) {
-        double cylinders = merged.value(QStringLiteral("cylinderComboboxValue")).toDouble();
+        const double defaultCylinders = valueOrStored(QStringLiteral("cylinderCombobox"),
+                                                      QStringLiteral("ui/exboard/cylinderCombobox"), 0)
+                                            .toDouble();
+        double cylinders = config.value(QStringLiteral("cylinderComboboxValue"), defaultCylinders).toDouble();
         if (rpmCanVersion == 1) {
-            const double v2Value = merged.value(QStringLiteral("cylinderComboboxV2Value")).toDouble();
+            const double v2Value = config.value(QStringLiteral("cylinderComboboxV2Value"), 0.0).toDouble();
             const int multiplier = m_calibrationHelper
                                        ? m_calibrationHelper->expanderChannelMultiplier(
-                                             merged.value(QStringLiteral("cylinderComboboxV2"), 0).toInt())
+                                             valueOrStored(QStringLiteral("cylinderComboboxV2"),
+                                                           QStringLiteral("ui/exboard/cylinderComboboxV2"), 0)
+                                                 .toInt())
                                        : 1;
             cylinders = v2Value * multiplier;
         }
@@ -342,15 +369,17 @@ void ExBoardConfigManager::saveBoardConfig(const QVariantMap &config)
         m_appSettings->writeRPMFrequencySettings(0.0, 0);
     } else {
         const double divider = m_calibrationHelper ? m_calibrationHelper->frequencyDividerForCylinders(
-                                                         merged.value(QStringLiteral("cylinderComboboxDi1"), 0).toInt())
+                                                         valueOrStored(QStringLiteral("cylinderComboboxDi1"),
+                                                                       QStringLiteral("ui/exboard/cylinderComboboxDi1"), 0)
+                                                             .toInt())
                                                    : 1.0;
         m_appSettings->writeRPMFrequencySettings(divider, 1);
     }
 
-    if (merged.contains(QStringLiteral("gearSensor")))
-        m_appSettings->writeGearSensorConfig(merged.value(QStringLiteral("gearSensor")).toMap());
-    if (merged.contains(QStringLiteral("speedSensor")))
-        m_appSettings->writeSpeedSensorConfig(merged.value(QStringLiteral("speedSensor")).toMap());
+    if (config.contains(QStringLiteral("gearSensor")))
+        m_appSettings->writeGearSensorConfig(config.value(QStringLiteral("gearSensor")).toMap());
+    if (config.contains(QStringLiteral("speedSensor")))
+        m_appSettings->writeSpeedSensorConfig(config.value(QStringLiteral("speedSensor")).toMap());
 
     emit configChanged();
 }
@@ -504,92 +533,11 @@ void ExBoardConfigManager::saveDigitalChannelConfigInternal(int channel, const Q
         m_appSettings->setValue(s_digitalNameKeys[channel], config.value(QStringLiteral("name")));
 }
 
-void ExBoardConfigManager::applyAnalogRuntimeSettings() const
+void ExBoardConfigManager::applyAnalogRuntimeSettings(const QVariantList &channels) const
 {
     if (!m_appSettings)
         return;
-
-    const qreal exa00 = m_appSettings->getValue(QStringLiteral("EXA00"), 0).toDouble();
-    const qreal exa05 = m_appSettings->getValue(QStringLiteral("EXA05"), 5).toDouble();
-    const qreal exa10 = m_appSettings->getValue(QStringLiteral("EXA10"), 0).toDouble();
-    const qreal exa15 = m_appSettings->getValue(QStringLiteral("EXA15"), 5).toDouble();
-    const qreal exa20 = m_appSettings->getValue(QStringLiteral("EXA20"), 0).toDouble();
-    const qreal exa25 = m_appSettings->getValue(QStringLiteral("EXA25"), 5).toDouble();
-    const qreal exa30 = m_appSettings->getValue(QStringLiteral("EXA30"), 0).toDouble();
-    const qreal exa35 = m_appSettings->getValue(QStringLiteral("EXA35"), 5).toDouble();
-    const qreal exa40 = m_appSettings->getValue(QStringLiteral("EXA40"), 0).toDouble();
-    const qreal exa45 = m_appSettings->getValue(QStringLiteral("EXA45"), 5).toDouble();
-    const qreal exa50 = m_appSettings->getValue(QStringLiteral("EXA50"), 0).toDouble();
-    const qreal exa55 = m_appSettings->getValue(QStringLiteral("EXA55"), 5).toDouble();
-    const qreal exa60 = m_appSettings->getValue(QStringLiteral("EXA60"), 0).toDouble();
-    const qreal exa65 = m_appSettings->getValue(QStringLiteral("EXA65"), 5).toDouble();
-    const qreal exa70 = m_appSettings->getValue(QStringLiteral("EXA70"), 0).toDouble();
-    const qreal exa75 = m_appSettings->getValue(QStringLiteral("EXA75"), 5).toDouble();
-
-    const int ntc0 = m_appSettings->getValue(QStringLiteral("steinhartcalc0on"), 0).toInt();
-    const int ntc1 = m_appSettings->getValue(QStringLiteral("steinhartcalc1on"), 0).toInt();
-    const int ntc2 = m_appSettings->getValue(QStringLiteral("steinhartcalc2on"), 0).toInt();
-    const int ntc3 = m_appSettings->getValue(QStringLiteral("steinhartcalc3on"), 0).toInt();
-    const int ntc4 = m_appSettings->getValue(QStringLiteral("steinhartcalc4on"), 0).toInt();
-    const int ntc5 = m_appSettings->getValue(QStringLiteral("steinhartcalc5on"), 0).toInt();
-
-    const int an0r3 = m_appSettings->getValue(QStringLiteral("AN0R3VAL"), 0).toInt();
-    const int an0r4 = m_appSettings->getValue(QStringLiteral("AN0R4VAL"), 0).toInt();
-    const int an1r3 = m_appSettings->getValue(QStringLiteral("AN1R3VAL"), 0).toInt();
-    const int an1r4 = m_appSettings->getValue(QStringLiteral("AN1R4VAL"), 0).toInt();
-    const int an2r3 = m_appSettings->getValue(QStringLiteral("AN2R3VAL"), 0).toInt();
-    const int an2r4 = m_appSettings->getValue(QStringLiteral("AN2R4VAL"), 0).toInt();
-    const int an3r3 = m_appSettings->getValue(QStringLiteral("AN3R3VAL"), 0).toInt();
-    const int an3r4 = m_appSettings->getValue(QStringLiteral("AN3R4VAL"), 0).toInt();
-    const int an4r3 = m_appSettings->getValue(QStringLiteral("AN4R3VAL"), 0).toInt();
-    const int an4r4 = m_appSettings->getValue(QStringLiteral("AN4R4VAL"), 0).toInt();
-    const int an5r3 = m_appSettings->getValue(QStringLiteral("AN5R3VAL"), 0).toInt();
-    const int an5r4 = m_appSettings->getValue(QStringLiteral("AN5R4VAL"), 0).toInt();
-
-    m_appSettings->writeEXBoardSettings(exa00, exa05, exa10, exa15, exa20, exa25, exa30, exa35, exa40, exa45, exa50,
-                                        exa55, exa60, exa65, exa70, exa75, ntc0, ntc1, ntc2, ntc3, ntc4, ntc5, an0r3,
-                                        an0r4, an1r3, an1r4, an2r3, an2r4, an3r3, an3r4, an4r3, an4r4, an5r3, an5r4);
-
-    const qreal t01 = m_appSettings->getValue(QStringLiteral("T01"), 0).toDouble();
-    const qreal t02 = m_appSettings->getValue(QStringLiteral("T02"), 0).toDouble();
-    const qreal t03 = m_appSettings->getValue(QStringLiteral("T03"), 0).toDouble();
-    const qreal r01 = m_appSettings->getValue(QStringLiteral("R01"), 0).toDouble();
-    const qreal r02 = m_appSettings->getValue(QStringLiteral("R02"), 0).toDouble();
-    const qreal r03 = m_appSettings->getValue(QStringLiteral("R03"), 0).toDouble();
-    const qreal t11 = m_appSettings->getValue(QStringLiteral("T11"), 0).toDouble();
-    const qreal t12 = m_appSettings->getValue(QStringLiteral("T12"), 0).toDouble();
-    const qreal t13 = m_appSettings->getValue(QStringLiteral("T13"), 0).toDouble();
-    const qreal r11 = m_appSettings->getValue(QStringLiteral("R11"), 0).toDouble();
-    const qreal r12 = m_appSettings->getValue(QStringLiteral("R12"), 0).toDouble();
-    const qreal r13 = m_appSettings->getValue(QStringLiteral("R13"), 0).toDouble();
-    const qreal t21 = m_appSettings->getValue(QStringLiteral("T21"), 0).toDouble();
-    const qreal t22 = m_appSettings->getValue(QStringLiteral("T22"), 0).toDouble();
-    const qreal t23 = m_appSettings->getValue(QStringLiteral("T23"), 0).toDouble();
-    const qreal r21 = m_appSettings->getValue(QStringLiteral("R21"), 0).toDouble();
-    const qreal r22 = m_appSettings->getValue(QStringLiteral("R22"), 0).toDouble();
-    const qreal r23 = m_appSettings->getValue(QStringLiteral("R23"), 0).toDouble();
-    const qreal t31 = m_appSettings->getValue(QStringLiteral("T31"), 0).toDouble();
-    const qreal t32 = m_appSettings->getValue(QStringLiteral("T32"), 0).toDouble();
-    const qreal t33 = m_appSettings->getValue(QStringLiteral("T33"), 0).toDouble();
-    const qreal r31 = m_appSettings->getValue(QStringLiteral("R31"), 0).toDouble();
-    const qreal r32 = m_appSettings->getValue(QStringLiteral("R32"), 0).toDouble();
-    const qreal r33 = m_appSettings->getValue(QStringLiteral("R33"), 0).toDouble();
-    const qreal t41 = m_appSettings->getValue(QStringLiteral("T41"), 0).toDouble();
-    const qreal t42 = m_appSettings->getValue(QStringLiteral("T42"), 0).toDouble();
-    const qreal t43 = m_appSettings->getValue(QStringLiteral("T43"), 0).toDouble();
-    const qreal r41 = m_appSettings->getValue(QStringLiteral("R41"), 0).toDouble();
-    const qreal r42 = m_appSettings->getValue(QStringLiteral("R42"), 0).toDouble();
-    const qreal r43 = m_appSettings->getValue(QStringLiteral("R43"), 0).toDouble();
-    const qreal t51 = m_appSettings->getValue(QStringLiteral("T51"), 0).toDouble();
-    const qreal t52 = m_appSettings->getValue(QStringLiteral("T52"), 0).toDouble();
-    const qreal t53 = m_appSettings->getValue(QStringLiteral("T53"), 0).toDouble();
-    const qreal r51 = m_appSettings->getValue(QStringLiteral("R51"), 0).toDouble();
-    const qreal r52 = m_appSettings->getValue(QStringLiteral("R52"), 0).toDouble();
-    const qreal r53 = m_appSettings->getValue(QStringLiteral("R53"), 0).toDouble();
-
-    m_appSettings->writeSteinhartSettings(t01, t02, t03, r01, r02, r03, t11, t12, t13, r11, r12, r13, t21, t22, t23,
-                                          r21, r22, r23, t31, t32, t33, r31, r32, r33, t41, t42, t43, r41, r42, r43,
-                                          t51, t52, t53, r51, r52, r53);
+    m_appSettings->applyEXBoardCalibration(channels);
 }
 
 void ExBoardConfigManager::refreshSensorRegistry() const
@@ -597,8 +545,7 @@ void ExBoardConfigManager::refreshSensorRegistry() const
     if (!m_sensorRegistry)
         return;
 
-    m_sensorRegistry->refreshExtenderAnalogInputs();
-    m_sensorRegistry->refreshExtenderDigitalInputs();
+    m_sensorRegistry->refreshAll();
 
     for (int channel = 0; channel < kAnalogChannels; ++channel)
         syncChannelSensorMetadata(channel);

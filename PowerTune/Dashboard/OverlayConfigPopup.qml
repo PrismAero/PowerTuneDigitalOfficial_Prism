@@ -314,14 +314,14 @@ Popup {
 
         gearSensorKey = cfg.gearKey || defs.gearKey || "Gear";
         gearTextColor = cfg.gearTextColor || defs.gearTextColor || "#FFFFFF";
-        gearFontSize = num(cfg.gearFontSize, num(defs.gearFontSize, 140));
+        gearFontSize = num(cfg.gearFontSize, num(defs.gearFontSize, 160));
         suffixFontSize = num(cfg.suffixFontSize, num(defs.suffixFontSize, 52.505));
         gearOffsetX = num(cfg.gearOffsetX, num(defs.gearOffsetX, 0));
         gearOffsetY = num(cfg.gearOffsetY, num(defs.gearOffsetY, 0));
         gearWidth = num(cfg.gearWidth, num(defs.gearWidth, 168));
         gearHeight = num(cfg.gearHeight, num(defs.gearHeight, 117));
 
-        shiftPoint = num(cfg.shiftPoint, num(defs.shiftPoint, 0.75));
+        shiftPoint = num(cfg.shiftPoint, num(defs.shiftPoint, 0.3));
         shiftCount = num(cfg.shiftCount, num(defs.shiftCount, 11));
         shiftPattern = cfg.shiftPattern || defs.shiftPattern || "center-out";
 
@@ -1420,11 +1420,10 @@ Popup {
                                 }
                             }
 
-                            // Flash settings (arc gauges only)
                             RowLayout {
                                 Layout.fillWidth: true
                                 spacing: 10
-                                visible: popup.isArc
+                                visible: popup.isArc || popup.isSensor
 
                                 StyledSwitch {
                                     checked: popup.warningFlash

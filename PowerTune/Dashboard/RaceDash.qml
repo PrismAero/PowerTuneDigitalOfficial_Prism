@@ -10,22 +10,43 @@ Item {
 
     property string dashboardId: "racedash"
     property var overlayConfigs: ({})
+    property var overlayDefinitions: [
+        {id: "tachCluster", legacyIds: ["tachGroup", "gearIndicator"]},
+        {id: "speedCluster", legacyIds: ["speedGroup"]},
+        {id: "shiftIndicator", legacyIds: []},
+        {id: "waterTemp", legacyIds: []},
+        {id: "oilPressure", legacyIds: []},
+        {id: "statusRow0", legacyIds: []},
+        {id: "statusRow1", legacyIds: []},
+        {id: "brakeBias", legacyIds: []},
+        {id: "bottomBar", legacyIds: []}
+    ]
 
-    function loadOverlayConfig(id, legacyIds) {
-        var defaults = OverlayDefaults.defaultsFor(id);
-        var loaded = AppSettings.loadOverlayConfig(dashboardId, id);
-        var merged = {};
-        for (var key in defaults)
-            merged[key] = defaults[key];
-        if (objectHasKeys(loaded)) {
-            mergeConfig(merged, loaded);
-        } else if (legacyIds !== undefined) {
-            for (var i = 0; i < legacyIds.length; ++i) {
-                var legacyLoaded = AppSettings.loadOverlayConfig(dashboardId, legacyIds[i]);
-                mergeConfig(merged, legacyLoaded);
+    function migrateLegacyOverlayConfigs() {
+        for (var i = 0; i < overlayDefinitions.length; ++i) {
+            var definition = overlayDefinitions[i];
+            if (!definition.legacyIds || definition.legacyIds.length === 0)
+                continue;
+
+            var current = AppSettings.loadOverlayConfig(dashboardId, definition.id);
+            if (objectHasKeys(current))
+                continue;
+
+            var mergedLegacy = {};
+            var foundLegacy = false;
+            for (var j = 0; j < definition.legacyIds.length; ++j) {
+                var legacyId = definition.legacyIds[j];
+                var legacyLoaded = AppSettings.loadOverlayConfig(dashboardId, legacyId);
+                if (objectHasKeys(legacyLoaded)) {
+                    mergeConfig(mergedLegacy, legacyLoaded);
+                    AppSettings.removeOverlayConfig(dashboardId, legacyId);
+                    foundLegacy = true;
+                }
             }
+
+            if (foundLegacy)
+                AppSettings.saveOverlayConfig(dashboardId, definition.id, mergedLegacy);
         }
-        return merged;
     }
 
     function mergeConfig(target, source) {
@@ -40,22 +61,32 @@ Item {
     }
 
     function refreshConfigs() {
-        overlayConfigs = {
-            tachCluster: loadOverlayConfig("tachCluster", ["tachGroup", "gearIndicator"]),
-            speedCluster: loadOverlayConfig("speedCluster", ["speedGroup"]),
-            shiftIndicator: loadOverlayConfig("shiftIndicator"),
-            waterTemp: loadOverlayConfig("waterTemp"),
-            oilPressure: loadOverlayConfig("oilPressure"),
-            statusRow0: loadOverlayConfig("statusRow0"),
-            statusRow1: loadOverlayConfig("statusRow1"),
-            brakeBias: loadOverlayConfig("brakeBias"),
-            bottomBar: loadOverlayConfig("bottomBar")
-        };
+        var ids = [];
+        for (var i = 0; i < overlayDefinitions.length; ++i)
+            ids.push(overlayDefinitions[i].id);
+
+        var loadedById = AppSettings.loadOverlayConfigs(dashboardId, ids);
+        var nextConfigs = {};
+        for (var j = 0; j < overlayDefinitions.length; ++j) {
+            var id = overlayDefinitions[j].id;
+            var defaults = OverlayDefaults.defaultsFor(id);
+            var merged = {};
+            for (var key in defaults)
+                merged[key] = defaults[key];
+            var loaded = loadedById[id] || ({});
+            if (objectHasKeys(loaded))
+                mergeConfig(merged, loaded);
+            nextConfigs[id] = merged;
+        }
+        overlayConfigs = nextConfigs;
     }
 
     anchors.fill: parent
 
-    Component.onCompleted: refreshConfigs()
+    Component.onCompleted: {
+        migrateLegacyOverlayConfigs();
+        refreshConfigs();
+    }
 
     Popup {
         id: layoutPopup

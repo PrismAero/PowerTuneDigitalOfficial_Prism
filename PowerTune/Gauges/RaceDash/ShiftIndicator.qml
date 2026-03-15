@@ -13,7 +13,7 @@ Item {
     property string sensorKey: config.sensorKey !== undefined ? config.sensorKey : "rpm"
     property int shiftCount: config.shiftCount !== undefined ? Number(config.shiftCount) : 11
     property string shiftPattern: config.shiftPattern !== undefined ? config.shiftPattern : "center-out"
-    property real shiftPoint: config.shiftPoint !== undefined ? Number(config.shiftPoint) : 0.75
+    property real shiftPoint: config.shiftPoint !== undefined ? Number(config.shiftPoint) : 0.3
 
     function readValue() {
         if (!PropertyRouter || !PropertyRouter.hasProperty(sensorKey))

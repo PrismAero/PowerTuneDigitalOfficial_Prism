@@ -40,7 +40,6 @@ find_package(Qt6 COMPONENTS ShaderTools QUIET)
 # * Source files - Core
 set(CORE_SOURCES
     Core/connect.cpp
-    Core/dashboard.cpp
     Core/appsettings.cpp
     Core/PropertyRouter.cpp
     Core/SensorRegistry.cpp
@@ -57,10 +56,7 @@ set(CORE_SOURCES
     Core/Models/AnalogInputs.cpp
     Core/Models/DigitalInputs.cpp
     Core/Models/ExpanderBoardData.cpp
-    Core/Models/ElectricMotorData.cpp
-    Core/Models/FlagsData.cpp
     Core/Models/TimingData.cpp
-    Core/Models/SensorData.cpp
     Core/Models/ConnectionData.cpp
     Core/Models/SettingsData.cpp
     Core/Models/CanFrameModel.cpp
@@ -68,7 +64,6 @@ set(CORE_SOURCES
 
 set(CORE_HEADERS
     Core/connect.h
-    Core/dashboard.h
     Core/appsettings.h
     Core/PropertyRouter.h
     Core/SensorRegistry.h
@@ -86,10 +81,7 @@ set(CORE_HEADERS
     Core/Models/AnalogInputs.h
     Core/Models/DigitalInputs.h
     Core/Models/ExpanderBoardData.h
-    Core/Models/ElectricMotorData.h
-    Core/Models/FlagsData.h
     Core/Models/TimingData.h
-    Core/Models/SensorData.h
     Core/Models/ConnectionData.h
     Core/Models/SettingsData.h
     Core/Models/CanFrameModel.h
@@ -125,12 +117,8 @@ set(UTILS_SOURCES
     Utils/Calculations.cpp
     Utils/SteinhartCalculator.cpp
     Utils/CalibrationHelper.cpp
-    Utils/SignalSmoother.cpp
     Utils/downloadmanager.cpp
-    Utils/ParseGithubData.cpp
-    Utils/textprogressbar.cpp
-    Utils/UDPReceiver.cpp
-    Utils/OverlayConfigManager.cpp
+    Utils/OverlayPositionManager.cpp
     Utils/ShiftIndicatorHelper.cpp
     Utils/wifiscanner.cpp
 )
@@ -140,12 +128,8 @@ set(UTILS_HEADERS
     Utils/Calculations.h
     Utils/SteinhartCalculator.h
     Utils/CalibrationHelper.h
-    Utils/SignalSmoother.h
     Utils/downloadmanager.h
-    Utils/ParseGithubData.h
-    Utils/textprogressbar.h
-    Utils/UDPReceiver.h
-    Utils/OverlayConfigManager.h
+    Utils/OverlayPositionManager.h
     Utils/ShiftIndicatorHelper.h
     Utils/wifiscanner.h
 )
@@ -292,7 +276,6 @@ qt_policy(SET QTP0004 OLD)
             PowerTune/Settings/NetworkSettings.qml
             PowerTune/Settings/CanMonitor.qml
             PowerTune/Settings/DiagnosticsSettings.qml
-            PowerTune/Settings/HelpPage.qml
             PowerTune/Settings/WifiCountryList.qml
         RESOURCE_PREFIX /qt/qml
         OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/qt/qml/PowerTune/Settings

@@ -15,6 +15,7 @@ SettingsPage {
         wificountrycbx.currentIndex = AppSettings.getValue("ui/wifiCountryIndex", 0);
         settingsLoaded = true;
     }
+    Component.onDestruction: Wifiscanner.shutdownWifiscanner()
 
     Connections {
         function onSerialStatChanged() {
