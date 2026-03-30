@@ -105,6 +105,68 @@ The preset build output is `build/macos-homebrew/PowerTuneQMLGui.app/Contents/Ma
 This build is for UI development, QML iteration, and testing only. It does not
 produce an ARM Linux binary for the target device.
 
+## 1.1 Local Development Build (Windows)
+
+This path is intended for rapid UI iteration and visual verification when the
+macOS development machine is unavailable.
+
+Prerequisites:
+
+- Qt 6 desktop kit (MSVC recommended), including `Core`, `Gui`, `Qml`, `Quick`,
+  `QuickControls2`, `Network`, `SerialBus`, and `Multimedia`
+- CMake 3.21+ (for preset support)
+- Optional: Visual Studio 2022 Build Tools (if using an MSVC kit)
+
+Set the Qt root once per PowerShell session:
+
+```powershell
+$env:POWERTUNE_QT_PREFIX = "C:\Qt\6.8.3\msvc2022_64"
+```
+
+Configure and build:
+
+```powershell
+cmake --preset windows-debug
+cmake --build --preset windows-debug
+```
+
+If your terminal cannot see `cl.exe`, run the same flow through `VsDevCmd`:
+
+```powershell
+cmd /d /c "\"C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\Common7\Tools\VsDevCmd.bat\" -arch=x64 && cmake --preset windows-debug && cmake --build --preset windows-debug --parallel"
+```
+
+Run the executable:
+
+```powershell
+.\build\windows-debug\PowerTuneQMLGui.exe
+```
+
+Use `windows-release` for optimized builds:
+
+```powershell
+cmake --preset windows-release
+cmake --build --preset windows-release
+```
+
+Deploy runtime DLLs/plugins after each build output refresh:
+
+```powershell
+"C:\Qt\6.8.3\msvc2022_64\bin\windeployqt.exe" --debug --qmldir "C:\Users\KaiWyborny\Projects\PowerTuneDigital_Prism" "C:\Users\KaiWyborny\Projects\PowerTuneDigital_Prism\build\windows-debug\PowerTuneQMLGui.exe"
+```
+
+If Windows shows `Qt6*.dll was not found`, the fix is to rerun `windeployqt`
+for the current target executable.
+
+Limitations on Windows local runs:
+
+- Linux CAN bring-up (`ip link`) is Linux-only in `CanStartupManager`.
+- Raspberry Pi backlight/sysfs and `ddcutil` paths are not expected to work on
+  typical Windows hosts.
+- Deployment scripts under `Scripts/*.sh` target macOS/Linux shells and remote
+  Linux devices.
+- Target runtime validation still requires the Raspberry Pi + Yocto deploy flow.
+
 ## 2. Cross-Compile Build (Yocto on Build Server)
 
 ### 2.1 Build Server Access

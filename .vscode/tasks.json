@@ -5,6 +5,9 @@
             "label": "Build (Debug)",
             "type": "shell",
             "command": "cmake --preset macos-homebrew && cmake --build --preset macos-homebrew",
+            "windows": {
+                "command": "cmake --preset windows-debug && cmake --build --preset windows-debug"
+            },
             "group": {
                 "kind": "build",
                 "isDefault": true
@@ -21,6 +24,9 @@
             "label": "Build (Release)",
             "type": "shell",
             "command": "cmake -S . -B build/release -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=/opt/homebrew && cmake --build build/release --parallel",
+            "windows": {
+                "command": "cmake --preset windows-release && cmake --build --preset windows-release"
+            },
             "group": "build",
             "problemMatcher": ["$gcc"],
             "presentation": {
@@ -34,6 +40,9 @@
             "label": "Clean",
             "type": "shell",
             "command": "rm -rf build/macos-homebrew build/release build/macos-dev",
+            "windows": {
+                "command": "if (Test-Path build/windows-debug) { Remove-Item -Recurse -Force build/windows-debug }; if (Test-Path build/windows-release) { Remove-Item -Recurse -Force build/windows-release }; if (Test-Path build/macos-homebrew) { Remove-Item -Recurse -Force build/macos-homebrew }; if (Test-Path build/release) { Remove-Item -Recurse -Force build/release }; if (Test-Path build/macos-dev) { Remove-Item -Recurse -Force build/macos-dev }"
+            },
             "group": "build",
             "problemMatcher": [],
             "presentation": {
@@ -47,6 +56,9 @@
             "label": "Run",
             "type": "shell",
             "command": "./build/macos-homebrew/PowerTuneQMLGui.app/Contents/MacOS/PowerTuneQMLGui",
+            "windows": {
+                "command": "& \"${workspaceFolder}/build/windows-debug/PowerTuneQMLGui.exe\""
+            },
             "group": "test",
             "problemMatcher": [],
             "presentation": {

@@ -67,6 +67,37 @@
             }
         },
         {
+            "name": "windows-base",
+            "hidden": true,
+            "inherits": "default",
+            "cacheVariables": {
+                "CMAKE_PREFIX_PATH": "$env{POWERTUNE_QT_PREFIX}"
+            },
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Windows"
+            }
+        },
+        {
+            "name": "windows-debug",
+            "displayName": "Windows (Debug)",
+            "description": "Windows debug build. Requires POWERTUNE_QT_PREFIX to point at a Qt 6 kit.",
+            "inherits": "windows-base",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug"
+            }
+        },
+        {
+            "name": "windows-release",
+            "displayName": "Windows (Release)",
+            "description": "Windows release build. Requires POWERTUNE_QT_PREFIX to point at a Qt 6 kit.",
+            "inherits": "windows-base",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release"
+            }
+        },
+        {
             "name": "raspberry-pi",
             "displayName": "Raspberry Pi (Cross-compile)",
             "description": "Cross-compilation for Raspberry Pi",
@@ -89,6 +120,14 @@
         {
             "name": "macos-homebrew",
             "configurePreset": "macos-homebrew"
+        },
+        {
+            "name": "windows-debug",
+            "configurePreset": "windows-debug"
+        },
+        {
+            "name": "windows-release",
+            "configurePreset": "windows-release"
         }
     ]
 }

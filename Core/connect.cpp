@@ -48,6 +48,7 @@
 #include <QByteArrayMatcher>
 #include <QCoreApplication>
 #include <QDebug>
+#include <QDir>
 #include <QFile>
 #include <QFileInfo>
 #include <QProcess>
@@ -62,6 +63,19 @@
 
 
 // File-scope globals migrated to Connect class members (Phase 5.3)
+namespace {
+QString dashboardsDirectoryPath()
+{
+#ifdef Q_OS_LINUX
+    return QStringLiteral("/home/pi/UserDashboards");
+#else
+    const QString appData = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+    QDir dir(appData);
+    dir.mkpath(QStringLiteral("UserDashboards"));
+    return dir.filePath(QStringLiteral("UserDashboards"));
+#endif
+}
+}  // namespace
 
 bool Connect::hasDdcBrightness() const
 {
@@ -271,7 +285,7 @@ void Connect::saveDashtoFile(const QString &filename, const QString &dashstring)
         fixformat.replace(",,", ", ,");
     }
 
-    QFile file("/home/pi/UserDashboards/" + fullName);
+    QFile file(QDir(dashboardsDirectoryPath()).filePath(fullName));
     file.remove();
     if (file.open(QIODevice::ReadWrite)) {
         QTextStream stream(&file);
@@ -319,8 +333,7 @@ void Connect::checkifraspberrypi()
 }
 void Connect::readavailabledashfiles()
 {
-    // QDir directory(""); //for Windows
-    QDir directory("/home/pi/UserDashboards");
+    QDir directory(dashboardsDirectoryPath());
     QStringList dashfiles = directory.entryList(QStringList() << "*.txt", QDir::Files);
     m_uiState->setdashfiles(dashfiles);
     // qDebug() <<"files" << dashfiles ;
@@ -341,9 +354,10 @@ void Connect::readavailablebackrounds()
               << "Racedash.png" << "Racedash800x480.png" << "RPM_BG.png" << "rotary.gif"
               << "test.png" << "StateGIF.gif";
 #elif defined(Q_OS_WIN)
-    // * Windows - use C:/Logo directory
-    QDir directory("C:/Logo");
-    dashfiles = directory.entryList(QStringList() << "*.png" << "*.gif", QDir::Files);
+    // * Windows - list bundled graphics resources for local UI testing
+    dashfiles << "Logo.png" << "MainDash.png" << "MainDashBlue.png" << "MainDashnew.png"
+              << "Racedash.png" << "Racedash800x480.png" << "RPM_BG.png" << "rotary.gif"
+              << "test.png" << "StateGIF.gif";
 #else
     QDir directory("./Logo");
     dashfiles = directory.entryList(QStringList() << "*.png" << "*.gif", QDir::Files);
@@ -355,8 +369,7 @@ void Connect::readavailablebackrounds()
 
 void Connect::readMaindashsetup()
 {
-    // QString path = "MainDash.txt";//for Windows
-    QString path = "/home/pi/UserDashboards/MainDash.txt";
+    const QString path = QDir(dashboardsDirectoryPath()).filePath(QStringLiteral("MainDash.txt"));
     QFile inputFile(path);
     if (inputFile.open(QIODevice::ReadOnly)) {
         QTextStream in(&inputFile);
@@ -377,7 +390,7 @@ void Connect::readDashSetup(int index)
     if (filename.isEmpty())
         return;
 
-    QString path = "/home/pi/UserDashboards/" + filename;
+    const QString path = QDir(dashboardsDirectoryPath()).filePath(filename);
     QFile inputFile(path);
     if (inputFile.open(QIODevice::ReadOnly)) {
         QTextStream in(&inputFile);

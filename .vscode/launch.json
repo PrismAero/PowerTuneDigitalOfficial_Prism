@@ -2,10 +2,29 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "PowerTune (Windows Debug)",
+            "type": "cppvsdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/windows-debug/PowerTuneQMLGui.exe",
+            "args": [],
+            "cwd": "${workspaceFolder}",
+            "preLaunchTask": "Build (Debug)",
+            "environment": [
+                {
+                    "name": "QT_QUICK_CONTROLS_STYLE",
+                    "value": "Basic"
+                },
+                {
+                    "name": "QML_IMPORT_TRACE",
+                    "value": "0"
+                }
+            ]
+        },
+        {
             "name": "PowerTune (Debug)",
             "type": "lldb",
             "request": "launch",
-            "program": "${workspaceFolder}/build/macos-dev/PowerTuneQMLGui.app/Contents/MacOS/PowerTuneQMLGui",
+            "program": "${workspaceFolder}/build/macos-homebrew/PowerTuneQMLGui.app/Contents/MacOS/PowerTuneQMLGui",
             "args": [],
             "cwd": "${workspaceFolder}",
             "preLaunchTask": "Build (Debug)",
@@ -19,7 +38,7 @@
             "name": "PowerTune (Debug - QML Trace)",
             "type": "lldb",
             "request": "launch",
-            "program": "${workspaceFolder}/build/macos-dev/PowerTuneQMLGui.app/Contents/MacOS/PowerTuneQMLGui",
+            "program": "${workspaceFolder}/build/macos-homebrew/PowerTuneQMLGui.app/Contents/MacOS/PowerTuneQMLGui",
             "args": [],
             "cwd": "${workspaceFolder}",
             "preLaunchTask": "Build (Debug)",
@@ -33,7 +52,7 @@
             "name": "PowerTune (Attach)",
             "type": "lldb",
             "request": "attach",
-            "program": "${workspaceFolder}/build/macos-dev/PowerTuneQMLGui.app/Contents/MacOS/PowerTuneQMLGui"
+            "program": "${workspaceFolder}/build/macos-homebrew/PowerTuneQMLGui.app/Contents/MacOS/PowerTuneQMLGui"
         }
     ]
 }
