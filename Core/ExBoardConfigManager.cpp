@@ -289,7 +289,8 @@ QVariantMap ExBoardConfigManager::loadBoardConfig() const
     QVariantMap cfg;
     cfg[QStringLiteral("selectedValue")] = m_appSettings->getValue(QStringLiteral("ui/exboard/selectedValue"), 0);
     cfg[QStringLiteral("switchValue")] = m_appSettings->getValue(QStringLiteral("ui/exboard/switchValue"), false);
-    cfg[QStringLiteral("rpmSource")] = m_appSettings->getValue(QStringLiteral("ui/exboard/rpmSource"), 0);
+    cfg[QStringLiteral("rpmSource")] = m_appSettings->getValue(QStringLiteral("ui/exboard/rpmSource"),
+                                                              m_appSettings->getValue(QStringLiteral("ui/exboard/rpmSourceValue"), 0));
     cfg[QStringLiteral("rpmCanVersion")] = m_appSettings->getValue(QStringLiteral("ui/exboard/rpmCanVersion"), 0);
     cfg[QStringLiteral("cylinderCombobox")] = m_appSettings->getValue(QStringLiteral("ui/exboard/cylinderCombobox"), 0);
     cfg[QStringLiteral("cylinderComboboxV2")] =
@@ -349,9 +350,8 @@ void ExBoardConfigManager::saveBoardConfig(const QVariantMap &config)
     if (rpmSource == 0) {
         m_appSettings->writeRPMFrequencySettings(0.0, 0);
     } else if (rpmSource == 1) {
-        const double defaultCylinders = valueOrStored(QStringLiteral("cylinderCombobox"),
-                                                      QStringLiteral("ui/exboard/cylinderCombobox"), 0)
-                                            .toDouble();
+        const double defaultCylinders =
+            m_appSettings->getValue(QStringLiteral("Cylinders"), 4.0).toDouble();
         double cylinders = config.value(QStringLiteral("cylinderComboboxValue"), defaultCylinders).toDouble();
         if (rpmCanVersion == 1) {
             const double v2Value = config.value(QStringLiteral("cylinderComboboxV2Value"), 0.0).toDouble();

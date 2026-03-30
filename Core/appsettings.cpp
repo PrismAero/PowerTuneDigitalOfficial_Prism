@@ -684,6 +684,7 @@ void AppSettings::writeExternalrpm(const int checked)
 
 void AppSettings::writeRpmSource(int source)
 {
+    setValue("ui/exboard/rpmSource", source);
     setValue("ui/exboard/rpmSourceValue", source);
     if (m_extender)
         m_extender->setRpmSource(source);
@@ -925,8 +926,10 @@ void AppSettings::readandApplySettings()
 
     if (m_settingsData)
         m_settingsData->setExternalrpm(getValue("ExternalRPM").toInt());
-    if (m_extender)
-        m_extender->setRpmSource(getValue("ui/exboard/rpmSourceValue", 0).toInt());
+    if (m_extender) {
+        const int rpmSource = getValue("ui/exboard/rpmSource", getValue("ui/exboard/rpmSourceValue", 0)).toInt();
+        m_extender->setRpmSource(rpmSource);
+    }
 
     if (m_connectionData) {
         m_connectionData->setexternalspeedconnectionrequest(getValue("externalspeedconnect").toInt());
@@ -950,7 +953,9 @@ void AppSettings::readandApplySettings()
             qreal v0 = getValue(val0vKeys[ch], 0.0).toReal();
             qreal v5 = getValue(val5vKeys[ch], 5.0).toReal();
             bool ntc = (ch < 6) ? (getValue(ntcKeys[ch], 0).toInt() != 0) : false;
-            m_extender->setChannelCalibration(ch, v0, v5, ntc);
+            qreal minV = getValue(QStringLiteral("ui/exboard/ch%1_minVoltage").arg(ch), 0.0).toReal();
+            qreal maxV = getValue(QStringLiteral("ui/exboard/ch%1_maxVoltage").arg(ch), 5.0).toReal();
+            m_extender->setChannelCalibration(ch, v0, v5, ntc, minV, maxV);
         }
     }
 

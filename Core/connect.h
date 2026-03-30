@@ -173,6 +173,8 @@ private:
 
 signals:
     void sig_portsNamesChanged(QStringList portsNames);
+    void connectionOpenResult(bool success, const QString &message);
+    void connectionStateChanged(bool connected, const QString &statusMessage);
 
 public slots:
     void setPortsNames(QStringList portsNames)

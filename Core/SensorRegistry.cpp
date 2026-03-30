@@ -330,7 +330,7 @@ void SensorRegistry::refreshExtenderAnalogInputs()
         m_sensors.insert(calcKey, calcEntry);
     }
 
-    const bool speedEnabled = readValue(QStringLiteral("ui/exboard/gearSensor/enabled"), false).toBool();
+    const bool speedEnabled = readValue(QStringLiteral("ui/exboard/speedSensor/enabled"), false).toBool();
     if (speedEnabled && !m_sensors.contains(QStringLiteral("EXSpeed"))) {
         SensorEntry speedEntry;
         speedEntry.key = QStringLiteral("EXSpeed");
@@ -400,7 +400,9 @@ void SensorRegistry::refreshExtenderDigitalInputs()
         return settings.value(key, defaultValue);
     };
 
-    const int rpmSource = readValue(QStringLiteral("ui/exboard/rpmSource"), 0).toInt();
+    const int rpmSource = readValue(QStringLiteral("ui/exboard/rpmSource"),
+                                    readValue(QStringLiteral("ui/exboard/rpmSourceValue"), 0))
+                              .toInt();
 
     for (int i = 1; i <= 8; ++i) {
         const bool enabled = readValue(QStringLiteral("ui/exboard/di%1_enabled").arg(i), true).toBool();

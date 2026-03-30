@@ -58,6 +58,8 @@ SettingsPage {
     property int connected: 0
     property int currentLanguage: (Settings && Settings.language !== undefined) ? Settings.language : 0
     readonly property var ecuBackendMap: [5]
+    property bool autoConnectAttempted: false
+    property bool autoConnectEnabled: false
     property int hexstring: 0
     property int hexstring2: 0
     readonly property bool isExtenderOnly: ecuBackendMap[ecuSelect.currentIndex] === 5
@@ -69,11 +71,10 @@ SettingsPage {
     }
 
     function autoConnect() {
-        if (connectButton.enabled === false) {
-            connectEcu();
-            ecuSelect.enabled = false;
-            disconnectButton.enabled = true;
-        }
+        if (!autoConnectEnabled || autoConnectAttempted || !connectButton.enabled)
+            return;
+        autoConnectAttempted = true;
+        connectEcu();
     }
 
     function connectEcu() {
@@ -81,12 +82,10 @@ SettingsPage {
         Connect.setWeight(weight.text);
         var backendIdx = ecuBackendMap[ecuSelect.currentIndex];
         Connect.openConnection("", backendIdx, baseadresstext.text, shiftlightbaseadresstext.text);
-        connected = 1;
     }
 
     function disconnectEcu() {
         Connect.closeConnection();
-        connected = 0;
     }
 
     function ecuDropdownFromBackend(backendIdx) {
@@ -120,7 +119,10 @@ SettingsPage {
     Component.onCompleted: {
         if (settingsLoaded)
             return;
-        connectButton.enabled = AppSettings.getValue("ui/connectAtStartup", false);
+        connectButton.enabled = true;
+        disconnectButton.enabled = false;
+        ecuSelect.enabled = true;
+        autoConnectEnabled = AppSettings.getValue("ui/canAutoConnect", AppSettings.getValue("ui/connectAtStartup", false));
         weight.text = AppSettings.getValue("ui/vehicleWeight", "0");
         unitSelect1.currentIndex = AppSettings.getValue("ui/unitSelector1", 0);
         unitSelect.currentIndex = AppSettings.getValue("ui/unitSelector", 0);
@@ -139,6 +141,17 @@ SettingsPage {
         AppSettings.setMainSpeedSourceIndex(mainspeedsource.currentIndex);
         settingsLoaded = true;
         autoConnect();
+    }
+
+    Connections {
+        function onConnectionStateChanged(isConnected, statusMessage) {
+            connectButton.enabled = !isConnected;
+            disconnectButton.enabled = isConnected;
+            ecuSelect.enabled = !isConnected;
+            connected = isConnected ? 1 : 0;
+        }
+
+        target: Connect
     }
 
     Connections {
@@ -187,12 +200,7 @@ SettingsPage {
 
                         onClicked: {
                             connectEcu();
-                            connectButton.enabled = false;
-                            ecuSelect.enabled = false;
-                            disconnectButton.enabled = true;
                         }
-                        onEnabledChanged: if (settingsLoaded)
-                                              AppSettings.setValue("ui/connectAtStartup", enabled)
                     }
 
                     StyledButton {
@@ -203,10 +211,23 @@ SettingsPage {
                         text: Translator.translate("Disconnect", Settings.language)
 
                         onClicked: {
-                            connectButton.enabled = true;
-                            disconnectButton.enabled = false;
-                            ecuSelect.enabled = true;
                             disconnectEcu();
+                        }
+                    }
+                }
+
+                MainSettingsRow {
+                    label: "Auto Connect"
+                    description: "Connect CAN automatically on startup"
+
+                    StyledSwitch {
+                        checked: autoConnectEnabled
+                        text: checked ? "On" : "Off"
+
+                        onCheckedChanged: {
+                            autoConnectEnabled = checked;
+                            if (settingsLoaded)
+                                AppSettings.setValue("ui/canAutoConnect", checked);
                         }
                     }
                 }

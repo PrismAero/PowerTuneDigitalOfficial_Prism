@@ -172,10 +172,6 @@ QVariant PropertyRouter::getValue(const QString &propertyName) const
 {
     const QString resolvedProperty = resolveAlias(propertyName);
     m_activeProperties.insert(resolvedProperty);
-    if (m_sensorRegistry && m_sensorRegistry->isAvailable(resolvedProperty)
-        && !m_sensorRegistry->isActive(resolvedProperty)) {
-        return QVariant(0);
-    }
     if (!m_propertyModelMap.contains(resolvedProperty)) {
         qWarning() << "PropertyRouter: Unknown property:" << propertyName;
         return QVariant(0);

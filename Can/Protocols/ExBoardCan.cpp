@@ -19,6 +19,7 @@
 static constexpr int STATUS_MASK = 128;
 static constexpr int FREQUENCY_MASK = 127;
 static constexpr int HZ_AVERAGE_WINDOW = 10;
+static constexpr double DI1_FREQUENCY_SCALE = 16.6666667;
 
 ExBoardCan::ExBoardCan(QObject *parent) : CanInterface(parent), m_hzAverage(HZ_AVERAGE_WINDOW, 0) {}
 
@@ -468,14 +469,16 @@ void ExBoardCan::onFrameReceived(const QCanBusFrame &frame)
             m_digitalInputs->setEXDigitalInput7((byte6 & STATUS_MASK) > 0);
             m_digitalInputs->setEXDigitalInput8((byte7 & STATUS_MASK) > 0);
 
-            if (m_digitalInputs->RPMFrequencyDividerDi1() > 0) {
+            if (m_digitalInputs->DI1RPMEnabled() > 0 && m_digitalInputs->RPMFrequencyDividerDi1() > 0.0) {
                 m_hzAverage.removeFirst();
                 m_hzAverage.append(byte0 & FREQUENCY_MASK);
                 m_avgHz = 0;
                 for (int i = 0; i < HZ_AVERAGE_WINDOW; ++i)
                     m_avgHz += m_hzAverage[i];
-                m_digitalInputs->setfrequencyDIEX1(
-                    qRound((m_avgHz / HZ_AVERAGE_WINDOW) * 16.6 * 60) / m_digitalInputs->RPMFrequencyDividerDi1());
+                const double avgRaw = m_avgHz / HZ_AVERAGE_WINDOW;
+                const double rpm =
+                    (avgRaw * DI1_FREQUENCY_SCALE * 60.0) / m_digitalInputs->RPMFrequencyDividerDi1();
+                m_digitalInputs->setfrequencyDIEX1(qRound(rpm));
             }
         }
 
@@ -521,9 +524,11 @@ void ExBoardCan::onFrameReceived(const QCanBusFrame &frame)
         }
     }
 
-    if (frame.frameId() == m_address5 && m_engineData && m_settingsData && (m_engineData->Cylinders() / 2) != 0 &&
-        m_rpmSource == 1) {
-        m_engineData->setrpm(qRound((pkgpayload[0] * 4) / (m_engineData->Cylinders() / 2)));
+    if (frame.frameId() == m_address5 && m_engineData && m_rpmSource == 1) {
+        const double cylinders = m_engineData->Cylinders();
+        if (cylinders > 0.0) {
+            m_engineData->setrpm(qRound((pkgpayload[0] * 8.0) / cylinders));
+        }
     }
 }
 

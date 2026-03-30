@@ -39,6 +39,7 @@ Item {
     }
 
     Component.onCompleted: liveGear = readValue()
+    onGearKeyChanged: liveGear = readValue()
 
     Connections {
         function onValueChanged(propertyName, value) {

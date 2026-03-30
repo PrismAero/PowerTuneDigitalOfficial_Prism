@@ -38,6 +38,7 @@ Item {
     }
 
     Component.onCompleted: liveValue = readValue()
+    onSensorKeyChanged: liveValue = readValue()
 
     Connections {
         function onValueChanged(propertyName, value) {

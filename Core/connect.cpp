@@ -169,6 +169,12 @@ Connect::Connect(QObject *parent)
             m_diagnosticsProvider->recordCanError();
         }
     });
+    connect(m_canTransport, &CanTransport::connectionChanged, this, [this](bool connected) {
+        if (m_diagnosticsProvider)
+            m_diagnosticsProvider->setCanStatus(connected, connected ? QStringLiteral("EX Board CAN") : QString());
+        emit connectionStateChanged(connected, connected ? QStringLiteral("Native CAN active")
+                                                         : QStringLiteral("Native CAN disconnected"));
+    });
     connect(m_canManager, &CanManager::activationFailed, this, [this](const QString &reason) {
         if (m_diagnosticsProvider)
             m_diagnosticsProvider->addLogMessage(QStringLiteral("ERROR"), reason);
@@ -249,7 +255,9 @@ Connect::Connect(QObject *parent)
     m_appSettings->setExtender(m_extender);
     m_appSettings->setSteinhartCalculator(m_steinhartCalc);
     m_appSettings->readandApplySettings();
-    {
+    const auto applyDifferentialConfig = [this]() {
+        if (!m_exBoardConfigManager || !m_differentialSensorCalc)
+            return;
         const QVariantMap diffCfg = m_exBoardConfigManager->getDifferentialSensorConfig();
         const QString formulaStr = diffCfg.value(QStringLiteral("formula"), QStringLiteral("percentage")).toString();
         DifferentialSensorCalc::Formula formula = DifferentialSensorCalc::Percentage;
@@ -263,7 +271,9 @@ Connect::Connect(QObject *parent)
             diffCfg.value(QStringLiteral("channelB"), 1).toInt(),
             formula,
             diffCfg.value(QStringLiteral("offset"), 0.0).toDouble());
-    }
+    };
+    applyDifferentialConfig();
+    connect(m_exBoardConfigManager, &ExBoardConfigManager::configChanged, this, applyDifferentialConfig);
     connect(qApp, &QCoreApplication::aboutToQuit, m_appSettings, &AppSettings::sync);
     // * Phase 7: Populate SensorRegistry with configured extender channels
     m_sensorRegistry->refreshAll();
@@ -527,8 +537,11 @@ void Connect::openConnection(const QString &portName, const int &ecuSelect, cons
     }
 
     if (!startActiveCanModule()) {
-        if (m_connectionData)
+        if (m_connectionData) {
             m_connectionData->setSerialStat(QStringLiteral("Native CAN startup failed"));
+        }
+        emit connectionOpenResult(false, QStringLiteral("Native CAN startup failed"));
+        emit connectionStateChanged(false, QStringLiteral("Native CAN startup failed"));
         return;
     }
 
@@ -539,6 +552,8 @@ void Connect::openConnection(const QString &portName, const int &ecuSelect, cons
 
     if (m_connectionData)
         m_connectionData->setSerialStat(QStringLiteral("Native CAN active"));
+    emit connectionOpenResult(true, QStringLiteral("Native CAN active"));
+    emit connectionStateChanged(true, QStringLiteral("Native CAN active"));
 
     if (m_calculations)
         m_calculations->start();
@@ -554,6 +569,7 @@ void Connect::closeConnection()
         m_diagnosticsProvider->addLogMessage(QStringLiteral("INFO"), QStringLiteral("Connection closed"));
         m_diagnosticsProvider->setCanStatus(false, QString());
     }
+    emit connectionStateChanged(false, QStringLiteral("Native CAN disconnected"));
     m_calculations->stop();
 }
 

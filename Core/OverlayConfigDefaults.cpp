@@ -218,6 +218,14 @@ QVariantMap OverlayConfigDefaults::brakeBiasDefaults() const
         {QStringLiteral("rightLabel"), QStringLiteral("FWD")},
         {QStringLiteral("minValue"), 0.0},
         {QStringLiteral("maxValue"), 100.0},
+        {QStringLiteral("showSideValues"), false},
+        {QStringLiteral("showCenterValue"), true},
+        {QStringLiteral("valueUnit"), QStringLiteral("")},
+        {QStringLiteral("valueDecimals"), 1},
+        {QStringLiteral("dampingMultiplier"), 1.0},
+        {QStringLiteral("markerEnabled"), true},
+        {QStringLiteral("markerColor"), QStringLiteral("#00C8FF")},
+        {QStringLiteral("markerWidth"), 2.0},
     };
 }
 

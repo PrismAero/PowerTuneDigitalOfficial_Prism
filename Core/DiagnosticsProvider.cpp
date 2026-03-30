@@ -77,6 +77,8 @@ DiagnosticsProvider::DiagnosticsProvider(QObject *parent) : QObject(parent)
     connect(&m_systemInfoTimer, &QTimer::timeout, this, &DiagnosticsProvider::updateSystemInfo);
     connect(&m_canRateTimer, &QTimer::timeout, this, &DiagnosticsProvider::updateCanRate);
     connect(&m_liveSensorTimer, &QTimer::timeout, this, &DiagnosticsProvider::refreshLiveSensorEntries);
+    // Keep CAN status freshness available even when Diagnostics page is closed.
+    m_canRateTimer.start(1000);
     addLogMessage(QStringLiteral("INFO"), QStringLiteral("Diagnostics provider initialized (idle)"));
 }
 
@@ -92,7 +94,6 @@ void DiagnosticsProvider::activate()
 
     m_initialized = true;
     m_systemInfoTimer.start(2000);
-    m_canRateTimer.start(1000);
     m_liveSensorTimer.start(1000);
     updateSystemInfo();
     refreshLiveSensorEntries();
@@ -633,7 +634,7 @@ QVariantList DiagnosticsProvider::getAnalogInputDiagnostics() const
 
 QVariantList DiagnosticsProvider::getDigitalInputDiagnostics() const
 {
-    return getExtenderDigitalDiagnostics();
+    return {};
 }
 
 /**
@@ -769,6 +770,7 @@ void DiagnosticsProvider::recordCanMessage()
     ++m_canTotalMessages;
     m_lastCanMsgTime.restart();
     m_lastCanMsgTimeValid = true;
+    emit canStatusChanged();
 }
 
 /**

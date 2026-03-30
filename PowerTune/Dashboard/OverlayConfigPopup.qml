@@ -97,6 +97,14 @@ Popup {
     property string shiftPattern: ""
     property string leftLabel: ""
     property string rightLabel: ""
+    property bool biasShowSideValues: false
+    property bool biasShowCenterValue: true
+    property string biasValueUnit: ""
+    property int biasValueDecimals: 1
+    property real biasDampingMultiplier: 1.0
+    property bool biasMarkerEnabled: true
+    property string biasMarkerColor: "#00C8FF"
+    property real biasMarkerWidth: 2.0
     property bool timeEnabled: false
 
     signal configChanged(string overlayId)
@@ -195,6 +203,14 @@ Popup {
         if (hasBiasLabels) {
             config.leftLabel = leftLabel;
             config.rightLabel = rightLabel;
+            config.showSideValues = biasShowSideValues;
+            config.showCenterValue = biasShowCenterValue;
+            config.valueUnit = biasValueUnit;
+            config.valueDecimals = biasValueDecimals;
+            config.dampingMultiplier = biasDampingMultiplier;
+            config.markerEnabled = biasMarkerEnabled;
+            config.markerColor = biasMarkerColor;
+            config.markerWidth = biasMarkerWidth;
         }
 
         if (hasStaticText) {
@@ -327,6 +343,14 @@ Popup {
 
         leftLabel = cfg.leftLabel || defs.leftLabel || "RWD";
         rightLabel = cfg.rightLabel || defs.rightLabel || "FWD";
+        biasShowSideValues = toBool(cfg.showSideValues, toBool(defs.showSideValues, false));
+        biasShowCenterValue = toBool(cfg.showCenterValue, toBool(defs.showCenterValue, true));
+        biasValueUnit = cfg.valueUnit || defs.valueUnit || "";
+        biasValueDecimals = num(cfg.valueDecimals, num(defs.valueDecimals, 1));
+        biasDampingMultiplier = num(cfg.dampingMultiplier, num(defs.dampingMultiplier, 1.0));
+        biasMarkerEnabled = toBool(cfg.markerEnabled, toBool(defs.markerEnabled, true));
+        biasMarkerColor = cfg.markerColor || defs.markerColor || "#00C8FF";
+        biasMarkerWidth = num(cfg.markerWidth, num(defs.markerWidth, 2.0));
 
         timeEnabled = toBool(cfg.timeEnabled, toBool(defs.timeEnabled, true));
     }
@@ -1879,50 +1903,211 @@ Popup {
                 // ============================================================
                 SettingsSection {
                     Layout.fillWidth: true
-                    title: "Bias Labels"
+                    title: "Bias Gauge"
                     visible: popup.hasBiasLabels
 
-                    RowLayout {
+                    ColumnLayout {
                         Layout.fillWidth: true
-                        spacing: 10
+                        spacing: 8
 
-                        ColumnLayout {
+                        RowLayout {
                             Layout.fillWidth: true
-                            spacing: 4
+                            spacing: 10
 
-                            Text {
-                                color: SettingsTheme.textSecondary
-                                font.family: SettingsTheme.fontFamily
-                                font.pixelSize: SettingsTheme.fontCaption
-                                text: "Left Label"
+                            ColumnLayout {
+                                Layout.fillWidth: true
+                                spacing: 4
+
+                                Text {
+                                    color: SettingsTheme.textSecondary
+                                    font.family: SettingsTheme.fontFamily
+                                    font.pixelSize: SettingsTheme.fontCaption
+                                    text: "Left Label"
+                                }
+
+                                StyledTextField {
+                                    Layout.fillWidth: true
+                                    Layout.preferredHeight: SettingsTheme.controlHeight
+                                    text: popup.leftLabel
+
+                                    onTextEdited: popup.leftLabel = text
+                                }
                             }
 
-                            StyledTextField {
+                            ColumnLayout {
                                 Layout.fillWidth: true
-                                Layout.preferredHeight: SettingsTheme.controlHeight
-                                text: popup.leftLabel
+                                spacing: 4
 
-                                onTextEdited: popup.leftLabel = text
+                                Text {
+                                    color: SettingsTheme.textSecondary
+                                    font.family: SettingsTheme.fontFamily
+                                    font.pixelSize: SettingsTheme.fontCaption
+                                    text: "Right Label"
+                                }
+
+                                StyledTextField {
+                                    Layout.fillWidth: true
+                                    Layout.preferredHeight: SettingsTheme.controlHeight
+                                    text: popup.rightLabel
+
+                                    onTextEdited: popup.rightLabel = text
+                                }
                             }
                         }
 
-                        ColumnLayout {
+                        RowLayout {
                             Layout.fillWidth: true
-                            spacing: 4
+                            spacing: 10
 
-                            Text {
-                                color: SettingsTheme.textSecondary
-                                font.family: SettingsTheme.fontFamily
-                                font.pixelSize: SettingsTheme.fontCaption
-                                text: "Right Label"
+                            StyledSwitch {
+                                checked: popup.biasShowSideValues
+                                text: "Show Side Values"
+
+                                onToggled: popup.biasShowSideValues = checked
                             }
 
-                            StyledTextField {
-                                Layout.fillWidth: true
-                                Layout.preferredHeight: SettingsTheme.controlHeight
-                                text: popup.rightLabel
+                            StyledSwitch {
+                                checked: popup.biasShowCenterValue
+                                text: "Show Center Value"
 
-                                onTextEdited: popup.rightLabel = text
+                                onToggled: popup.biasShowCenterValue = checked
+                            }
+                        }
+
+                        RowLayout {
+                            Layout.fillWidth: true
+                            spacing: 10
+
+                            ColumnLayout {
+                                Layout.fillWidth: true
+                                spacing: 4
+
+                                Text {
+                                    color: SettingsTheme.textSecondary
+                                    font.family: SettingsTheme.fontFamily
+                                    font.pixelSize: SettingsTheme.fontCaption
+                                    text: "Value Unit"
+                                }
+
+                                StyledTextField {
+                                    Layout.fillWidth: true
+                                    Layout.preferredHeight: SettingsTheme.controlHeight
+                                    text: popup.biasValueUnit
+
+                                    onTextEdited: popup.biasValueUnit = text
+                                }
+                            }
+
+                            ColumnLayout {
+                                Layout.preferredWidth: 140
+                                spacing: 4
+
+                                Text {
+                                    color: SettingsTheme.textSecondary
+                                    font.family: SettingsTheme.fontFamily
+                                    font.pixelSize: SettingsTheme.fontCaption
+                                    text: "Decimals"
+                                }
+
+                                StyledSpinBox {
+                                    Layout.preferredHeight: SettingsTheme.controlHeight
+                                    Layout.preferredWidth: 140
+                                    from: 0
+                                    to: 4
+                                    value: popup.biasValueDecimals
+
+                                    onValueChanged: popup.biasValueDecimals = value
+                                }
+                            }
+                        }
+
+                        RowLayout {
+                            Layout.fillWidth: true
+                            spacing: 10
+
+                            ColumnLayout {
+                                Layout.fillWidth: true
+                                spacing: 4
+
+                                Text {
+                                    color: SettingsTheme.textSecondary
+                                    font.family: SettingsTheme.fontFamily
+                                    font.pixelSize: SettingsTheme.fontCaption
+                                    text: "Damping Multiplier (0.01 - 1.00)"
+                                }
+
+                                StyledTextField {
+                                    Layout.fillWidth: true
+                                    Layout.preferredHeight: SettingsTheme.controlHeight
+                                    inputMethodHints: Qt.ImhFormattedNumbersOnly
+                                    text: popup.biasDampingMultiplier.toFixed(2)
+
+                                    onTextEdited: {
+                                        var v = parseFloat(text);
+                                        if (!isNaN(v) && v >= 0.01 && v <= 1.0)
+                                            popup.biasDampingMultiplier = v;
+                                    }
+                                }
+                            }
+
+                            ColumnLayout {
+                                Layout.preferredWidth: 140
+                                spacing: 4
+
+                                Text {
+                                    color: SettingsTheme.textSecondary
+                                    font.family: SettingsTheme.fontFamily
+                                    font.pixelSize: SettingsTheme.fontCaption
+                                    text: "Marker Width"
+                                }
+
+                                StyledTextField {
+                                    Layout.preferredHeight: SettingsTheme.controlHeight
+                                    Layout.preferredWidth: 140
+                                    inputMethodHints: Qt.ImhFormattedNumbersOnly
+                                    text: popup.biasMarkerWidth.toFixed(1)
+
+                                    onTextEdited: {
+                                        var v = parseFloat(text);
+                                        if (!isNaN(v) && v >= 1.0 && v <= 8.0)
+                                            popup.biasMarkerWidth = v;
+                                    }
+                                }
+                            }
+                        }
+
+                        RowLayout {
+                            Layout.fillWidth: true
+                            spacing: 10
+
+                            StyledSwitch {
+                                checked: popup.biasMarkerEnabled
+                                text: "Enable Extreme Marker"
+
+                                onToggled: popup.biasMarkerEnabled = checked
+                            }
+
+                            ColumnLayout {
+                                Layout.fillWidth: true
+                                spacing: 4
+                                visible: popup.biasMarkerEnabled
+
+                                Text {
+                                    color: SettingsTheme.textSecondary
+                                    font.family: SettingsTheme.fontFamily
+                                    font.pixelSize: SettingsTheme.fontCaption
+                                    text: "Marker Color"
+                                }
+
+                                StyledColorPicker {
+                                    Layout.fillWidth: true
+                                    Layout.preferredHeight: SettingsTheme.controlHeight
+                                    colorValue: popup.biasMarkerColor
+
+                                    onColorEdited: function (c) {
+                                        popup.biasMarkerColor = c;
+                                    }
+                                }
                             }
                         }
                     }
