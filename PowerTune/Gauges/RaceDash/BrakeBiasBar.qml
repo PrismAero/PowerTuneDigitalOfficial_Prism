@@ -17,10 +17,12 @@ Item {
     property color markerColor: config.markerColor !== undefined ? String(config.markerColor) : "#00C8FF"
     property real markerWidth: config.markerWidth !== undefined ? Number(config.markerWidth) : 2.0
     property real targetValue: (minValue + maxValue) / 2
-    property real minSeen: targetValue
-    property real maxSeen: targetValue
-    property real lastExtremeValue: targetValue
+    property real minSeen: zeroValue
+    property real maxSeen: zeroValue
+    property real lastExtremeValue: zeroValue
+    property bool hasExtremeMarker: false
     readonly property real span: Math.max(0.0001, maxValue - minValue)
+    readonly property real zeroValue: clamp(0.0, minValue, maxValue)
     readonly property real progress: {
         if (maxValue <= minValue)
             return 0.5;
@@ -59,9 +61,10 @@ Item {
         var initial = clamp(readValue(), minValue, maxValue);
         targetValue = initial;
         liveValue = initial;
-        minSeen = initial;
-        maxSeen = initial;
-        lastExtremeValue = initial;
+        minSeen = zeroValue;
+        maxSeen = zeroValue;
+        lastExtremeValue = zeroValue;
+        hasExtremeMarker = false;
     }
 
     Component.onCompleted: resetLiveState()
@@ -75,15 +78,19 @@ Item {
                 var numericValue = Number(value);
                 var resolvedValue = isNaN(numericValue) ? (root.minValue + root.maxValue) / 2 : numericValue;
                 root.targetValue = root.clamp(resolvedValue, root.minValue, root.maxValue);
+                var epsilon = 0.0001;
+                var isNonZeroReading = Math.abs(root.targetValue - root.zeroValue) > epsilon;
 
-                if (root.targetValue < root.minSeen) {
+                if (isNonZeroReading && root.targetValue < root.minSeen) {
                     root.minSeen = root.targetValue;
                     root.lastExtremeValue = root.targetValue;
+                    root.hasExtremeMarker = true;
                 }
 
-                if (root.targetValue > root.maxSeen) {
+                if (isNonZeroReading && root.targetValue > root.maxSeen) {
                     root.maxSeen = root.targetValue;
                     root.lastExtremeValue = root.targetValue;
+                    root.hasExtremeMarker = true;
                 }
 
                 if (root.dampingMultiplier >= 0.999)
@@ -205,7 +212,7 @@ Item {
         color: root.markerColor
         height: biasTrack.height + 16
         radius: width / 2
-        visible: root.markerEnabled
+        visible: root.markerEnabled && root.hasExtremeMarker
         width: root.clamp(root.markerWidth, 1.0, 8.0)
         x: biasTrack.x + (root.markerProgress * biasTrack.width) - width / 2
     }

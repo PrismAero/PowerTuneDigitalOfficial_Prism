@@ -70,6 +70,7 @@
             "name": "windows-base",
             "hidden": true,
             "inherits": "default",
+            "generator": "Ninja",
             "cacheVariables": {
                 "CMAKE_PREFIX_PATH": "$env{POWERTUNE_QT_PREFIX}"
             },

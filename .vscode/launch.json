@@ -17,6 +17,18 @@
                 {
                     "name": "QML_IMPORT_TRACE",
                     "value": "0"
+                },
+                {
+                    "name": "QT_AUTO_SCREEN_SCALE_FACTOR",
+                    "value": "0"
+                },
+                {
+                    "name": "QT_ENABLE_HIGHDPI_SCALING",
+                    "value": "0"
+                },
+                {
+                    "name": "QT_SCALE_FACTOR",
+                    "value": "1"
                 }
             ]
         },

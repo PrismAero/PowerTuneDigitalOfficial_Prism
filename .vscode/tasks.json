@@ -6,7 +6,7 @@
             "type": "shell",
             "command": "cmake --preset macos-homebrew && cmake --build --preset macos-homebrew",
             "windows": {
-                "command": "cmake --preset windows-debug && cmake --build --preset windows-debug"
+                "command": "$vs = & \"${env:ProgramFiles(x86)}\\Microsoft Visual Studio\\Installer\\vswhere.exe\" -products * -latest -property installationPath; & \"$vs\\Common7\\Tools\\Launch-VsDevShell.ps1\" -Arch amd64 -HostArch amd64; cmake --preset windows-debug; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; cmake --build --preset windows-debug"
             },
             "group": {
                 "kind": "build",
@@ -25,7 +25,7 @@
             "type": "shell",
             "command": "cmake -S . -B build/release -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=/opt/homebrew && cmake --build build/release --parallel",
             "windows": {
-                "command": "cmake --preset windows-release && cmake --build --preset windows-release"
+                "command": "$vs = & \"${env:ProgramFiles(x86)}\\Microsoft Visual Studio\\Installer\\vswhere.exe\" -products * -latest -property installationPath; & \"$vs\\Common7\\Tools\\Launch-VsDevShell.ps1\" -Arch amd64 -HostArch amd64; cmake --preset windows-release; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; cmake --build --preset windows-release"
             },
             "group": "build",
             "problemMatcher": ["$gcc"],
