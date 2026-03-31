@@ -8,15 +8,53 @@ Popup {
     id: popup
 
     property var diffConfig: ({})
+    property var unavailableAnalogPorts: []
+    property var channelAValues: []
+    property var channelBValues: []
 
     signal saved(var config)
+
+    function rebuildChannelModels(selectedA, selectedB) {
+        var valsA = [];
+        var labelsA = [];
+        var valsB = [];
+        var labelsB = [];
+        for (var i = 0; i < 8; ++i) {
+            var blocked = unavailableAnalogPorts.indexOf(i) !== -1;
+            if (!blocked || i === selectedA || i === selectedB) {
+                valsA.push(i);
+                labelsA.push("EX Analog " + i);
+                valsB.push(i);
+                labelsB.push("EX Analog " + i);
+            }
+        }
+        if (valsA.length === 0) {
+            valsA = [selectedA >= 0 && selectedA <= 7 ? selectedA : 0];
+            labelsA = ["EX Analog " + valsA[0]];
+        }
+        if (valsB.length === 0) {
+            valsB = [selectedB >= 0 && selectedB <= 7 ? selectedB : 1];
+            labelsB = ["EX Analog " + valsB[0]];
+        }
+
+        channelAValues = valsA;
+        channelBValues = valsB;
+        channelACombo.model = labelsA;
+        channelBCombo.model = labelsB;
+
+        var idxA = channelAValues.indexOf(selectedA);
+        var idxB = channelBValues.indexOf(selectedB);
+        channelACombo.currentIndex = idxA >= 0 ? idxA : 0;
+        channelBCombo.currentIndex = idxB >= 0 ? idxB : 0;
+    }
 
     function loadConfig(config) {
         if (!config)
             config = {};
         diffEnabled.checked = config.enabled === true || config.enabled === "true";
-        channelACombo.currentIndex = Math.max(0, Math.min(7, parseInt(config.channelA) || 0));
-        channelBCombo.currentIndex = Math.max(0, Math.min(7, parseInt(config.channelB) || 1));
+        var selectedA = Math.max(0, Math.min(7, parseInt(config.channelA) || 0));
+        var selectedB = Math.max(0, Math.min(7, parseInt(config.channelB) || 1));
+        rebuildChannelModels(selectedA, selectedB);
         var formulaStr = config.formula || "percentage";
         if (formulaStr === "differential")
             formulaCombo.currentIndex = 1;
@@ -31,12 +69,14 @@ Popup {
         var formulaValues = ["percentage", "differential", "ratio"];
         return {
             enabled: diffEnabled.checked,
-            channelA: channelACombo.currentIndex,
-            channelB: channelBCombo.currentIndex,
+            channelA: channelAValues.length > 0 ? channelAValues[Math.max(0, channelACombo.currentIndex)] : 0,
+            channelB: channelBValues.length > 0 ? channelBValues[Math.max(0, channelBCombo.currentIndex)] : 1,
             formula: formulaValues[formulaCombo.currentIndex],
             offset: parseFloat(offsetField.text) || 0.0
         };
     }
+
+    onUnavailableAnalogPortsChanged: loadConfig(diffConfig || ({}))
 
     closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
     modal: true
@@ -142,10 +182,7 @@ Popup {
 
                         StyledComboBox {
                             id: channelACombo
-                            model: [
-                                "EX Analog 0", "EX Analog 1", "EX Analog 2", "EX Analog 3",
-                                "EX Analog 4", "EX Analog 5", "EX Analog 6", "EX Analog 7"
-                            ]
+                            model: []
                         }
                     }
 
@@ -157,10 +194,7 @@ Popup {
                         StyledComboBox {
                             id: channelBCombo
                             currentIndex: 1
-                            model: [
-                                "EX Analog 0", "EX Analog 1", "EX Analog 2", "EX Analog 3",
-                                "EX Analog 4", "EX Analog 5", "EX Analog 6", "EX Analog 7"
-                            ]
+                            model: []
                         }
                     }
 

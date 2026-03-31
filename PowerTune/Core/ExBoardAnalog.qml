@@ -12,6 +12,8 @@ SettingsPage {
     property var channelConfigs: []
     property var digitalChannelConfigs: []
     property var boardConfig: ({})
+    property var reservedAnalogPorts: []
+    property var reservedDigitalPorts: []
 
     property var linearPresetNames: {
         var presets = Calibration.linearPresets();
@@ -48,6 +50,7 @@ SettingsPage {
         digitalChannelConfigs = diConfigs;
 
         boardConfig = config.board || {};
+        refreshPortReservations();
         loadingConfig = false;
     }
 
@@ -63,6 +66,58 @@ SettingsPage {
             digitalChannels: digitalChannelConfigs,
             board: boardConfig
         });
+        refreshPortReservations();
+    }
+
+    function refreshPortReservations() {
+        var analogSet = {};
+        var digitalSet = {};
+        var speed = boardConfig.speedSensor || ({});
+        var gear = boardConfig.gearSensor || ({});
+        var bright = boardConfig.brightness || ({});
+        var diff = diffSensorPopup.diffConfig || ({});
+
+        if (gear.enabled === true || gear.enabled === "true")
+            analogSet[Number(gear.port)] = true;
+
+        var speedEnabled = speed.enabled === true || speed.enabled === "true";
+        var speedSource = speed.sourceType ? String(speed.sourceType).toLowerCase() : "analog";
+        if (speedEnabled) {
+            if (speedSource === "analog" || speedSource === "analogsquare" || speedSource === "analogfrequency")
+                analogSet[Number(speed.analogPort)] = true;
+            else if (speedSource === "digital")
+                digitalSet[Number(speed.digitalPort)] = true;
+        }
+
+        if (diff.enabled === true || diff.enabled === "true") {
+            analogSet[Number(diff.channelA)] = true;
+            analogSet[Number(diff.channelB)] = true;
+        }
+
+        if (bright.analogEnabled === true || bright.analogEnabled === "true")
+            analogSet[Number(bright.analogChannel)] = true;
+        if (bright.discreteEnabled === true || bright.discreteEnabled === "true"
+                || bright.canIoEnabled === true || bright.canIoEnabled === "true") {
+            digitalSet[Number(bright.headlightChannel)] = true;
+        }
+
+        if (boardConfig.rpmSource === 2)
+            digitalSet[0] = true; // DI1 tach source reservation
+
+        var analog = [];
+        var digital = [];
+        for (var a in analogSet) {
+            var ai = Number(a);
+            if (!isNaN(ai) && ai >= 0 && ai <= 7)
+                analog.push(ai);
+        }
+        for (var d in digitalSet) {
+            var di = Number(d);
+            if (!isNaN(di) && di >= 0 && di <= 7)
+                digital.push(di);
+        }
+        reservedAnalogPorts = analog;
+        reservedDigitalPorts = digital;
     }
 
     function liveRawVoltage(ch) {
@@ -108,6 +163,8 @@ SettingsPage {
     }
 
     Component.onCompleted: loadAllSettingsFromManager()
+
+    onBoardConfigChanged: refreshPortReservations()
 
     SettingsSection {
         title: "Board Status"
@@ -157,6 +214,29 @@ SettingsPage {
                     return spd + " " + unit;
                 }
                 color: SettingsTheme.textPrimary
+                font.family: SettingsTheme.fontFamily
+                font.pixelSize: SettingsTheme.fontStatus
+            }
+
+            Text {
+                visible: boardConfig.speedSensor !== undefined && boardConfig.speedSensor !== null && boardConfig.speedSensor.enabled === true
+                text: {
+                    var cfg = boardConfig.speedSensor || ({});
+                    var source = cfg.sourceType ? String(cfg.sourceType).toLowerCase() : "analog";
+                    if (source === "analogsquare" || source === "analogfrequency") {
+                        var aPort = (cfg.analogPort !== undefined) ? Number(cfg.analogPort) : 0;
+                        var th = (cfg.frequencyThreshold !== undefined) ? Number(cfg.frequencyThreshold) : 1.2;
+                        var hy = (cfg.frequencyHysteresis !== undefined) ? Number(cfg.frequencyHysteresis) : 0.2;
+                        return "SpeedSrc: AN" + aPort + " sq, th " + th.toFixed(2) + "V, hys " + hy.toFixed(2) + "V";
+                    }
+                    if (source === "digital") {
+                        var dPort = (cfg.digitalPort !== undefined) ? Number(cfg.digitalPort) : 0;
+                        return "SpeedSrc: DI" + (dPort + 1) + " sq";
+                    }
+                    var port = (cfg.analogPort !== undefined) ? Number(cfg.analogPort) : 0;
+                    return "SpeedSrc: AN" + port + " linear";
+                }
+                color: SettingsTheme.textSecondary
                 font.family: SettingsTheme.fontFamily
                 font.pixelSize: SettingsTheme.fontStatus
             }
@@ -213,7 +293,7 @@ SettingsPage {
             StyledButton {
                 primary: false
                 text: "Speed Sensor"
-                onClicked: root.openPopup(speedSensorPopup)
+                onClicked: root.openPopup(boardConfigPopup)
             }
 
             StyledButton {
@@ -556,6 +636,8 @@ SettingsPage {
                     id: boardConfigSection
                     width: boardConfigScroll.contentWidth
                     boardConfig: root.boardConfig
+                    reservedAnalogPorts: root.reservedAnalogPorts
+                    reservedDigitalPorts: root.reservedDigitalPorts
 
                     onConfigChanged: function(config) {
                         root.boardConfig = config;
@@ -645,6 +727,7 @@ SettingsPage {
     GearSensorConfigPopup {
         id: gearSensorPopup
         gearConfig: root.boardConfig.gearSensor || ({})
+        unavailableAnalogPorts: root.reservedAnalogPorts
         expanderData: Expander
 
         onSaved: function(config) {
@@ -655,26 +738,15 @@ SettingsPage {
         }
     }
 
-    SpeedSensorConfigPopup {
-        id: speedSensorPopup
-        speedConfig: root.boardConfig.speedSensor || ({})
-        expanderData: Expander
-
-        onSaved: function(config) {
-            var bc = JSON.parse(JSON.stringify(root.boardConfig));
-            bc.speedSensor = config;
-            root.boardConfig = bc;
-            root.saveAllSettings();
-        }
-    }
-
     DiffSensorConfigPopup {
         id: diffSensorPopup
         diffConfig: ExBoardConfig.getDifferentialSensorConfig()
+        unavailableAnalogPorts: root.reservedAnalogPorts
 
         onSaved: function(config) {
             ExBoardConfig.saveDifferentialSensorConfig(config);
             diffSensorPopup.diffConfig = config;
+            refreshPortReservations();
         }
     }
 }

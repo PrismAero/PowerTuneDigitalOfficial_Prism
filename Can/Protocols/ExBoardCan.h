@@ -5,6 +5,7 @@
 
 #include <QByteArray>
 #include <QCanBusFrame>
+#include <QElapsedTimer>
 #include <QMetaObject>
 #include <QString>
 #include <QVariantMap>
@@ -56,6 +57,8 @@ struct SpeedSensorConfig
     int digitalPort = 0;
     double pulsesPerRev = 4.0;
     double voltageMultiplier = 1.0;
+    double frequencyThreshold = 1.2;
+    double frequencyHysteresis = 0.2;
     double tireCircumference = 2.06;
     double finalDriveRatio = 1.0;
     QString unit = QStringLiteral("MPH");
@@ -114,6 +117,9 @@ private:
     void applyCalibration(int channel, qreal voltage);
     QString byteArrayToHex(const QByteArray &byteArray) const;
     int voltageToGear(double voltage) const;
+    double calculateSpeedFromFrequencyHz(double frequencyHz) const;
+    double speedAnalogVoltage() const;
+    void updateAnalogSquareWaveSpeed(double voltage);
     void onGearPortVoltageChanged();
     void onSpeedSourceChanged();
 
@@ -145,7 +151,13 @@ private:
     quint32 m_address3 = 0;
     quint32 m_address5 = 0;
     QVector<int> m_hzAverage;
+    QVector<int> m_speedHzAverage;
+    QVector<double> m_speedFreqAverage;
     qreal m_avgHz = 0;
+    QElapsedTimer m_speedEdgeTimer;
+    qint64 m_lastSpeedRisingEdgeNs = -1;
+    bool m_analogSpeedStateInitialized = false;
+    bool m_analogSpeedHigh = false;
 
     ChannelCalibration m_calibration[EX_ANALOG_CHANNELS];
     GearVoltageConfig m_gearConfig;

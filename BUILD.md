@@ -174,13 +174,62 @@ Limitations on Windows local runs:
 | Property | Value |
 |----------|-------|
 | Host | `192.168.15.205` |
+| SSH port | `33567` |
 | User | `kai_admin` |
 | OS | Ubuntu 22.04.5 LTS (x86_64) |
 | Yocto dir | `~/powertune-yocto/` |
 | Build dir | `~/powertune-yocto/build-powertune/` |
 
 ```sh
-ssh kai_admin@192.168.15.205
+ssh -p 33567 kai_admin@192.168.15.205
+```
+
+#### 2.1.1 Windows Remote Build Quickstart (VPN + Direct-Link Pi)
+
+Use this when developing from Windows with:
+
+- VPN route to build server `192.168.15.205`
+- Build server SSH on port `33567`
+- Direct-link Pi over ICS DHCP (`192.168.137.x`)
+
+Assumes key-based SSH is already set up for:
+
+- `kai_admin@192.168.15.205:33567`
+- `root@192.168.137.251` (or current direct-link Pi IP)
+
+PowerShell end-to-end flow:
+
+```powershell
+Set-Location "C:\Users\KaiWyborny\Projects\PowerTuneDigital_Prism"
+
+# 1) Package source with required top-level powertune-src/
+$stageRoot = Join-Path $env:TEMP "powertune-src-stage"
+$payload = Join-Path $stageRoot "powertune-src"
+if (Test-Path $stageRoot) { Remove-Item -Recurse -Force $stageRoot }
+New-Item -ItemType Directory -Path $payload | Out-Null
+robocopy . $payload /MIR /XD .git .cursor docs-misc node_modules .memory .kilocode .vscode target-backups .cache build build-* /XF .DS_Store compile_commands.json > $null
+$tarball = Join-Path $env:TEMP "powertune-src.tar.gz"
+if (Test-Path $tarball) { Remove-Item -Force $tarball }
+tar -czf $tarball -C $stageRoot powertune-src
+
+# 2) Upload source tarball to Yocto recipe files
+scp -P 33567 $tarball kai_admin@192.168.15.205:~/powertune-yocto/meta-powertune/recipes-powertune/powertune-app/files/powertune-src.tar.gz
+
+# 3) Rebuild app recipe on build server
+ssh -p 33567 kai_admin@192.168.15.205 "cd ~/powertune-yocto && source poky/oe-init-build-env build-powertune 2>/dev/null && bitbake -c cleansstate powertune-app && bitbake powertune-app"
+
+# 4) (Optional) Build full image artifact
+ssh -p 33567 kai_admin@192.168.15.205 "cd ~/powertune-yocto && source poky/oe-init-build-env build-powertune 2>/dev/null && bitbake powertune-image"
+
+# 5) Pull rebuilt ARM app binary locally
+$localBin = Join-Path $env:TEMP "PowerTuneQMLGui"
+if (Test-Path $localBin) { Remove-Item -Force $localBin }
+scp -P 33567 kai_admin@192.168.15.205:~/powertune-yocto/build-powertune/tmp/work/cortexa7t2hf-neon-vfpv4-poky-linux-gnueabi/powertune-app/1.0/image/opt/PowerTune/PowerTuneQMLGui $localBin
+
+# 6) Deploy binary to direct-link target (example Pi IP 192.168.137.251)
+scp $localBin root@192.168.137.251:/tmp/PowerTuneQMLGui.new
+ssh root@192.168.137.251 "touch /tmp/powertune-maintenance && killall -9 PowerTuneQMLGui 2>/dev/null || true && killall -9 powertune-launcher 2>/dev/null || true && sleep 2 && cp /tmp/PowerTuneQMLGui.new /opt/PowerTune/PowerTuneQMLGui && chmod 0755 /opt/PowerTune/PowerTuneQMLGui && rm -f /tmp/PowerTuneQMLGui.new && sync && rm -f /tmp/powertune-maintenance"
+ssh root@192.168.137.251 "/etc/init.d/powertune status; ps | grep PowerTuneQMLGui | grep -v grep || true"
 ```
 
 ### 2.2 Yocto Layer Stack
@@ -220,7 +269,7 @@ cd /path/to/PowerTuneDigitalOfficial_Prism
 ./Scripts/package-source-tarball.sh
 
 # Upload the tarball to the build server recipe files directory
-scp /tmp/powertune-src.tar.gz \
+scp -P 33567 /tmp/powertune-src.tar.gz \
     kai_admin@192.168.15.205:~/powertune-yocto/meta-powertune/recipes-powertune/powertune-app/files/powertune-src.tar.gz
 ```
 
@@ -229,13 +278,21 @@ scp /tmp/powertune-src.tar.gz \
 `.DS_Store`, `.memory`, `.kilocode`, `.vscode`, `compile_commands.json`, and
 `target-backups`.
 
+Important tarball layout requirement:
+
+- The archive must contain a top-level `powertune-src/` directory because the
+  recipe uses `S = "${WORKDIR}/powertune-src"`.
+- If the tarball root is `./` (repo files directly at archive root),
+  `powertune-app:do_configure` fails because `CMakeLists.txt` is not found in
+  `${WORKDIR}/powertune-src`.
+
 ### 2.5 Building the App Only
 
 To rebuild just the PowerTune app binary (fastest iteration):
 
 ```sh
 # Run directly from the Mac
-ssh kai_admin@192.168.15.205 '
+ssh -p 33567 kai_admin@192.168.15.205 '
     cd ~/powertune-yocto &&
     source poky/oe-init-build-env build-powertune 2>/dev/null &&
     bitbake -c cleansstate powertune-app &&
@@ -286,7 +343,8 @@ The build is configured in `build-powertune/conf/local.conf`:
 
 | Property | Value |
 |----------|-------|
-| Host | `192.168.15.183` |
+| Host (LAN) | `192.168.15.183` |
+| Host (direct-link/ICS) | `192.168.137.251` |
 | User | `root` (passwordless SSH) |
 | Board | Raspberry Pi 4 Model B (BCM2711, ARMv7 32-bit) |
 | OS | Poky (Yocto) with SysVinit |
@@ -296,6 +354,16 @@ The build is configured in `build-powertune/conf/local.conf`:
 | App path | `/opt/PowerTune/PowerTuneQMLGui` |
 | App log | `/var/log/powertune.log` |
 | Settings | `/home/root/.config/PowerTune/PowerTune.conf` |
+
+#### 3.1.1 Direct-Link Adapter (Windows ICS DHCP)
+
+When connected directly from the development PC to the Pi over a dedicated
+adapter, enable Windows Internet Connection Sharing (ICS) on the upstream
+interface and share it to the Pi adapter:
+
+- ICS sets the host adapter to `192.168.137.1`
+- Windows provides DHCP on that segment
+- Pi receives a lease in `192.168.137.x` (example validated: `192.168.137.251`)
 
 ### 3.2 Mac-Driven Deployment Scripts
 
@@ -348,14 +416,14 @@ This creates:
 #### 3.3.2 Send the tarball to the build server
 
 ```sh
-scp /tmp/powertune-src.tar.gz \
+scp -P 33567 /tmp/powertune-src.tar.gz \
     kai_admin@192.168.15.205:~/powertune-yocto/meta-powertune/recipes-powertune/powertune-app/files/powertune-src.tar.gz
 ```
 
 #### 3.3.3 Build the app on the build server
 
 ```sh
-ssh kai_admin@192.168.15.205 '
+ssh -p 33567 kai_admin@192.168.15.205 '
     cd ~/powertune-yocto &&
     source poky/oe-init-build-env build-powertune 2>/dev/null &&
     bitbake -c cleansstate powertune-app &&
@@ -366,7 +434,7 @@ ssh kai_admin@192.168.15.205 '
 #### 3.3.4 Download the fresh ARM binary from the build server
 
 ```sh
-scp \
+scp -P 33567 \
     kai_admin@192.168.15.205:~/powertune-yocto/build-powertune/tmp/work/cortexa7t2hf-neon-vfpv4-poky-linux-gnueabi/powertune-app/1.0/image/opt/PowerTune/PowerTuneQMLGui \
     /tmp/PowerTuneQMLGui
 ```
@@ -413,10 +481,10 @@ Build only the app recipe on the build server:
 cd /path/to/PowerTuneDigitalOfficial_Prism
 ./Scripts/package-source-tarball.sh
 
-scp /tmp/powertune-src.tar.gz \
+scp -P 33567 /tmp/powertune-src.tar.gz \
     kai_admin@192.168.15.205:~/powertune-yocto/meta-powertune/recipes-powertune/powertune-app/files/powertune-src.tar.gz
 
-ssh kai_admin@192.168.15.205 '
+ssh -p 33567 kai_admin@192.168.15.205 '
     cd ~/powertune-yocto &&
     source poky/oe-init-build-env build-powertune 2>/dev/null &&
     bitbake -c cleansstate powertune-app &&
@@ -427,7 +495,7 @@ ssh kai_admin@192.168.15.205 '
 Download the rebuilt ARM binary:
 
 ```sh
-scp \
+scp -P 33567 \
     kai_admin@192.168.15.205:~/powertune-yocto/build-powertune/tmp/work/cortexa7t2hf-neon-vfpv4-poky-linux-gnueabi/powertune-app/1.0/image/opt/PowerTune/PowerTuneQMLGui \
     /tmp/PowerTuneQMLGui
 ```

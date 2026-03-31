@@ -125,3 +125,4 @@ yocto/meta-powertune/recipes-powertune/powertune-app/files/powertune-src.tar.gz
 
 # Prebuilt ARM binary (cross-compiled, too large for git)
 PowerTuneQMLGui
+artifacts/powertune-image-raspberrypi4.rootfs.wic.bz2

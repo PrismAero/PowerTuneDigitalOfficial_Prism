@@ -13,7 +13,11 @@ Item {
     id: root
 
     property var boardConfig: ({})
+    property var reservedAnalogPorts: []
+    property var reservedDigitalPorts: []
     property bool loading: false
+    property var speedAnalogPortValues: []
+    property var speedDigitalPortValues: []
 
     signal configChanged(var config)
 
@@ -22,6 +26,8 @@ Item {
     implicitWidth: section.implicitWidth
 
     function buildConfig() {
+        var speedAnalogPort = speedAnalogPortValues.length > 0 ? speedAnalogPortValues[Math.max(0, speedAnalogPort.currentIndex)] : 0;
+        var speedDigitalPort = speedDigitalPortValues.length > 0 ? speedDigitalPortValues[Math.max(0, speedDigitalPort.currentIndex)] : 0;
         return {
             selectedValue: digitalExtender.currentIndex,
             switchValue: discreteBrightnessEnabled.checked || canIoBrightnessEnabled.checked,
@@ -40,6 +46,19 @@ Item {
                 analogEnabled: analogBrightnessEnabled.checked,
                 headlightChannel: digitalExtender.currentIndex,
                 analogChannel: analogBrightnessChannel.currentIndex
+            },
+            speedSensor: {
+                enabled: speedSensorEnabled.checked,
+                sourceType: speedSourceType.currentIndex === 0 ? "analog" : (speedSourceType.currentIndex === 1 ? "analogsquare" : "digital"),
+                analogPort: speedAnalogPort,
+                digitalPort: speedDigitalPort,
+                pulsesPerRev: parseFloat(speedPulsesPerRev.text) || 4.0,
+                voltageMultiplier: parseFloat(speedVoltageMultiplier.text) || 1.0,
+                frequencyThreshold: parseFloat(speedFrequencyThreshold.text) || 1.2,
+                frequencyHysteresis: parseFloat(speedFrequencyHysteresis.text) || 0.2,
+                tireCircumference: parseFloat(speedTireCircumference.text) || 2.06,
+                finalDriveRatio: parseFloat(speedFinalDriveRatio.text) || 1.0,
+                unit: speedUnit.currentIndex === 0 ? "MPH" : "KPH"
             }
         };
     }
@@ -47,6 +66,7 @@ Item {
     function loadConfig(config) {
         var board = config || {};
         var brightnessConfig = board.brightness || {};
+        var speedConfig = board.speedSensor || {};
 
         loading = true;
 
@@ -70,12 +90,81 @@ Item {
 
         analogBrightnessChannel.currentIndex = brightnessConfig.analogChannel !== undefined ? brightnessConfig.analogChannel : 0;
 
+        speedSensorEnabled.checked = speedConfig.enabled !== undefined ? !!speedConfig.enabled : false;
+        var sourceType = speedConfig.sourceType !== undefined ? String(speedConfig.sourceType).toLowerCase() : "analog";
+        if (sourceType === "analogsquare" || sourceType === "analogfrequency")
+            speedSourceType.currentIndex = 1;
+        else if (sourceType === "digital" || sourceType === "squarewave" || sourceType === "digitalfrequency")
+            speedSourceType.currentIndex = 2;
+        else
+            speedSourceType.currentIndex = 0;
+        var selectedSpeedAnalogPort = speedConfig.analogPort !== undefined ? speedConfig.analogPort : 0;
+        var selectedSpeedDigitalPort = speedConfig.digitalPort !== undefined ? speedConfig.digitalPort : 0;
+        rebuildSpeedPortModels(selectedSpeedAnalogPort, selectedSpeedDigitalPort);
+        speedPulsesPerRev.text = speedConfig.pulsesPerRev !== undefined ? String(speedConfig.pulsesPerRev) : "4.0";
+        speedVoltageMultiplier.text = speedConfig.voltageMultiplier !== undefined ? String(speedConfig.voltageMultiplier) : "1.0";
+        speedFrequencyThreshold.text = speedConfig.frequencyThreshold !== undefined ? String(speedConfig.frequencyThreshold) : "1.2";
+        speedFrequencyHysteresis.text = speedConfig.frequencyHysteresis !== undefined ? String(speedConfig.frequencyHysteresis) : "0.2";
+        speedTireCircumference.text = speedConfig.tireCircumference !== undefined ? String(speedConfig.tireCircumference) : "2.06";
+        speedFinalDriveRatio.text = speedConfig.finalDriveRatio !== undefined ? String(speedConfig.finalDriveRatio) : "1.0";
+        speedUnit.currentIndex = speedConfig.unit === "KPH" ? 1 : 0;
+
         loading = false;
+    }
+
+    function rebuildSpeedPortModels(selectedAnalog, selectedDigital) {
+        var analogValues = [];
+        var analogLabels = [];
+        var digitalValues = [];
+        var digitalLabels = [];
+
+        for (var i = 0; i < 8; ++i) {
+            var analogBlocked = reservedAnalogPorts.indexOf(i) !== -1;
+            if (!analogBlocked || i === selectedAnalog) {
+                analogValues.push(i);
+                analogLabels.push("EX Analog " + i);
+            }
+
+            var digitalBlocked = reservedDigitalPorts.indexOf(i) !== -1;
+            if (!digitalBlocked || i === selectedDigital) {
+                digitalValues.push(i);
+                digitalLabels.push("EX Digital " + (i + 1));
+            }
+        }
+
+        if (analogValues.length === 0) {
+            analogValues = [selectedAnalog >= 0 && selectedAnalog <= 7 ? selectedAnalog : 0];
+            analogLabels = ["EX Analog " + analogValues[0]];
+        }
+        if (digitalValues.length === 0) {
+            digitalValues = [selectedDigital >= 0 && selectedDigital <= 7 ? selectedDigital : 0];
+            digitalLabels = ["EX Digital " + (digitalValues[0] + 1)];
+        }
+
+        speedAnalogPortValues = analogValues;
+        speedDigitalPortValues = digitalValues;
+        speedAnalogPort.model = analogLabels;
+        speedDigitalPort.model = digitalLabels;
+        var idxA = speedAnalogPortValues.indexOf(selectedAnalog);
+        var idxD = speedDigitalPortValues.indexOf(selectedDigital);
+        speedAnalogPort.currentIndex = idxA >= 0 ? idxA : 0;
+        speedDigitalPort.currentIndex = idxD >= 0 ? idxD : 0;
     }
 
     function notifyChanged() {
         if (!loading)
             configChanged(buildConfig());
+    }
+
+    onReservedAnalogPortsChanged: {
+        if (!loading)
+            rebuildSpeedPortModels(speedAnalogPortValues[Math.max(0, speedAnalogPort.currentIndex)] || 0,
+                                   speedDigitalPortValues[Math.max(0, speedDigitalPort.currentIndex)] || 0);
+    }
+    onReservedDigitalPortsChanged: {
+        if (!loading)
+            rebuildSpeedPortModels(speedAnalogPortValues[Math.max(0, speedAnalogPort.currentIndex)] || 0,
+                                   speedDigitalPortValues[Math.max(0, speedDigitalPort.currentIndex)] || 0);
     }
 
     SettingsSection {
@@ -312,6 +401,208 @@ Item {
                     Layout.preferredHeight: SettingsTheme.controlHeight
                     Layout.preferredWidth: 200
                     model: ["Ex Analog Input 1", "Ex Analog Input 2", "Ex Analog Input 3", "Ex Analog Input 4", "Ex Analog Input 5", "Ex Analog Input 6", "Ex Analog Input 7", "Ex Analog Input 8"]
+
+                    onActivated: root.notifyChanged()
+                }
+            }
+
+            Rectangle { Layout.fillWidth: true; height: SettingsTheme.borderWidth; color: SettingsTheme.border }
+
+            Text {
+                Layout.fillWidth: true
+                color: SettingsTheme.textPrimary
+                font.family: SettingsTheme.fontFamily
+                font.pixelSize: SettingsTheme.fontLabel
+                font.weight: Font.DemiBold
+                text: "Speed Sensor (EX Board)"
+            }
+
+            SettingsRow {
+                label: "Enable Speed Sensor"
+
+                Component.onCompleted: children[0].Layout.preferredWidth = parent.boardConfigLabelW
+
+                StyledSwitch {
+                    id: speedSensorEnabled
+
+                    Layout.preferredWidth: 100
+                    text: checked ? "On" : "Off"
+
+                    onCheckedChanged: root.notifyChanged()
+                }
+            }
+
+            SettingsRow {
+                label: "Source Type"
+                visible: speedSensorEnabled.checked
+
+                Component.onCompleted: children[0].Layout.preferredWidth = parent.boardConfigLabelW
+
+                StyledComboBox {
+                    id: speedSourceType
+
+                    Layout.preferredHeight: SettingsTheme.controlHeight
+                    Layout.preferredWidth: 220
+                    model: ["Analog Voltage", "Analog Square Wave", "Digital Square Wave"]
+
+                    onActivated: root.notifyChanged()
+                }
+            }
+
+            SettingsRow {
+                label: "Analog Port"
+                visible: speedSensorEnabled.checked && (speedSourceType.currentIndex === 0 || speedSourceType.currentIndex === 1)
+
+                Component.onCompleted: children[0].Layout.preferredWidth = parent.boardConfigLabelW
+
+                StyledComboBox {
+                    id: speedAnalogPort
+
+                    Layout.preferredHeight: SettingsTheme.controlHeight
+                    Layout.preferredWidth: 220
+                    model: []
+
+                    onActivated: root.notifyChanged()
+                }
+            }
+
+            SettingsRow {
+                label: "Digital Port"
+                visible: speedSensorEnabled.checked && speedSourceType.currentIndex === 2
+
+                Component.onCompleted: children[0].Layout.preferredWidth = parent.boardConfigLabelW
+
+                StyledComboBox {
+                    id: speedDigitalPort
+
+                    Layout.preferredHeight: SettingsTheme.controlHeight
+                    Layout.preferredWidth: 220
+                    model: []
+
+                    onActivated: root.notifyChanged()
+                }
+            }
+
+            SettingsRow {
+                label: "Pulses / Rev"
+                visible: speedSensorEnabled.checked && (speedSourceType.currentIndex === 1 || speedSourceType.currentIndex === 2)
+
+                Component.onCompleted: children[0].Layout.preferredWidth = parent.boardConfigLabelW
+
+                StyledTextField {
+                    id: speedPulsesPerRev
+
+                    Layout.preferredHeight: SettingsTheme.controlHeight
+                    Layout.preferredWidth: 120
+                    inputMethodHints: Qt.ImhFormattedNumbersOnly
+                    text: "4.0"
+
+                    onEditingFinished: root.notifyChanged()
+                }
+            }
+
+            SettingsRow {
+                label: "Voltage Multiplier"
+                visible: speedSensorEnabled.checked && speedSourceType.currentIndex === 0
+
+                Component.onCompleted: children[0].Layout.preferredWidth = parent.boardConfigLabelW
+
+                StyledTextField {
+                    id: speedVoltageMultiplier
+
+                    Layout.preferredHeight: SettingsTheme.controlHeight
+                    Layout.preferredWidth: 120
+                    inputMethodHints: Qt.ImhFormattedNumbersOnly
+                    text: "1.0"
+
+                    onEditingFinished: root.notifyChanged()
+                }
+            }
+
+            SettingsRow {
+                label: "Threshold (V)"
+                visible: speedSensorEnabled.checked && speedSourceType.currentIndex === 1
+
+                Component.onCompleted: children[0].Layout.preferredWidth = parent.boardConfigLabelW
+
+                StyledTextField {
+                    id: speedFrequencyThreshold
+
+                    Layout.preferredHeight: SettingsTheme.controlHeight
+                    Layout.preferredWidth: 120
+                    inputMethodHints: Qt.ImhFormattedNumbersOnly
+                    text: "1.2"
+
+                    onEditingFinished: root.notifyChanged()
+                }
+            }
+
+            SettingsRow {
+                label: "Hysteresis (V)"
+                visible: speedSensorEnabled.checked && speedSourceType.currentIndex === 1
+
+                Component.onCompleted: children[0].Layout.preferredWidth = parent.boardConfigLabelW
+
+                StyledTextField {
+                    id: speedFrequencyHysteresis
+
+                    Layout.preferredHeight: SettingsTheme.controlHeight
+                    Layout.preferredWidth: 120
+                    inputMethodHints: Qt.ImhFormattedNumbersOnly
+                    text: "0.2"
+
+                    onEditingFinished: root.notifyChanged()
+                }
+            }
+
+            SettingsRow {
+                label: "Tire Circumference (m)"
+                visible: speedSensorEnabled.checked
+
+                Component.onCompleted: children[0].Layout.preferredWidth = parent.boardConfigLabelW
+
+                StyledTextField {
+                    id: speedTireCircumference
+
+                    Layout.preferredHeight: SettingsTheme.controlHeight
+                    Layout.preferredWidth: 120
+                    inputMethodHints: Qt.ImhFormattedNumbersOnly
+                    text: "2.06"
+
+                    onEditingFinished: root.notifyChanged()
+                }
+            }
+
+            SettingsRow {
+                label: "Final Drive Ratio"
+                visible: speedSensorEnabled.checked
+
+                Component.onCompleted: children[0].Layout.preferredWidth = parent.boardConfigLabelW
+
+                StyledTextField {
+                    id: speedFinalDriveRatio
+
+                    Layout.preferredHeight: SettingsTheme.controlHeight
+                    Layout.preferredWidth: 120
+                    inputMethodHints: Qt.ImhFormattedNumbersOnly
+                    text: "1.0"
+
+                    onEditingFinished: root.notifyChanged()
+                }
+            }
+
+            SettingsRow {
+                label: "Unit"
+                visible: speedSensorEnabled.checked
+
+                Component.onCompleted: children[0].Layout.preferredWidth = parent.boardConfigLabelW
+
+                StyledComboBox {
+                    id: speedUnit
+
+                    Layout.preferredHeight: SettingsTheme.controlHeight
+                    Layout.preferredWidth: 120
+                    model: ["MPH", "KPH"]
 
                     onActivated: root.notifyChanged()
                 }

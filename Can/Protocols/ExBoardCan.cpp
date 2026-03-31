@@ -21,7 +21,12 @@ static constexpr int FREQUENCY_MASK = 127;
 static constexpr int HZ_AVERAGE_WINDOW = 10;
 static constexpr double DI1_FREQUENCY_SCALE = 16.6666667;
 
-ExBoardCan::ExBoardCan(QObject *parent) : CanInterface(parent), m_hzAverage(HZ_AVERAGE_WINDOW, 0) {}
+ExBoardCan::ExBoardCan(QObject *parent)
+    : CanInterface(parent),
+      m_hzAverage(HZ_AVERAGE_WINDOW, 0),
+      m_speedHzAverage(HZ_AVERAGE_WINDOW, 0),
+      m_speedFreqAverage(HZ_AVERAGE_WINDOW, 0.0)
+{}
 
 ExBoardCan::ExBoardCan(DigitalInputs *digitalInputs, ExpanderBoardData *expanderBoardData, EngineData *engineData,
                        SettingsData *settingsData, VehicleData *vehicleData, ConnectionData *connectionData,
@@ -33,7 +38,9 @@ ExBoardCan::ExBoardCan(DigitalInputs *digitalInputs, ExpanderBoardData *expander
       m_settingsData(settingsData),
       m_vehicleData(vehicleData),
       m_connectionData(connectionData),
-      m_hzAverage(HZ_AVERAGE_WINDOW, 0)
+      m_hzAverage(HZ_AVERAGE_WINDOW, 0),
+      m_speedHzAverage(HZ_AVERAGE_WINDOW, 0),
+      m_speedFreqAverage(HZ_AVERAGE_WINDOW, 0.0)
 {}
 
 ExBoardCan::~ExBoardCan()
@@ -313,11 +320,22 @@ void ExBoardCan::onGearPortVoltageChanged()
 void ExBoardCan::setSpeedSensorConfig(const QVariantMap &config)
 {
     m_speedConfig.enabled = config.value(QStringLiteral("enabled"), false).toBool();
-    m_speedConfig.sourceType = config.value(QStringLiteral("sourceType"), QStringLiteral("analog")).toString();
+    QString sourceType = config.value(QStringLiteral("sourceType"), QStringLiteral("analog")).toString().trimmed().toLower();
+    if (sourceType == QLatin1String("digitalfrequency") || sourceType == QLatin1String("squarewave"))
+        sourceType = QStringLiteral("digital");
+    if (sourceType == QLatin1String("analogsquare") || sourceType == QLatin1String("analogfrequency"))
+        sourceType = QStringLiteral("analogsquare");
+    if (sourceType != QLatin1String("analog") && sourceType != QLatin1String("digital")
+        && sourceType != QLatin1String("analogsquare")) {
+        sourceType = QStringLiteral("analog");
+    }
+    m_speedConfig.sourceType = sourceType;
     m_speedConfig.analogPort = config.value(QStringLiteral("analogPort"), 0).toInt();
     m_speedConfig.digitalPort = config.value(QStringLiteral("digitalPort"), 0).toInt();
     m_speedConfig.pulsesPerRev = config.value(QStringLiteral("pulsesPerRev"), 4.0).toDouble();
     m_speedConfig.voltageMultiplier = config.value(QStringLiteral("voltageMultiplier"), 1.0).toDouble();
+    m_speedConfig.frequencyThreshold = config.value(QStringLiteral("frequencyThreshold"), 1.2).toDouble();
+    m_speedConfig.frequencyHysteresis = config.value(QStringLiteral("frequencyHysteresis"), 0.2).toDouble();
     m_speedConfig.tireCircumference = config.value(QStringLiteral("tireCircumference"), 2.06).toDouble();
     m_speedConfig.finalDriveRatio = config.value(QStringLiteral("finalDriveRatio"), 1.0).toDouble();
     m_speedConfig.unit = config.value(QStringLiteral("unit"), QStringLiteral("MPH")).toString();
@@ -328,7 +346,8 @@ void ExBoardCan::setSpeedSensorConfig(const QVariantMap &config)
     if (!m_speedConfig.enabled || !m_expanderBoardData)
         return;
 
-    if (m_speedConfig.sourceType == QLatin1String("analog")) {
+    if (m_speedConfig.sourceType == QLatin1String("analog")
+        || m_speedConfig.sourceType == QLatin1String("analogsquare")) {
         const int port = m_speedConfig.analogPort;
         auto connectSpeedSignal = [this, port]() {
             switch (port) {
@@ -361,10 +380,114 @@ void ExBoardCan::setSpeedSensorConfig(const QVariantMap &config)
             }
         };
         m_speedConnection = connectSpeedSignal();
-    } else if (m_digitalInputs) {
-        m_speedConnection =
-            connect(m_digitalInputs, &DigitalInputs::frequencyDIEX1Changed, this, &ExBoardCan::onSpeedSourceChanged);
+        m_speedFreqAverage.fill(0.0);
+        m_lastSpeedRisingEdgeNs = -1;
+        m_analogSpeedStateInitialized = false;
+        m_analogSpeedHigh = false;
+        m_speedEdgeTimer.restart();
+    } else if (m_speedConfig.enabled) {
+        // Digital square-wave speed is sampled from EX frame digital bytes in onFrameReceived().
+        m_speedHzAverage.fill(0);
+        m_speedFreqAverage.fill(0.0);
+        m_lastSpeedRisingEdgeNs = -1;
+        m_analogSpeedStateInitialized = false;
+        m_analogSpeedHigh = false;
+        onSpeedSourceChanged();
     }
+}
+
+double ExBoardCan::calculateSpeedFromFrequencyHz(double frequencyHz) const
+{
+    if (m_speedConfig.pulsesPerRev <= 0.0)
+        return 0.0;
+
+    const double wheelRps = frequencyHz / m_speedConfig.pulsesPerRev;
+    const double wheelSpeedMps = wheelRps * m_speedConfig.tireCircumference;
+    const double corrected =
+        (m_speedConfig.finalDriveRatio > 0.0) ? wheelSpeedMps / m_speedConfig.finalDriveRatio : wheelSpeedMps;
+    return (m_speedConfig.unit.compare(QStringLiteral("MPH"), Qt::CaseInsensitive) == 0) ? corrected * 2.23694
+                                                                                           : corrected * 3.6;
+}
+
+double ExBoardCan::speedAnalogVoltage() const
+{
+    if (!m_expanderBoardData)
+        return 0.0;
+
+    switch (m_speedConfig.analogPort) {
+    case 0:
+        return m_expanderBoardData->EXAnalogInput0();
+    case 1:
+        return m_expanderBoardData->EXAnalogInput1();
+    case 2:
+        return m_expanderBoardData->EXAnalogInput2();
+    case 3:
+        return m_expanderBoardData->EXAnalogInput3();
+    case 4:
+        return m_expanderBoardData->EXAnalogInput4();
+    case 5:
+        return m_expanderBoardData->EXAnalogInput5();
+    case 6:
+        return m_expanderBoardData->EXAnalogInput6();
+    case 7:
+        return m_expanderBoardData->EXAnalogInput7();
+    default:
+        return 0.0;
+    }
+}
+
+void ExBoardCan::updateAnalogSquareWaveSpeed(double voltage)
+{
+    if (!m_expanderBoardData)
+        return;
+
+    const double threshold = m_speedConfig.frequencyThreshold;
+    const double hysteresis = qBound(0.02, m_speedConfig.frequencyHysteresis, 2.0);
+    const double highThreshold = threshold + (hysteresis * 0.5);
+    const double lowThreshold = threshold - (hysteresis * 0.5);
+
+    if (!m_speedEdgeTimer.isValid())
+        m_speedEdgeTimer.start();
+
+    if (!m_analogSpeedStateInitialized) {
+        m_analogSpeedHigh = voltage >= threshold;
+        m_analogSpeedStateInitialized = true;
+    }
+
+    bool newHigh = m_analogSpeedHigh;
+    if (m_analogSpeedHigh) {
+        if (voltage <= lowThreshold)
+            newHigh = false;
+    } else {
+        if (voltage >= highThreshold)
+            newHigh = true;
+    }
+
+    if (!m_analogSpeedHigh && newHigh) {
+        const qint64 nowNs = m_speedEdgeTimer.nsecsElapsed();
+        if (m_lastSpeedRisingEdgeNs > 0) {
+            const qint64 deltaNs = nowNs - m_lastSpeedRisingEdgeNs;
+            if (deltaNs > 0) {
+                const double hz = 1.0e9 / static_cast<double>(deltaNs);
+                m_speedFreqAverage.removeFirst();
+                m_speedFreqAverage.append(hz);
+                double avgHz = 0.0;
+                for (int i = 0; i < HZ_AVERAGE_WINDOW; ++i)
+                    avgHz += m_speedFreqAverage[i];
+                avgHz /= HZ_AVERAGE_WINDOW;
+                m_expanderBoardData->setEXSpeed(calculateSpeedFromFrequencyHz(avgHz));
+            }
+        }
+        m_lastSpeedRisingEdgeNs = nowNs;
+    } else if (m_lastSpeedRisingEdgeNs > 0) {
+        const qint64 ageNs = m_speedEdgeTimer.nsecsElapsed() - m_lastSpeedRisingEdgeNs;
+        if (ageNs > 800000000) {
+            m_speedFreqAverage.fill(0.0);
+            m_expanderBoardData->setEXSpeed(0.0);
+        }
+    }
+
+    m_analogSpeedHigh = newHigh;
 }
 
 void ExBoardCan::onSpeedSourceChanged()
@@ -372,50 +495,12 @@ void ExBoardCan::onSpeedSourceChanged()
     if (!m_speedConfig.enabled || !m_expanderBoardData)
         return;
 
-    double speed = 0.0;
     if (m_speedConfig.sourceType == QLatin1String("analog")) {
-        double voltage = 0.0;
-        switch (m_speedConfig.analogPort) {
-        case 0:
-            voltage = m_expanderBoardData->EXAnalogInput0();
-            break;
-        case 1:
-            voltage = m_expanderBoardData->EXAnalogInput1();
-            break;
-        case 2:
-            voltage = m_expanderBoardData->EXAnalogInput2();
-            break;
-        case 3:
-            voltage = m_expanderBoardData->EXAnalogInput3();
-            break;
-        case 4:
-            voltage = m_expanderBoardData->EXAnalogInput4();
-            break;
-        case 5:
-            voltage = m_expanderBoardData->EXAnalogInput5();
-            break;
-        case 6:
-            voltage = m_expanderBoardData->EXAnalogInput6();
-            break;
-        case 7:
-            voltage = m_expanderBoardData->EXAnalogInput7();
-            break;
-        default:
-            break;
-        }
-        speed = voltage * m_speedConfig.voltageMultiplier;
-    } else {
-        const double frequency = m_digitalInputs ? m_digitalInputs->frequencyDIEX1() : 0.0;
-        if (m_speedConfig.pulsesPerRev > 0.0) {
-            const double wheelRPM = frequency / m_speedConfig.pulsesPerRev;
-            const double wheelSpeedMps = wheelRPM * m_speedConfig.tireCircumference / 60.0;
-            const double corrected =
-                (m_speedConfig.finalDriveRatio > 0.0) ? wheelSpeedMps / m_speedConfig.finalDriveRatio : wheelSpeedMps;
-            speed = (m_speedConfig.unit == QLatin1String("MPH")) ? corrected * 2.23694 : corrected * 3.6;
-        }
+        const double voltage = speedAnalogVoltage();
+        m_expanderBoardData->setEXSpeed(voltage * m_speedConfig.voltageMultiplier);
+    } else if (m_speedConfig.sourceType == QLatin1String("analogsquare")) {
+        updateAnalogSquareWaveSpeed(speedAnalogVoltage());
     }
-
-    m_expanderBoardData->setEXSpeed(speed);
 }
 
 QString ExBoardCan::byteArrayToHex(const QByteArray &byteArray) const
@@ -482,6 +567,23 @@ void ExBoardCan::onFrameReceived(const QCanBusFrame &frame)
             }
         }
 
+        if (m_speedConfig.enabled && m_speedConfig.sourceType == QLatin1String("digital") && m_expanderBoardData) {
+            const int selectedPort = qBound(0, m_speedConfig.digitalPort, 7);
+            const int digitalBytes[8] = {byte0, byte1, byte2, byte3, byte4, byte5, byte6, byte7};
+            const int rawFrequency = digitalBytes[selectedPort] & FREQUENCY_MASK;
+            m_speedHzAverage.removeFirst();
+            m_speedHzAverage.append(rawFrequency);
+
+            double avgRaw = 0.0;
+            for (int i = 0; i < HZ_AVERAGE_WINDOW; ++i)
+                avgRaw += m_speedHzAverage[i];
+            avgRaw /= HZ_AVERAGE_WINDOW;
+
+            const double frequencyHz = avgRaw * DI1_FREQUENCY_SCALE;
+            const double speed = calculateSpeedFromFrequencyHz(frequencyHz);
+            m_expanderBoardData->setEXSpeed(speed);
+        }
+
         if (m_sensorRegistry) {
             for (int i = 1; i <= 8; ++i)
                 m_sensorRegistry->markCanSensorActive(QStringLiteral("EXDigitalInput%1").arg(i));
@@ -507,6 +609,11 @@ void ExBoardCan::onFrameReceived(const QCanBusFrame &frame)
                 m_sensorRegistry->markCanSensorActive(QStringLiteral("EXAnalogCalc%1").arg(i));
             }
         }
+        if (m_speedConfig.enabled && (m_speedConfig.sourceType == QLatin1String("analog")
+                                      || m_speedConfig.sourceType == QLatin1String("analogsquare"))
+            && m_speedConfig.analogPort >= 0 && m_speedConfig.analogPort <= 3) {
+            onSpeedSourceChanged();
+        }
     }
 
     if (frame.frameId() == m_address3) {
@@ -521,6 +628,11 @@ void ExBoardCan::onFrameReceived(const QCanBusFrame &frame)
                 m_sensorRegistry->markCanSensorActive(QStringLiteral("EXAnalogInput%1").arg(i));
                 m_sensorRegistry->markCanSensorActive(QStringLiteral("EXAnalogCalc%1").arg(i));
             }
+        }
+        if (m_speedConfig.enabled && (m_speedConfig.sourceType == QLatin1String("analog")
+                                      || m_speedConfig.sourceType == QLatin1String("analogsquare"))
+            && m_speedConfig.analogPort >= 4 && m_speedConfig.analogPort <= 7) {
+            onSpeedSourceChanged();
         }
     }
 

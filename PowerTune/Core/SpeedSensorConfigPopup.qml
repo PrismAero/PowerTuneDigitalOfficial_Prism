@@ -15,11 +15,13 @@ Popup {
     function buildConfig() {
         return {
             enabled: enableSwitch.checked,
-            sourceType: sourceTypeCombo.currentIndex === 0 ? "Analog" : "Digital",
+            sourceType: sourceTypeCombo.currentIndex === 0 ? "analog" : (sourceTypeCombo.currentIndex === 1 ? "analogsquare" : "digital"),
             analogPort: analogPortCombo.currentIndex,
             digitalPort: digitalPortCombo.currentIndex,
             pulsesPerRev: parseFloat(pulsesPerRevField.text) || 4.0,
             voltageMultiplier: parseFloat(voltageMultiplierField.text) || 1.0,
+            frequencyThreshold: parseFloat(frequencyThresholdField.text) || 1.2,
+            frequencyHysteresis: parseFloat(frequencyHysteresisField.text) || 0.2,
             tireCircumference: parseFloat(tireCircumferenceField.text) || 2.06,
             finalDriveRatio: parseFloat(finalDriveRatioField.text) || 1.0,
             unit: unitCombo.currentIndex === 0 ? "MPH" : "KPH"
@@ -32,8 +34,11 @@ Popup {
 
         enableSwitch.checked = config.enabled === true || config.enabled === "true";
 
-        if (config.sourceType === "Digital")
+        var sourceType = (config.sourceType !== undefined ? String(config.sourceType) : "analog").toLowerCase();
+        if (sourceType === "analogsquare" || sourceType === "analogfrequency")
             sourceTypeCombo.currentIndex = 1;
+        else if (sourceType === "digital" || sourceType === "squarewave" || sourceType === "digitalfrequency")
+            sourceTypeCombo.currentIndex = 2;
         else
             sourceTypeCombo.currentIndex = 0;
 
@@ -54,6 +59,10 @@ Popup {
 
         var vm = parseFloat(config.voltageMultiplier);
         voltageMultiplierField.text = !isNaN(vm) ? vm.toString() : "1.0";
+        var ft = parseFloat(config.frequencyThreshold);
+        frequencyThresholdField.text = !isNaN(ft) ? ft.toString() : "1.2";
+        var fh = parseFloat(config.frequencyHysteresis);
+        frequencyHysteresisField.text = !isNaN(fh) ? fh.toString() : "0.2";
 
         var tc = parseFloat(config.tireCircumference);
         tireCircumferenceField.text = !isNaN(tc) ? tc.toString() : "2.06";
@@ -171,7 +180,7 @@ Popup {
                         StyledComboBox {
                             id: sourceTypeCombo
 
-                            model: ["Analog", "Digital"]
+                            model: ["Analog Voltage", "Analog Square Wave", "Digital Square Wave"]
                         }
                     }
                 }
@@ -183,7 +192,7 @@ Popup {
 
                     SettingsRow {
                         label: "Analog Port"
-                        visible: sourceTypeCombo.currentIndex === 0
+                        visible: sourceTypeCombo.currentIndex === 0 || sourceTypeCombo.currentIndex === 1
 
                         StyledComboBox {
                             id: analogPortCombo
@@ -196,8 +205,8 @@ Popup {
                     }
 
                     SettingsRow {
-                        label: "Digital Port"
-                        visible: sourceTypeCombo.currentIndex === 1
+                        label: "Digital Port (Square Wave)"
+                        visible: sourceTypeCombo.currentIndex === 2
 
                         StyledComboBox {
                             id: digitalPortCombo
@@ -211,7 +220,7 @@ Popup {
 
                     SettingsRow {
                         label: "Pulses/Rev"
-                        visible: sourceTypeCombo.currentIndex === 1
+                        visible: sourceTypeCombo.currentIndex === 1 || sourceTypeCombo.currentIndex === 2
 
                         StyledTextField {
                             id: pulsesPerRevField
@@ -220,6 +229,18 @@ Popup {
                             inputMethodHints: Qt.ImhFormattedNumbersOnly
                             text: "4.0"
                         }
+                    }
+
+                    Text {
+                        Layout.fillWidth: true
+                        color: SettingsTheme.textSecondary
+                        font.family: SettingsTheme.fontFamily
+                        font.pixelSize: SettingsTheme.fontCaption
+                        visible: sourceTypeCombo.currentIndex === 1 || sourceTypeCombo.currentIndex === 2
+                        wrapMode: Text.WordWrap
+                        text: sourceTypeCombo.currentIndex === 1
+                              ? "Use Analog Square Wave when sensor voltage is below EX digital thresholds."
+                              : "Use Digital Square Wave for hall/VR sensors that switch EX digital inputs cleanly."
                     }
 
                     SettingsRow {
@@ -232,6 +253,32 @@ Popup {
                             Layout.preferredWidth: 100
                             inputMethodHints: Qt.ImhFormattedNumbersOnly
                             text: "1.0"
+                        }
+                    }
+
+                    SettingsRow {
+                        label: "Threshold (V)"
+                        visible: sourceTypeCombo.currentIndex === 1
+
+                        StyledTextField {
+                            id: frequencyThresholdField
+
+                            Layout.preferredWidth: 100
+                            inputMethodHints: Qt.ImhFormattedNumbersOnly
+                            text: "1.2"
+                        }
+                    }
+
+                    SettingsRow {
+                        label: "Hysteresis (V)"
+                        visible: sourceTypeCombo.currentIndex === 1
+
+                        StyledTextField {
+                            id: frequencyHysteresisField
+
+                            Layout.preferredWidth: 100
+                            inputMethodHints: Qt.ImhFormattedNumbersOnly
+                            text: "0.2"
                         }
                     }
                 }

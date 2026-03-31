@@ -9,14 +9,37 @@ Popup {
 
     property var gearConfig: ({})
     property var expanderData: null
+    property var unavailableAnalogPorts: []
+    property var analogPortValues: []
 
     signal saved(var config)
+
+    function rebuildAnalogPortModel(selectedPort) {
+        var values = [];
+        var labels = [];
+        for (var i = 0; i < 8; ++i) {
+            var blocked = unavailableAnalogPorts.indexOf(i) !== -1;
+            if (!blocked || i === selectedPort) {
+                values.push(i);
+                labels.push("EX Analog " + i);
+            }
+        }
+        if (values.length === 0) {
+            values = [selectedPort >= 0 && selectedPort <= 7 ? selectedPort : 0];
+            labels = ["EX Analog " + values[0]];
+        }
+        analogPortValues = values;
+        gearSensorPort.model = labels;
+        var idx = analogPortValues.indexOf(selectedPort);
+        gearSensorPort.currentIndex = idx >= 0 ? idx : 0;
+    }
 
     function loadConfig(config) {
         if (!config)
             config = {};
         gearSensorEnabled.checked = config.enabled === true || config.enabled === "true";
-        gearSensorPort.currentIndex = Math.max(0, Math.min(7, parseInt(config.port) || 0));
+        var selectedPort = Math.max(0, Math.min(7, parseInt(config.port) || 0));
+        rebuildAnalogPortModel(selectedPort);
         gearTolerance.text = config.tolerance !== undefined ? String(config.tolerance) : "0.2";
         gearVoltageN.text = config.voltageN !== undefined ? String(config.voltageN) : "0.0";
         gearVoltageR.text = config.voltageR !== undefined ? String(config.voltageR) : "0.5";
@@ -31,7 +54,7 @@ Popup {
     function buildConfig() {
         return {
             enabled: gearSensorEnabled.checked,
-            port: gearSensorPort.currentIndex,
+            port: analogPortValues.length > 0 ? analogPortValues[Math.max(0, gearSensorPort.currentIndex)] : 0,
             tolerance: parseFloat(gearTolerance.text) || 0.2,
             voltageN: parseFloat(gearVoltageN.text) || 0.0,
             voltageR: parseFloat(gearVoltageR.text) || 0.0,
@@ -43,6 +66,8 @@ Popup {
             voltage6: parseFloat(gearVoltage6.text) || 0.0
         };
     }
+
+    onUnavailableAnalogPortsChanged: loadConfig(gearConfig || ({}))
 
     closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
     modal: true
@@ -146,10 +171,7 @@ Popup {
                         StyledComboBox {
                             id: gearSensorPort
 
-                            model: [
-                                "EX Analog 0", "EX Analog 1", "EX Analog 2", "EX Analog 3",
-                                "EX Analog 4", "EX Analog 5", "EX Analog 6", "EX Analog 7"
-                            ]
+                            model: []
                         }
                     }
 

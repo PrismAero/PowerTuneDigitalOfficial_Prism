@@ -819,6 +819,7 @@ void AppSettings::writeSpeedSensorConfig(const QVariantMap &config)
     static const char *prefix = "ui/exboard/speedSensor/";
     const QStringList keys = {"enabled",           "sourceType",      "analogPort",
                               "digitalPort",       "pulsesPerRev",    "voltageMultiplier",
+                              "frequencyThreshold","frequencyHysteresis",
                               "tireCircumference", "finalDriveRatio", "unit"};
     for (const QString &key : keys) {
         if (config.contains(key))
@@ -838,6 +839,8 @@ QVariantMap AppSettings::readSpeedSensorConfig()
     config["digitalPort"] = getValue(QString(prefix) + "digitalPort", 0);
     config["pulsesPerRev"] = getValue(QString(prefix) + "pulsesPerRev", 4.0);
     config["voltageMultiplier"] = getValue(QString(prefix) + "voltageMultiplier", 1.0);
+    config["frequencyThreshold"] = getValue(QString(prefix) + "frequencyThreshold", 1.2);
+    config["frequencyHysteresis"] = getValue(QString(prefix) + "frequencyHysteresis", 0.2);
     config["tireCircumference"] = getValue(QString(prefix) + "tireCircumference", 2.06);
     config["finalDriveRatio"] = getValue(QString(prefix) + "finalDriveRatio", 1.0);
     config["unit"] = getValue(QString(prefix) + "unit", "MPH");
