@@ -54,6 +54,47 @@ Item {
             target[key] = source[key];
     }
 
+    function normalizeAnalogSensorKey(key) {
+        if (key === undefined || key === null)
+            return "";
+
+        var trimmed = String(key).trim();
+        var match = trimmed.match(/^EXAnalogInput([0-7])$/);
+        if (match && match.length === 2)
+            return "EXAnalogCalc" + match[1];
+
+        return trimmed;
+    }
+
+    function normalizePersistedOverlaySensorBindings() {
+        for (var i = 0; i < overlayDefinitions.length; ++i) {
+            var id = overlayDefinitions[i].id;
+            var loaded = AppSettings.loadOverlayConfig(dashboardId, id);
+            if (!objectHasKeys(loaded))
+                continue;
+
+            var changed = false;
+            if (loaded.sensorKey !== undefined) {
+                var normalizedSensorKey = normalizeAnalogSensorKey(loaded.sensorKey);
+                if (normalizedSensorKey !== loaded.sensorKey) {
+                    loaded.sensorKey = normalizedSensorKey;
+                    changed = true;
+                }
+            }
+
+            if (loaded.gearKey !== undefined) {
+                var normalizedGearKey = normalizeAnalogSensorKey(loaded.gearKey);
+                if (normalizedGearKey !== loaded.gearKey) {
+                    loaded.gearKey = normalizedGearKey;
+                    changed = true;
+                }
+            }
+
+            if (changed)
+                AppSettings.saveOverlayConfig(dashboardId, id, loaded);
+        }
+    }
+
     function objectHasKeys(obj) {
         for (var key in obj)
             return true;
@@ -74,8 +115,13 @@ Item {
             for (var key in defaults)
                 merged[key] = defaults[key];
             var loaded = loadedById[id] || ({});
-            if (objectHasKeys(loaded))
+            if (objectHasKeys(loaded)) {
+                if (loaded.sensorKey !== undefined)
+                    loaded.sensorKey = normalizeAnalogSensorKey(loaded.sensorKey);
+                if (loaded.gearKey !== undefined)
+                    loaded.gearKey = normalizeAnalogSensorKey(loaded.gearKey);
                 mergeConfig(merged, loaded);
+            }
             nextConfigs[id] = merged;
         }
         overlayConfigs = nextConfigs;
@@ -85,6 +131,7 @@ Item {
 
     Component.onCompleted: {
         migrateLegacyOverlayConfigs();
+        normalizePersistedOverlaySensorBindings();
         refreshConfigs();
     }
 

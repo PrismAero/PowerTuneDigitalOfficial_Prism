@@ -113,7 +113,7 @@ Popup {
         var config = {};
 
         if (hasDatasource)
-            config.sensorKey = sensorKey;
+            config.sensorKey = normalizeAnalogSensorKey(sensorKey);
 
         if (hasLabel)
             config.label = labelText;
@@ -184,7 +184,7 @@ Popup {
         }
 
         if (hasGearConfig) {
-            config.gearKey = gearSensorKey;
+            config.gearKey = normalizeAnalogSensorKey(gearSensorKey);
             config.gearTextColor = gearTextColor;
             config.gearFontSize = gearFontSize;
             config.suffixFontSize = suffixFontSize;
@@ -248,6 +248,18 @@ Popup {
         return val !== undefined ? Number(val) : def;
     }
 
+    function normalizeAnalogSensorKey(key) {
+        if (key === undefined || key === null)
+            return "";
+
+        var trimmed = String(key).trim();
+        var match = trimmed.match(/^EXAnalogInput([0-7])$/);
+        if (match && match.length === 2)
+            return "EXAnalogCalc" + match[1];
+
+        return trimmed;
+    }
+
     // -- Public API --
     function openFor(id, type) {
         overlayId = id;
@@ -269,7 +281,7 @@ Popup {
         var cfg = currentConfig;
         var defs = getDefaults();
 
-        sensorKey = cfg.sensorKey || defs.sensorKey || "";
+        sensorKey = normalizeAnalogSensorKey(cfg.sensorKey || defs.sensorKey || "");
 
         labelText = cfg.label || defs.label || "";
         unitText = cfg.unit || defs.unit || "";
@@ -328,7 +340,7 @@ Popup {
         offColor = cfg.offColor || defs.offColor || "#FF0909";
         invertLogic = toBool(cfg.invertLogic, toBool(defs.invertLogic, false));
 
-        gearSensorKey = cfg.gearKey || defs.gearKey || "Gear";
+        gearSensorKey = normalizeAnalogSensorKey(cfg.gearKey || defs.gearKey || "Gear");
         gearTextColor = cfg.gearTextColor || defs.gearTextColor || "#FFFFFF";
         gearFontSize = num(cfg.gearFontSize, num(defs.gearFontSize, 160));
         suffixFontSize = num(cfg.suffixFontSize, num(defs.suffixFontSize, 52.505));
@@ -470,7 +482,7 @@ Popup {
                             selectedKey: popup.sensorKey
 
                             onSensorSelected: function (key, displayName, unit) {
-                                popup.sensorKey = key;
+                                popup.sensorKey = popup.normalizeAnalogSensorKey(key);
                             }
                         }
                     }
@@ -1609,7 +1621,7 @@ Popup {
                                 selectedKey: popup.gearSensorKey
 
                                 onSensorSelected: function (key, displayName, unit) {
-                                    popup.gearSensorKey = key;
+                                    popup.gearSensorKey = popup.normalizeAnalogSensorKey(key);
                                 }
                             }
                         }
