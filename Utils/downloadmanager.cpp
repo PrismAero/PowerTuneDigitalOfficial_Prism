@@ -50,12 +50,8 @@
 
 #include "downloadmanager.h"
 
-#include "ParseGithubData.h"
-
 #include <QDebug>
 #include <QTextStream>
-
-#include <cstdio>
 
 using namespace std;
 
@@ -126,10 +122,7 @@ QString DownloadManager::downloadFilename() const
 void DownloadManager::startNextDownload()
 {
     if (downloadQueue.isEmpty()) {
-        printf("%d/%d files downloaded successfully\n", downloadedCount, totalCount);
-        parsegithubData pgh;
-        // qDebug() << "Sort FILES again ? ";
-        // pgh.sortDownloadedFiles();
+        qDebug() << downloadedCount << "/" << totalCount << "files downloaded successfully";
         emit finished();
         setDownloadStatus("Finished");
         return;
@@ -154,14 +147,14 @@ void DownloadManager::startNextDownload()
     connect(currentDownload, &QNetworkReply::readyRead, this, &DownloadManager::downloadReadyRead);
 
     // prepare the output
-    printf("Downloading %s...\n", url.toEncoded().constData());
+    qDebug() << "Downloading" << url.toEncoded();
     setDownloadFilename(QStringLiteral("Downloading %1...\n").arg(QString::fromUtf8(url.toEncoded())));
     downloadTimer.start();
 }
 
 void DownloadManager::downloadProgress(qint64 bytesReceived, qint64 bytesTotal)
 {
-    progressBar.setStatus(bytesReceived, bytesTotal);
+    setProgressStatus(bytesReceived, bytesTotal);
 
     // calculate the download speed
     double speed = bytesReceived * 1000.0 / downloadTimer.elapsed();
@@ -176,15 +169,14 @@ void DownloadManager::downloadProgress(qint64 bytesReceived, qint64 bytesTotal)
         unit = "MB/s";
     }
 
-    progressBar.setMessage(QString::fromLatin1("%1 %2").arg(speed, 3, 'f', 1).arg(unit));
-    progressBar.update();
+    setProgressMessage(QString::fromLatin1("%1 %2").arg(speed, 3, 'f', 1).arg(unit));
+    updateProgress();
     setDownloadStatus((QString::fromLatin1("%1 %2").arg(speed, 3, 'f', 1).arg(unit)));
 }
 
 void DownloadManager::downloadFinished()
 {
-    parsegithubData pgh;
-    progressBar.clear();
+    clearProgress();
     output.close();
 
     if (currentDownload->error()) {
@@ -206,15 +198,14 @@ void DownloadManager::downloadFinished()
 
 
     if (downloadQueue.size() <= 1 && resetFlag == false) {
-        // pgh.readTrackData(); no need to read track data twice
-        append(pgh.readTrackData());
+        append(readTrackData());
         resetFlag = true;
     }
 
     if (downloadQueue.isEmpty()) {
         qDebug() << "READ TRACK DATA AND SORT FILES ";
-        pgh.readTrackData();
-        pgh.sortDownloadedFiles();
+        readTrackData();
+        sortDownloadedFiles();
     }
 
 
@@ -248,4 +239,100 @@ void DownloadManager::reportRedirect()
     if (redirectUrl.isRelative())
         redirectUrl = requestUrl.resolved(redirectUrl);
     QTextStream(stderr) << "Redirected to: " << redirectUrl.toDisplayString() << '\n';
+}
+
+QList<QString> DownloadManager::readTrackData()
+{
+    QList<QPair<QString, QString>> parsedPairs;
+    QString pathString;
+
+#ifdef __linux__
+    pathString = QStringLiteral("/opt/PowerTune/repo.txt");
+#elif _WIN32
+    pathString = QCoreApplication::applicationFilePath().remove("release/PowerTuneQMLGui.exe") + "repo.txt";
+#else
+    pathString.clear();
+#endif
+
+    QFile inputFile(pathString);
+    if (inputFile.open(QIODevice::ReadOnly)) {
+        QTextStream in(&inputFile);
+        while (!in.atEnd()) {
+            const QString line = in.readLine();
+            const QList<QString> splitList = line.split(':');
+            if (splitList.size() < 2)
+                continue;
+            parsedPairs.append(qMakePair(splitList[0], splitList[1]));
+        }
+        inputFile.flush();
+        inputFile.close();
+    }
+
+    m_trackPairs = parsedPairs;
+    QList<QString> urls;
+    for (const auto &pair : parsedPairs) {
+        urls.append(QStringLiteral("https://gitlab.com/PowerTuneDigital/PowertuneTracks/-/raw/main/Tracks/") + pair.first
+                    + QStringLiteral("/") + pair.second);
+    }
+    return urls;
+}
+
+void DownloadManager::sortDownloadedFiles()
+{
+    QString sourceRoot;
+    QString destinationRoot;
+    QDir dir;
+
+#ifdef __linux__
+    sourceRoot = QStringLiteral("/opt/PowerTune/");
+    destinationRoot = QStringLiteral("/home/root/KTracks/");
+#elif _WIN32
+    sourceRoot = QCoreApplication::applicationDirPath() + "/";
+    destinationRoot = sourceRoot;
+#else
+    return;
+#endif
+
+    for (const auto &pair : m_trackPairs) {
+        const QFileInfo outputDir(destinationRoot + pair.first);
+        const QFileInfo outputFile(destinationRoot + pair.first + "/" + pair.second);
+
+        if (!outputDir.exists())
+            dir.mkpath(destinationRoot + pair.first);
+
+        if (outputFile.exists())
+            dir.remove(destinationRoot + pair.first + "/" + pair.second);
+
+        QFile::copy(sourceRoot + pair.second, destinationRoot + pair.first + "/" + pair.second);
+        QFile::remove(sourceRoot + pair.second);
+    }
+}
+
+void DownloadManager::clearProgress()
+{
+    m_progressValue = 0;
+    m_progressMaximum = -1;
+    m_progressIteration = 0;
+}
+
+void DownloadManager::updateProgress()
+{
+    ++m_progressIteration;
+    if (m_progressMaximum > 0) {
+        const int percent = static_cast<int>((m_progressValue * 100) / m_progressMaximum);
+        qDebug() << "Download progress:" << percent << "%" << m_progressMessage;
+    } else {
+        qDebug() << "Download progress:" << m_progressMessage;
+    }
+}
+
+void DownloadManager::setProgressMessage(const QString &message)
+{
+    m_progressMessage = message;
+}
+
+void DownloadManager::setProgressStatus(qint64 value, qint64 maximum)
+{
+    m_progressValue = value;
+    m_progressMaximum = maximum;
 }

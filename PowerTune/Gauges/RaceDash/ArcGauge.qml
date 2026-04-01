@@ -5,39 +5,31 @@ import PowerTune.Gauges.RaceDash 1.0
 Item {
     id: root
 
-    property string arcColorEnd: config.arcColorEnd !== undefined ? config.arcColorEnd : (shapeMode === "speedSvg" ? "#B00000" :
-                                                                                                                     "#B00000")
+    property string arcColorEnd: config.arcColorEnd !== undefined ? config.arcColorEnd : "#B00000"
     property string arcColorMid: {
-        var raw = config.arcColorMid !== undefined ? config.arcColorMid : (shapeMode === "speedSvg" ? "#E11B1B" :
-                                                                                                      "#FF8A00");
-
-
+        var raw = config.arcColorMid !== undefined ? config.arcColorMid : "";
         if (raw === "" || raw === "0" || raw === "none" || raw === "transparent")
             return "";
         return raw;
     }
     property real arcColorMidPos: config.arcColorMidPos !== undefined ? Number(config.arcColorMidPos) : 0.65
-    property string arcColorStart: config.arcColorStart !== undefined ? config.arcColorStart : (shapeMode
-                                                                                                === "speedSvg"
-                                                                                                ? "#7A0D0D" : "#8F4D17")
-    property real arcOffsetX: config.arcOffsetX !== undefined ? Number(config.arcOffsetX) : 5
+    property string arcColorStart: config.arcColorStart !== undefined ? config.arcColorStart : "#8F4D17"
+    property real arcOffsetX: config.arcOffsetX !== undefined ? Number(config.arcOffsetX) : 0
     property real arcOffsetY: config.arcOffsetY !== undefined ? Number(config.arcOffsetY) : 0
-    property real arcScale: config.arcScale !== undefined ? Number(config.arcScale) : 0.945
-    property real arcWidth: config.arcWidth !== undefined ? Number(config.arcWidth) : 0.285
+    property real arcScale: config.arcScale !== undefined ? Number(config.arcScale) : 1.0
+    property real arcWidth: config.arcWidth !== undefined ? Number(config.arcWidth) : 0.32
     property var config: ({})
     property int decimals: config.decimals !== undefined ? Number(config.decimals) : 0
     readonly property real displayValue: minValue + ((maxValue - minValue) * effectiveProgress)
     readonly property real effectiveProgress: testLoopEnabled ? testProgress : normalizedValue
-    property real endAngle: config.endAngle !== undefined ? Number(config.endAngle) : (shapeMode === "speedSvg" ? 315 :
-                                                                                                                  56)
-    property real endTaper: config.endTaper !== undefined ? Number(config.endTaper) : (shapeMode === "speedSvg" ? 0.24 :
-                                                                                                                  0.18)
+    property real endAngle: config.endAngle !== undefined ? Number(config.endAngle) : 400
+    property real endTaper: config.endTaper !== undefined ? Number(config.endTaper) : 0.18
     property real liveValue: 0
     property real maxValue: config.maxValue !== undefined ? Number(config.maxValue) : 100
     property real minValue: config.minValue !== undefined ? Number(config.minValue) : 0
     property real minimumVisibleFraction: config.minimumVisibleFraction !== undefined ? Number(
                                                                                             config.minimumVisibleFraction) :
-                                                                                        0.08
+                                                                                        0.0
     readonly property real normalizedValue: {
         if (maxValue <= minValue)
             return 0;
@@ -46,14 +38,11 @@ Item {
     property string sensorKey: config.sensorKey !== undefined ? config.sensorKey : ""
     property string shapeMode: config.shapeMode === "speedSvg" ? "speedSvg" : "tachSvg"
     property real startAngle: config.startAngle !== undefined ? Number(config.startAngle) : 225
-    property real startTaper: config.startTaper !== undefined ? Number(config.startTaper) : (shapeMode === "speedSvg" ? 0.28 :
-                                                                                                                        0.18)
+    property real startTaper: config.startTaper !== undefined ? Number(config.startTaper) : 0.18
     property int testLoopDuration: config.testLoopDuration !== undefined ? Number(config.testLoopDuration) : 1800
     property bool testLoopEnabled: config.testLoopEnabled === true || config.testLoopEnabled === "true"
     property real testProgress: 0
-    property real valueOffsetY: config.valueOffsetY !== undefined ? Number(config.valueOffsetY) : (shapeMode
-                                                                                                   === "speedSvg" ? 62 :
-                                                                                                                    94)
+    property real valueOffsetY: config.valueOffsetY !== undefined ? Number(config.valueOffsetY) : 0
     readonly property bool warningActive: warningEnabled && displayValue >= warningThreshold
     property bool warningEnabled: config.warningEnabled === true || config.warningEnabled === "true"
     property bool warningFlash: config.warningFlash !== undefined ? (config.warningFlash === true
@@ -88,6 +77,7 @@ Item {
     }
 
     Component.onCompleted: liveValue = readValue()
+    onSensorKeyChanged: liveValue = readValue()
 
     Connections {
         function onValueChanged(propertyName, value) {

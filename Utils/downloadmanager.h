@@ -51,8 +51,6 @@
 #ifndef DOWNLOADMANAGER_H
 #define DOWNLOADMANAGER_H
 
-#include "textprogressbar.h"
-
 #include <QtCore>
 #include <QtNetwork>
 
@@ -92,13 +90,23 @@ private slots:
 private:
     bool isHttpRedirect() const;
     void reportRedirect();
+    QList<QString> readTrackData();
+    void sortDownloadedFiles();
+    void clearProgress();
+    void updateProgress();
+    void setProgressMessage(const QString &message);
+    void setProgressStatus(qint64 value, qint64 maximum);
 
     QNetworkAccessManager manager;
     QQueue<QUrl> downloadQueue;
     QNetworkReply *currentDownload = nullptr;
     QFile output;
     QElapsedTimer downloadTimer;
-    TextProgressBar progressBar;
+    QList<QPair<QString, QString>> m_trackPairs;
+    QString m_progressMessage;
+    qint64 m_progressValue = 0;
+    qint64 m_progressMaximum = -1;
+    int m_progressIteration = 0;
 
     int downloadedCount = 0;
     int totalCount = 0;

@@ -7,8 +7,13 @@ Rectangle {
     id: popUp1
 
     function dismiss() {
-        if (popUp1.parent)
+        if (popUp1.parent) {
             popUp1.parent.visible = false;
+            if (popUp1.parent.parent && popUp1.parent.parent.hasOwnProperty("brightnessPopupDismissed"))
+                popUp1.parent.parent.brightnessPopupDismissed = true;
+            if (popUp1.parent.hasOwnProperty("active"))
+                popUp1.parent.active = false;
+        }
     }
 
     color: "grey"

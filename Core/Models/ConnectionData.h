@@ -34,6 +34,10 @@ class ConnectionData : public QObject
     // * Network status
     Q_PROPERTY(QString WifiStat READ WifiStat WRITE setWifiStat NOTIFY WifiStatChanged)
     Q_PROPERTY(QString EthernetStat READ EthernetStat WRITE setEthernetStat NOTIFY EthernetStatChanged)
+    Q_PROPERTY(bool wifiBusy READ wifiBusy WRITE setWifiBusy NOTIFY wifiBusyChanged)
+    Q_PROPERTY(QString wifiLastError READ wifiLastError WRITE setWifiLastError NOTIFY wifiLastErrorChanged)
+    Q_PROPERTY(QString wifiLastActionMessage READ wifiLastActionMessage WRITE setWifiLastActionMessage NOTIFY
+                   wifiLastActionMessageChanged)
 
     // * Platform
     Q_PROPERTY(QString Platform READ Platform WRITE setPlatform NOTIFY platformChanged)
@@ -44,7 +48,6 @@ class ConnectionData : public QObject
 
     // * ECU status
     Q_PROPERTY(int ecu READ ecu WRITE setecu NOTIFY ecuChanged)
-    Q_PROPERTY(int supportedReg READ supportedReg WRITE setsupportedReg NOTIFY supportedRegChanged)
 
     // * Error state
     Q_PROPERTY(QString Error READ Error WRITE setError NOTIFY ErrorChanged)
@@ -57,10 +60,6 @@ class ConnectionData : public QObject
 
     // * Media path
     Q_PROPERTY(QString musicpath READ musicpath WRITE setmusicpath NOTIFY musicpathChanged)
-
-    // * Daemon/License
-    Q_PROPERTY(QString daemonlicense READ daemonlicense WRITE setdaemonlicense NOTIFY daemonlicenseChanged)
-    Q_PROPERTY(QString holleyproductid READ holleyproductid WRITE setholleyproductid NOTIFY holleyproductidChanged)
 
 public:
     explicit ConnectionData(QObject *parent = nullptr);
@@ -75,6 +74,9 @@ public:
     // * Getters - Network status
     QString WifiStat() const { return m_WifiStat; }
     QString EthernetStat() const { return m_EthernetStat; }
+    bool wifiBusy() const { return m_wifiBusy; }
+    QString wifiLastError() const { return m_wifiLastError; }
+    QString wifiLastActionMessage() const { return m_wifiLastActionMessage; }
 
     // * Getters - Platform
     QString Platform() const { return m_Platform; }
@@ -85,7 +87,6 @@ public:
 
     // * Getters - ECU status
     int ecu() const { return m_ecu; }
-    int supportedReg() const { return m_supportedReg; }
 
     // * Getters - Error state
     QString Error() const { return m_Error; }
@@ -96,10 +97,6 @@ public:
 
     // * Getters - Media path
     QString musicpath() const { return m_musicpath; }
-
-    // * Getters - Daemon/License
-    QString daemonlicense() const { return m_daemonlicense; }
-    QString holleyproductid() const { return m_holleyproductid; }
 
 public slots:
     // * Setters - Serial status
@@ -112,6 +109,9 @@ public slots:
     // * Setters - Network status
     void setWifiStat(const QString &WifiStat);
     void setEthernetStat(const QString &EthernetStat);
+    void setWifiBusy(bool wifiBusy);
+    void setWifiLastError(const QString &wifiLastError);
+    void setWifiLastActionMessage(const QString &wifiLastActionMessage);
 
     // * Setters - Platform
     void setPlatform(const QString &Platform);
@@ -122,7 +122,6 @@ public slots:
 
     // * Setters - ECU status
     void setecu(int ecu);
-    void setsupportedReg(int supportedReg);
 
     // * Setters - Error state
     void setError(const QString &Error);
@@ -133,10 +132,6 @@ public slots:
 
     // * Setters - Media path
     void setmusicpath(const QString &musicpath);
-
-    // * Setters - Daemon/License
-    void setdaemonlicense(const QString &daemonlicense);
-    void setholleyproductid(const QString &holleyproductid);
 
 signals:
     // * Signals - Serial status
@@ -149,6 +144,9 @@ signals:
     // * Signals - Network status
     void WifiStatChanged(const QString &WifiStat);
     void EthernetStatChanged(const QString &EthernetStat);
+    void wifiBusyChanged(bool wifiBusy);
+    void wifiLastErrorChanged(const QString &wifiLastError);
+    void wifiLastActionMessageChanged(const QString &wifiLastActionMessage);
 
     // * Signals - Platform
     void platformChanged(const QString &Platform);
@@ -159,7 +157,6 @@ signals:
 
     // * Signals - ECU status
     void ecuChanged(int ecu);
-    void supportedRegChanged(int supportedReg);
 
     // * Signals - Error state
     void ErrorChanged(const QString &Error);
@@ -170,10 +167,6 @@ signals:
 
     // * Signals - Media path
     void musicpathChanged(const QString &musicpath);
-
-    // * Signals - Daemon/License
-    void daemonlicenseChanged(const QString &daemonlicense);
-    void holleyproductidChanged(const QString &holleyproductid);
 
 private:
     // * Serial status
@@ -186,6 +179,9 @@ private:
     // * Network status
     QString m_WifiStat;
     QString m_EthernetStat;
+    bool m_wifiBusy = false;
+    QString m_wifiLastError;
+    QString m_wifiLastActionMessage;
 
     // * Platform
     QString m_Platform;
@@ -196,7 +192,6 @@ private:
 
     // * ECU status
     int m_ecu = 0;
-    int m_supportedReg = 0;
 
     // * Error state
     QString m_Error;
@@ -208,9 +203,6 @@ private:
     // * Media path
     QString m_musicpath;
 
-    // * Daemon/License
-    QString m_daemonlicense;
-    QString m_holleyproductid;
 };
 
 #endif  // CONNECTIONDATA_H

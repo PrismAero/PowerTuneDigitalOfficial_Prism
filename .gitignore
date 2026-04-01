@@ -115,6 +115,14 @@ reference_sourcecode/
 
 # Device backup (too large for git)
 device-backup/
+target-backups/
 
 # Remote SSH credentials
 remotessh.login
+
+# Yocto source tarball (generated per-build, scp'd to build server)
+yocto/meta-powertune/recipes-powertune/powertune-app/files/powertune-src.tar.gz
+
+# Prebuilt ARM binary (cross-compiled, too large for git)
+PowerTuneQMLGui
+artifacts/powertune-image-raspberrypi4.rootfs.wic.bz2

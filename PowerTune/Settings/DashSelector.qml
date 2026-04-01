@@ -13,62 +13,19 @@ SettingsPage {
 
     function adremove() {
         UI.Visibledashes = numberofdashes.currentIndex + 1;
-
-        while (dashView.count > numberofdashes.currentIndex + 2) {
-            dashView.takeItem(dashView.count - 2);
-        }
-
-        while (dashView.count < numberofdashes.currentIndex + 2) {
-            switch (dashView.count) {
-            case 2:
-                dashView.insertItem(1, secondPageLoader);
-                break;
-            case 3:
-                dashView.insertItem(2, thirdPageLoader);
-                break;
-            case 4:
-                dashView.insertItem(3, fourthPageLoader);
-                break;
-            }
-        }
-    }
-
-    function getDashByIndex(index) {
-        switch (index) {
-        case 0:
-            return "qrc:/qt/qml/PrismPT/Dashboard/PowerTune/Dashboard/UserDashboard.qml";
-        case 1:
-            return "qrc:/qt/qml/PrismPT/Dashboard/PowerTune/Dashboard/UserDashboard.qml";
-        case 2:
-            return "qrc:/qt/qml/PrismPT/Dashboard/PowerTune/Dashboard/UserDashboard.qml";
-        case 3:
-            return "qrc:/qt/qml/PrismPT/Dashboard/PowerTune/Dashboard/RaceDash.qml";
-        case 4:
-            return Qt.resolvedUrl("CanMonitor.qml");
-        }
-        return "";
-    }
-
-    function getDashIndex(comboIndex) {
-        return comboIndex;
     }
 
     Component.onCompleted: {
-        dash1.currentIndex = AppSettings.getValue("ui/dashSelect1", 0);
-        dash2.currentIndex = AppSettings.getValue("ui/dashSelect2", 0);
-        dash3.currentIndex = AppSettings.getValue("ui/dashSelect3", 0);
-        dash4.currentIndex = AppSettings.getValue("ui/dashSelect4", 0);
-        numberofdashes.currentIndex = AppSettings.getValue("ui/dashCount", 0);
-        if (numberofdashes.currentIndex >= 0) {
-            adremove();
-            firstPageLoader.source = getDashByIndex(dash1.currentIndex);
-            if (dash2.currentIndex >= 0)
-                secondPageLoader.source = getDashByIndex(dash2.currentIndex);
-            if (dash3.currentIndex >= 0)
-                thirdPageLoader.source = getDashByIndex(dash3.currentIndex);
-            if (dash4.currentIndex >= 0)
-                fourthPageLoader.source = getDashByIndex(dash4.currentIndex);
-        }
+        var savedCount = AppSettings.getValue("ui/dashCount", 0);
+        var savedDash1 = AppSettings.getValue("ui/dashSelect1", 0);
+        var savedDash2 = AppSettings.getValue("ui/dashSelect2", 0);
+        var savedDash3 = AppSettings.getValue("ui/dashSelect3", 0);
+        var savedDash4 = AppSettings.getValue("ui/dashSelect4", 0);
+        numberofdashes.currentIndex = savedCount;
+        dash1.currentIndex = savedDash1;
+        dash2.currentIndex = savedDash2;
+        dash3.currentIndex = savedDash3;
+        dash4.currentIndex = savedDash4;
         settingsLoaded = true;
     }
 
@@ -118,7 +75,6 @@ SettingsPage {
                 id: dash1
 
                 index: 1
-                linkedLoader: firstPageLoader
 
                 onCurrentIndexChanged: if (settingsLoaded)
                                            AppSettings.setValue("ui/dashSelect1", currentIndex)
@@ -128,7 +84,6 @@ SettingsPage {
                 id: dash2
 
                 index: 2
-                linkedLoader: secondPageLoader
 
                 onCurrentIndexChanged: if (settingsLoaded)
                                            AppSettings.setValue("ui/dashSelect2", currentIndex)
@@ -138,7 +93,6 @@ SettingsPage {
                 id: dash3
 
                 index: 3
-                linkedLoader: thirdPageLoader
 
                 onCurrentIndexChanged: if (settingsLoaded)
                                            AppSettings.setValue("ui/dashSelect3", currentIndex)
@@ -148,9 +102,7 @@ SettingsPage {
                 id: dash4
 
                 index: 4
-                linkedLoader: fourthPageLoader
 
-                Component.onCompleted: tabView.currentIndex = 0
                 onCurrentIndexChanged: if (settingsLoaded)
                                            AppSettings.setValue("ui/dashSelect4", currentIndex)
             }

@@ -65,6 +65,30 @@ void ConnectionData::setEthernetStat(const QString &EthernetStat)
     emit EthernetStatChanged(m_EthernetStat);
 }
 
+void ConnectionData::setWifiBusy(bool wifiBusy)
+{
+    if (m_wifiBusy == wifiBusy)
+        return;
+    m_wifiBusy = wifiBusy;
+    emit wifiBusyChanged(m_wifiBusy);
+}
+
+void ConnectionData::setWifiLastError(const QString &wifiLastError)
+{
+    if (m_wifiLastError == wifiLastError)
+        return;
+    m_wifiLastError = wifiLastError;
+    emit wifiLastErrorChanged(m_wifiLastError);
+}
+
+void ConnectionData::setWifiLastActionMessage(const QString &wifiLastActionMessage)
+{
+    if (m_wifiLastActionMessage == wifiLastActionMessage)
+        return;
+    m_wifiLastActionMessage = wifiLastActionMessage;
+    emit wifiLastActionMessageChanged(m_wifiLastActionMessage);
+}
+
 // * Setters - Platform
 void ConnectionData::setPlatform(const QString &Platform)
 {
@@ -98,14 +122,6 @@ void ConnectionData::setecu(int ecu)
         return;
     m_ecu = ecu;
     emit ecuChanged(m_ecu);
-}
-
-void ConnectionData::setsupportedReg(int supportedReg)
-{
-    if (m_supportedReg == supportedReg)
-        return;
-    m_supportedReg = supportedReg;
-    emit supportedRegChanged(m_supportedReg);
 }
 
 // * Setters - Error state
@@ -143,27 +159,3 @@ void ConnectionData::setmusicpath(const QString &musicpath)
     emit musicpathChanged(m_musicpath);
 }
 
-// * Setters - Daemon/License
-/**
- * @brief Set the daemon license key for external daemon authentication
- * @param daemonlicense License key string
- */
-void ConnectionData::setdaemonlicense(const QString &daemonlicense)
-{
-    if (m_daemonlicense == daemonlicense)
-        return;
-    m_daemonlicense = daemonlicense;
-    emit daemonlicenseChanged(m_daemonlicense);
-}
-
-/**
- * @brief Set the Holley product ID for Holley EFI daemon connections
- * @param holleyproductid Product identifier string
- */
-void ConnectionData::setholleyproductid(const QString &holleyproductid)
-{
-    if (m_holleyproductid == holleyproductid)
-        return;
-    m_holleyproductid = holleyproductid;
-    emit holleyproductidChanged(m_holleyproductid);
-}

@@ -1,6 +1,6 @@
 # CMakeLists.txt for PowerTune Digital Dashboard
-# This CMake configuration mirrors the qmake .pro file and provides modern CMake support
-# for IDE tooling, clangd integration, and cross-platform builds.
+# Primary Qt 6 CMake build configuration for IDE tooling, local development,
+# and cross-platform builds.
 
 cmake_minimum_required(VERSION 3.16)
 
@@ -28,6 +28,7 @@ find_package(Qt6 REQUIRED COMPONENTS
     QuickControls2
     Network
     SerialBus
+    Multimedia
 )
 
 # * Optional ShaderTools - kept available for future Qt 6 effects
@@ -39,12 +40,14 @@ find_package(Qt6 COMPONENTS ShaderTools QUIET)
 # * Source files - Core
 set(CORE_SOURCES
     Core/connect.cpp
-    Core/dashboard.cpp
     Core/appsettings.cpp
     Core/PropertyRouter.cpp
     Core/SensorRegistry.cpp
     Core/DiagnosticsProvider.cpp
+    Core/DifferentialSensorCalc.cpp
     Core/ExBoardConfigManager.cpp
+    Core/DemoModeService.cpp
+    Core/UpdateManagerService.cpp
     Core/ScreenControlService.cpp
     Core/DashboardLockService.cpp
     Core/OverlayConfigDefaults.cpp
@@ -55,10 +58,7 @@ set(CORE_SOURCES
     Core/Models/AnalogInputs.cpp
     Core/Models/DigitalInputs.cpp
     Core/Models/ExpanderBoardData.cpp
-    Core/Models/ElectricMotorData.cpp
-    Core/Models/FlagsData.cpp
     Core/Models/TimingData.cpp
-    Core/Models/SensorData.cpp
     Core/Models/ConnectionData.cpp
     Core/Models/SettingsData.cpp
     Core/Models/CanFrameModel.cpp
@@ -66,12 +66,14 @@ set(CORE_SOURCES
 
 set(CORE_HEADERS
     Core/connect.h
-    Core/dashboard.h
     Core/appsettings.h
     Core/PropertyRouter.h
     Core/SensorRegistry.h
     Core/DiagnosticsProvider.h
+    Core/DifferentialSensorCalc.h
     Core/ExBoardConfigManager.h
+    Core/DemoModeService.h
+    Core/UpdateManagerService.h
     Core/ScreenControlService.h
     Core/DashboardLockService.h
     Core/OverlayConfigDefaults.h
@@ -83,13 +85,25 @@ set(CORE_HEADERS
     Core/Models/AnalogInputs.h
     Core/Models/DigitalInputs.h
     Core/Models/ExpanderBoardData.h
-    Core/Models/ElectricMotorData.h
-    Core/Models/FlagsData.h
     Core/Models/TimingData.h
-    Core/Models/SensorData.h
     Core/Models/ConnectionData.h
     Core/Models/SettingsData.h
     Core/Models/CanFrameModel.h
+)
+
+set(CAN_SOURCES
+    Can/CanStartupManager.cpp
+    Can/CanTransport.cpp
+    Can/CanManager.cpp
+    Can/Protocols/ExBoardCan.cpp
+)
+
+set(CAN_HEADERS
+    Can/CanInterface.h
+    Can/CanStartupManager.h
+    Can/CanTransport.h
+    Can/CanManager.h
+    Can/Protocols/ExBoardCan.h
 )
 
 # * Source files - Hardware interfaces
@@ -107,13 +121,8 @@ set(UTILS_SOURCES
     Utils/Calculations.cpp
     Utils/SteinhartCalculator.cpp
     Utils/CalibrationHelper.cpp
-    Utils/SignalSmoother.cpp
     Utils/downloadmanager.cpp
-    Utils/ParseGithubData.cpp
-    Utils/shcalc.cpp
-    Utils/textprogressbar.cpp
-    Utils/UDPReceiver.cpp
-    Utils/OverlayConfigManager.cpp
+    Utils/OverlayPositionManager.cpp
     Utils/ShiftIndicatorHelper.cpp
     Utils/wifiscanner.cpp
 )
@@ -123,13 +132,8 @@ set(UTILS_HEADERS
     Utils/Calculations.h
     Utils/SteinhartCalculator.h
     Utils/CalibrationHelper.h
-    Utils/SignalSmoother.h
     Utils/downloadmanager.h
-    Utils/ParseGithubData.h
-    Utils/shcalc.h
-    Utils/textprogressbar.h
-    Utils/UDPReceiver.h
-    Utils/OverlayConfigManager.h
+    Utils/OverlayPositionManager.h
     Utils/ShiftIndicatorHelper.h
     Utils/wifiscanner.h
 )
@@ -138,12 +142,14 @@ set(UTILS_HEADERS
 set(PROJECT_SOURCES
     main.cpp
     ${CORE_SOURCES}
+    ${CAN_SOURCES}
     ${HARDWARE_SOURCES}
     ${UTILS_SOURCES}
 )
 
 set(PROJECT_HEADERS
     ${CORE_HEADERS}
+    ${CAN_HEADERS}
     ${HARDWARE_HEADERS}
     ${UTILS_HEADERS}
 )
@@ -158,6 +164,7 @@ qt_add_executable(${PROJECT_NAME}
 # * Include directories
 target_include_directories(${PROJECT_NAME} PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}/Can
     ${CMAKE_CURRENT_SOURCE_DIR}/Core
     ${CMAKE_CURRENT_SOURCE_DIR}/Hardware
     ${CMAKE_CURRENT_SOURCE_DIR}/Utils
@@ -172,6 +179,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     Qt6::QuickControls2
     Qt6::Network
     Qt6::SerialBus
+    Qt6::Multimedia
 )
 
 # * PowerTune QML Sub-Modules
@@ -222,9 +230,15 @@ qt_policy(SET QTP0004 OLD)
         VERSION 1.0
         QML_FILES
             PowerTune/Core/Main.qml
-            PowerTune/Core/Intro.qml
+            PowerTune/Core/BootSplash.qml
             PowerTune/Core/SettingsManager.qml
             PowerTune/Core/ExBoardAnalog.qml
+            PowerTune/Core/AnalogChannelConfigPopup.qml
+            PowerTune/Core/BoardConfigSection.qml
+            PowerTune/Core/DigitalInputsSection.qml
+            PowerTune/Core/DiffSensorConfigPopup.qml
+            PowerTune/Core/GearSensorConfigPopup.qml
+            PowerTune/Core/SpeedSensorConfigPopup.qml
             PowerTune/Core/BrightnessPopUp.qml
         RESOURCE_PREFIX /qt/qml
         OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/qt/qml/PowerTune/Core
@@ -263,9 +277,7 @@ qt_policy(SET QTP0004 OLD)
             PowerTune/Settings/DashSelectorWidget.qml
             PowerTune/Settings/VehicleRPMSettings.qml
             PowerTune/Settings/NetworkSettings.qml
-            PowerTune/Settings/CanMonitor.qml
             PowerTune/Settings/DiagnosticsSettings.qml
-            PowerTune/Settings/HelpPage.qml
             PowerTune/Settings/WifiCountryList.qml
         RESOURCE_PREFIX /qt/qml
         OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/qt/qml/PowerTune/Settings
@@ -322,7 +334,6 @@ qt_policy(SET QTP0004 OLD)
         IMPORTS PowerTune.UI PowerTune.Gauges.Shared PowerTune.Gauges.RaceDash
         QML_FILES
             PowerTune/Dashboard/DashboardTheme.qml
-            PowerTune/Dashboard/UserDashboard.qml
             PowerTune/Dashboard/RaceDash.qml
             PowerTune/Dashboard/DraggableOverlay.qml
             PowerTune/Dashboard/OverlayConfigPopup.qml

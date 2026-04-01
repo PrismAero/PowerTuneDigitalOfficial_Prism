@@ -2,6 +2,7 @@
 #define SCREENCONTROLSERVICE_H
 
 #include <QObject>
+#include <QProcess>
 #include <QString>
 #include <QTimer>
 
@@ -22,6 +23,7 @@ class ScreenControlService : public QObject
     Q_PROPERTY(int nightPresetPercent READ nightPresetPercent WRITE setNightPresetPercent NOTIFY nightPresetPercentChanged)
     Q_PROPERTY(bool popupEnabled READ popupEnabled WRITE setPopupEnabled NOTIFY popupEnabledChanged)
     Q_PROPERTY(bool presetControlsVisible READ presetControlsVisible NOTIFY presetControlsVisibleChanged)
+    Q_PROPERTY(bool startupPopupVisible READ startupPopupVisible NOTIFY startupPopupVisibleChanged)
 
 public:
     enum class Backend { None, Sysfs, DdcUtil };
@@ -43,6 +45,7 @@ public:
     int nightPresetPercent() const;
     bool popupEnabled() const;
     bool presetControlsVisible() const { return m_presetControlsVisible; }
+    bool startupPopupVisible() const { return m_startupPopupVisible; }
     Backend backend() const { return m_backend; }
 
     Q_INVOKABLE void detectBackend();
@@ -70,9 +73,11 @@ signals:
     void nightPresetPercentChanged(int percent);
     void popupEnabledChanged(bool enabled);
     void presetControlsVisibleChanged(bool visible);
+    void startupPopupVisibleChanged(bool visible);
 
 private slots:
     void onOverrideTimeout();
+    void onDdcProbeFinished(int exitCode, QProcess::ExitStatus status);
 
 private:
     int clampPercent(int percent) const;
@@ -84,6 +89,7 @@ private:
     void writeHardwareBrightness(int value);
     void applyPreset(const QString &presetName, bool persistSelection);
     QString lastPreset() const;
+    void refreshStartupPopupVisible();
 
     AppSettings *m_appSettings = nullptr;
     UIState *m_uiState = nullptr;
@@ -92,7 +98,9 @@ private:
     QString m_lastError;
     int m_currentBrightnessPercent = 100;
     bool m_presetControlsVisible = false;
+    bool m_startupPopupVisible = false;
     QTimer m_overrideTimer;
+    QProcess *m_ddcProbe = nullptr;
 };
 
 #endif  // SCREENCONTROLSERVICE_H

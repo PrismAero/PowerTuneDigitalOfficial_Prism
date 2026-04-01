@@ -6,7 +6,8 @@ Rectangle {
     id: root
 
     property string categoryFilter: ""
-    property string filterMode: "all"
+    property bool expanded: false
+    property string filterMode: "active"
     property string searchText: ""
     property string selectedKey: ""
 
@@ -35,26 +36,72 @@ Rectangle {
         }
     }
 
+    function selectedDisplayName() {
+        if (selectedKey === "")
+            return "None";
+        var name = SensorRegistry.getDisplayName(selectedKey);
+        return name ? name : selectedKey;
+    }
+
+    function selectedUnit() {
+        if (selectedKey === "")
+            return "";
+        return SensorRegistry.getUnit(selectedKey) || "";
+    }
+
     Layout.fillWidth: true
     border.color: SettingsTheme.border
     border.width: SettingsTheme.borderWidth
     color: SettingsTheme.surface
-    implicitHeight: 420
+    implicitHeight: expanded ? 460 : collapsedRow.implicitHeight + (SettingsTheme.sectionPadding * 2)
     radius: SettingsTheme.radiusLarge
 
-    Component.onCompleted: refresh()
-    onCategoryFilterChanged: refresh()
-    onFilterModeChanged: refresh()
-    onSearchTextChanged: refresh()
+    Behavior on implicitHeight {
+        NumberAnimation {
+            duration: 150
+            easing.type: Easing.OutQuad
+        }
+    }
+
+    Component.onCompleted: {
+        if (expanded)
+            refresh();
+    }
+    onCategoryFilterChanged: {
+        if (expanded)
+            refresh();
+    }
+    onExpandedChanged: {
+        if (expanded)
+            refresh();
+    }
+    onFilterModeChanged: {
+        if (expanded)
+            refresh();
+    }
+    onSearchTextChanged: {
+        if (expanded)
+            refresh();
+    }
 
     ListModel {
         id: filteredModel
+    }
 
+    Timer {
+        id: sensorsChangedDebounce
+        interval: 50
+        repeat: false
+        onTriggered: {
+            if (root.expanded)
+                root.refresh()
+        }
     }
 
     Connections {
         function onSensorsChanged() {
-            root.refresh();
+            if (root.expanded)
+                sensorsChangedDebounce.restart();
         }
 
         target: SensorRegistry
@@ -66,8 +113,50 @@ Rectangle {
         spacing: SettingsTheme.contentSpacing
 
         RowLayout {
+            id: collapsedRow
+
+            Layout.fillWidth: true
+            spacing: 8
+
+            Rectangle {
+                color: root.selectedKey !== "" ? SettingsTheme.success : SettingsTheme.textDisabled
+                height: SettingsTheme.statusDotSize
+                radius: SettingsTheme.statusDotSize / 2
+                width: SettingsTheme.statusDotSize
+            }
+
+            Text {
+                Layout.fillWidth: true
+                color: root.selectedKey !== "" ? SettingsTheme.textPrimary : SettingsTheme.textDisabled
+                elide: Text.ElideRight
+                font.family: SettingsTheme.fontFamily
+                font.pixelSize: SettingsTheme.fontControl
+                font.weight: Font.DemiBold
+                text: root.selectedDisplayName()
+            }
+
+            Text {
+                color: SettingsTheme.textSecondary
+                font.family: SettingsTheme.fontFamily
+                font.pixelSize: SettingsTheme.fontCaption
+                text: root.selectedUnit()
+                visible: text.length > 0
+            }
+
+            StyledButton {
+                implicitHeight: 30
+                implicitWidth: 80
+                primary: root.expanded
+                text: root.expanded ? "Done" : "Change"
+
+                onClicked: root.expanded = !root.expanded
+            }
+        }
+
+        RowLayout {
             Layout.fillWidth: true
             spacing: 6
+            visible: root.expanded
 
             StyledButton {
                 implicitWidth: 60
@@ -103,6 +192,7 @@ Rectangle {
             inputMethodHints: Qt.ImhNoPredictiveText
             placeholderText: "Search sensors..."
             text: root.searchText
+            visible: root.expanded
 
             onTextChanged: root.searchText = text
         }
@@ -110,7 +200,7 @@ Rectangle {
         Flow {
             Layout.fillWidth: true
             spacing: 4
-            visible: root.filterMode === "category"
+            visible: root.expanded && root.filterMode === "category"
 
             Repeater {
                 model: SensorRegistry.availableCategories
@@ -135,6 +225,7 @@ Rectangle {
             clip: true
             model: filteredModel
             section.property: "category"
+            visible: root.expanded
 
             ScrollBar.vertical: ScrollBar {
                 minimumSize: 0.1
@@ -195,6 +286,7 @@ Rectangle {
                     onClicked: {
                         root.selectedKey = model.sensorKey;
                         root.sensorSelected(model.sensorKey, model.displayName, model.unit);
+                        root.expanded = false;
                     }
                 }
             }

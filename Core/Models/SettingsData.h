@@ -60,6 +60,7 @@ class SettingsData : public QObject
     // * External speed/rpm
     Q_PROPERTY(int ExternalSpeed READ ExternalSpeed WRITE setExternalSpeed NOTIFY ExternalSpeedChanged)
     Q_PROPERTY(int Externalrpm READ Externalrpm WRITE setExternalrpm NOTIFY ExternalrpmChanged)
+    Q_PROPERTY(bool gearSourceExpander READ gearSourceExpander WRITE setGearSourceExpander NOTIFY gearSourceExpanderChanged)
 
     // * Speed configuration
     Q_PROPERTY(qreal speedpercent READ speedpercent WRITE setspeedpercent NOTIFY speedpercentChanged)
@@ -115,6 +116,7 @@ public:
     // * Getters - External speed/rpm
     int ExternalSpeed() const { return m_ExternalSpeed; }
     int Externalrpm() const { return m_Externalrpm; }
+    bool gearSourceExpander() const { return m_gearSourceExpander; }
 
     // * Getters - Speed configuration
     qreal speedpercent() const { return m_speedpercent; }
@@ -167,6 +169,7 @@ public slots:
     // * Setters - External speed/rpm
     void setExternalSpeed(int ExternalSpeed);
     void setExternalrpm(int Externalrpm);
+    void setGearSourceExpander(bool enabled);
 
     // * Setters - Speed configuration
     void setspeedpercent(qreal speedpercent);
@@ -219,6 +222,7 @@ signals:
     // * Signals - External speed/rpm
     void ExternalSpeedChanged(int ExternalSpeed);
     void ExternalrpmChanged(int Externalrpm);
+    void gearSourceExpanderChanged(bool enabled);
 
     // * Signals - Speed configuration
     void speedpercentChanged(qreal speedpercent);
@@ -271,6 +275,7 @@ private:
     // * External speed/rpm
     int m_ExternalSpeed = 0;
     int m_Externalrpm = 0;
+    bool m_gearSourceExpander = false;
 
     // * Speed configuration
     qreal m_speedpercent = 0;

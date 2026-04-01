@@ -2,10 +2,12 @@
 #define APPSETTINGS_H
 
 #include <QObject>
+#include <QSettings>
+#include <QTimer>
 #include <QVariant>
 #include <QVariantMap>
+#include <QHash>
 
-class DashBoard;
 class SettingsData;
 class UIState;
 class VehicleData;
@@ -24,8 +26,7 @@ class AppSettings : public QObject
 public:
     ~AppSettings() override;
     explicit AppSettings(QObject *parent = nullptr);
-    explicit AppSettings(DashBoard *dashboard, QObject *parent = nullptr);
-    explicit AppSettings(DashBoard *dashboard, SettingsData *settingsData, UIState *uiState, VehicleData *vehicleData,
+    explicit AppSettings(SettingsData *settingsData, UIState *uiState, VehicleData *vehicleData,
                          AnalogInputs *analogInputs, ExpanderBoardData *expanderBoardData, EngineData *engineData,
                          ConnectionData *connectionData, DigitalInputs *digitalInputs, QObject *parent = nullptr);
 
@@ -108,13 +109,12 @@ public:
     Q_INVOKABLE void writeDashboardLockEnabled(bool enabled);
     Q_INVOKABLE void writeRPMFrequencySettings(const qreal &Divider, const int &DI1isRPM);
     Q_INVOKABLE void writeExternalrpm(const int checked);
+    Q_INVOKABLE void writeRpmSource(int source);
     Q_INVOKABLE void writeLanguage(const int Language);
     Q_INVOKABLE void writeStartupSettings(const int &ExternalSpeed);
-    Q_INVOKABLE void writeDaemonLicenseKey(const QString &DaemonLicenseKey);
-    Q_INVOKABLE void writeHolleyProductID(const QString &HolleyProductID);
-    Q_INVOKABLE QString getDaemonActivationKey();
     void setExtender(Extender *extender);
     void setSteinhartCalculator(SteinhartCalculator *calc);
+    void applyEXBoardCalibration(const QVariantList &channels);
     Q_INVOKABLE void readandApplySettings();
 
     // * Expander board sensor configs (gear position, speed)
@@ -129,10 +129,14 @@ public:
     // Overlay config persistence (per-dashboard, per-overlay instance)
     Q_INVOKABLE void saveOverlayConfig(const QString &dashboardId, const QString &overlayId, const QVariantMap &config);
     Q_INVOKABLE QVariantMap loadOverlayConfig(const QString &dashboardId, const QString &overlayId);
+    Q_INVOKABLE QVariantMap loadOverlayConfigs(const QString &dashboardId, const QStringList &overlayIds);
     Q_INVOKABLE void removeOverlayConfig(const QString &dashboardId, const QString &overlayId);
 
 private:
-    DashBoard *m_dashboard;
+    void preloadCache();
+    void scheduleSync();
+    void flushToDisk();
+
     SettingsData *m_settingsData;
     UIState *m_uiState;
     VehicleData *m_vehicleData;
@@ -143,6 +147,11 @@ private:
     DigitalInputs *m_digitalInputs;
     Extender *m_extender = nullptr;
     SteinhartCalculator *m_steinhartCalc = nullptr;
+    mutable QSettings m_settings;
+    mutable QHash<QString, QVariant> m_cache;
+    QTimer m_syncTimer;
+    bool m_cacheLoaded = false;
+    bool m_dirty = false;
 };
 
 #endif  // APPSETTINGS_H

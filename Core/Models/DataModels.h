@@ -20,10 +20,7 @@ class GPSData;
 class AnalogInputs;
 class DigitalInputs;
 class ExpanderBoardData;
-class ElectricMotorData;
-class FlagsData;
 class TimingData;
-class SensorData;
 class ConnectionData;
 class SettingsData;
 
@@ -31,12 +28,9 @@ class SettingsData;
 #include "AnalogInputs.h"
 #include "ConnectionData.h"
 #include "DigitalInputs.h"
-#include "ElectricMotorData.h"
 #include "EngineData.h"
 #include "ExpanderBoardData.h"
-#include "FlagsData.h"
 #include "GPSData.h"
-#include "SensorData.h"
 #include "SettingsData.h"
 #include "TimingData.h"
 #include "UIState.h"

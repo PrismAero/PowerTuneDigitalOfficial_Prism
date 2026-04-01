@@ -30,14 +30,11 @@
 #include <QTimer>
 
 
-class DashBoard;
 class datalogger;
 class calculations;
 class AppSettings;
-class udpreceiver;
 class WifiScanner;
 class Extender;
-// * Data Models (Phase 2 & 3 - Modularization)
 class UIState;
 class EngineData;
 class VehicleData;
@@ -45,29 +42,27 @@ class GPSData;
 class AnalogInputs;
 class DigitalInputs;
 class ExpanderBoardData;
-class ElectricMotorData;
-class FlagsData;
 class TimingData;
-class SensorData;
 class ConnectionData;
 class SettingsData;
-// * PropertyRouter for dynamic QML property access
 class PropertyRouter;
-// * Phase 6: Sensor calibration
 class SteinhartCalculator;
 class CalibrationHelper;
-// * Phase 7: Sensor registry
 class SensorRegistry;
-// * Phase 8: Diagnostics provider
 class DiagnosticsProvider;
-// * Overlay configuration persistence
-class OverlayConfigManager;
+class OverlayPositionManager;
 class ShiftIndicatorHelper;
 class CanFrameModel;
+class DifferentialSensorCalc;
 class ExBoardConfigManager;
 class OverlayConfigDefaults;
 class ScreenControlService;
 class DashboardLockService;
+class DemoModeService;
+class UpdateManagerService;
+class CanStartupManager;
+class CanTransport;
+class CanManager;
 
 class Connect : public QObject
 {
@@ -111,12 +106,7 @@ public:
     Q_INVOKABLE void setOdometer(const qreal &Odometer);
     Q_INVOKABLE void qmlTreeviewclicked(const QModelIndex &index);
     Q_INVOKABLE void clear() const;
-    Q_INVOKABLE void checkReg();
-    Q_INVOKABLE void checkOBDReg();
-    Q_INVOKABLE void LiveReqMsgOBD(const QString &obdpids);
-    Q_INVOKABLE void daemonstartup(const int &daemon);
     Q_INVOKABLE void canbitratesetup(const int &cansetting);
-    Q_INVOKABLE void LiveReqMsg(const QVariantList &values);
     Q_INVOKABLE void openConnection(const QString &portName, const int &ecuSelect, const int &canbase,
                                     const int &rpmcanbase);
     Q_INVOKABLE void closeConnection();
@@ -125,24 +115,20 @@ public:
     Q_INVOKABLE void shutdown();
     Q_INVOKABLE void reboot();
     Q_INVOKABLE void turnscreen();
-    Q_INVOKABLE void candump();
-    Q_INVOKABLE void minicom();
-    Q_INVOKABLE void RequestLicence();
-    Q_INVOKABLE void restartDaemon();
 
 
 public:
     QStringList portsNames() const { return m_portsNames; }
 
 private:
-    DashBoard *m_dashBoard;
+    int canBitrateForSelection(int selection) const;
+    bool startActiveCanModule();
+
     AppSettings *m_appSettings;
-    udpreceiver *m_udpreceiver;
     datalogger *m_datalogger;
     calculations *m_calculations;
     QStringList m_portsNames;
     QStringList *m_ecuList;
-    QProcess process;
     QFileSystemModel *dirModel;
     QFileSystemModel *fileModel;
     WifiScanner *m_wifiscanner;
@@ -155,29 +141,27 @@ private:
     AnalogInputs *m_analogInputs;
     DigitalInputs *m_digitalInputs;
     ExpanderBoardData *m_expanderBoardData;
-    ElectricMotorData *m_electricMotorData;
-    FlagsData *m_flagsData;
     TimingData *m_timingData;
-    SensorData *m_sensorData;
     ConnectionData *m_connectionData;
     SettingsData *m_settingsData;
-    // * PropertyRouter for dynamic QML property access
     PropertyRouter *m_propertyRouter;
-    // * Phase 6: Sensor calibration helpers
     SteinhartCalculator *m_steinhartCalc;
     CalibrationHelper *m_calibrationHelper;
-    // * Phase 7: Sensor registry
     SensorRegistry *m_sensorRegistry;
-    // * Phase 8: Diagnostics provider
     DiagnosticsProvider *m_diagnosticsProvider;
-    // * Overlay configuration persistence
-    OverlayConfigManager *m_overlayConfigManager;
+    OverlayPositionManager *m_overlayConfigManager;
     ShiftIndicatorHelper *m_shiftIndicatorHelper;
     CanFrameModel *m_canFrameModel;
+    DifferentialSensorCalc *m_differentialSensorCalc;
     ExBoardConfigManager *m_exBoardConfigManager;
     OverlayConfigDefaults *m_overlayConfigDefaults;
     ScreenControlService *m_screenControlService;
     DashboardLockService *m_dashboardLockService;
+    DemoModeService *m_demoModeService;
+    UpdateManagerService *m_updateManagerService;
+    CanStartupManager *m_canStartupManager;
+    CanTransport *m_canTransport;
+    CanManager *m_canManager;
     BrightnessMethod m_brightnessMethod = BrightnessMethod::None;
 
     int m_ecu = 0;
@@ -193,9 +177,10 @@ private:
 
 signals:
     void sig_portsNamesChanged(QStringList portsNames);
+    void connectionOpenResult(bool success, const QString &message);
+    void connectionStateChanged(bool connected, const QString &statusMessage);
 
 public slots:
-    void updatefinished(int exitCode, QProcess::ExitStatus exitStatus);
     void setPortsNames(QStringList portsNames)
     {
         if (m_portsNames == portsNames)
@@ -204,7 +189,6 @@ public slots:
         m_portsNames = portsNames;
         emit sig_portsNamesChanged(portsNames);
     }
-    void processOutput();
 };
 
 

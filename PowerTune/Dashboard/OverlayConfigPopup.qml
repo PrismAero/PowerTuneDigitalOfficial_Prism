@@ -6,48 +6,12 @@ import PowerTune.UI 1.0
 Popup {
     id: popup
 
-    property string arcColorEnd: "#B00000"
-    property string arcColorMid: "#FF8A00"
-    property real arcColorMidPos: 0.65
-    property string arcColorStart: "#8F4D17"
-    property real arcOffsetX: 5
-    property real arcOffsetY: 0
-    property real arcScale: 0.945
-    property real arcWidth: 0.285
     property string configType: ""
     property var currentConfig: ({})
     property string dashboardId: "racedash"
-    property int decimals: 0
-    property real endAngle: 56
-    property real endTaper: 0.18
-    property int gearFontSize: 140
-    property real gearHeight: 117
-    property real gearOffsetX: 0
-    property real gearOffsetY: 0
+    property string overlayId: ""
 
-    // Gear
-    property string gearSensorKey: "Gear"
-    property string gearTextColor: "#FFFFFF"
-    property real gearWidth: 168
-    readonly property bool hasArcAlignment: isArc
-    readonly property bool hasArcColors: isArc
-    readonly property bool hasArcGeometry: isArc
-    readonly property bool hasArcOverlaySize: configType === "tachCluster" || configType === "speedCluster"
-    readonly property bool hasBiasLabels: isBrakeBias
-    // Section visibility flags
-    readonly property bool hasDatasource: isArc || isGear || isSensor || isStatus || isBrakeBias
-    readonly property bool hasGearConfig: isGear || isTachCluster
-    readonly property bool hasLabel: isSensor || isStatus
-    readonly property bool hasReadoutConfig: isCluster
-    readonly property bool hasShiftConfig: isShift
-    readonly property bool hasStaticText: isBottomBar
-    readonly property bool hasStatusConfig: isStatus
-    readonly property bool hasUnitDecimals: isArc || isSensor
-    readonly property bool hasValueRange: isArc || isBrakeBias
-    readonly property bool hasWarning: isArc || isSensor || isShift
-    property bool invertLogic: false
-
-    // -- Config type classification --
+    // Config type classification
     readonly property bool isArc: configType === "tachCluster" || configType === "speedCluster"
     readonly property bool isBottomBar: configType === "bottombar"
     readonly property bool isBrakeBias: configType === "brakebias"
@@ -58,66 +22,90 @@ Popup {
     readonly property bool isStatus: configType === "statusRow"
     readonly property bool isTachCluster: configType === "tachCluster"
 
-    // Labels
+    // Section visibility flags
+    readonly property bool hasArcAlignment: isArc
+    readonly property bool hasArcColors: isArc
+    readonly property bool hasArcGeometry: isArc
+    readonly property bool hasArcOverlaySize: configType === "tachCluster" || configType === "speedCluster"
+    readonly property bool hasBiasLabels: isBrakeBias
+    readonly property bool hasDatasource: isArc || isGear || isSensor || isStatus || isBrakeBias
+    readonly property bool hasGearConfig: isGear || isTachCluster
+    readonly property bool hasLabel: isSensor || isStatus
+    readonly property bool hasReadoutConfig: isCluster
+    readonly property bool hasShiftConfig: isShift
+    readonly property bool hasStaticText: isBottomBar
+    readonly property bool hasStatusConfig: isStatus
+    readonly property bool hasUnitDecimals: isArc || isSensor
+    readonly property bool hasValueRange: isArc || isBrakeBias
+    readonly property bool hasWarning: isArc || isSensor || isShift
+
+    // Editable config fields -- all populated by populateFromConfig() from OverlayDefaults
+    property string sensorKey: ""
     property string labelText: ""
-
-    // Brake bias labels
-    property string leftLabel: "RWD"
-    property real maxValue: 100
-
-    // Value range
+    property string unitText: ""
+    property string staticText: ""
     property real minValue: 0
-    property real minimumVisibleFraction: 0.08
-    property string normalColor: "#FFFFFF"
-    property string offColor: "#FF0909"
-    property string onColor: "#1ED033"
-
-    // -- Public interface --
-    property string overlayId: ""
-
-    // Race dash arc settings
+    property real maxValue: 0
+    property int decimals: 0
     property real overlaySize: 0
+    property real startAngle: 0
+    property real endAngle: 0
+    property real arcWidth: 0
+    property real arcScale: 0
+    property real arcOffsetX: 0
+    property real arcOffsetY: 0
+    property real minimumVisibleFraction: 0
+    property real startTaper: 0
+    property real endTaper: 0
+    property bool testLoopEnabled: false
+    property int testLoopDuration: 0
+    property string arcColorStart: ""
+    property string arcColorMid: ""
+    property real arcColorMidPos: 0
+    property string arcColorEnd: ""
+    property real valueOffsetY: 0
     property real readoutOffsetX: 0
     property real readoutOffsetY: 0
-    property real readoutSpacing: 0
-    property real readoutStep: 1
-    property string readoutTextColor: "#FFFFFF"
-    property real readoutUnitScale: 0.076
-    property real readoutValueScale: 0.213
-    property string rightLabel: "FWD"
-
-    // -- Editable config fields --
-    // Datasource
-    property string sensorKey: ""
-    property int shiftCount: 11
-    property string shiftPattern: "center-out"
-
-    // Shift
-    property real shiftPoint: 0.75
-    property real startAngle: 225
-    property real startTaper: 0.18
-    property string staticText: ""
-    property real suffixFontSize: 52.505
-    property int testLoopDuration: 1800
-    property bool testLoopEnabled: false
-
-    // Status
-    property real threshold: 0.5
-
-    // Bottom bar
-    property bool timeEnabled: true
+    property real readoutStep: 0
+    property real readoutValueScale: 0
+    property real readoutUnitScale: 0
     property real unitOffsetX: 0
     property real unitOffsetY: 0
-    property string unitText: ""
-    property real valueOffsetY: 0
-    property string warningColor: "#FF0000"
-    property string warningDirection: "above"
-
-    // Warning
+    property real readoutSpacing: 0
+    property string readoutTextColor: ""
     property bool warningEnabled: false
-    property bool warningFlash: true
-    property int warningFlashRate: 200
     property real warningThreshold: 0
+    property string warningColor: ""
+    property bool warningFlash: false
+    property int warningFlashRate: 0
+    property string warningDirection: ""
+    property string normalColor: ""
+    property real threshold: 0
+    property string onColor: ""
+    property string offColor: ""
+    property bool invertLogic: false
+    property string gearSensorKey: ""
+    property string gearTextColor: ""
+    property int gearFontSize: 0
+    property real suffixFontSize: 0
+    property real gearOffsetX: 0
+    property real gearOffsetY: 0
+    property real gearWidth: 0
+    property real gearHeight: 0
+    property real shiftPoint: 0
+    property int shiftCount: 0
+    property string shiftPattern: ""
+    property string leftLabel: ""
+    property string rightLabel: ""
+    property bool biasShowSideValues: false
+    property bool biasShowCenterValue: true
+    property string biasValueUnit: ""
+    property int biasValueDecimals: 1
+    property real biasDampingMultiplier: 1.0
+    property bool biasMarkerEnabled: true
+    property string biasMarkerColor: "#00C8FF"
+    property real biasMarkerWidth: 2.0
+    property bool timeEnabled: false
 
     signal configChanged(string overlayId)
 
@@ -125,7 +113,7 @@ Popup {
         var config = {};
 
         if (hasDatasource)
-            config.sensorKey = sensorKey;
+            config.sensorKey = normalizeAnalogSensorKey(sensorKey);
 
         if (hasLabel)
             config.label = labelText;
@@ -196,7 +184,7 @@ Popup {
         }
 
         if (hasGearConfig) {
-            config.gearKey = gearSensorKey;
+            config.gearKey = normalizeAnalogSensorKey(gearSensorKey);
             config.gearTextColor = gearTextColor;
             config.gearFontSize = gearFontSize;
             config.suffixFontSize = suffixFontSize;
@@ -215,6 +203,14 @@ Popup {
         if (hasBiasLabels) {
             config.leftLabel = leftLabel;
             config.rightLabel = rightLabel;
+            config.showSideValues = biasShowSideValues;
+            config.showCenterValue = biasShowCenterValue;
+            config.valueUnit = biasValueUnit;
+            config.valueDecimals = biasValueDecimals;
+            config.dampingMultiplier = biasDampingMultiplier;
+            config.markerEnabled = biasMarkerEnabled;
+            config.markerColor = biasMarkerColor;
+            config.markerWidth = biasMarkerWidth;
         }
 
         if (hasStaticText) {
@@ -231,77 +227,8 @@ Popup {
         return false;
     }
 
-    function defaultArcConfigFor(type) {
-        if (type === "speedCluster") {
-            return {
-                startAngle: 225,
-                endAngle: 315,
-                arcWidth: 0.285,
-                arcScale: 0.945,
-                arcOffsetX: 5,
-                arcOffsetY: 0,
-                minimumVisibleFraction: 0.08,
-                startTaper: 0.28,
-                endTaper: 0.24,
-                testLoopEnabled: false,
-                testLoopDuration: 1800,
-                arcColorStart: "#7A0D0D",
-                arcColorMid: "#E11B1B",
-                arcColorMidPos: 0.62,
-                arcColorEnd: "#B00000",
-                readoutTextColor: "#FFFFFF",
-                readoutStep: 1,
-                readoutOffsetX: 0,
-                readoutOffsetY: 62,
-                readoutValueScale: 0.213,
-                readoutUnitScale: 0.076,
-                unitOffsetX: 14,
-                unitOffsetY: -2,
-                readoutSpacing: -1,
-                valueOffsetY: 62
-            };
-        }
-
-        return {
-            startAngle: 225,
-            endAngle: 56,
-            arcWidth: 0.285,
-            arcScale: 0.945,
-            arcOffsetX: 5,
-            arcOffsetY: 0,
-            minimumVisibleFraction: 0.08,
-            startTaper: 0.18,
-            endTaper: 0.18,
-            testLoopEnabled: false,
-            testLoopDuration: 1800,
-            arcColorStart: "#8F4D17",
-            arcColorMid: "#FF8A00",
-            arcColorMidPos: 0.65,
-            arcColorEnd: "#B00000",
-            readoutTextColor: "#FFFFFF",
-            readoutStep: 1,
-            readoutOffsetX: 0,
-            readoutOffsetY: 94,
-            readoutValueScale: 0.213,
-            readoutUnitScale: 0.076,
-            unitOffsetX: 34,
-            unitOffsetY: -2,
-            readoutSpacing: -2,
-            gearOffsetX: 21.5,
-            gearOffsetY: -76,
-            gearWidth: 168,
-            gearHeight: 117,
-            suffixFontSize: 52.505,
-            valueOffsetY: 94
-        };
-    }
-
-    function defaultOverlaySizeFor(type) {
-        if (type === "tachCluster")
-            return 575.051;
-        if (type === "speedCluster")
-            return 503.17;
-        return 0;
+    function getDefaults() {
+        return OverlayDefaults.defaultsFor(overlayId);
     }
 
     function doReset() {
@@ -319,6 +246,18 @@ Popup {
 
     function num(val, def) {
         return val !== undefined ? Number(val) : def;
+    }
+
+    function normalizeAnalogSensorKey(key) {
+        if (key === undefined || key === null)
+            return "";
+
+        var trimmed = String(key).trim();
+        var match = trimmed.match(/^EXAnalogInput([0-7])$/);
+        if (match && match.length === 2)
+            return "EXAnalogCalc" + match[1];
+
+        return trimmed;
     }
 
     // -- Public API --
@@ -340,97 +279,92 @@ Popup {
 
     function populateFromConfig() {
         var cfg = currentConfig;
-        var arcDefaults = defaultArcConfigFor(configType);
+        var defs = getDefaults();
 
-        // Datasource
-        sensorKey = cfg.sensorKey || "";
+        sensorKey = normalizeAnalogSensorKey(cfg.sensorKey || defs.sensorKey || "");
 
-        // Labels
-        labelText = cfg.label || "";
-        unitText = cfg.unit || "";
-        staticText = cfg.text || "";
+        labelText = cfg.label || defs.label || "";
+        unitText = cfg.unit || defs.unit || "";
+        staticText = cfg.text || defs.text || "";
 
-        // Value range
-        minValue = num(cfg.minValue, 0);
-        maxValue = num(cfg.maxValue, 100);
-        decimals = num(cfg.decimals, 0);
+        minValue = num(cfg.minValue, num(defs.minValue, 0));
+        maxValue = num(cfg.maxValue, num(defs.maxValue, 100));
+        decimals = num(cfg.decimals, num(defs.decimals, 0));
 
+        var defSize = num(defs.overlaySize, 0);
         var rawOverlaySize = num(cfg.overlaySize, 0);
-        if (configType === "tachCluster" || configType === "speedCluster") {
-            overlaySize = rawOverlaySize > 0 ? rawOverlaySize : defaultOverlaySizeFor(configType);
-        } else {
-            overlaySize = rawOverlaySize > 0 ? rawOverlaySize : 0;
-        }
+        overlaySize = rawOverlaySize > 0 ? rawOverlaySize : defSize;
 
-        startAngle = num(cfg.startAngle, arcDefaults.startAngle);
-        endAngle = num(cfg.endAngle, arcDefaults.endAngle);
-        arcWidth = num(cfg.arcWidth, arcDefaults.arcWidth);
-        arcScale = num(cfg.arcScale, arcDefaults.arcScale);
-        arcOffsetX = num(cfg.arcOffsetX, arcDefaults.arcOffsetX);
-        arcOffsetY = num(cfg.arcOffsetY, arcDefaults.arcOffsetY);
-        minimumVisibleFraction = num(cfg.minimumVisibleFraction, arcDefaults.minimumVisibleFraction);
-        startTaper = num(cfg.startTaper, arcDefaults.startTaper);
-        endTaper = num(cfg.endTaper, arcDefaults.endTaper);
+        startAngle = num(cfg.startAngle, num(defs.startAngle, 225));
+        endAngle = num(cfg.endAngle, num(defs.endAngle, 400));
+        arcWidth = num(cfg.arcWidth, num(defs.arcWidth, 0.32));
+        arcScale = num(cfg.arcScale, num(defs.arcScale, 1));
+        arcOffsetX = num(cfg.arcOffsetX, num(defs.arcOffsetX, 0));
+        arcOffsetY = num(cfg.arcOffsetY, num(defs.arcOffsetY, 0));
+        minimumVisibleFraction = num(cfg.minimumVisibleFraction, num(defs.minimumVisibleFraction, 0));
+        startTaper = num(cfg.startTaper, num(defs.startTaper, 0.18));
+        endTaper = num(cfg.endTaper, num(defs.endTaper, 0.18));
 
         if (cfg.testLoopEnabled !== undefined)
             testLoopEnabled = toBool(cfg.testLoopEnabled, false);
         else
-            testLoopEnabled = toBool(cfg.alignmentOverrideEnabled, false);
+            testLoopEnabled = toBool(cfg.alignmentOverrideEnabled, toBool(defs.testLoopEnabled, false));
 
-        testLoopDuration = num(cfg.testLoopDuration, arcDefaults.testLoopDuration);
-        arcColorStart = cfg.arcColorStart || arcDefaults.arcColorStart;
-        arcColorMid = cfg.arcColorMid || arcDefaults.arcColorMid;
-        arcColorMidPos = num(cfg.arcColorMidPos, arcDefaults.arcColorMidPos);
-        arcColorEnd = cfg.arcColorEnd || arcDefaults.arcColorEnd;
-        valueOffsetY = num(cfg.valueOffsetY, arcDefaults.valueOffsetY);
-        readoutOffsetX = num(cfg.readoutOffsetX, arcDefaults.readoutOffsetX);
+        testLoopDuration = num(cfg.testLoopDuration, num(defs.testLoopDuration, 1800));
+        arcColorStart = cfg.arcColorStart || defs.arcColorStart || "#8F4D17";
+        arcColorMid = cfg.arcColorMid || defs.arcColorMid || "";
+        arcColorMidPos = num(cfg.arcColorMidPos, num(defs.arcColorMidPos, 0.65));
+        arcColorEnd = cfg.arcColorEnd || defs.arcColorEnd || "#B00000";
+        valueOffsetY = num(cfg.valueOffsetY, num(defs.valueOffsetY, 0));
+        readoutOffsetX = num(cfg.readoutOffsetX, num(defs.readoutOffsetX, 0));
         readoutOffsetY = num(cfg.readoutOffsetY, cfg.valueOffsetY !== undefined ? num(cfg.valueOffsetY, 0) :
-                                                                                  arcDefaults.readoutOffsetY);
-        readoutStep = num(cfg.readoutStep, arcDefaults.readoutStep);
-        readoutValueScale = num(cfg.readoutValueScale, arcDefaults.readoutValueScale);
-        readoutUnitScale = num(cfg.readoutUnitScale, arcDefaults.readoutUnitScale);
-        unitOffsetX = num(cfg.unitOffsetX, arcDefaults.unitOffsetX);
-        unitOffsetY = num(cfg.unitOffsetY, arcDefaults.unitOffsetY);
-        readoutSpacing = num(cfg.readoutSpacing, arcDefaults.readoutSpacing);
-        readoutTextColor = cfg.readoutTextColor || arcDefaults.readoutTextColor;
+                                                                                  num(defs.readoutOffsetY, 0));
+        readoutStep = num(cfg.readoutStep, num(defs.readoutStep, 1));
+        readoutValueScale = num(cfg.readoutValueScale, num(defs.readoutValueScale, 0.213));
+        readoutUnitScale = num(cfg.readoutUnitScale, num(defs.readoutUnitScale, 0.076));
+        unitOffsetX = num(cfg.unitOffsetX, num(defs.unitOffsetX, 0));
+        unitOffsetY = num(cfg.unitOffsetY, num(defs.unitOffsetY, 0));
+        readoutSpacing = num(cfg.readoutSpacing, num(defs.readoutSpacing, 0));
+        readoutTextColor = cfg.readoutTextColor || defs.readoutTextColor || "#FFFFFF";
 
-        // Warning
-        warningEnabled = toBool(cfg.warningEnabled, false);
-        warningThreshold = num(cfg.warningThreshold, 0);
-        warningColor = cfg.warningColor || "#FF0000";
-        warningFlash = toBool(cfg.warningFlash, true);
-        warningFlashRate = num(cfg.warningFlashRate, 200);
-        warningDirection = cfg.warningDirection || "above";
-        normalColor = cfg.normalColor || "#FFFFFF";
+        warningEnabled = toBool(cfg.warningEnabled, toBool(defs.warningEnabled, false));
+        warningThreshold = num(cfg.warningThreshold, num(defs.warningThreshold, 0));
+        warningColor = cfg.warningColor || defs.warningColor || "#FF0000";
+        warningFlash = toBool(cfg.warningFlash, toBool(defs.warningFlash, true));
+        warningFlashRate = num(cfg.warningFlashRate, num(defs.warningFlashRate, 200));
+        warningDirection = cfg.warningDirection || defs.warningDirection || "above";
+        normalColor = cfg.normalColor || defs.normalColor || "#FFFFFF";
 
-        // Status
-        threshold = num(cfg.threshold, 0.5);
-        onColor = cfg.onColor || "#1ED033";
-        offColor = cfg.offColor || "#FF0909";
-        invertLogic = toBool(cfg.invertLogic, false);
+        threshold = num(cfg.threshold, num(defs.threshold, 0.5));
+        onColor = cfg.onColor || defs.onColor || "#1ED033";
+        offColor = cfg.offColor || defs.offColor || "#FF0909";
+        invertLogic = toBool(cfg.invertLogic, toBool(defs.invertLogic, false));
 
-        // Gear
-        gearSensorKey = cfg.gearKey || "Gear";
-        gearTextColor = cfg.gearTextColor || "#FFFFFF";
-        gearFontSize = num(cfg.gearFontSize, 140);
-        suffixFontSize = num(cfg.suffixFontSize, arcDefaults.suffixFontSize !== undefined ? arcDefaults.suffixFontSize :
-                                                                                            52.505);
-        gearOffsetX = num(cfg.gearOffsetX, arcDefaults.gearOffsetX !== undefined ? arcDefaults.gearOffsetX : 0);
-        gearOffsetY = num(cfg.gearOffsetY, arcDefaults.gearOffsetY !== undefined ? arcDefaults.gearOffsetY : 0);
-        gearWidth = num(cfg.gearWidth, arcDefaults.gearWidth !== undefined ? arcDefaults.gearWidth : 168);
-        gearHeight = num(cfg.gearHeight, arcDefaults.gearHeight !== undefined ? arcDefaults.gearHeight : 117);
+        gearSensorKey = normalizeAnalogSensorKey(cfg.gearKey || defs.gearKey || "Gear");
+        gearTextColor = cfg.gearTextColor || defs.gearTextColor || "#FFFFFF";
+        gearFontSize = num(cfg.gearFontSize, num(defs.gearFontSize, 160));
+        suffixFontSize = num(cfg.suffixFontSize, num(defs.suffixFontSize, 52.505));
+        gearOffsetX = num(cfg.gearOffsetX, num(defs.gearOffsetX, 0));
+        gearOffsetY = num(cfg.gearOffsetY, num(defs.gearOffsetY, 0));
+        gearWidth = num(cfg.gearWidth, num(defs.gearWidth, 168));
+        gearHeight = num(cfg.gearHeight, num(defs.gearHeight, 117));
 
-        // Shift
-        shiftPoint = num(cfg.shiftPoint, 0.75);
-        shiftCount = num(cfg.shiftCount, 11);
-        shiftPattern = cfg.shiftPattern || "center-out";
+        shiftPoint = num(cfg.shiftPoint, num(defs.shiftPoint, 0.3));
+        shiftCount = num(cfg.shiftCount, num(defs.shiftCount, 11));
+        shiftPattern = cfg.shiftPattern || defs.shiftPattern || "center-out";
 
-        // Brake bias labels
-        leftLabel = cfg.leftLabel || "RWD";
-        rightLabel = cfg.rightLabel || "FWD";
+        leftLabel = cfg.leftLabel || defs.leftLabel || "RWD";
+        rightLabel = cfg.rightLabel || defs.rightLabel || "FWD";
+        biasShowSideValues = toBool(cfg.showSideValues, toBool(defs.showSideValues, false));
+        biasShowCenterValue = toBool(cfg.showCenterValue, toBool(defs.showCenterValue, true));
+        biasValueUnit = cfg.valueUnit || defs.valueUnit || "";
+        biasValueDecimals = num(cfg.valueDecimals, num(defs.valueDecimals, 1));
+        biasDampingMultiplier = num(cfg.dampingMultiplier, num(defs.dampingMultiplier, 1.0));
+        biasMarkerEnabled = toBool(cfg.markerEnabled, toBool(defs.markerEnabled, true));
+        biasMarkerColor = cfg.markerColor || defs.markerColor || "#00C8FF";
+        biasMarkerWidth = num(cfg.markerWidth, num(defs.markerWidth, 2.0));
 
-        // Bottom bar
-        timeEnabled = toBool(cfg.timeEnabled, true);
+        timeEnabled = toBool(cfg.timeEnabled, toBool(defs.timeEnabled, true));
     }
 
     function toBool(val, def) {
@@ -516,10 +450,11 @@ Popup {
             Layout.topMargin: 10
             ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
             clip: true
+            contentWidth: availableWidth
 
             ColumnLayout {
                 spacing: 10
-                width: scrollArea.availableWidth
+                width: scrollArea.contentWidth
 
                 // ============================================================
                 // DATA SOURCE SECTION
@@ -547,7 +482,7 @@ Popup {
                             selectedKey: popup.sensorKey
 
                             onSensorSelected: function (key, displayName, unit) {
-                                popup.sensorKey = key;
+                                popup.sensorKey = popup.normalizeAnalogSensorKey(key);
                             }
                         }
                     }
@@ -1521,11 +1456,10 @@ Popup {
                                 }
                             }
 
-                            // Flash settings (arc gauges only)
                             RowLayout {
                                 Layout.fillWidth: true
                                 spacing: 10
-                                visible: popup.isArc
+                                visible: popup.isArc || popup.isSensor
 
                                 StyledSwitch {
                                     checked: popup.warningFlash
@@ -1687,7 +1621,7 @@ Popup {
                                 selectedKey: popup.gearSensorKey
 
                                 onSensorSelected: function (key, displayName, unit) {
-                                    popup.gearSensorKey = key;
+                                    popup.gearSensorKey = popup.normalizeAnalogSensorKey(key);
                                 }
                             }
                         }
@@ -1981,50 +1915,211 @@ Popup {
                 // ============================================================
                 SettingsSection {
                     Layout.fillWidth: true
-                    title: "Bias Labels"
+                    title: "Bias Gauge"
                     visible: popup.hasBiasLabels
 
-                    RowLayout {
+                    ColumnLayout {
                         Layout.fillWidth: true
-                        spacing: 10
+                        spacing: 8
 
-                        ColumnLayout {
+                        RowLayout {
                             Layout.fillWidth: true
-                            spacing: 4
+                            spacing: 10
 
-                            Text {
-                                color: SettingsTheme.textSecondary
-                                font.family: SettingsTheme.fontFamily
-                                font.pixelSize: SettingsTheme.fontCaption
-                                text: "Left Label"
+                            ColumnLayout {
+                                Layout.fillWidth: true
+                                spacing: 4
+
+                                Text {
+                                    color: SettingsTheme.textSecondary
+                                    font.family: SettingsTheme.fontFamily
+                                    font.pixelSize: SettingsTheme.fontCaption
+                                    text: "Left Label"
+                                }
+
+                                StyledTextField {
+                                    Layout.fillWidth: true
+                                    Layout.preferredHeight: SettingsTheme.controlHeight
+                                    text: popup.leftLabel
+
+                                    onTextEdited: popup.leftLabel = text
+                                }
                             }
 
-                            StyledTextField {
+                            ColumnLayout {
                                 Layout.fillWidth: true
-                                Layout.preferredHeight: SettingsTheme.controlHeight
-                                text: popup.leftLabel
+                                spacing: 4
 
-                                onTextEdited: popup.leftLabel = text
+                                Text {
+                                    color: SettingsTheme.textSecondary
+                                    font.family: SettingsTheme.fontFamily
+                                    font.pixelSize: SettingsTheme.fontCaption
+                                    text: "Right Label"
+                                }
+
+                                StyledTextField {
+                                    Layout.fillWidth: true
+                                    Layout.preferredHeight: SettingsTheme.controlHeight
+                                    text: popup.rightLabel
+
+                                    onTextEdited: popup.rightLabel = text
+                                }
                             }
                         }
 
-                        ColumnLayout {
+                        RowLayout {
                             Layout.fillWidth: true
-                            spacing: 4
+                            spacing: 10
 
-                            Text {
-                                color: SettingsTheme.textSecondary
-                                font.family: SettingsTheme.fontFamily
-                                font.pixelSize: SettingsTheme.fontCaption
-                                text: "Right Label"
+                            StyledSwitch {
+                                checked: popup.biasShowSideValues
+                                text: "Show Side Values"
+
+                                onToggled: popup.biasShowSideValues = checked
                             }
 
-                            StyledTextField {
-                                Layout.fillWidth: true
-                                Layout.preferredHeight: SettingsTheme.controlHeight
-                                text: popup.rightLabel
+                            StyledSwitch {
+                                checked: popup.biasShowCenterValue
+                                text: "Show Center Value"
 
-                                onTextEdited: popup.rightLabel = text
+                                onToggled: popup.biasShowCenterValue = checked
+                            }
+                        }
+
+                        RowLayout {
+                            Layout.fillWidth: true
+                            spacing: 10
+
+                            ColumnLayout {
+                                Layout.fillWidth: true
+                                spacing: 4
+
+                                Text {
+                                    color: SettingsTheme.textSecondary
+                                    font.family: SettingsTheme.fontFamily
+                                    font.pixelSize: SettingsTheme.fontCaption
+                                    text: "Value Unit"
+                                }
+
+                                StyledTextField {
+                                    Layout.fillWidth: true
+                                    Layout.preferredHeight: SettingsTheme.controlHeight
+                                    text: popup.biasValueUnit
+
+                                    onTextEdited: popup.biasValueUnit = text
+                                }
+                            }
+
+                            ColumnLayout {
+                                Layout.preferredWidth: 140
+                                spacing: 4
+
+                                Text {
+                                    color: SettingsTheme.textSecondary
+                                    font.family: SettingsTheme.fontFamily
+                                    font.pixelSize: SettingsTheme.fontCaption
+                                    text: "Decimals"
+                                }
+
+                                StyledSpinBox {
+                                    Layout.preferredHeight: SettingsTheme.controlHeight
+                                    Layout.preferredWidth: 140
+                                    from: 0
+                                    to: 4
+                                    value: popup.biasValueDecimals
+
+                                    onValueChanged: popup.biasValueDecimals = value
+                                }
+                            }
+                        }
+
+                        RowLayout {
+                            Layout.fillWidth: true
+                            spacing: 10
+
+                            ColumnLayout {
+                                Layout.fillWidth: true
+                                spacing: 4
+
+                                Text {
+                                    color: SettingsTheme.textSecondary
+                                    font.family: SettingsTheme.fontFamily
+                                    font.pixelSize: SettingsTheme.fontCaption
+                                    text: "Damping Multiplier (0.01 - 1.00)"
+                                }
+
+                                StyledTextField {
+                                    Layout.fillWidth: true
+                                    Layout.preferredHeight: SettingsTheme.controlHeight
+                                    inputMethodHints: Qt.ImhFormattedNumbersOnly
+                                    text: popup.biasDampingMultiplier.toFixed(2)
+
+                                    onTextEdited: {
+                                        var v = parseFloat(text);
+                                        if (!isNaN(v) && v >= 0.01 && v <= 1.0)
+                                            popup.biasDampingMultiplier = v;
+                                    }
+                                }
+                            }
+
+                            ColumnLayout {
+                                Layout.preferredWidth: 140
+                                spacing: 4
+
+                                Text {
+                                    color: SettingsTheme.textSecondary
+                                    font.family: SettingsTheme.fontFamily
+                                    font.pixelSize: SettingsTheme.fontCaption
+                                    text: "Marker Width"
+                                }
+
+                                StyledTextField {
+                                    Layout.preferredHeight: SettingsTheme.controlHeight
+                                    Layout.preferredWidth: 140
+                                    inputMethodHints: Qt.ImhFormattedNumbersOnly
+                                    text: popup.biasMarkerWidth.toFixed(1)
+
+                                    onTextEdited: {
+                                        var v = parseFloat(text);
+                                        if (!isNaN(v) && v >= 1.0 && v <= 8.0)
+                                            popup.biasMarkerWidth = v;
+                                    }
+                                }
+                            }
+                        }
+
+                        RowLayout {
+                            Layout.fillWidth: true
+                            spacing: 10
+
+                            StyledSwitch {
+                                checked: popup.biasMarkerEnabled
+                                text: "Enable Extreme Marker"
+
+                                onToggled: popup.biasMarkerEnabled = checked
+                            }
+
+                            ColumnLayout {
+                                Layout.fillWidth: true
+                                spacing: 4
+                                visible: popup.biasMarkerEnabled
+
+                                Text {
+                                    color: SettingsTheme.textSecondary
+                                    font.family: SettingsTheme.fontFamily
+                                    font.pixelSize: SettingsTheme.fontCaption
+                                    text: "Marker Color"
+                                }
+
+                                StyledColorPicker {
+                                    Layout.fillWidth: true
+                                    Layout.preferredHeight: SettingsTheme.controlHeight
+                                    colorValue: popup.biasMarkerColor
+
+                                    onColorEdited: function (c) {
+                                        popup.biasMarkerColor = c;
+                                    }
+                                }
                             }
                         }
                     }

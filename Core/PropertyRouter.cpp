@@ -14,16 +14,14 @@
 #include "Models/AnalogInputs.h"
 #include "Models/ConnectionData.h"
 #include "Models/DigitalInputs.h"
-#include "Models/ElectricMotorData.h"
 #include "Models/EngineData.h"
 #include "Models/ExpanderBoardData.h"
-#include "Models/FlagsData.h"
 #include "Models/GPSData.h"
-#include "Models/SensorData.h"
 #include "Models/SettingsData.h"
 #include "Models/TimingData.h"
 #include "Models/UIState.h"
 #include "Models/VehicleData.h"
+#include "SensorRegistry.h"
 
 #include <QDebug>
 #include <QMetaMethod>
@@ -32,9 +30,8 @@
 #include <algorithm>
 
 PropertyRouter::PropertyRouter(EngineData *engine, VehicleData *vehicle, GPSData *gps, AnalogInputs *analog,
-                               DigitalInputs *digital, ExpanderBoardData *expander, ElectricMotorData *motor,
-                               FlagsData *flags, SensorData *sensor, ConnectionData *connection, SettingsData *settings,
-                               TimingData *timing, UIState *ui, QObject *parent)
+                               DigitalInputs *digital, ExpanderBoardData *expander, ConnectionData *connection,
+                               SettingsData *settings, TimingData *timing, UIState *ui, QObject *parent)
     : QObject(parent),
       m_engine(engine),
       m_vehicle(vehicle),
@@ -42,9 +39,6 @@ PropertyRouter::PropertyRouter(EngineData *engine, VehicleData *vehicle, GPSData
       m_analog(analog),
       m_digital(digital),
       m_expander(expander),
-      m_motor(motor),
-      m_flags(flags),
-      m_sensor(sensor),
       m_connection(connection),
       m_settings(settings),
       m_timing(timing),
@@ -80,36 +74,13 @@ void PropertyRouter::initializePropertyMappings()
     mapModelProperties(m_analog, ModelType::Analog);
     mapModelProperties(m_digital, ModelType::Digital);
     mapModelProperties(m_expander, ModelType::Expander);
-    mapModelProperties(m_motor, ModelType::Motor);
-    mapModelProperties(m_flags, ModelType::Flags);
-    mapModelProperties(m_sensor, ModelType::Sensor);
     mapModelProperties(m_connection, ModelType::Connection);
     mapModelProperties(m_settings, ModelType::Settings);
     mapModelProperties(m_timing, ModelType::Timing);
     mapModelProperties(m_ui, ModelType::UI);
 
     qDebug() << "PropertyRouter: Initialized with" << m_propertyModelMap.size() << "properties";
-
-    // * Connect all model NOTIFY signals to our relay slot for reactive binding
-    connectModelSignals(m_engine);
-    connectModelSignals(m_vehicle);
-    connectModelSignals(m_gps);
-    connectModelSignals(m_analog);
-    connectModelSignals(m_digital);
-    connectModelSignals(m_expander);
-    connectModelSignals(m_motor);
-    connectModelSignals(m_flags);
-    connectModelSignals(m_sensor);
-    connectModelSignals(m_connection);
-    connectModelSignals(m_settings);
-    connectModelSignals(m_timing);
-    connectModelSignals(m_ui);
-
-    int signalCount = 0;
-    for (auto it = m_signalToPropertyMap.constBegin(); it != m_signalToPropertyMap.constEnd(); ++it) {
-        signalCount += it.value().size();
-    }
-    qDebug() << "PropertyRouter: Connected" << signalCount << "NOTIFY signals for reactive binding";
+    qDebug() << "PropertyRouter: Deferring NOTIFY signal wiring until first property access";
 }
 
 void PropertyRouter::connectModelSignals(QObject *model)
@@ -143,6 +114,30 @@ void PropertyRouter::connectModelSignals(QObject *model)
     }
 }
 
+void PropertyRouter::disconnectModelSignals(QObject *model)
+{
+    if (!model)
+        return;
+    QObject::disconnect(model, nullptr, this, nullptr);
+    m_signalToPropertyMap.remove(model);
+}
+
+void PropertyRouter::connectModel(QObject *model)
+{
+    if (!model || m_connectedModels.contains(model))
+        return;
+    connectModelSignals(model);
+    m_connectedModels.insert(model);
+}
+
+void PropertyRouter::disconnectModel(QObject *model)
+{
+    if (!model || !m_connectedModels.contains(model))
+        return;
+    disconnectModelSignals(model);
+    m_connectedModels.remove(model);
+}
+
 void PropertyRouter::onModelPropertyChanged()
 {
     QObject *model = sender();
@@ -162,6 +157,9 @@ void PropertyRouter::onModelPropertyChanged()
         return;
 
     const SignalPropertyInfo &info = propIt.value();
+    if (!m_activeProperties.contains(info.propertyName))
+        return;
+
     QVariant val = model->metaObject()->property(info.propertyIndex).read(model);
     emit valueChanged(info.propertyName, val);
 
@@ -173,64 +171,21 @@ void PropertyRouter::onModelPropertyChanged()
 QVariant PropertyRouter::getValue(const QString &propertyName) const
 {
     const QString resolvedProperty = resolveAlias(propertyName);
+    m_activeProperties.insert(resolvedProperty);
     if (!m_propertyModelMap.contains(resolvedProperty)) {
         qWarning() << "PropertyRouter: Unknown property:" << propertyName;
         return QVariant(0);
     }
 
-    ModelType type = m_propertyModelMap.value(resolvedProperty);
-    QObject *model = nullptr;
-
-    switch (type) {
-    case ModelType::Engine:
-        model = m_engine;
-        break;
-    case ModelType::Vehicle:
-        model = m_vehicle;
-        break;
-    case ModelType::GPS:
-        model = m_gps;
-        break;
-    case ModelType::Analog:
-        model = m_analog;
-        break;
-    case ModelType::Digital:
-        model = m_digital;
-        break;
-    case ModelType::Expander:
-        model = m_expander;
-        break;
-    case ModelType::Motor:
-        model = m_motor;
-        break;
-    case ModelType::Flags:
-        model = m_flags;
-        break;
-    case ModelType::Sensor:
-        model = m_sensor;
-        break;
-    case ModelType::Connection:
-        model = m_connection;
-        break;
-    case ModelType::Settings:
-        model = m_settings;
-        break;
-    case ModelType::Timing:
-        model = m_timing;
-        break;
-    case ModelType::UI:
-        model = m_ui;
-        break;
-    default:
-        qWarning() << "PropertyRouter: No model for type";
-        return QVariant(0);
-    }
+    const ModelType type = m_propertyModelMap.value(resolvedProperty);
+    QObject *model = modelForType(type);
 
     if (!model) {
         qWarning() << "PropertyRouter: Model is null for property:" << propertyName;
         return QVariant(0);
     }
 
+    const_cast<PropertyRouter *>(this)->connectModel(model);
     QVariant val = model->property(resolvedProperty.toLatin1().constData());
     if (!val.isValid())
         return QVariant(0);
@@ -259,12 +214,6 @@ QString PropertyRouter::getModelName(const QString &propertyName) const
         return QStringLiteral("Digital");
     case ModelType::Expander:
         return QStringLiteral("Expander");
-    case ModelType::Motor:
-        return QStringLiteral("Motor");
-    case ModelType::Flags:
-        return QStringLiteral("Flags");
-    case ModelType::Sensor:
-        return QStringLiteral("Sensor");
     case ModelType::Connection:
         return QStringLiteral("Connection");
     case ModelType::Settings:
@@ -290,6 +239,11 @@ QStringList PropertyRouter::availableProperties() const
     properties.removeDuplicates();
     properties.sort(Qt::CaseInsensitive);
     return properties;
+}
+
+void PropertyRouter::clearActiveProperties()
+{
+    m_activeProperties.clear();
 }
 
 void PropertyRouter::aliasProperty(const QString &sourceKey, const QString &aliasKey)
@@ -335,4 +289,37 @@ bool PropertyRouter::isAlias(const QString &key) const
 QString PropertyRouter::resolveAlias(const QString &key) const
 {
     return m_aliases.value(key, key);
+}
+
+void PropertyRouter::setSensorRegistry(SensorRegistry *sensorRegistry)
+{
+    m_sensorRegistry = sensorRegistry;
+}
+
+QObject *PropertyRouter::modelForType(ModelType type) const
+{
+    switch (type) {
+    case ModelType::Engine:
+        return m_engine;
+    case ModelType::Vehicle:
+        return m_vehicle;
+    case ModelType::GPS:
+        return m_gps;
+    case ModelType::Analog:
+        return m_analog;
+    case ModelType::Digital:
+        return m_digital;
+    case ModelType::Expander:
+        return m_expander;
+    case ModelType::Connection:
+        return m_connection;
+    case ModelType::Settings:
+        return m_settings;
+    case ModelType::Timing:
+        return m_timing;
+    case ModelType::UI:
+        return m_ui;
+    default:
+        return nullptr;
+    }
 }

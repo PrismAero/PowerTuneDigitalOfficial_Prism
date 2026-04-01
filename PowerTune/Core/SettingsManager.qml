@@ -109,32 +109,68 @@ Rectangle {
             Layout.fillWidth: true
             currentIndex: tabBar.currentIndex
 
-            MainSettings {
-                visible: stackLayout.currentIndex === 0
+            Component { id: mainSettingsComponent; MainSettings { } }
+            Component { id: displaySettingsComponent; DisplaySettings { } }
+            Component { id: dashSelectorComponent; DashSelector { } }
+            Component { id: vehicleRpmComponent; VehicleRPMSettings { } }
+            Component { id: exBoardComponent; ExBoardAnalog { } }
+            Component { id: networkComponent; NetworkSettings { } }
+            Component { id: diagnosticsComponent; DiagnosticsSettings { } }
+
+            Loader {
+                id: mainSettingsLoader
+                active: stackLayout.currentIndex === 0
+                Layout.fillHeight: true
+                Layout.fillWidth: true
+                sourceComponent: mainSettingsComponent
             }
 
-            DisplaySettings {
-                visible: stackLayout.currentIndex === 1
+            Loader {
+                id: displaySettingsLoader
+                active: stackLayout.currentIndex === 1
+                Layout.fillHeight: true
+                Layout.fillWidth: true
+                sourceComponent: displaySettingsComponent
             }
 
-            DashSelector {
-                visible: stackLayout.currentIndex === 2
+            Loader {
+                id: dashSelectorLoader
+                active: stackLayout.currentIndex === 2
+                Layout.fillHeight: true
+                Layout.fillWidth: true
+                sourceComponent: dashSelectorComponent
             }
 
-            VehicleRPMSettings {
-                visible: stackLayout.currentIndex === 3
+            Loader {
+                id: vehicleRpmLoader
+                active: stackLayout.currentIndex === 3
+                Layout.fillHeight: true
+                Layout.fillWidth: true
+                sourceComponent: vehicleRpmComponent
             }
 
-            ExBoardAnalog {
-                visible: stackLayout.currentIndex === 4
+            Loader {
+                id: exBoardLoader
+                active: stackLayout.currentIndex === 4
+                Layout.fillHeight: true
+                Layout.fillWidth: true
+                sourceComponent: exBoardComponent
             }
 
-            NetworkSettings {
-                visible: stackLayout.currentIndex === 5
+            Loader {
+                id: networkLoader
+                active: stackLayout.currentIndex === 5
+                Layout.fillHeight: true
+                Layout.fillWidth: true
+                sourceComponent: networkComponent
             }
 
-            DiagnosticsSettings {
-                visible: stackLayout.currentIndex === 6
+            Loader {
+                id: diagnosticsLoader
+                active: stackLayout.currentIndex === 6
+                Layout.fillHeight: true
+                Layout.fillWidth: true
+                sourceComponent: diagnosticsComponent
             }
         }
     }

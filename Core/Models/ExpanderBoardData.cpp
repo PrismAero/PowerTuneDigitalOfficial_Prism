@@ -140,3 +140,10 @@ void ExpanderBoardData::setEXSpeed(qreal EXSpeed)
         emit EXSpeedChanged(EXSpeed);
     }
 }
+void ExpanderBoardData::setDifferentialSensor(qreal value)
+{
+    if (m_differentialSensor != value) {
+        m_differentialSensor = value;
+        emit differentialSensorChanged(value);
+    }
+}

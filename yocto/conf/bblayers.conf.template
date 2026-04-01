@@ -1,0 +1,16 @@
+POKY_BBLAYERS_CONF_VERSION = "2"
+
+BBPATH = "${TOPDIR}"
+BBFILES ?= ""
+
+BBLAYERS ?= " \
+    YOCTO_ROOT_PLACEHOLDER/poky/meta \
+    YOCTO_ROOT_PLACEHOLDER/poky/meta-poky \
+    YOCTO_ROOT_PLACEHOLDER/meta-raspberrypi \
+    YOCTO_ROOT_PLACEHOLDER/meta-openembedded/meta-oe \
+    YOCTO_ROOT_PLACEHOLDER/meta-openembedded/meta-python \
+    YOCTO_ROOT_PLACEHOLDER/meta-openembedded/meta-networking \
+    YOCTO_ROOT_PLACEHOLDER/meta-openembedded/meta-multimedia \
+    YOCTO_ROOT_PLACEHOLDER/meta-qt6 \
+    YOCTO_ROOT_PLACEHOLDER/meta-powertune \
+"

@@ -25,6 +25,7 @@
 #include <QVariantList>
 #include <QVariantMap>
 
+class AppSettings;
 class SensorRegistry;
 class PropertyRouter;
 
@@ -139,10 +140,14 @@ public:
      * @brief Construct a DiagnosticsProvider.
      * @param parent Parent QObject (typically the Connect instance)
      *
-     * Starts uptime timer, system info polling (2s), and CAN rate tracking (1s).
-     * Installs a Qt message handler to capture qDebug/qWarning/qCritical/qFatal.
+     * Starts uptime timer and installs a Qt message handler to capture
+     * qDebug/qWarning/qCritical/qFatal. Polling timers are started lazily
+     * when activate() is called from the Diagnostics page.
      */
     explicit DiagnosticsProvider(QObject *parent = nullptr);
+
+    /// Lazily starts diagnostics polling timers when the page is opened.
+    Q_INVOKABLE void activate();
 
     static DiagnosticsProvider *instance();
 
@@ -157,6 +162,12 @@ public:
      * @param router Pointer to the PropertyRouter instance
      */
     void setPropertyRouter(class PropertyRouter *router);
+
+    /**
+     * @brief Set the AppSettings reference for reading configuration values.
+     * @param settings Pointer to the AppSettings instance
+     */
+    void setAppSettings(AppSettings *settings);
 
     // -- System Info accessors --
 
@@ -309,24 +320,7 @@ public:
      */
     Q_INVOKABLE QVariantList getLiveSensorData() const;
 
-    /**
-     * @brief Returns diagnostic information for ECU-reported analog input channels.
-     *
-     * Provides raw ADC voltage and calibration data for Analog0 through Analog10
-     * (0-indexed, 11 channels total) received via daemon UDP.
-     *
-     * @return QVariantList containing diagnostic entries for each analog input channel.
-     */
     Q_INVOKABLE QVariantList getAnalogInputDiagnostics() const;
-
-    /**
-     * @brief Returns diagnostic information for daemon-reported digital inputs.
-     *
-     * Provides state and configuration data for DigitalInput1 through
-     * DigitalInput7 (7 channels total) received via daemon UDP.
-     *
-     * @return QVariantList containing diagnostic entries for each digital input channel.
-     */
     Q_INVOKABLE QVariantList getDigitalInputDiagnostics() const;
 
     /**
@@ -376,7 +370,7 @@ public:
 
     void recordCanFrame(quint32 id, const QByteArray &payload);
 
-    // -- CAN tracking (called from UDPReceiver/connect) --
+    // -- CAN tracking (called from ExBoardCan/connect) --
 
     /**
      * @brief Record a received CAN message for rate tracking.
@@ -496,9 +490,10 @@ private:
     QString m_serialPort;
     int m_serialBaudRate = 0;
 
-    // Sensor registry and property router references
+    // Sensor registry, property router, and settings references
     SensorRegistry *m_sensorRegistry = nullptr;
     PropertyRouter *m_propertyRouter = nullptr;
+    AppSettings *m_appSettings = nullptr;
 
     struct LogEntry
     {
@@ -535,6 +530,7 @@ private:
     QTimer m_systemInfoTimer;  // 2-second interval for system info
     QTimer m_canRateTimer;     // 1-second interval for CAN message rate
     QTimer m_liveSensorTimer;  // 1-second interval for live sensor table
+    bool m_initialized = false;
 
     /**
      * @brief Read CPU temperature from system.

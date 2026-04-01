@@ -1,5 +1,4 @@
 #include "Core/connect.h"
-#include "Hardware/Extender.h"
 #include "Utils/downloadmanager.h"
 
 #include <QDir>
@@ -36,7 +35,6 @@ int main(int argc, char *argv[])
     qmlRegisterType<Connect>("com.powertune", 1, 0, "ConnectObject");
     engine.rootContext()->setContextProperty("DLM", new DownloadManager(&engine));
     engine.rootContext()->setContextProperty("Connect", new Connect(&engine));
-    engine.rootContext()->setContextProperty("Extender2", new Extender(&engine));
     // * Load main QML from PowerTune.Core module
     // ! Resource path includes both prefix and source path due to qt_add_qml_module behavior
     engine.load(QUrl(QStringLiteral("qrc:/qt/qml/PowerTune/Core/PowerTune/Core/Main.qml")));

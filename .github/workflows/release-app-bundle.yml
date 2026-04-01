@@ -1,0 +1,125 @@
+name: Release App Bundle
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Release version (ex: v1.2.3). Defaults to tag name when running from tag."
+        required: false
+        type: string
+      build_source:
+        description: "Build source for release assets"
+        required: true
+        type: choice
+        options:
+          - github
+          - prebuilt_url
+        default: github
+      prebuilt_bundle_url:
+        description: "If build_source=prebuilt_url, direct URL to powertune-app-bundle-<version>.tar.gz"
+        required: false
+        type: string
+      platform:
+        description: "Manifest platform field (ex: linux-armv7)"
+        required: false
+        default: linux-armv7
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  release_app_bundle:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Resolve release variables
+        id: vars
+        shell: bash
+        run: |
+          if [[ -n "${{ github.event.inputs.version }}" ]]; then
+            VERSION="${{ github.event.inputs.version }}"
+          elif [[ "${GITHUB_REF_TYPE}" == "tag" ]]; then
+            VERSION="${GITHUB_REF_NAME}"
+          else
+            echo "No version provided and not running from tag."
+            exit 1
+          fi
+          if [[ "${{ github.event.inputs.build_source }}" == "" ]]; then
+            BUILD_SOURCE="github"
+          else
+            BUILD_SOURCE="${{ github.event.inputs.build_source }}"
+          fi
+          PLATFORM="${{ github.event.inputs.platform }}"
+          if [[ -z "${PLATFORM}" ]]; then
+            PLATFORM="linux-armv7"
+          fi
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "build_source=${BUILD_SOURCE}" >> "$GITHUB_OUTPUT"
+          echo "platform=${PLATFORM}" >> "$GITHUB_OUTPUT"
+
+      - name: Install Qt
+        if: steps.vars.outputs.build_source == 'github'
+        uses: jurplel/install-qt-action@v2
+        with:
+          version: "6.8.3"
+          host: "linux"
+          target: "desktop"
+
+      - name: Configure
+        if: steps.vars.outputs.build_source == 'github'
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build
+        if: steps.vars.outputs.build_source == 'github'
+        run: cmake --build build --parallel
+
+      - name: Prepare output directory
+        shell: bash
+        run: mkdir -p release-assets
+
+      - name: Package GitHub-built artifact
+        if: steps.vars.outputs.build_source == 'github'
+        shell: bash
+        run: |
+          chmod +x Scripts/package-app-bundle.sh
+          Scripts/package-app-bundle.sh "${{ steps.vars.outputs.version }}" "build/PowerTuneQMLGui" "release-assets" "${{ steps.vars.outputs.platform }}"
+
+      - name: Fetch prebuilt bundle from URL
+        if: steps.vars.outputs.build_source == 'prebuilt_url'
+        shell: bash
+        run: |
+          if [[ -z "${{ github.event.inputs.prebuilt_bundle_url }}" ]]; then
+            echo "prebuilt_bundle_url is required when build_source=prebuilt_url"
+            exit 1
+          fi
+          URL="${{ github.event.inputs.prebuilt_bundle_url }}"
+          BUNDLE_NAME="powertune-app-bundle-${{ steps.vars.outputs.version }}.tar.gz"
+          curl -fL "$URL" -o "release-assets/${BUNDLE_NAME}"
+          SHA256="$(sha256sum "release-assets/${BUNDLE_NAME}" | awk '{print $1}')"
+          echo "${SHA256}  ${BUNDLE_NAME}" > "release-assets/powertune-app-bundle-${{ steps.vars.outputs.version }}.sha256"
+          cat > "release-assets/release-manifest.json" <<EOF
+          {
+            "version": "${{ steps.vars.outputs.version }}",
+            "platform": "${{ steps.vars.outputs.platform }}",
+            "bundle_file": "${BUNDLE_NAME}",
+            "checksum_file": "powertune-app-bundle-${{ steps.vars.outputs.version }}.sha256",
+            "sha256": "${SHA256}",
+            "published_at_utc": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
+            "release_notes_url": "https://github.com/${GITHUB_REPOSITORY}/releases/tag/${{ steps.vars.outputs.version }}"
+          }
+          EOF
+
+      - name: Create/Update GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.vars.outputs.version }}
+          files: |
+            release-assets/*.tar.gz
+            release-assets/*.sha256
+            release-assets/release-manifest.json

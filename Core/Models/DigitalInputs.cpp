@@ -9,58 +9,6 @@
 
 DigitalInputs::DigitalInputs(QObject *parent) : QObject(parent) {}
 
-// * Setters - Main Board
-void DigitalInputs::setDigitalInput1(qreal DigitalInput1)
-{
-    if (m_DigitalInput1 != DigitalInput1) {
-        m_DigitalInput1 = DigitalInput1;
-        emit DigitalInput1Changed(DigitalInput1);
-    }
-}
-void DigitalInputs::setDigitalInput2(qreal DigitalInput2)
-{
-    if (m_DigitalInput2 != DigitalInput2) {
-        m_DigitalInput2 = DigitalInput2;
-        emit DigitalInput2Changed(DigitalInput2);
-    }
-}
-void DigitalInputs::setDigitalInput3(qreal DigitalInput3)
-{
-    if (m_DigitalInput3 != DigitalInput3) {
-        m_DigitalInput3 = DigitalInput3;
-        emit DigitalInput3Changed(DigitalInput3);
-    }
-}
-void DigitalInputs::setDigitalInput4(qreal DigitalInput4)
-{
-    if (m_DigitalInput4 != DigitalInput4) {
-        m_DigitalInput4 = DigitalInput4;
-        emit DigitalInput4Changed(DigitalInput4);
-    }
-}
-void DigitalInputs::setDigitalInput5(qreal DigitalInput5)
-{
-    if (m_DigitalInput5 != DigitalInput5) {
-        m_DigitalInput5 = DigitalInput5;
-        emit DigitalInput5Changed(DigitalInput5);
-    }
-}
-void DigitalInputs::setDigitalInput6(qreal DigitalInput6)
-{
-    if (m_DigitalInput6 != DigitalInput6) {
-        m_DigitalInput6 = DigitalInput6;
-        emit DigitalInput6Changed(DigitalInput6);
-    }
-}
-void DigitalInputs::setDigitalInput7(qreal DigitalInput7)
-{
-    if (m_DigitalInput7 != DigitalInput7) {
-        m_DigitalInput7 = DigitalInput7;
-        emit DigitalInput7Changed(DigitalInput7);
-    }
-}
-
-// * Setters - Expansion Board
 void DigitalInputs::setEXDigitalInput1(qreal EXDigitalInput1)
 {
     if (m_EXDigitalInput1 != EXDigitalInput1) {
@@ -118,7 +66,6 @@ void DigitalInputs::setEXDigitalInput8(qreal EXDigitalInput8)
     }
 }
 
-// * Setters - Frequency/RPM
 void DigitalInputs::setRPMFrequencyDividerDi1(qreal RPMFrequencyDividerDi1)
 {
     if (m_RPMFrequencyDividerDi1 != RPMFrequencyDividerDi1) {

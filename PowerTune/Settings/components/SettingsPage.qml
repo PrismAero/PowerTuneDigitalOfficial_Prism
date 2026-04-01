@@ -20,14 +20,18 @@ Rectangle {
         ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
         ScrollBar.vertical.policy: ScrollBar.AsNeeded
         anchors.fill: parent
-        anchors.margins: SettingsTheme.pageMargin
+        anchors.topMargin: SettingsTheme.pageMargin
+        anchors.bottomMargin: SettingsTheme.pageMargin
+        anchors.leftMargin: 40
+        anchors.rightMargin: 40
         clip: true
+        contentWidth: availableWidth
 
         ColumnLayout {
             id: contentColumn
 
             spacing: SettingsTheme.sectionSpacing
-            width: scrollView.availableWidth
+            width: scrollView.contentWidth
         }
     }
 }

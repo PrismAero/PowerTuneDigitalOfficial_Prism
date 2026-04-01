@@ -18,7 +18,7 @@ RowLayout {
 
     Behavior on height {
         NumberAnimation {
-            duration: 150
+            duration: 5
         }
     }
     Behavior on opacity {

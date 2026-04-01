@@ -5,7 +5,6 @@
  * @brief Runtime registry tracking which sensors are actually available.
  *
  * Sensors can be registered from multiple sources:
- * - ECU data via daemon UDP (engine data, analog channels, digital inputs)
  * - Extender board analog inputs via CAN
  * - Extender board digital inputs via CAN
  * - Built-in hardware (GPS, SenseHat)
@@ -26,6 +25,8 @@
 #include <QVariantList>
 #include <QVariantMap>
 
+class AppSettings;
+
 class SensorRegistry : public QObject
 {
     Q_OBJECT
@@ -41,6 +42,7 @@ class SensorRegistry : public QObject
 
 public:
     explicit SensorRegistry(QObject *parent = nullptr);
+    void setAppSettings(AppSettings *settings);
 
     // -- Sensor source enum --
 
@@ -48,9 +50,6 @@ public:
      * @brief Identifies where a sensor's data originates.
      */
     enum class SensorSource {
-        DaemonUDP,        ///< ECU data via daemon UDP (port 45454) - includes engine data,
-                          ///< ECU-reported analog channels (Analog0-10), and
-                          ///< ECU-reported digital inputs (DigitalInput1-7)
         ExtenderAnalog,   ///< Extender board analog inputs via CAN (EXAnalogInput0-7)
         ExtenderDigital,  ///< Extender board digital inputs via CAN (EXDigitalInput1-8)
         GPS,              ///< GPS hardware (serial NMEA)
@@ -88,7 +87,7 @@ public:
 
     /**
      * @brief Mark a CAN sensor as active (received data recently).
-     * @param key Property key from UDPReceiver
+     * @param key Property key from a CAN-backed source
      */
     void markCanSensorActive(const QString &key);
 
@@ -111,6 +110,7 @@ public:
      * @return true if available
      */
     Q_INVOKABLE bool isAvailable(const QString &key) const;
+    Q_INVOKABLE bool isActive(const QString &key) const;
 
     /**
      * @brief Get display name for a sensor key.
@@ -132,18 +132,6 @@ public:
                                           double stepSize);
 
     /**
-     * @brief Register ECU-reported analog voltage channels via daemon UDP.
-     *
-     * Registers Analog0 through Analog10 and their corresponding AnalogCalc0
-     * through AnalogCalc10 calibrated channels. These are ECU-reported analog
-     * voltage channels received via daemon UDP (port 45454), not physical
-     * Raspberry Pi analog inputs.
-     *
-     * Call this when analog input settings change.
-     */
-    Q_INVOKABLE void refreshEcuAnalogChannels();
-
-    /**
      * @brief Register extender board analog input channels via CAN.
      *
      * Registers EXAnalogInput0 through EXAnalogInput7 and their corresponding
@@ -155,17 +143,6 @@ public:
     Q_INVOKABLE void refreshExtenderAnalogInputs();
 
     /**
-     * @brief Register ECU-reported digital input channels via daemon UDP.
-     *
-     * Registers DigitalInput1 through DigitalInput7. These are ECU-reported
-     * digital input states received via daemon UDP (port 45454), not physical
-     * Raspberry Pi GPIO inputs.
-     *
-     * Call this when digital input settings change.
-     */
-    Q_INVOKABLE void refreshEcuDigitalInputs();
-
-    /**
      * @brief Register extender board digital input channels via CAN.
      *
      * Registers EXDigitalInput1 through EXDigitalInput8. These are digital
@@ -174,6 +151,7 @@ public:
      * Call this when extender board settings change.
      */
     Q_INVOKABLE void refreshExtenderDigitalInputs();
+    Q_INVOKABLE void refreshAll();
 
     // -- Property accessors --
 
@@ -224,7 +202,7 @@ private:
         QString category;
         QString unit;
         SensorSource source;
-        bool active = true;              ///< For DaemonUDP sensors: true if data received recently
+        bool active = true;
         qint64 lastActiveTimestamp = 0;  ///< msecsSinceEpoch of last markCanSensorActive call
         int decimals = 2;
         double maxValue = 100.0;
@@ -232,18 +210,19 @@ private:
     };
 
     QMap<QString, SensorEntry> m_sensors;
-    QTimer m_canTimeoutTimer;  ///< Periodically check for stale DaemonUDP sensors
+    QTimer m_canTimeoutTimer;  ///< Periodically check for stale sensors
+    QTimer m_sensorsChangedTimer;
+    AppSettings *m_appSettings = nullptr;
+    bool m_sensorsChangedPending = false;
+    bool m_suppressEmit = false;
 
     /**
      * @brief Register built-in sensors that are always available (GPS, SenseHat).
      */
     void registerBuiltinSensors();
 
-    /**
-     * @brief Register common CAN/daemon sensors that most ECUs provide.
-     * These are registered with active=false and become active when data arrives.
-     */
-    void registerCommonCanSensors();
+    void scheduleSensorsChanged();
+    void emitScheduledSensorsChanged();
 
     /**
      * @brief Convert a SensorEntry to a QVariantMap for QML consumption.
