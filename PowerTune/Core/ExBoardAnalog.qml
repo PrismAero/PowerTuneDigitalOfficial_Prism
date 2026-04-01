@@ -293,7 +293,7 @@ SettingsPage {
             StyledButton {
                 primary: false
                 text: "Speed Sensor"
-                onClicked: root.openPopup(boardConfigPopup)
+                onClicked: root.openPopup(speedSensorPopup)
             }
 
             StyledButton {
@@ -733,6 +733,19 @@ SettingsPage {
         onSaved: function(config) {
             var bc = JSON.parse(JSON.stringify(root.boardConfig));
             bc.gearSensor = config;
+            root.boardConfig = bc;
+            root.saveAllSettings();
+        }
+    }
+
+    SpeedSensorConfigPopup {
+        id: speedSensorPopup
+        speedConfig: root.boardConfig.speedSensor || ({})
+        expanderData: Expander
+
+        onSaved: function(config) {
+            var bc = JSON.parse(JSON.stringify(root.boardConfig));
+            bc.speedSensor = config;
             root.boardConfig = bc;
             root.saveAllSettings();
         }

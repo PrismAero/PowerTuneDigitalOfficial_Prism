@@ -1,5 +1,6 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
+import QtMultimedia
 import QtQuick.Window 2.15
 import com.powertune 1.0
 import PowerTune.Core 1.0
@@ -11,6 +12,9 @@ ApplicationWindow {
     id: window
 
     property bool showUnlockAnimation: false
+    property bool brightnessPopupDismissed: false
+    readonly property string raceDashSource: "qrc:/qt/qml/PrismPT/Dashboard/PowerTune/Dashboard/RaceDash.qml"
+    readonly property string demoVideoSource: "file:///home/root/bootsplash.mp4"
     color: "black"
     height: 720
     minimumHeight: 720
@@ -19,7 +23,32 @@ ApplicationWindow {
     visible: true
     width: 1600
 
+    function dashSourceFromSelection(selectionIndex) {
+        return raceDashSource;
+    }
+
+    function normalizeDashSettings() {
+        var count = AppSettings.getValue("ui/dashCount", AppSettings.getValue("Number of Dashes", 0));
+        if (count !== 0)
+            AppSettings.setValue("ui/dashCount", 0);
+
+        var firstSelection = AppSettings.getValue("ui/dashSelect1", 0);
+        if (firstSelection !== 0)
+            AppSettings.setValue("ui/dashSelect1", 0);
+
+        firstPageLoader.source = dashSourceFromSelection(firstSelection);
+        if (UI.Visibledashes !== 1)
+            UI.Visibledashes = 1;
+    }
+
+    function ensureDashboardPageIfNavigationDisabled() {
+        if (!dashView.interactive && dashView.currentIndex > 0)
+            dashView.currentIndex = 0;
+    }
+
     Component.onCompleted: {
+        normalizeDashSettings();
+        ensureDashboardPageIfNavigationDisabled();
         if (popUpLoader.active)
             popUpLoader.visible = true;
     }
@@ -30,12 +59,12 @@ ApplicationWindow {
         anchors.bottomMargin: prismKeyboard.visibleHeight
         anchors.fill: parent
         currentIndex: 0
-        interactive: UI.draggable === 0 && DashboardLock.swipeAllowed
+        interactive: UI.draggable === 0 && DashboardLock.swipeAllowed && !DemoMode.active
 
         Loader {
             id: firstPageLoader
 
-            source: "qrc:/qt/qml/PrismPT/Dashboard/PowerTune/Dashboard/RaceDash.qml"
+            source: raceDashSource
         }
 
         Item {
@@ -47,38 +76,21 @@ ApplicationWindow {
     }
 
     Loader {
-        id: secondPageLoader
-
-        active: source !== ""
-        source: ""
-    }
-
-    Loader {
-        id: thirdPageLoader
-
-        active: source !== ""
-        source: ""
-    }
-
-    Loader {
-        id: fourthPageLoader
-
-        active: source !== ""
-        source: ""
-    }
-
-    Loader {
         id: popUpLoader
 
-        active: ScreenControl.shouldShowPopupOnStartup()
+        active: ScreenControl.startupPopupVisible && !brightnessPopupDismissed && !DemoMode.active
         anchors.right: parent.right
         source: active ? Qt.resolvedUrl("BrightnessPopUp.qml") : ""
         visible: false
         width: window.width * 0.15
 
+        onActiveChanged: if (!active)
+                             visible = false
         onItemChanged: {
-            if (item)
+            if (item) {
                 visible = true;
+                brightnessPopupDismissed = false;
+            }
         }
     }
 
@@ -89,19 +101,20 @@ ApplicationWindow {
         anchors.horizontalCenter: parent.horizontalCenter
         count: dashView.count
         currentIndex: dashView.currentIndex
-        visible: !DashboardLock.lockoutEnabled || DashboardLock.sessionUnlocked
+        visible: (!DashboardLock.lockoutEnabled || DashboardLock.sessionUnlocked) && !DemoMode.active
     }
 
     PrismKeyboard {
         id: prismKeyboard
 
         parent: Overlay.overlay
+        visible: !DemoMode.active
     }
 
     Rectangle {
         anchors.fill: parent
         color: "#28000000"
-        visible: DashboardLock.lockoutEnabled && (DashboardLock.unlocking || showUnlockAnimation)
+        visible: DashboardLock.lockoutEnabled && (DashboardLock.unlocking || showUnlockAnimation) && !DemoMode.active
         z: 20
 
         Item {
@@ -244,7 +257,7 @@ ApplicationWindow {
         anchors.left: parent.left
         color: "transparent"
         height: 120
-        visible: DashboardLock.lockoutEnabled && !DashboardLock.sessionUnlocked
+        visible: DashboardLock.lockoutEnabled && !DashboardLock.sessionUnlocked && !DemoMode.active
         width: 120
         z: 21
 
@@ -261,7 +274,7 @@ ApplicationWindow {
         anchors.right: parent.right
         color: "transparent"
         height: 120
-        visible: DashboardLock.lockoutEnabled && !DashboardLock.sessionUnlocked
+        visible: DashboardLock.lockoutEnabled && !DashboardLock.sessionUnlocked && !DemoMode.active
         width: 120
         z: 21
 
@@ -271,6 +284,14 @@ ApplicationWindow {
             onPressed: DashboardLock.beginUnlockHold()
             onReleased: DashboardLock.cancelUnlockHold()
         }
+    }
+
+    Connections {
+        function onDraggableChanged() {
+            ensureDashboardPageIfNavigationDisabled();
+        }
+
+        target: UI
     }
 
     Connections {
@@ -292,8 +313,11 @@ ApplicationWindow {
 
     Connections {
         function onSwipeAllowedChanged(allowed) {
-            if (!allowed && dashView.currentIndex === dashView.count - 1)
+            if (!allowed && dashView.currentIndex === dashView.count - 1) {
                 dashView.currentIndex = 0;
+                return;
+            }
+            ensureDashboardPageIfNavigationDisabled();
         }
 
         function onSessionUnlockedChanged(unlocked) {
@@ -331,6 +355,52 @@ ApplicationWindow {
             }
 
             target: bootSplashLoader.item
+        }
+    }
+
+    Rectangle {
+        id: demoModeOverlay
+
+        anchors.fill: parent
+        color: "black"
+        visible: DemoMode.active
+        z: 95
+
+        VideoOutput {
+            id: demoVideoOutput
+            anchors.fill: parent
+            fillMode: VideoOutput.PreserveAspectCrop
+        }
+
+        MediaPlayer {
+            id: demoPlayer
+            loops: MediaPlayer.Infinite
+            source: demoVideoSource
+            videoOutput: demoVideoOutput
+        }
+
+        Image {
+            anchors.fill: parent
+            fillMode: Image.PreserveAspectFit
+            source: "qrc:/Resources/graphics/Logo.png"
+            visible: demoPlayer.mediaStatus === MediaPlayer.InvalidMedia || demoPlayer.mediaStatus === MediaPlayer.NoMedia
+        }
+
+        MouseArea {
+            anchors.fill: parent
+            onPressed: function(mouse) {
+                mouse.accepted = true;
+            }
+        }
+
+        onVisibleChanged: {
+            if (visible) {
+                popUpLoader.visible = false;
+                prismKeyboard.hide();
+                demoPlayer.play();
+            } else {
+                demoPlayer.stop();
+            }
         }
     }
 }

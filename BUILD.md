@@ -354,6 +354,25 @@ The build is configured in `build-powertune/conf/local.conf`:
 | App path | `/opt/PowerTune/PowerTuneQMLGui` |
 | App log | `/var/log/powertune.log` |
 | Settings | `/home/root/.config/PowerTune/PowerTune.conf` |
+| User dashboards | `/home/root/UserDashboards` |
+| Logo assets | `/home/root/Logo` |
+| Track downloads | `/home/root/KTracks` |
+
+#### 3.1.2 OTA Update Auth Provisioning (Private GitHub)
+
+The in-device updater checks private GitHub Releases. Configure target auth:
+
+```sh
+mkdir -p /home/root/.config/PowerTune
+printf '%s\n' '<github_token_with_repo_read_access>' > /home/root/.config/PowerTune/github-token
+chmod 600 /home/root/.config/PowerTune/github-token
+```
+
+Optional runtime overrides:
+
+- `POWERTUNE_GH_TOKEN` (token directly in env)
+- `POWERTUNE_GH_REPO` (default: `PowerTuneDigital/PowerTuneDigital_Prism`)
+- `POWERTUNE_UPDATE_INSTALLER` (default: `/opt/PowerTune/Scripts/install-app-update.sh`)
 
 #### 3.1.1 Direct-Link Adapter (Windows ICS DHCP)
 

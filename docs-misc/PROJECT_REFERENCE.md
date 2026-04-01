@@ -29,8 +29,8 @@ This audit confirmed the following:
 - The active build system is Qt 6 + CMake from the root `CMakeLists.txt`
 - The app entry point is `main.cpp`, which loads `PowerTune/Core/Main.qml`
 - The central C++ wiring point is `Core/connect.cpp`
-- The dashboard stack is based on `RaceDash.qml`, `UserDashboard.qml`, overlay
-  configs, and `PropertyRouter`
+- The dashboard stack is based on `RaceDash.qml`, overlay configs, and `PropertyRouter`
+- archived/orphan UI surfaces are tracked under `docs-misc/code-archive/ui-orphans-2026-03/`
 - The settings UI includes a dedicated `DisplaySettings.qml` page and new
   services such as `ScreenControlService` and `DashboardLockService`
 - Older docs that referenced `Qt.labs.settings`, `DatasourceService.qml`,
@@ -83,7 +83,7 @@ PowerTuneDigitalOfficial_Prism/
 
 | Directory | Purpose |
 | --- | --- |
-| `PowerTune/Core/` | Main app shell, intro page, settings manager, ex-board page, brightness popup |
+| `PowerTune/Core/` | Main app shell, settings manager, ex-board page, brightness popup, speed sensor popup |
 | `PowerTune/Settings/` | Main, display, network, diagnostics, vehicle/RPM, dash selection pages |
 | `PowerTune/Settings/components/` | Shared styled controls and layout primitives |
 | `PowerTune/Dashboard/` | Dashboard pages and overlay configuration UI |
@@ -148,12 +148,12 @@ The active QML modules declared in `CMakeLists.txt` are:
 | URI | Library Target | Key Contents |
 | --- | --- | --- |
 | `PowerTune.Utils` | `PowerTuneUtilsLib` | `Translator.qml`, `MaterialIcon.qml` |
-| `PowerTune.Core` | `PowerTuneCoreLib` | `Main.qml`, `Intro.qml`, `SettingsManager.qml`, `ExBoardAnalog.qml`, `BrightnessPopUp.qml` |
+| `PowerTune.Core` | `PowerTuneCoreLib` | `Main.qml`, `SettingsManager.qml`, `ExBoardAnalog.qml`, `BrightnessPopUp.qml`, `SpeedSensorConfigPopup.qml` |
 | `PowerTune.UI` | `PowerTuneUiLib` | themed settings components such as `StyledButton`, `StyledSpinBox`, `SensorPicker` |
-| `PowerTune.Settings` | `PowerTuneSettingsLib` | `MainSettings.qml`, `DisplaySettings.qml`, `DashSelector.qml`, `VehicleRPMSettings.qml`, `NetworkSettings.qml`, `CanMonitor.qml`, `DiagnosticsSettings.qml`, `HelpPage.qml` |
+| `PowerTune.Settings` | `PowerTuneSettingsLib` | `MainSettings.qml`, `DisplaySettings.qml`, `DashSelector.qml`, `VehicleRPMSettings.qml`, `NetworkSettings.qml`, `DiagnosticsSettings.qml`, `WifiCountryList.qml` |
 | `PowerTune.Gauges.Shared` | `GaugesSharedLib` | `Warning.qml`, `WarningLoader.qml`, `WarningFlashTimer.qml` |
 | `PowerTune.Gauges.RaceDash` | `GaugesRaceDashLib` | `ArcGauge.qml`, `GaugeReadout.qml`, `ShiftIndicator.qml`, `SensorCard.qml`, `StatusBox.qml`, `BrakeBiasBar.qml`, `BottomStatusBar.qml`, `GearIndicator.qml`, `TachCluster.qml`, `SpeedCluster.qml` |
-| `PrismPT.Dashboard` | `PrismPTDashboardLib` | `DashboardTheme.qml`, `UserDashboard.qml`, `RaceDash.qml`, `DraggableOverlay.qml`, `OverlayConfigPopup.qml` |
+| `PrismPT.Dashboard` | `PrismPTDashboardLib` | `DashboardTheme.qml`, `RaceDash.qml`, `DraggableOverlay.qml`, `OverlayConfigPopup.qml` |
 | `Prism.Keyboard` | `PrismKeyboardLib` | `PrismKeyboard.qml`, `QwertyLayout.qml`, `NumericPad.qml`, `KeyButton.qml`, theme/icon helpers |
 
 ### 7.1 Embedded C++ in QML Modules
@@ -172,9 +172,8 @@ and linked into `GaugesRaceDashLib`.
 Current high-level page flow:
 
 - `SwipeView`
-- page 0: `Intro.qml`
-- pages 1-3: additional dashboard loaders depending on `UI.Visibledashes`
-- final page: `SettingsManager.qml`
+- page 0: `RaceDash.qml`
+- page 1: `SettingsManager.qml`
 
 Additional global UI behavior in `Main.qml`:
 
@@ -220,7 +219,6 @@ Additional global UI behavior in `Main.qml`:
 - `Diagnostics`
 - `OverlayConfig`
 - `ShiftHelper`
-- `CanMonitorModel`
 - `ExBoardConfig`
 - `ScreenControl`
 - `DashboardLock`
@@ -299,7 +297,6 @@ Canonical runtime settings path on the target device:
 
 | File | Role |
 | --- | --- |
-| `UserDashboard.qml` | dashboard page with persisted background image/color |
 | `RaceDash.qml` | primary race dashboard with draggable overlays |
 | `DraggableOverlay.qml` | drag/edit shell |
 | `OverlayConfigPopup.qml` | overlay editor |
@@ -338,7 +335,7 @@ Warning UI is currently provided by the shared gauge module:
 - `PowerTune/Gauges/Shared/WarningLoader.qml`
 - `PowerTune/Gauges/Shared/WarningFlashTimer.qml`
 
-`UserDashboard.qml` hosts `WarningLoader`.
+`RaceDash.qml` hosts warning overlays through shared gauge warning components.
 
 ## 13. Resources
 

@@ -262,7 +262,7 @@ void AppSettings::setLogging(const int &arg)
 
 void AppSettings::writeSelectedDashSettings(int numberofdashes)
 {
-    setValue("Number of Dashes", numberofdashes);
+    setValue("ui/dashCount", numberofdashes);
 }
 
 void AppSettings::externalspeedconnectionstatus(int connected)
@@ -908,6 +908,7 @@ void AppSettings::readandApplySettings()
     if (m_settingsData) {
         m_settingsData->setCBXCountrysave(getValue("Country").toString());
         m_settingsData->setCBXTracksave(getValue("Track").toString());
+        m_settingsData->setlanguage(getValue("Language", 0).toInt());
     }
 
     if (m_uiState) {
@@ -931,6 +932,7 @@ void AppSettings::readandApplySettings()
         m_settingsData->setExternalrpm(getValue("ExternalRPM").toInt());
     if (m_extender) {
         const int rpmSource = getValue("ui/exboard/rpmSource", getValue("ui/exboard/rpmSourceValue", 0)).toInt();
+        setValue("ui/exboard/rpmSource", rpmSource);
         m_extender->setRpmSource(rpmSource);
     }
 

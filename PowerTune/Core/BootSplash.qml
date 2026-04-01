@@ -29,7 +29,7 @@ Rectangle {
     MediaPlayer {
         id: mediaPlayer
         videoOutput: videoOutput
-        source: "file:///home/pi/bootsplash.mp4"
+        source: "file:///home/root/bootsplash.mp4"
 
         onMediaStatusChanged: {
             if (mediaStatus === MediaPlayer.InvalidMedia

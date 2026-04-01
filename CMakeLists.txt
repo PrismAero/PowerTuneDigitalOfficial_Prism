@@ -46,6 +46,8 @@ set(CORE_SOURCES
     Core/DiagnosticsProvider.cpp
     Core/DifferentialSensorCalc.cpp
     Core/ExBoardConfigManager.cpp
+    Core/DemoModeService.cpp
+    Core/UpdateManagerService.cpp
     Core/ScreenControlService.cpp
     Core/DashboardLockService.cpp
     Core/OverlayConfigDefaults.cpp
@@ -70,6 +72,8 @@ set(CORE_HEADERS
     Core/DiagnosticsProvider.h
     Core/DifferentialSensorCalc.h
     Core/ExBoardConfigManager.h
+    Core/DemoModeService.h
+    Core/UpdateManagerService.h
     Core/ScreenControlService.h
     Core/DashboardLockService.h
     Core/OverlayConfigDefaults.h
@@ -226,7 +230,6 @@ qt_policy(SET QTP0004 OLD)
         VERSION 1.0
         QML_FILES
             PowerTune/Core/Main.qml
-            PowerTune/Core/Intro.qml
             PowerTune/Core/BootSplash.qml
             PowerTune/Core/SettingsManager.qml
             PowerTune/Core/ExBoardAnalog.qml
@@ -274,7 +277,6 @@ qt_policy(SET QTP0004 OLD)
             PowerTune/Settings/DashSelectorWidget.qml
             PowerTune/Settings/VehicleRPMSettings.qml
             PowerTune/Settings/NetworkSettings.qml
-            PowerTune/Settings/CanMonitor.qml
             PowerTune/Settings/DiagnosticsSettings.qml
             PowerTune/Settings/WifiCountryList.qml
         RESOURCE_PREFIX /qt/qml
@@ -332,7 +334,6 @@ qt_policy(SET QTP0004 OLD)
         IMPORTS PowerTune.UI PowerTune.Gauges.Shared PowerTune.Gauges.RaceDash
         QML_FILES
             PowerTune/Dashboard/DashboardTheme.qml
-            PowerTune/Dashboard/UserDashboard.qml
             PowerTune/Dashboard/RaceDash.qml
             PowerTune/Dashboard/DraggableOverlay.qml
             PowerTune/Dashboard/OverlayConfigPopup.qml

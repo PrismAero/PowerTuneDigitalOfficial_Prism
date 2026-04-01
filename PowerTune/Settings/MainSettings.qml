@@ -123,6 +123,7 @@ SettingsPage {
         disconnectButton.enabled = false;
         ecuSelect.enabled = true;
         autoConnectEnabled = AppSettings.getValue("ui/canAutoConnect", AppSettings.getValue("ui/connectAtStartup", false));
+        AppSettings.setValue("ui/canAutoConnect", autoConnectEnabled);
         weight.text = AppSettings.getValue("ui/vehicleWeight", "0");
         unitSelect1.currentIndex = AppSettings.getValue("ui/unitSelector1", 0);
         unitSelect.currentIndex = AppSettings.getValue("ui/unitSelector", 0);
@@ -423,6 +424,87 @@ SettingsPage {
 
                         onClicked: Connect.shutdown()
                     }
+                }
+            }
+
+            SettingsSection {
+                Layout.fillWidth: true
+                title: Translator.translate("Updates", Settings.language)
+
+                MainSettingsRow {
+                    label: Translator.translate("Current Version", Settings.language)
+
+                    Text {
+                        color: SettingsTheme.textSecondary
+                        font.family: SettingsTheme.fontFamilyMono
+                        font.pixelSize: SettingsTheme.fontStatus
+                        text: Updater.currentVersion
+                    }
+                }
+
+                MainSettingsRow {
+                    label: Translator.translate("Latest Version", Settings.language)
+
+                    Text {
+                        color: SettingsTheme.textSecondary
+                        font.family: SettingsTheme.fontFamilyMono
+                        font.pixelSize: SettingsTheme.fontStatus
+                        text: Updater.latestVersion === "" ? "-" : Updater.latestVersion
+                    }
+                }
+
+                MainSettingsRow {
+                    label: Translator.translate("Auth", Settings.language)
+
+                    Text {
+                        color: Updater.hasAuthToken ? SettingsTheme.success : SettingsTheme.warning
+                        font.family: SettingsTheme.fontFamily
+                        font.pixelSize: SettingsTheme.fontStatus
+                        text: Updater.hasAuthToken
+                              ? Translator.translate("Token available", Settings.language)
+                              : Translator.translate("Token missing", Settings.language)
+                    }
+                }
+
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: SettingsTheme.sectionPadding
+
+                    StyledButton {
+                        text: Translator.translate("Check for Updates", Settings.language)
+                        onClicked: Updater.checkForUpdates()
+                    }
+
+                    StyledButton {
+                        enabled: Updater.updateAvailable
+                        primary: false
+                        text: Translator.translate("Download Update", Settings.language)
+                        onClicked: Updater.downloadUpdate()
+                    }
+
+                    StyledButton {
+                        enabled: Updater.downloadReady
+                        danger: true
+                        text: Translator.translate("Install Update", Settings.language)
+                        onClicked: Updater.installUpdate()
+                    }
+                }
+
+                ProgressBar {
+                    Layout.fillWidth: true
+                    from: 0
+                    to: 100
+                    value: Updater.downloadProgressPercent
+                    visible: Updater.status === "downloading" || Updater.status === "verifying"
+                }
+
+                Text {
+                    Layout.fillWidth: true
+                    color: SettingsTheme.textPrimary
+                    font.family: SettingsTheme.fontFamily
+                    font.pixelSize: SettingsTheme.fontStatus
+                    text: Updater.statusMessage
+                    wrapMode: Text.WordWrap
                 }
             }
         }

@@ -34,6 +34,7 @@
 #include "../Utils/wifiscanner.h"
 #include "DiagnosticsProvider.h"
 #include "DashboardLockService.h"
+#include "DemoModeService.h"
 #include "DifferentialSensorCalc.h"
 #include "ExBoardConfigManager.h"
 #include "Models/CanFrameModel.h"
@@ -43,6 +44,7 @@
 #include "PropertyRouter.h"
 #include "ScreenControlService.h"
 #include "SensorRegistry.h"
+#include "UpdateManagerService.h"
 #include "appsettings.h"
 
 #include <QByteArrayMatcher>
@@ -67,7 +69,7 @@ namespace {
 QString dashboardsDirectoryPath()
 {
 #ifdef Q_OS_LINUX
-    return QStringLiteral("/home/pi/UserDashboards");
+    return QStringLiteral("/home/root/UserDashboards");
 #else
     const QString appData = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
     QDir dir(appData);
@@ -110,6 +112,8 @@ Connect::Connect(QObject *parent)
       m_diagnosticsProvider(nullptr),
       m_screenControlService(nullptr),
       m_dashboardLockService(nullptr),
+      m_demoModeService(nullptr),
+      m_updateManagerService(nullptr),
       m_canStartupManager(nullptr),
       m_canTransport(nullptr),
       m_canManager(nullptr)
@@ -196,6 +200,8 @@ Connect::Connect(QObject *parent)
     m_dashboardLockService = new DashboardLockService(this);
     m_dashboardLockService->setAppSettings(m_appSettings);
     m_dashboardLockService->initialize();
+    m_demoModeService = new DemoModeService(this);
+    m_updateManagerService = new UpdateManagerService(this);
     m_overlayConfigDefaults = new OverlayConfigDefaults(this);
     m_overlayConfigDefaults->setAppSettings(m_appSettings);
     // m_wifiscanner = new WifScanner(this);
@@ -247,10 +253,11 @@ Connect::Connect(QObject *parent)
     engine->rootContext()->setContextProperty("Diagnostics", m_diagnosticsProvider);
     engine->rootContext()->setContextProperty("OverlayConfig", m_overlayConfigManager);
     engine->rootContext()->setContextProperty("ShiftHelper", m_shiftIndicatorHelper);
-    engine->rootContext()->setContextProperty("CanMonitorModel", m_canFrameModel);
     engine->rootContext()->setContextProperty("ExBoardConfig", m_exBoardConfigManager);
     engine->rootContext()->setContextProperty("ScreenControl", m_screenControlService);
     engine->rootContext()->setContextProperty("DashboardLock", m_dashboardLockService);
+    engine->rootContext()->setContextProperty("DemoMode", m_demoModeService);
+    engine->rootContext()->setContextProperty("Updater", m_updateManagerService);
     engine->rootContext()->setContextProperty("OverlayDefaults", m_overlayConfigDefaults);
     m_appSettings->setExtender(m_extender);
     m_appSettings->setSteinhartCalculator(m_steinhartCalc);
@@ -354,8 +361,8 @@ void Connect::readavailablebackrounds()
     QStringList dashfiles;
 
 #ifdef Q_OS_LINUX
-    // * Linux (Raspberry Pi) - use /home/pi/Logo directory
-    QDir directory("/home/pi/Logo");
+    // * Linux (Raspberry Pi) - use /home/root/Logo directory
+    QDir directory("/home/root/Logo");
     dashfiles = directory.entryList(QStringList() << "*.png" << "*.gif", QDir::Files);
 #elif defined(Q_OS_MACOS)
     // * macOS - list bundled graphics resources for development testing
@@ -601,7 +608,9 @@ bool Connect::startActiveCanModule()
         return false;
     }
 
-    const int bitrateSelection = m_appSettings ? m_appSettings->getValue(QStringLiteral("ui/bitrateSelect"), 2).toInt() : 2;
+    int bitrateSelection = m_appSettings ? m_appSettings->getValue(QStringLiteral("ui/bitrateSelect"), 0).toInt() : 0;
+    if (bitrateSelection < 0 || bitrateSelection > 2)
+        bitrateSelection = 0;
     const int bitrate = canBitrateForSelection(bitrateSelection);
     if (bitrate <= 0) {
         if (m_diagnosticsProvider)
@@ -629,19 +638,13 @@ bool Connect::startActiveCanModule()
 
 void Connect::update()
 {
+    if (m_updateManagerService)
+        m_updateManagerService->checkForUpdates();
+
     if (m_diagnosticsProvider)
         m_diagnosticsProvider->addLogMessage(QStringLiteral("INFO"), QStringLiteral("System update initiated"));
-
-    if (m_diagnosticsProvider) {
-        m_diagnosticsProvider->addLogMessage(
-            QStringLiteral("WARN"),
-            QStringLiteral("In-app update is unavailable: no updater script is configured in this repository"));
-    }
-
-    if (m_connectionData) {
-        m_connectionData->setSerialStat(
-            QStringLiteral("Update unavailable: use the documented CMake/Yocto deployment workflow"));
-    }
+    if (m_connectionData)
+        m_connectionData->setSerialStat(QStringLiteral("Checking for updates"));
 }
 
 void Connect::changefolderpermission()
@@ -649,7 +652,7 @@ void Connect::changefolderpermission()
     QProcess *process = new QProcess(this);
     QString program = "sudo";
     QStringList arguments;
-    arguments << "chown" << "-R" << "pi:pi" << "/home/pi/KTracks";
+    arguments << "chown" << "-R" << "root:root" << "/home/root/KTracks";
 
     process->start(program, arguments);
     process->waitForFinished(600000);  // 10 minutes time before timeout
@@ -682,7 +685,7 @@ void Connect::turnscreen()
     QProcess *process = new QProcess(this);
     QString program = "sudo";
     QStringList arguments;
-    arguments << "cp" << "/home/pi/src/config.txt" << "/boot/config.txt";
+    arguments << "cp" << "/home/root/src/config.txt" << "/boot/config.txt";
 
     process->start(program, arguments);
     process->waitForFinished(600000);  // 10 minutes time before timeout

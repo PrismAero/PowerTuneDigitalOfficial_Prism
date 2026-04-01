@@ -58,6 +58,8 @@ class ExBoardConfigManager;
 class OverlayConfigDefaults;
 class ScreenControlService;
 class DashboardLockService;
+class DemoModeService;
+class UpdateManagerService;
 class CanStartupManager;
 class CanTransport;
 class CanManager;
@@ -155,6 +157,8 @@ private:
     OverlayConfigDefaults *m_overlayConfigDefaults;
     ScreenControlService *m_screenControlService;
     DashboardLockService *m_dashboardLockService;
+    DemoModeService *m_demoModeService;
+    UpdateManagerService *m_updateManagerService;
     CanStartupManager *m_canStartupManager;
     CanTransport *m_canTransport;
     CanManager *m_canManager;

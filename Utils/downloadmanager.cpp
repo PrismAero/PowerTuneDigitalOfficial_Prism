@@ -249,7 +249,7 @@ QList<QString> DownloadManager::readTrackData()
 #ifdef __linux__
     pathString = QStringLiteral("/opt/PowerTune/repo.txt");
 #elif _WIN32
-    pathString = QCoreApplication::applicationFilePath().remove("release/PowertuneQMLGui.exe") + "repo.txt";
+    pathString = QCoreApplication::applicationFilePath().remove("release/PowerTuneQMLGui.exe") + "repo.txt";
 #else
     pathString.clear();
 #endif
@@ -285,7 +285,7 @@ void DownloadManager::sortDownloadedFiles()
 
 #ifdef __linux__
     sourceRoot = QStringLiteral("/opt/PowerTune/");
-    destinationRoot = QStringLiteral("/home/pi/KTracks/");
+    destinationRoot = QStringLiteral("/home/root/KTracks/");
 #elif _WIN32
     sourceRoot = QCoreApplication::applicationDirPath() + "/";
     destinationRoot = sourceRoot;

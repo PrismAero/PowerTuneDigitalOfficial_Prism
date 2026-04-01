@@ -1230,23 +1230,4 @@ SettingsPage {
         }
     }
 
-    // * DEBUG TOOLS
-    SettingsSection {
-        Layout.fillWidth: true
-        title: "Debug Tools"
-
-        SettingsRow {
-            description: "Force all arc gauges to 100% fill for alignment verification"
-            label: "Full Arc Sweep"
-
-            StyledSwitch {
-                checked: {
-                    var v = AppSettings.getValue("debug/arcFullSweep", false);
-                    return v === true || v === "true";
-                }
-
-                onCheckedChanged: AppSettings.setValue("debug/arcFullSweep", checked)
-            }
-        }
-    }
 }

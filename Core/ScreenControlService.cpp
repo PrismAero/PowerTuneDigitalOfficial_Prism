@@ -27,6 +27,8 @@ ScreenControlService::ScreenControlService(QObject *parent) : QObject(parent)
 void ScreenControlService::setAppSettings(AppSettings *settings)
 {
     m_appSettings = settings;
+    refreshConfig();
+    refreshStartupPopupVisible();
 }
 
 void ScreenControlService::setUIState(UIState *state)
@@ -130,8 +132,10 @@ void ScreenControlService::detectBackend()
     if (priorBackend != m_backend)
         emit capabilityChanged();
 
-    if (!m_ddcProbe)
+    if (!m_ddcProbe) {
         refreshConfig();
+        refreshStartupPopupVisible();
+    }
 }
 
 void ScreenControlService::restoreStartupBrightness()
@@ -173,7 +177,7 @@ void ScreenControlService::applyNightPreset()
 
 bool ScreenControlService::shouldShowPopupOnStartup() const
 {
-    return hasBrightnessControl() && popupEnabled() && presetControlsVisible();
+    return startupPopupVisible();
 }
 
 void ScreenControlService::applyHardwareBrightness(int value)
@@ -239,6 +243,7 @@ void ScreenControlService::setPopupEnabled(bool enabled)
 
     m_appSettings->writeBrightnessPopupEnabled(enabled);
     emit popupEnabledChanged(enabled);
+    refreshStartupPopupVisible();
 }
 
 void ScreenControlService::refreshConfig()
@@ -252,6 +257,7 @@ void ScreenControlService::refreshConfig()
 
     m_presetControlsVisible = visible;
     emit presetControlsVisibleChanged(m_presetControlsVisible);
+    refreshStartupPopupVisible();
 }
 
 void ScreenControlService::onOverrideTimeout()
@@ -295,6 +301,17 @@ void ScreenControlService::onDdcProbeFinished(int exitCode, QProcess::ExitStatus
     m_ddcProbe->deleteLater();
     m_ddcProbe = nullptr;
     refreshConfig();
+    refreshStartupPopupVisible();
+}
+
+void ScreenControlService::refreshStartupPopupVisible()
+{
+    const bool visible = hasBrightnessControl() && popupEnabled() && presetControlsVisible();
+    if (m_startupPopupVisible == visible)
+        return;
+
+    m_startupPopupVisible = visible;
+    emit startupPopupVisibleChanged(m_startupPopupVisible);
 }
 
 int ScreenControlService::clampPercent(int percent) const

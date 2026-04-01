@@ -61,8 +61,8 @@ The active QML modules declared in `CMakeLists.txt` are:
 - `main.cpp` loads `PowerTune/Core/Main.qml`
 - `Core/connect.cpp` creates the backend objects and exposes them to QML
 - `PowerTune/Core/SettingsManager.qml` owns the settings tab stack
-- `PowerTune/Dashboard/RaceDash.qml` and `PowerTune/Dashboard/UserDashboard.qml`
-  provide the dashboard pages
+- `PowerTune/Dashboard/RaceDash.qml` provides the active dashboard page
+- legacy dashboard surfaces were archived under `docs-misc/code-archive/ui-orphans-2026-03/`
 
 ## Local Build
 
@@ -151,6 +151,28 @@ or
 
 - `docs-misc/PROJECT_REFERENCE.md`: current architecture and codebase reference
 - `BUILD.md`: build, Yocto, and deployment workflow
+- `docs-misc/UPDATE_ARTIFACT_CONTRACT.md`: release asset format used by OTA updater
+- `docs-misc/UPDATE_MANAGER_RUNBOOK.md`: auth, release, install, and recovery runbook
+- `docs-misc/UPDATE_VALIDATION_MATRIX.md`: validation coverage and remaining on-device tests
+
+## OTA Updates (GitHub Releases)
+
+The app includes a manual update flow in Settings:
+
+- Check for update
+- Download update bundle
+- Install update bundle
+
+Release artifacts are expected from private GitHub Releases using:
+
+- `powertune-app-bundle-<version>.tar.gz`
+- `powertune-app-bundle-<version>.sha256`
+- `release-manifest.json`
+
+Device auth is provided via either:
+
+- env var `POWERTUNE_GH_TOKEN`, or
+- token file `/home/root/.config/PowerTune/github-token`
 
 ## Historical Notes
 
