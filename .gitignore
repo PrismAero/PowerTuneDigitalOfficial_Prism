@@ -118,3 +118,4 @@ device-backup/
 
 # Remote SSH credentials
 remotessh.login
+artifacts/powertune-image-raspberrypi4.rootfs.wic.bz2
