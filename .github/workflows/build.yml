@@ -15,6 +15,6 @@ jobs:
       - run: cmake --build build --parallel
       - name: Check file existence
         id: check_files
-        uses: andstor/file-existence-action@v1
+        uses: andstor/file-existence-action@v3
         with:
           files: "build/PowerTuneQMLGui"
