@@ -45,15 +45,6 @@ jobs:
         run: |
           git fetch origin dev main --tags --prune
 
-      - name: Ensure main is fast-forwardable to dev
-        shell: bash
-        run: |
-          if ! git merge-base --is-ancestor "origin/main" "origin/dev"; then
-            echo "main is not an ancestor of dev."
-            echo "Refusing non-fast-forward merge to preserve release history safety."
-            exit 1
-          fi
-
       - name: Ensure release tag does not already exist
         shell: bash
         run: |
@@ -63,11 +54,11 @@ jobs:
             exit 1
           fi
 
-      - name: Fast-forward main to dev
+      - name: Merge dev into main
         shell: bash
         run: |
           git checkout -B main origin/main
-          git merge --ff-only origin/dev
+          git merge --no-ff --no-edit origin/dev
           git push origin main
 
       - name: Create and push release tag on promoted main
