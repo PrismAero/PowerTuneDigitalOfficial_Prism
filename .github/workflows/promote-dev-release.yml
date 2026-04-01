@@ -1,0 +1,78 @@
+name: Promote Dev And Tag Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Release tag to create (must start with v, ex: v1.2.3)"
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: promote-dev-release
+  cancel-in-progress: false
+
+jobs:
+  promote_and_tag:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate release tag format
+        shell: bash
+        run: |
+          VERSION="${{ inputs.version }}"
+          if [[ ! "${VERSION}" =~ ^v[0-9]+(\.[0-9]+){1,2}([.-][0-9A-Za-z.-]+)?$ ]]; then
+            echo "Invalid version format: ${VERSION}"
+            echo "Expected examples: v1.2.3 or v1.2.3-rc1"
+            exit 1
+          fi
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configure git identity
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Fetch branches and tags
+        shell: bash
+        run: |
+          git fetch origin dev main --tags --prune
+
+      - name: Ensure main is fast-forwardable to dev
+        shell: bash
+        run: |
+          if ! git merge-base --is-ancestor "origin/main" "origin/dev"; then
+            echo "main is not an ancestor of dev."
+            echo "Refusing non-fast-forward merge to preserve release history safety."
+            exit 1
+          fi
+
+      - name: Ensure release tag does not already exist
+        shell: bash
+        run: |
+          VERSION="${{ inputs.version }}"
+          if git rev-parse -q --verify "refs/tags/${VERSION}" >/dev/null; then
+            echo "Tag ${VERSION} already exists"
+            exit 1
+          fi
+
+      - name: Fast-forward main to dev
+        shell: bash
+        run: |
+          git checkout -B main origin/main
+          git merge --ff-only origin/dev
+          git push origin main
+
+      - name: Create and push release tag on promoted main
+        shell: bash
+        run: |
+          VERSION="${{ inputs.version }}"
+          git tag -a "${VERSION}" -m "Release ${VERSION}"
+          git push origin "${VERSION}"
