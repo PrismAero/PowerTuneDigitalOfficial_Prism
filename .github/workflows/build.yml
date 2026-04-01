@@ -7,14 +7,14 @@ jobs:
       - name: Install Qt
         uses: jurplel/install-qt-action@v2
         with:
-          version: '5.15.2'
+          version: '6.8.3'
           host: 'linux'
           target: 'desktop'
-          modules: 'qtcharts qtvirtualkeyboard'
-      - uses: actions/checkout@v2
-      - run: mkdir build && cd build && qmake .. && make
+      - uses: actions/checkout@v4
+      - run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
+      - run: cmake --build build --parallel
       - name: Check file existence
         id: check_files
         uses: andstor/file-existence-action@v1
         with:
-          files: "build/PowertuneQMLGui"
+          files: "build/PowerTuneQMLGui"

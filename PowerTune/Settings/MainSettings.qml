@@ -9,10 +9,57 @@ import PowerTune.Utils 1.0
 SettingsPage {
     id: root
 
+    component MainSettingsRow: RowLayout {
+        id: formRow
+
+        default property alias control: controlContainer.data
+        property string description: ""
+        property string label: ""
+
+        Layout.fillWidth: true
+        spacing: SettingsTheme.controlGap
+
+        ColumnLayout {
+            Layout.alignment: Qt.AlignTop
+            Layout.minimumWidth: 150
+            Layout.preferredWidth: 150
+            spacing: 4
+
+            Text {
+                Layout.fillWidth: true
+                color: SettingsTheme.textPrimary
+                font.family: SettingsTheme.fontFamily
+                font.pixelSize: SettingsTheme.fontLabel
+                text: formRow.label
+                wrapMode: Text.WordWrap
+            }
+
+            Text {
+                Layout.fillWidth: true
+                color: SettingsTheme.textSecondary
+                font.family: SettingsTheme.fontFamily
+                font.pixelSize: SettingsTheme.fontStatus
+                text: formRow.description
+                visible: formRow.description !== ""
+                wrapMode: Text.WordWrap
+            }
+        }
+
+        RowLayout {
+            id: controlContainer
+
+            Layout.fillWidth: true
+            Layout.minimumHeight: SettingsTheme.controlHeight
+            Layout.preferredHeight: childrenRect.height > 0 ? childrenRect.height : SettingsTheme.controlHeight
+            spacing: SettingsTheme.controlGap
+        }
+    }
+
     property int connected: 0
     property int currentLanguage: (Settings && Settings.language !== undefined) ? Settings.language : 0
-    readonly property var ecuBackendMap: [5, 0, 4]
-    readonly property int genericCanDaemonIndex: 40
+    readonly property var ecuBackendMap: [5]
+    property bool autoConnectAttempted: false
+    property bool autoConnectEnabled: false
     property int hexstring: 0
     property int hexstring2: 0
     readonly property bool isExtenderOnly: ecuBackendMap[ecuSelect.currentIndex] === 5
@@ -24,11 +71,10 @@ SettingsPage {
     }
 
     function autoConnect() {
-        if (connectButton.enabled === false) {
-            connectEcu();
-            ecuSelect.enabled = false;
-            disconnectButton.enabled = true;
-        }
+        if (!autoConnectEnabled || autoConnectAttempted || !connectButton.enabled)
+            return;
+        autoConnectAttempted = true;
+        connectEcu();
     }
 
     function connectEcu() {
@@ -36,12 +82,10 @@ SettingsPage {
         Connect.setWeight(weight.text);
         var backendIdx = ecuBackendMap[ecuSelect.currentIndex];
         Connect.openConnection("", backendIdx, baseadresstext.text, shiftlightbaseadresstext.text);
-        connected = 1;
     }
 
     function disconnectEcu() {
         Connect.closeConnection();
-        connected = 0;
     }
 
     function ecuDropdownFromBackend(backendIdx) {
@@ -73,7 +117,13 @@ SettingsPage {
     }
 
     Component.onCompleted: {
-        connectButton.enabled = AppSettings.getValue("ui/connectAtStartup", false);
+        if (settingsLoaded)
+            return;
+        connectButton.enabled = true;
+        disconnectButton.enabled = false;
+        ecuSelect.enabled = true;
+        autoConnectEnabled = AppSettings.getValue("ui/canAutoConnect", AppSettings.getValue("ui/connectAtStartup", false));
+        AppSettings.setValue("ui/canAutoConnect", autoConnectEnabled);
         weight.text = AppSettings.getValue("ui/vehicleWeight", "0");
         unitSelect1.currentIndex = AppSettings.getValue("ui/unitSelector1", 0);
         unitSelect.currentIndex = AppSettings.getValue("ui/unitSelector", 0);
@@ -95,6 +145,17 @@ SettingsPage {
     }
 
     Connections {
+        function onConnectionStateChanged(isConnected, statusMessage) {
+            connectButton.enabled = !isConnected;
+            disconnectButton.enabled = isConnected;
+            ecuSelect.enabled = !isConnected;
+            connected = isConnected ? 1 : 0;
+        }
+
+        target: Connect
+    }
+
+    Connections {
         function onOdoChanged() {
             odometer.text = Vehicle.Odo.toFixed(3);
         }
@@ -107,18 +168,8 @@ SettingsPage {
     }
 
     Connections {
-        function onKnockChanged() {
-            if (Engine.Knock > Settings.knockwarn)
-                triggerWarning();
-        }
-
         function onRpmChanged() {
             if (Engine.rpm > Settings.rpmwarn)
-                triggerWarning();
-        }
-
-        function onWatertempChanged() {
-            if (Engine.Watertemp > Settings.waterwarn)
                 triggerWarning();
         }
 
@@ -129,7 +180,6 @@ SettingsPage {
         Layout.fillWidth: true
         spacing: SettingsTheme.sectionSpacing
 
-        // * LEFT COLUMN - Connection, Units, Language, Data Logging
         ColumnLayout {
             Layout.alignment: Qt.AlignTop
             Layout.fillHeight: true
@@ -138,9 +188,10 @@ SettingsPage {
 
             SettingsSection {
                 Layout.fillWidth: true
-                title: Translator.translate("Connection", Settings.language)
+                title: "CAN / Connection"
 
                 RowLayout {
+                    Layout.fillWidth: true
                     spacing: SettingsTheme.sectionPadding
 
                     StyledButton {
@@ -150,12 +201,7 @@ SettingsPage {
 
                         onClicked: {
                             connectEcu();
-                            connectButton.enabled = false;
-                            ecuSelect.enabled = false;
-                            disconnectButton.enabled = true;
                         }
-                        onEnabledChanged: if (settingsLoaded)
-                                              AppSettings.setValue("ui/connectAtStartup", enabled)
                     }
 
                     StyledButton {
@@ -166,19 +212,33 @@ SettingsPage {
                         text: Translator.translate("Disconnect", Settings.language)
 
                         onClicked: {
-                            connectButton.enabled = true;
-                            disconnectButton.enabled = false;
-                            ecuSelect.enabled = true;
                             disconnectEcu();
                         }
                     }
                 }
 
-                SettingsRow {
+                MainSettingsRow {
+                    label: "Auto Connect"
+                    description: "Connect CAN automatically on startup"
+
+                    StyledSwitch {
+                        checked: autoConnectEnabled
+                        text: checked ? "On" : "Off"
+
+                        onCheckedChanged: {
+                            autoConnectEnabled = checked;
+                            if (settingsLoaded)
+                                AppSettings.setValue("ui/canAutoConnect", checked);
+                        }
+                    }
+                }
+
+                MainSettingsRow {
                     label: "CAN Status"
 
                     ConnectionStatusIndicator {
-                        height: parent.height
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: SettingsTheme.controlHeight
                         status: {
                             if (Diagnostics.canStatusText === "Active")
                                 return "connected";
@@ -187,11 +247,10 @@ SettingsPage {
                             return "disconnected";
                         }
                         statusText: Diagnostics.canStatusText
-                        width: parent.width
                     }
                 }
 
-                SettingsRow {
+                MainSettingsRow {
                     label: Translator.translate("ECU Selection", Settings.language)
 
                     StyledComboBox {
@@ -199,9 +258,9 @@ SettingsPage {
 
                         property bool initialized: false
 
-                        height: parent.height
-                        model: ["Extender Only", "CAN", "Generic CAN"]
-                        width: parent.width
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: SettingsTheme.controlHeight
+                        model: ["Extender Only"]
 
                         Component.onCompleted: {
                             var stored = AppSettings.getECU();
@@ -211,220 +270,116 @@ SettingsPage {
                             autoConnect();
                         }
                         onCurrentIndexChanged: {
-                            if (initialized) {
+                            if (initialized)
                                 AppSettings.setEcuIndex(currentIndex);
-                            }
-                        }
-                    }
-                }
-            }
-
-            SettingsSection {
-                Layout.fillWidth: true
-                title: Translator.translate("Units", Settings.language)
-
-                SettingsRow {
-                    label: Translator.translate("Speed units", Settings.language)
-
-                    StyledComboBox {
-                        id: unitSelect1
-
-                        height: parent.height
-                        model: [Translator.translate("Metric", Settings.language), Translator.translate("Imperial",
-                                                                                                        Settings.language)]
-                        width: parent.width
-
-                        onCurrentIndexChanged: {
-                            updateWeightLabel();
-                            if (settingsLoaded)
-                                AppSettings.setSpeedUnitIndex(currentIndex);
                         }
                     }
                 }
 
-                SettingsRow {
-                    label: Translator.translate("Temp units", Settings.language)
-
-                    StyledComboBox {
-                        id: unitSelect
-
-                        height: parent.height
-                        model: [Translator.translate("C", Settings.language), Translator.translate("F",
-                                                                                                   Settings.language)]
-                        width: parent.width
-
-                        onCurrentIndexChanged: {
-                            updateWeightLabel();
-                            if (settingsLoaded)
-                                AppSettings.setTempUnitIndex(currentIndex);
-                        }
-                    }
-                }
-
-                SettingsRow {
-                    label: Translator.translate("Pressure units", Settings.language)
-
-                    StyledComboBox {
-                        id: unitSelect2
-
-                        height: parent.height
-                        model: ["kPa", "PSI"]
-                        width: parent.width
-
-                        onCurrentIndexChanged: {
-                            if (settingsLoaded)
-                                AppSettings.setPressureUnitIndex(currentIndex);
-                        }
-                    }
-                }
-            }
-
-            SettingsSection {
-                Layout.fillWidth: true
-                title: Translator.translate("Language", Settings.language)
-
-                StyledComboBox {
-                    id: languageselect
-
-                    Layout.fillWidth: true
-                    model: ["English", "Deutsch", "\u65E5\u672C\u8A9E", "Espanol"]
-
-                    onCurrentIndexChanged: {
-                        applyLanguage();
-                        updateWeightLabel();
-                        if (settingsLoaded)
-                            AppSettings.setValue("Language", currentIndex);
-                    }
-                }
-            }
-
-            SettingsSection {
-                Layout.fillWidth: true
-                title: Translator.translate("Data Logging", Settings.language)
-
-                SettingsRow {
-                    label: Translator.translate("Logfile name", Settings.language)
-
-                    StyledTextField {
-                        id: logfilenameSelect
-
-                        height: parent.height
-                        inputMethodHints: Qt.ImhNoAutoUppercase | Qt.ImhPreferLowercase | Qt.ImhSensitiveData
-                                          | Qt.ImhNoPredictiveText
-                        text: "DataLog"
-                        width: parent.width
-                    }
-                }
-
-                StyledSwitch {
-                    id: loggerswitch
-
-                    label: Translator.translate("Data Logger", Settings.language)
-
-                    Component.onCompleted: toggleDataLogger()
-                    onClicked: toggleDataLogger()
-                }
-            }
-        }
-
-        // * MIDDLE COLUMN - Vehicle, CAN Bus, Daemon, Display
-        ColumnLayout {
-            Layout.alignment: Qt.AlignTop
-            Layout.fillHeight: true
-            Layout.fillWidth: true
-            spacing: SettingsTheme.sectionPadding
-
-            SettingsSection {
-                Layout.fillWidth: true
-                title: Translator.translate("Vehicle", Settings.language)
-
-                SettingsRow {
-                    id: weightRow
-
-                    label: Translator.translate("Weight", Settings.language) + " kg"
-
-                    StyledTextField {
-                        id: weight
-
-                        height: parent.height
-                        inputMethodHints: Qt.ImhFormattedNumbersOnly
-                        width: parent.width
-
-                        onEditingFinished: AppSettings.setValue("ui/vehicleWeight", text)
-                    }
-                }
-
-                SettingsRow {
-                    label: Translator.translate("Odo", Settings.language)
-
-                    StyledTextField {
-                        id: odometer
-
-                        height: parent.height
-                        inputMethodHints: Qt.ImhFormattedNumbersOnly
-                        text: "0"
-                        width: parent.width
-
-                        onTextChanged: if (settingsLoaded)
-                                           AppSettings.setValue("ui/odometer", text)
-                    }
-                }
-
-                RowLayout {
-                    Layout.fillWidth: true
-                    spacing: SettingsTheme.sectionPadding
-
-                    Text {
-                        Layout.preferredWidth: SettingsTheme.labelWidth
-                        color: SettingsTheme.textPrimary
-                        font.family: SettingsTheme.fontFamily
-                        font.pixelSize: SettingsTheme.fontLabel
-                        text: Translator.translate("Trip", Settings.language)
-                    }
-
-                    StyledTextField {
-                        id: tripmeter
-
-                        Layout.fillWidth: true
-                        Layout.preferredHeight: SettingsTheme.controlHeight
-                        readOnly: true
-                        text: "0"
-
-                        onTextChanged: if (settingsLoaded)
-                                           AppSettings.setValue("ui/tripmeter", text)
-                    }
-
-                    StyledButton {
-                        Layout.preferredHeight: SettingsTheme.controlHeight
-                        primary: false
-                        text: Translator.translate("Trip Reset", Settings.language)
-
-                        onClicked: Calculations.resettrip()
-                    }
-                }
-            }
-
-            SettingsSection {
-                Layout.fillWidth: true
-                title: Translator.translate("CAN Bus", Settings.language)
-
-                SettingsRow {
-                    label: Translator.translate("Can Bitrate", Settings.language)
+                MainSettingsRow {
+                    label: Translator.translate("CAN Bitrate", Settings.language)
 
                     StyledComboBox {
                         id: canbitrateselect
 
-                        height: parent.height
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: SettingsTheme.controlHeight
                         model: ["250 kbit/s", "500 kbit/s", "1 Mbit/s"]
-                        width: parent.width
 
                         onCurrentIndexChanged: if (settingsLoaded)
                                                    AppSettings.setValue("ui/bitrateSelect", currentIndex)
                     }
                 }
 
+                MainSettingsRow {
+                    label: Translator.translate("Speed Source", Settings.language)
+
+                    StyledComboBox {
+                        id: mainspeedsource
+
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: SettingsTheme.controlHeight
+                        model: ["ECU Speed", "LF Wheel", "RF Wheel", "LR Wheel", "RR Wheel", "GPS", "VR Sensor"]
+
+                        onCurrentIndexChanged: {
+                            if (settingsLoaded)
+                                AppSettings.setMainSpeedSourceIndex(currentIndex);
+                        }
+                    }
+                }
+
+                MainSettingsRow {
+                    label: "Extender Base"
+                    description: "CAN address (decimal)"
+
+                    RowLayout {
+                        Layout.fillWidth: true
+                        spacing: SettingsTheme.controlGap
+
+                        StyledTextField {
+                            id: baseadresstext
+
+                            Layout.preferredWidth: SettingsTheme.textFieldMinWidth
+                            Layout.preferredHeight: SettingsTheme.controlHeight
+                            enabled: connectButton.enabled
+                            inputMethodHints: Qt.ImhFormattedNumbersOnly
+                            placeholderText: "1024"
+
+                            validator: IntValidator {
+                                bottom: 0
+                                top: 4000
+                            }
+
+                            onEditingFinished: AppSettings.setValue("ui/extenderCanBase", text)
+                            onTextChanged: hexstring = parseInt(baseadresstext.text) || 0
+                        }
+
+                        Text {
+                            color: SettingsTheme.textSecondary
+                            font.family: SettingsTheme.fontFamilyMono
+                            font.pixelSize: SettingsTheme.fontStatus
+                            text: "0x" + (hexstring + 0x1000).toString(16).substr(-3).toUpperCase()
+                        }
+                    }
+                }
+
+                MainSettingsRow {
+                    label: "Shiftlight Base"
+                    description: "CAN address (decimal)"
+
+                    RowLayout {
+                        Layout.fillWidth: true
+                        spacing: SettingsTheme.controlGap
+
+                        StyledTextField {
+                            id: shiftlightbaseadresstext
+
+                            Layout.preferredWidth: SettingsTheme.textFieldMinWidth
+                            Layout.preferredHeight: SettingsTheme.controlHeight
+                            enabled: connectButton.enabled
+                            inputMethodHints: Qt.ImhFormattedNumbersOnly
+                            placeholderText: "1024"
+
+                            validator: IntValidator {
+                                bottom: 0
+                                top: 4000
+                            }
+
+                            onEditingFinished: AppSettings.setValue("ui/shiftLightCanBase", text)
+                            onTextChanged: hexstring2 = parseInt(shiftlightbaseadresstext.text) || 0
+                        }
+
+                        Text {
+                            color: SettingsTheme.textSecondary
+                            font.family: SettingsTheme.fontFamilyMono
+                            font.pixelSize: SettingsTheme.fontStatus
+                            text: "0x" + (hexstring2 + 0x1000).toString(16).substr(-3).toUpperCase()
+                        }
+                    }
+                }
+
                 StyledButton {
-                    text: Translator.translate("Apply Bitrate", Settings.language)
+                    text: Translator.translate("Apply CAN Settings", Settings.language)
 
                     onClicked: Connect.canbitratesetup(canbitrateselect.currentIndex)
                 }
@@ -432,171 +387,21 @@ SettingsPage {
 
             SettingsSection {
                 Layout.fillWidth: true
-                title: Translator.translate("Daemon / Startup", Settings.language)
-                visible: !isExtenderOnly
-
-                SettingsRow {
-                    label: Translator.translate("Daemon", Settings.language)
-
-                    StyledComboBox {
-                        enabled: false
-                        height: parent.height
-                        model: ["Generic CAN"]
-                        width: parent.width
-                    }
-                }
-
-                SettingsRow {
-                    label: Translator.translate("Speed Source", Settings.language)
-
-                    StyledComboBox {
-                        id: mainspeedsource
-
-                        height: parent.height
-                        model: ["ECU Speed", "LF Wheel", "RF Wheel", "LR Wheel", "RR Wheel", "GPS", "VR Sensor"]
-                        width: parent.width
-
-                        onCurrentIndexChanged: {
-                            if (settingsLoaded) {
-                                AppSettings.setMainSpeedSourceIndex(currentIndex);
-                            }
-                        }
-                    }
-                }
-
-                StyledButton {
-                    text: Translator.translate("Apply Startup", Settings.language)
-
-                    onClicked: {
-                        Connect.daemonstartup(genericCanDaemonIndex);
-                        Connect.canbitratesetup(canbitrateselect.currentIndex);
-                    }
-                }
-            }
-
-        }
-
-        // * RIGHT COLUMN - CAN Configuration, System
-        ColumnLayout {
-            Layout.alignment: Qt.AlignTop
-            Layout.fillHeight: true
-            Layout.fillWidth: true
-            spacing: SettingsTheme.sectionPadding
-
-            SettingsSection {
-                Layout.fillWidth: true
-                title: "CAN Configuration"
-
-                Text {
-                    color: SettingsTheme.accent
-                    font.family: SettingsTheme.fontFamily
-                    font.pixelSize: SettingsTheme.fontLabel
-                    font.weight: Font.DemiBold
-                    text: "CAN Extender"
-                }
-
-                Text {
-                    color: SettingsTheme.textSecondary
-                    font.family: SettingsTheme.fontFamily
-                    font.pixelSize: SettingsTheme.fontStatus
-                    text: Translator.translate("base adress", Settings.language) + " " + Translator.translate(
-                              "(decimal)", Settings.language)
-                }
-
-                RowLayout {
-                    Layout.fillWidth: true
-                    spacing: SettingsTheme.controlGap
-
-                    StyledTextField {
-                        id: baseadresstext
-
-                        Layout.preferredWidth: SettingsTheme.textFieldMinWidth
-                        enabled: connectButton.enabled
-                        inputMethodHints: Qt.ImhFormattedNumbersOnly
-                        placeholderText: "1024"
-
-                        validator: IntValidator {
-                            bottom: 0
-                            top: 4000
-                        }
-
-                        onEditingFinished: AppSettings.setValue("ui/extenderCanBase", text)
-                        onTextChanged: hexstring = parseInt(baseadresstext.text) || 0
-                    }
-
-                    Text {
-                        color: SettingsTheme.accent
-                        font.family: SettingsTheme.fontFamily
-                        font.pixelSize: SettingsTheme.fontLabel
-                        font.weight: Font.DemiBold
-                        text: "HEX: 0x" + (hexstring + 0x1000).toString(16).substr(-3).toUpperCase()
-                    }
-                }
-
-                Item {
-                    Layout.fillWidth: true
-                    height: SettingsTheme.contentSpacing / 2
-                }
-
-                Text {
-                    color: SettingsTheme.accent
-                    font.family: SettingsTheme.fontFamily
-                    font.pixelSize: SettingsTheme.fontLabel
-                    font.weight: Font.DemiBold
-                    text: "Shiftlight CAN"
-                }
-
-                Text {
-                    color: SettingsTheme.textSecondary
-                    font.family: SettingsTheme.fontFamily
-                    font.pixelSize: SettingsTheme.fontStatus
-                    text: Translator.translate("base adress", Settings.language) + " " + Translator.translate(
-                              "(decimal)", Settings.language)
-                }
-
-                RowLayout {
-                    Layout.fillWidth: true
-                    spacing: SettingsTheme.controlGap
-
-                    StyledTextField {
-                        id: shiftlightbaseadresstext
-
-                        Layout.preferredWidth: SettingsTheme.textFieldMinWidth
-                        enabled: connectButton.enabled
-                        inputMethodHints: Qt.ImhFormattedNumbersOnly
-                        placeholderText: "1024"
-
-                        validator: IntValidator {
-                            bottom: 0
-                            top: 4000
-                        }
-
-                        onEditingFinished: AppSettings.setValue("ui/shiftLightCanBase", text)
-                        onTextChanged: hexstring2 = parseInt(shiftlightbaseadresstext.text) || 0
-                    }
-
-                    Text {
-                        color: SettingsTheme.accent
-                        font.family: SettingsTheme.fontFamily
-                        font.pixelSize: SettingsTheme.fontLabel
-                        font.weight: Font.DemiBold
-                        text: "HEX: 0x" + (hexstring2 + 0x1000).toString(16).substr(-3).toUpperCase()
-                    }
-                }
-            }
-
-            SettingsSection {
-                Layout.fillWidth: true
                 title: Translator.translate("System", Settings.language)
 
-                Text {
-                    color: SettingsTheme.textSecondary
-                    font.family: SettingsTheme.fontFamily
-                    font.pixelSize: SettingsTheme.fontStatus
-                    text: "V 1.99F " + Connection.Platform
+                MainSettingsRow {
+                    label: "Version"
+
+                    Text {
+                        color: SettingsTheme.textSecondary
+                        font.family: SettingsTheme.fontFamilyMono
+                        font.pixelSize: SettingsTheme.fontStatus
+                        text: "V 1.99F " + Connection.Platform
+                    }
                 }
 
                 RowLayout {
+                    Layout.fillWidth: true
                     spacing: SettingsTheme.sectionPadding
 
                     StyledButton {
@@ -618,6 +423,272 @@ SettingsPage {
                         text: Translator.translate("Shutdown", Settings.language)
 
                         onClicked: Connect.shutdown()
+                    }
+                }
+            }
+
+            SettingsSection {
+                Layout.fillWidth: true
+                title: Translator.translate("Updates", Settings.language)
+
+                MainSettingsRow {
+                    label: Translator.translate("Current Version", Settings.language)
+
+                    Text {
+                        color: SettingsTheme.textSecondary
+                        font.family: SettingsTheme.fontFamilyMono
+                        font.pixelSize: SettingsTheme.fontStatus
+                        text: Updater.currentVersion
+                    }
+                }
+
+                MainSettingsRow {
+                    label: Translator.translate("Latest Version", Settings.language)
+
+                    Text {
+                        color: SettingsTheme.textSecondary
+                        font.family: SettingsTheme.fontFamilyMono
+                        font.pixelSize: SettingsTheme.fontStatus
+                        text: Updater.latestVersion === "" ? "-" : Updater.latestVersion
+                    }
+                }
+
+                MainSettingsRow {
+                    label: Translator.translate("Auth", Settings.language)
+
+                    Text {
+                        color: Updater.hasAuthToken ? SettingsTheme.success : SettingsTheme.warning
+                        font.family: SettingsTheme.fontFamily
+                        font.pixelSize: SettingsTheme.fontStatus
+                        text: Updater.hasAuthToken
+                              ? Translator.translate("Token available", Settings.language)
+                              : Translator.translate("Token missing", Settings.language)
+                    }
+                }
+
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: SettingsTheme.sectionPadding
+
+                    StyledButton {
+                        text: Translator.translate("Check for Updates", Settings.language)
+                        onClicked: Updater.checkForUpdates()
+                    }
+
+                    StyledButton {
+                        enabled: Updater.updateAvailable
+                        primary: false
+                        text: Translator.translate("Download Update", Settings.language)
+                        onClicked: Updater.downloadUpdate()
+                    }
+
+                    StyledButton {
+                        enabled: Updater.downloadReady
+                        danger: true
+                        text: Translator.translate("Install Update", Settings.language)
+                        onClicked: Updater.installUpdate()
+                    }
+                }
+
+                ProgressBar {
+                    Layout.fillWidth: true
+                    from: 0
+                    to: 100
+                    value: Updater.downloadProgressPercent
+                    visible: Updater.status === "downloading" || Updater.status === "verifying"
+                }
+
+                Text {
+                    Layout.fillWidth: true
+                    color: SettingsTheme.textPrimary
+                    font.family: SettingsTheme.fontFamily
+                    font.pixelSize: SettingsTheme.fontStatus
+                    text: Updater.statusMessage
+                    wrapMode: Text.WordWrap
+                }
+            }
+        }
+
+        ColumnLayout {
+            Layout.alignment: Qt.AlignTop
+            Layout.fillHeight: true
+            Layout.fillWidth: true
+            spacing: SettingsTheme.sectionPadding
+
+            SettingsSection {
+                Layout.fillWidth: true
+                title: Translator.translate("Vehicle", Settings.language)
+
+                MainSettingsRow {
+                    id: weightRow
+
+                    label: Translator.translate("Weight", Settings.language) + " kg"
+
+                    StyledTextField {
+                        id: weight
+
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: SettingsTheme.controlHeight
+                        inputMethodHints: Qt.ImhFormattedNumbersOnly
+
+                        onEditingFinished: AppSettings.setValue("ui/vehicleWeight", text)
+                    }
+                }
+
+                MainSettingsRow {
+                    label: Translator.translate("Odo", Settings.language)
+
+                    StyledTextField {
+                        id: odometer
+
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: SettingsTheme.controlHeight
+                        inputMethodHints: Qt.ImhFormattedNumbersOnly
+                        text: "0"
+
+                        onTextChanged: if (settingsLoaded)
+                                           AppSettings.setValue("ui/odometer", text)
+                    }
+                }
+
+                MainSettingsRow {
+                    label: Translator.translate("Trip", Settings.language)
+
+                    RowLayout {
+                        Layout.fillWidth: true
+                        spacing: SettingsTheme.controlGap
+
+                        StyledTextField {
+                            id: tripmeter
+
+                            Layout.fillWidth: true
+                            Layout.preferredHeight: SettingsTheme.controlHeight
+                            readOnly: true
+                            text: "0"
+
+                            onTextChanged: if (settingsLoaded)
+                                               AppSettings.setValue("ui/tripmeter", text)
+                        }
+
+                        StyledButton {
+                            Layout.preferredHeight: SettingsTheme.controlHeight
+                            primary: false
+                            text: Translator.translate("Trip Reset", Settings.language)
+
+                            onClicked: Calculations.resettrip()
+                        }
+                    }
+                }
+            }
+
+            SettingsSection {
+                Layout.fillWidth: true
+                title: Translator.translate("Units", Settings.language)
+
+                MainSettingsRow {
+                    label: Translator.translate("Speed units", Settings.language)
+
+                    StyledComboBox {
+                        id: unitSelect1
+
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: SettingsTheme.controlHeight
+                        model: [Translator.translate("Metric", Settings.language), Translator.translate("Imperial", Settings.language)]
+
+                        onCurrentIndexChanged: {
+                            updateWeightLabel();
+                            if (settingsLoaded)
+                                AppSettings.setSpeedUnitIndex(currentIndex);
+                        }
+                    }
+                }
+
+                MainSettingsRow {
+                    label: Translator.translate("Temp units", Settings.language)
+
+                    StyledComboBox {
+                        id: unitSelect
+
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: SettingsTheme.controlHeight
+                        model: [Translator.translate("C", Settings.language), Translator.translate("F", Settings.language)]
+
+                        onCurrentIndexChanged: {
+                            updateWeightLabel();
+                            if (settingsLoaded)
+                                AppSettings.setTempUnitIndex(currentIndex);
+                        }
+                    }
+                }
+
+                MainSettingsRow {
+                    label: Translator.translate("Pressure units", Settings.language)
+
+                    StyledComboBox {
+                        id: unitSelect2
+
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: SettingsTheme.controlHeight
+                        model: ["kPa", "PSI"]
+
+                        onCurrentIndexChanged: {
+                            if (settingsLoaded)
+                                AppSettings.setPressureUnitIndex(currentIndex);
+                        }
+                    }
+                }
+            }
+
+            SettingsSection {
+                Layout.fillWidth: true
+                title: Translator.translate("Language", Settings.language)
+
+                MainSettingsRow {
+                    label: Translator.translate("Language", Settings.language)
+
+                    StyledComboBox {
+                        id: languageselect
+
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: SettingsTheme.controlHeight
+                        model: ["English", "Deutsch", "\u65E5\u672C\u8A9E", "Espanol"]
+
+                        onCurrentIndexChanged: {
+                            applyLanguage();
+                            updateWeightLabel();
+                            if (settingsLoaded)
+                                AppSettings.setValue("Language", currentIndex);
+                        }
+                    }
+                }
+            }
+
+            SettingsSection {
+                Layout.fillWidth: true
+                title: Translator.translate("Data Logging", Settings.language)
+
+                MainSettingsRow {
+                    label: Translator.translate("Logfile name", Settings.language)
+
+                    StyledTextField {
+                        id: logfilenameSelect
+
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: SettingsTheme.controlHeight
+                        inputMethodHints: Qt.ImhNoAutoUppercase | Qt.ImhPreferLowercase | Qt.ImhSensitiveData
+                                          | Qt.ImhNoPredictiveText
+                        text: "DataLog"
+                    }
+                }
+
+                MainSettingsRow {
+                    label: Translator.translate("Data Logger", Settings.language)
+
+                    StyledSwitch {
+                        id: loggerswitch
+
+                        Component.onCompleted: toggleDataLogger()
+                        onClicked: toggleDataLogger()
                     }
                 }
             }

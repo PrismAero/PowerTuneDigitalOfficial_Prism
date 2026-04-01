@@ -1,0 +1,27 @@
+# /etc/inittab - PowerTune Digital appliance
+#
+# No login getty: this is a dedicated dashboard, not a general-purpose Linux
+# box.  The only interactive access is via SSH.
+#
+# PowerTuneQMLGui is launched by /opt/PowerTune/powertune-launcher with the
+# 'respawn' action so init(8) automatically restarts it on exit or crash.
+
+id:5:initdefault:
+
+si::sysinit:/etc/init.d/rcS
+
+~~:S:wait:/sbin/sulogin
+
+l0:0:wait:/etc/init.d/rc 0
+l1:1:wait:/etc/init.d/rc 1
+l2:2:wait:/etc/init.d/rc 2
+l3:3:wait:/etc/init.d/rc 3
+l4:4:wait:/etc/init.d/rc 4
+l5:5:wait:/etc/init.d/rc 5
+l6:6:wait:/etc/init.d/rc 6
+
+z6:6:respawn:/sbin/sulogin
+
+S0:12345:respawn:/usr/sbin/ttyrun ttyS0 /bin/start_getty 115200 ttyS0 vt102
+
+PT:2345:respawn:/opt/PowerTune/powertune-launcher

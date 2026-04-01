@@ -5,11 +5,11 @@ Item {
 
     property var config: ({})
     property bool invertLogic: config.invertLogic === true || config.invertLogic === "true"
-    property string label: config.label !== undefined ? config.label : ""
+    property string label: config.label !== undefined ? config.label : "Status:"
     property real liveValue: 0
     property color offColor: config.offColor !== undefined ? config.offColor : "#FF0909"
     property color onColor: config.onColor !== undefined ? config.onColor : "#1ED033"
-    property string sensorKey: config.sensorKey !== undefined ? config.sensorKey : ""
+    property string sensorKey: config.sensorKey !== undefined ? config.sensorKey : "EXDigitalInput1"
     readonly property bool stateOn: invertLogic ? liveValue < threshold : liveValue >= threshold
     property real threshold: config.threshold !== undefined ? Number(config.threshold) : 0.5
 
@@ -21,6 +21,7 @@ Item {
     }
 
     Component.onCompleted: liveValue = readValue()
+    onSensorKeyChanged: liveValue = readValue()
 
     Connections {
         function onValueChanged(propertyName, value) {

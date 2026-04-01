@@ -35,7 +35,7 @@ QtObject {
     readonly property real defaultWaterTempX: 66
     readonly property real defaultWaterTempY: 62
     readonly property string fontFamily: "Hyperspace Race"
-    readonly property real gearFontSize: 140.013
+    readonly property real gearFontSize: 160.0
     readonly property real gearSuffixFontSize: 52.505
     readonly property real sensorLabelFontSize: 40
     readonly property real sensorUnitFontSize: 32

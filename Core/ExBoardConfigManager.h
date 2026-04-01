@@ -42,6 +42,9 @@ public:
     Q_INVOKABLE QStringList channelNames() const;
     Q_INVOKABLE QStringList digitalChannelNames() const;
 
+    Q_INVOKABLE QVariantMap getDifferentialSensorConfig() const;
+    Q_INVOKABLE void saveDifferentialSensorConfig(const QVariantMap &config);
+
 signals:
     void configChanged();
 
@@ -66,7 +69,7 @@ private:
     QVariantMap getDigitalChannelConfig(int channel) const;
     void saveChannelConfigInternal(int channel, const QVariantMap &config);
     void saveDigitalChannelConfigInternal(int channel, const QVariantMap &config);
-    void applyAnalogRuntimeSettings() const;
+    void applyAnalogRuntimeSettings(const QVariantList &channels) const;
     void refreshSensorRegistry() const;
     void syncChannelSensorMetadata(int channel) const;
 };

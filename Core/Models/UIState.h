@@ -116,7 +116,7 @@ private:
 
     int m_draggable = 0;
     int m_Brightness = 255;
-    int m_Visibledashes = 3;
+    int m_Visibledashes = 1;
     bool m_screen = false;
     int m_dashboardCount = 3;
     QStringList m_maindashsetup;

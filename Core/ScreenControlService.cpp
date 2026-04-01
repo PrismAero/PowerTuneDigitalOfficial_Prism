@@ -27,6 +27,8 @@ ScreenControlService::ScreenControlService(QObject *parent) : QObject(parent)
 void ScreenControlService::setAppSettings(AppSettings *settings)
 {
     m_appSettings = settings;
+    refreshConfig();
+    refreshStartupPopupVisible();
 }
 
 void ScreenControlService::setUIState(UIState *state)
@@ -94,6 +96,14 @@ void ScreenControlService::detectBackend()
 {
     const Backend priorBackend = m_backend;
 
+    if (m_ddcProbe) {
+        disconnect(m_ddcProbe, nullptr, this, nullptr);
+        if (m_ddcProbe->state() != QProcess::NotRunning)
+            m_ddcProbe->kill();
+        m_ddcProbe->deleteLater();
+        m_ddcProbe = nullptr;
+    }
+
     if (QFileInfo::exists(kSysfsBrightnessPath)) {
         m_backend = Backend::Sysfs;
         setLastError(QString());
@@ -107,23 +117,13 @@ void ScreenControlService::detectBackend()
                 setCurrentPercent(hardwareToPercent(value));
         }
     } else if (QFileInfo::exists(kDdcutilBinary)) {
-        QProcess detect;
-        detect.start(kDdcutilBinary, {QStringLiteral("detect")});
-        if (!detect.waitForFinished(5000)) {
-            detect.kill();
-            m_backend = Backend::None;
-            setLastError(QStringLiteral("Timed out while probing ddcutil detect."));
-        } else if (detect.exitStatus() == QProcess::NormalExit && detect.exitCode() == 0) {
-            m_backend = Backend::DdcUtil;
-            setLastError(QString());
-            if (m_appSettings)
-                setCurrentPercent(m_appSettings->readDisplayBrightnessPercent());
-        } else {
-            m_backend = Backend::None;
-            const QString stderrText = QString::fromUtf8(detect.readAllStandardError()).trimmed();
-            const QString stdoutText = QString::fromUtf8(detect.readAllStandardOutput()).trimmed();
-            setLastError(!stderrText.isEmpty() ? stderrText : stdoutText);
-        }
+        m_backend = Backend::None;
+        m_ddcProbe = new QProcess(this);
+        connect(m_ddcProbe,
+                qOverload<int, QProcess::ExitStatus>(&QProcess::finished),
+                this,
+                &ScreenControlService::onDdcProbeFinished);
+        m_ddcProbe->start(kDdcutilBinary, {QStringLiteral("detect")});
     } else {
         m_backend = Backend::None;
         setLastError(QStringLiteral("No supported screen brightness backend detected."));
@@ -132,7 +132,10 @@ void ScreenControlService::detectBackend()
     if (priorBackend != m_backend)
         emit capabilityChanged();
 
-    refreshConfig();
+    if (!m_ddcProbe) {
+        refreshConfig();
+        refreshStartupPopupVisible();
+    }
 }
 
 void ScreenControlService::restoreStartupBrightness()
@@ -174,7 +177,7 @@ void ScreenControlService::applyNightPreset()
 
 bool ScreenControlService::shouldShowPopupOnStartup() const
 {
-    return hasBrightnessControl() && popupEnabled() && presetControlsVisible();
+    return startupPopupVisible();
 }
 
 void ScreenControlService::applyHardwareBrightness(int value)
@@ -240,6 +243,7 @@ void ScreenControlService::setPopupEnabled(bool enabled)
 
     m_appSettings->writeBrightnessPopupEnabled(enabled);
     emit popupEnabledChanged(enabled);
+    refreshStartupPopupVisible();
 }
 
 void ScreenControlService::refreshConfig()
@@ -253,6 +257,7 @@ void ScreenControlService::refreshConfig()
 
     m_presetControlsVisible = visible;
     emit presetControlsVisibleChanged(m_presetControlsVisible);
+    refreshStartupPopupVisible();
 }
 
 void ScreenControlService::onOverrideTimeout()
@@ -261,6 +266,52 @@ void ScreenControlService::onOverrideTimeout()
         return;
 
     applyPreset(lastPreset(), false);
+}
+
+void ScreenControlService::onDdcProbeFinished(int exitCode, QProcess::ExitStatus status)
+{
+    if (!m_ddcProbe)
+        return;
+
+    const Backend priorBackend = m_backend;
+    const QString stderrText = QString::fromUtf8(m_ddcProbe->readAllStandardError()).trimmed();
+    const QString stdoutText = QString::fromUtf8(m_ddcProbe->readAllStandardOutput()).trimmed();
+
+    if (status == QProcess::NormalExit && exitCode == 0) {
+        m_backend = Backend::DdcUtil;
+        setLastError(QString());
+        if (m_appSettings)
+            setCurrentPercent(m_appSettings->readDisplayBrightnessPercent());
+    } else {
+        m_backend = Backend::None;
+        if (status == QProcess::CrashExit) {
+            setLastError(QStringLiteral("ddcutil detect crashed while probing display support."));
+        } else if (!stderrText.isEmpty()) {
+            setLastError(stderrText);
+        } else if (!stdoutText.isEmpty()) {
+            setLastError(stdoutText);
+        } else {
+            setLastError(QStringLiteral("ddcutil detect failed."));
+        }
+    }
+
+    if (priorBackend != m_backend)
+        emit capabilityChanged();
+
+    m_ddcProbe->deleteLater();
+    m_ddcProbe = nullptr;
+    refreshConfig();
+    refreshStartupPopupVisible();
+}
+
+void ScreenControlService::refreshStartupPopupVisible()
+{
+    const bool visible = hasBrightnessControl() && popupEnabled() && presetControlsVisible();
+    if (m_startupPopupVisible == visible)
+        return;
+
+    m_startupPopupVisible = visible;
+    emit startupPopupVisibleChanged(m_startupPopupVisible);
 }
 
 int ScreenControlService::clampPercent(int percent) const

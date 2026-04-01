@@ -10,7 +10,7 @@ Item {
                                                                                                "#FFFFFF",
                                            gearFontSize: config.gearFontSize !== undefined ? Number(
                                                                                                  config.gearFontSize) :
-                                                                                             140.013,
+                                                                                             160.0,
                                            suffixFontSize: config.suffixFontSize !== undefined ? Number(
                                                                                                      config.suffixFontSize) :
                                                                                                  52.505
@@ -26,17 +26,17 @@ Item {
     ArcAlertMarker {
         active: enabled && (arc.displayValue >= Number(root.config.warningThreshold))
         anchors.fill: parent
-        arcScale: root.config.arcScale !== undefined ? Number(root.config.arcScale) : 0.945
-        arcWidth: root.config.arcWidth !== undefined ? Number(root.config.arcWidth) : 0.285
-        centerOffsetX: root.config.arcOffsetX !== undefined ? Number(root.config.arcOffsetX) : 5
+        arcScale: root.config.arcScale !== undefined ? Number(root.config.arcScale) : 1.0
+        arcWidth: root.config.arcWidth !== undefined ? Number(root.config.arcWidth) : 0.32
+        centerOffsetX: root.config.arcOffsetX !== undefined ? Number(root.config.arcOffsetX) : 0
         centerOffsetY: root.config.arcOffsetY !== undefined ? Number(root.config.arcOffsetY) : 0
         enabled: root.config.warningEnabled === true || root.config.warningEnabled === "true"
         endAngle: root.config.endAngle !== undefined ? Number(root.config.endAngle) : 56
         flashEnabled: root.config.warningFlash !== undefined ? (root.config.warningFlash === true
                                                                 || root.config.warningFlash === "true") : true
         flashRate: root.config.warningFlashRate !== undefined ? Number(root.config.warningFlashRate) : 200
-        markerColor: root.config.warningColor !== undefined ? root.config.warningColor : "#FF3300"
-        maxValue: root.config.maxValue !== undefined ? Number(root.config.maxValue) : 10000
+        markerColor: root.config.warningColor !== undefined ? root.config.warningColor : "#FF0000"
+        maxValue: root.config.maxValue !== undefined ? Number(root.config.maxValue) : 15000
         minValue: root.config.minValue !== undefined ? Number(root.config.minValue) : 0
         startAngle: root.config.startAngle !== undefined ? Number(root.config.startAngle) : 225
         thresholdValue: root.config.warningThreshold !== undefined ? Number(root.config.warningThreshold) : maxValue
@@ -44,8 +44,8 @@ Item {
 
     GearIndicator {
         anchors.centerIn: parent
-        anchors.horizontalCenterOffset: root.config.gearOffsetX !== undefined ? Number(root.config.gearOffsetX) : 21.5
-        anchors.verticalCenterOffset: root.config.gearOffsetY !== undefined ? Number(root.config.gearOffsetY) : -76
+        anchors.horizontalCenterOffset: root.config.gearOffsetX !== undefined ? Number(root.config.gearOffsetX) : 0
+        anchors.verticalCenterOffset: root.config.gearOffsetY !== undefined ? Number(root.config.gearOffsetY) : -85
         config: root.gearConfig
         height: root.config.gearHeight !== undefined ? Number(root.config.gearHeight) : 117
         width: root.config.gearWidth !== undefined ? Number(root.config.gearWidth) : 168
@@ -58,9 +58,9 @@ Item {
         offsetY: root.config.readoutOffsetY !== undefined ? Number(root.config.readoutOffsetY) : (
                                                                 root.config.valueOffsetY !== undefined ? Number(
                                                                                                              root.config.valueOffsetY) :
-                                                                                                         94)
+                                                                                                         50)
         spacing: root.config.readoutSpacing !== undefined ? Number(root.config.readoutSpacing) : -2
-        stepSize: root.config.readoutStep !== undefined ? Number(root.config.readoutStep) : 1
+        stepSize: root.config.readoutStep !== undefined ? Number(root.config.readoutStep) : 100
         textColor: root.config.readoutTextColor !== undefined ? root.config.readoutTextColor : "#FFFFFF"
         unit: root.config.unit !== undefined ? root.config.unit : "RPM"
         unitOffsetX: root.config.unitOffsetX !== undefined ? Number(root.config.unitOffsetX) : 34

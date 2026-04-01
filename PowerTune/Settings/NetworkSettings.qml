@@ -15,6 +15,7 @@ SettingsPage {
         wificountrycbx.currentIndex = AppSettings.getValue("ui/wifiCountryIndex", 0);
         settingsLoaded = true;
     }
+    Component.onDestruction: Wifiscanner.shutdownWifiscanner()
 
     Connections {
         function onSerialStatChanged() {
@@ -72,6 +73,7 @@ SettingsPage {
 
                         height: parent.height
                         model: Connection.wifi
+                        enabled: !Connection.wifiBusy
                         width: parent.width
 
                         onCountChanged: btnScanNetwork.enabled = true
@@ -85,10 +87,21 @@ SettingsPage {
                         id: pw1
 
                         echoMode: TextInput.Password
+                        enabled: !Connection.wifiBusy
                         height: parent.height
                         placeholderText: qsTr("Passphrase")
                         width: parent.width
                     }
+                }
+
+                Text {
+                    Layout.fillWidth: true
+                    color: Connection.wifiLastError.length > 0 ? SettingsTheme.error : SettingsTheme.textSecondary
+                    font.family: SettingsTheme.fontFamily
+                    font.pixelSize: SettingsTheme.fontCaption
+                    wrapMode: Text.WordWrap
+                    text: Connection.wifiLastError.length > 0 ? Connection.wifiLastError : Connection.wifiLastActionMessage
+                    visible: text.length > 0
                 }
 
                 RowLayout {
@@ -98,6 +111,7 @@ SettingsPage {
                         id: btnScanNetwork
 
                         text: Translator.translate("Scan WIFI", Settings.language)
+                        enabled: !Connection.wifiBusy
 
                         onClicked: {
                             consoleText.clear();
@@ -109,12 +123,12 @@ SettingsPage {
                         id: applyWifiSettings
 
                         text: Translator.translate("Connect WIFI", Settings.language)
+                        enabled: !Connection.wifiBusy
 
                         onClicked: {
                             Wifiscanner.setwifi(wificountrynames.get(wificountrycbx.currentIndex).countryname,
                                                 wifilistbox.textAt(wifilistbox.currentIndex), pw1.text, "placeholder",
                                                 "placeholder");
-                            Connect.reboot();
                         }
                     }
                 }
@@ -155,34 +169,13 @@ SettingsPage {
                 Layout.fillWidth: true
                 title: Translator.translate("System Actions", Settings.language)
 
-                RowLayout {
-                    spacing: SettingsTheme.sectionPadding
-
-                    StyledButton {
-                        id: updateBtn
-
-                        text: Translator.translate("Update", Settings.language)
-
-                        onClicked: {
-                            Diagnostics.addLogMessage("INFO", "System update initiated");
-                            consoleText.append("[System] Update initiated...");
-                            Connect.update();
-                            updateBtn.enabled = false;
-                        }
-                    }
-
-                    StyledButton {
-                        id: develtest
-
-                        primary: false
-                        text: Translator.translate("Restart daemon", Settings.language)
-
-                        onClicked: {
-                            Diagnostics.addLogMessage("INFO", "Daemon restart initiated");
-                            consoleText.append("[System] Restarting daemon...");
-                            Connect.restartDaemon();
-                        }
-                    }
+                Text {
+                    Layout.fillWidth: true
+                    color: SettingsTheme.textSecondary
+                    font.family: SettingsTheme.fontFamily
+                    font.pixelSize: SettingsTheme.fontCaption
+                    wrapMode: Text.WordWrap
+                    text: "App updates and service restarts are now handled by the external deployment workflow. Use the local deploy scripts to copy a prebuilt binary to the target and inspect logs over SSH."
                 }
             }
 

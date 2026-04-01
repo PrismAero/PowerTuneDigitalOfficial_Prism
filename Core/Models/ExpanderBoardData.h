@@ -42,6 +42,9 @@ class ExpanderBoardData : public QObject
     Q_PROPERTY(int EXGear READ EXGear WRITE setEXGear NOTIFY EXGearChanged)
     Q_PROPERTY(qreal EXSpeed READ EXSpeed WRITE setEXSpeed NOTIFY EXSpeedChanged)
 
+    // * Differential sensor (derived from two analog channels)
+    Q_PROPERTY(qreal differentialSensor READ differentialSensor WRITE setDifferentialSensor NOTIFY differentialSensorChanged)
+
 public:
     explicit ExpanderBoardData(QObject *parent = nullptr);
 
@@ -58,6 +61,7 @@ public:
     // * Getters - Derived
     int EXGear() const { return m_EXGear; }
     qreal EXSpeed() const { return m_EXSpeed; }
+    qreal differentialSensor() const { return m_differentialSensor; }
 
     // * Getters - Calculated
     qreal EXAnalogCalc0() const { return m_EXAnalogCalc0; }
@@ -93,6 +97,7 @@ public slots:
     // * Setters - Derived
     void setEXGear(int EXGear);
     void setEXSpeed(qreal EXSpeed);
+    void setDifferentialSensor(qreal value);
 
 signals:
     // * Signals - Raw
@@ -118,6 +123,7 @@ signals:
     // * Signals - Derived
     void EXGearChanged(int EXGear);
     void EXSpeedChanged(qreal EXSpeed);
+    void differentialSensorChanged(qreal value);
 
 private:
     // * Raw
@@ -143,6 +149,7 @@ private:
     // * Derived
     int m_EXGear = -2;      // -2 = unknown, -1 = reverse, 0 = neutral, 1-6 = gears
     qreal m_EXSpeed = 0.0;  // Calculated speed in configured unit
+    qreal m_differentialSensor = 0.0;
 };
 
 #endif  // EXPANDERBOARDDATA_H

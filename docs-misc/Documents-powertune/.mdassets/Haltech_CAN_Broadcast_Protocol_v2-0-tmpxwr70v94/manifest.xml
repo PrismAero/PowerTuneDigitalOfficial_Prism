@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document xmlns="https://any2md.dev/manifest/v1">
+  <meta>
+    <device>Haltech_CAN_Broadcast_Protocol_v2 0</device>
+    <title>Haltech_CAN_Broadcast_Protocol_v2 0 tmpxwr70v94</title>
+    <source>/Users/kaiwybornyprismaero/Projects/PT-Prism-Advanced/PowerTuneDigitalOfficial_Prism/docs-misc/Documents-powertune/Haltech_CAN_Broadcast_Protocol_v2 0.pdf</source>
+    <sourceHash algo="sha256">8df4f54b4b2505a6704d03ef500de246a2a54745caf06d0dc3585db98f96f719</sourceHash>
+    <pageCount>8</pageCount>
+    <profile></profile>
+    <converterVersion>1.3.0</converterVersion>
+    <createdAt>2026-03-13T04:03:32Z</createdAt>
+    <outputFile>Haltech_CAN_Broadcast_Protocol_v2-0-tmpxwr70v94.md</outputFile>
+  </meta>
+  <images count="1">
+    <image id="figure-1" type="figure" page="1">
+      <filename>Haltech_CAN_Broadcast_Protocol_v2 0-figure-1.png</filename>
+      <caption></caption>
+      <width>630</width>
+      <height>228</height>
+      <hash algo="sha256">0ac6e83f0fbefb0bbafadf38de72d5b707c68d5f0254ea32292517392433283a</hash>
+    </image>
+  </images>
+  <sections count="10">
+    <section id="can-broadcast-protocol-specification-version" level="2">
+      <heading>CAN BROADCAST PROTOCOL SPECIFICATION VERSION</heading>
+      <startLine>8</startLine>
+      <endLine>9</endLine>
+      <wordCount>0</wordCount>
+      <tokenEstimate>0</tokenEstimate>
+      <contentTypes></contentTypes>
+    </section>
+    <section id="2-0" level="2">
+      <heading>2.0</heading>
+      <startLine>10</startLine>
+      <endLine>11</endLine>
+      <wordCount>0</wordCount>
+      <tokenEstimate>0</tokenEstimate>
+      <contentTypes></contentTypes>
+    </section>
+    <section id="7-february-2012" level="2">
+      <heading>7 February, 2012</heading>
+      <startLine>12</startLine>
+      <endLine>25</endLine>
+      <wordCount>95</wordCount>
+      <tokenEstimate>124</tokenEstimate>
+      <contentTypes>text,table</contentTypes>
+    </section>
+    <section id="table-of-contents" level="2">
+      <heading>TABLE OF CONTENTS</heading>
+      <startLine>26</startLine>
+      <endLine>29</endLine>
+      <wordCount>2</wordCount>
+      <tokenEstimate>3</tokenEstimate>
+      <contentTypes>text,list</contentTypes>
+    </section>
+    <section id="1-introduction" level="2">
+      <heading>1. INTRODUCTION</heading>
+      <startLine>30</startLine>
+      <endLine>35</endLine>
+      <wordCount>96</wordCount>
+      <tokenEstimate>125</tokenEstimate>
+      <contentTypes>text</contentTypes>
+    </section>
+    <section id="2-encoding" level="2">
+      <heading>2. ENCODING</heading>
+      <startLine>36</startLine>
+      <endLine>41</endLine>
+      <wordCount>107</wordCount>
+      <tokenEstimate>140</tokenEstimate>
+      <contentTypes>text</contentTypes>
+    </section>
+    <section id="examples" level="2">
+      <heading>Examples</heading>
+      <startLine>42</startLine>
+      <endLine>53</endLine>
+      <wordCount>60</wordCount>
+      <tokenEstimate>78</tokenEstimate>
+      <contentTypes>text,table</contentTypes>
+    </section>
+    <section id="3-units" level="2">
+      <heading>3. UNITS</heading>
+      <startLine>54</startLine>
+      <endLine>57</endLine>
+      <wordCount>74</wordCount>
+      <tokenEstimate>97</tokenEstimate>
+      <contentTypes>text</contentTypes>
+    </section>
+    <section id="4-haltech-v2-protocol" level="2">
+      <heading>4. HALTECH V2 PROTOCOL</heading>
+      <startLine>58</startLine>
+      <endLine>197</endLine>
+      <wordCount>2182</wordCount>
+      <tokenEstimate>2837</tokenEstimate>
+      <contentTypes>text,table</contentTypes>
+    </section>
+    <section id="a-revison-history" level="2">
+      <heading>A. Revison History</heading>
+      <startLine>198</startLine>
+      <endLine>206</endLine>
+      <wordCount>21</wordCount>
+      <tokenEstimate>28</tokenEstimate>
+      <contentTypes>text,table</contentTypes>
+    </section>
+  </sections>
+  <conversion>
+    <sourceHash algo="sha256">8df4f54b4b2505a6704d03ef500de246a2a54745caf06d0dc3585db98f96f719</sourceHash>
+    <optionsHash algo="sha256"></optionsHash>
+    <convertedAt>2026-03-13T04:03:32Z</convertedAt>
+  </conversion>
+</document>

@@ -1,0 +1,12 @@
+{
+    "device": "/dev/dri/card0",
+    "outputs": [
+        {
+            "name": "HDMI1",
+            "mode": "preferred",
+            "format": "xrgb8888"
+        }
+    ],
+    "hwcursor": false,
+    "separateScreens": false
+}

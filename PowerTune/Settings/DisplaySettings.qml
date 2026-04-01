@@ -214,5 +214,34 @@ SettingsPage {
                 visible: DashboardLock.lockoutEnabled && DashboardLock.unlocking
             }
         }
+
+        SettingsSection {
+            Layout.fillWidth: true
+            title: Translator.translate("Demo Mode", Settings.language)
+
+            StyledButton {
+                enabled: !DemoMode.active
+                primary: !DemoMode.active
+                text: DemoMode.active
+                      ? Translator.translate("Demo Mode Active (until reboot)", Settings.language)
+                      : Translator.translate("Enter Demo Mode", Settings.language)
+
+                onClicked: {
+                    if (root.settingsLoaded && !DemoMode.active)
+                        DemoMode.enterDemoMode();
+                }
+            }
+
+            Text {
+                Layout.fillWidth: true
+                color: SettingsTheme.textSecondary
+                font.family: SettingsTheme.fontFamily
+                font.pixelSize: SettingsTheme.fontStatus
+                text: DemoMode.active
+                      ? Translator.translate("Demo mode is locked for this boot session. Reboot to exit.", Settings.language)
+                      : Translator.translate("Demo mode hides all normal UI and loops the intro video.", Settings.language)
+                wrapMode: Text.WordWrap
+            }
+        }
     }
 }

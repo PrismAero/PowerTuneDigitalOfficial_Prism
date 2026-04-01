@@ -10,6 +10,8 @@ SettingsPage {
     id: root
 
     property int gercalactive: 0
+    property bool settingsLoaded: false
+    property bool suppressWrites: true
 
     // * Alias bridge properties for Settings persistence (Repeater delegates)
     property var stage1Ref: null
@@ -24,6 +26,8 @@ SettingsPage {
     property var valgear6Ref: null
 
     Component.onCompleted: {
+        if (settingsLoaded)
+            return;
         watertempwarn.text = AppSettings.getValue("waterwarn", "110");
         boostwarn.text = AppSettings.getValue("boostwarn", "0.9");
         rpmwarn.text = AppSettings.getValue("rpmwarn", "10000");
@@ -43,6 +47,8 @@ SettingsPage {
         valgear6.text = AppSettings.getValue("valgear6", "");
         var sp = AppSettings.getValue("Speedcorrection", 1);
         speedpercent.text = String(Math.round(sp * 100));
+        settingsLoaded = true;
+        suppressWrites = false;
     }
 
     ListModel {
@@ -180,7 +186,6 @@ SettingsPage {
                         text: "100"
                         width: parent.width
 
-                        Component.onCompleted: AppSettings.writeSpeedSettings(speedpercent.text / 100, 100000)
                         onEditingFinished: AppSettings.writeSpeedSettings(speedpercent.text / 100, 100000)
                     }
                 }
@@ -291,9 +296,10 @@ SettingsPage {
 
                     Component.onCompleted: {
                         gercalactive = gearcalcselect.checked ? 1 : 0;
-                        applyWarnGear.start();
                     }
                     onCheckedChanged: {
+                        if (!settingsLoaded || suppressWrites)
+                            return;
                         gercalactive = gearcalcselect.checked ? 1 : 0;
                         applyWarnGear.start();
                     }
@@ -347,7 +353,6 @@ SettingsPage {
                                     } else if (index === 5) {
                                         gearField.text = "";
                                         root.valgear6Ref = gearField;
-                                        applyWarnGear.start();
                                     }
                                 }
                                 onEditingFinished: applyWarnGear.start()
@@ -562,6 +567,8 @@ SettingsPage {
         id: applyWarnGear
 
         function start() {
+            if (!settingsLoaded || suppressWrites)
+                return;
             AppSettings.writeWarnGearSettings(watertempwarn.text, boostwarn.text, rpmwarn.text, knockwarn.text,
                                               gercalactive, lambdamultiply.text, valgear1.text, valgear2.text,
                                               valgear3.text, valgear4.text, valgear5.text, valgear6.text);
@@ -574,6 +581,8 @@ SettingsPage {
         id: applyRPM
 
         function start() {
+            if (!settingsLoaded || suppressWrites)
+                return;
             AppSettings.writeRPMSettings(maxRPM.text, stage1.text, stage2.text, stage3.text, stage4.text);
         }
 
