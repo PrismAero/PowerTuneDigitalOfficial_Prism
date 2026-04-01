@@ -73,6 +73,7 @@ SettingsPage {
 
                         height: parent.height
                         model: Connection.wifi
+                        enabled: !Connection.wifiBusy
                         width: parent.width
 
                         onCountChanged: btnScanNetwork.enabled = true
@@ -86,10 +87,21 @@ SettingsPage {
                         id: pw1
 
                         echoMode: TextInput.Password
+                        enabled: !Connection.wifiBusy
                         height: parent.height
                         placeholderText: qsTr("Passphrase")
                         width: parent.width
                     }
+                }
+
+                Text {
+                    Layout.fillWidth: true
+                    color: Connection.wifiLastError.length > 0 ? SettingsTheme.error : SettingsTheme.textSecondary
+                    font.family: SettingsTheme.fontFamily
+                    font.pixelSize: SettingsTheme.fontCaption
+                    wrapMode: Text.WordWrap
+                    text: Connection.wifiLastError.length > 0 ? Connection.wifiLastError : Connection.wifiLastActionMessage
+                    visible: text.length > 0
                 }
 
                 RowLayout {
@@ -99,6 +111,7 @@ SettingsPage {
                         id: btnScanNetwork
 
                         text: Translator.translate("Scan WIFI", Settings.language)
+                        enabled: !Connection.wifiBusy
 
                         onClicked: {
                             consoleText.clear();
@@ -110,12 +123,12 @@ SettingsPage {
                         id: applyWifiSettings
 
                         text: Translator.translate("Connect WIFI", Settings.language)
+                        enabled: !Connection.wifiBusy
 
                         onClicked: {
                             Wifiscanner.setwifi(wificountrynames.get(wificountrycbx.currentIndex).countryname,
                                                 wifilistbox.textAt(wifilistbox.currentIndex), pw1.text, "placeholder",
                                                 "placeholder");
-                            Connect.reboot();
                         }
                     }
                 }

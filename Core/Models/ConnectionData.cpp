@@ -65,6 +65,30 @@ void ConnectionData::setEthernetStat(const QString &EthernetStat)
     emit EthernetStatChanged(m_EthernetStat);
 }
 
+void ConnectionData::setWifiBusy(bool wifiBusy)
+{
+    if (m_wifiBusy == wifiBusy)
+        return;
+    m_wifiBusy = wifiBusy;
+    emit wifiBusyChanged(m_wifiBusy);
+}
+
+void ConnectionData::setWifiLastError(const QString &wifiLastError)
+{
+    if (m_wifiLastError == wifiLastError)
+        return;
+    m_wifiLastError = wifiLastError;
+    emit wifiLastErrorChanged(m_wifiLastError);
+}
+
+void ConnectionData::setWifiLastActionMessage(const QString &wifiLastActionMessage)
+{
+    if (m_wifiLastActionMessage == wifiLastActionMessage)
+        return;
+    m_wifiLastActionMessage = wifiLastActionMessage;
+    emit wifiLastActionMessageChanged(m_wifiLastActionMessage);
+}
+
 // * Setters - Platform
 void ConnectionData::setPlatform(const QString &Platform)
 {

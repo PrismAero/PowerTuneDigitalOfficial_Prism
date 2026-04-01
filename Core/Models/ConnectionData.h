@@ -34,6 +34,10 @@ class ConnectionData : public QObject
     // * Network status
     Q_PROPERTY(QString WifiStat READ WifiStat WRITE setWifiStat NOTIFY WifiStatChanged)
     Q_PROPERTY(QString EthernetStat READ EthernetStat WRITE setEthernetStat NOTIFY EthernetStatChanged)
+    Q_PROPERTY(bool wifiBusy READ wifiBusy WRITE setWifiBusy NOTIFY wifiBusyChanged)
+    Q_PROPERTY(QString wifiLastError READ wifiLastError WRITE setWifiLastError NOTIFY wifiLastErrorChanged)
+    Q_PROPERTY(QString wifiLastActionMessage READ wifiLastActionMessage WRITE setWifiLastActionMessage NOTIFY
+                   wifiLastActionMessageChanged)
 
     // * Platform
     Q_PROPERTY(QString Platform READ Platform WRITE setPlatform NOTIFY platformChanged)
@@ -70,6 +74,9 @@ public:
     // * Getters - Network status
     QString WifiStat() const { return m_WifiStat; }
     QString EthernetStat() const { return m_EthernetStat; }
+    bool wifiBusy() const { return m_wifiBusy; }
+    QString wifiLastError() const { return m_wifiLastError; }
+    QString wifiLastActionMessage() const { return m_wifiLastActionMessage; }
 
     // * Getters - Platform
     QString Platform() const { return m_Platform; }
@@ -102,6 +109,9 @@ public slots:
     // * Setters - Network status
     void setWifiStat(const QString &WifiStat);
     void setEthernetStat(const QString &EthernetStat);
+    void setWifiBusy(bool wifiBusy);
+    void setWifiLastError(const QString &wifiLastError);
+    void setWifiLastActionMessage(const QString &wifiLastActionMessage);
 
     // * Setters - Platform
     void setPlatform(const QString &Platform);
@@ -134,6 +144,9 @@ signals:
     // * Signals - Network status
     void WifiStatChanged(const QString &WifiStat);
     void EthernetStatChanged(const QString &EthernetStat);
+    void wifiBusyChanged(bool wifiBusy);
+    void wifiLastErrorChanged(const QString &wifiLastError);
+    void wifiLastActionMessageChanged(const QString &wifiLastActionMessage);
 
     // * Signals - Platform
     void platformChanged(const QString &Platform);
@@ -166,6 +179,9 @@ private:
     // * Network status
     QString m_WifiStat;
     QString m_EthernetStat;
+    bool m_wifiBusy = false;
+    QString m_wifiLastError;
+    QString m_wifiLastActionMessage;
 
     // * Platform
     QString m_Platform;
