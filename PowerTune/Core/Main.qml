@@ -13,7 +13,7 @@ ApplicationWindow {
 
     property bool showUnlockAnimation: false
     property bool brightnessPopupDismissed: false
-    readonly property string raceDashSource: "qrc:/qt/qml/PrismPT/Dashboard/RaceDash.qml"
+    readonly property string raceDashSource: "qrc:/qt/qml/PrismPT/Dashboard/PowerTune/Dashboard/RaceDash.qml"
     readonly property string demoVideoSource: "file:///home/root/bootsplash.mp4"
     color: "black"
     height: 720

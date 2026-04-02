@@ -132,9 +132,37 @@
             }
         },
         {
+            "name": "windows-debug-deploy",
+            "configurePreset": "windows-debug",
+            "configuration": "Debug",
+            "targets": [
+                "powertune_deploy_runtime"
+            ],
+            "nativeToolOptions": [
+                "/m"
+            ],
+            "environment": {
+                "CMAKE_BUILD_PARALLEL_LEVEL": "$penv{NUMBER_OF_PROCESSORS}"
+            }
+        },
+        {
             "name": "windows-release",
             "configurePreset": "windows-release",
             "configuration": "Release",
+            "nativeToolOptions": [
+                "/m"
+            ],
+            "environment": {
+                "CMAKE_BUILD_PARALLEL_LEVEL": "$penv{NUMBER_OF_PROCESSORS}"
+            }
+        },
+        {
+            "name": "windows-release-deploy",
+            "configurePreset": "windows-release",
+            "configuration": "Release",
+            "targets": [
+                "powertune_deploy_runtime"
+            ],
             "nativeToolOptions": [
                 "/m"
             ],

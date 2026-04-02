@@ -10,13 +10,19 @@ project(PowerTuneQMLGui
     LANGUAGES CXX
 )
 
+option(POWERTUNE_ENABLE_WINDEPLOYQT "Run windeployqt as a post-build step on Windows" ON)
+
 # * Build metadata exposed to runtime UI
 set(POWERTUNE_VERSION_LABEL "1.5.9 Beta Unreleased" CACHE STRING "Runtime application version label")
 set(POWERTUNE_BUILD_PROFILE "${CMAKE_BUILD_TYPE}" CACHE STRING "Build profile label")
 if(POWERTUNE_BUILD_PROFILE STREQUAL "")
     set(POWERTUNE_BUILD_PROFILE "Release")
 endif()
-string(TIMESTAMP POWERTUNE_BUILD_DATE_UTC "%Y-%m-%dT%H:%M:%SZ" UTC)
+set(POWERTUNE_BUILD_DATE_UTC "" CACHE STRING "Build date in UTC ISO-8601. Leave empty to stamp once per build directory.")
+if(POWERTUNE_BUILD_DATE_UTC STREQUAL "")
+    string(TIMESTAMP _powertune_build_date_utc "%Y-%m-%dT%H:%M:%SZ" UTC)
+    set(POWERTUNE_BUILD_DATE_UTC "${_powertune_build_date_utc}" CACHE STRING "Build date in UTC ISO-8601. Leave empty to stamp once per build directory." FORCE)
+endif()
 execute_process(
     COMMAND git rev-parse --short=12 HEAD
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
@@ -234,16 +240,29 @@ if(WIN32)
     endif()
 
     if(_powertune_windeployqt)
-        add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+        if(POWERTUNE_ENABLE_WINDEPLOYQT)
+            add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+                COMMAND "${_powertune_windeployqt}"
+                            $<IF:$<CONFIG:Debug>,--debug,--release>
+                        --qmldir "${CMAKE_CURRENT_SOURCE_DIR}"
+                        "$<TARGET_FILE:${PROJECT_NAME}>"
+                COMMENT "Deploying Qt runtime with windeployqt"
+                VERBATIM
+            )
+        endif()
+
+        # * Manual deployment target for generating Qt DLLs on demand.
+        # * Keeps normal incremental dev builds fast.
+        add_custom_target(powertune_deploy_runtime
             COMMAND "${_powertune_windeployqt}"
-                    "$<$<CONFIG:Debug>:--debug>"
-                    "$<$<NOT:$<CONFIG:Debug>>:--release>"
+                        $<IF:$<CONFIG:Debug>,--debug,--release>
                     --qmldir "${CMAKE_CURRENT_SOURCE_DIR}"
                     "$<TARGET_FILE:${PROJECT_NAME}>"
             COMMENT "Deploying Qt runtime with windeployqt"
+            DEPENDS ${PROJECT_NAME}
             VERBATIM
         )
-    else()
+    elseif(POWERTUNE_ENABLE_WINDEPLOYQT)
         message(WARNING "windeployqt.exe not found. Set POWERTUNE_QT_PREFIX to enable automatic Windows deployment.")
     endif()
 endif()
