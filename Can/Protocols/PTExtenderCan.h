@@ -51,6 +51,7 @@ class PTExtenderCan : public CanInterface
     Q_PROPERTY(int startStopLedG READ startStopLedG NOTIFY ledStateChanged)
     Q_PROPERTY(int startStopLedB READ startStopLedB NOTIFY ledStateChanged)
     Q_PROPERTY(int startStopLedPattern READ startStopLedPattern NOTIFY ledStateChanged)
+    Q_PROPERTY(int externalInputMask READ externalInputMask WRITE setExternalInputMask NOTIFY externalInputMaskChanged)
 
 public:
     enum DeviceCommand : int {
@@ -121,6 +122,7 @@ public:
     int startStopLedG() const { return m_startStopLedG; }
     int startStopLedB() const { return m_startStopLedB; }
     int startStopLedPattern() const { return m_startStopLedPattern; }
+    int externalInputMask() const { return m_externalInputMask; }
     int lastConfigAckStatus() const { return m_lastConfigAckStatus; }
     int lastConfigReadGroup() const { return m_lastConfigReadGroup; }
     int lastConfigReadIndex() const { return m_lastConfigReadIndex; }
@@ -134,6 +136,7 @@ public:
     Q_INVOKABLE bool sendLedChannelCommand(int channel, int brightness);
     Q_INVOKABLE bool sendStateOverrideCommand(int state, int r, int g, int b, int pattern, int period10ms);
     Q_INVOKABLE bool sendDeviceCommand(int command);
+    Q_INVOKABLE bool sendExternalInputState(int bitmask);
     Q_INVOKABLE bool writeConfigRegister(int group, int index, int sub, const QByteArray &data);
     Q_INVOKABLE bool readConfigRegister(int group, int index, int sub);
     Q_INVOKABLE bool setGpiFunction(int channel, int function);
@@ -146,6 +149,8 @@ public:
     Q_INVOKABLE bool saveDeviceConfig() { return sendDeviceCommand(DeviceCommandSaveConfig); }
     Q_INVOKABLE bool resetDeviceConfig() { return sendDeviceCommand(DeviceCommandResetConfig); }
     Q_INVOKABLE bool rebootDevice() { return sendDeviceCommand(DeviceCommandReboot); }
+    Q_INVOKABLE bool setExternalInputBit(int bit, bool active);
+    void setExternalInputMask(int bitmask);
 
 signals:
     void baseIdChanged();
@@ -158,6 +163,7 @@ signals:
     void Newtestsignal();
     void configResponseReceived(int group, int index, int sub, QByteArray data);
     void configWriteAcked(int status, int group, int index, int sub);
+    void externalInputMaskChanged();
 
 private slots:
     void onFrameReceived(const QCanBusFrame &frame);
@@ -210,6 +216,7 @@ private:
     int m_startStopLedG = 0;
     int m_startStopLedB = 0;
     int m_startStopLedPattern = 0;
+    int m_externalInputMask = 0;
     int m_lastConfigAckStatus = -1;
     int m_lastConfigReadGroup = -1;
     int m_lastConfigReadIndex = -1;

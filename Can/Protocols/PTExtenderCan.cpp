@@ -153,6 +153,35 @@ bool PTExtenderCan::sendDeviceCommand(int command)
     return writeFrame(m_baseId + 0x12, payload);
 }
 
+bool PTExtenderCan::sendExternalInputState(int bitmask)
+{
+    QByteArray payload(8, '\0');
+    payload[0] = static_cast<char>(qBound(0, bitmask, 255));
+    return writeFrame(m_baseId + 0x13, payload);
+}
+
+void PTExtenderCan::setExternalInputMask(int bitmask)
+{
+    const int normalized = qBound(0, bitmask, 255);
+    if (m_externalInputMask == normalized)
+        return;
+    m_externalInputMask = normalized;
+    emit externalInputMaskChanged();
+}
+
+bool PTExtenderCan::setExternalInputBit(int bit, bool active)
+{
+    if (bit < 0 || bit > 7)
+        return false;
+    int nextMask = m_externalInputMask;
+    if (active)
+        nextMask |= (1 << bit);
+    else
+        nextMask &= ~(1 << bit);
+    setExternalInputMask(nextMask);
+    return sendExternalInputState(nextMask);
+}
+
 bool PTExtenderCan::writeConfigRegister(int group, int index, int sub, const QByteArray &data)
 {
     QByteArray payload(8, '\0');

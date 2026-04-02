@@ -193,6 +193,27 @@ Connect::Connect(QObject *parent)
         if (m_diagnosticsProvider)
             m_diagnosticsProvider->addLogMessage(QStringLiteral("ERROR"), reason);
     });
+    auto *ptExternalInputTimer = new QTimer(this);
+    ptExternalInputTimer->setInterval(200);
+    connect(ptExternalInputTimer, &QTimer::timeout, this, [this]() {
+        if (!m_canManager || !m_ptExtenderCan || !m_digitalInputs)
+            return;
+        if (!m_canManager->isModuleActive(PT_EXTENDER_BACKEND_ID))
+            return;
+
+        int bitmask = 0;
+        if (m_digitalInputs->EXDigitalInput1() > 0.5) bitmask |= (1 << 0);
+        if (m_digitalInputs->EXDigitalInput2() > 0.5) bitmask |= (1 << 1);
+        if (m_digitalInputs->EXDigitalInput3() > 0.5) bitmask |= (1 << 2);
+        if (m_digitalInputs->EXDigitalInput4() > 0.5) bitmask |= (1 << 3);
+        if (m_digitalInputs->EXDigitalInput5() > 0.5) bitmask |= (1 << 4);
+        if (m_digitalInputs->EXDigitalInput6() > 0.5) bitmask |= (1 << 5);
+        if (m_digitalInputs->EXDigitalInput7() > 0.5) bitmask |= (1 << 6);
+        if (m_digitalInputs->EXDigitalInput8() > 0.5) bitmask |= (1 << 7);
+        m_ptExtenderCan->setExternalInputMask(bitmask);
+        m_ptExtenderCan->sendExternalInputState(bitmask);
+    });
+    ptExternalInputTimer->start();
     m_overlayConfigManager = new OverlayPositionManager(this);
     m_shiftIndicatorHelper = new ShiftIndicatorHelper(this);
     m_canFrameModel = new CanFrameModel(m_connectionData, m_extender, this);

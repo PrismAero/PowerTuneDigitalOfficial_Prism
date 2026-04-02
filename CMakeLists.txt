@@ -265,14 +265,16 @@ qt_policy(SET QTP0004 OLD)
             PowerTune/Core/ExBoardAnalog.qml
             PowerTune/Core/ExtenderBoardTab.qml
             PowerTune/Core/ExBoardSection.qml
-            PowerTune/Core/PTExtenderConfigPage.qml
-            PowerTune/Core/PTExtenderSystemSection.qml
-            PowerTune/Core/PTExtenderGpiSection.qml
-            PowerTune/Core/PTExtenderRelaySection.qml
-            PowerTune/Core/PTExtenderTimingSection.qml
-            PowerTune/Core/PTExtenderLedSection.qml
-            PowerTune/Core/PTExtenderIndicatorSection.qml
-            PowerTune/Core/PTExtenderDfiSection.qml
+            PowerTune/Core/PTExtender/PTExtenderConfigPage.qml
+            PowerTune/Core/PTExtender/PTExtenderSystemSection.qml
+            PowerTune/Core/PTExtender/PTExtenderGpiSection.qml
+            PowerTune/Core/PTExtender/PTExtenderRelaySection.qml
+            PowerTune/Core/PTExtender/PTExtenderTimingSection.qml
+            PowerTune/Core/PTExtender/PTExtenderLedSection.qml
+            PowerTune/Core/PTExtender/PTExtenderIndicatorSection.qml
+            PowerTune/Core/PTExtender/LedAnimationPreview.qml
+            PowerTune/Core/PTExtender/LogicRuleEditor.qml
+            PowerTune/Core/PTExtender/PTExtenderDfiSection.qml
             PowerTune/Core/AnalogChannelConfigPopup.qml
             PowerTune/Core/BoardConfigSection.qml
             PowerTune/Core/DigitalInputsSection.qml

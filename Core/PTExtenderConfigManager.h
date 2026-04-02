@@ -18,7 +18,7 @@ public:
     explicit PTExtenderConfigManager(QObject *parent = nullptr);
 
     void setAppSettings(AppSettings *settings) { m_appSettings = settings; }
-    void setPTExtenderCan(PTExtenderCan *can) { m_ptExtenderCan = can; }
+    void setPTExtenderCan(PTExtenderCan *can);
 
     Q_INVOKABLE QVariantMap loadAllSettings() const;
     Q_INVOKABLE void saveAllSettings(const QVariantMap &config);
