@@ -26,6 +26,8 @@ SettingsSection {
                 Text {
                     text: modelData.label
                     color: SettingsTheme.textPrimary
+                    font.family: SettingsTheme.fontFamily
+                    font.pixelSize: SettingsTheme.fontLabel
                 }
 
                 StyledSpinBox {

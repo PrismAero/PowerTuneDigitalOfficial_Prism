@@ -14,7 +14,12 @@ SettingsSection {
         RowLayout {
             Layout.fillWidth: true
 
-            Text { text: "Device Name"; color: SettingsTheme.textPrimary }
+            Text {
+                text: "Device Name"
+                color: SettingsTheme.textPrimary
+                font.family: SettingsTheme.fontFamily
+                font.pixelSize: SettingsTheme.fontLabel
+            }
             StyledTextField {
                 Layout.fillWidth: true
                 text: AppSettings.getValue("ui/ptextender/system/deviceName", "PTExtender")
@@ -24,7 +29,12 @@ SettingsSection {
 
         RowLayout {
             Layout.fillWidth: true
-            Text { text: "Faults Enabled"; color: SettingsTheme.textPrimary }
+            Text {
+                text: "Faults Enabled"
+                color: SettingsTheme.textPrimary
+                font.family: SettingsTheme.fontFamily
+                font.pixelSize: SettingsTheme.fontLabel
+            }
             StyledSwitch {
                 checked: AppSettings.getValue("ui/ptextender/system/faultEnable", true)
                 onCheckedChanged: AppSettings.setValue("ui/ptextender/system/faultEnable", checked)

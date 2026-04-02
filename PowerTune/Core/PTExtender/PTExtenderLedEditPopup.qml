@@ -66,7 +66,7 @@ Popup {
                 Layout.fillWidth: true
                 spacing: SettingsTheme.controlGap
 
-                Text { color: SettingsTheme.textSecondary; text: "Name" }
+                Text { color: SettingsTheme.textSecondary; font.family: SettingsTheme.fontFamily; font.pixelSize: SettingsTheme.fontLabel; text: "Name" }
                 StyledTextField {
                     Layout.fillWidth: true
                     text: AppSettings.getValue(root.lk("name"), "LED " + root.channelIndex)
@@ -83,19 +83,19 @@ Popup {
                 Layout.fillWidth: true
                 spacing: SettingsTheme.controlGap
 
-                Text { color: SettingsTheme.textSecondary; text: "RGB Group" }
+                Text { color: SettingsTheme.textSecondary; font.family: SettingsTheme.fontFamily; font.pixelSize: SettingsTheme.fontLabel; text: "RGB Group" }
                 StyledSpinBox {
                     from: 0; to: 5
                     value: AppSettings.getValue(root.lk("rgbGroup"), 0)
                     onValueChanged: AppSettings.setValue(root.lk("rgbGroup"), value)
                 }
-                Text { color: SettingsTheme.textSecondary; text: "RGB Role" }
+                Text { color: SettingsTheme.textSecondary; font.family: SettingsTheme.fontFamily; font.pixelSize: SettingsTheme.fontLabel; text: "RGB Role" }
                 StyledComboBox {
                     model: ["R", "G", "B"]
                     currentIndex: AppSettings.getValue(root.lk("rgbChannel"), 0)
                     onActivated: AppSettings.setValue(root.lk("rgbChannel"), currentIndex)
                 }
-                Text { color: SettingsTheme.textSecondary; text: "Quick Bind" }
+                Text { color: SettingsTheme.textSecondary; font.family: SettingsTheme.fontFamily; font.pixelSize: SettingsTheme.fontLabel; text: "Quick Bind" }
                 StyledComboBox {
                     model: ["None", "GPI1", "GPI2", "GPI3", "GPI4", "Ext 0", "Ext 1", "Ext 2", "Ext 3", "Ext 4", "Ext 5", "Ext 6", "Ext 7"]
                     currentIndex: AppSettings.getValue(root.lk("quickBindInput"), -1) + 1
@@ -107,7 +107,7 @@ Popup {
                 Layout.fillWidth: true
                 spacing: SettingsTheme.controlGap
 
-                Text { color: SettingsTheme.textSecondary; text: "Base Brightness" }
+                Text { color: SettingsTheme.textSecondary; font.family: SettingsTheme.fontFamily; font.pixelSize: SettingsTheme.fontLabel; text: "Base Brightness" }
                 StyledSlider {
                     Layout.fillWidth: true
                     from: 0; to: 255; stepSize: 1
@@ -117,6 +117,8 @@ Popup {
                 Text {
                     Layout.preferredWidth: 40
                     color: SettingsTheme.textPrimary
+                    font.family: SettingsTheme.fontFamilyMono
+                    font.pixelSize: SettingsTheme.fontLabel
                     text: Math.round(AppSettings.getValue(root.lk("onBrightness"), 255)).toString()
                 }
             }
@@ -125,7 +127,7 @@ Popup {
                 Layout.fillWidth: true
                 spacing: SettingsTheme.controlGap
 
-                Text { color: SettingsTheme.textSecondary; text: "Base Pattern" }
+                Text { color: SettingsTheme.textSecondary; font.family: SettingsTheme.fontFamily; font.pixelSize: SettingsTheme.fontLabel; text: "Base Pattern" }
                 StyledComboBox {
                     model: root.patternNames
                     currentIndex: AppSettings.getValue(root.lk("pattern"), 0)
@@ -147,7 +149,7 @@ Popup {
                 Layout.fillWidth: true
                 spacing: SettingsTheme.controlGap
 
-                Text { color: SettingsTheme.textSecondary; text: "Color" }
+                Text { color: SettingsTheme.textSecondary; font.family: SettingsTheme.fontFamily; font.pixelSize: SettingsTheme.fontLabel; text: "Color" }
                 StyledColorPicker {
                     Layout.preferredWidth: 160
                     colorValue: PTExtenderConfig.rgbToHex(
@@ -161,13 +163,13 @@ Popup {
                         AppSettings.setValue(root.lk("overrideB"), rgb.b);
                     }
                 }
-                Text { color: SettingsTheme.textSecondary; text: "Pattern" }
+                Text { color: SettingsTheme.textSecondary; font.family: SettingsTheme.fontFamily; font.pixelSize: SettingsTheme.fontLabel; text: "Pattern" }
                 StyledComboBox {
                     model: root.overridePatternNames
                     currentIndex: AppSettings.getValue(root.lk("overridePattern"), 2)
                     onActivated: AppSettings.setValue(root.lk("overridePattern"), currentIndex)
                 }
-                Text { color: SettingsTheme.textSecondary; text: "Scope" }
+                Text { color: SettingsTheme.textSecondary; font.family: SettingsTheme.fontFamily; font.pixelSize: SettingsTheme.fontLabel; text: "Scope" }
                 StyledComboBox {
                     model: ["Channel", "Group"]
                     currentIndex: AppSettings.getValue(root.lk("overrideScope"), 1)
@@ -180,7 +182,7 @@ Popup {
                 visible: AppSettings.getValue(root.lk("overridePattern"), 2) === 7
                 spacing: SettingsTheme.controlGap
 
-                Text { color: SettingsTheme.textSecondary; text: "Tri-Color C" }
+                Text { color: SettingsTheme.textSecondary; font.family: SettingsTheme.fontFamily; font.pixelSize: SettingsTheme.fontLabel; text: "Tri-Color C" }
                 StyledColorPicker {
                     Layout.preferredWidth: 160
                     colorValue: PTExtenderConfig.rgbToHex(
@@ -200,12 +202,12 @@ Popup {
                 Layout.fillWidth: true
                 spacing: SettingsTheme.controlGap
 
-                Text { color: SettingsTheme.textSecondary; text: "Idle Preview" }
+                Text { color: SettingsTheme.textSecondary; font.family: SettingsTheme.fontFamily; font.pixelSize: SettingsTheme.fontLabel; text: "Idle Preview" }
                 LedAnimationPreview {
                     colorA: PTExtenderConfig.rgbToHex(0, 180, 0)
                     pattern: AppSettings.getValue(root.lk("pattern"), 0)
                 }
-                Text { color: SettingsTheme.textSecondary; text: "Active Preview" }
+                Text { color: SettingsTheme.textSecondary; font.family: SettingsTheme.fontFamily; font.pixelSize: SettingsTheme.fontLabel; text: "Active Preview" }
                 LedAnimationPreview {
                     colorA: PTExtenderConfig.rgbToHex(
                                 AppSettings.getValue(root.lk("overrideR"), 255),

@@ -22,7 +22,7 @@ SettingsSection {
 
     ColumnLayout {
         Layout.fillWidth: true
-        spacing: 6
+        spacing: SettingsTheme.contentSpacing
 
         RowLayout {
             Layout.fillWidth: true
@@ -44,77 +44,82 @@ SettingsSection {
 
         RowLayout {
             Layout.fillWidth: true
-            spacing: 0
+            spacing: 12
 
-            Text { Layout.preferredWidth: 50; color: SettingsTheme.textSecondary; font.pixelSize: SettingsTheme.fontCaption; text: "CH" }
-            Text { Layout.fillWidth: true; Layout.minimumWidth: 100; color: SettingsTheme.textSecondary; font.pixelSize: SettingsTheme.fontCaption; text: "Name" }
-            Text { Layout.preferredWidth: 60; color: SettingsTheme.textSecondary; font.pixelSize: SettingsTheme.fontCaption; text: "Enabled" }
-            Text { Layout.preferredWidth: 50; color: SettingsTheme.textSecondary; font.pixelSize: SettingsTheme.fontCaption; text: "Group" }
-            Text { Layout.preferredWidth: 30; color: SettingsTheme.textSecondary; font.pixelSize: SettingsTheme.fontCaption; text: "Color" }
-            Text { Layout.preferredWidth: 100; color: SettingsTheme.textSecondary; font.pixelSize: SettingsTheme.fontCaption; text: "Pattern" }
-            Text { Layout.preferredWidth: 50; color: SettingsTheme.textSecondary; font.pixelSize: SettingsTheme.fontCaption; text: "Preview" }
-            Text { Layout.preferredWidth: 80; color: SettingsTheme.textSecondary; font.pixelSize: SettingsTheme.fontCaption; text: "" }
+            Item { Layout.preferredWidth: 20 }
+            Text { Layout.preferredWidth: 50; color: SettingsTheme.textSecondary; font.family: SettingsTheme.fontFamily; font.pixelSize: SettingsTheme.fontStatus; font.bold: true; text: "CH" }
+            Text { Layout.fillWidth: true; Layout.minimumWidth: 100; color: SettingsTheme.textSecondary; font.family: SettingsTheme.fontFamily; font.pixelSize: SettingsTheme.fontStatus; font.bold: true; text: "Name" }
+            Text { Layout.preferredWidth: 50; color: SettingsTheme.textSecondary; font.family: SettingsTheme.fontFamily; font.pixelSize: SettingsTheme.fontStatus; font.bold: true; text: "Group" }
+            Text { Layout.preferredWidth: 160; color: SettingsTheme.textSecondary; font.family: SettingsTheme.fontFamily; font.pixelSize: SettingsTheme.fontStatus; font.bold: true; text: "Color / Pattern" }
+            Item { Layout.preferredWidth: 80 }
         }
+
+        Rectangle { Layout.fillWidth: true; height: SettingsTheme.borderWidth; color: SettingsTheme.border }
 
         Repeater {
             model: 16
 
-            delegate: Rectangle {
+            delegate: RowLayout {
                 required property int index
                 Layout.fillWidth: true
-                color: index % 2 === 0 ? SettingsTheme.surfaceElevated : SettingsTheme.surface
-                border.color: SettingsTheme.border
-                border.width: SettingsTheme.borderWidth
-                radius: 2
-                implicitHeight: 40
+                Layout.preferredHeight: 44
+                spacing: 12
+                opacity: AppSettings.getValue(root.ledKey(index, "enabled"), index < 14) ? 1.0 : 0.4
 
-                RowLayout {
-                    anchors.fill: parent
-                    anchors.margins: 4
-                    spacing: 0
-
-                    Text {
-                        Layout.preferredWidth: 50
-                        color: SettingsTheme.textPrimary
-                        font.family: SettingsTheme.fontFamily
-                        font.pixelSize: SettingsTheme.fontControl
-                        font.weight: Font.Bold
-                        text: index.toString()
-                    }
-
-                    Text {
-                        Layout.fillWidth: true
-                        Layout.minimumWidth: 100
-                        color: SettingsTheme.textPrimary
-                        font.family: SettingsTheme.fontFamily
-                        font.pixelSize: SettingsTheme.fontControl
-                        elide: Text.ElideRight
-                        text: AppSettings.getValue(root.ledKey(index, "name"), "LED " + index)
-                    }
-
-                    Text {
-                        Layout.preferredWidth: 60
-                        color: AppSettings.getValue(root.ledKey(index, "enabled"), index < 14) ? SettingsTheme.success : SettingsTheme.textDisabled
-                        font.family: SettingsTheme.fontFamily
-                        font.pixelSize: SettingsTheme.fontControl
-                        text: AppSettings.getValue(root.ledKey(index, "enabled"), index < 14) ? "ON" : "OFF"
-                    }
-
-                    Text {
-                        Layout.preferredWidth: 50
-                        color: SettingsTheme.textSecondary
-                        font.family: SettingsTheme.fontFamily
-                        font.pixelSize: SettingsTheme.fontControl
-                        text: {
-                            const g = AppSettings.getValue(root.ledKey(index, "rgbGroup"), 0);
-                            return g > 0 ? ("G" + g) : "-";
-                        }
-                    }
+                Item {
+                    Layout.preferredWidth: 20
+                    Layout.preferredHeight: parent.height
 
                     Rectangle {
-                        Layout.preferredWidth: 24
-                        Layout.preferredHeight: 24
-                        Layout.leftMargin: 3
+                        anchors.centerIn: parent
+                        width: SettingsTheme.statusDotSize
+                        height: SettingsTheme.statusDotSize
+                        radius: SettingsTheme.statusDotSize / 2
+                        color: AppSettings.getValue(root.ledKey(index, "enabled"), index < 14)
+                               ? SettingsTheme.success : SettingsTheme.textDisabled
+                    }
+                }
+
+                Text {
+                    Layout.preferredWidth: 50
+                    color: SettingsTheme.textPrimary
+                    font.family: SettingsTheme.fontFamily
+                    font.pixelSize: SettingsTheme.fontLabel
+                    font.bold: true
+                    verticalAlignment: Text.AlignVCenter
+                    text: index.toString()
+                }
+
+                Text {
+                    Layout.fillWidth: true
+                    Layout.minimumWidth: 100
+                    color: SettingsTheme.textPrimary
+                    font.family: SettingsTheme.fontFamily
+                    font.pixelSize: SettingsTheme.fontLabel
+                    elide: Text.ElideRight
+                    verticalAlignment: Text.AlignVCenter
+                    text: AppSettings.getValue(root.ledKey(index, "name"), "LED " + index)
+                }
+
+                Text {
+                    Layout.preferredWidth: 50
+                    color: SettingsTheme.textSecondary
+                    font.family: SettingsTheme.fontFamily
+                    font.pixelSize: SettingsTheme.fontLabel
+                    verticalAlignment: Text.AlignVCenter
+                    text: {
+                        const g = AppSettings.getValue(root.ledKey(index, "rgbGroup"), 0);
+                        return g > 0 ? ("G" + g) : "-";
+                    }
+                }
+
+                RowLayout {
+                    Layout.preferredWidth: 160
+                    spacing: 8
+
+                    Rectangle {
+                        width: 20
+                        height: 20
                         radius: 4
                         border.color: SettingsTheme.border
                         border.width: 1
@@ -125,31 +130,25 @@ SettingsSection {
                     }
 
                     Text {
-                        Layout.preferredWidth: 100
-                        Layout.leftMargin: 6
+                        Layout.fillWidth: true
                         color: SettingsTheme.textSecondary
                         font.family: SettingsTheme.fontFamily
-                        font.pixelSize: SettingsTheme.fontControl
+                        font.pixelSize: SettingsTheme.fontStatus
                         elide: Text.ElideRight
+                        verticalAlignment: Text.AlignVCenter
                         text: root.patternLabel(AppSettings.getValue(root.ledKey(index, "overridePattern"), 2))
                     }
+                }
 
-                    LedAnimationPreview {
-                        Layout.preferredWidth: 50
-                        colorA: PTExtenderConfig.rgbToHex(
-                                    AppSettings.getValue(root.ledKey(index, "overrideR"), 255),
-                                    AppSettings.getValue(root.ledKey(index, "overrideG"), 0),
-                                    AppSettings.getValue(root.ledKey(index, "overrideB"), 0))
-                        pattern: AppSettings.getValue(root.ledKey(index, "overridePattern"), 2)
-                    }
-
-                    StyledButton {
-                        Layout.preferredWidth: 80
-                        text: "Edit"
-                        onClicked: {
-                            editPopup.channelIndex = index;
-                            editPopup.open();
-                        }
+                StyledButton {
+                    Layout.preferredWidth: 80
+                    Layout.preferredHeight: 32
+                    Layout.alignment: Qt.AlignVCenter
+                    primary: false
+                    text: "Edit"
+                    onClicked: {
+                        editPopup.channelIndex = index;
+                        editPopup.open();
                     }
                 }
             }

@@ -64,7 +64,7 @@ Item {
             Text {
                 color: SettingsTheme.textSecondary
                 font.family: SettingsTheme.fontFamily
-                font.pixelSize: SettingsTheme.fontControl
+                font.pixelSize: SettingsTheme.fontLabel
                 text: "conditions"
             }
         }

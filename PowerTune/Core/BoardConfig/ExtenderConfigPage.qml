@@ -267,14 +267,20 @@ Rectangle {
 
                     Text {
                         color: SettingsTheme.textPrimary
+                        font.family: SettingsTheme.fontFamily
+                        font.pixelSize: SettingsTheme.fontLabel
                         text: "Gear: " + (PTExtenderCan.gear < 0 ? "N/?" : PTExtenderCan.gear)
                     }
                     Text {
                         color: SettingsTheme.textPrimary
+                        font.family: SettingsTheme.fontFamily
+                        font.pixelSize: SettingsTheme.fontLabel
                         text: "Active Codes: " + PTExtenderCan.filteredActiveCodeCount
                     }
                     Text {
                         color: SettingsTheme.textSecondary
+                        font.family: SettingsTheme.fontFamily
+                        font.pixelSize: SettingsTheme.fontStatus
                         text: "DFI Checksum Errors: " + PTExtenderCan.dfiChecksumErrors
                     }
                 }
@@ -283,6 +289,8 @@ Rectangle {
                     model: PTExtenderCan ? PTExtenderCan.filteredActiveCodeDetails() : []
                     delegate: Text {
                         color: SettingsTheme.accent
+                        font.family: SettingsTheme.fontFamily
+                        font.pixelSize: SettingsTheme.fontStatus
                         text: "DFI " + modelData.code + ": " + modelData.description
                     }
                 }

@@ -35,6 +35,8 @@ SettingsSection {
 
                 Text {
                     color: SettingsTheme.textPrimary
+                    font.family: SettingsTheme.fontFamily
+                    font.pixelSize: SettingsTheme.fontLabel
                     text: "DFI " + modelData + ": " + PTExtenderCan.dfiCodeDescription(modelData)
                 }
 
