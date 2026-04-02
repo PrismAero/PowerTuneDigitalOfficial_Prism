@@ -5,8 +5,12 @@ Item {
     id: root
 
     property string centerText: config.text !== undefined ? config.text : "Cardinal Racing"
+    property string centerDisplayText: centerText
+    property color centerDisplayColor: "#FFFFFF"
     property var config: ({})
     property string currentTimeText: ""
+    property var dfiCodeRows: []
+    property int dfiCodeIndex: 0
     property bool timeEnabled: config.timeEnabled !== undefined ? (config.timeEnabled === true || config.timeEnabled
                                                                    === "true") : true
 
@@ -25,7 +29,33 @@ Item {
         currentTimeText = Qt.formatTime(now, "h:mm AP");
     }
 
+    function refreshDfiCodes() {
+        if (!PTExtenderCan) {
+            dfiCodeRows = [];
+            centerDisplayText = centerText;
+            centerDisplayColor = "#FFFFFF";
+            dfiCodeTicker.running = false;
+            return;
+        }
+
+        dfiCodeRows = PTExtenderCan.filteredActiveCodeDetails();
+        if (dfiCodeRows.length === 0) {
+            dfiCodeIndex = 0;
+            centerDisplayText = centerText;
+            centerDisplayColor = "#FFFFFF";
+            dfiCodeTicker.running = false;
+            return;
+        }
+
+        dfiCodeIndex = 0;
+        centerDisplayText = "DFI " + dfiCodeRows[0].code + ": " + dfiCodeRows[0].description;
+        centerDisplayColor = "#F1E83C";
+        dfiCodeTicker.running = dfiCodeRows.length > 1;
+    }
+
     Component.onCompleted: updateTime()
+    Component.onCompleted: refreshDfiCodes()
+    onCenterTextChanged: refreshDfiCodes()
 
     Timer {
         interval: 1000
@@ -33,6 +63,33 @@ Item {
         running: true
 
         onTriggered: root.updateTime()
+    }
+
+    Timer {
+        id: dfiCodeTicker
+
+        interval: 3000
+        repeat: true
+        running: false
+        onTriggered: {
+            if (!root.dfiCodeRows || root.dfiCodeRows.length === 0) {
+                running = false;
+                root.centerDisplayText = root.centerText;
+                root.centerDisplayColor = "#FFFFFF";
+                return;
+            }
+            root.dfiCodeIndex = (root.dfiCodeIndex + 1) % root.dfiCodeRows.length;
+            var row = root.dfiCodeRows[root.dfiCodeIndex];
+            root.centerDisplayText = "DFI " + row.code + ": " + row.description;
+            root.centerDisplayColor = "#F1E83C";
+        }
+    }
+
+    Connections {
+        target: PTExtenderCan
+        function onActiveCodesChanged() {
+            root.refreshDfiCodes();
+        }
     }
 
     RowLayout {
@@ -75,11 +132,11 @@ Item {
 
             Text {
                 anchors.centerIn: parent
-                color: "#FFFFFF"
+                color: root.centerDisplayColor
                 font.family: "Hyperspace Race"
                 font.italic: true
                 font.pixelSize: 24
-                text: root.centerText
+                text: root.centerDisplayText
             }
         }
 

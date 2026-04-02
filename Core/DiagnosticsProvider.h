@@ -342,6 +342,7 @@ public:
      * @return QVariantList containing diagnostic entries for each extender digital input channel.
      */
     Q_INVOKABLE QVariantList getExtenderDigitalDiagnostics() const;
+    Q_INVOKABLE QVariantList getPTExtenderDiagnostics() const;
 
     /**
      * @brief Add a log message to the buffer.

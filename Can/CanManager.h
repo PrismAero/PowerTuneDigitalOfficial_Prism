@@ -23,10 +23,12 @@ public:
     bool hasModule(int backendId) const;
 
     bool activateModule(int backendId, const QVariantMap &config);
-    void deactivateModule();
+    void deactivateModule(int backendId);
+    void deactivateAll();
+    bool isModuleActive(int backendId) const;
 
     QString activeModuleName() const;
-    CanInterface *activeModule() const;
+    QList<CanInterface *> activeModules() const;
 
 signals:
     void activeModuleChanged();
@@ -35,7 +37,7 @@ signals:
 private:
     QHash<int, QPointer<CanInterface>> m_modules;
     QPointer<CanTransport> m_transport;
-    QPointer<CanInterface> m_activeModule;
+    QHash<int, QPointer<CanInterface>> m_activeModules;
 };
 
 #endif  // CANMANAGER_H

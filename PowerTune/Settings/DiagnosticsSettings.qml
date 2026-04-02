@@ -1065,6 +1065,58 @@ SettingsPage {
         }
     }
 
+    SettingsSection {
+        id: ptExtenderSection
+
+        Layout.fillWidth: true
+        collapsed: true
+        collapsible: true
+        title: "PT Extender"
+
+        Timer {
+            interval: 1000
+            repeat: true
+            running: !ptExtenderSection.collapsed
+            triggeredOnStart: true
+            onTriggered: ptDiagModel.refresh()
+        }
+
+        ListModel {
+            id: ptDiagModel
+            function refresh() {
+                clear();
+                var data = Diagnostics.getPTExtenderDiagnostics();
+                for (var i = 0; i < data.length; i++)
+                    append(data[i]);
+            }
+        }
+
+        Repeater {
+            model: ptDiagModel
+
+            delegate: RowLayout {
+                Layout.fillWidth: true
+                spacing: SettingsTheme.contentSpacing
+
+                Text {
+                    Layout.preferredWidth: 180
+                    color: SettingsTheme.textPrimary
+                    font.family: SettingsTheme.fontFamily
+                    font.pixelSize: SettingsTheme.fontCaption
+                    text: model.key !== undefined ? model.key : ""
+                }
+
+                Text {
+                    Layout.fillWidth: true
+                    color: SettingsTheme.textSecondary
+                    font.family: SettingsTheme.fontFamilyMono
+                    font.pixelSize: SettingsTheme.fontCaption
+                    text: model.value !== undefined ? model.value : ""
+                }
+            }
+        }
+    }
+
     // * CAN MESSAGE VIEWER
     SettingsSection {
         id: canSection

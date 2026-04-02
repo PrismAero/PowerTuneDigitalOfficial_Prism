@@ -179,6 +179,22 @@ void DigitalInputs::setPTRelayBoundTargetsPacked(int PTRelayBoundTargetsPacked)
     }
 }
 
+void DigitalInputs::setPTGear(int PTGear)
+{
+    if (m_PTGear != PTGear) {
+        m_PTGear = PTGear;
+        emit PTGearChanged(PTGear);
+    }
+}
+
+void DigitalInputs::setPTActiveCodes(const QString &PTActiveCodes)
+{
+    if (m_PTActiveCodes != PTActiveCodes) {
+        m_PTActiveCodes = PTActiveCodes;
+        emit PTActiveCodesChanged(PTActiveCodes);
+    }
+}
+
 void DigitalInputs::setRPMFrequencyDividerDi1(qreal RPMFrequencyDividerDi1)
 {
     if (m_RPMFrequencyDividerDi1 != RPMFrequencyDividerDi1) {

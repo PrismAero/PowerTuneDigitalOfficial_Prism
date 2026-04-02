@@ -10,8 +10,6 @@
 
 #include <iterator>
 
-static constexpr int ECU_DROPDOWN_TO_BACKEND[] = {5, 0, 4};
-
 AppSettings::AppSettings(QObject *parent)
     : QObject(parent),
       m_settingsData(nullptr),
@@ -164,10 +162,24 @@ void AppSettings::setPressureUnitIndex(int index)
 
 void AppSettings::setEcuIndex(int index)
 {
-    if (index < 0 || index >= static_cast<int>(std::size(ECU_DROPDOWN_TO_BACKEND)))
+    if (index < 0)
         return;
 
-    const int backendIndex = ECU_DROPDOWN_TO_BACKEND[index];
+    int backendIndex = 5;
+    bool exEnabled = true;
+    bool ptEnabled = false;
+    if (index == 1) {
+        backendIndex = 6;
+        exEnabled = false;
+        ptEnabled = true;
+    } else if (index == 2) {
+        backendIndex = 5;
+        exEnabled = true;
+        ptEnabled = true;
+    }
+
+    setValue(QStringLiteral("ui/exboard/enabled"), exEnabled);
+    setValue(QStringLiteral("ui/ptextender/enabled"), ptEnabled);
     setECU(backendIndex);
 
     if (m_connectionData)
@@ -232,7 +244,11 @@ void AppSettings::setFlowControl(const int &arg)
 
 int AppSettings::getECU()
 {
-    return getValue("serial/ECU").toInt();
+    const bool exEnabled = getValue(QStringLiteral("ui/exboard/enabled"), true).toBool();
+    const bool ptEnabled = getValue(QStringLiteral("ui/ptextender/enabled"), false).toBool();
+    if (ptEnabled && !exEnabled)
+        return 6;
+    return getValue(QStringLiteral("serial/ECU"), 5).toInt();
 }
 
 void AppSettings::setECU(const int &arg)

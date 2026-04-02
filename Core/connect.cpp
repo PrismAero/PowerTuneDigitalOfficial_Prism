@@ -38,6 +38,7 @@
 #include "DemoModeService.h"
 #include "DifferentialSensorCalc.h"
 #include "ExBoardConfigManager.h"
+#include "PTExtenderConfigManager.h"
 #include "Models/CanFrameModel.h"
 #include "Models/DataModels.h"
 #include "Models/UIState.h"
@@ -92,6 +93,7 @@ bool Connect::hasBrightnessControl() const
 
 Connect::Connect(QObject *parent)
     : QObject(parent),
+      m_appSettings(nullptr),
       m_datalogger(nullptr),
       m_calculations(nullptr),
       m_wifiscanner(nullptr),
@@ -118,7 +120,8 @@ Connect::Connect(QObject *parent)
       m_canStartupManager(nullptr),
       m_canTransport(nullptr),
       m_canManager(nullptr),
-      m_ptExtenderCan(nullptr)
+      m_ptExtenderCan(nullptr),
+      m_ptExtenderConfigManager(nullptr)
 
 {
     // * Phase 2: Create domain data models
@@ -182,7 +185,7 @@ Connect::Connect(QObject *parent)
     });
     connect(m_canTransport, &CanTransport::connectionChanged, this, [this](bool connected) {
         if (m_diagnosticsProvider)
-            m_diagnosticsProvider->setCanStatus(connected, connected ? QStringLiteral("EX Board CAN") : QString());
+            m_diagnosticsProvider->setCanStatus(connected, connected ? activeCanLabel() : QString());
         emit connectionStateChanged(connected, connected ? QStringLiteral("Native CAN active")
                                                          : QStringLiteral("Native CAN disconnected"));
     });
@@ -197,6 +200,10 @@ Connect::Connect(QObject *parent)
     m_exBoardConfigManager->setAppSettings(m_appSettings);
     m_exBoardConfigManager->setCalibrationHelper(m_calibrationHelper);
     m_exBoardConfigManager->setSensorRegistry(m_sensorRegistry);
+    m_ptExtenderConfigManager = new PTExtenderConfigManager(this);
+    m_ptExtenderConfigManager->setAppSettings(m_appSettings);
+    m_ptExtenderConfigManager->setPTExtenderCan(m_ptExtenderCan);
+    m_ptExtenderCan->setConfigManager(m_ptExtenderConfigManager);
     m_differentialSensorCalc = new DifferentialSensorCalc(this);
     m_differentialSensorCalc->setExpanderBoardData(m_expanderBoardData);
     m_differentialSensorCalc->setSensorRegistry(m_sensorRegistry);
@@ -254,6 +261,7 @@ Connect::Connect(QObject *parent)
     engine->rootContext()->setContextProperty("OverlayConfig", m_overlayConfigManager);
     engine->rootContext()->setContextProperty("ShiftHelper", m_shiftIndicatorHelper);
     engine->rootContext()->setContextProperty("ExBoardConfig", m_exBoardConfigManager);
+    engine->rootContext()->setContextProperty("PTExtenderConfig", m_ptExtenderConfigManager);
     engine->rootContext()->setContextProperty("ScreenControl", m_screenControlService);
     engine->rootContext()->setContextProperty("DashboardLock", m_dashboardLockService);
     engine->rootContext()->setContextProperty("DemoMode", m_demoModeService);
@@ -514,11 +522,11 @@ void Connect::canbitratesetup(const int &cansetting)
     }
 
     if (m_canManager)
-        m_canManager->deactivateModule();
+        m_canManager->deactivateAll();
     if (m_canTransport)
         m_canTransport->close();
 
-    if (!startActiveCanModule()) {
+    if (!startCanModules()) {
         if (m_connectionData)
             m_connectionData->setSerialStat(QStringLiteral("Failed to apply CAN bitrate %1").arg(bitrate));
         return;
@@ -528,13 +536,51 @@ void Connect::canbitratesetup(const int &cansetting)
         m_connectionData->setSerialStat(QStringLiteral("Applied CAN bitrate %1").arg(bitrate));
 }
 
+void Connect::openConnection()
+{
+    if (m_diagnosticsProvider) {
+        m_diagnosticsProvider->addLogMessage(QStringLiteral("INFO"), QStringLiteral("Opening connection (auto module selection)"));
+        m_diagnosticsProvider->setCanStatus(false, QString());
+    }
+
+    if (!startCanModules()) {
+        if (m_connectionData)
+            m_connectionData->setSerialStat(QStringLiteral("Native CAN startup failed"));
+        emit connectionOpenResult(false, QStringLiteral("Native CAN startup failed"));
+        emit connectionStateChanged(false, QStringLiteral("Native CAN startup failed"));
+        return;
+    }
+
+    if (m_diagnosticsProvider) {
+        m_diagnosticsProvider->setCanStatus(true, activeCanLabel());
+        m_diagnosticsProvider->setConnectionInfo(false, QString(), 0, QStringLiteral("CAN"));
+    }
+
+    if (m_connectionData)
+        m_connectionData->setSerialStat(QStringLiteral("Native CAN active"));
+    emit connectionOpenResult(true, QStringLiteral("Native CAN active"));
+    emit connectionStateChanged(true, QStringLiteral("Native CAN active"));
+
+    if (m_calculations)
+        m_calculations->start();
+}
+
 
 void Connect::openConnection(const QString &portName, const int &ecuSelect, const int &canbase, const int &rpmcanbase)
 {
-    m_ecu = ecuSelect;
     m_selectedPort = portName;
-    m_canBaseAddress = canbase;
-    m_rpmCanBaseAddress = rpmcanbase;
+    if (m_appSettings) {
+        if (ecuSelect == EX_BOARD_BACKEND_ID) {
+            m_appSettings->setValue(QStringLiteral("ui/exboard/enabled"), true);
+            m_appSettings->setValue(QStringLiteral("ui/ptextender/enabled"), false);
+            m_appSettings->setValue(QStringLiteral("ui/extenderCanBase"), canbase);
+            m_appSettings->setValue(QStringLiteral("ui/shiftLightCanBase"), rpmcanbase);
+        } else if (ecuSelect == PT_EXTENDER_BACKEND_ID) {
+            m_appSettings->setValue(QStringLiteral("ui/exboard/enabled"), false);
+            m_appSettings->setValue(QStringLiteral("ui/ptextender/enabled"), true);
+            m_appSettings->setValue(QStringLiteral("ui/ptextender/canBase"), canbase);
+        }
+    }
 
     if (m_diagnosticsProvider) {
         m_diagnosticsProvider->addLogMessage(
@@ -543,7 +589,7 @@ void Connect::openConnection(const QString &portName, const int &ecuSelect, cons
         m_diagnosticsProvider->setCanStatus(false, QString());
     }
 
-    if (!startActiveCanModule()) {
+    if (!startCanModules()) {
         if (m_connectionData) {
             m_connectionData->setSerialStat(QStringLiteral("Native CAN startup failed"));
         }
@@ -553,9 +599,7 @@ void Connect::openConnection(const QString &portName, const int &ecuSelect, cons
     }
 
     if (m_diagnosticsProvider) {
-        const QString canLabel =
-            (m_ecu == PT_EXTENDER_BACKEND_ID) ? QStringLiteral("PT Extender CAN") : QStringLiteral("EX Board CAN");
-        m_diagnosticsProvider->setCanStatus(true, canLabel);
+        m_diagnosticsProvider->setCanStatus(true, activeCanLabel());
         m_diagnosticsProvider->setConnectionInfo(false, QString(), 0, QStringLiteral("CAN"));
     }
 
@@ -570,7 +614,7 @@ void Connect::openConnection(const QString &portName, const int &ecuSelect, cons
 void Connect::closeConnection()
 {
     if (m_canManager)
-        m_canManager->deactivateModule();
+        m_canManager->deactivateAll();
     if (m_canTransport)
         m_canTransport->close();
 
@@ -596,19 +640,15 @@ int Connect::canBitrateForSelection(int selection) const
     }
 }
 
-bool Connect::startActiveCanModule()
+bool Connect::startCanModules()
 {
     if (!m_canStartupManager || !m_canTransport || !m_canManager)
         return false;
 
-    if (!m_canManager->hasModule(m_ecu)) {
-        if (m_diagnosticsProvider) {
-            m_diagnosticsProvider->addLogMessage(
-                QStringLiteral("ERROR"),
-                QStringLiteral("ECU backend %1 does not have a native CAN module in this phase").arg(m_ecu));
-        }
+    const bool exEnabled = m_appSettings ? m_appSettings->getValue(QStringLiteral("ui/exboard/enabled"), true).toBool() : true;
+    const bool ptEnabled = m_appSettings ? m_appSettings->getValue(QStringLiteral("ui/ptextender/enabled"), false).toBool() : false;
+    if (!exEnabled && !ptEnabled)
         return false;
-    }
 
     int bitrateSelection = m_appSettings ? m_appSettings->getValue(QStringLiteral("ui/bitrateSelect"), 0).toInt() : 0;
     if (bitrateSelection < 0 || bitrateSelection > 2)
@@ -627,15 +667,50 @@ bool Connect::startActiveCanModule()
     if (!m_canTransport->open())
         return false;
 
-    const QVariantMap moduleConfig = {{QStringLiteral("canBaseId"), m_canBaseAddress},
-                                      {QStringLiteral("rpmBaseId"), m_rpmCanBaseAddress}};
+    bool activatedAny = false;
 
-    if (!m_canManager->activateModule(m_ecu, moduleConfig)) {
+    if (exEnabled) {
+        const int exBase = m_appSettings ? m_appSettings->getValue(QStringLiteral("ui/extenderCanBase"), 0).toInt() : 0;
+        const int exRpmBase = m_appSettings ? m_appSettings->getValue(QStringLiteral("ui/shiftLightCanBase"), 0).toInt() : 0;
+        const QVariantMap exConfig = {{QStringLiteral("canBaseId"), exBase}, {QStringLiteral("rpmBaseId"), exRpmBase}};
+        if (!m_canManager->activateModule(EX_BOARD_BACKEND_ID, exConfig)) {
+            m_canTransport->close();
+            return false;
+        }
+        activatedAny = true;
+    }
+
+    if (ptEnabled) {
+        const int ptBase = m_appSettings ? m_appSettings->getValue(QStringLiteral("ui/ptextender/canBase"), 0).toInt() : 0;
+        const QVariantMap ptConfig = {{QStringLiteral("canBaseId"), ptBase}, {QStringLiteral("rpmBaseId"), 0}};
+        if (!m_canManager->activateModule(PT_EXTENDER_BACKEND_ID, ptConfig)) {
+            m_canTransport->close();
+            return false;
+        }
+        activatedAny = true;
+    }
+
+    if (!activatedAny) {
         m_canTransport->close();
         return false;
     }
 
     return true;
+}
+
+QString Connect::activeCanLabel() const
+{
+    if (!m_canManager)
+        return QString();
+    const bool exActive = m_canManager->isModuleActive(EX_BOARD_BACKEND_ID);
+    const bool ptActive = m_canManager->isModuleActive(PT_EXTENDER_BACKEND_ID);
+    if (exActive && ptActive)
+        return QStringLiteral("EX Board + PT Extender CAN");
+    if (ptActive)
+        return QStringLiteral("PT Extender CAN");
+    if (exActive)
+        return QStringLiteral("EX Board CAN");
+    return QString();
 }
 
 void Connect::update()

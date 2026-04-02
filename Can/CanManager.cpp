@@ -3,6 +3,8 @@
 #include "CanInterface.h"
 #include "CanTransport.h"
 
+#include <QStringList>
+
 CanManager::CanManager(QObject *parent) : QObject(parent) {}
 
 void CanManager::setTransport(CanTransport *transport)
@@ -37,32 +39,67 @@ bool CanManager::activateModule(int backendId, const QVariantMap &config)
         return false;
     }
 
-    if (m_activeModule && m_activeModule != it.value())
-        m_activeModule->detachTransport();
+    QPointer<CanInterface> module = it.value();
+    if (module.isNull()) {
+        emit activationFailed(QStringLiteral("CAN module for ECU backend %1 is no longer valid").arg(backendId));
+        return false;
+    }
 
-    m_activeModule = it.value();
-    m_activeModule->configureConnection(config);
-    m_activeModule->attachTransport(m_transport);
+    module->configureConnection(config);
+    module->attachTransport(m_transport);
+    m_activeModules.insert(backendId, module);
     emit activeModuleChanged();
     return true;
 }
 
-void CanManager::deactivateModule()
+void CanManager::deactivateModule(int backendId)
 {
-    if (!m_activeModule)
+    const auto it = m_activeModules.find(backendId);
+    if (it == m_activeModules.end())
         return;
 
-    m_activeModule->detachTransport();
-    m_activeModule = nullptr;
+    if (!it.value().isNull())
+        it.value()->detachTransport();
+    m_activeModules.erase(it);
     emit activeModuleChanged();
+}
+
+void CanManager::deactivateAll()
+{
+    bool hadAny = false;
+    for (auto it = m_activeModules.begin(); it != m_activeModules.end(); ++it) {
+        if (!it.value().isNull())
+            it.value()->detachTransport();
+        hadAny = true;
+    }
+    m_activeModules.clear();
+    if (hadAny)
+        emit activeModuleChanged();
+}
+
+bool CanManager::isModuleActive(int backendId) const
+{
+    const auto it = m_activeModules.constFind(backendId);
+    return it != m_activeModules.constEnd() && !it.value().isNull();
 }
 
 QString CanManager::activeModuleName() const
 {
-    return m_activeModule ? m_activeModule->moduleName() : QString();
+    QStringList names;
+    for (auto it = m_activeModules.constBegin(); it != m_activeModules.constEnd(); ++it) {
+        if (!it.value().isNull())
+            names << it.value()->moduleName();
+    }
+    return names.join(QStringLiteral(", "));
 }
 
-CanInterface *CanManager::activeModule() const
+QList<CanInterface *> CanManager::activeModules() const
 {
-    return m_activeModule;
+    QList<CanInterface *> modules;
+    modules.reserve(m_activeModules.size());
+    for (auto it = m_activeModules.constBegin(); it != m_activeModules.constEnd(); ++it) {
+        if (!it.value().isNull())
+            modules.append(it.value());
+    }
+    return modules;
 }

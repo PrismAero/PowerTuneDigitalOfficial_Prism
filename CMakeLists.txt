@@ -71,6 +71,7 @@ set(CORE_SOURCES
     Core/DiagnosticsProvider.cpp
     Core/DifferentialSensorCalc.cpp
     Core/ExBoardConfigManager.cpp
+    Core/PTExtenderConfigManager.cpp
     Core/DemoModeService.cpp
     Core/UpdateManagerService.cpp
     Core/ScreenControlService.cpp
@@ -97,6 +98,7 @@ set(CORE_HEADERS
     Core/DiagnosticsProvider.h
     Core/DifferentialSensorCalc.h
     Core/ExBoardConfigManager.h
+    Core/PTExtenderConfigManager.h
     Core/DemoModeService.h
     Core/UpdateManagerService.h
     Core/ScreenControlService.h
@@ -261,6 +263,16 @@ qt_policy(SET QTP0004 OLD)
             PowerTune/Core/BootSplash.qml
             PowerTune/Core/SettingsManager.qml
             PowerTune/Core/ExBoardAnalog.qml
+            PowerTune/Core/ExtenderBoardTab.qml
+            PowerTune/Core/ExBoardSection.qml
+            PowerTune/Core/PTExtenderConfigPage.qml
+            PowerTune/Core/PTExtenderSystemSection.qml
+            PowerTune/Core/PTExtenderGpiSection.qml
+            PowerTune/Core/PTExtenderRelaySection.qml
+            PowerTune/Core/PTExtenderTimingSection.qml
+            PowerTune/Core/PTExtenderLedSection.qml
+            PowerTune/Core/PTExtenderIndicatorSection.qml
+            PowerTune/Core/PTExtenderDfiSection.qml
             PowerTune/Core/AnalogChannelConfigPopup.qml
             PowerTune/Core/BoardConfigSection.qml
             PowerTune/Core/DigitalInputsSection.qml
@@ -319,6 +331,7 @@ qt_policy(SET QTP0004 OLD)
             PowerTune/Gauges/Shared/Warning.qml
             PowerTune/Gauges/Shared/WarningLoader.qml
             PowerTune/Gauges/Shared/WarningFlashTimer.qml
+            PowerTune/Gauges/Shared/ActiveCodesDisplay.qml
         RESOURCE_PREFIX /qt/qml
         OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/qt/qml/PowerTune/Gauges/Shared
     )

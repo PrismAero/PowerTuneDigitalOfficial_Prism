@@ -14,6 +14,7 @@
 #define DIGITALINPUTS_H
 
 #include <QObject>
+#include <QString>
 
 class DigitalInputs : public QObject
 {
@@ -44,6 +45,8 @@ class DigitalInputs : public QObject
     Q_PROPERTY(int PTRelayFollowerMask READ PTRelayFollowerMask WRITE setPTRelayFollowerMask NOTIFY PTRelayFollowerMaskChanged)
     Q_PROPERTY(int PTRelayInvertMask READ PTRelayInvertMask WRITE setPTRelayInvertMask NOTIFY PTRelayInvertMaskChanged)
     Q_PROPERTY(int PTRelayBoundTargetsPacked READ PTRelayBoundTargetsPacked WRITE setPTRelayBoundTargetsPacked NOTIFY PTRelayBoundTargetsPackedChanged)
+    Q_PROPERTY(int PTGear READ PTGear WRITE setPTGear NOTIFY PTGearChanged)
+    Q_PROPERTY(QString PTActiveCodes READ PTActiveCodes WRITE setPTActiveCodes NOTIFY PTActiveCodesChanged)
 
     Q_PROPERTY(qreal RPMFrequencyDividerDi1 READ RPMFrequencyDividerDi1 WRITE setRPMFrequencyDividerDi1 NOTIFY
                    RPMFrequencyDividerDi1Changed)
@@ -78,6 +81,8 @@ public:
     int PTRelayFollowerMask() const { return m_PTRelayFollowerMask; }
     int PTRelayInvertMask() const { return m_PTRelayInvertMask; }
     int PTRelayBoundTargetsPacked() const { return m_PTRelayBoundTargetsPacked; }
+    int PTGear() const { return m_PTGear; }
+    QString PTActiveCodes() const { return m_PTActiveCodes; }
 
     qreal RPMFrequencyDividerDi1() const { return m_RPMFrequencyDividerDi1; }
     qreal frequencyDIEX1() const { return m_frequencyDIEX1; }
@@ -109,6 +114,8 @@ public slots:
     void setPTRelayFollowerMask(int PTRelayFollowerMask);
     void setPTRelayInvertMask(int PTRelayInvertMask);
     void setPTRelayBoundTargetsPacked(int PTRelayBoundTargetsPacked);
+    void setPTGear(int PTGear);
+    void setPTActiveCodes(const QString &PTActiveCodes);
 
     void setRPMFrequencyDividerDi1(qreal RPMFrequencyDividerDi1);
     void setfrequencyDIEX1(qreal frequencyDIEX1);
@@ -140,6 +147,8 @@ signals:
     void PTRelayFollowerMaskChanged(int PTRelayFollowerMask);
     void PTRelayInvertMaskChanged(int PTRelayInvertMask);
     void PTRelayBoundTargetsPackedChanged(int PTRelayBoundTargetsPacked);
+    void PTGearChanged(int PTGear);
+    void PTActiveCodesChanged(const QString &PTActiveCodes);
 
     void RPMFrequencyDividerDi1Changed(qreal RPMFrequencyDividerDi1);
     void frequencyDIEX1Changed(qreal frequencyDIEX1);
@@ -170,6 +179,8 @@ private:
     int m_PTRelayFollowerMask = 0;
     int m_PTRelayInvertMask = 0;
     int m_PTRelayBoundTargetsPacked = 0;
+    int m_PTGear = -2;
+    QString m_PTActiveCodes;
 
     qreal m_RPMFrequencyDividerDi1 = 0;
     qreal m_frequencyDIEX1 = 0;

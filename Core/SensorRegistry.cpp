@@ -576,6 +576,32 @@ void SensorRegistry::refreshExtenderDigitalInputs()
     ptBoundPack.stepSize = 1.0;
     m_sensors.insert(ptBoundPack.key, ptBoundPack);
 
+    SensorEntry ptGear;
+    ptGear.key = QStringLiteral("PTGear");
+    ptGear.displayName = QStringLiteral("PT Gear");
+    ptGear.category = QStringLiteral("PT Extender");
+    ptGear.unit = QString();
+    ptGear.source = SensorSource::ExtenderDigital;
+    ptGear.active = false;
+    ptGear.lastActiveTimestamp = 0;
+    ptGear.decimals = 0;
+    ptGear.maxValue = 7.0;
+    ptGear.stepSize = 1.0;
+    m_sensors.insert(ptGear.key, ptGear);
+
+    SensorEntry ptActiveCodes;
+    ptActiveCodes.key = QStringLiteral("PTActiveCodes");
+    ptActiveCodes.displayName = QStringLiteral("PT Active Codes");
+    ptActiveCodes.category = QStringLiteral("PT Extender");
+    ptActiveCodes.unit = QString();
+    ptActiveCodes.source = SensorSource::ExtenderDigital;
+    ptActiveCodes.active = false;
+    ptActiveCodes.lastActiveTimestamp = 0;
+    ptActiveCodes.decimals = 0;
+    ptActiveCodes.maxValue = 0.0;
+    ptActiveCodes.stepSize = 1.0;
+    m_sensors.insert(ptActiveCodes.key, ptActiveCodes);
+
     scheduleSensorsChanged();
 }
 

@@ -10,6 +10,7 @@
 
 #include "DiagnosticsProvider.h"
 
+#include "../Can/Protocols/PTExtenderCan.h"
 #include "PropertyRouter.h"
 #include "SensorRegistry.h"
 #include "appsettings.h"
@@ -764,6 +765,47 @@ QVariantList DiagnosticsProvider::getExtenderDigitalDiagnostics() const
         statusEntry[QStringLiteral("state")] = value;
         statusEntry[QStringLiteral("configured")] = (value != 0);
         result.append(statusEntry);
+    }
+
+    return result;
+}
+
+QVariantList DiagnosticsProvider::getPTExtenderDiagnostics() const
+{
+    QVariantList result;
+    if (!m_propertyRouter)
+        return result;
+
+    const QStringList keys = {
+        QStringLiteral("PTGear"),
+        QStringLiteral("PTActiveCodes"),
+        QStringLiteral("PTSystemState"),
+        QStringLiteral("PTSystemFault"),
+        QStringLiteral("PTDfiChecksumErrors"),
+        QStringLiteral("PTCanTxErrors"),
+        QStringLiteral("PTRelayMask"),
+    };
+
+    for (const QString &key : keys) {
+        QVariantMap entry;
+        entry[QStringLiteral("key")] = key;
+        entry[QStringLiteral("value")] = m_propertyRouter->hasProperty(key) ? m_propertyRouter->getValue(key) : QVariant();
+        result.append(entry);
+    }
+
+    if (m_propertyRouter->hasProperty(QStringLiteral("PTActiveCodes"))) {
+        const QString codesCsv = m_propertyRouter->getValue(QStringLiteral("PTActiveCodes")).toString();
+        const QStringList codes = codesCsv.split(',', Qt::SkipEmptyParts);
+        for (const QString &codeStr : codes) {
+            bool ok = false;
+            const int code = codeStr.trimmed().toInt(&ok);
+            if (!ok || code <= 0)
+                continue;
+            QVariantMap entry;
+            entry[QStringLiteral("key")] = QStringLiteral("DFI %1").arg(code);
+            entry[QStringLiteral("value")] = PTExtenderCan::dfiCodeDescription(code);
+            result.append(entry);
+        }
     }
 
     return result;

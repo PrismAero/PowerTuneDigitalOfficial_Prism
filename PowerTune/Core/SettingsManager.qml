@@ -42,7 +42,7 @@ Rectangle {
         }
 
         ListElement {
-            title: "EX Board"
+            title: "Extender Board"
         }
 
         ListElement {
@@ -113,7 +113,7 @@ Rectangle {
             Component { id: displaySettingsComponent; DisplaySettings { } }
             Component { id: dashSelectorComponent; DashSelector { } }
             Component { id: vehicleRpmComponent; VehicleRPMSettings { } }
-            Component { id: exBoardComponent; ExBoardAnalog { } }
+            Component { id: exBoardComponent; ExtenderBoardTab { } }
             Component { id: networkComponent; NetworkSettings { } }
             Component { id: diagnosticsComponent; DiagnosticsSettings { } }
 

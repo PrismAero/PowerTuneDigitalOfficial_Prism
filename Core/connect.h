@@ -64,6 +64,7 @@ class CanStartupManager;
 class CanTransport;
 class CanManager;
 class PTExtenderCan;
+class PTExtenderConfigManager;
 
 class Connect : public QObject
 {
@@ -108,6 +109,7 @@ public:
     Q_INVOKABLE void qmlTreeviewclicked(const QModelIndex &index);
     Q_INVOKABLE void clear() const;
     Q_INVOKABLE void canbitratesetup(const int &cansetting);
+    Q_INVOKABLE void openConnection();
     Q_INVOKABLE void openConnection(const QString &portName, const int &ecuSelect, const int &canbase,
                                     const int &rpmcanbase);
     Q_INVOKABLE void closeConnection();
@@ -123,7 +125,8 @@ public:
 
 private:
     int canBitrateForSelection(int selection) const;
-    bool startActiveCanModule();
+    bool startCanModules();
+    QString activeCanLabel() const;
 
     AppSettings *m_appSettings;
     datalogger *m_datalogger;
@@ -164,13 +167,10 @@ private:
     CanTransport *m_canTransport;
     CanManager *m_canManager;
     PTExtenderCan *m_ptExtenderCan;
+    PTExtenderConfigManager *m_ptExtenderConfigManager;
     BrightnessMethod m_brightnessMethod = BrightnessMethod::None;
-
-    int m_ecu = 0;
     int m_logging = 0;
     int m_connectClicked = 0;
-    int m_canBaseAddress = 0;
-    int m_rpmCanBaseAddress = 0;
     QByteArray m_checksumHex;
     QByteArray m_recvChecksumHex;
     QString m_selectedPort;

@@ -3,8 +3,10 @@
 
 #include "../../Can/CanInterface.h"
 
+#include <QByteArray>
 #include <QCanBusFrame>
 #include <QString>
+#include <QVariantList>
 #include <QVariantMap>
 
 class CanTransport;
@@ -14,6 +16,7 @@ class VehicleData;
 class ConnectionData;
 class DiagnosticsProvider;
 class SensorRegistry;
+class PTExtenderConfigManager;
 
 static constexpr int PT_EXTENDER_BACKEND_ID = 6;
 
@@ -22,6 +25,9 @@ class PTExtenderCan : public CanInterface
     Q_OBJECT
     Q_PROPERTY(int baseId READ baseId NOTIFY baseIdChanged)
     Q_PROPERTY(QString activeCodes READ activeCodes NOTIFY activeCodesChanged)
+    Q_PROPERTY(QString filteredActiveCodes READ filteredActiveCodes NOTIFY activeCodesChanged)
+    Q_PROPERTY(int filteredActiveCodeCount READ filteredActiveCodeCount NOTIFY activeCodesChanged)
+    Q_PROPERTY(int gear READ gear NOTIFY gearChanged)
     Q_PROPERTY(int ioState READ ioState NOTIFY ioStatusChanged)
     Q_PROPERTY(int ioFault READ ioFault NOTIFY ioStatusChanged)
     Q_PROPERTY(int dfiChecksumErrors READ dfiChecksumErrors NOTIFY ioStatusChanged)
@@ -55,6 +61,27 @@ public:
     };
     Q_ENUM(DeviceCommand)
 
+    enum ConfigGroup : int {
+        ConfigGroupSystemGlobals = 0,
+        ConfigGroupTiming = 1,
+        ConfigGroupGpi = 2,
+        ConfigGroupRelay = 3,
+        ConfigGroupLed = 4,
+        ConfigGroupFault = 5,
+        ConfigGroupIndicator = 6
+    };
+    Q_ENUM(ConfigGroup)
+
+    enum ConfigWriteStatus : int {
+        ConfigWriteOk = 0,
+        ConfigErrInvalidGroup = 1,
+        ConfigErrInvalidIndex = 2,
+        ConfigErrInvalidSub = 3,
+        ConfigErrValueRange = 4,
+        ConfigErrBlocked = 5
+    };
+    Q_ENUM(ConfigWriteStatus)
+
     explicit PTExtenderCan(QObject *parent = nullptr);
     explicit PTExtenderCan(DigitalInputs *digitalInputs, ExpanderBoardData *expanderBoardData, VehicleData *vehicleData,
                            ConnectionData *connectionData, QObject *parent = nullptr);
@@ -68,6 +95,9 @@ public:
 
     int baseId() const { return static_cast<int>(m_baseId); }
     QString activeCodes() const { return m_activeCodes; }
+    QString filteredActiveCodes() const;
+    int filteredActiveCodeCount() const;
+    int gear() const { return m_gear; }
     int ioState() const { return m_ioState; }
     int ioFault() const { return m_ioFault; }
     int dfiChecksumErrors() const { return m_dfiChecksumErrors; }
@@ -91,13 +121,28 @@ public:
     int startStopLedG() const { return m_startStopLedG; }
     int startStopLedB() const { return m_startStopLedB; }
     int startStopLedPattern() const { return m_startStopLedPattern; }
+    int lastConfigAckStatus() const { return m_lastConfigAckStatus; }
+    int lastConfigReadGroup() const { return m_lastConfigReadGroup; }
+    int lastConfigReadIndex() const { return m_lastConfigReadIndex; }
+    int lastConfigReadSub() const { return m_lastConfigReadSub; }
+    QString lastConfigReadPayloadHex() const { return m_lastConfigReadPayloadHex; }
 
     void setDiagnosticsProvider(DiagnosticsProvider *diag) { m_diagnosticsProvider = diag; }
     void setSensorRegistry(SensorRegistry *reg) { m_sensorRegistry = reg; }
+    void setConfigManager(PTExtenderConfigManager *manager);
 
     Q_INVOKABLE bool sendLedChannelCommand(int channel, int brightness);
     Q_INVOKABLE bool sendStateOverrideCommand(int state, int r, int g, int b, int pattern, int period10ms);
     Q_INVOKABLE bool sendDeviceCommand(int command);
+    Q_INVOKABLE bool writeConfigRegister(int group, int index, int sub, const QByteArray &data);
+    Q_INVOKABLE bool readConfigRegister(int group, int index, int sub);
+    Q_INVOKABLE bool setGpiFunction(int channel, int function);
+    Q_INVOKABLE bool setRelayFunction(int channel, int function);
+    Q_INVOKABLE bool setTimingParam(int param, int valueMs);
+    Q_INVOKABLE bool setEngineProofMode(int mode);
+    Q_INVOKABLE QVariantList activeCodeDetails() const;
+    Q_INVOKABLE QVariantList filteredActiveCodeDetails() const;
+    Q_INVOKABLE static QString dfiCodeDescription(int code);
     Q_INVOKABLE bool saveDeviceConfig() { return sendDeviceCommand(DeviceCommandSaveConfig); }
     Q_INVOKABLE bool resetDeviceConfig() { return sendDeviceCommand(DeviceCommandResetConfig); }
     Q_INVOKABLE bool rebootDevice() { return sendDeviceCommand(DeviceCommandReboot); }
@@ -105,11 +150,14 @@ public:
 signals:
     void baseIdChanged();
     void activeCodesChanged();
+    void gearChanged();
     void ioStatusChanged();
     void indicatorConfigChanged();
     void ledStateChanged();
     void NewCanFrameReceived(int canId, QString payload);
     void Newtestsignal();
+    void configResponseReceived(int group, int index, int sub, QByteArray data);
+    void configWriteAcked(int status, int group, int index, int sub);
 
 private slots:
     void onFrameReceived(const QCanBusFrame &frame);
@@ -118,6 +166,8 @@ private:
     QString byteArrayToHex(const QByteArray &byteArray) const;
     bool writeFrame(quint32 id, const QByteArray &payload);
     void updateActiveCodesFromFrame(const QByteArray &payload);
+    QList<int> parseActiveCodeList() const;
+    bool isCodeSuppressed(int code) const;
 
     CanTransport *m_transport = nullptr;
     DigitalInputs *m_digitalInputs = nullptr;
@@ -126,13 +176,17 @@ private:
     ConnectionData *m_connectionData = nullptr;
     DiagnosticsProvider *m_diagnosticsProvider = nullptr;
     SensorRegistry *m_sensorRegistry = nullptr;
+    PTExtenderConfigManager *m_configManager = nullptr;
 
     quint32 m_baseId = 0;
     quint32 m_statusAddress = 0;
     quint32 m_ioAddress = 0;
     quint32 m_ledAddress = 0;
     quint32 m_indicatorConfigAddress = 0;
+    quint32 m_configReadResponseAddress = 0;
+    quint32 m_configWriteAckAddress = 0;
     QString m_activeCodes;
+    int m_gear = -2;
     int m_ioState = 0;
     int m_ioFault = 0;
     int m_dfiChecksumErrors = 0;
@@ -156,6 +210,11 @@ private:
     int m_startStopLedG = 0;
     int m_startStopLedB = 0;
     int m_startStopLedPattern = 0;
+    int m_lastConfigAckStatus = -1;
+    int m_lastConfigReadGroup = -1;
+    int m_lastConfigReadIndex = -1;
+    int m_lastConfigReadSub = -1;
+    QString m_lastConfigReadPayloadHex;
 };
 
 #endif  // PTEXTENDERCAN_H

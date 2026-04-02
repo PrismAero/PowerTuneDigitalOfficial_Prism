@@ -57,12 +57,11 @@ SettingsPage {
 
     property int connected: 0
     property int currentLanguage: (Settings && Settings.language !== undefined) ? Settings.language : 0
-    readonly property var ecuBackendMap: [5, 6]
     property bool autoConnectAttempted: false
     property bool autoConnectEnabled: false
     property int hexstring: 0
     property int hexstring2: 0
-    readonly property bool isExtenderOnly: ecuBackendMap[ecuSelect.currentIndex] === 5 || ecuBackendMap[ecuSelect.currentIndex] === 6
+    property int ptHexstring: 0
     property bool loggerActive: false
     property bool settingsLoaded: false
     readonly property string appVersionText: (Updater && Updater.currentVersion !== "") ? Updater.currentVersion : (Qt.application.version !== "" ? Qt.application.version : "0.0.0")
@@ -87,20 +86,11 @@ SettingsPage {
     function connectEcu() {
         Connect.setOdometer(odometer.text);
         Connect.setWeight(weight.text);
-        const backendIdx = ecuBackendMap[ecuSelect.currentIndex];
-        Connect.openConnection("", backendIdx, baseadresstext.text, shiftlightbaseadresstext.text);
+        Connect.openConnection();
     }
 
     function disconnectEcu() {
         Connect.closeConnection();
-    }
-
-    function ecuDropdownFromBackend(backendIdx) {
-        for (let i = 0; i < ecuBackendMap.length; i++) {
-            if (ecuBackendMap[i] === backendIdx)
-                return i;
-        }
-        return 0;
     }
 
     function toggleDataLogger() {
@@ -128,7 +118,6 @@ SettingsPage {
             return;
         connectButton.enabled = true;
         disconnectButton.enabled = false;
-        ecuSelect.enabled = true;
         autoConnectEnabled = AppSettings.getValue("ui/canAutoConnect", AppSettings.getValue("ui/connectAtStartup", false));
         AppSettings.setValue("ui/canAutoConnect", autoConnectEnabled);
         weight.text = AppSettings.getValue("ui/vehicleWeight", "0");
@@ -137,8 +126,11 @@ SettingsPage {
         unitSelect2.currentIndex = AppSettings.getValue("ui/unitSelector2", 0);
         odometer.text = AppSettings.getValue("ui/odometer", "0");
         tripmeter.text = AppSettings.getValue("ui/tripmeter", "0");
+        exboardEnabledSwitch.checked = AppSettings.getValue("ui/exboard/enabled", true);
+        ptEnabledSwitch.checked = AppSettings.getValue("ui/ptextender/enabled", false);
         baseadresstext.text = AppSettings.getValue("ui/extenderCanBase", "");
         shiftlightbaseadresstext.text = AppSettings.getValue("ui/shiftLightCanBase", "");
+        ptextenderbaseadresstext.text = AppSettings.getValue("ui/ptextender/canBase", "");
         languageselect.currentIndex = AppSettings.getValue("Language", 0);
         mainspeedsource.currentIndex = AppSettings.getValue("ui/mainSpeedSource", 0);
         canbitrateselect.currentIndex = AppSettings.getValue("ui/bitrateSelect", 0);
@@ -155,7 +147,8 @@ SettingsPage {
         function onConnectionStateChanged(isConnected, statusMessage) {
             connectButton.enabled = !isConnected;
             disconnectButton.enabled = isConnected;
-            ecuSelect.enabled = !isConnected;
+            exboardEnabledSwitch.enabled = !isConnected;
+            ptEnabledSwitch.enabled = !isConnected;
             connected = isConnected ? 1 : 0;
         }
 
@@ -354,28 +347,28 @@ SettingsPage {
                 }
 
                 MainSettingsRow {
-                    label: Translator.translate("ECU Selection", Settings.language)
+                    label: "EX Board Extender"
 
-                    StyledComboBox {
-                        id: ecuSelect
-
-                        property bool initialized: false
+                    StyledSwitch {
+                        id: exboardEnabledSwitch
 
                         Layout.fillWidth: true
                         Layout.preferredHeight: SettingsTheme.controlHeight
-                        model: ["EX Board Extender", "PT Extender"]
+                        onCheckedChanged: if (settingsLoaded)
+                                              AppSettings.setValue("ui/exboard/enabled", checked)
+                    }
+                }
 
-                        Component.onCompleted: {
-                            var stored = AppSettings.getECU();
-                            currentIndex = ecuDropdownFromBackend(stored);
-                            AppSettings.setEcuIndex(currentIndex);
-                            initialized = true;
-                            autoConnect();
-                        }
-                        onCurrentIndexChanged: {
-                            if (initialized)
-                                AppSettings.setEcuIndex(currentIndex);
-                        }
+                MainSettingsRow {
+                    label: "PT Extender"
+
+                    StyledSwitch {
+                        id: ptEnabledSwitch
+
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: SettingsTheme.controlHeight
+                        onCheckedChanged: if (settingsLoaded)
+                                              AppSettings.setValue("ui/ptextender/enabled", checked)
                     }
                 }
 
@@ -477,6 +470,41 @@ SettingsPage {
                             font.family: SettingsTheme.fontFamilyMono
                             font.pixelSize: SettingsTheme.fontStatus
                             text: "0x" + (hexstring2 + 0x1000).toString(16).substr(-3).toUpperCase()
+                        }
+                    }
+                }
+
+                MainSettingsRow {
+                    label: "PT Extender Base"
+                    description: "CAN address (decimal)"
+
+                    RowLayout {
+                        Layout.fillWidth: true
+                        spacing: SettingsTheme.controlGap
+
+                        StyledTextField {
+                            id: ptextenderbaseadresstext
+
+                            Layout.preferredWidth: SettingsTheme.textFieldMinWidth
+                            Layout.preferredHeight: SettingsTheme.controlHeight
+                            enabled: connectButton.enabled
+                            inputMethodHints: Qt.ImhFormattedNumbersOnly
+                            placeholderText: "1536"
+
+                            validator: IntValidator {
+                                bottom: 0
+                                top: 4000
+                            }
+
+                            onEditingFinished: AppSettings.setValue("ui/ptextender/canBase", text)
+                            onTextChanged: ptHexstring = parseInt(ptextenderbaseadresstext.text) || 0
+                        }
+
+                        Text {
+                            color: SettingsTheme.textSecondary
+                            font.family: SettingsTheme.fontFamilyMono
+                            font.pixelSize: SettingsTheme.fontStatus
+                            text: "0x" + (ptHexstring + 0x1000).toString(16).substr(-3).toUpperCase()
                         }
                     }
                 }
