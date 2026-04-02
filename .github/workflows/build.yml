@@ -10,7 +10,7 @@ jobs:
           version: '6.8.3'
           host: 'linux'
           target: 'desktop'
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
       - run: cmake --build build --parallel
       - name: Check file existence
