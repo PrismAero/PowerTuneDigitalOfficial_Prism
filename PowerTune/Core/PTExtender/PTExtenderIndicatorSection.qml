@@ -12,31 +12,9 @@ SettingsSection {
         return "ui/ptextender/indicator/" + profile + "/" + suffix;
     }
 
-    function toHex(v) {
-        const clamped = Math.max(0, Math.min(255, v));
-        const h = clamped.toString(16).toUpperCase();
-        return h.length < 2 ? "0" + h : h;
-    }
-
-    function rgbToHex(r, g, b) {
-        return "#" + toHex(r) + toHex(g) + toHex(b);
-    }
-
-    function writeProfile(profile) {
-        const pfx = "ui/ptextender/indicator/" + profile + "/";
-        const payload = String.fromCharCode(AppSettings.getValue(pfx + "enabled", true) ? 1 : 0, AppSettings.getValue(pfx + "type", 1), AppSettings.getValue(pfx + "ch1", profile === 0 ? 1 : 0), AppSettings.getValue(pfx + "ch2", profile === 0 ? 2 : 4), AppSettings.getValue(pfx + "ch3", profile === 0 ? 3 : 5));
-        PTExtenderCan.writeConfigRegister(PTExtenderCan.ConfigGroupIndicator, profile, 0x00, payload);
-    }
-
-    function writeStateEffect(profile, state) {
-        const pfx = "ui/ptextender/indicator/" + profile + "/effect/" + state + "/";
-        const payloadA = String.fromCharCode(AppSettings.getValue(pfx + "pattern", state === 0 ? 3 : 1), AppSettings.getValue(pfx + "intensity", 180), AppSettings.getValue(pfx + "r", 0), AppSettings.getValue(pfx + "g", 0), AppSettings.getValue(pfx + "b", 255));
-        const p1 = AppSettings.getValue(pfx + "p1", 1200);
-        const p2 = AppSettings.getValue(pfx + "p2", 0);
-        const payloadB = String.fromCharCode(p1 & 0xFF, (p1 >> 8) & 0xFF, p2 & 0xFF, (p2 >> 8) & 0xFF);
-        PTExtenderCan.writeConfigRegister(PTExtenderCan.ConfigGroupIndicator, profile, 0x10 + state, payloadA);
-        PTExtenderCan.writeConfigRegister(PTExtenderCan.ConfigGroupIndicator, profile, 0x20 + state, payloadB);
-    }
+    readonly property var patternNames: PTExtenderConfig.metadataLoaded ? PTExtenderConfig.ledPatternNames() : ["Off", "Solid", "Blink", "Pulse", "Chase", "Bi-Blink", "Bi-Pulse", "Tri-Cycle", "Strobe", "Breathe"]
+    readonly property var ledTypeNames: PTExtenderConfig.metadataLoaded ? PTExtenderConfig.ledTypeNames() : ["Single", "Dual", "RGB"]
+    readonly property var stateLabels: ["INIT", "STANDBY", "CRANKING", "RUNNING", "STOPPING", "TESTING", "CONFIG", "FAULT"]
 
     ColumnLayout {
         Layout.fillWidth: true
@@ -52,74 +30,64 @@ SettingsSection {
                 border.color: SettingsTheme.border
                 border.width: SettingsTheme.borderWidth
                 radius: SettingsTheme.radiusSmall
-                implicitHeight: content.implicitHeight + 12
+                implicitHeight: profileContent.implicitHeight + 12
 
                 ColumnLayout {
-                    id: content
+                    id: profileContent
                     anchors.fill: parent
                     anchors.margins: 6
                     spacing: 6
 
                     Text {
                         color: SettingsTheme.textPrimary
+                        font.family: SettingsTheme.fontFamily
+                        font.pixelSize: SettingsTheme.fontLabel
                         font.bold: true
                         text: index === 0 ? "System Indicator Profile" : "Start/Stop Indicator Profile"
                     }
 
                     RowLayout {
                         Layout.fillWidth: true
+                        spacing: SettingsTheme.controlGap
+
                         StyledSwitch {
                             checked: AppSettings.getValue(root.indicatorKey(index, "enabled"), true)
                             text: "Enabled"
                             onToggled: AppSettings.setValue(root.indicatorKey(index, "enabled"), checked)
                         }
-                        Text {
-                            color: SettingsTheme.textSecondary
-                            text: "Type"
-                        }
-                        ComboBox {
-                            model: ["Single", "Dual", "RGB"]
+                        Text { color: SettingsTheme.textSecondary; text: "Type" }
+                        StyledComboBox {
+                            model: root.ledTypeNames
                             currentIndex: AppSettings.getValue(root.indicatorKey(index, "type"), 1) - 1
                             onActivated: AppSettings.setValue(root.indicatorKey(index, "type"), currentIndex + 1)
                         }
-                        Text {
-                            color: SettingsTheme.textSecondary
-                            text: "CH1"
-                        }
-                        SpinBox {
-                            from: 0
-                            to: 15
+                        Text { color: SettingsTheme.textSecondary; text: "CH1" }
+                        StyledSpinBox {
+                            from: 0; to: 15
                             value: AppSettings.getValue(root.indicatorKey(index, "ch1"), index === 0 ? 1 : 0)
-                            onValueModified: AppSettings.setValue(root.indicatorKey(index, "ch1"), value)
+                            onValueChanged: AppSettings.setValue(root.indicatorKey(index, "ch1"), value)
                         }
-                        Text {
-                            color: SettingsTheme.textSecondary
-                            text: "CH2"
-                        }
-                        SpinBox {
-                            from: 0
-                            to: 15
+                        Text { color: SettingsTheme.textSecondary; text: "CH2" }
+                        StyledSpinBox {
+                            from: 0; to: 15
                             value: AppSettings.getValue(root.indicatorKey(index, "ch2"), index === 0 ? 2 : 4)
-                            onValueModified: AppSettings.setValue(root.indicatorKey(index, "ch2"), value)
+                            onValueChanged: AppSettings.setValue(root.indicatorKey(index, "ch2"), value)
                         }
-                        Text {
-                            color: SettingsTheme.textSecondary
-                            text: "CH3"
-                        }
-                        SpinBox {
-                            from: 0
-                            to: 15
+                        Text { color: SettingsTheme.textSecondary; text: "CH3" }
+                        StyledSpinBox {
+                            from: 0; to: 15
                             value: AppSettings.getValue(root.indicatorKey(index, "ch3"), index === 0 ? 3 : 5)
-                            onValueModified: AppSettings.setValue(root.indicatorKey(index, "ch3"), value)
+                            onValueChanged: AppSettings.setValue(root.indicatorKey(index, "ch3"), value)
                         }
-                        Button {
+                        StyledButton {
+                            enabled: PTExtenderConfig.configModeActive
                             text: "Write Profile"
-                            onClicked: root.writeProfile(index)
+                            onClicked: PTExtenderConfig.writeIndicatorProfile(index)
                         }
                     }
 
                     Repeater {
-                        model: ["INIT", "STANDBY", "CRANKING", "RUNNING", "STOPPING", "TESTING", "CONFIG", "FAULT"]
+                        model: root.stateLabels
                         delegate: RowLayout {
                             required property int index
                             required property string modelData
@@ -127,36 +95,38 @@ SettingsSection {
                             spacing: 6
 
                             Text {
-                                color: SettingsTheme.textSecondary
-                                text: modelData
                                 Layout.preferredWidth: 80
+                                color: SettingsTheme.textSecondary
+                                font.family: SettingsTheme.fontFamily
+                                font.pixelSize: SettingsTheme.fontControl
+                                text: modelData
                             }
-                            ComboBox {
-                                model: ["OFF", "SOLID", "BLINK", "PULSE", "CHASE", "BI BLINK", "BI PULSE", "TRI CYCLE", "STROBE", "BREATHE"]
+                            StyledComboBox {
+                                model: root.patternNames
                                 currentIndex: AppSettings.getValue("ui/ptextender/indicator/" + profileIndex + "/effect/" + index + "/pattern", index === 0 ? 3 : 1)
                                 onActivated: AppSettings.setValue("ui/ptextender/indicator/" + profileIndex + "/effect/" + index + "/pattern", currentIndex)
                             }
-                            SpinBox {
-                                from: 0
-                                to: 255
+                            StyledSpinBox {
+                                from: 0; to: 255
                                 value: AppSettings.getValue("ui/ptextender/indicator/" + profileIndex + "/effect/" + index + "/intensity", 180)
-                                onValueModified: AppSettings.setValue("ui/ptextender/indicator/" + profileIndex + "/effect/" + index + "/intensity", value)
+                                onValueChanged: AppSettings.setValue("ui/ptextender/indicator/" + profileIndex + "/effect/" + index + "/intensity", value)
                             }
-                            SpinBox {
-                                from: 0
-                                to: 65535
+                            StyledSpinBox {
+                                from: 0; to: 65535
                                 value: AppSettings.getValue("ui/ptextender/indicator/" + profileIndex + "/effect/" + index + "/p1", 1200)
-                                onValueModified: AppSettings.setValue("ui/ptextender/indicator/" + profileIndex + "/effect/" + index + "/p1", value)
+                                onValueChanged: AppSettings.setValue("ui/ptextender/indicator/" + profileIndex + "/effect/" + index + "/p1", value)
                             }
-                            SpinBox {
-                                from: 0
-                                to: 65535
+                            StyledSpinBox {
+                                from: 0; to: 65535
                                 value: AppSettings.getValue("ui/ptextender/indicator/" + profileIndex + "/effect/" + index + "/p2", 0)
-                                onValueModified: AppSettings.setValue("ui/ptextender/indicator/" + profileIndex + "/effect/" + index + "/p2", value)
+                                onValueChanged: AppSettings.setValue("ui/ptextender/indicator/" + profileIndex + "/effect/" + index + "/p2", value)
                             }
                             StyledColorPicker {
                                 Layout.preferredWidth: 130
-                                colorValue: root.rgbToHex(AppSettings.getValue("ui/ptextender/indicator/" + profileIndex + "/effect/" + index + "/r", 0), AppSettings.getValue("ui/ptextender/indicator/" + profileIndex + "/effect/" + index + "/g", 0), AppSettings.getValue("ui/ptextender/indicator/" + profileIndex + "/effect/" + index + "/b", 255))
+                                colorValue: PTExtenderConfig.rgbToHex(
+                                                AppSettings.getValue("ui/ptextender/indicator/" + profileIndex + "/effect/" + index + "/r", 0),
+                                                AppSettings.getValue("ui/ptextender/indicator/" + profileIndex + "/effect/" + index + "/g", 0),
+                                                AppSettings.getValue("ui/ptextender/indicator/" + profileIndex + "/effect/" + index + "/b", 255))
                                 onColorEdited: function (newColor) {
                                     if (!newColor || newColor.length !== 7)
                                         return;
@@ -166,14 +136,18 @@ SettingsSection {
                                 }
                             }
                             LedAnimationPreview {
-                                colorA: Qt.rgba(AppSettings.getValue("ui/ptextender/indicator/" + profileIndex + "/effect/" + index + "/r", 0) / 255.0, AppSettings.getValue("ui/ptextender/indicator/" + profileIndex + "/effect/" + index + "/g", 0) / 255.0, AppSettings.getValue("ui/ptextender/indicator/" + profileIndex + "/effect/" + index + "/b", 255) / 255.0, 1.0)
+                                colorA: Qt.rgba(
+                                            AppSettings.getValue("ui/ptextender/indicator/" + profileIndex + "/effect/" + index + "/r", 0) / 255.0,
+                                            AppSettings.getValue("ui/ptextender/indicator/" + profileIndex + "/effect/" + index + "/g", 0) / 255.0,
+                                            AppSettings.getValue("ui/ptextender/indicator/" + profileIndex + "/effect/" + index + "/b", 255) / 255.0, 1.0)
                                 pattern: AppSettings.getValue("ui/ptextender/indicator/" + profileIndex + "/effect/" + index + "/pattern", index === 0 ? 3 : 1)
                                 param1: AppSettings.getValue("ui/ptextender/indicator/" + profileIndex + "/effect/" + index + "/p1", 1200)
                                 param2: AppSettings.getValue("ui/ptextender/indicator/" + profileIndex + "/effect/" + index + "/p2", 0)
                             }
-                            Button {
+                            StyledButton {
+                                enabled: PTExtenderConfig.configModeActive
                                 text: "Write"
-                                onClicked: root.writeStateEffect(profileIndex, index)
+                                onClicked: PTExtenderConfig.writeIndicatorStateEffect(profileIndex, index)
                             }
                         }
                     }

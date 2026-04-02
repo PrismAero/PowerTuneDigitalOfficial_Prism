@@ -42,10 +42,6 @@ Rectangle {
         }
 
         ListElement {
-            title: "Extender Board"
-        }
-
-        ListElement {
             title: "Network"
         }
 
@@ -113,7 +109,6 @@ Rectangle {
             Component { id: displaySettingsComponent; DisplaySettings { } }
             Component { id: dashSelectorComponent; DashSelector { } }
             Component { id: vehicleRpmComponent; VehicleRPMSettings { } }
-            Component { id: exBoardComponent; ExtenderBoardTab { } }
             Component { id: networkComponent; NetworkSettings { } }
             Component { id: diagnosticsComponent; DiagnosticsSettings { } }
 
@@ -150,16 +145,8 @@ Rectangle {
             }
 
             Loader {
-                id: exBoardLoader
-                active: stackLayout.currentIndex === 4
-                Layout.fillHeight: true
-                Layout.fillWidth: true
-                sourceComponent: exBoardComponent
-            }
-
-            Loader {
                 id: networkLoader
-                active: stackLayout.currentIndex === 5
+                active: stackLayout.currentIndex === 4
                 Layout.fillHeight: true
                 Layout.fillWidth: true
                 sourceComponent: networkComponent
@@ -167,7 +154,7 @@ Rectangle {
 
             Loader {
                 id: diagnosticsLoader
-                active: stackLayout.currentIndex === 6
+                active: stackLayout.currentIndex === 5
                 Layout.fillHeight: true
                 Layout.fillWidth: true
                 sourceComponent: diagnosticsComponent

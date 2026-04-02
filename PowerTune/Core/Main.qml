@@ -68,9 +68,17 @@ ApplicationWindow {
         }
 
         Item {
-            id: lastPage
-
             SettingsManager {
+            }
+        }
+
+        Item {
+            id: extenderConfigPage
+
+            Loader {
+                anchors.fill: parent
+                active: dashView.currentIndex === 2
+                source: active ? "qrc:/qt/qml/PowerTune/Core/PowerTune/Core/BoardConfig/ExtenderConfigPage.qml" : ""
             }
         }
     }

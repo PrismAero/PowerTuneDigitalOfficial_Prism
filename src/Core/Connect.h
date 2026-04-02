@@ -2,23 +2,9 @@
 #define CONNECT_H
 
 /*
- * Copyright (C) 2016 Markus Ippy, Bastian Gschrey, Jan
+ * Copyright (C) 2016 Markus Ippy, Bastian Gschrey, Jan, Kai
  *
- * Digital Gauges for Apexi Power FC for RX7 on Raspberry Pi
- *
- *
- * This software comes under the GPL (GNU Public License)
- * You may freely copy,distribute etc. this as long as the source code
- * is made available for FREE.
- *
- * No warranty is made or implied. You use this program at your own risk.
- */
-
-/*
-  \file serial.h
-  \
-  \author Bastian Gschrey & Markus Ippy
-  \modifier Kai Wyborny
+ * Kai Wyborny
  */
 
 #include "../Utils/Calculations.h"
@@ -53,9 +39,13 @@ class DiagnosticsProvider;
 class OverlayPositionManager;
 class ShiftIndicatorHelper;
 class CanFrameModel;
+class ExBoardChannelModel;
+class ExBoardDigitalModel;
+class VehicleRpmSettingsModel;
 class DifferentialSensorCalc;
 class ExBoardConfigManager;
 class OverlayConfigDefaults;
+class OverlayConfigService;
 class ScreenControlService;
 class DashboardLockService;
 class DemoModeService;
@@ -156,9 +146,13 @@ private:
     OverlayPositionManager *m_overlayConfigManager;
     ShiftIndicatorHelper *m_shiftIndicatorHelper;
     CanFrameModel *m_canFrameModel;
+    ExBoardChannelModel *m_exBoardChannelModel;
+    ExBoardDigitalModel *m_exBoardDigitalModel;
+    VehicleRpmSettingsModel *m_vehicleRpmSettingsModel;
     DifferentialSensorCalc *m_differentialSensorCalc;
     ExBoardConfigManager *m_exBoardConfigManager;
     OverlayConfigDefaults *m_overlayConfigDefaults;
+    OverlayConfigService *m_overlayConfigService;
     ScreenControlService *m_screenControlService;
     DashboardLockService *m_dashboardLockService;
     DemoModeService *m_demoModeService;

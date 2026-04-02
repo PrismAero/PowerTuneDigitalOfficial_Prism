@@ -4,13 +4,14 @@ import QtQuick.Layouts
 Item {
     id: root
 
+    property int activeTab: 0
+
     implicitHeight: content.implicitHeight
-    implicitWidth: content.implicitWidth
 
     ExBoardAnalog {
         id: content
 
-        anchors.left: parent.left
-        anchors.right: parent.right
+        activeTab: root.activeTab
+        width: root.width
     }
 }

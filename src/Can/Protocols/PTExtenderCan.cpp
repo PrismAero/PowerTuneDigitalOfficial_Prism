@@ -85,6 +85,7 @@ void PTExtenderCan::configureConnection(const QVariantMap &config)
     m_indicatorConfigAddress = m_baseId + 0x04;
     m_configReadResponseAddress = m_baseId + 0x05;
     m_configWriteAckAddress = m_baseId + 0x06;
+    m_metadataResponseAddress = m_baseId + 0x07;
     emit baseIdChanged();
 }
 
@@ -239,6 +240,15 @@ bool PTExtenderCan::setEngineProofMode(int mode)
     QByteArray payload(1, '\0');
     payload[0] = static_cast<char>(qBound(0, mode, 255));
     return writeConfigRegister(ConfigGroupSystemGlobals, 0x06, 0x00, payload);
+}
+
+bool PTExtenderCan::requestMetadata(int category)
+{
+    if (category < 0 || category >= MetaCategoryCount)
+        return false;
+    QByteArray payload(8, '\0');
+    payload[0] = static_cast<char>(category);
+    return writeFrame(m_baseId + 0x22, payload);
 }
 
 void PTExtenderCan::onFrameReceived(const QCanBusFrame &frame)
@@ -460,6 +470,13 @@ void PTExtenderCan::onFrameReceived(const QCanBusFrame &frame)
         }
         if (changed)
             emit indicatorConfigChanged();
+    } else if (frameId == m_metadataResponseAddress) {
+        const int category = static_cast<unsigned char>(payload[0]);
+        const int totalCount = static_cast<unsigned char>(payload[1]);
+        const int optionIndex = static_cast<unsigned char>(payload[2]);
+        const int chunkIndex = static_cast<unsigned char>(payload[3]);
+        const QByteArray chunkData = payload.mid(4, 4);
+        emit metadataReceived(category, totalCount, optionIndex, chunkIndex, chunkData);
     }
 }
 

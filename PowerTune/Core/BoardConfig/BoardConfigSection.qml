@@ -113,42 +113,13 @@ Item {
     }
 
     function rebuildSpeedPortModels(selectedAnalog, selectedDigital) {
-        var analogValues = [];
-        var analogLabels = [];
-        var digitalValues = [];
-        var digitalLabels = [];
-
-        for (var i = 0; i < 8; ++i) {
-            var analogBlocked = reservedAnalogPorts.indexOf(i) !== -1;
-            if (!analogBlocked || i === selectedAnalog) {
-                analogValues.push(i);
-                analogLabels.push("EX Analog " + i);
-            }
-
-            var digitalBlocked = reservedDigitalPorts.indexOf(i) !== -1;
-            if (!digitalBlocked || i === selectedDigital) {
-                digitalValues.push(i);
-                digitalLabels.push("EX Digital " + (i + 1));
-            }
-        }
-
-        if (analogValues.length === 0) {
-            analogValues = [selectedAnalog >= 0 && selectedAnalog <= 7 ? selectedAnalog : 0];
-            analogLabels = ["EX Analog " + analogValues[0]];
-        }
-        if (digitalValues.length === 0) {
-            digitalValues = [selectedDigital >= 0 && selectedDigital <= 7 ? selectedDigital : 0];
-            digitalLabels = ["EX Digital " + (digitalValues[0] + 1)];
-        }
-
-        speedAnalogPortValues = analogValues;
-        speedDigitalPortValues = digitalValues;
-        speedAnalogPort.model = analogLabels;
-        speedDigitalPort.model = digitalLabels;
-        var idxA = speedAnalogPortValues.indexOf(selectedAnalog);
-        var idxD = speedDigitalPortValues.indexOf(selectedDigital);
-        speedAnalogPort.currentIndex = idxA >= 0 ? idxA : 0;
-        speedDigitalPort.currentIndex = idxD >= 0 ? idxD : 0;
+        var options = ExBoardConfig.speedPortOptions(selectedAnalog, selectedDigital);
+        speedAnalogPortValues = options.analogValues || [];
+        speedDigitalPortValues = options.digitalValues || [];
+        speedAnalogPort.model = options.analogLabels || [];
+        speedDigitalPort.model = options.digitalLabels || [];
+        speedAnalogPort.currentIndex = options.analogIndex !== undefined ? options.analogIndex : 0;
+        speedDigitalPort.currentIndex = options.digitalIndex !== undefined ? options.digitalIndex : 0;
     }
 
     function notifyChanged() {

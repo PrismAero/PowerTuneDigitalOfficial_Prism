@@ -58,9 +58,21 @@ public:
         DeviceCommandNop = 0,
         DeviceCommandSaveConfig = 1,
         DeviceCommandResetConfig = 2,
-        DeviceCommandReboot = 3
+        DeviceCommandReboot = 3,
+        DeviceCommandEnterConfig = 4,
+        DeviceCommandExitConfig = 5
     };
     Q_ENUM(DeviceCommand)
+
+    enum MetadataCategory : int {
+        MetaGpiFunctions = 0,
+        MetaRelayFunctions = 1,
+        MetaLogicConditions = 2,
+        MetaLedPatterns = 3,
+        MetaLedTypes = 4,
+        MetaCategoryCount = 5
+    };
+    Q_ENUM(MetadataCategory)
 
     enum ConfigGroup : int {
         ConfigGroupSystemGlobals = 0,
@@ -149,6 +161,9 @@ public:
     Q_INVOKABLE bool saveDeviceConfig() { return sendDeviceCommand(DeviceCommandSaveConfig); }
     Q_INVOKABLE bool resetDeviceConfig() { return sendDeviceCommand(DeviceCommandResetConfig); }
     Q_INVOKABLE bool rebootDevice() { return sendDeviceCommand(DeviceCommandReboot); }
+    Q_INVOKABLE bool enterConfigMode() { return sendDeviceCommand(DeviceCommandEnterConfig); }
+    Q_INVOKABLE bool exitConfigMode() { return sendDeviceCommand(DeviceCommandExitConfig); }
+    Q_INVOKABLE bool requestMetadata(int category);
     Q_INVOKABLE bool setExternalInputBit(int bit, bool active);
     void setExternalInputMask(int bitmask);
 
@@ -163,6 +178,7 @@ signals:
     void Newtestsignal();
     void configResponseReceived(int group, int index, int sub, QByteArray data);
     void configWriteAcked(int status, int group, int index, int sub);
+    void metadataReceived(int category, int totalCount, int optionIndex, int chunkIndex, const QByteArray &data);
     void externalInputMaskChanged();
 
 private slots:
@@ -191,6 +207,7 @@ private:
     quint32 m_indicatorConfigAddress = 0;
     quint32 m_configReadResponseAddress = 0;
     quint32 m_configWriteAckAddress = 0;
+    quint32 m_metadataResponseAddress = 0;
     QString m_activeCodes;
     int m_gear = -2;
     int m_ioState = 0;

@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QString>
 #include <QStringList>
+#include <QVariantList>
 #include <QVariantMap>
 
 class AppSettings;
@@ -30,6 +31,7 @@ public:
 
     Q_INVOKABLE QVariantMap getChannelConfig(int channel) const;
     Q_INVOKABLE void saveChannelConfig(int channel, const QVariantMap &config);
+    Q_INVOKABLE QVariantMap getDigitalChannelConfig(int channel) const;
 
     Q_INVOKABLE void applyLinearPreset(int channel, const QString &presetName);
     Q_INVOKABLE void applyNtcPreset(int channel, const QString &presetName);
@@ -41,6 +43,11 @@ public:
 
     Q_INVOKABLE QStringList channelNames() const;
     Q_INVOKABLE QStringList digitalChannelNames() const;
+    Q_INVOKABLE QStringList linearPresetNames() const;
+    Q_INVOKABLE QStringList ntcPresetNames() const;
+    Q_INVOKABLE QVariantList reservedAnalogPorts() const;
+    Q_INVOKABLE QVariantList reservedDigitalPorts() const;
+    Q_INVOKABLE QVariantMap speedPortOptions(int selectedAnalogPort, int selectedDigitalPort) const;
 
     Q_INVOKABLE QVariantMap getDifferentialSensorConfig() const;
     Q_INVOKABLE void saveDifferentialSensorConfig(const QVariantMap &config);
@@ -66,7 +73,6 @@ private:
     static const QString s_channelEnableKeys[kAnalogChannels];
     static const QString s_digitalEnableKeys[kDigitalChannels];
 
-    QVariantMap getDigitalChannelConfig(int channel) const;
     void saveChannelConfigInternal(int channel, const QVariantMap &config);
     void saveDigitalChannelConfigInternal(int channel, const QVariantMap &config);
     void applyAnalogRuntimeSettings(const QVariantList &channels) const;

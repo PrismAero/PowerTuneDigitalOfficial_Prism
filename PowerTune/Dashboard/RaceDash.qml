@@ -10,128 +10,16 @@ Item {
 
     property string dashboardId: "racedash"
     property var overlayConfigs: ({})
-    property var overlayDefinitions: [
-        {id: "tachCluster", legacyIds: ["tachGroup", "gearIndicator"]},
-        {id: "speedCluster", legacyIds: ["speedGroup"]},
-        {id: "shiftIndicator", legacyIds: []},
-        {id: "waterTemp", legacyIds: []},
-        {id: "oilPressure", legacyIds: []},
-        {id: "statusRow0", legacyIds: []},
-        {id: "statusRow1", legacyIds: []},
-        {id: "brakeBias", legacyIds: []},
-        {id: "bottomBar", legacyIds: []}
-    ]
-
-    function migrateLegacyOverlayConfigs() {
-        for (var i = 0; i < overlayDefinitions.length; ++i) {
-            var definition = overlayDefinitions[i];
-            if (!definition.legacyIds || definition.legacyIds.length === 0)
-                continue;
-
-            var current = AppSettings.loadOverlayConfig(dashboardId, definition.id);
-            if (objectHasKeys(current))
-                continue;
-
-            var mergedLegacy = {};
-            var foundLegacy = false;
-            for (var j = 0; j < definition.legacyIds.length; ++j) {
-                var legacyId = definition.legacyIds[j];
-                var legacyLoaded = AppSettings.loadOverlayConfig(dashboardId, legacyId);
-                if (objectHasKeys(legacyLoaded)) {
-                    mergeConfig(mergedLegacy, legacyLoaded);
-                    AppSettings.removeOverlayConfig(dashboardId, legacyId);
-                    foundLegacy = true;
-                }
-            }
-
-            if (foundLegacy)
-                AppSettings.saveOverlayConfig(dashboardId, definition.id, mergedLegacy);
-        }
-    }
-
-    function mergeConfig(target, source) {
-        for (var key in source)
-            target[key] = source[key];
-    }
-
-    function normalizeAnalogSensorKey(key) {
-        if (key === undefined || key === null)
-            return "";
-
-        var trimmed = String(key).trim();
-        var match = trimmed.match(/^EXAnalogInput([0-7])$/);
-        if (match && match.length === 2)
-            return "EXAnalogCalc" + match[1];
-
-        return trimmed;
-    }
-
-    function normalizePersistedOverlaySensorBindings() {
-        for (var i = 0; i < overlayDefinitions.length; ++i) {
-            var id = overlayDefinitions[i].id;
-            var loaded = AppSettings.loadOverlayConfig(dashboardId, id);
-            if (!objectHasKeys(loaded))
-                continue;
-
-            var changed = false;
-            if (loaded.sensorKey !== undefined) {
-                var normalizedSensorKey = normalizeAnalogSensorKey(loaded.sensorKey);
-                if (normalizedSensorKey !== loaded.sensorKey) {
-                    loaded.sensorKey = normalizedSensorKey;
-                    changed = true;
-                }
-            }
-
-            if (loaded.gearKey !== undefined) {
-                var normalizedGearKey = normalizeAnalogSensorKey(loaded.gearKey);
-                if (normalizedGearKey !== loaded.gearKey) {
-                    loaded.gearKey = normalizedGearKey;
-                    changed = true;
-                }
-            }
-
-            if (changed)
-                AppSettings.saveOverlayConfig(dashboardId, id, loaded);
-        }
-    }
-
-    function objectHasKeys(obj) {
-        for (var key in obj)
-            return true;
-        return false;
-    }
+    property var overlayIds: ["tachCluster", "speedCluster", "shiftIndicator", "waterTemp", "oilPressure",
+                              "statusRow0", "statusRow1", "brakeBias", "bottomBar"]
 
     function refreshConfigs() {
-        var ids = [];
-        for (var i = 0; i < overlayDefinitions.length; ++i)
-            ids.push(overlayDefinitions[i].id);
-
-        var loadedById = AppSettings.loadOverlayConfigs(dashboardId, ids);
-        var nextConfigs = {};
-        for (var j = 0; j < overlayDefinitions.length; ++j) {
-            var id = overlayDefinitions[j].id;
-            var defaults = OverlayDefaults.defaultsFor(id);
-            var merged = {};
-            for (var key in defaults)
-                merged[key] = defaults[key];
-            var loaded = loadedById[id] || ({});
-            if (objectHasKeys(loaded)) {
-                if (loaded.sensorKey !== undefined)
-                    loaded.sensorKey = normalizeAnalogSensorKey(loaded.sensorKey);
-                if (loaded.gearKey !== undefined)
-                    loaded.gearKey = normalizeAnalogSensorKey(loaded.gearKey);
-                mergeConfig(merged, loaded);
-            }
-            nextConfigs[id] = merged;
-        }
-        overlayConfigs = nextConfigs;
+        overlayConfigs = OverlayConfigService.migrateAndLoadConfigs(dashboardId, overlayIds);
     }
 
     anchors.fill: parent
 
     Component.onCompleted: {
-        migrateLegacyOverlayConfigs();
-        normalizePersistedOverlaySensorBindings();
         refreshConfigs();
     }
 

@@ -40,9 +40,13 @@
 #include "ExBoardConfigManager.h"
 #include "PTExtenderConfigManager.h"
 #include "Models/CanFrameModel.h"
+#include "Models/ExBoardChannelModel.h"
+#include "Models/ExBoardDigitalModel.h"
+#include "Models/VehicleRpmSettingsModel.h"
 #include "Models/DataModels.h"
 #include "Models/UIState.h"
 #include "OverlayConfigDefaults.h"
+#include "OverlayConfigService.h"
 #include "PropertyRouter.h"
 #include "ScreenControlService.h"
 #include "SensorRegistry.h"
@@ -113,6 +117,9 @@ Connect::Connect(QObject *parent)
       m_calibrationHelper(nullptr),
       m_sensorRegistry(nullptr),
       m_diagnosticsProvider(nullptr),
+      m_exBoardChannelModel(nullptr),
+      m_exBoardDigitalModel(nullptr),
+      m_vehicleRpmSettingsModel(nullptr),
       m_screenControlService(nullptr),
       m_dashboardLockService(nullptr),
       m_demoModeService(nullptr),
@@ -121,7 +128,8 @@ Connect::Connect(QObject *parent)
       m_canTransport(nullptr),
       m_canManager(nullptr),
       m_ptExtenderCan(nullptr),
-      m_ptExtenderConfigManager(nullptr)
+      m_ptExtenderConfigManager(nullptr),
+      m_overlayConfigService(nullptr)
 
 {
     // * Phase 2: Create domain data models
@@ -221,6 +229,15 @@ Connect::Connect(QObject *parent)
     m_exBoardConfigManager->setAppSettings(m_appSettings);
     m_exBoardConfigManager->setCalibrationHelper(m_calibrationHelper);
     m_exBoardConfigManager->setSensorRegistry(m_sensorRegistry);
+    m_exBoardChannelModel = new ExBoardChannelModel(this);
+    m_exBoardChannelModel->setConfigManager(m_exBoardConfigManager);
+    m_exBoardChannelModel->setExpanderData(m_expanderBoardData);
+    m_exBoardDigitalModel = new ExBoardDigitalModel(this);
+    m_exBoardDigitalModel->setConfigManager(m_exBoardConfigManager);
+    m_exBoardDigitalModel->setDigitalInputs(m_digitalInputs);
+    m_vehicleRpmSettingsModel = new VehicleRpmSettingsModel(this);
+    m_vehicleRpmSettingsModel->setAppSettings(m_appSettings);
+    m_vehicleRpmSettingsModel->load();
     m_ptExtenderConfigManager = new PTExtenderConfigManager(this);
     m_ptExtenderConfigManager->setAppSettings(m_appSettings);
     m_ptExtenderConfigManager->setPTExtenderCan(m_ptExtenderCan);
@@ -239,6 +256,9 @@ Connect::Connect(QObject *parent)
     m_updateManagerService = new UpdateManagerService(this);
     m_overlayConfigDefaults = new OverlayConfigDefaults(this);
     m_overlayConfigDefaults->setAppSettings(m_appSettings);
+    m_overlayConfigService = new OverlayConfigService(this);
+    m_overlayConfigService->setAppSettings(m_appSettings);
+    m_overlayConfigService->setDefaults(m_overlayConfigDefaults);
     QString mPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
     QDir().mkpath(mPath);  // Ensure the directory exists
     dirModel = new QFileSystemModel(this);
@@ -283,12 +303,16 @@ Connect::Connect(QObject *parent)
     engine->rootContext()->setContextProperty("OverlayConfig", m_overlayConfigManager);
     engine->rootContext()->setContextProperty("ShiftHelper", m_shiftIndicatorHelper);
     engine->rootContext()->setContextProperty("ExBoardConfig", m_exBoardConfigManager);
+    engine->rootContext()->setContextProperty("ExBoardChannelModel", m_exBoardChannelModel);
+    engine->rootContext()->setContextProperty("ExBoardDigitalModel", m_exBoardDigitalModel);
+    engine->rootContext()->setContextProperty("VehicleRpmSettingsModel", m_vehicleRpmSettingsModel);
     engine->rootContext()->setContextProperty("PTExtenderConfig", m_ptExtenderConfigManager);
     engine->rootContext()->setContextProperty("ScreenControl", m_screenControlService);
     engine->rootContext()->setContextProperty("DashboardLock", m_dashboardLockService);
     engine->rootContext()->setContextProperty("DemoMode", m_demoModeService);
     engine->rootContext()->setContextProperty("Updater", m_updateManagerService);
     engine->rootContext()->setContextProperty("OverlayDefaults", m_overlayConfigDefaults);
+    engine->rootContext()->setContextProperty("OverlayConfigService", m_overlayConfigService);
     m_appSettings->setExtender(m_extender);
     m_appSettings->setSteinhartCalculator(m_steinhartCalc);
     m_appSettings->readandApplySettings();

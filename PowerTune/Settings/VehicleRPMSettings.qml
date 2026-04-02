@@ -9,46 +9,8 @@ import PowerTune.Utils 1.0
 SettingsPage {
     id: root
 
-    property int gercalactive: 0
-    property bool settingsLoaded: false
-    property bool suppressWrites: true
-
-    // * Alias bridge properties for Settings persistence (Repeater delegates)
-    property var stage1Ref: null
-    property var stage2Ref: null
-    property var stage3Ref: null
-    property var stage4Ref: null
-    property var valgear1Ref: null
-    property var valgear2Ref: null
-    property var valgear3Ref: null
-    property var valgear4Ref: null
-    property var valgear5Ref: null
-    property var valgear6Ref: null
-
     Component.onCompleted: {
-        if (settingsLoaded)
-            return;
-        watertempwarn.text = AppSettings.getValue("waterwarn", "110");
-        boostwarn.text = AppSettings.getValue("boostwarn", "0.9");
-        rpmwarn.text = AppSettings.getValue("rpmwarn", "10000");
-        knockwarn.text = AppSettings.getValue("knockwarn", "80");
-        lambdamultiply.text = AppSettings.getValue("lambdamultiply", "14.7");
-        gearcalcselect.checked = AppSettings.getValue("gercalactive", 0) > 0;
-        maxRPM.text = AppSettings.getValue("Max RPM", "10000");
-        stage1.text = AppSettings.getValue("Shift Light1", "3000");
-        stage2.text = AppSettings.getValue("Shift Light2", "5500");
-        stage3.text = AppSettings.getValue("Shift Light3", "5500");
-        stage4.text = AppSettings.getValue("Shift Light4", "7500");
-        valgear1.text = AppSettings.getValue("valgear1", "120");
-        valgear2.text = AppSettings.getValue("valgear2", "74");
-        valgear3.text = AppSettings.getValue("valgear3", "54");
-        valgear4.text = AppSettings.getValue("valgear4", "37");
-        valgear5.text = AppSettings.getValue("valgear5", "28");
-        valgear6.text = AppSettings.getValue("valgear6", "");
-        var sp = AppSettings.getValue("Speedcorrection", 1);
-        speedpercent.text = String(Math.round(sp * 100));
-        settingsLoaded = true;
-        suppressWrites = false;
+        VehicleRpmSettingsModel.load();
     }
 
     ListModel {
@@ -102,10 +64,13 @@ SettingsPage {
 
                         height: parent.height
                         inputMethodHints: Qt.ImhFormattedNumbersOnly
-                        text: "110"
+                        text: VehicleRpmSettingsModel.waterTempWarn
                         width: parent.width
 
-                        onEditingFinished: applyWarnGear.start()
+                        onEditingFinished: {
+                            VehicleRpmSettingsModel.waterTempWarn = text;
+                            VehicleRpmSettingsModel.applyWarnGear();
+                        }
                     }
                 }
 
@@ -117,10 +82,13 @@ SettingsPage {
 
                         height: parent.height
                         inputMethodHints: Qt.ImhFormattedNumbersOnly
-                        text: "0.9"
+                        text: VehicleRpmSettingsModel.boostWarn
                         width: parent.width
 
-                        onEditingFinished: applyWarnGear.start()
+                        onEditingFinished: {
+                            VehicleRpmSettingsModel.boostWarn = text;
+                            VehicleRpmSettingsModel.applyWarnGear();
+                        }
                     }
                 }
 
@@ -132,10 +100,13 @@ SettingsPage {
 
                         height: parent.height
                         inputMethodHints: Qt.ImhFormattedNumbersOnly
-                        text: "10000"
+                        text: VehicleRpmSettingsModel.rpmWarn
                         width: parent.width
 
-                        onEditingFinished: applyWarnGear.start()
+                        onEditingFinished: {
+                            VehicleRpmSettingsModel.rpmWarn = text;
+                            VehicleRpmSettingsModel.applyWarnGear();
+                        }
                     }
                 }
 
@@ -147,10 +118,13 @@ SettingsPage {
 
                         height: parent.height
                         inputMethodHints: Qt.ImhFormattedNumbersOnly
-                        text: "80"
+                        text: VehicleRpmSettingsModel.knockWarn
                         width: parent.width
 
-                        onEditingFinished: applyWarnGear.start()
+                        onEditingFinished: {
+                            VehicleRpmSettingsModel.knockWarn = text;
+                            VehicleRpmSettingsModel.applyWarnGear();
+                        }
                     }
                 }
 
@@ -162,10 +136,13 @@ SettingsPage {
 
                         height: parent.height
                         inputMethodHints: Qt.ImhFormattedNumbersOnly
-                        text: "14.7"
+                        text: VehicleRpmSettingsModel.lambdaMultiply
                         width: parent.width
 
-                        onEditingFinished: applyWarnGear.start()
+                        onEditingFinished: {
+                            VehicleRpmSettingsModel.lambdaMultiply = text;
+                            VehicleRpmSettingsModel.applyWarnGear();
+                        }
                     }
                 }
             }
@@ -183,10 +160,13 @@ SettingsPage {
 
                         height: parent.height
                         inputMethodHints: Qt.ImhFormattedNumbersOnly
-                        text: "100"
+                        text: VehicleRpmSettingsModel.speedPercent
                         width: parent.width
 
-                        onEditingFinished: AppSettings.writeSpeedSettings(speedpercent.text / 100, 100000)
+                        onEditingFinished: {
+                            VehicleRpmSettingsModel.speedPercent = text;
+                            VehicleRpmSettingsModel.applySpeed();
+                        }
                     }
                 }
             }
@@ -211,10 +191,13 @@ SettingsPage {
 
                         height: parent.height
                         inputMethodHints: Qt.ImhFormattedNumbersOnly
-                        text: "10000"
+                        text: VehicleRpmSettingsModel.maxRpm
                         width: parent.width
 
-                        onEditingFinished: applyRPM.start()
+                        onEditingFinished: {
+                            VehicleRpmSettingsModel.maxRpm = text;
+                            VehicleRpmSettingsModel.applyRpm();
+                        }
                     }
                 }
 
@@ -255,18 +238,11 @@ SettingsPage {
                                     font.pixelSize: SettingsTheme.fontControl
                                     horizontalAlignment: Text.AlignHCenter
                                     inputMethodHints: Qt.ImhFormattedNumbersOnly
-
-                                    Component.onCompleted: {
-                                        if (model.fieldId === "stage1")
-                                            root.stage1Ref = stageField;
-                                        else if (model.fieldId === "stage2")
-                                            root.stage2Ref = stageField;
-                                        else if (model.fieldId === "stage3")
-                                            root.stage3Ref = stageField;
-                                        else if (model.fieldId === "stage4")
-                                            root.stage4Ref = stageField;
+                                    text: VehicleRpmSettingsModel.shiftStageText(index)
+                                    onEditingFinished: {
+                                        VehicleRpmSettingsModel.setShiftStageText(index, text);
+                                        VehicleRpmSettingsModel.applyRpm();
                                     }
-                                    onEditingFinished: applyRPM.start()
                                 }
 
                                 Text {
@@ -289,19 +265,15 @@ SettingsPage {
                 StyledSwitch {
                     id: gearcalcselect
 
-                    label: gearcalcselect.checked ? Translator.translate("GearCalculation", Settings.language) + " "
+                    checked: VehicleRpmSettingsModel.gearCalcEnabled
+                    label: checked ? Translator.translate("GearCalculation", Settings.language) + " "
                                                     + Translator.translate("ON", Settings.language) :
                                                     Translator.translate("GearCalculation", Settings.language) + " "
                                                     + Translator.translate("OFF", Settings.language)
 
-                    Component.onCompleted: {
-                        gercalactive = gearcalcselect.checked ? 1 : 0;
-                    }
                     onCheckedChanged: {
-                        if (!settingsLoaded || suppressWrites)
-                            return;
-                        gercalactive = gearcalcselect.checked ? 1 : 0;
-                        applyWarnGear.start();
+                        VehicleRpmSettingsModel.gearCalcEnabled = checked;
+                        VehicleRpmSettingsModel.applyWarnGear();
                     }
                 }
 
@@ -333,29 +305,11 @@ SettingsPage {
                                 font.pixelSize: SettingsTheme.fontControl
                                 horizontalAlignment: Text.AlignHCenter
                                 inputMethodHints: Qt.ImhFormattedNumbersOnly
-
-                                Component.onCompleted: {
-                                    if (index === 0) {
-                                        gearField.text = "120";
-                                        root.valgear1Ref = gearField;
-                                    } else if (index === 1) {
-                                        gearField.text = "74";
-                                        root.valgear2Ref = gearField;
-                                    } else if (index === 2) {
-                                        gearField.text = "54";
-                                        root.valgear3Ref = gearField;
-                                    } else if (index === 3) {
-                                        gearField.text = "37";
-                                        root.valgear4Ref = gearField;
-                                    } else if (index === 4) {
-                                        gearField.text = "28";
-                                        root.valgear5Ref = gearField;
-                                    } else if (index === 5) {
-                                        gearField.text = "";
-                                        root.valgear6Ref = gearField;
+                                    text: VehicleRpmSettingsModel.gearValueText(index)
+                                    onEditingFinished: {
+                                        VehicleRpmSettingsModel.setGearValueText(index, text);
+                                        VehicleRpmSettingsModel.applyWarnGear();
                                     }
-                                }
-                                onEditingFinished: applyWarnGear.start()
                             }
                         }
                     }
@@ -370,222 +324,5 @@ SettingsPage {
                 }
             }
         }
-    }
-
-    // * Hidden fields for Settings alias binding (aliases need real ids, not dynamic refs)
-    StyledTextField {
-        id: stage1
-
-        text: stage1Ref ? stage1Ref.text : "3000"
-        visible: false
-
-        onTextChanged: if (stage1Ref && stage1Ref.text !== text)
-                           stage1Ref.text = text
-    }
-
-    StyledTextField {
-        id: stage2
-
-        text: stage2Ref ? stage2Ref.text : "5500"
-        visible: false
-
-        onTextChanged: if (stage2Ref && stage2Ref.text !== text)
-                           stage2Ref.text = text
-    }
-
-    StyledTextField {
-        id: stage3
-
-        text: stage3Ref ? stage3Ref.text : "5500"
-        visible: false
-
-        onTextChanged: if (stage3Ref && stage3Ref.text !== text)
-                           stage3Ref.text = text
-    }
-
-    StyledTextField {
-        id: stage4
-
-        text: stage4Ref ? stage4Ref.text : "7500"
-        visible: false
-
-        onTextChanged: if (stage4Ref && stage4Ref.text !== text)
-                           stage4Ref.text = text
-    }
-
-    StyledTextField {
-        id: valgear1
-
-        text: valgear1Ref ? valgear1Ref.text : "120"
-        visible: false
-
-        onTextChanged: if (valgear1Ref && valgear1Ref.text !== text)
-                           valgear1Ref.text = text
-    }
-
-    StyledTextField {
-        id: valgear2
-
-        text: valgear2Ref ? valgear2Ref.text : "74"
-        visible: false
-
-        onTextChanged: if (valgear2Ref && valgear2Ref.text !== text)
-                           valgear2Ref.text = text
-    }
-
-    StyledTextField {
-        id: valgear3
-
-        text: valgear3Ref ? valgear3Ref.text : "54"
-        visible: false
-
-        onTextChanged: if (valgear3Ref && valgear3Ref.text !== text)
-                           valgear3Ref.text = text
-    }
-
-    StyledTextField {
-        id: valgear4
-
-        text: valgear4Ref ? valgear4Ref.text : "37"
-        visible: false
-
-        onTextChanged: if (valgear4Ref && valgear4Ref.text !== text)
-                           valgear4Ref.text = text
-    }
-
-    StyledTextField {
-        id: valgear5
-
-        text: valgear5Ref ? valgear5Ref.text : "28"
-        visible: false
-
-        onTextChanged: if (valgear5Ref && valgear5Ref.text !== text)
-                           valgear5Ref.text = text
-    }
-
-    StyledTextField {
-        id: valgear6
-
-        text: valgear6Ref ? valgear6Ref.text : ""
-        visible: false
-
-        onTextChanged: if (valgear6Ref && valgear6Ref.text !== text)
-                           valgear6Ref.text = text
-    }
-
-    Connections {
-        function onTextChanged() {
-            if (stage1.text !== stage1Ref.text)
-                stage1.text = stage1Ref.text;
-        }
-
-        target: stage1Ref
-    }
-
-    Connections {
-        function onTextChanged() {
-            if (stage2.text !== stage2Ref.text)
-                stage2.text = stage2Ref.text;
-        }
-
-        target: stage2Ref
-    }
-
-    Connections {
-        function onTextChanged() {
-            if (stage3.text !== stage3Ref.text)
-                stage3.text = stage3Ref.text;
-        }
-
-        target: stage3Ref
-    }
-
-    Connections {
-        function onTextChanged() {
-            if (stage4.text !== stage4Ref.text)
-                stage4.text = stage4Ref.text;
-        }
-
-        target: stage4Ref
-    }
-
-    Connections {
-        function onTextChanged() {
-            if (valgear1.text !== valgear1Ref.text)
-                valgear1.text = valgear1Ref.text;
-        }
-
-        target: valgear1Ref
-    }
-
-    Connections {
-        function onTextChanged() {
-            if (valgear2.text !== valgear2Ref.text)
-                valgear2.text = valgear2Ref.text;
-        }
-
-        target: valgear2Ref
-    }
-
-    Connections {
-        function onTextChanged() {
-            if (valgear3.text !== valgear3Ref.text)
-                valgear3.text = valgear3Ref.text;
-        }
-
-        target: valgear3Ref
-    }
-
-    Connections {
-        function onTextChanged() {
-            if (valgear4.text !== valgear4Ref.text)
-                valgear4.text = valgear4Ref.text;
-        }
-
-        target: valgear4Ref
-    }
-
-    Connections {
-        function onTextChanged() {
-            if (valgear5.text !== valgear5Ref.text)
-                valgear5.text = valgear5Ref.text;
-        }
-
-        target: valgear5Ref
-    }
-
-    Connections {
-        function onTextChanged() {
-            if (valgear6.text !== valgear6Ref.text)
-                valgear6.text = valgear6Ref.text;
-        }
-
-        target: valgear6Ref
-    }
-
-    Item {
-        id: applyWarnGear
-
-        function start() {
-            if (!settingsLoaded || suppressWrites)
-                return;
-            AppSettings.writeWarnGearSettings(watertempwarn.text, boostwarn.text, rpmwarn.text, knockwarn.text,
-                                              gercalactive, lambdamultiply.text, valgear1.text, valgear2.text,
-                                              valgear3.text, valgear4.text, valgear5.text, valgear6.text);
-        }
-
-        visible: false
-    }
-
-    Item {
-        id: applyRPM
-
-        function start() {
-            if (!settingsLoaded || suppressWrites)
-                return;
-            AppSettings.writeRPMSettings(maxRPM.text, stage1.text, stage2.text, stage3.text, stage4.text);
-        }
-
-        visible: false
     }
 }

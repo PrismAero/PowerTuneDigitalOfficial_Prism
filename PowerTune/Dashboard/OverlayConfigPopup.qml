@@ -106,122 +106,75 @@ Popup {
 
     signal configChanged(string overlayId)
 
-    function collectConfig() {
-        var config = {};
-
-        if (hasDatasource)
-            config.sensorKey = normalizeAnalogSensorKey(sensorKey);
-
-        if (hasLabel)
-            config.label = labelText;
-
-        if (hasUnitDecimals) {
-            config.unit = unitText;
-            config.decimals = decimals;
-        }
-
-        if (hasValueRange) {
-            config.minValue = minValue;
-            config.maxValue = maxValue;
-        }
-
-        if (hasArcGeometry) {
-            config.startAngle = startAngle;
-            config.endAngle = endAngle;
-            config.arcWidth = arcWidth;
-            config.arcScale = arcScale;
-            config.arcOffsetX = arcOffsetX;
-            config.arcOffsetY = arcOffsetY;
-            config.minimumVisibleFraction = minimumVisibleFraction;
-            config.startTaper = startTaper;
-            config.endTaper = endTaper;
-            config.testLoopEnabled = testLoopEnabled;
-            config.testLoopDuration = testLoopDuration;
-            config.valueOffsetY = valueOffsetY;
-            config.readoutOffsetX = readoutOffsetX;
-            config.readoutOffsetY = readoutOffsetY;
-            config.readoutStep = readoutStep;
-            config.readoutValueScale = readoutValueScale;
-            config.readoutUnitScale = readoutUnitScale;
-            config.unitOffsetX = unitOffsetX;
-            config.unitOffsetY = unitOffsetY;
-            config.readoutSpacing = readoutSpacing;
-            config.readoutTextColor = readoutTextColor;
-        }
-
-        if (hasArcOverlaySize)
-            config.overlaySize = overlaySize;
-
-        if (hasArcColors) {
-            config.arcColorStart = arcColorStart;
-            config.arcColorMid = arcColorMid;
-            config.arcColorMidPos = arcColorMidPos;
-            config.arcColorEnd = arcColorEnd;
-        }
-
-        if (hasWarning) {
-            config.warningEnabled = warningEnabled;
-            config.warningThreshold = warningThreshold;
-            config.warningFlash = warningFlash;
-            config.warningFlashRate = warningFlashRate;
-            if (isArc)
-                config.warningColor = warningColor;
-            if (isSensor) {
-                config.warningColor = warningColor;
-                config.warningDirection = warningDirection;
-                config.normalColor = normalColor;
-            }
-        }
-
-        if (hasStatusConfig) {
-            config.threshold = threshold;
-            config.onColor = onColor;
-            config.offColor = offColor;
-            config.invertLogic = invertLogic;
-        }
-
-        if (hasGearConfig) {
-            config.gearKey = normalizeAnalogSensorKey(gearSensorKey);
-            config.gearTextColor = gearTextColor;
-            config.gearFontSize = gearFontSize;
-            config.suffixFontSize = suffixFontSize;
-            config.gearOffsetX = gearOffsetX;
-            config.gearOffsetY = gearOffsetY;
-            config.gearWidth = gearWidth;
-            config.gearHeight = gearHeight;
-        }
-
-        if (hasShiftConfig) {
-            config.shiftPoint = shiftPoint;
-            config.shiftCount = shiftCount;
-            config.shiftPattern = shiftPattern;
-        }
-
-        if (hasBiasLabels) {
-            config.leftLabel = leftLabel;
-            config.rightLabel = rightLabel;
-            config.showSideValues = biasShowSideValues;
-            config.showCenterValue = biasShowCenterValue;
-            config.valueUnit = biasValueUnit;
-            config.valueDecimals = biasValueDecimals;
-            config.dampingMultiplier = biasDampingMultiplier;
-            config.markerEnabled = biasMarkerEnabled;
-            config.markerColor = biasMarkerColor;
-            config.markerWidth = biasMarkerWidth;
-        }
-
-        if (hasStaticText) {
-            config.text = staticText;
-            config.timeEnabled = timeEnabled;
-        }
-
-        return config;
-    }
-
-    function configHasKeys(obj) {
-        for (var key in obj)
-            return true;
-        return false;
+    function editorState() {
+        return {
+            sensorKey: sensorKey,
+            labelText: labelText,
+            unitText: unitText,
+            staticText: staticText,
+            minValue: minValue,
+            maxValue: maxValue,
+            decimals: decimals,
+            overlaySize: overlaySize,
+            startAngle: startAngle,
+            endAngle: endAngle,
+            arcWidth: arcWidth,
+            arcScale: arcScale,
+            arcOffsetX: arcOffsetX,
+            arcOffsetY: arcOffsetY,
+            minimumVisibleFraction: minimumVisibleFraction,
+            startTaper: startTaper,
+            endTaper: endTaper,
+            testLoopEnabled: testLoopEnabled,
+            testLoopDuration: testLoopDuration,
+            arcColorStart: arcColorStart,
+            arcColorMid: arcColorMid,
+            arcColorMidPos: arcColorMidPos,
+            arcColorEnd: arcColorEnd,
+            valueOffsetY: valueOffsetY,
+            readoutOffsetX: readoutOffsetX,
+            readoutOffsetY: readoutOffsetY,
+            readoutStep: readoutStep,
+            readoutValueScale: readoutValueScale,
+            readoutUnitScale: readoutUnitScale,
+            unitOffsetX: unitOffsetX,
+            unitOffsetY: unitOffsetY,
+            readoutSpacing: readoutSpacing,
+            readoutTextColor: readoutTextColor,
+            warningEnabled: warningEnabled,
+            warningThreshold: warningThreshold,
+            warningColor: warningColor,
+            warningFlash: warningFlash,
+            warningFlashRate: warningFlashRate,
+            warningDirection: warningDirection,
+            normalColor: normalColor,
+            threshold: threshold,
+            onColor: onColor,
+            offColor: offColor,
+            invertLogic: invertLogic,
+            gearSensorKey: gearSensorKey,
+            gearTextColor: gearTextColor,
+            gearFontSize: gearFontSize,
+            suffixFontSize: suffixFontSize,
+            gearOffsetX: gearOffsetX,
+            gearOffsetY: gearOffsetY,
+            gearWidth: gearWidth,
+            gearHeight: gearHeight,
+            shiftPoint: shiftPoint,
+            shiftCount: shiftCount,
+            shiftPattern: shiftPattern,
+            leftLabel: leftLabel,
+            rightLabel: rightLabel,
+            biasShowSideValues: biasShowSideValues,
+            biasShowCenterValue: biasShowCenterValue,
+            biasValueUnit: biasValueUnit,
+            biasValueDecimals: biasValueDecimals,
+            biasDampingMultiplier: biasDampingMultiplier,
+            biasMarkerEnabled: biasMarkerEnabled,
+            biasMarkerColor: biasMarkerColor,
+            biasMarkerWidth: biasMarkerWidth,
+            timeEnabled: timeEnabled
+        };
     }
 
     function getDefaults() {
@@ -235,7 +188,7 @@ Popup {
     }
 
     function doSave() {
-        var config = collectConfig();
+        var config = OverlayConfigService.buildOverlayConfig(configType, editorState());
         AppSettings.saveOverlayConfig(dashboardId, overlayId, config);
         configChanged(overlayId);
         close();
@@ -245,30 +198,10 @@ Popup {
         return val !== undefined ? Number(val) : def;
     }
 
-    function normalizeAnalogSensorKey(key) {
-        if (key === undefined || key === null)
-            return "";
-
-        var trimmed = String(key).trim();
-        var match = trimmed.match(/^EXAnalogInput([0-7])$/);
-        if (match && match.length === 2)
-            return "EXAnalogCalc" + match[1];
-
-        return trimmed;
-    }
-
     function openFor(id, type) {
         overlayId = id;
         configType = type;
-        currentConfig = AppSettings.loadOverlayConfig(dashboardId, id);
-        if (!configHasKeys(currentConfig) && type === "tachCluster") {
-            currentConfig = AppSettings.loadOverlayConfig(dashboardId, "tachGroup");
-            var legacyGear = AppSettings.loadOverlayConfig(dashboardId, "gearIndicator");
-            for (var gearKey in legacyGear)
-                currentConfig[gearKey] = legacyGear[gearKey];
-        } else if (!configHasKeys(currentConfig) && type === "speedCluster") {
-            currentConfig = AppSettings.loadOverlayConfig(dashboardId, "speedGroup");
-        }
+        currentConfig = OverlayConfigService.prepareOverlayEditorConfig(dashboardId, id, type);
         populateFromConfig();
         open();
     }
@@ -277,7 +210,7 @@ Popup {
         var cfg = currentConfig;
         var defs = getDefaults();
 
-        sensorKey = normalizeAnalogSensorKey(cfg.sensorKey || defs.sensorKey || "");
+        sensorKey = OverlayConfigService.normalizeAnalogSensorKey(cfg.sensorKey || defs.sensorKey || "");
 
         labelText = cfg.label || defs.label || "";
         unitText = cfg.unit || defs.unit || "";
@@ -336,7 +269,7 @@ Popup {
         offColor = cfg.offColor || defs.offColor || "#FF0909";
         invertLogic = toBool(cfg.invertLogic, toBool(defs.invertLogic, false));
 
-        gearSensorKey = normalizeAnalogSensorKey(cfg.gearKey || defs.gearKey || "Gear");
+        gearSensorKey = OverlayConfigService.normalizeAnalogSensorKey(cfg.gearKey || defs.gearKey || "Gear");
         gearTextColor = cfg.gearTextColor || defs.gearTextColor || "#FFFFFF";
         gearFontSize = num(cfg.gearFontSize, num(defs.gearFontSize, 160));
         suffixFontSize = num(cfg.suffixFontSize, num(defs.suffixFontSize, 52.505));

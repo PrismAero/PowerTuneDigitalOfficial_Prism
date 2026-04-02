@@ -6,6 +6,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <QSet>
 
 namespace {
 struct SensorMetadata
@@ -47,6 +48,58 @@ double stepForRange(double maxValue, const QString &unit)
     if (maxValue <= 400.0)
         return 5.0;
     return 10.0;
+}
+
+QVariantList buildReservedPorts(const QVariantMap &boardConfig, const QVariantMap &diffConfig, bool analog)
+{
+    QSet<int> reserved;
+    const QVariantMap speed = boardConfig.value(QStringLiteral("speedSensor")).toMap();
+    const QVariantMap gear = boardConfig.value(QStringLiteral("gearSensor")).toMap();
+    const QVariantMap brightness = boardConfig.value(QStringLiteral("brightness")).toMap();
+
+    if (analog) {
+        if (gear.value(QStringLiteral("enabled")).toBool())
+            reserved.insert(gear.value(QStringLiteral("port")).toInt());
+
+        const bool speedEnabled = speed.value(QStringLiteral("enabled")).toBool();
+        const QString speedSource = speed.value(QStringLiteral("sourceType"), QStringLiteral("analog")).toString().toLower();
+        if (speedEnabled && (speedSource == QLatin1String("analog") || speedSource == QLatin1String("analogsquare")
+                             || speedSource == QLatin1String("analogfrequency"))) {
+            reserved.insert(speed.value(QStringLiteral("analogPort")).toInt());
+        }
+
+        if (diffConfig.value(QStringLiteral("enabled")).toBool()) {
+            reserved.insert(diffConfig.value(QStringLiteral("channelA")).toInt());
+            reserved.insert(diffConfig.value(QStringLiteral("channelB")).toInt());
+        }
+
+        if (brightness.value(QStringLiteral("analogEnabled")).toBool())
+            reserved.insert(brightness.value(QStringLiteral("analogChannel")).toInt());
+    } else {
+        const bool speedEnabled = speed.value(QStringLiteral("enabled")).toBool();
+        const QString speedSource = speed.value(QStringLiteral("sourceType"), QStringLiteral("analog")).toString().toLower();
+        if (speedEnabled && speedSource == QLatin1String("digital"))
+            reserved.insert(speed.value(QStringLiteral("digitalPort")).toInt());
+
+        if (brightness.value(QStringLiteral("discreteEnabled")).toBool()
+            || brightness.value(QStringLiteral("canIoEnabled")).toBool()) {
+            reserved.insert(brightness.value(QStringLiteral("headlightChannel")).toInt());
+        }
+
+        if (boardConfig.value(QStringLiteral("rpmSource")).toInt() == 2)
+            reserved.insert(0);
+    }
+
+    QVariantList values;
+    for (int value : reserved) {
+        if (value >= 0 && value < ExBoardConfigManager::kAnalogChannels)
+            values.append(value);
+    }
+
+    std::sort(values.begin(), values.end(), [](const QVariant &a, const QVariant &b) {
+        return a.toInt() < b.toInt();
+    });
+    return values;
 }
 }  // namespace
 
@@ -468,6 +521,94 @@ QStringList ExBoardConfigManager::digitalChannelNames() const
     for (int i = 0; i < kDigitalChannels; ++i)
         names.append(m_appSettings->getValue(s_digitalNameKeys[i], QString()).toString());
     return names;
+}
+
+QStringList ExBoardConfigManager::linearPresetNames() const
+{
+    QStringList names{QStringLiteral("Custom")};
+    if (!m_calibrationHelper)
+        return names;
+
+    const QVariantList presets = m_calibrationHelper->linearPresets();
+    for (const QVariant &presetValue : presets) {
+        const QString presetName = presetValue.toMap().value(QStringLiteral("name")).toString();
+        if (!presetName.isEmpty() && !names.contains(presetName))
+            names.append(presetName);
+    }
+    return names;
+}
+
+QStringList ExBoardConfigManager::ntcPresetNames() const
+{
+    QStringList names{QStringLiteral("Custom")};
+    if (!m_calibrationHelper)
+        return names;
+
+    const QVariantList presets = m_calibrationHelper->ntcPresets();
+    for (const QVariant &presetValue : presets) {
+        const QString presetName = presetValue.toMap().value(QStringLiteral("name")).toString();
+        if (!presetName.isEmpty() && !names.contains(presetName))
+            names.append(presetName);
+    }
+    return names;
+}
+
+QVariantList ExBoardConfigManager::reservedAnalogPorts() const
+{
+    return buildReservedPorts(loadBoardConfig(), getDifferentialSensorConfig(), true);
+}
+
+QVariantList ExBoardConfigManager::reservedDigitalPorts() const
+{
+    return buildReservedPorts(loadBoardConfig(), getDifferentialSensorConfig(), false);
+}
+
+QVariantMap ExBoardConfigManager::speedPortOptions(int selectedAnalogPort, int selectedDigitalPort) const
+{
+    const QVariantList analogReserved = reservedAnalogPorts();
+    const QVariantList digitalReserved = reservedDigitalPorts();
+    QSet<int> reservedAnalogSet;
+    QSet<int> reservedDigitalSet;
+    for (const QVariant &v : analogReserved)
+        reservedAnalogSet.insert(v.toInt());
+    for (const QVariant &v : digitalReserved)
+        reservedDigitalSet.insert(v.toInt());
+
+    QVariantList analogValues;
+    QVariantList analogLabels;
+    QVariantList digitalValues;
+    QVariantList digitalLabels;
+
+    for (int i = 0; i < kAnalogChannels; ++i) {
+        if (!reservedAnalogSet.contains(i) || i == selectedAnalogPort) {
+            analogValues.append(i);
+            analogLabels.append(QStringLiteral("EX Analog %1").arg(i));
+        }
+        if (!reservedDigitalSet.contains(i) || i == selectedDigitalPort) {
+            digitalValues.append(i);
+            digitalLabels.append(QStringLiteral("EX Digital %1").arg(i + 1));
+        }
+    }
+
+    if (analogValues.isEmpty()) {
+        const int fallback = qBound(0, selectedAnalogPort, kAnalogChannels - 1);
+        analogValues.append(fallback);
+        analogLabels.append(QStringLiteral("EX Analog %1").arg(fallback));
+    }
+    if (digitalValues.isEmpty()) {
+        const int fallback = qBound(0, selectedDigitalPort, kDigitalChannels - 1);
+        digitalValues.append(fallback);
+        digitalLabels.append(QStringLiteral("EX Digital %1").arg(fallback + 1));
+    }
+
+    QVariantMap out;
+    out[QStringLiteral("analogValues")] = analogValues;
+    out[QStringLiteral("analogLabels")] = analogLabels;
+    out[QStringLiteral("digitalValues")] = digitalValues;
+    out[QStringLiteral("digitalLabels")] = digitalLabels;
+    out[QStringLiteral("analogIndex")] = qMax(0, analogValues.indexOf(selectedAnalogPort));
+    out[QStringLiteral("digitalIndex")] = qMax(0, digitalValues.indexOf(selectedDigitalPort));
+    return out;
 }
 
 QVariantMap ExBoardConfigManager::getDigitalChannelConfig(int channel) const

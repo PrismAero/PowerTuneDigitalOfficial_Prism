@@ -91,6 +91,7 @@ set(CORE_SOURCES
     src/Core/Services/ScreenControlService.cpp
     src/Core/Services/DashboardLockService.cpp
     src/Core/Config/OverlayConfigDefaults.cpp
+    src/Core/Config/OverlayConfigService.cpp
     src/Core/Models/UIState.cpp
     src/Core/Models/EngineData.cpp
     src/Core/Models/VehicleData.cpp
@@ -102,6 +103,9 @@ set(CORE_SOURCES
     src/Core/Models/ConnectionData.cpp
     src/Core/Models/SettingsData.cpp
     src/Core/Models/CanFrameModel.cpp
+    src/Core/Models/ExBoardChannelModel.cpp
+    src/Core/Models/ExBoardDigitalModel.cpp
+    src/Core/Models/VehicleRpmSettingsModel.cpp
 )
 
 set(CORE_HEADERS
@@ -118,6 +122,7 @@ set(CORE_HEADERS
     src/Core/Services/ScreenControlService.h
     src/Core/Services/DashboardLockService.h
     src/Core/Config/OverlayConfigDefaults.h
+    src/Core/Config/OverlayConfigService.h
     src/Core/Models/UIState.h
     src/Core/Models/DataModels.h
     src/Core/Models/EngineData.h
@@ -130,6 +135,9 @@ set(CORE_HEADERS
     src/Core/Models/ConnectionData.h
     src/Core/Models/SettingsData.h
     src/Core/Models/CanFrameModel.h
+    src/Core/Models/ExBoardChannelModel.h
+    src/Core/Models/ExBoardDigitalModel.h
+    src/Core/Models/VehicleRpmSettingsModel.h
 )
 
 set(CAN_SOURCES
@@ -324,8 +332,10 @@ qt_policy(SET QTP0004 NEW)
             PowerTune/Core/SettingsManager.qml
             PowerTune/Core/BoardConfig/ExBoardAnalog.qml
             PowerTune/Core/BoardConfig/ExtenderBoardTab.qml
+            PowerTune/Core/BoardConfig/ExtenderConfigPage.qml
             PowerTune/Core/BoardConfig/ExBoardSection.qml
             PowerTune/Core/PTExtender/PTExtenderConfigPage.qml
+            PowerTune/Core/PTExtender/PTExtenderLedEditPopup.qml
             PowerTune/Core/PTExtender/PTExtenderSystemSection.qml
             PowerTune/Core/PTExtender/PTExtenderGpiSection.qml
             PowerTune/Core/PTExtender/PTExtenderRelaySection.qml
@@ -361,6 +371,8 @@ qt_policy(SET QTP0004 NEW)
             PowerTune/UI/StyledTextField.qml
             PowerTune/UI/StyledCheckBox.qml
             PowerTune/UI/StyledSpinBox.qml
+            PowerTune/UI/StyledSlider.qml
+            PowerTune/UI/StyledTabGroupHeader.qml
             PowerTune/UI/StyledColorPicker.qml
             PowerTune/UI/ConnectionStatusIndicator.qml
             PowerTune/UI/SensorPicker.qml

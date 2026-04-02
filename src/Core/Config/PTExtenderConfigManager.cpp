@@ -4,6 +4,7 @@
 #include "AppSettings.h"
 
 #include <algorithm>
+#include <QColor>
 
 namespace {
 static const int kKnownDfiCodes[] = {11, 12, 13, 14, 15, 21, 23, 24, 25, 31, 32, 33, 34, 35,
@@ -13,7 +14,21 @@ constexpr int kIndicatorProfileCount = 2;
 constexpr int kIndicatorStateCount = 8;
 }
 
-PTExtenderConfigManager::PTExtenderConfigManager(QObject *parent) : QObject(parent) {}
+PTExtenderConfigManager::PTExtenderConfigManager(QObject *parent) : QObject(parent)
+{
+    m_rebootTimer.setSingleShot(true);
+    m_rebootTimer.setInterval(500);
+    connect(&m_rebootTimer, &QTimer::timeout, this, [this]() {
+        if (m_ptExtenderCan)
+            m_ptExtenderCan->rebootDevice();
+        m_configModeActive = false;
+        m_metadataLoaded = false;
+        m_metadata.clear();
+        m_assemblyBuffer.clear();
+        emit configModeActiveChanged();
+        emit metadataLoadedChanged();
+    });
+}
 
 void PTExtenderConfigManager::setPTExtenderCan(PTExtenderCan *can)
 {
@@ -24,7 +39,13 @@ void PTExtenderConfigManager::setPTExtenderCan(PTExtenderCan *can)
         disconnect(m_ptExtenderCan, nullptr, this, nullptr);
     m_ptExtenderCan = can;
 
-    if (!m_ptExtenderCan || !m_appSettings)
+    if (!m_ptExtenderCan)
+        return;
+
+    connect(m_ptExtenderCan, &PTExtenderCan::metadataReceived,
+            this, &PTExtenderConfigManager::onMetadataReceived);
+
+    if (!m_appSettings)
         return;
 
     connect(m_ptExtenderCan, &PTExtenderCan::configResponseReceived, this, [this](int group, int index, int sub, const QByteArray &data) {
@@ -360,66 +381,7 @@ bool PTExtenderConfigManager::syncToDevice()
                                              .toInt())
          && ok;
 
-    for (int ch = 0; ch < 16; ++ch) {
-        const QString base = QStringLiteral("ui/ptextender/led/%1/").arg(ch);
-        const QByteArray name = m_appSettings->getValue(base + QStringLiteral("name"), QStringLiteral("LED %1").arg(ch))
-                                    .toString()
-                                    .leftJustified(16, QChar('\0'))
-                                    .left(16)
-                                    .toLatin1();
-        QByteArray ledMain(5, '\0');
-        ledMain[0] = static_cast<char>(m_appSettings->getValue(base + QStringLiteral("rgbGroup"), 0).toInt() & 0xFF);
-        ledMain[1] = static_cast<char>(m_appSettings->getValue(base + QStringLiteral("rgbChannel"), 0).toInt() & 0xFF);
-        ledMain[2] = static_cast<char>(m_appSettings->getValue(base + QStringLiteral("onBrightness"), 255).toInt() & 0xFF);
-        ledMain[3] = static_cast<char>(m_appSettings->getValue(base + QStringLiteral("pattern"), 0).toInt() & 0xFF);
-        ledMain[4] = static_cast<char>(m_appSettings->getValue(base + QStringLiteral("enabled"), ch < 14).toBool() ? 1 : 0);
-        ok = m_ptExtenderCan->writeConfigRegister(PTExtenderCan::ConfigGroupLed, ch, 0x00, ledMain) && ok;
-
-        QByteArray ledOverride(5, '\0');
-        ledOverride[0] = static_cast<char>(m_appSettings->getValue(base + QStringLiteral("overrideR"), 255).toInt() & 0xFF);
-        ledOverride[1] = static_cast<char>(m_appSettings->getValue(base + QStringLiteral("overrideG"), 0).toInt() & 0xFF);
-        ledOverride[2] = static_cast<char>(m_appSettings->getValue(base + QStringLiteral("overrideB"), 0).toInt() & 0xFF);
-        ledOverride[3] = static_cast<char>(m_appSettings->getValue(base + QStringLiteral("overridePattern"), 2).toInt() & 0xFF);
-        ledOverride[4] = static_cast<char>(m_appSettings->getValue(base + QStringLiteral("overrideScope"), 1).toInt() & 0xFF);
-        ok = m_ptExtenderCan->writeConfigRegister(PTExtenderCan::ConfigGroupLed, ch, 0x01, ledOverride) && ok;
-
-        QByteArray ledOverride2(3, '\0');
-        ledOverride2[0] = static_cast<char>(m_appSettings->getValue(base + QStringLiteral("overrideR2"), 0).toInt() & 0xFF);
-        ledOverride2[1] = static_cast<char>(m_appSettings->getValue(base + QStringLiteral("overrideG2"), 0).toInt() & 0xFF);
-        ledOverride2[2] = static_cast<char>(m_appSettings->getValue(base + QStringLiteral("overrideB2"), 255).toInt() & 0xFF);
-        ok = m_ptExtenderCan->writeConfigRegister(PTExtenderCan::ConfigGroupLed, ch, 0x02, ledOverride2) && ok;
-
-        QByteArray ledQuickBind(1, '\0');
-        ledQuickBind[0] = static_cast<char>(m_appSettings->getValue(base + QStringLiteral("quickBindInput"), -1).toInt() & 0xFF);
-        ok = m_ptExtenderCan->writeConfigRegister(PTExtenderCan::ConfigGroupLed, ch, 0x03, ledQuickBind) && ok;
-
-        ok = m_ptExtenderCan->writeConfigRegister(PTExtenderCan::ConfigGroupLed, ch, 0x10, name.mid(0, 5)) && ok;
-        ok = m_ptExtenderCan->writeConfigRegister(PTExtenderCan::ConfigGroupLed, ch, 0x11, name.mid(5, 5)) && ok;
-        ok = m_ptExtenderCan->writeConfigRegister(PTExtenderCan::ConfigGroupLed, ch, 0x12, name.mid(10, 5)) && ok;
-        ok = m_ptExtenderCan->writeConfigRegister(PTExtenderCan::ConfigGroupLed, ch, 0x13, name.mid(15, 1)) && ok;
-
-        QByteArray ruleMeta(2, '\0');
-        ruleMeta[0] = static_cast<char>(m_appSettings->getValue(base + QStringLiteral("rule/enabled"), false).toBool() ? 1 : 0);
-        ruleMeta[1] = static_cast<char>(m_appSettings->getValue(base + QStringLiteral("rule/conditionCount"), 1).toInt() & 0xFF);
-        ok = m_ptExtenderCan->writeConfigRegister(PTExtenderCan::ConfigGroupLed, ch, 0x20, ruleMeta) && ok;
-
-        for (int cond = 0; cond < 4; ++cond) {
-            const int threshold = m_appSettings->getValue(base + QStringLiteral("rule/cond%1/threshold").arg(cond), 0).toInt();
-            QByteArray condData(5, '\0');
-            condData[0] = static_cast<char>(m_appSettings->getValue(base + QStringLiteral("rule/cond%1/type").arg(cond), 0).toInt() & 0xFF);
-            condData[1] = static_cast<char>(m_appSettings->getValue(base + QStringLiteral("rule/cond%1/channel").arg(cond), 0).toInt() & 0xFF);
-            condData[2] = static_cast<char>(threshold & 0xFF);
-            condData[3] = static_cast<char>((threshold >> 8) & 0xFF);
-            condData[4] = static_cast<char>(m_appSettings->getValue(base + QStringLiteral("rule/cond%1/enabled").arg(cond), cond == 0).toBool() ? 1 : 0);
-            ok = m_ptExtenderCan->writeConfigRegister(PTExtenderCan::ConfigGroupLed, ch, 0x21 + cond, condData) && ok;
-        }
-
-        QByteArray opData(3, '\0');
-        opData[0] = static_cast<char>(m_appSettings->getValue(base + QStringLiteral("rule/op0"), 1).toInt() & 0xFF);
-        opData[1] = static_cast<char>(m_appSettings->getValue(base + QStringLiteral("rule/op1"), 1).toInt() & 0xFF);
-        opData[2] = static_cast<char>(m_appSettings->getValue(base + QStringLiteral("rule/op2"), 1).toInt() & 0xFF);
-        ok = m_ptExtenderCan->writeConfigRegister(PTExtenderCan::ConfigGroupLed, ch, 0x25, opData) && ok;
-    }
+    ok = writeAllLedChannels() && ok;
 
     for (int profile = 0; profile < 2; ++profile) {
         const QString pfx = QStringLiteral("ui/ptextender/indicator/%1/").arg(profile);
@@ -586,4 +548,304 @@ QString PTExtenderConfigManager::toSuppressedCodesCsv(const QStringList &codes)
     normalized.removeDuplicates();
     std::sort(normalized.begin(), normalized.end(), [](const QString &a, const QString &b) { return a.toInt() < b.toInt(); });
     return normalized.join(QStringLiteral(","));
+}
+
+int PTExtenderConfigManager::clampByte(int value)
+{
+    return qBound(0, value, 255);
+}
+
+QString PTExtenderConfigManager::ledStorageKey(int channel, const QString &suffix) const
+{
+    const int safeChannel = qBound(0, channel, kLedChannelCount - 1);
+    return QStringLiteral("ui/ptextender/led/%1/%2").arg(safeChannel).arg(suffix);
+}
+
+QString PTExtenderConfigManager::rgbToHex(int r, int g, int b) const
+{
+    const QColor color(clampByte(r), clampByte(g), clampByte(b));
+    return color.name(QColor::HexRgb).toUpper();
+}
+
+QVariantMap PTExtenderConfigManager::hexToRgb(const QString &hex, int fallbackR, int fallbackG, int fallbackB) const
+{
+    QVariantMap rgb;
+    QColor color(hex);
+    if (!color.isValid()) {
+        rgb[QStringLiteral("r")] = clampByte(fallbackR);
+        rgb[QStringLiteral("g")] = clampByte(fallbackG);
+        rgb[QStringLiteral("b")] = clampByte(fallbackB);
+        return rgb;
+    }
+
+    rgb[QStringLiteral("r")] = color.red();
+    rgb[QStringLiteral("g")] = color.green();
+    rgb[QStringLiteral("b")] = color.blue();
+    return rgb;
+}
+
+bool PTExtenderConfigManager::writeLedChannel(int channel)
+{
+    if (!m_ptExtenderCan || !m_appSettings || channel < 0 || channel >= kLedChannelCount)
+        return false;
+
+    const QString base = QStringLiteral("ui/ptextender/led/%1/").arg(channel);
+    const QByteArray name =
+        m_appSettings->getValue(base + QStringLiteral("name"), QStringLiteral("LED %1").arg(channel))
+            .toString()
+            .leftJustified(16, QChar('\0'))
+            .left(16)
+            .toLatin1();
+
+    QByteArray ledMain(5, '\0');
+    ledMain[0] = static_cast<char>(clampByte(m_appSettings->getValue(base + QStringLiteral("rgbGroup"), 0).toInt()));
+    ledMain[1] =
+        static_cast<char>(clampByte(m_appSettings->getValue(base + QStringLiteral("rgbChannel"), 0).toInt()));
+    ledMain[2] =
+        static_cast<char>(clampByte(m_appSettings->getValue(base + QStringLiteral("onBrightness"), 255).toInt()));
+    ledMain[3] = static_cast<char>(clampByte(m_appSettings->getValue(base + QStringLiteral("pattern"), 0).toInt()));
+    ledMain[4] =
+        static_cast<char>(m_appSettings->getValue(base + QStringLiteral("enabled"), channel < 14).toBool() ? 1 : 0);
+
+    QByteArray ledOverride(5, '\0');
+    ledOverride[0] =
+        static_cast<char>(clampByte(m_appSettings->getValue(base + QStringLiteral("overrideR"), 255).toInt()));
+    ledOverride[1] =
+        static_cast<char>(clampByte(m_appSettings->getValue(base + QStringLiteral("overrideG"), 0).toInt()));
+    ledOverride[2] =
+        static_cast<char>(clampByte(m_appSettings->getValue(base + QStringLiteral("overrideB"), 0).toInt()));
+    ledOverride[3] = static_cast<char>(
+        clampByte(m_appSettings->getValue(base + QStringLiteral("overridePattern"), 2).toInt()));
+    ledOverride[4] =
+        static_cast<char>(clampByte(m_appSettings->getValue(base + QStringLiteral("overrideScope"), 1).toInt()));
+
+    QByteArray ledOverride2(3, '\0');
+    ledOverride2[0] =
+        static_cast<char>(clampByte(m_appSettings->getValue(base + QStringLiteral("overrideR2"), 0).toInt()));
+    ledOverride2[1] =
+        static_cast<char>(clampByte(m_appSettings->getValue(base + QStringLiteral("overrideG2"), 0).toInt()));
+    ledOverride2[2] =
+        static_cast<char>(clampByte(m_appSettings->getValue(base + QStringLiteral("overrideB2"), 255).toInt()));
+
+    QByteArray ledQuickBind(1, '\0');
+    ledQuickBind[0] = static_cast<char>(
+        static_cast<qint8>(m_appSettings->getValue(base + QStringLiteral("quickBindInput"), -1).toInt()));
+
+    bool ok = true;
+    ok = m_ptExtenderCan->writeConfigRegister(PTExtenderCan::ConfigGroupLed, channel, 0x00, ledMain) && ok;
+    ok = m_ptExtenderCan->writeConfigRegister(PTExtenderCan::ConfigGroupLed, channel, 0x01, ledOverride) && ok;
+    ok = m_ptExtenderCan->writeConfigRegister(PTExtenderCan::ConfigGroupLed, channel, 0x02, ledOverride2) && ok;
+    ok = m_ptExtenderCan->writeConfigRegister(PTExtenderCan::ConfigGroupLed, channel, 0x03, ledQuickBind) && ok;
+    ok = m_ptExtenderCan->writeConfigRegister(PTExtenderCan::ConfigGroupLed, channel, 0x10, name.mid(0, 5)) && ok;
+    ok = m_ptExtenderCan->writeConfigRegister(PTExtenderCan::ConfigGroupLed, channel, 0x11, name.mid(5, 5)) && ok;
+    ok = m_ptExtenderCan->writeConfigRegister(PTExtenderCan::ConfigGroupLed, channel, 0x12, name.mid(10, 5)) && ok;
+    ok = m_ptExtenderCan->writeConfigRegister(PTExtenderCan::ConfigGroupLed, channel, 0x13, name.mid(15, 1)) && ok;
+
+    QByteArray ruleMeta(2, '\0');
+    ruleMeta[0] =
+        static_cast<char>(m_appSettings->getValue(base + QStringLiteral("rule/enabled"), false).toBool() ? 1 : 0);
+    ruleMeta[1] = static_cast<char>(
+        clampByte(m_appSettings->getValue(base + QStringLiteral("rule/conditionCount"), 1).toInt()));
+    ok = m_ptExtenderCan->writeConfigRegister(PTExtenderCan::ConfigGroupLed, channel, 0x20, ruleMeta) && ok;
+
+    for (int cond = 0; cond < 4; ++cond) {
+        const int threshold =
+            m_appSettings->getValue(base + QStringLiteral("rule/cond%1/threshold").arg(cond), 0).toInt();
+        QByteArray condData(5, '\0');
+        condData[0] = static_cast<char>(
+            clampByte(m_appSettings->getValue(base + QStringLiteral("rule/cond%1/type").arg(cond), 0).toInt()));
+        condData[1] = static_cast<char>(
+            clampByte(m_appSettings->getValue(base + QStringLiteral("rule/cond%1/channel").arg(cond), 0).toInt()));
+        condData[2] = static_cast<char>(threshold & 0xFF);
+        condData[3] = static_cast<char>((threshold >> 8) & 0xFF);
+        condData[4] = static_cast<char>(
+            m_appSettings->getValue(base + QStringLiteral("rule/cond%1/enabled").arg(cond), cond == 0).toBool()
+                ? 1
+                : 0);
+        ok = m_ptExtenderCan->writeConfigRegister(PTExtenderCan::ConfigGroupLed, channel, 0x21 + cond, condData)
+             && ok;
+    }
+
+    QByteArray opData(3, '\0');
+    opData[0] =
+        static_cast<char>(clampByte(m_appSettings->getValue(base + QStringLiteral("rule/op0"), 1).toInt()));
+    opData[1] =
+        static_cast<char>(clampByte(m_appSettings->getValue(base + QStringLiteral("rule/op1"), 1).toInt()));
+    opData[2] =
+        static_cast<char>(clampByte(m_appSettings->getValue(base + QStringLiteral("rule/op2"), 1).toInt()));
+    ok = m_ptExtenderCan->writeConfigRegister(PTExtenderCan::ConfigGroupLed, channel, 0x25, opData) && ok;
+
+    return ok;
+}
+
+bool PTExtenderConfigManager::writeAllLedChannels()
+{
+    bool ok = true;
+    for (int ch = 0; ch < kLedChannelCount; ++ch)
+        ok = writeLedChannel(ch) && ok;
+    return ok;
+}
+
+void PTExtenderConfigManager::enterConfigMode()
+{
+    if (!m_ptExtenderCan || m_configModeActive)
+        return;
+
+    m_ptExtenderCan->enterConfigMode();
+    m_configModeActive = true;
+    m_metadataLoaded = false;
+    m_metadata.clear();
+    m_assemblyBuffer.clear();
+    for (int i = 0; i < 5; ++i)
+        m_expectedCounts[i] = 0;
+    emit configModeActiveChanged();
+    emit metadataLoadedChanged();
+
+    for (int cat = 0; cat < 5; ++cat)
+        m_ptExtenderCan->requestMetadata(cat);
+}
+
+void PTExtenderConfigManager::exitConfigMode()
+{
+    if (!m_ptExtenderCan || !m_configModeActive)
+        return;
+
+    m_ptExtenderCan->exitConfigMode();
+    m_configModeActive = false;
+    m_metadataLoaded = false;
+    m_metadata.clear();
+    m_assemblyBuffer.clear();
+    emit configModeActiveChanged();
+    emit metadataLoadedChanged();
+}
+
+void PTExtenderConfigManager::saveAndReboot()
+{
+    if (!m_ptExtenderCan || !m_configModeActive)
+        return;
+
+    m_ptExtenderCan->saveDeviceConfig();
+    m_rebootTimer.start();
+}
+
+void PTExtenderConfigManager::onMetadataReceived(int category, int totalCount, int optionIndex, int chunkIndex, const QByteArray &data)
+{
+    if (category < 0 || category >= 5)
+        return;
+
+    m_expectedCounts[category] = totalCount;
+
+    QMap<int, QString> &catBuffer = m_assemblyBuffer[category];
+    QString &partial = catBuffer[optionIndex];
+
+    for (int i = 0; i < data.size(); ++i) {
+        const char c = data[i];
+        if (c == '\0')
+            break;
+        partial.append(QChar::fromLatin1(c));
+    }
+
+    bool hasNull = false;
+    for (int i = 0; i < data.size(); ++i) {
+        if (data[i] == '\0') {
+            hasNull = true;
+            break;
+        }
+    }
+
+    if (hasNull) {
+        QStringList &names = m_metadata[category];
+        if (names.size() <= optionIndex)
+            names.resize(totalCount);
+        names[optionIndex] = partial;
+    }
+
+    checkMetadataComplete();
+}
+
+void PTExtenderConfigManager::checkMetadataComplete()
+{
+    for (int cat = 0; cat < 5; ++cat) {
+        if (m_expectedCounts[cat] == 0)
+            return;
+        if (!m_metadata.contains(cat))
+            return;
+        if (m_metadata[cat].size() < m_expectedCounts[cat])
+            return;
+        for (const QString &name : m_metadata[cat]) {
+            if (name.isEmpty())
+                return;
+        }
+    }
+
+    if (!m_metadataLoaded) {
+        m_metadataLoaded = true;
+        emit metadataLoadedChanged();
+    }
+}
+
+QStringList PTExtenderConfigManager::gpiFunctionNames() const
+{
+    return m_metadata.value(0);
+}
+
+QStringList PTExtenderConfigManager::relayFunctionNames() const
+{
+    return m_metadata.value(1);
+}
+
+QStringList PTExtenderConfigManager::logicConditionNames() const
+{
+    return m_metadata.value(2);
+}
+
+QStringList PTExtenderConfigManager::ledPatternNames() const
+{
+    return m_metadata.value(3);
+}
+
+QStringList PTExtenderConfigManager::ledTypeNames() const
+{
+    return m_metadata.value(4);
+}
+
+bool PTExtenderConfigManager::writeIndicatorProfile(int profile)
+{
+    if (!m_ptExtenderCan || !m_appSettings || profile < 0 || profile >= kIndicatorProfileCount)
+        return false;
+
+    const QString pfx = QStringLiteral("ui/ptextender/indicator/%1/").arg(profile);
+    QByteArray payload(5, '\0');
+    payload[0] = static_cast<char>(m_appSettings->getValue(pfx + QStringLiteral("enabled"), true).toBool() ? 1 : 0);
+    payload[1] = static_cast<char>(clampByte(m_appSettings->getValue(pfx + QStringLiteral("type"), 1).toInt()));
+    payload[2] = static_cast<char>(clampByte(m_appSettings->getValue(pfx + QStringLiteral("ch1"), profile == 0 ? 1 : 0).toInt()));
+    payload[3] = static_cast<char>(clampByte(m_appSettings->getValue(pfx + QStringLiteral("ch2"), profile == 0 ? 2 : 4).toInt()));
+    payload[4] = static_cast<char>(clampByte(m_appSettings->getValue(pfx + QStringLiteral("ch3"), profile == 0 ? 3 : 5).toInt()));
+    return m_ptExtenderCan->writeConfigRegister(PTExtenderCan::ConfigGroupIndicator, profile, 0x00, payload);
+}
+
+bool PTExtenderConfigManager::writeIndicatorStateEffect(int profile, int state)
+{
+    if (!m_ptExtenderCan || !m_appSettings || profile < 0 || profile >= kIndicatorProfileCount || state < 0 || state >= kIndicatorStateCount)
+        return false;
+
+    const QString pfx = QStringLiteral("ui/ptextender/indicator/%1/effect/%2/").arg(profile).arg(state);
+    QByteArray payloadA(5, '\0');
+    payloadA[0] = static_cast<char>(clampByte(m_appSettings->getValue(pfx + QStringLiteral("pattern"), state == 0 ? 3 : 1).toInt()));
+    payloadA[1] = static_cast<char>(clampByte(m_appSettings->getValue(pfx + QStringLiteral("intensity"), 180).toInt()));
+    payloadA[2] = static_cast<char>(clampByte(m_appSettings->getValue(pfx + QStringLiteral("r"), 0).toInt()));
+    payloadA[3] = static_cast<char>(clampByte(m_appSettings->getValue(pfx + QStringLiteral("g"), 0).toInt()));
+    payloadA[4] = static_cast<char>(clampByte(m_appSettings->getValue(pfx + QStringLiteral("b"), 255).toInt()));
+
+    const int p1 = m_appSettings->getValue(pfx + QStringLiteral("p1"), 1200).toInt();
+    const int p2 = m_appSettings->getValue(pfx + QStringLiteral("p2"), 0).toInt();
+    QByteArray payloadB(4, '\0');
+    payloadB[0] = static_cast<char>(p1 & 0xFF);
+    payloadB[1] = static_cast<char>((p1 >> 8) & 0xFF);
+    payloadB[2] = static_cast<char>(p2 & 0xFF);
+    payloadB[3] = static_cast<char>((p2 >> 8) & 0xFF);
+
+    bool ok = m_ptExtenderCan->writeConfigRegister(PTExtenderCan::ConfigGroupIndicator, profile, 0x10 + state, payloadA);
+    ok = m_ptExtenderCan->writeConfigRegister(PTExtenderCan::ConfigGroupIndicator, profile, 0x20 + state, payloadB) && ok;
+    return ok;
 }
