@@ -99,7 +99,7 @@ Rectangle {
     Timer {
         interval: 40
         repeat: true
-        running: true
+        running: root.visible
         onTriggered: {
             root.elapsedMs += interval
             root.updatePreview()

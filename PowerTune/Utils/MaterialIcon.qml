@@ -1,6 +1,6 @@
 // * Material Design Icons component
 // * Uses Material Symbols font for consistent icons across the app
-import QtQuick 2.15
+import QtQuick
 
 Text {
     id: root

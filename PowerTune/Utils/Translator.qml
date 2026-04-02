@@ -1,7 +1,7 @@
 // * PowerTune Translator singleton
 // * Provides translation functions for the entire application
 pragma Singleton
-import QtQuick 2.15
+import QtQuick
 import "Translator.js" as TranslatorJS
 
 QtObject {

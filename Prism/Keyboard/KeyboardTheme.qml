@@ -4,7 +4,7 @@
 // All colors use neutral grays (no blue/purple tint).
 // This file has no external dependencies so the module remains portable.
 pragma Singleton
-import QtQuick 2.15
+import QtQuick
 
 QtObject {
 

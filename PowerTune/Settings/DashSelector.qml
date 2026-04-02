@@ -1,7 +1,7 @@
 // Copyright (c) Kai Wyborny. All rights reserved.
-import QtQuick 2.15
-import QtQuick.Controls 2.15
-import QtQuick.Layouts 1.15
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
 import PowerTune.Settings 1.0
 import PowerTune.UI 1.0
 import PowerTune.Utils 1.0
