@@ -24,6 +24,7 @@
 #include "../Can/CanManager.h"
 #include "../Can/CanStartupManager.h"
 #include "../Can/CanTransport.h"
+#include "../Can/Protocols/PTExtenderCan.h"
 #include "../Hardware/Extender.h"
 #include "../Utils/Calculations.h"
 #include "../Utils/CalibrationHelper.h"
@@ -116,7 +117,8 @@ Connect::Connect(QObject *parent)
       m_updateManagerService(nullptr),
       m_canStartupManager(nullptr),
       m_canTransport(nullptr),
-      m_canManager(nullptr)
+      m_canManager(nullptr),
+      m_ptExtenderCan(nullptr)
 
 {
     // * Phase 2: Create domain data models
@@ -148,6 +150,9 @@ Connect::Connect(QObject *parent)
     m_canManager = new CanManager(this);
     m_canManager->setTransport(m_canTransport);
     m_canManager->registerModule(m_extender);
+    m_ptExtenderCan =
+        new PTExtenderCan(m_digitalInputs, m_expanderBoardData, m_vehicleData, m_connectionData, this);
+    m_canManager->registerModule(m_ptExtenderCan);
     m_steinhartCalc = new SteinhartCalculator(this);
     m_extender->setSteinhartCalculator(m_steinhartCalc);
     m_extender->connectCalibrationSignals();
@@ -156,11 +161,13 @@ Connect::Connect(QObject *parent)
     m_sensorRegistry->setAppSettings(m_appSettings);
     m_propertyRouter->setSensorRegistry(m_sensorRegistry);
     m_extender->setSensorRegistry(m_sensorRegistry);
+    m_ptExtenderCan->setSensorRegistry(m_sensorRegistry);
     m_diagnosticsProvider = new DiagnosticsProvider(this);
     m_diagnosticsProvider->setSensorRegistry(m_sensorRegistry);
     m_diagnosticsProvider->setPropertyRouter(m_propertyRouter);
     m_diagnosticsProvider->setAppSettings(m_appSettings);
     m_extender->setDiagnosticsProvider(m_diagnosticsProvider);
+    m_ptExtenderCan->setDiagnosticsProvider(m_diagnosticsProvider);
     connect(m_canStartupManager, &CanStartupManager::startupFailed, this, [this](const QString &reason) {
         if (m_diagnosticsProvider) {
             m_diagnosticsProvider->addLogMessage(QStringLiteral("ERROR"), reason);
@@ -204,21 +211,13 @@ Connect::Connect(QObject *parent)
     m_updateManagerService = new UpdateManagerService(this);
     m_overlayConfigDefaults = new OverlayConfigDefaults(this);
     m_overlayConfigDefaults->setAppSettings(m_appSettings);
-    // m_wifiscanner = new WifScanner(this);
-    // Use AppDataLocation instead of "/" to prevent QFileSystemModel from
-    // indexing the entire filesystem (saves 0.5-2GB+ RAM on macOS dev builds)
     QString mPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
     QDir().mkpath(mPath);  // Ensure the directory exists
-    // DIRECTORIES
     dirModel = new QFileSystemModel(this);
-    // Set filter
     dirModel->setFilter(QDir::NoDotAndDotDot | QDir::AllDirs);
-    // QFileSystemModel requires root path
     dirModel->setRootPath(mPath);
     fileModel = new QFileSystemModel(this);
-    // Set filter
     fileModel->setFilter(QDir::NoDotAndDotDot | QDir::Files);
-    // QFileSystemModel requires root path
     fileModel->setRootPath(mPath);
 
     QQmlApplicationEngine *engine = dynamic_cast<QQmlApplicationEngine *>(parent);

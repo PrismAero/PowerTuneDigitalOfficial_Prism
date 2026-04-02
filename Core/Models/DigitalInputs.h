@@ -3,7 +3,8 @@
  * @brief Digital input data model for PowerTune
  *
  * This class encapsulates digital I/O state data including:
- * - EXDigitalInput1-8 (expansion board)
+ * - EXDigitalInput1-8 (CAN ExBoard extender)
+ * - PTDigitalInput1-4 and PTRelay1-4 (PT_Extender CAN protocol)
  * - Frequency/RPM divider inputs
  *
  * Part of the DashBoard God Object refactoring (TODO-001)
@@ -26,6 +27,16 @@ class DigitalInputs : public QObject
     Q_PROPERTY(qreal EXDigitalInput6 READ EXDigitalInput6 WRITE setEXDigitalInput6 NOTIFY EXDigitalInput6Changed)
     Q_PROPERTY(qreal EXDigitalInput7 READ EXDigitalInput7 WRITE setEXDigitalInput7 NOTIFY EXDigitalInput7Changed)
     Q_PROPERTY(qreal EXDigitalInput8 READ EXDigitalInput8 WRITE setEXDigitalInput8 NOTIFY EXDigitalInput8Changed)
+    Q_PROPERTY(qreal PTDigitalInput1 READ PTDigitalInput1 WRITE setPTDigitalInput1 NOTIFY PTDigitalInput1Changed)
+    Q_PROPERTY(qreal PTDigitalInput2 READ PTDigitalInput2 WRITE setPTDigitalInput2 NOTIFY PTDigitalInput2Changed)
+    Q_PROPERTY(qreal PTDigitalInput3 READ PTDigitalInput3 WRITE setPTDigitalInput3 NOTIFY PTDigitalInput3Changed)
+    Q_PROPERTY(qreal PTDigitalInput4 READ PTDigitalInput4 WRITE setPTDigitalInput4 NOTIFY PTDigitalInput4Changed)
+
+    Q_PROPERTY(qreal PTRelay1 READ PTRelay1 WRITE setPTRelay1 NOTIFY PTRelay1Changed)
+    Q_PROPERTY(qreal PTRelay2 READ PTRelay2 WRITE setPTRelay2 NOTIFY PTRelay2Changed)
+    Q_PROPERTY(qreal PTRelay3 READ PTRelay3 WRITE setPTRelay3 NOTIFY PTRelay3Changed)
+    Q_PROPERTY(qreal PTRelay4 READ PTRelay4 WRITE setPTRelay4 NOTIFY PTRelay4Changed)
+    Q_PROPERTY(int PTRelayMask READ PTRelayMask WRITE setPTRelayMask NOTIFY PTRelayMaskChanged)
 
     Q_PROPERTY(qreal RPMFrequencyDividerDi1 READ RPMFrequencyDividerDi1 WRITE setRPMFrequencyDividerDi1 NOTIFY
                    RPMFrequencyDividerDi1Changed)
@@ -43,6 +54,16 @@ public:
     qreal EXDigitalInput6() const { return m_EXDigitalInput6; }
     qreal EXDigitalInput7() const { return m_EXDigitalInput7; }
     qreal EXDigitalInput8() const { return m_EXDigitalInput8; }
+    qreal PTDigitalInput1() const { return m_PTDigitalInput1; }
+    qreal PTDigitalInput2() const { return m_PTDigitalInput2; }
+    qreal PTDigitalInput3() const { return m_PTDigitalInput3; }
+    qreal PTDigitalInput4() const { return m_PTDigitalInput4; }
+
+    qreal PTRelay1() const { return m_PTRelay1; }
+    qreal PTRelay2() const { return m_PTRelay2; }
+    qreal PTRelay3() const { return m_PTRelay3; }
+    qreal PTRelay4() const { return m_PTRelay4; }
+    int PTRelayMask() const { return m_PTRelayMask; }
 
     qreal RPMFrequencyDividerDi1() const { return m_RPMFrequencyDividerDi1; }
     qreal frequencyDIEX1() const { return m_frequencyDIEX1; }
@@ -57,6 +78,16 @@ public slots:
     void setEXDigitalInput6(qreal EXDigitalInput6);
     void setEXDigitalInput7(qreal EXDigitalInput7);
     void setEXDigitalInput8(qreal EXDigitalInput8);
+    void setPTDigitalInput1(qreal PTDigitalInput1);
+    void setPTDigitalInput2(qreal PTDigitalInput2);
+    void setPTDigitalInput3(qreal PTDigitalInput3);
+    void setPTDigitalInput4(qreal PTDigitalInput4);
+
+    void setPTRelay1(qreal PTRelay1);
+    void setPTRelay2(qreal PTRelay2);
+    void setPTRelay3(qreal PTRelay3);
+    void setPTRelay4(qreal PTRelay4);
+    void setPTRelayMask(int PTRelayMask);
 
     void setRPMFrequencyDividerDi1(qreal RPMFrequencyDividerDi1);
     void setfrequencyDIEX1(qreal frequencyDIEX1);
@@ -71,6 +102,16 @@ signals:
     void EXDigitalInput6Changed(qreal EXDigitalInput6);
     void EXDigitalInput7Changed(qreal EXDigitalInput7);
     void EXDigitalInput8Changed(qreal EXDigitalInput8);
+    void PTDigitalInput1Changed(qreal PTDigitalInput1);
+    void PTDigitalInput2Changed(qreal PTDigitalInput2);
+    void PTDigitalInput3Changed(qreal PTDigitalInput3);
+    void PTDigitalInput4Changed(qreal PTDigitalInput4);
+
+    void PTRelay1Changed(qreal PTRelay1);
+    void PTRelay2Changed(qreal PTRelay2);
+    void PTRelay3Changed(qreal PTRelay3);
+    void PTRelay4Changed(qreal PTRelay4);
+    void PTRelayMaskChanged(int PTRelayMask);
 
     void RPMFrequencyDividerDi1Changed(qreal RPMFrequencyDividerDi1);
     void frequencyDIEX1Changed(qreal frequencyDIEX1);
@@ -85,6 +126,15 @@ private:
     qreal m_EXDigitalInput6 = 0;
     qreal m_EXDigitalInput7 = 0;
     qreal m_EXDigitalInput8 = 0;
+    qreal m_PTDigitalInput1 = 0;
+    qreal m_PTDigitalInput2 = 0;
+    qreal m_PTDigitalInput3 = 0;
+    qreal m_PTDigitalInput4 = 0;
+    qreal m_PTRelay1 = 0;
+    qreal m_PTRelay2 = 0;
+    qreal m_PTRelay3 = 0;
+    qreal m_PTRelay4 = 0;
+    int m_PTRelayMask = 0;
 
     qreal m_RPMFrequencyDividerDi1 = 0;
     qreal m_frequencyDIEX1 = 0;

@@ -65,6 +65,13 @@ SettingsPage {
     readonly property bool isExtenderOnly: ecuBackendMap[ecuSelect.currentIndex] === 5
     property bool loggerActive: false
     property bool settingsLoaded: false
+    readonly property string appVersionText: (Updater && Updater.currentVersion !== "") ? Updater.currentVersion : (Qt.application.version !== "" ? Qt.application.version : "0.0.0")
+    readonly property string buildVersionText: (typeof BuildVersion !== "undefined" && BuildVersion !== "") ? BuildVersion : appVersionText
+    readonly property string buildProfileText: (typeof BuildProfile !== "undefined" && BuildProfile !== "") ? BuildProfile : "release"
+    readonly property string buildDateText: (typeof BuildDateUtc !== "undefined" && BuildDateUtc !== "") ? BuildDateUtc : "unknown"
+    readonly property string buildCommitText: (typeof BuildCommit !== "undefined" && BuildCommit !== "") ? BuildCommit : "unknown"
+    readonly property string buildDependenciesText: (typeof BuildDependencies !== "undefined" && BuildDependencies !== "") ? BuildDependencies : "Qt 6.8.3, Yocto Scarthgap, meta-qt6"
+    readonly property string buildNotesText: (typeof BuildNotes !== "undefined" && BuildNotes !== "") ? BuildNotes : "No build notes provided."
 
     function applyLanguage() {
         AppSettings.writeLanguage(languageselect.currentIndex);
@@ -80,7 +87,7 @@ SettingsPage {
     function connectEcu() {
         Connect.setOdometer(odometer.text);
         Connect.setWeight(weight.text);
-        var backendIdx = ecuBackendMap[ecuSelect.currentIndex];
+        const backendIdx = ecuBackendMap[ecuSelect.currentIndex];
         Connect.openConnection("", backendIdx, baseadresstext.text, shiftlightbaseadresstext.text);
     }
 
@@ -89,7 +96,7 @@ SettingsPage {
     }
 
     function ecuDropdownFromBackend(backendIdx) {
-        for (var i = 0; i < ecuBackendMap.length; i++) {
+        for (let i = 0; i < ecuBackendMap.length; i++) {
             if (ecuBackendMap[i] === backendIdx)
                 return i;
         }
@@ -174,6 +181,102 @@ SettingsPage {
         }
 
         target: Engine
+    }
+
+    Popup {
+        id: buildInfoPopup
+
+        anchors.centerIn: Overlay.overlay
+        closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
+        modal: true
+        padding: SettingsTheme.sectionPadding
+        width: Math.min(root.width * 0.75, 780)
+
+        background: Rectangle {
+            border.color: SettingsTheme.border
+            border.width: SettingsTheme.borderWidth
+            color: SettingsTheme.cardBg
+            radius: SettingsTheme.radiusLarge
+        }
+
+        contentItem: ColumnLayout {
+            spacing: SettingsTheme.contentSpacing
+
+            Text {
+                Layout.fillWidth: true
+                color: SettingsTheme.textPrimary
+                font.family: SettingsTheme.fontFamily
+                font.pixelSize: SettingsTheme.fontSectionTitle
+                font.weight: Font.Bold
+                text: Translator.translate("Build Information", Settings.language)
+            }
+
+            Text {
+                Layout.fillWidth: true
+                color: SettingsTheme.textSecondary
+                font.family: SettingsTheme.fontFamily
+                font.pixelSize: SettingsTheme.fontStatus
+                text: "Software: " + root.buildVersionText + " | Platform: " + (Connection.Platform || "Unknown")
+            }
+
+            Text {
+                Layout.fillWidth: true
+                color: SettingsTheme.textSecondary
+                font.family: SettingsTheme.fontFamilyMono
+                font.pixelSize: SettingsTheme.fontStatus
+                text: "Build Profile: " + root.buildProfileText + "\nBuild Date UTC: " + root.buildDateText + "\nCommit: " + root.buildCommitText + "\nQt Runtime: " + Qt.version
+                wrapMode: Text.WordWrap
+            }
+
+            Text {
+                Layout.fillWidth: true
+                color: SettingsTheme.textPrimary
+                font.family: SettingsTheme.fontFamily
+                font.pixelSize: SettingsTheme.fontLabel
+                text: Translator.translate("Dependencies", Settings.language)
+            }
+
+            Text {
+                Layout.fillWidth: true
+                color: SettingsTheme.textSecondary
+                font.family: SettingsTheme.fontFamily
+                font.pixelSize: SettingsTheme.fontStatus
+                text: root.buildDependenciesText
+                wrapMode: Text.WordWrap
+            }
+
+            Text {
+                Layout.fillWidth: true
+                color: SettingsTheme.textPrimary
+                font.family: SettingsTheme.fontFamily
+                font.pixelSize: SettingsTheme.fontLabel
+                text: Translator.translate("Notes", Settings.language)
+            }
+
+            ScrollView {
+                Layout.fillWidth: true
+                Layout.preferredHeight: 150
+
+                TextArea {
+                    color: SettingsTheme.textSecondary
+                    font.family: SettingsTheme.fontFamily
+                    font.pixelSize: SettingsTheme.fontStatus
+                    readOnly: true
+                    text: root.buildNotesText
+                    wrapMode: TextEdit.WordWrap
+                }
+            }
+
+            RowLayout {
+                Layout.alignment: Qt.AlignRight
+
+                StyledButton {
+                    primary: false
+                    text: Translator.translate("Close", Settings.language)
+                    onClicked: buildInfoPopup.close()
+                }
+            }
+        }
     }
 
     RowLayout {
@@ -392,11 +495,22 @@ SettingsPage {
                 MainSettingsRow {
                     label: "Version"
 
-                    Text {
-                        color: SettingsTheme.textSecondary
-                        font.family: SettingsTheme.fontFamilyMono
-                        font.pixelSize: SettingsTheme.fontStatus
-                        text: "V 1.99F " + Connection.Platform
+                    RowLayout {
+                        Layout.fillWidth: true
+                        spacing: SettingsTheme.controlGap
+
+                        Text {
+                            color: SettingsTheme.textSecondary
+                            font.family: SettingsTheme.fontFamilyMono
+                            font.pixelSize: SettingsTheme.fontStatus
+                            text: root.appVersionText + " (" + (Connection.Platform || "Unknown") + ")"
+                        }
+
+                        StyledButton {
+                            primary: false
+                            text: Translator.translate("Info", Settings.language)
+                            onClicked: buildInfoPopup.open()
+                        }
                     }
                 }
 

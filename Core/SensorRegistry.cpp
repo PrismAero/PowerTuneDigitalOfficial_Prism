@@ -444,6 +444,47 @@ void SensorRegistry::refreshExtenderDigitalInputs()
         m_sensors.insert(freqEntry.key, freqEntry);
     }
 
+    for (int i = 1; i <= 4; ++i) {
+        SensorEntry ptDiEntry;
+        ptDiEntry.key = QStringLiteral("PTDigitalInput%1").arg(i);
+        ptDiEntry.displayName = QStringLiteral("PT Digital %1").arg(i);
+        ptDiEntry.category = QStringLiteral("PT Extender");
+        ptDiEntry.unit = QString();
+        ptDiEntry.source = SensorSource::ExtenderDigital;
+        ptDiEntry.active = false;
+        ptDiEntry.lastActiveTimestamp = 0;
+        ptDiEntry.decimals = 0;
+        ptDiEntry.maxValue = 1.0;
+        ptDiEntry.stepSize = 1.0;
+        m_sensors.insert(ptDiEntry.key, ptDiEntry);
+
+        SensorEntry ptRelayEntry;
+        ptRelayEntry.key = QStringLiteral("PTRelay%1").arg(i);
+        ptRelayEntry.displayName = QStringLiteral("PT Relay %1").arg(i);
+        ptRelayEntry.category = QStringLiteral("PT Extender");
+        ptRelayEntry.unit = QString();
+        ptRelayEntry.source = SensorSource::ExtenderDigital;
+        ptRelayEntry.active = false;
+        ptRelayEntry.lastActiveTimestamp = 0;
+        ptRelayEntry.decimals = 0;
+        ptRelayEntry.maxValue = 1.0;
+        ptRelayEntry.stepSize = 1.0;
+        m_sensors.insert(ptRelayEntry.key, ptRelayEntry);
+    }
+
+    SensorEntry ptRelayMask;
+    ptRelayMask.key = QStringLiteral("PTRelayMask");
+    ptRelayMask.displayName = QStringLiteral("PT Relay Mask");
+    ptRelayMask.category = QStringLiteral("PT Extender");
+    ptRelayMask.unit = QString();
+    ptRelayMask.source = SensorSource::ExtenderDigital;
+    ptRelayMask.active = false;
+    ptRelayMask.lastActiveTimestamp = 0;
+    ptRelayMask.decimals = 0;
+    ptRelayMask.maxValue = 15.0;
+    ptRelayMask.stepSize = 1.0;
+    m_sensors.insert(ptRelayMask.key, ptRelayMask);
+
     scheduleSensorsChanged();
 }
 

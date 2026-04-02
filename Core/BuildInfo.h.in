@@ -1,0 +1,11 @@
+#ifndef POWERTUNE_BUILD_INFO_H
+#define POWERTUNE_BUILD_INFO_H
+
+static constexpr const char *kPowerTuneVersionLabel = "@POWERTUNE_VERSION_LABEL@";
+static constexpr const char *kPowerTuneBuildProfile = "@POWERTUNE_BUILD_PROFILE@";
+static constexpr const char *kPowerTuneBuildDateUtc = "@POWERTUNE_BUILD_DATE_UTC@";
+static constexpr const char *kPowerTuneGitCommit = "@POWERTUNE_GIT_COMMIT@";
+static constexpr const char *kPowerTuneBuildDependencies = "@POWERTUNE_BUILD_DEPENDENCIES@";
+static constexpr const char *kPowerTuneBuildNotes = "@POWERTUNE_BUILD_NOTES@";
+
+#endif  // POWERTUNE_BUILD_INFO_H

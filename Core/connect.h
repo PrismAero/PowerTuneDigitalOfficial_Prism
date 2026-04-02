@@ -63,6 +63,7 @@ class UpdateManagerService;
 class CanStartupManager;
 class CanTransport;
 class CanManager;
+class PTExtenderCan;
 
 class Connect : public QObject
 {
@@ -162,6 +163,7 @@ private:
     CanStartupManager *m_canStartupManager;
     CanTransport *m_canTransport;
     CanManager *m_canManager;
+    PTExtenderCan *m_ptExtenderCan;
     BrightnessMethod m_brightnessMethod = BrightnessMethod::None;
 
     int m_ecu = 0;

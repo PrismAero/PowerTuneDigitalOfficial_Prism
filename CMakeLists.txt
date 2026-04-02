@@ -10,6 +10,31 @@ project(PowerTuneQMLGui
     LANGUAGES CXX
 )
 
+# * Build metadata exposed to runtime UI
+set(POWERTUNE_VERSION_LABEL "1.5.9 Beta Unreleased" CACHE STRING "Runtime application version label")
+set(POWERTUNE_BUILD_PROFILE "${CMAKE_BUILD_TYPE}" CACHE STRING "Build profile label")
+if(POWERTUNE_BUILD_PROFILE STREQUAL "")
+    set(POWERTUNE_BUILD_PROFILE "Release")
+endif()
+string(TIMESTAMP POWERTUNE_BUILD_DATE_UTC "%Y-%m-%dT%H:%M:%SZ" UTC)
+execute_process(
+    COMMAND git rev-parse --short=12 HEAD
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    OUTPUT_VARIABLE POWERTUNE_GIT_COMMIT
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    ERROR_QUIET
+)
+if(POWERTUNE_GIT_COMMIT STREQUAL "")
+    set(POWERTUNE_GIT_COMMIT "unknown")
+endif()
+set(POWERTUNE_BUILD_DEPENDENCIES "Qt ${QT_VERSION}; Yocto Scarthgap; meta-qt6" CACHE STRING "Dependency summary")
+set(POWERTUNE_BUILD_NOTES "Beta unreleased build." CACHE STRING "Build notes shown in settings UI")
+configure_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/Core/BuildInfo.h.in
+    ${CMAKE_CURRENT_BINARY_DIR}/generated/BuildInfo.h
+    @ONLY
+)
+
 # * C++ Standard Configuration
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -96,6 +121,7 @@ set(CAN_SOURCES
     Can/CanTransport.cpp
     Can/CanManager.cpp
     Can/Protocols/ExBoardCan.cpp
+    Can/Protocols/PTExtenderCan.cpp
 )
 
 set(CAN_HEADERS
@@ -104,6 +130,7 @@ set(CAN_HEADERS
     Can/CanTransport.h
     Can/CanManager.h
     Can/Protocols/ExBoardCan.h
+    Can/Protocols/PTExtenderCan.h
 )
 
 # * Source files - Hardware interfaces
@@ -164,6 +191,7 @@ qt_add_executable(${PROJECT_NAME}
 # * Include directories
 target_include_directories(${PROJECT_NAME} PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_CURRENT_BINARY_DIR}/generated
     ${CMAKE_CURRENT_SOURCE_DIR}/Can
     ${CMAKE_CURRENT_SOURCE_DIR}/Core
     ${CMAKE_CURRENT_SOURCE_DIR}/Hardware

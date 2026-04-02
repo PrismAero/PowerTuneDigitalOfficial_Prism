@@ -65,6 +65,70 @@ void DigitalInputs::setEXDigitalInput8(qreal EXDigitalInput8)
         emit EXDigitalInput8Changed(EXDigitalInput8);
     }
 }
+void DigitalInputs::setPTDigitalInput1(qreal PTDigitalInput1)
+{
+    if (m_PTDigitalInput1 != PTDigitalInput1) {
+        m_PTDigitalInput1 = PTDigitalInput1;
+        emit PTDigitalInput1Changed(PTDigitalInput1);
+    }
+}
+void DigitalInputs::setPTDigitalInput2(qreal PTDigitalInput2)
+{
+    if (m_PTDigitalInput2 != PTDigitalInput2) {
+        m_PTDigitalInput2 = PTDigitalInput2;
+        emit PTDigitalInput2Changed(PTDigitalInput2);
+    }
+}
+void DigitalInputs::setPTDigitalInput3(qreal PTDigitalInput3)
+{
+    if (m_PTDigitalInput3 != PTDigitalInput3) {
+        m_PTDigitalInput3 = PTDigitalInput3;
+        emit PTDigitalInput3Changed(PTDigitalInput3);
+    }
+}
+void DigitalInputs::setPTDigitalInput4(qreal PTDigitalInput4)
+{
+    if (m_PTDigitalInput4 != PTDigitalInput4) {
+        m_PTDigitalInput4 = PTDigitalInput4;
+        emit PTDigitalInput4Changed(PTDigitalInput4);
+    }
+}
+
+void DigitalInputs::setPTRelay1(qreal PTRelay1)
+{
+    if (m_PTRelay1 != PTRelay1) {
+        m_PTRelay1 = PTRelay1;
+        emit PTRelay1Changed(PTRelay1);
+    }
+}
+void DigitalInputs::setPTRelay2(qreal PTRelay2)
+{
+    if (m_PTRelay2 != PTRelay2) {
+        m_PTRelay2 = PTRelay2;
+        emit PTRelay2Changed(PTRelay2);
+    }
+}
+void DigitalInputs::setPTRelay3(qreal PTRelay3)
+{
+    if (m_PTRelay3 != PTRelay3) {
+        m_PTRelay3 = PTRelay3;
+        emit PTRelay3Changed(PTRelay3);
+    }
+}
+void DigitalInputs::setPTRelay4(qreal PTRelay4)
+{
+    if (m_PTRelay4 != PTRelay4) {
+        m_PTRelay4 = PTRelay4;
+        emit PTRelay4Changed(PTRelay4);
+    }
+}
+void DigitalInputs::setPTRelayMask(int PTRelayMask)
+{
+    if (m_PTRelayMask != PTRelayMask) {
+        m_PTRelayMask = PTRelayMask;
+        emit PTRelayMaskChanged(PTRelayMask);
+    }
+}
 
 void DigitalInputs::setRPMFrequencyDividerDi1(qreal RPMFrequencyDividerDi1)
 {
