@@ -44,7 +44,6 @@ int main(int argc, char *argv[])
     engine.rootContext()->setContextProperty("DLM", new DownloadManager(&engine));
     engine.rootContext()->setContextProperty("Connect", new Connect(&engine));
     // * Load main QML from PowerTune.Core module
-    // ! Resource path includes both prefix and source path due to qt_add_qml_module behavior
-    engine.load(QUrl(QStringLiteral("qrc:/qt/qml/PowerTune/Core/PowerTune/Core/Main.qml")));
+    engine.load(QUrl(QStringLiteral("qrc:/qt/qml/PowerTune/Core/Main.qml")));
     return app.exec();
 }

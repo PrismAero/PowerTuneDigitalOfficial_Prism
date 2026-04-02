@@ -8,11 +8,11 @@ SettingsPage {
     id: root
 
     property bool exEnabled: AppSettings.getValue("ui/exboard/enabled", true)
-    property bool ptEnabled: AppSettings.getValue("ui/ptextender/enabled", false)
+    property bool ptEnabled: AppSettings.getValue("ui/ptextender/enabled", true)
 
     Component.onCompleted: {
         exEnabled = AppSettings.getValue("ui/exboard/enabled", true);
-        ptEnabled = AppSettings.getValue("ui/ptextender/enabled", false);
+        ptEnabled = AppSettings.getValue("ui/ptextender/enabled", true);
     }
 
     ScrollView {

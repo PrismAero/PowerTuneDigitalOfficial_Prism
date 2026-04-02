@@ -70,7 +70,11 @@
             "name": "windows-base",
             "hidden": true,
             "inherits": "default",
-            "generator": "Ninja",
+            "generator": "Visual Studio 17 2022",
+            "architecture": {
+                "value": "x64",
+                "strategy": "set"
+            },
             "cacheVariables": {
                 "CMAKE_PREFIX_PATH": "$env{POWERTUNE_QT_PREFIX}"
             },
@@ -84,19 +88,13 @@
             "name": "windows-debug",
             "displayName": "Windows (Debug)",
             "description": "Windows debug build. Requires POWERTUNE_QT_PREFIX to point at a Qt 6 kit.",
-            "inherits": "windows-base",
-            "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Debug"
-            }
+            "inherits": "windows-base"
         },
         {
             "name": "windows-release",
             "displayName": "Windows (Release)",
             "description": "Windows release build. Requires POWERTUNE_QT_PREFIX to point at a Qt 6 kit.",
-            "inherits": "windows-base",
-            "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Release"
-            }
+            "inherits": "windows-base"
         },
         {
             "name": "raspberry-pi",
@@ -124,11 +122,25 @@
         },
         {
             "name": "windows-debug",
-            "configurePreset": "windows-debug"
+            "configurePreset": "windows-debug",
+            "configuration": "Debug",
+            "nativeToolOptions": [
+                "/m"
+            ],
+            "environment": {
+                "CMAKE_BUILD_PARALLEL_LEVEL": "$penv{NUMBER_OF_PROCESSORS}"
+            }
         },
         {
             "name": "windows-release",
-            "configurePreset": "windows-release"
+            "configurePreset": "windows-release",
+            "configuration": "Release",
+            "nativeToolOptions": [
+                "/m"
+            ],
+            "environment": {
+                "CMAKE_BUILD_PARALLEL_LEVEL": "$penv{NUMBER_OF_PROCESSORS}"
+            }
         }
     ]
 }

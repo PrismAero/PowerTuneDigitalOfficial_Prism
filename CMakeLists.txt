@@ -44,6 +44,12 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
+# * Silence optional Vulkan wrapper probe noise on Windows when Vulkan SDK
+# * headers are not installed. This project does not require Vulkan.
+if(WIN32)
+    set(CMAKE_DISABLE_FIND_PACKAGE_WrapVulkanHeaders ON)
+endif()
+
 # * Find Qt 6 packages
 find_package(Qt6 REQUIRED COMPONENTS
     Core
@@ -212,9 +218,39 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     Qt6::Multimedia
 )
 
+if(WIN32)
+    set(_powertune_windeployqt "")
+
+    if(DEFINED ENV{POWERTUNE_QT_PREFIX} AND EXISTS "$ENV{POWERTUNE_QT_PREFIX}/bin/windeployqt.exe")
+        set(_powertune_windeployqt "$ENV{POWERTUNE_QT_PREFIX}/bin/windeployqt.exe")
+    else()
+        get_target_property(_qt_qmake_path Qt6::qmake IMPORTED_LOCATION)
+        if(_qt_qmake_path)
+            get_filename_component(_qt_bin_dir "${_qt_qmake_path}" DIRECTORY)
+            if(EXISTS "${_qt_bin_dir}/windeployqt.exe")
+                set(_powertune_windeployqt "${_qt_bin_dir}/windeployqt.exe")
+            endif()
+        endif()
+    endif()
+
+    if(_powertune_windeployqt)
+        add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+            COMMAND "${_powertune_windeployqt}"
+                    "$<$<CONFIG:Debug>:--debug>"
+                    "$<$<NOT:$<CONFIG:Debug>>:--release>"
+                    --qmldir "${CMAKE_CURRENT_SOURCE_DIR}"
+                    "$<TARGET_FILE:${PROJECT_NAME}>"
+            COMMENT "Deploying Qt runtime with windeployqt"
+            VERBATIM
+        )
+    else()
+        message(WARNING "windeployqt.exe not found. Set POWERTUNE_QT_PREFIX to enable automatic Windows deployment.")
+    endif()
+endif()
+
 # * PowerTune QML Sub-Modules
 # * Provides organized imports: PowerTune.Core, PowerTune.Settings, PowerTune.Gauges, PowerTune.Utils
-qt_policy(SET QTP0004 OLD)
+qt_policy(SET QTP0004 NEW)
     
     # * Define singletons
     set_source_files_properties(PowerTune/Utils/Translator.qml PROPERTIES

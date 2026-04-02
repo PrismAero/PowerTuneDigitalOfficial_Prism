@@ -127,7 +127,7 @@ SettingsPage {
         odometer.text = AppSettings.getValue("ui/odometer", "0");
         tripmeter.text = AppSettings.getValue("ui/tripmeter", "0");
         exboardEnabledSwitch.checked = AppSettings.getValue("ui/exboard/enabled", true);
-        ptEnabledSwitch.checked = AppSettings.getValue("ui/ptextender/enabled", false);
+        ptEnabledSwitch.checked = AppSettings.getValue("ui/ptextender/enabled", true);
         baseadresstext.text = AppSettings.getValue("ui/extenderCanBase", "");
         shiftlightbaseadresstext.text = AppSettings.getValue("ui/shiftLightCanBase", "");
         ptextenderbaseadresstext.text = AppSettings.getValue("ui/ptextender/canBase", "");

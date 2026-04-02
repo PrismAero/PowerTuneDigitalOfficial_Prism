@@ -667,7 +667,7 @@ bool Connect::startCanModules()
         return false;
 
     const bool exEnabled = m_appSettings ? m_appSettings->getValue(QStringLiteral("ui/exboard/enabled"), true).toBool() : true;
-    const bool ptEnabled = m_appSettings ? m_appSettings->getValue(QStringLiteral("ui/ptextender/enabled"), false).toBool() : false;
+    const bool ptEnabled = m_appSettings ? m_appSettings->getValue(QStringLiteral("ui/ptextender/enabled"), true).toBool() : true;
     if (!exEnabled && !ptEnabled)
         return false;
 

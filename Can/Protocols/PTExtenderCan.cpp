@@ -306,34 +306,34 @@ void PTExtenderCan::onFrameReceived(const QCanBusFrame &frame)
         const int byte5 = static_cast<unsigned char>(payload[5]);
         const int byte6 = static_cast<unsigned char>(payload[6]);
         const int byte7 = static_cast<unsigned char>(payload[7]);
-        bool ioStatusChanged = false;
+        bool ioStatusDirty = false;
         if (m_ioState != byte2) {
             m_ioState = byte2;
-            ioStatusChanged = true;
+            ioStatusDirty = true;
         }
         if (m_ioFault != byte3) {
             m_ioFault = byte3;
-            ioStatusChanged = true;
+            ioStatusDirty = true;
         }
         if (m_relayFollowerMask != (byte4 & 0x0F)) {
             m_relayFollowerMask = byte4 & 0x0F;
-            ioStatusChanged = true;
+            ioStatusDirty = true;
         }
         if (m_relayInvertMask != ((byte4 >> 4) & 0x0F)) {
             m_relayInvertMask = (byte4 >> 4) & 0x0F;
-            ioStatusChanged = true;
+            ioStatusDirty = true;
         }
         if (m_relayBoundTargetsPacked != byte5) {
             m_relayBoundTargetsPacked = byte5;
-            ioStatusChanged = true;
+            ioStatusDirty = true;
         }
         if (m_dfiChecksumErrors != byte6) {
             m_dfiChecksumErrors = byte6;
-            ioStatusChanged = true;
+            ioStatusDirty = true;
         }
         if (m_canTxErrors != byte7) {
             m_canTxErrors = byte7;
-            ioStatusChanged = true;
+            ioStatusDirty = true;
         }
         if (m_digitalInputs) {
             const int byte0 = static_cast<unsigned char>(payload[0]);
@@ -370,7 +370,7 @@ void PTExtenderCan::onFrameReceived(const QCanBusFrame &frame)
             m_sensorRegistry->markCanSensorActive(QStringLiteral("PTRelayInvertMask"));
             m_sensorRegistry->markCanSensorActive(QStringLiteral("PTRelayBoundTargetsPacked"));
         }
-        if (ioStatusChanged)
+        if (ioStatusDirty)
             emit ioStatusChanged();
     } else if (frameId == m_ledAddress) {
         const int systemR = static_cast<unsigned char>(payload[0]);

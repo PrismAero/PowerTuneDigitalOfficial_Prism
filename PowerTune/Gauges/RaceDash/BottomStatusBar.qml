@@ -53,8 +53,10 @@ Item {
         dfiCodeTicker.running = dfiCodeRows.length > 1;
     }
 
-    Component.onCompleted: updateTime()
-    Component.onCompleted: refreshDfiCodes()
+    Component.onCompleted: {
+        updateTime();
+        refreshDfiCodes();
+    }
     onCenterTextChanged: refreshDfiCodes()
 
     Timer {
