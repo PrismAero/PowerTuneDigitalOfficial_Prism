@@ -36,7 +36,7 @@
 #include "DiagnosticsProvider.h"
 #include "DashboardLockService.h"
 #include "DemoModeService.h"
-#include "DifferentialSensorCalc.h"
+#include "../Utils/DifferentialSensorCalc.h"
 #include "ExBoardConfigManager.h"
 #include "PTExtenderConfigManager.h"
 #include "Models/CanFrameModel.h"

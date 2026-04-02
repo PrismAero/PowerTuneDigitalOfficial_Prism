@@ -1,7 +1,7 @@
 #include "DifferentialSensorCalc.h"
 
-#include "Models/ExpanderBoardData.h"
-#include "SensorRegistry.h"
+#include "../Core/Models/ExpanderBoardData.h"
+#include "../Core/SensorRegistry.h"
 
 #include <QtMath>
 

@@ -83,7 +83,7 @@ set(CORE_SOURCES
     src/Core/PropertyRouter.cpp
     src/Core/SensorRegistry.cpp
     src/Core/DiagnosticsProvider.cpp
-    src/Core/DifferentialSensorCalc.cpp
+    src/Utils/DifferentialSensorCalc.cpp
     src/Core/Config/ExBoardConfigManager.cpp
     src/Core/Config/PTExtenderConfigManager.cpp
     src/Core/Services/DemoModeService.cpp
@@ -110,7 +110,7 @@ set(CORE_HEADERS
     src/Core/PropertyRouter.h
     src/Core/SensorRegistry.h
     src/Core/DiagnosticsProvider.h
-    src/Core/DifferentialSensorCalc.h
+    src/Utils/DifferentialSensorCalc.h
     src/Core/Config/ExBoardConfigManager.h
     src/Core/Config/PTExtenderConfigManager.h
     src/Core/Services/DemoModeService.h
