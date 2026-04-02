@@ -37,6 +37,13 @@ class DigitalInputs : public QObject
     Q_PROPERTY(qreal PTRelay3 READ PTRelay3 WRITE setPTRelay3 NOTIFY PTRelay3Changed)
     Q_PROPERTY(qreal PTRelay4 READ PTRelay4 WRITE setPTRelay4 NOTIFY PTRelay4Changed)
     Q_PROPERTY(int PTRelayMask READ PTRelayMask WRITE setPTRelayMask NOTIFY PTRelayMaskChanged)
+    Q_PROPERTY(int PTSystemState READ PTSystemState WRITE setPTSystemState NOTIFY PTSystemStateChanged)
+    Q_PROPERTY(int PTSystemFault READ PTSystemFault WRITE setPTSystemFault NOTIFY PTSystemFaultChanged)
+    Q_PROPERTY(int PTDfiChecksumErrors READ PTDfiChecksumErrors WRITE setPTDfiChecksumErrors NOTIFY PTDfiChecksumErrorsChanged)
+    Q_PROPERTY(int PTCanTxErrors READ PTCanTxErrors WRITE setPTCanTxErrors NOTIFY PTCanTxErrorsChanged)
+    Q_PROPERTY(int PTRelayFollowerMask READ PTRelayFollowerMask WRITE setPTRelayFollowerMask NOTIFY PTRelayFollowerMaskChanged)
+    Q_PROPERTY(int PTRelayInvertMask READ PTRelayInvertMask WRITE setPTRelayInvertMask NOTIFY PTRelayInvertMaskChanged)
+    Q_PROPERTY(int PTRelayBoundTargetsPacked READ PTRelayBoundTargetsPacked WRITE setPTRelayBoundTargetsPacked NOTIFY PTRelayBoundTargetsPackedChanged)
 
     Q_PROPERTY(qreal RPMFrequencyDividerDi1 READ RPMFrequencyDividerDi1 WRITE setRPMFrequencyDividerDi1 NOTIFY
                    RPMFrequencyDividerDi1Changed)
@@ -64,6 +71,13 @@ public:
     qreal PTRelay3() const { return m_PTRelay3; }
     qreal PTRelay4() const { return m_PTRelay4; }
     int PTRelayMask() const { return m_PTRelayMask; }
+    int PTSystemState() const { return m_PTSystemState; }
+    int PTSystemFault() const { return m_PTSystemFault; }
+    int PTDfiChecksumErrors() const { return m_PTDfiChecksumErrors; }
+    int PTCanTxErrors() const { return m_PTCanTxErrors; }
+    int PTRelayFollowerMask() const { return m_PTRelayFollowerMask; }
+    int PTRelayInvertMask() const { return m_PTRelayInvertMask; }
+    int PTRelayBoundTargetsPacked() const { return m_PTRelayBoundTargetsPacked; }
 
     qreal RPMFrequencyDividerDi1() const { return m_RPMFrequencyDividerDi1; }
     qreal frequencyDIEX1() const { return m_frequencyDIEX1; }
@@ -88,6 +102,13 @@ public slots:
     void setPTRelay3(qreal PTRelay3);
     void setPTRelay4(qreal PTRelay4);
     void setPTRelayMask(int PTRelayMask);
+    void setPTSystemState(int PTSystemState);
+    void setPTSystemFault(int PTSystemFault);
+    void setPTDfiChecksumErrors(int PTDfiChecksumErrors);
+    void setPTCanTxErrors(int PTCanTxErrors);
+    void setPTRelayFollowerMask(int PTRelayFollowerMask);
+    void setPTRelayInvertMask(int PTRelayInvertMask);
+    void setPTRelayBoundTargetsPacked(int PTRelayBoundTargetsPacked);
 
     void setRPMFrequencyDividerDi1(qreal RPMFrequencyDividerDi1);
     void setfrequencyDIEX1(qreal frequencyDIEX1);
@@ -112,6 +133,13 @@ signals:
     void PTRelay3Changed(qreal PTRelay3);
     void PTRelay4Changed(qreal PTRelay4);
     void PTRelayMaskChanged(int PTRelayMask);
+    void PTSystemStateChanged(int PTSystemState);
+    void PTSystemFaultChanged(int PTSystemFault);
+    void PTDfiChecksumErrorsChanged(int PTDfiChecksumErrors);
+    void PTCanTxErrorsChanged(int PTCanTxErrors);
+    void PTRelayFollowerMaskChanged(int PTRelayFollowerMask);
+    void PTRelayInvertMaskChanged(int PTRelayInvertMask);
+    void PTRelayBoundTargetsPackedChanged(int PTRelayBoundTargetsPacked);
 
     void RPMFrequencyDividerDi1Changed(qreal RPMFrequencyDividerDi1);
     void frequencyDIEX1Changed(qreal frequencyDIEX1);
@@ -135,6 +163,13 @@ private:
     qreal m_PTRelay3 = 0;
     qreal m_PTRelay4 = 0;
     int m_PTRelayMask = 0;
+    int m_PTSystemState = 0;
+    int m_PTSystemFault = 0;
+    int m_PTDfiChecksumErrors = 0;
+    int m_PTCanTxErrors = 0;
+    int m_PTRelayFollowerMask = 0;
+    int m_PTRelayInvertMask = 0;
+    int m_PTRelayBoundTargetsPacked = 0;
 
     qreal m_RPMFrequencyDividerDi1 = 0;
     qreal m_frequencyDIEX1 = 0;

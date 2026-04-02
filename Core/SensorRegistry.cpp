@@ -485,6 +485,97 @@ void SensorRegistry::refreshExtenderDigitalInputs()
     ptRelayMask.stepSize = 1.0;
     m_sensors.insert(ptRelayMask.key, ptRelayMask);
 
+    SensorEntry ptState;
+    ptState.key = QStringLiteral("PTSystemState");
+    ptState.displayName = QStringLiteral("PT System State");
+    ptState.category = QStringLiteral("PT Extender");
+    ptState.unit = QString();
+    ptState.source = SensorSource::ExtenderDigital;
+    ptState.active = false;
+    ptState.lastActiveTimestamp = 0;
+    ptState.decimals = 0;
+    ptState.maxValue = 255.0;
+    ptState.stepSize = 1.0;
+    m_sensors.insert(ptState.key, ptState);
+
+    SensorEntry ptFault;
+    ptFault.key = QStringLiteral("PTSystemFault");
+    ptFault.displayName = QStringLiteral("PT System Fault");
+    ptFault.category = QStringLiteral("PT Extender");
+    ptFault.unit = QString();
+    ptFault.source = SensorSource::ExtenderDigital;
+    ptFault.active = false;
+    ptFault.lastActiveTimestamp = 0;
+    ptFault.decimals = 0;
+    ptFault.maxValue = 255.0;
+    ptFault.stepSize = 1.0;
+    m_sensors.insert(ptFault.key, ptFault);
+
+    SensorEntry ptDfiErr;
+    ptDfiErr.key = QStringLiteral("PTDfiChecksumErrors");
+    ptDfiErr.displayName = QStringLiteral("PT DFI Checksum Errors");
+    ptDfiErr.category = QStringLiteral("PT Extender");
+    ptDfiErr.unit = QString();
+    ptDfiErr.source = SensorSource::ExtenderDigital;
+    ptDfiErr.active = false;
+    ptDfiErr.lastActiveTimestamp = 0;
+    ptDfiErr.decimals = 0;
+    ptDfiErr.maxValue = 255.0;
+    ptDfiErr.stepSize = 1.0;
+    m_sensors.insert(ptDfiErr.key, ptDfiErr);
+
+    SensorEntry ptCanErr;
+    ptCanErr.key = QStringLiteral("PTCanTxErrors");
+    ptCanErr.displayName = QStringLiteral("PT CAN TX Errors");
+    ptCanErr.category = QStringLiteral("PT Extender");
+    ptCanErr.unit = QString();
+    ptCanErr.source = SensorSource::ExtenderDigital;
+    ptCanErr.active = false;
+    ptCanErr.lastActiveTimestamp = 0;
+    ptCanErr.decimals = 0;
+    ptCanErr.maxValue = 255.0;
+    ptCanErr.stepSize = 1.0;
+    m_sensors.insert(ptCanErr.key, ptCanErr);
+
+    SensorEntry ptFollowerMask;
+    ptFollowerMask.key = QStringLiteral("PTRelayFollowerMask");
+    ptFollowerMask.displayName = QStringLiteral("PT Relay Follower Mask");
+    ptFollowerMask.category = QStringLiteral("PT Extender");
+    ptFollowerMask.unit = QString();
+    ptFollowerMask.source = SensorSource::ExtenderDigital;
+    ptFollowerMask.active = false;
+    ptFollowerMask.lastActiveTimestamp = 0;
+    ptFollowerMask.decimals = 0;
+    ptFollowerMask.maxValue = 15.0;
+    ptFollowerMask.stepSize = 1.0;
+    m_sensors.insert(ptFollowerMask.key, ptFollowerMask);
+
+    SensorEntry ptInvertMask;
+    ptInvertMask.key = QStringLiteral("PTRelayInvertMask");
+    ptInvertMask.displayName = QStringLiteral("PT Relay Invert Mask");
+    ptInvertMask.category = QStringLiteral("PT Extender");
+    ptInvertMask.unit = QString();
+    ptInvertMask.source = SensorSource::ExtenderDigital;
+    ptInvertMask.active = false;
+    ptInvertMask.lastActiveTimestamp = 0;
+    ptInvertMask.decimals = 0;
+    ptInvertMask.maxValue = 15.0;
+    ptInvertMask.stepSize = 1.0;
+    m_sensors.insert(ptInvertMask.key, ptInvertMask);
+
+    SensorEntry ptBoundPack;
+    ptBoundPack.key = QStringLiteral("PTRelayBoundTargetsPacked");
+    ptBoundPack.displayName = QStringLiteral("PT Relay Bound Targets");
+    ptBoundPack.category = QStringLiteral("PT Extender");
+    ptBoundPack.unit = QString();
+    ptBoundPack.source = SensorSource::ExtenderDigital;
+    ptBoundPack.active = false;
+    ptBoundPack.lastActiveTimestamp = 0;
+    ptBoundPack.decimals = 0;
+    ptBoundPack.maxValue = 255.0;
+    ptBoundPack.stepSize = 1.0;
+    m_sensors.insert(ptBoundPack.key, ptBoundPack);
+
     scheduleSensorsChanged();
 }
 

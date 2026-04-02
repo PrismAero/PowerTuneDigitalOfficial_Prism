@@ -57,12 +57,12 @@ SettingsPage {
 
     property int connected: 0
     property int currentLanguage: (Settings && Settings.language !== undefined) ? Settings.language : 0
-    readonly property var ecuBackendMap: [5]
+    readonly property var ecuBackendMap: [5, 6]
     property bool autoConnectAttempted: false
     property bool autoConnectEnabled: false
     property int hexstring: 0
     property int hexstring2: 0
-    readonly property bool isExtenderOnly: ecuBackendMap[ecuSelect.currentIndex] === 5
+    readonly property bool isExtenderOnly: ecuBackendMap[ecuSelect.currentIndex] === 5 || ecuBackendMap[ecuSelect.currentIndex] === 6
     property bool loggerActive: false
     property bool settingsLoaded: false
     readonly property string appVersionText: (Updater && Updater.currentVersion !== "") ? Updater.currentVersion : (Qt.application.version !== "" ? Qt.application.version : "0.0.0")
@@ -363,7 +363,7 @@ SettingsPage {
 
                         Layout.fillWidth: true
                         Layout.preferredHeight: SettingsTheme.controlHeight
-                        model: ["Extender Only"]
+                        model: ["EX Board Extender", "PT Extender"]
 
                         Component.onCompleted: {
                             var stored = AppSettings.getECU();
@@ -426,7 +426,7 @@ SettingsPage {
                             Layout.preferredHeight: SettingsTheme.controlHeight
                             enabled: connectButton.enabled
                             inputMethodHints: Qt.ImhFormattedNumbersOnly
-                            placeholderText: "1024"
+                            placeholderText: "1536"
 
                             validator: IntValidator {
                                 bottom: 0
@@ -461,7 +461,7 @@ SettingsPage {
                             Layout.preferredHeight: SettingsTheme.controlHeight
                             enabled: connectButton.enabled
                             inputMethodHints: Qt.ImhFormattedNumbersOnly
-                            placeholderText: "1024"
+                            placeholderText: "1536"
 
                             validator: IntValidator {
                                 bottom: 0

@@ -238,6 +238,7 @@ Connect::Connect(QObject *parent)
     // * Phase 3: Expose PropertyRouter for dynamic property access (replaces Dashboard[propName])
     engine->rootContext()->setContextProperty("PropertyRouter", m_propertyRouter);
     engine->rootContext()->setContextProperty("Extender2", m_extender);
+    engine->rootContext()->setContextProperty("PTExtenderCan", m_ptExtenderCan);
     engine->rootContext()->setContextProperty("AppSettings", m_appSettings);
     engine->rootContext()->setContextProperty("Logger", m_datalogger);
     engine->rootContext()->setContextProperty("Calculations", m_calculations);
@@ -552,7 +553,9 @@ void Connect::openConnection(const QString &portName, const int &ecuSelect, cons
     }
 
     if (m_diagnosticsProvider) {
-        m_diagnosticsProvider->setCanStatus(true, QStringLiteral("EX Board CAN"));
+        const QString canLabel =
+            (m_ecu == PT_EXTENDER_BACKEND_ID) ? QStringLiteral("PT Extender CAN") : QStringLiteral("EX Board CAN");
+        m_diagnosticsProvider->setCanStatus(true, canLabel);
         m_diagnosticsProvider->setConnectionInfo(false, QString(), 0, QStringLiteral("CAN"));
     }
 

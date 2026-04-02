@@ -716,6 +716,56 @@ QVariantList DiagnosticsProvider::getExtenderDigitalDiagnostics() const
         result.append(entry);
     }
 
+    for (int i = 1; i <= 4; ++i) {
+        QString diKey = QStringLiteral("PTDigitalInput%1").arg(i);
+        QString relayKey = QStringLiteral("PTRelay%1").arg(i);
+
+        bool diState = false;
+        bool relayState = false;
+        if (m_propertyRouter && m_propertyRouter->hasProperty(diKey))
+            diState = m_propertyRouter->getValue(diKey).toBool();
+        if (m_propertyRouter && m_propertyRouter->hasProperty(relayKey))
+            relayState = m_propertyRouter->getValue(relayKey).toBool();
+
+        QVariantMap diEntry;
+        diEntry[QStringLiteral("channel")] = i;
+        diEntry[QStringLiteral("label")] = diKey;
+        diEntry[QStringLiteral("state")] = diState;
+        diEntry[QStringLiteral("configured")] = diState;
+        result.append(diEntry);
+
+        QVariantMap relayEntry;
+        relayEntry[QStringLiteral("channel")] = i;
+        relayEntry[QStringLiteral("label")] = relayKey;
+        relayEntry[QStringLiteral("state")] = relayState;
+        relayEntry[QStringLiteral("configured")] = relayState;
+        result.append(relayEntry);
+    }
+
+    const QStringList ptStatusKeys = {
+        QStringLiteral("PTRelayMask"),
+        QStringLiteral("PTRelayFollowerMask"),
+        QStringLiteral("PTRelayInvertMask"),
+        QStringLiteral("PTRelayBoundTargetsPacked"),
+        QStringLiteral("PTSystemState"),
+        QStringLiteral("PTSystemFault"),
+        QStringLiteral("PTDfiChecksumErrors"),
+        QStringLiteral("PTCanTxErrors"),
+    };
+    for (int i = 0; i < ptStatusKeys.size(); ++i) {
+        const QString key = ptStatusKeys.at(i);
+        int value = 0;
+        if (m_propertyRouter && m_propertyRouter->hasProperty(key))
+            value = m_propertyRouter->getValue(key).toInt();
+
+        QVariantMap statusEntry;
+        statusEntry[QStringLiteral("channel")] = 100 + i;
+        statusEntry[QStringLiteral("label")] = key;
+        statusEntry[QStringLiteral("state")] = value;
+        statusEntry[QStringLiteral("configured")] = (value != 0);
+        result.append(statusEntry);
+    }
+
     return result;
 }
 

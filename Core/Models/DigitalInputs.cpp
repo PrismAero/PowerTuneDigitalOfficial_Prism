@@ -129,6 +129,55 @@ void DigitalInputs::setPTRelayMask(int PTRelayMask)
         emit PTRelayMaskChanged(PTRelayMask);
     }
 }
+void DigitalInputs::setPTSystemState(int PTSystemState)
+{
+    if (m_PTSystemState != PTSystemState) {
+        m_PTSystemState = PTSystemState;
+        emit PTSystemStateChanged(PTSystemState);
+    }
+}
+void DigitalInputs::setPTSystemFault(int PTSystemFault)
+{
+    if (m_PTSystemFault != PTSystemFault) {
+        m_PTSystemFault = PTSystemFault;
+        emit PTSystemFaultChanged(PTSystemFault);
+    }
+}
+void DigitalInputs::setPTDfiChecksumErrors(int PTDfiChecksumErrors)
+{
+    if (m_PTDfiChecksumErrors != PTDfiChecksumErrors) {
+        m_PTDfiChecksumErrors = PTDfiChecksumErrors;
+        emit PTDfiChecksumErrorsChanged(PTDfiChecksumErrors);
+    }
+}
+void DigitalInputs::setPTCanTxErrors(int PTCanTxErrors)
+{
+    if (m_PTCanTxErrors != PTCanTxErrors) {
+        m_PTCanTxErrors = PTCanTxErrors;
+        emit PTCanTxErrorsChanged(PTCanTxErrors);
+    }
+}
+void DigitalInputs::setPTRelayFollowerMask(int PTRelayFollowerMask)
+{
+    if (m_PTRelayFollowerMask != PTRelayFollowerMask) {
+        m_PTRelayFollowerMask = PTRelayFollowerMask;
+        emit PTRelayFollowerMaskChanged(PTRelayFollowerMask);
+    }
+}
+void DigitalInputs::setPTRelayInvertMask(int PTRelayInvertMask)
+{
+    if (m_PTRelayInvertMask != PTRelayInvertMask) {
+        m_PTRelayInvertMask = PTRelayInvertMask;
+        emit PTRelayInvertMaskChanged(PTRelayInvertMask);
+    }
+}
+void DigitalInputs::setPTRelayBoundTargetsPacked(int PTRelayBoundTargetsPacked)
+{
+    if (m_PTRelayBoundTargetsPacked != PTRelayBoundTargetsPacked) {
+        m_PTRelayBoundTargetsPacked = PTRelayBoundTargetsPacked;
+        emit PTRelayBoundTargetsPackedChanged(PTRelayBoundTargetsPacked);
+    }
+}
 
 void DigitalInputs::setRPMFrequencyDividerDi1(qreal RPMFrequencyDividerDi1)
 {

@@ -43,6 +43,7 @@ void PTExtenderCan::configureConnection(const QVariantMap &config)
     m_statusAddress = m_baseId + 0x01;
     m_ioAddress = m_baseId + 0x02;
     m_ledAddress = m_baseId + 0x03;
+    m_indicatorConfigAddress = m_baseId + 0x04;
     emit baseIdChanged();
 }
 
@@ -115,7 +116,8 @@ void PTExtenderCan::onFrameReceived(const QCanBusFrame &frame)
         payload.append(QByteArray(8 - payload.size(), '\0'));
 
     if (frameId == m_statusAddress) {
-        const int gear = static_cast<unsigned char>(payload[0]);
+        const int rawGear = static_cast<unsigned char>(payload[0]);
+        const int gear = (rawGear == 0xFF) ? -2 : rawGear;
         if (m_expanderBoardData)
             m_expanderBoardData->setEXGear(gear);
         if (m_vehicleData)
@@ -125,6 +127,41 @@ void PTExtenderCan::onFrameReceived(const QCanBusFrame &frame)
             m_sensorRegistry->markCanSensorActive(QStringLiteral("EXGear"));
         }
     } else if (frameId == m_ioAddress) {
+        const int byte2 = static_cast<unsigned char>(payload[2]);
+        const int byte3 = static_cast<unsigned char>(payload[3]);
+        const int byte4 = static_cast<unsigned char>(payload[4]);
+        const int byte5 = static_cast<unsigned char>(payload[5]);
+        const int byte6 = static_cast<unsigned char>(payload[6]);
+        const int byte7 = static_cast<unsigned char>(payload[7]);
+        bool ioStatusChanged = false;
+        if (m_ioState != byte2) {
+            m_ioState = byte2;
+            ioStatusChanged = true;
+        }
+        if (m_ioFault != byte3) {
+            m_ioFault = byte3;
+            ioStatusChanged = true;
+        }
+        if (m_relayFollowerMask != (byte4 & 0x0F)) {
+            m_relayFollowerMask = byte4 & 0x0F;
+            ioStatusChanged = true;
+        }
+        if (m_relayInvertMask != ((byte4 >> 4) & 0x0F)) {
+            m_relayInvertMask = (byte4 >> 4) & 0x0F;
+            ioStatusChanged = true;
+        }
+        if (m_relayBoundTargetsPacked != byte5) {
+            m_relayBoundTargetsPacked = byte5;
+            ioStatusChanged = true;
+        }
+        if (m_dfiChecksumErrors != byte6) {
+            m_dfiChecksumErrors = byte6;
+            ioStatusChanged = true;
+        }
+        if (m_canTxErrors != byte7) {
+            m_canTxErrors = byte7;
+            ioStatusChanged = true;
+        }
         if (m_digitalInputs) {
             const int byte0 = static_cast<unsigned char>(payload[0]);
             const int byte1 = static_cast<unsigned char>(payload[1]);
@@ -138,6 +175,13 @@ void PTExtenderCan::onFrameReceived(const QCanBusFrame &frame)
             m_digitalInputs->setPTRelay2((byte1 & 0x02) != 0);
             m_digitalInputs->setPTRelay3((byte1 & 0x04) != 0);
             m_digitalInputs->setPTRelay4((byte1 & 0x08) != 0);
+            m_digitalInputs->setPTSystemState(byte2);
+            m_digitalInputs->setPTSystemFault(byte3);
+            m_digitalInputs->setPTRelayFollowerMask(byte4 & 0x0F);
+            m_digitalInputs->setPTRelayInvertMask((byte4 >> 4) & 0x0F);
+            m_digitalInputs->setPTRelayBoundTargetsPacked(byte5);
+            m_digitalInputs->setPTDfiChecksumErrors(byte6);
+            m_digitalInputs->setPTCanTxErrors(byte7);
         }
         if (m_sensorRegistry) {
             for (int i = 1; i <= 4; ++i) {
@@ -145,9 +189,104 @@ void PTExtenderCan::onFrameReceived(const QCanBusFrame &frame)
                 m_sensorRegistry->markCanSensorActive(QStringLiteral("PTRelay%1").arg(i));
             }
             m_sensorRegistry->markCanSensorActive(QStringLiteral("PTRelayMask"));
+            m_sensorRegistry->markCanSensorActive(QStringLiteral("PTSystemState"));
+            m_sensorRegistry->markCanSensorActive(QStringLiteral("PTSystemFault"));
+            m_sensorRegistry->markCanSensorActive(QStringLiteral("PTDfiChecksumErrors"));
+            m_sensorRegistry->markCanSensorActive(QStringLiteral("PTCanTxErrors"));
+            m_sensorRegistry->markCanSensorActive(QStringLiteral("PTRelayFollowerMask"));
+            m_sensorRegistry->markCanSensorActive(QStringLiteral("PTRelayInvertMask"));
+            m_sensorRegistry->markCanSensorActive(QStringLiteral("PTRelayBoundTargetsPacked"));
         }
+        if (ioStatusChanged)
+            emit ioStatusChanged();
     } else if (frameId == m_ledAddress) {
-        // LED feedback frame is currently consumed only via diagnostics/frame viewer.
+        const int systemR = static_cast<unsigned char>(payload[0]);
+        const int systemG = static_cast<unsigned char>(payload[1]);
+        const int systemB = static_cast<unsigned char>(payload[2]);
+        const int systemPattern = static_cast<unsigned char>(payload[3]);
+        const int startR = static_cast<unsigned char>(payload[4]);
+        const int startG = static_cast<unsigned char>(payload[5]);
+        const int startB = static_cast<unsigned char>(payload[6]);
+        const int startPattern = static_cast<unsigned char>(payload[7]);
+        bool changed = false;
+        if (m_systemLedR != systemR) {
+            m_systemLedR = systemR;
+            changed = true;
+        }
+        if (m_systemLedG != systemG) {
+            m_systemLedG = systemG;
+            changed = true;
+        }
+        if (m_systemLedB != systemB) {
+            m_systemLedB = systemB;
+            changed = true;
+        }
+        if (m_systemLedPattern != systemPattern) {
+            m_systemLedPattern = systemPattern;
+            changed = true;
+        }
+        if (m_startStopLedR != startR) {
+            m_startStopLedR = startR;
+            changed = true;
+        }
+        if (m_startStopLedG != startG) {
+            m_startStopLedG = startG;
+            changed = true;
+        }
+        if (m_startStopLedB != startB) {
+            m_startStopLedB = startB;
+            changed = true;
+        }
+        if (m_startStopLedPattern != startPattern) {
+            m_startStopLedPattern = startPattern;
+            changed = true;
+        }
+        if (changed)
+            emit ledStateChanged();
+    } else if (frameId == m_indicatorConfigAddress) {
+        const int systemMeta = static_cast<unsigned char>(payload[0]);
+        const int systemCh1 = static_cast<unsigned char>(payload[1]);
+        const int systemCh2 = static_cast<unsigned char>(payload[2]);
+        const int systemCh3 = static_cast<unsigned char>(payload[3]);
+        const int startMeta = static_cast<unsigned char>(payload[4]);
+        const int startCh1 = static_cast<unsigned char>(payload[5]);
+        const int startCh2 = static_cast<unsigned char>(payload[6]);
+        const int startCh3 = static_cast<unsigned char>(payload[7]);
+        bool changed = false;
+        if (m_systemIndicatorMeta != systemMeta) {
+            m_systemIndicatorMeta = systemMeta;
+            changed = true;
+        }
+        if (m_systemIndicatorCh1 != systemCh1) {
+            m_systemIndicatorCh1 = systemCh1;
+            changed = true;
+        }
+        if (m_systemIndicatorCh2 != systemCh2) {
+            m_systemIndicatorCh2 = systemCh2;
+            changed = true;
+        }
+        if (m_systemIndicatorCh3 != systemCh3) {
+            m_systemIndicatorCh3 = systemCh3;
+            changed = true;
+        }
+        if (m_startStopIndicatorMeta != startMeta) {
+            m_startStopIndicatorMeta = startMeta;
+            changed = true;
+        }
+        if (m_startStopIndicatorCh1 != startCh1) {
+            m_startStopIndicatorCh1 = startCh1;
+            changed = true;
+        }
+        if (m_startStopIndicatorCh2 != startCh2) {
+            m_startStopIndicatorCh2 = startCh2;
+            changed = true;
+        }
+        if (m_startStopIndicatorCh3 != startCh3) {
+            m_startStopIndicatorCh3 = startCh3;
+            changed = true;
+        }
+        if (changed)
+            emit indicatorConfigChanged();
     }
 }
 
