@@ -1,6 +1,7 @@
 #ifndef DATALOGGER_H
 #define DATALOGGER_H
 #include <QObject>
+#include <QFile>
 #include <QThread>
 #include <QTime>
 #include <QTimer>
@@ -41,6 +42,7 @@ private:
     QTimer m_updatetimer;
     QString m_logBasePath;
     QTime m_loggerStartTime;
+    QFile m_logFile;
 };
 
 #endif  // DATALOGGER_H

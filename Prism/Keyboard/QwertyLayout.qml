@@ -1,5 +1,5 @@
 // Copyright (c) 2026 Kai Wyborny. All rights reserved.
-import QtQuick 2.15
+import QtQuick
 
 Item {
     id: qwertyLayout

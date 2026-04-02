@@ -1,6 +1,6 @@
-#include "Core/connect.h"
+#include "Core/Connect.h"
 #include "BuildInfo.h"
-#include "Utils/downloadmanager.h"
+#include "Utils/DownloadManager.h"
 
 #include <QDir>
 #include <QFontDatabase>

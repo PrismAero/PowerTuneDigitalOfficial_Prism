@@ -1,4 +1,4 @@
-#include "wifiscanner.h"
+#include "WifiScanner.h"
 
 #include "../Core/Models/ConnectionData.h"
 
@@ -32,6 +32,14 @@ WifiScanner::WifiScanner(QObject *parent) : QObject(parent), m_connectionData(nu
     m_verifyTimeoutTimer.setSingleShot(true);
     connect(&m_verifyTimeoutTimer, &QTimer::timeout, this, [this]() {
         finishWifiOperation(false, QStringLiteral("Wi-Fi connect timed out"));
+    });
+    connect(&m_verifyProcess, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this,
+            [this](int exitCode, QProcess::ExitStatus exitStatus) {
+        m_verifyAssociationInFlight = false;
+        if (exitStatus == QProcess::NormalExit && exitCode == 0
+            && !firstIpv4ForInterface(QStringLiteral("wlan0")).isEmpty()) {
+            finishWifiOperation(true, QStringLiteral("Wi-Fi connected"));
+        }
     });
 
     connect(&m_scanProcess, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this,
@@ -90,6 +98,14 @@ WifiScanner::WifiScanner(ConnectionData *connectionData, QObject *parent)
     m_verifyTimeoutTimer.setSingleShot(true);
     connect(&m_verifyTimeoutTimer, &QTimer::timeout, this, [this]() {
         finishWifiOperation(false, QStringLiteral("Wi-Fi connect timed out"));
+    });
+    connect(&m_verifyProcess, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this,
+            [this](int exitCode, QProcess::ExitStatus exitStatus) {
+        m_verifyAssociationInFlight = false;
+        if (exitStatus == QProcess::NormalExit && exitCode == 0
+            && !firstIpv4ForInterface(QStringLiteral("wlan0")).isEmpty()) {
+            finishWifiOperation(true, QStringLiteral("Wi-Fi connected"));
+        }
     });
 
     connect(&m_scanProcess, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this,
@@ -292,8 +308,12 @@ void WifiScanner::beginConnectionVerification()
 void WifiScanner::verifyConnectionStep()
 {
     getconnectionStatus();
-    if (isWifiAssociated() && firstIpv4ForInterface(QStringLiteral("wlan0")).size() > 0)
-        finishWifiOperation(true, QStringLiteral("Wi-Fi connected"));
+    if (m_verifyAssociationInFlight)
+        return;
+    m_verifyAssociationInFlight = true;
+    m_verifyProcess.start(QStringLiteral("sh"),
+                          QStringList() << QStringLiteral("-c")
+                                        << QStringLiteral("iw dev wlan0 link | grep 'Connected to'"));
 }
 
 void WifiScanner::finishWifiOperation(bool success, const QString &message)
@@ -302,6 +322,9 @@ void WifiScanner::finishWifiOperation(bool success, const QString &message)
     m_verifyTimeoutTimer.stop();
     m_pendingCommands.clear();
     m_operationInProgress = false;
+    m_verifyAssociationInFlight = false;
+    if (m_verifyProcess.state() != QProcess::NotRunning)
+        m_verifyProcess.kill();
 
     if (!m_connectionData)
         return;

@@ -58,8 +58,10 @@ private:
     QProcess m_commandProcess;
     QTimer m_verifyPollTimer;
     QTimer m_verifyTimeoutTimer;
+    QProcess m_verifyProcess;
     QStringList m_pendingCommands;
     bool m_operationInProgress = false;
+    bool m_verifyAssociationInFlight = false;
 };
 
 #endif  // WIFISCANNER_H

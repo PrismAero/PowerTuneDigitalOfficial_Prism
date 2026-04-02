@@ -1,6 +1,6 @@
 #include "OverlayConfigDefaults.h"
 
-#include "appsettings.h"
+#include "AppSettings.h"
 
 OverlayConfigDefaults::OverlayConfigDefaults(QObject *parent) : QObject(parent) {}
 

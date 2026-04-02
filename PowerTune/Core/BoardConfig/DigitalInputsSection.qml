@@ -1,9 +1,9 @@
 // Copyright (c) PowerTune Digital, Kai Wyborny. All rights reserved.
 // DigitalInputsSection.qml - Extracted expansion board digital input configuration
 
-import QtQuick 2.15
-import QtQuick.Controls 2.15
-import QtQuick.Layouts 1.15
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
 import PowerTune.Settings 1.0
 import PowerTune.UI 1.0
 

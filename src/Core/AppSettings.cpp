@@ -1,4 +1,4 @@
-#include "appsettings.h"
+#include "AppSettings.h"
 
 #include "AppConstants.h"
 #include "../Hardware/Extender.h"
@@ -9,6 +9,7 @@
 #include <QSettings>
 
 #include <iterator>
+#include <utility>
 
 AppSettings::AppSettings(QObject *parent)
     : QObject(parent),
@@ -350,28 +351,16 @@ void AppSettings::writeAnalogSettings(const qreal &A00, const qreal &A05, const 
                                       const qreal &A80, const qreal &A85, const qreal &A90, const qreal &A95,
                                       const qreal &A100, const qreal &A105)
 {
-    setValue("AN00", A00);
-    setValue("AN05", A05);
-    setValue("AN10", A10);
-    setValue("AN15", A15);
-    setValue("AN20", A20);
-    setValue("AN25", A25);
-    setValue("AN30", A30);
-    setValue("AN35", A35);
-    setValue("AN40", A40);
-    setValue("AN45", A45);
-    setValue("AN50", A50);
-    setValue("AN55", A55);
-    setValue("AN60", A60);
-    setValue("AN65", A65);
-    setValue("AN70", A70);
-    setValue("AN75", A75);
-    setValue("AN80", A80);
-    setValue("AN85", A85);
-    setValue("AN90", A90);
-    setValue("AN95", A95);
-    setValue("AN100", A100);
-    setValue("AN105", A105);
+    const std::pair<const char *, qreal> entries[] = {
+        {"AN00", A00},   {"AN05", A05},   {"AN10", A10},   {"AN15", A15},
+        {"AN20", A20},   {"AN25", A25},   {"AN30", A30},   {"AN35", A35},
+        {"AN40", A40},   {"AN45", A45},   {"AN50", A50},   {"AN55", A55},
+        {"AN60", A60},   {"AN65", A65},   {"AN70", A70},   {"AN75", A75},
+        {"AN80", A80},   {"AN85", A85},   {"AN90", A90},   {"AN95", A95},
+        {"AN100", A100}, {"AN105", A105},
+    };
+    for (const auto &[key, value] : entries)
+        setValue(key, value);
 }
 
 void AppSettings::writeRPMSettings(const int &mxrpm, const int &shift1, const int &shift2, const int &shift3,
@@ -403,52 +392,30 @@ void AppSettings::writeEXBoardSettings(const qreal &EXA00, const qreal &EXA05, c
                                        const int &AN3R4VAL, const int &AN4R3VAL, const int &AN4R4VAL,
                                        const int &AN5R3VAL, const int &AN5R4VAL)
 {
-    setValue("EXA00", EXA00);
-    setValue("EXA05", EXA05);
-    setValue("EXA10", EXA10);
-    setValue("EXA15", EXA15);
-    setValue("EXA20", EXA20);
-    setValue("EXA25", EXA25);
-    setValue("EXA30", EXA30);
-    setValue("EXA35", EXA35);
-    setValue("EXA40", EXA40);
-    setValue("EXA45", EXA45);
-    setValue("EXA50", EXA50);
-    setValue("EXA55", EXA55);
-    setValue("EXA60", EXA60);
-    setValue("EXA65", EXA65);
-    setValue("EXA70", EXA70);
-    setValue("EXA75", EXA75);
-    setValue("steinhartcalc0on", steinhartcalc0on);
-    setValue("steinhartcalc1on", steinhartcalc1on);
-    setValue("steinhartcalc2on", steinhartcalc2on);
-    setValue("steinhartcalc3on", steinhartcalc3on);
-    setValue("steinhartcalc4on", steinhartcalc4on);
-    setValue("steinhartcalc5on", steinhartcalc5on);
-    setValue("AN0R3VAL", AN0R3VAL);
-    setValue("AN0R4VAL", AN0R4VAL);
-    setValue("AN1R3VAL", AN1R3VAL);
-    setValue("AN1R4VAL", AN1R4VAL);
-    setValue("AN2R3VAL", AN2R3VAL);
-    setValue("AN2R4VAL", AN2R4VAL);
-    setValue("AN3R3VAL", AN3R3VAL);
-    setValue("AN3R4VAL", AN3R4VAL);
-    setValue("AN4R3VAL", AN4R3VAL);
-    setValue("AN4R4VAL", AN4R4VAL);
-    setValue("AN5R3VAL", AN5R3VAL);
-    setValue("AN5R4VAL", AN5R4VAL);
+    const std::pair<const char *, QVariant> entries[] = {
+        {"EXA00", EXA00}, {"EXA05", EXA05}, {"EXA10", EXA10}, {"EXA15", EXA15},
+        {"EXA20", EXA20}, {"EXA25", EXA25}, {"EXA30", EXA30}, {"EXA35", EXA35},
+        {"EXA40", EXA40}, {"EXA45", EXA45}, {"EXA50", EXA50}, {"EXA55", EXA55},
+        {"EXA60", EXA60}, {"EXA65", EXA65}, {"EXA70", EXA70}, {"EXA75", EXA75},
+        {"steinhartcalc0on", steinhartcalc0on}, {"steinhartcalc1on", steinhartcalc1on},
+        {"steinhartcalc2on", steinhartcalc2on}, {"steinhartcalc3on", steinhartcalc3on},
+        {"steinhartcalc4on", steinhartcalc4on}, {"steinhartcalc5on", steinhartcalc5on},
+        {"AN0R3VAL", AN0R3VAL}, {"AN0R4VAL", AN0R4VAL},
+        {"AN1R3VAL", AN1R3VAL}, {"AN1R4VAL", AN1R4VAL},
+        {"AN2R3VAL", AN2R3VAL}, {"AN2R4VAL", AN2R4VAL},
+        {"AN3R3VAL", AN3R3VAL}, {"AN3R4VAL", AN3R4VAL},
+        {"AN4R3VAL", AN4R3VAL}, {"AN4R4VAL", AN4R4VAL},
+        {"AN5R3VAL", AN5R3VAL}, {"AN5R4VAL", AN5R4VAL},
+    };
+    for (const auto &[key, value] : entries)
+        setValue(key, value);
+
+    const qreal v0v[] = {EXA00, EXA10, EXA20, EXA30, EXA40, EXA50, EXA60, EXA70};
+    const qreal v5v[] = {EXA05, EXA15, EXA25, EXA35, EXA45, EXA55, EXA65, EXA75};
+    const int ntcFlags[] = {steinhartcalc0on, steinhartcalc1on, steinhartcalc2on,
+                            steinhartcalc3on, steinhartcalc4on, steinhartcalc5on, 0, 0};
 
     if (m_extender) {
-        const qreal v0v[] = {EXA00, EXA10, EXA20, EXA30, EXA40, EXA50, EXA60, EXA70};
-        const qreal v5v[] = {EXA05, EXA15, EXA25, EXA35, EXA45, EXA55, EXA65, EXA75};
-        const int ntcFlags[] = {steinhartcalc0on,
-                                steinhartcalc1on,
-                                steinhartcalc2on,
-                                steinhartcalc3on,
-                                steinhartcalc4on,
-                                steinhartcalc5on,
-                                0,
-                                0};
         for (int ch = 0; ch < EX_ANALOG_CHANNELS; ++ch) {
             const qreal minV = getValue(QStringLiteral("ui/exboard/ch%1_minVoltage").arg(ch), 0.0).toDouble();
             const qreal maxV = getValue(QStringLiteral("ui/exboard/ch%1_maxVoltage").arg(ch), 5.0).toDouble();
@@ -457,15 +424,13 @@ void AppSettings::writeEXBoardSettings(const qreal &EXA00, const qreal &EXA05, c
     }
 
     if (m_steinhartCalc) {
-        const int ntcOn[] = {steinhartcalc0on, steinhartcalc1on, steinhartcalc2on,
-                             steinhartcalc3on, steinhartcalc4on, steinhartcalc5on};
         const int r3Vals[] = {AN0R3VAL, AN1R3VAL, AN2R3VAL, AN3R3VAL, AN4R3VAL, AN5R3VAL};
         const int r4Vals[] = {AN0R4VAL, AN1R4VAL, AN2R4VAL, AN3R4VAL, AN4R4VAL, AN5R4VAL};
         for (int ch = 0; ch < SteinhartCalculator::MAX_CHANNELS; ++ch) {
-            m_steinhartCalc->setChannelEnabled(ch, ntcOn[ch] != 0);
-            qreal r3 = (r3Vals[ch] != 0) ? 100.0 : 0.0;
-            qreal r4 = (r4Vals[ch] != 0) ? 1000.0 : 0.0;
-            m_steinhartCalc->setVoltageDividerParams(ch, r3, r4);
+            m_steinhartCalc->setChannelEnabled(ch, ntcFlags[ch] != 0);
+            m_steinhartCalc->setVoltageDividerParams(ch,
+                (r3Vals[ch] != 0) ? 100.0 : 0.0,
+                (r4Vals[ch] != 0) ? 1000.0 : 0.0);
         }
     }
 }
@@ -529,52 +494,25 @@ void AppSettings::writeSteinhartSettings(const qreal &T01, const qreal &T02, con
                                          const qreal &R42, const qreal &R43, const qreal &T51, const qreal &T52,
                                          const qreal &T53, const qreal &R51, const qreal &R52, const qreal &R53)
 {
-    setValue("T01", T01);
-    setValue("T02", T02);
-    setValue("T03", T03);
-    setValue("R01", R01);
-    setValue("R02", R02);
-    setValue("R03", R03);
-    setValue("T11", T11);
-    setValue("T12", T12);
-    setValue("T13", T13);
-    setValue("R11", R11);
-    setValue("R12", R12);
-    setValue("R13", R13);
-    setValue("T21", T21);
-    setValue("T22", T22);
-    setValue("T23", T23);
-    setValue("R21", R21);
-    setValue("R22", R22);
-    setValue("R23", R23);
-    setValue("T31", T31);
-    setValue("T32", T32);
-    setValue("T33", T33);
-    setValue("R31", R31);
-    setValue("R32", R32);
-    setValue("R33", R33);
-    setValue("T41", T41);
-    setValue("T42", T42);
-    setValue("T43", T43);
-    setValue("R41", R41);
-    setValue("R42", R42);
-    setValue("R43", R43);
-    setValue("T51", T51);
-    setValue("T52", T52);
-    setValue("T53", T53);
-    setValue("R51", R51);
-    setValue("R52", R52);
-    setValue("R53", R53);
+    const qreal T[][3] = {{T01, T02, T03}, {T11, T12, T13}, {T21, T22, T23},
+                          {T31, T32, T33}, {T41, T42, T43}, {T51, T52, T53}};
+    const qreal R[][3] = {{R01, R02, R03}, {R11, R12, R13}, {R21, R22, R23},
+                          {R31, R32, R33}, {R41, R42, R43}, {R51, R52, R53}};
+
+    for (int ch = 0; ch < 6; ++ch) {
+        const QString chStr = QString::number(ch);
+        setValue(QStringLiteral("T%11").arg(chStr), T[ch][0]);
+        setValue(QStringLiteral("T%12").arg(chStr), T[ch][1]);
+        setValue(QStringLiteral("T%13").arg(chStr), T[ch][2]);
+        setValue(QStringLiteral("R%11").arg(chStr), R[ch][0]);
+        setValue(QStringLiteral("R%12").arg(chStr), R[ch][1]);
+        setValue(QStringLiteral("R%13").arg(chStr), R[ch][2]);
+    }
 
     if (m_steinhartCalc) {
-        const qreal T[][3] = {{T01, T02, T03}, {T11, T12, T13}, {T21, T22, T23},
-                              {T31, T32, T33}, {T41, T42, T43}, {T51, T52, T53}};
-        const qreal R[][3] = {{R01, R02, R03}, {R11, R12, R13}, {R21, R22, R23},
-                              {R31, R32, R33}, {R41, R42, R43}, {R51, R52, R53}};
         for (int ch = 0; ch < SteinhartCalculator::MAX_CHANNELS; ++ch) {
-            if (R[ch][0] > 0 && R[ch][1] > 0 && R[ch][2] > 0) {
+            if (R[ch][0] > 0 && R[ch][1] > 0 && R[ch][2] > 0)
                 m_steinhartCalc->calibrateChannel(ch, T[ch][0], T[ch][1], T[ch][2], R[ch][0], R[ch][1], R[ch][2]);
-            }
         }
     }
 }
@@ -712,87 +650,6 @@ void AppSettings::writeLanguage(const int Language)
     if (m_settingsData) {
         m_settingsData->setlanguage(Language);
     }
-}
-
-void AppSettings::writeDashboardConfig(int index, const QString &bgPicture, const QString &bgColor)
-{
-    QString prefix = QString("dashboard_%1/").arg(index);
-    setValue(prefix + "backgroundPicture", bgPicture);
-    setValue(prefix + "backgroundColor", bgColor);
-}
-
-QVariantMap AppSettings::loadDashboardConfig(int index) const
-{
-    QString prefix = QString("dashboard_%1/").arg(index);
-    QVariantMap config;
-    config["backgroundPicture"] = getValue(prefix + "backgroundPicture", "");
-    config["backgroundColor"] = getValue(prefix + "backgroundColor", "#000000");
-    return config;
-}
-
-void AppSettings::saveOverlayConfig(const QString &dashboardId, const QString &overlayId, const QVariantMap &config)
-{
-    const QString prefix = QStringLiteral("overlay/%1/%2/").arg(dashboardId, overlayId);
-    for (auto it = config.constBegin(); it != config.constEnd(); ++it) {
-        const QString fullKey = prefix + it.key();
-        m_settings.setValue(fullKey, it.value());
-        m_cache.insert(fullKey, it.value());
-    }
-    m_dirty = true;
-    scheduleSync();
-}
-
-QVariantMap AppSettings::loadOverlayConfig(const QString &dashboardId, const QString &overlayId)
-{
-    QVariantMap config;
-    const QString group = QStringLiteral("overlay/%1/%2").arg(dashboardId, overlayId);
-    m_settings.beginGroup(group);
-    const QStringList keys = m_settings.childKeys();
-    for (const QString &key : keys) {
-        const QVariant value = m_settings.value(key);
-        config.insert(key, value);
-        m_cache.insert(group + QLatin1Char('/') + key, value);
-    }
-    m_settings.endGroup();
-    return config;
-}
-
-QVariantMap AppSettings::loadOverlayConfigs(const QString &dashboardId, const QStringList &overlayIds)
-{
-    QVariantMap allConfigs;
-    for (const QString &overlayId : overlayIds) {
-        QVariantMap config;
-        const QString group = QStringLiteral("overlay/%1/%2").arg(dashboardId, overlayId);
-        m_settings.beginGroup(group);
-        const QStringList keys = m_settings.childKeys();
-        for (const QString &key : keys) {
-            const QVariant value = m_settings.value(key);
-            config.insert(key, value);
-            m_cache.insert(group + QLatin1Char('/') + key, value);
-        }
-        m_settings.endGroup();
-        allConfigs.insert(overlayId, config);
-    }
-    return allConfigs;
-}
-
-void AppSettings::removeOverlayConfig(const QString &dashboardId, const QString &overlayId)
-{
-    const QString group = QStringLiteral("overlay/%1/%2").arg(dashboardId, overlayId);
-    m_settings.beginGroup(group);
-    m_settings.remove(QString());
-    m_settings.endGroup();
-
-    for (auto it = m_cache.begin(); it != m_cache.end();) {
-        if (it.key().startsWith(group + QLatin1Char('/'))) {
-            it = m_cache.erase(it);
-        } else {
-            ++it;
-        }
-    }
-
-    m_dirty = true;
-    scheduleSync();
 }
 
 // * Expander board sensor config persistence

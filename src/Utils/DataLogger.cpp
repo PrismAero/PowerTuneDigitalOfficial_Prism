@@ -30,16 +30,24 @@ datalogger::datalogger(EngineData *engineData, VehicleData *vehicleData, Expande
 
 void datalogger::startLog(QString logFilename)
 {
+    if (m_updatetimer.isActive())
+        stopLog();
+
     m_logBasePath = std::move(logFilename);
     m_loggerStartTime = QTime::currentTime();
     createHeader();
+    m_logFile.setFileName(m_logBasePath + ".csv");
+    if (!m_logFile.open(QFile::Append | QFile::Text))
+        return;
     connect(&m_updatetimer, &QTimer::timeout, this, &datalogger::updateLog, Qt::UniqueConnection);
-    m_updatetimer.start(100);
+    m_updatetimer.start(200);
 }
 
 void datalogger::stopLog()
 {
     m_updatetimer.stop();
+    if (m_logFile.isOpen())
+        m_logFile.close();
 }
 
 void datalogger::createHeader()
@@ -58,11 +66,10 @@ void datalogger::createHeader()
 
 void datalogger::updateLog()
 {
-    QFile file(m_logBasePath + ".csv");
-    if (!file.open(QFile::Append | QFile::Text))
+    if (!m_logFile.isOpen() && !m_logFile.open(QFile::Append | QFile::Text))
         return;
 
-    QTextStream out(&file);
+    QTextStream out(&m_logFile);
     out << elapsedMs(m_loggerStartTime) << ","
         << (m_engineData ? m_engineData->rpm() : 0.0) << ","
         << (m_engineData ? m_engineData->Power() : 0.0) << ","
@@ -103,4 +110,5 @@ void datalogger::updateLog()
         << (m_digitalInputs ? m_digitalInputs->EXDigitalInput7() : 0) << ","
         << (m_digitalInputs ? m_digitalInputs->EXDigitalInput8() : 0) << ","
         << (m_digitalInputs ? m_digitalInputs->frequencyDIEX1() : 0.0) << "\n";
+    m_logFile.flush();
 }

@@ -7,7 +7,7 @@
 
 #include "SensorRegistry.h"
 
-#include "appsettings.h"
+#include "AppSettings.h"
 
 #include <QDateTime>
 #include <QDebug>

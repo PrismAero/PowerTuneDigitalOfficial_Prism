@@ -531,7 +531,9 @@ private:
     QTimer m_systemInfoTimer;  // 2-second interval for system info
     QTimer m_canRateTimer;     // 1-second interval for CAN message rate
     QTimer m_liveSensorTimer;  // 1-second interval for live sensor table
+    QTimer m_canFrameNotifyTimer;  // coalesces high-frequency frame updates
     bool m_initialized = false;
+    bool m_canFrameDirty = false;
 
     /**
      * @brief Read CPU temperature from system.

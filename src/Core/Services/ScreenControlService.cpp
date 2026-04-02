@@ -2,7 +2,7 @@
 
 #include "ExBoardConfigManager.h"
 #include "Models/UIState.h"
-#include "appsettings.h"
+#include "AppSettings.h"
 
 #include <QFile>
 #include <QFileInfo>

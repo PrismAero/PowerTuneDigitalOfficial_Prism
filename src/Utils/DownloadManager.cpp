@@ -48,7 +48,7 @@
 **
 ****************************************************************************/
 
-#include "downloadmanager.h"
+#include "DownloadManager.h"
 
 #include <QDebug>
 #include <QTextStream>

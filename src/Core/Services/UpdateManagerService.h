@@ -6,6 +6,7 @@
 
 class QNetworkAccessManager;
 class QNetworkReply;
+class QProcess;
 
 class UpdateManagerService : public QObject
 {
@@ -84,6 +85,7 @@ private:
     QByteArray m_latestReleasePayload;
 
     QNetworkAccessManager *m_networkManager = nullptr;
+    QProcess *m_installerProcess = nullptr;
 };
 
 #endif  // UPDATEMANAGERSERVICE_H

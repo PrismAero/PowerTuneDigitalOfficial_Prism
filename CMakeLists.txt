@@ -36,7 +36,7 @@ endif()
 set(POWERTUNE_BUILD_DEPENDENCIES "Qt ${QT_VERSION}; Yocto Scarthgap; meta-qt6" CACHE STRING "Dependency summary")
 set(POWERTUNE_BUILD_NOTES "Beta unreleased build." CACHE STRING "Build notes shown in settings UI")
 configure_file(
-    ${CMAKE_CURRENT_SOURCE_DIR}/Core/BuildInfo.h.in
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Core/BuildInfo.h.in
     ${CMAKE_CURRENT_BINARY_DIR}/generated/BuildInfo.h
     @ONLY
 )
@@ -76,112 +76,114 @@ find_package(Qt6 COMPONENTS ShaderTools QUIET)
 
 # * Source files - Core
 set(CORE_SOURCES
-    Core/connect.cpp
-    Core/appsettings.cpp
-    Core/PropertyRouter.cpp
-    Core/SensorRegistry.cpp
-    Core/DiagnosticsProvider.cpp
-    Core/DifferentialSensorCalc.cpp
-    Core/ExBoardConfigManager.cpp
-    Core/PTExtenderConfigManager.cpp
-    Core/DemoModeService.cpp
-    Core/UpdateManagerService.cpp
-    Core/ScreenControlService.cpp
-    Core/DashboardLockService.cpp
-    Core/OverlayConfigDefaults.cpp
-    Core/Models/UIState.cpp
-    Core/Models/EngineData.cpp
-    Core/Models/VehicleData.cpp
-    Core/Models/GPSData.cpp
-    Core/Models/AnalogInputs.cpp
-    Core/Models/DigitalInputs.cpp
-    Core/Models/ExpanderBoardData.cpp
-    Core/Models/TimingData.cpp
-    Core/Models/ConnectionData.cpp
-    Core/Models/SettingsData.cpp
-    Core/Models/CanFrameModel.cpp
+    src/Core/Connect.cpp
+    src/Core/ConnectSystemActions.cpp
+    src/Core/AppSettings.cpp
+    src/Core/AppSettingsOverlay.cpp
+    src/Core/PropertyRouter.cpp
+    src/Core/SensorRegistry.cpp
+    src/Core/DiagnosticsProvider.cpp
+    src/Core/DifferentialSensorCalc.cpp
+    src/Core/Config/ExBoardConfigManager.cpp
+    src/Core/Config/PTExtenderConfigManager.cpp
+    src/Core/Services/DemoModeService.cpp
+    src/Core/Services/UpdateManagerService.cpp
+    src/Core/Services/ScreenControlService.cpp
+    src/Core/Services/DashboardLockService.cpp
+    src/Core/Config/OverlayConfigDefaults.cpp
+    src/Core/Models/UIState.cpp
+    src/Core/Models/EngineData.cpp
+    src/Core/Models/VehicleData.cpp
+    src/Core/Models/GPSData.cpp
+    src/Core/Models/AnalogInputs.cpp
+    src/Core/Models/DigitalInputs.cpp
+    src/Core/Models/ExpanderBoardData.cpp
+    src/Core/Models/TimingData.cpp
+    src/Core/Models/ConnectionData.cpp
+    src/Core/Models/SettingsData.cpp
+    src/Core/Models/CanFrameModel.cpp
 )
 
 set(CORE_HEADERS
-    Core/connect.h
-    Core/appsettings.h
-    Core/PropertyRouter.h
-    Core/SensorRegistry.h
-    Core/DiagnosticsProvider.h
-    Core/DifferentialSensorCalc.h
-    Core/ExBoardConfigManager.h
-    Core/PTExtenderConfigManager.h
-    Core/DemoModeService.h
-    Core/UpdateManagerService.h
-    Core/ScreenControlService.h
-    Core/DashboardLockService.h
-    Core/OverlayConfigDefaults.h
-    Core/Models/UIState.h
-    Core/Models/DataModels.h
-    Core/Models/EngineData.h
-    Core/Models/VehicleData.h
-    Core/Models/GPSData.h
-    Core/Models/AnalogInputs.h
-    Core/Models/DigitalInputs.h
-    Core/Models/ExpanderBoardData.h
-    Core/Models/TimingData.h
-    Core/Models/ConnectionData.h
-    Core/Models/SettingsData.h
-    Core/Models/CanFrameModel.h
+    src/Core/Connect.h
+    src/Core/AppSettings.h
+    src/Core/PropertyRouter.h
+    src/Core/SensorRegistry.h
+    src/Core/DiagnosticsProvider.h
+    src/Core/DifferentialSensorCalc.h
+    src/Core/Config/ExBoardConfigManager.h
+    src/Core/Config/PTExtenderConfigManager.h
+    src/Core/Services/DemoModeService.h
+    src/Core/Services/UpdateManagerService.h
+    src/Core/Services/ScreenControlService.h
+    src/Core/Services/DashboardLockService.h
+    src/Core/Config/OverlayConfigDefaults.h
+    src/Core/Models/UIState.h
+    src/Core/Models/DataModels.h
+    src/Core/Models/EngineData.h
+    src/Core/Models/VehicleData.h
+    src/Core/Models/GPSData.h
+    src/Core/Models/AnalogInputs.h
+    src/Core/Models/DigitalInputs.h
+    src/Core/Models/ExpanderBoardData.h
+    src/Core/Models/TimingData.h
+    src/Core/Models/ConnectionData.h
+    src/Core/Models/SettingsData.h
+    src/Core/Models/CanFrameModel.h
 )
 
 set(CAN_SOURCES
-    Can/CanStartupManager.cpp
-    Can/CanTransport.cpp
-    Can/CanManager.cpp
-    Can/Protocols/ExBoardCan.cpp
-    Can/Protocols/PTExtenderCan.cpp
+    src/Can/CanStartupManager.cpp
+    src/Can/CanTransport.cpp
+    src/Can/CanManager.cpp
+    src/Can/Protocols/ExBoardCan.cpp
+    src/Can/Protocols/PTExtenderCan.cpp
 )
 
 set(CAN_HEADERS
-    Can/CanInterface.h
-    Can/CanStartupManager.h
-    Can/CanTransport.h
-    Can/CanManager.h
-    Can/Protocols/ExBoardCan.h
-    Can/Protocols/PTExtenderCan.h
+    src/Can/CanInterface.h
+    src/Can/CanStartupManager.h
+    src/Can/CanTransport.h
+    src/Can/CanManager.h
+    src/Can/Protocols/ExBoardCan.h
+    src/Can/Protocols/PTExtenderCan.h
 )
 
 # * Source files - Hardware interfaces
 set(HARDWARE_SOURCES
-    Hardware/Extender.cpp
+    src/Hardware/Extender.cpp
 )
 
 set(HARDWARE_HEADERS
-    Hardware/Extender.h
+    src/Hardware/Extender.h
 )
 
 # * Source files - Utilities
 set(UTILS_SOURCES
-    Utils/DataLogger.cpp
-    Utils/Calculations.cpp
-    Utils/SteinhartCalculator.cpp
-    Utils/CalibrationHelper.cpp
-    Utils/downloadmanager.cpp
-    Utils/OverlayPositionManager.cpp
-    Utils/ShiftIndicatorHelper.cpp
-    Utils/wifiscanner.cpp
+    src/Utils/DataLogger.cpp
+    src/Utils/Calculations.cpp
+    src/Utils/SteinhartCalculator.cpp
+    src/Utils/CalibrationHelper.cpp
+    src/Utils/DownloadManager.cpp
+    src/Utils/OverlayPositionManager.cpp
+    src/Utils/ShiftIndicatorHelper.cpp
+    src/Utils/WifiScanner.cpp
 )
 
 set(UTILS_HEADERS
-    Utils/DataLogger.h
-    Utils/Calculations.h
-    Utils/SteinhartCalculator.h
-    Utils/CalibrationHelper.h
-    Utils/downloadmanager.h
-    Utils/OverlayPositionManager.h
-    Utils/ShiftIndicatorHelper.h
-    Utils/wifiscanner.h
+    src/Utils/DataLogger.h
+    src/Utils/Calculations.h
+    src/Utils/SteinhartCalculator.h
+    src/Utils/CalibrationHelper.h
+    src/Utils/DownloadManager.h
+    src/Utils/OverlayPositionManager.h
+    src/Utils/ShiftIndicatorHelper.h
+    src/Utils/WifiScanner.h
 )
 
 # * Combine all sources
 set(PROJECT_SOURCES
-    main.cpp
+    src/main.cpp
     ${CORE_SOURCES}
     ${CAN_SOURCES}
     ${HARDWARE_SOURCES}
@@ -206,10 +208,13 @@ qt_add_executable(${PROJECT_NAME}
 target_include_directories(${PROJECT_NAME} PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_BINARY_DIR}/generated
-    ${CMAKE_CURRENT_SOURCE_DIR}/Can
-    ${CMAKE_CURRENT_SOURCE_DIR}/Core
-    ${CMAKE_CURRENT_SOURCE_DIR}/Hardware
-    ${CMAKE_CURRENT_SOURCE_DIR}/Utils
+    ${CMAKE_CURRENT_SOURCE_DIR}/src
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Can
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Core
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Core/Config
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Core/Services
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Hardware
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Utils
 )
 
 # * Link Qt libraries
@@ -278,7 +283,7 @@ qt_policy(SET QTP0004 NEW)
     set_source_files_properties(PowerTune/Dashboard/DashboardTheme.qml PROPERTIES
         QT_QML_SINGLETON_TYPE TRUE
     )
-    set_source_files_properties(PowerTune/Settings/components/SettingsTheme.qml PROPERTIES
+    set_source_files_properties(PowerTune/UI/SettingsTheme.qml PROPERTIES
         QT_QML_SINGLETON_TYPE TRUE
     )
     set_source_files_properties(Prism/Keyboard/KeyboardTheme.qml PROPERTIES
@@ -317,9 +322,9 @@ qt_policy(SET QTP0004 NEW)
             PowerTune/Core/Main.qml
             PowerTune/Core/BootSplash.qml
             PowerTune/Core/SettingsManager.qml
-            PowerTune/Core/ExBoardAnalog.qml
-            PowerTune/Core/ExtenderBoardTab.qml
-            PowerTune/Core/ExBoardSection.qml
+            PowerTune/Core/BoardConfig/ExBoardAnalog.qml
+            PowerTune/Core/BoardConfig/ExtenderBoardTab.qml
+            PowerTune/Core/BoardConfig/ExBoardSection.qml
             PowerTune/Core/PTExtender/PTExtenderConfigPage.qml
             PowerTune/Core/PTExtender/PTExtenderSystemSection.qml
             PowerTune/Core/PTExtender/PTExtenderGpiSection.qml
@@ -330,13 +335,13 @@ qt_policy(SET QTP0004 NEW)
             PowerTune/Core/PTExtender/LedAnimationPreview.qml
             PowerTune/Core/PTExtender/LogicRuleEditor.qml
             PowerTune/Core/PTExtender/PTExtenderDfiSection.qml
-            PowerTune/Core/AnalogChannelConfigPopup.qml
-            PowerTune/Core/BoardConfigSection.qml
-            PowerTune/Core/DigitalInputsSection.qml
-            PowerTune/Core/DiffSensorConfigPopup.qml
-            PowerTune/Core/GearSensorConfigPopup.qml
-            PowerTune/Core/SpeedSensorConfigPopup.qml
-            PowerTune/Core/BrightnessPopUp.qml
+            PowerTune/Core/SensorConfig/AnalogChannelConfigPopup.qml
+            PowerTune/Core/BoardConfig/BoardConfigSection.qml
+            PowerTune/Core/BoardConfig/DigitalInputsSection.qml
+            PowerTune/Core/SensorConfig/DiffSensorConfigPopup.qml
+            PowerTune/Core/SensorConfig/GearSensorConfigPopup.qml
+            PowerTune/Core/SensorConfig/SpeedSensorConfigPopup.qml
+            PowerTune/Core/BrightnessPopup.qml
         RESOURCE_PREFIX /qt/qml
         OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/qt/qml/PowerTune/Core
     )
@@ -346,19 +351,19 @@ qt_policy(SET QTP0004 NEW)
         URI PowerTune.UI
         VERSION 1.0
         QML_FILES
-            PowerTune/Settings/components/SettingsTheme.qml
-            PowerTune/Settings/components/SettingsPage.qml
-            PowerTune/Settings/components/SettingsSection.qml
-            PowerTune/Settings/components/SettingsRow.qml
-            PowerTune/Settings/components/StyledButton.qml
-            PowerTune/Settings/components/StyledComboBox.qml
-            PowerTune/Settings/components/StyledSwitch.qml
-            PowerTune/Settings/components/StyledTextField.qml
-            PowerTune/Settings/components/StyledCheckBox.qml
-            PowerTune/Settings/components/StyledSpinBox.qml
-            PowerTune/Settings/components/StyledColorPicker.qml
-            PowerTune/Settings/components/ConnectionStatusIndicator.qml
-            PowerTune/Settings/components/SensorPicker.qml
+            PowerTune/UI/SettingsTheme.qml
+            PowerTune/UI/SettingsPage.qml
+            PowerTune/UI/SettingsSection.qml
+            PowerTune/UI/SettingsRow.qml
+            PowerTune/UI/StyledButton.qml
+            PowerTune/UI/StyledComboBox.qml
+            PowerTune/UI/StyledSwitch.qml
+            PowerTune/UI/StyledTextField.qml
+            PowerTune/UI/StyledCheckBox.qml
+            PowerTune/UI/StyledSpinBox.qml
+            PowerTune/UI/StyledColorPicker.qml
+            PowerTune/UI/ConnectionStatusIndicator.qml
+            PowerTune/UI/SensorPicker.qml
         RESOURCE_PREFIX /qt/qml
         OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/qt/qml/PowerTune/UI
     )
@@ -369,12 +374,19 @@ qt_policy(SET QTP0004 NEW)
         VERSION 1.0
         QML_FILES
             PowerTune/Settings/MainSettings.qml
+            PowerTune/Settings/Main/MainSettingsContent.qml
             PowerTune/Settings/DisplaySettings.qml
             PowerTune/Settings/DashSelector.qml
             PowerTune/Settings/DashSelectorWidget.qml
             PowerTune/Settings/VehicleRPMSettings.qml
             PowerTune/Settings/NetworkSettings.qml
             PowerTune/Settings/DiagnosticsSettings.qml
+            PowerTune/Settings/Diagnostics/DiagSystemInfoSection.qml
+            PowerTune/Settings/Diagnostics/DiagSensorLogSection.qml
+            PowerTune/Settings/Diagnostics/DiagAnalogSection.qml
+            PowerTune/Settings/Diagnostics/DiagDigitalSection.qml
+            PowerTune/Settings/Diagnostics/DiagExpanderSection.qml
+            PowerTune/Settings/Diagnostics/DiagCanSection.qml
             PowerTune/Settings/WifiCountryList.qml
         RESOURCE_PREFIX /qt/qml
         OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/qt/qml/PowerTune/Settings
@@ -425,9 +437,9 @@ qt_policy(SET QTP0004 NEW)
         ${CMAKE_CURRENT_SOURCE_DIR}/PowerTune/Gauges/RaceDash/geohelpers
     )
     
-    # * PrismPT.Dashboard module - User dashboard canvas and panels
+    # * PowerTune.Dashboard module - User dashboard canvas and panels
     qt_add_qml_module(PrismPTDashboardLib
-        URI PrismPT.Dashboard
+        URI PowerTune.Dashboard
         VERSION 1.0
         IMPORTS PowerTune.UI PowerTune.Gauges.Shared PowerTune.Gauges.RaceDash
         QML_FILES
@@ -435,13 +447,18 @@ qt_policy(SET QTP0004 NEW)
             PowerTune/Dashboard/RaceDash.qml
             PowerTune/Dashboard/DraggableOverlay.qml
             PowerTune/Dashboard/OverlayConfigPopup.qml
+            PowerTune/Dashboard/OverlayConfig/OverlayDataSection.qml
+            PowerTune/Dashboard/OverlayConfig/OverlayArcSection.qml
+            PowerTune/Dashboard/OverlayConfig/OverlayAlertSection.qml
+            PowerTune/Dashboard/OverlayConfig/OverlayGearShiftSection.qml
+            PowerTune/Dashboard/OverlayConfig/OverlayBiasTextSection.qml
         RESOURCE_PREFIX /qt/qml
-        OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/qt/qml/PrismPT/Dashboard
+        OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/qt/qml/PowerTune/Dashboard
     )
     
-    # * Prism.Keyboard module - Custom virtual keyboard
+    # * PowerTune.Keyboard module - Custom virtual keyboard
     qt_add_qml_module(PrismKeyboardLib
-        URI Prism.Keyboard
+        URI PowerTune.Keyboard
         VERSION 1.0
         QML_FILES
             Prism/Keyboard/KeyboardTheme.qml
@@ -451,7 +468,7 @@ qt_policy(SET QTP0004 NEW)
             Prism/Keyboard/QwertyLayout.qml
             Prism/Keyboard/PrismKeyboard.qml
         RESOURCE_PREFIX /qt/qml
-        OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/qt/qml/Prism/Keyboard
+        OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/qt/qml/PowerTune/Keyboard
     )
     
     # * Static assets (graphics, fonts) - embedded directly into the executable
@@ -500,7 +517,7 @@ qt_policy(SET QTP0004 NEW)
             Resources/graphics/Racedash800x480.png
             Resources/graphics/Racedash_AiM.png
             Resources/graphics/needle.svg
-            Resources/graphics/RoungGaugeRing.png
+            Resources/graphics/RoundGaugeRing.png
             Resources/graphics/green_Light.png
             Resources/graphics/Indicator_left.png
             Resources/graphics/Indicator_left_off.png
@@ -537,14 +554,7 @@ qt_policy(SET QTP0004 NEW)
 
 # * QML Import paths for Qt Creator and Qt Design Studio
 set(QML_IMPORT_PATH
-    "${CMAKE_CURRENT_SOURCE_DIR}/PowerTune"
-    "${CMAKE_CURRENT_SOURCE_DIR}/PowerTune/Core"
-    "${CMAKE_CURRENT_SOURCE_DIR}/PowerTune/Settings"
-    "${CMAKE_CURRENT_SOURCE_DIR}/PowerTune/UI"
-    "${CMAKE_CURRENT_SOURCE_DIR}/PowerTune/Gauges/Shared"
-    "${CMAKE_CURRENT_SOURCE_DIR}/PowerTune/Gauges/RaceDash"
-    "${CMAKE_CURRENT_SOURCE_DIR}/PowerTune/Utils"
-    "${CMAKE_CURRENT_SOURCE_DIR}/PowerTune/Dashboard"
+    "${CMAKE_BINARY_DIR}/qt/qml"
     CACHE STRING "Qt Creator/Design Studio QML import paths"
     FORCE
 )

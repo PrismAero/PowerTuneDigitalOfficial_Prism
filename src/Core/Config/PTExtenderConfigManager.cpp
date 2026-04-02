@@ -1,7 +1,7 @@
 #include "PTExtenderConfigManager.h"
 
-#include "../Can/Protocols/PTExtenderCan.h"
-#include "appsettings.h"
+#include "../../Can/Protocols/PTExtenderCan.h"
+#include "AppSettings.h"
 
 #include <algorithm>
 

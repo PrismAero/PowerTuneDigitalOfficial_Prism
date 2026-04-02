@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QSettings>
+#include <QTimer>
 #include <QVariantMap>
 
 #include "../Core/AppConstants.h"
@@ -31,6 +32,7 @@ signals:
 private:
     bool m_positionsLocked = false;
     mutable QSettings m_settings;
+    QTimer m_syncTimer;
 };
 
 #endif  // OVERLAYPOSITIONMANAGER_H

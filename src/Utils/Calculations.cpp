@@ -167,7 +167,6 @@ void calculations::calculate()
 {
     weight = m_vehicleData->Weight();
     const qreal currentSpeed = m_expanderBoardData ? m_expanderBoardData->EXSpeed() : 0.0;
-    m_updatetimer.start(25);
 
     if (m_settingsData->speedunits() == "metric" && startdragcalculation == 1) {
         timesincelastupdate = (startTime.msecsTo(QTime::currentTime())) - totaldragtime;

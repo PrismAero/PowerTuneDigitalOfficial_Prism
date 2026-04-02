@@ -1,19 +1,19 @@
-import QtQuick 2.15
-import QtQuick.Controls 2.15
+import QtQuick
+import QtQuick.Controls
 import QtMultimedia
-import QtQuick.Window 2.15
+import QtQuick.Window
 import com.powertune 1.0
 import PowerTune.Core 1.0
 import PowerTune.UI 1.0
 import PowerTune.Utils 1.0
-import Prism.Keyboard 1.0
+import PowerTune.Keyboard 1.0
 
 ApplicationWindow {
     id: window
 
     property bool showUnlockAnimation: false
     property bool brightnessPopupDismissed: false
-    readonly property string raceDashSource: "qrc:/qt/qml/PrismPT/Dashboard/PowerTune/Dashboard/RaceDash.qml"
+    readonly property string raceDashSource: "qrc:/qt/qml/PowerTune/Dashboard/PowerTune/Dashboard/RaceDash.qml"
     readonly property string demoVideoSource: "file:///home/root/bootsplash.mp4"
     color: "black"
     height: 720
@@ -80,7 +80,7 @@ ApplicationWindow {
 
         active: ScreenControl.startupPopupVisible && !brightnessPopupDismissed && !DemoMode.active
         anchors.right: parent.right
-        source: active ? Qt.resolvedUrl("BrightnessPopUp.qml") : ""
+        source: active ? Qt.resolvedUrl("BrightnessPopup.qml") : ""
         visible: false
         width: window.width * 0.15
 
@@ -380,6 +380,7 @@ ApplicationWindow {
         }
 
         Image {
+            asynchronous: true
             anchors.fill: parent
             fillMode: Image.PreserveAspectFit
             source: "qrc:/Resources/graphics/Logo.png"

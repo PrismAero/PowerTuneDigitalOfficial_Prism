@@ -19,7 +19,7 @@
   Copyright (C) 2026 Kai Wyborny - Memory optimization changes
 */
 
-#include "connect.h"
+#include "Connect.h"
 
 #include "../Can/CanManager.h"
 #include "../Can/CanStartupManager.h"
@@ -32,7 +32,7 @@
 #include "../Utils/OverlayPositionManager.h"
 #include "../Utils/ShiftIndicatorHelper.h"
 #include "../Utils/SteinhartCalculator.h"
-#include "../Utils/wifiscanner.h"
+#include "../Utils/WifiScanner.h"
 #include "DiagnosticsProvider.h"
 #include "DashboardLockService.h"
 #include "DemoModeService.h"
@@ -47,7 +47,7 @@
 #include "ScreenControlService.h"
 #include "SensorRegistry.h"
 #include "UpdateManagerService.h"
-#include "appsettings.h"
+#include "AppSettings.h"
 
 #include <QByteArrayMatcher>
 #include <QCoreApplication>
@@ -279,6 +279,7 @@ Connect::Connect(QObject *parent)
     engine->rootContext()->setContextProperty("SensorRegistry", m_sensorRegistry);
     // * Phase 8: Expose DiagnosticsProvider to QML
     engine->rootContext()->setContextProperty("Diagnostics", m_diagnosticsProvider);
+    engine->rootContext()->setContextProperty("CanFrameModel", m_canFrameModel);
     engine->rootContext()->setContextProperty("OverlayConfig", m_overlayConfigManager);
     engine->rootContext()->setContextProperty("ShiftHelper", m_shiftIndicatorHelper);
     engine->rootContext()->setContextProperty("ExBoardConfig", m_exBoardConfigManager);
@@ -743,50 +744,5 @@ void Connect::update()
         m_diagnosticsProvider->addLogMessage(QStringLiteral("INFO"), QStringLiteral("System update initiated"));
     if (m_connectionData)
         m_connectionData->setSerialStat(QStringLiteral("Checking for updates"));
-}
-
-void Connect::changefolderpermission()
-{
-    QProcess *process = new QProcess(this);
-    QString program = "sudo";
-    QStringList arguments;
-    arguments << "chown" << "-R" << "root:root" << "/home/root/KTracks";
-
-    process->start(program, arguments);
-    process->waitForFinished(600000);  // 10 minutes time before timeout
-    reboot();
-}
-
-void Connect::shutdown()
-{
-    m_connectionData->setSerialStat("Shutting Down");
-    if (m_diagnosticsProvider)
-        m_diagnosticsProvider->addLogMessage(QStringLiteral("WARN"), QStringLiteral("System shutdown initiated"));
-    if (m_appSettings)
-        m_appSettings->sync();
-    QProcess::startDetached(QStringLiteral("shutdown"), QStringList() << QStringLiteral("-h") << QStringLiteral("now"));
-}
-
-void Connect::reboot()
-{
-    m_connectionData->setSerialStat("Rebooting");
-    if (m_diagnosticsProvider)
-        m_diagnosticsProvider->addLogMessage(QStringLiteral("INFO"), QStringLiteral("System reboot initiated"));
-    if (m_appSettings)
-        m_appSettings->sync();
-    QProcess::startDetached(QStringLiteral("reboot"), QStringList());
-}
-
-void Connect::turnscreen()
-{
-    m_connectionData->setSerialStat("Turning Screen");
-    QProcess *process = new QProcess(this);
-    QString program = "sudo";
-    QStringList arguments;
-    arguments << "cp" << "/home/root/src/config.txt" << "/boot/config.txt";
-
-    process->start(program, arguments);
-    process->waitForFinished(600000);  // 10 minutes time before timeout
-    reboot();
 }
 

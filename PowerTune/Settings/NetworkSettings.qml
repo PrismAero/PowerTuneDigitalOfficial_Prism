@@ -1,7 +1,7 @@
 // Copyright (c) Kai Wyborny. All rights reserved.
-import QtQuick 2.15
-import QtQuick.Controls 2.15
-import QtQuick.Layouts 1.15
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
 import PowerTune.Settings 1.0
 import PowerTune.UI 1.0
 import PowerTune.Utils 1.0
@@ -20,6 +20,9 @@ SettingsPage {
     Connections {
         function onSerialStatChanged() {
             consoleText.append(Connection.SerialStat);
+            var lines = consoleText.text.split("\n");
+            if (lines.length > 500)
+                consoleText.text = lines.slice(lines.length - 500).join("\n");
             consoleFlickable.contentY = consoleFlickable.contentHeight - consoleFlickable.height;
         }
 

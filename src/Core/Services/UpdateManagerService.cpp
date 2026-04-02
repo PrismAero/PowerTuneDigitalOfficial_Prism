@@ -373,22 +373,33 @@ void UpdateManagerService::installUpdate()
         return;
     }
 
+    if (m_installerProcess && m_installerProcess->state() != QProcess::NotRunning) {
+        setStatus(QStringLiteral("error"), QStringLiteral("Install already in progress"));
+        return;
+    }
+
+    if (!m_installerProcess) {
+        m_installerProcess = new QProcess(this);
+        connect(m_installerProcess,
+                qOverload<int, QProcess::ExitStatus>(&QProcess::finished),
+                this,
+                [this](int exitCode, QProcess::ExitStatus status) {
+            if (status != QProcess::NormalExit || exitCode != 0) {
+                const QString stderrText = QString::fromUtf8(m_installerProcess->readAllStandardError()).trimmed();
+                setStatus(QStringLiteral("error"),
+                          QStringLiteral("Install failed: %1").arg(stderrText.isEmpty()
+                                                                   ? QStringLiteral("unknown error")
+                                                                   : stderrText));
+                return;
+            }
+
+            setCurrentVersion(m_latestVersion);
+            setUpdateAvailable(false);
+            setDownloadReady(false);
+            setStatus(QStringLiteral("success"), QStringLiteral("Update installed successfully. Reboot required."));
+        });
+    }
+
     setStatus(QStringLiteral("installing"), QStringLiteral("Installing update bundle"));
-    QProcess installer;
-    installer.start(installerPath, {m_downloadedBundlePath, m_latestVersion});
-    if (!installer.waitForFinished(-1)) {
-        setStatus(QStringLiteral("error"), QStringLiteral("Installer execution failed"));
-        return;
-    }
-
-    if (installer.exitStatus() != QProcess::NormalExit || installer.exitCode() != 0) {
-        const QString stderrText = QString::fromUtf8(installer.readAllStandardError()).trimmed();
-        setStatus(QStringLiteral("error"), QStringLiteral("Install failed: %1").arg(stderrText));
-        return;
-    }
-
-    setCurrentVersion(m_latestVersion);
-    setUpdateAvailable(false);
-    setDownloadReady(false);
-    setStatus(QStringLiteral("success"), QStringLiteral("Update installed successfully. Reboot required."));
+    m_installerProcess->start(installerPath, {m_downloadedBundlePath, m_latestVersion});
 }

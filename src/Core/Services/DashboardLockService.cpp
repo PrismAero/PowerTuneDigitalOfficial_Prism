@@ -1,6 +1,6 @@
 #include "DashboardLockService.h"
 
-#include "appsettings.h"
+#include "AppSettings.h"
 
 namespace {
 constexpr int kUnlockHoldDelayMs = 500;

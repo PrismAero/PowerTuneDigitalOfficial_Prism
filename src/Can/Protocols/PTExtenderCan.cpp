@@ -2,7 +2,7 @@
 
 #include "../../Can/CanTransport.h"
 #include "../../Core/DiagnosticsProvider.h"
-#include "../../Core/PTExtenderConfigManager.h"
+#include "../../Core/Config/PTExtenderConfigManager.h"
 #include "../../Core/Models/ConnectionData.h"
 #include "../../Core/Models/DigitalInputs.h"
 #include "../../Core/Models/ExpanderBoardData.h"

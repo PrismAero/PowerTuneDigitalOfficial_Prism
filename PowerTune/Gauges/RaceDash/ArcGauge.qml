@@ -1,4 +1,4 @@
-import QtQuick 2.15
+import QtQuick
 import PowerTune.Gauges.Shared 1.0
 import PowerTune.Gauges.RaceDash 1.0
 

@@ -4,6 +4,9 @@ OverlayPositionManager::OverlayPositionManager(QObject *parent)
     : QObject(parent), m_positionsLocked(false), m_settings(AppConstants::ORG_NAME, AppConstants::APP_NAME)
 {
     m_positionsLocked = m_settings.value(QStringLiteral("ui/overlayPositionsLocked"), false).toBool();
+    m_syncTimer.setSingleShot(true);
+    m_syncTimer.setInterval(500);
+    connect(&m_syncTimer, &QTimer::timeout, this, [this]() { m_settings.sync(); });
 }
 
 void OverlayPositionManager::savePosition(const QString &overlayId, qreal x, qreal y)
@@ -12,7 +15,7 @@ void OverlayPositionManager::savePosition(const QString &overlayId, qreal x, qre
     m_settings.setValue(overlayId + QStringLiteral("/x"), x);
     m_settings.setValue(overlayId + QStringLiteral("/y"), y);
     m_settings.endGroup();
-    m_settings.sync();
+    m_syncTimer.start();
 }
 
 QVariantMap OverlayPositionManager::getPosition(const QString &overlayId) const

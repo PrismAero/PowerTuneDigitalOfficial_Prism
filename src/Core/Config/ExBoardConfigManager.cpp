@@ -1,8 +1,8 @@
 #include "ExBoardConfigManager.h"
 
-#include "../Utils/CalibrationHelper.h"
+#include "../../Utils/CalibrationHelper.h"
 #include "SensorRegistry.h"
-#include "appsettings.h"
+#include "AppSettings.h"
 
 #include <algorithm>
 #include <cmath>

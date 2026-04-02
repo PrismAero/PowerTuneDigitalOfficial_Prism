@@ -13,7 +13,7 @@
 #include "../Can/Protocols/PTExtenderCan.h"
 #include "PropertyRouter.h"
 #include "SensorRegistry.h"
-#include "appsettings.h"
+#include "AppSettings.h"
 
 #include <QDebug>
 #include <QFile>
@@ -78,8 +78,15 @@ DiagnosticsProvider::DiagnosticsProvider(QObject *parent) : QObject(parent)
     connect(&m_systemInfoTimer, &QTimer::timeout, this, &DiagnosticsProvider::updateSystemInfo);
     connect(&m_canRateTimer, &QTimer::timeout, this, &DiagnosticsProvider::updateCanRate);
     connect(&m_liveSensorTimer, &QTimer::timeout, this, &DiagnosticsProvider::refreshLiveSensorEntries);
-    // Keep CAN status freshness available even when Diagnostics page is closed.
-    m_canRateTimer.start(1000);
+    m_canFrameNotifyTimer.setSingleShot(true);
+    m_canFrameNotifyTimer.setInterval(100);
+    connect(&m_canFrameNotifyTimer, &QTimer::timeout, this, [this]() {
+        if (!m_canFrameDirty)
+            return;
+        m_canFrameDirty = false;
+        emit canFrameBufferChanged();
+    });
+    // Start CAN polling lazily when diagnostics page is visible.
     addLogMessage(QStringLiteral("INFO"), QStringLiteral("Diagnostics provider initialized (idle)"));
 }
 
@@ -94,6 +101,8 @@ void DiagnosticsProvider::activate()
         return;
 
     m_initialized = true;
+    if (m_pageVisible && !m_canRateTimer.isActive())
+        m_canRateTimer.start(1000);
     m_systemInfoTimer.start(2000);
     m_liveSensorTimer.start(1000);
     updateSystemInfo();
@@ -394,6 +403,8 @@ void DiagnosticsProvider::setPageVisible(bool visible)
     m_pageVisible = visible;
 
     if (m_pageVisible) {
+        if (!m_canRateTimer.isActive())
+            m_canRateTimer.start(1000);
         if (!m_systemInfoTimer.isActive())
             m_systemInfoTimer.start(2000);
         if (!m_liveSensorTimer.isActive())
@@ -402,6 +413,7 @@ void DiagnosticsProvider::setPageVisible(bool visible)
         updateSystemInfo();
         refreshLiveSensorEntries();
     } else {
+        m_canRateTimer.stop();
         m_systemInfoTimer.stop();
         m_liveSensorTimer.stop();
     }
@@ -460,7 +472,9 @@ void DiagnosticsProvider::recordCanFrame(quint32 id, const QByteArray &payload)
         m_canFrameRing[m_canFrameWritePos] = frame;
         m_canFrameWritePos = (m_canFrameWritePos + 1) % MAX_CAN_FRAMES;
     }
-    emit canFrameBufferChanged();
+    m_canFrameDirty = true;
+    if (!m_canFrameNotifyTimer.isActive())
+        m_canFrameNotifyTimer.start();
 }
 
 QVariantList DiagnosticsProvider::canFrameBuffer() const

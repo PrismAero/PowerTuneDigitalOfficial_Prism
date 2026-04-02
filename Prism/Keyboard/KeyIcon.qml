@@ -2,7 +2,7 @@
 // Self-contained Material Symbols icon component for Prism.Keyboard module.
 // Uses ligature-based rendering with the MaterialSymbolsOutlined font.
 // The host application must embed the font as a Qt resource at the path below.
-import QtQuick 2.15
+import QtQuick
 
 Text {
     id: root

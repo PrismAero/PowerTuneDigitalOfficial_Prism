@@ -1,6 +1,6 @@
-import QtQuick 2.15
-import QtQuick.Controls 2.15
-import PrismPT.Dashboard 1.0
+import QtQuick
+import QtQuick.Controls
+import PowerTune.Dashboard 1.0
 import PowerTune.UI 1.0
 import PowerTune.Gauges.Shared 1.0
 import PowerTune.Gauges.RaceDash 1.0
@@ -191,6 +191,7 @@ Item {
     }
 
     Image {
+        asynchronous: true
         anchors.fill: parent
         fillMode: Image.Stretch
         smooth: true
