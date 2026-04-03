@@ -55,7 +55,8 @@ public:
         GPS,              ///< GPS hardware (serial NMEA)
         SenseHat,         ///< SenseHat sensors (accelerometer, gyroscope, compass,
                           ///< ambient temperature, ambient pressure)
-        Computed          ///< Values derived from other sensors
+        Computed,         ///< Values derived from other sensors
+        DfiSerial         ///< Direct DFI serial UART input (Kawasaki DFI protocol)
     };
     Q_ENUM(SensorSource)
 
@@ -151,6 +152,7 @@ public:
      * Call this when extender board settings change.
      */
     Q_INVOKABLE void refreshExtenderDigitalInputs();
+    Q_INVOKABLE void refreshDfiSerialSensors();
     Q_INVOKABLE void refreshAll();
 
     // -- Property accessors --

@@ -27,4 +27,5 @@ SettingsPage {
     DiagDigitalSection {}
     DiagExpanderSection {}
     DiagCanSection {}
+    DiagDfiSerialSection {}
 }

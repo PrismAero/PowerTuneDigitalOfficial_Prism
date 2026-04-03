@@ -26,6 +26,7 @@
 #include <QVariantMap>
 
 class AppSettings;
+class DfiSerialReader;
 class SensorRegistry;
 class PropertyRouter;
 
@@ -168,6 +169,7 @@ public:
      * @param settings Pointer to the AppSettings instance
      */
     void setAppSettings(AppSettings *settings);
+    void setDfiSerialReader(DfiSerialReader *reader);
 
     // -- System Info accessors --
 
@@ -343,6 +345,7 @@ public:
      */
     Q_INVOKABLE QVariantList getExtenderDigitalDiagnostics() const;
     Q_INVOKABLE QVariantList getPTExtenderDiagnostics() const;
+    Q_INVOKABLE QVariantList getDfiSerialDiagnostics() const;
 
     /**
      * @brief Add a log message to the buffer.
@@ -495,6 +498,7 @@ private:
     SensorRegistry *m_sensorRegistry = nullptr;
     PropertyRouter *m_propertyRouter = nullptr;
     AppSettings *m_appSettings = nullptr;
+    DfiSerialReader *m_dfiSerialReader = nullptr;
 
     struct LogEntry
     {

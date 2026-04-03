@@ -65,6 +65,7 @@ find_package(Qt6 REQUIRED COMPONENTS
     QuickControls2
     Network
     SerialBus
+    SerialPort
     Multimedia
 )
 
@@ -157,6 +158,16 @@ set(CAN_HEADERS
     src/Can/Protocols/PTExtenderCan.h
 )
 
+set(DFI_SOURCES
+    src/DFI/kawasaki_dfi_comm.c
+    src/DFI/DfiSerialReader.cpp
+)
+
+set(DFI_HEADERS
+    src/DFI/kawasaki_dfi_comm.h
+    src/DFI/DfiSerialReader.h
+)
+
 # * Source files - Hardware interfaces
 set(HARDWARE_SOURCES
     src/Hardware/Extender.cpp
@@ -194,6 +205,7 @@ set(PROJECT_SOURCES
     src/main.cpp
     ${CORE_SOURCES}
     ${CAN_SOURCES}
+    ${DFI_SOURCES}
     ${HARDWARE_SOURCES}
     ${UTILS_SOURCES}
 )
@@ -201,6 +213,7 @@ set(PROJECT_SOURCES
 set(PROJECT_HEADERS
     ${CORE_HEADERS}
     ${CAN_HEADERS}
+    ${DFI_HEADERS}
     ${HARDWARE_HEADERS}
     ${UTILS_HEADERS}
 )
@@ -234,6 +247,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     Qt6::QuickControls2
     Qt6::Network
     Qt6::SerialBus
+    Qt6::SerialPort
     Qt6::Multimedia
 )
 
@@ -345,6 +359,7 @@ qt_policy(SET QTP0004 NEW)
             PowerTune/Core/PTExtender/LedAnimationPreview.qml
             PowerTune/Core/PTExtender/LogicRuleEditor.qml
             PowerTune/Core/PTExtender/PTExtenderDfiSection.qml
+            PowerTune/Core/DFI/DfiCodeFilterPopup.qml
             PowerTune/Core/SensorConfig/AnalogChannelConfigPopup.qml
             PowerTune/Core/BoardConfig/BoardConfigSection.qml
             PowerTune/Core/BoardConfig/DigitalInputsSection.qml
@@ -399,6 +414,7 @@ qt_policy(SET QTP0004 NEW)
             PowerTune/Settings/Diagnostics/DiagDigitalSection.qml
             PowerTune/Settings/Diagnostics/DiagExpanderSection.qml
             PowerTune/Settings/Diagnostics/DiagCanSection.qml
+            PowerTune/Settings/Diagnostics/DiagDfiSerialSection.qml
             PowerTune/Settings/WifiCountryList.qml
         RESOURCE_PREFIX /qt/qml
         OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/qt/qml/PowerTune/Settings

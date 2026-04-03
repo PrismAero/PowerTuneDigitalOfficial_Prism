@@ -52,6 +52,7 @@
 #include "SensorRegistry.h"
 #include "UpdateManagerService.h"
 #include "AppSettings.h"
+#include "../DFI/DfiSerialReader.h"
 
 #include <QByteArrayMatcher>
 #include <QCoreApplication>
@@ -129,6 +130,7 @@ Connect::Connect(QObject *parent)
       m_canManager(nullptr),
       m_ptExtenderCan(nullptr),
       m_ptExtenderConfigManager(nullptr),
+      m_dfiSerialReader(nullptr),
       m_overlayConfigService(nullptr)
 
 {
@@ -242,6 +244,14 @@ Connect::Connect(QObject *parent)
     m_ptExtenderConfigManager->setAppSettings(m_appSettings);
     m_ptExtenderConfigManager->setPTExtenderCan(m_ptExtenderCan);
     m_ptExtenderCan->setConfigManager(m_ptExtenderConfigManager);
+    m_dfiSerialReader = new DfiSerialReader(this);
+    m_dfiSerialReader->setAppSettings(m_appSettings);
+    m_dfiSerialReader->setVehicleData(m_vehicleData);
+    m_dfiSerialReader->setDiagnosticsProvider(m_diagnosticsProvider);
+    m_dfiSerialReader->setSensorRegistry(m_sensorRegistry);
+    m_diagnosticsProvider->setDfiSerialReader(m_dfiSerialReader);
+    if (m_dfiSerialReader->enabled())
+        m_dfiSerialReader->start();
     m_differentialSensorCalc = new DifferentialSensorCalc(this);
     m_differentialSensorCalc->setExpanderBoardData(m_expanderBoardData);
     m_differentialSensorCalc->setSensorRegistry(m_sensorRegistry);
@@ -307,6 +317,7 @@ Connect::Connect(QObject *parent)
     engine->rootContext()->setContextProperty("ExBoardDigitalModel", m_exBoardDigitalModel);
     engine->rootContext()->setContextProperty("VehicleRpmSettingsModel", m_vehicleRpmSettingsModel);
     engine->rootContext()->setContextProperty("PTExtenderConfig", m_ptExtenderConfigManager);
+    engine->rootContext()->setContextProperty("DfiSerial", m_dfiSerialReader);
     engine->rootContext()->setContextProperty("ScreenControl", m_screenControlService);
     engine->rootContext()->setContextProperty("DashboardLock", m_dashboardLockService);
     engine->rootContext()->setContextProperty("DemoMode", m_demoModeService);

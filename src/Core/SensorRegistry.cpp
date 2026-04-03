@@ -605,12 +605,68 @@ void SensorRegistry::refreshExtenderDigitalInputs()
     scheduleSensorsChanged();
 }
 
+void SensorRegistry::refreshDfiSerialSensors()
+{
+    QStringList toRemove;
+    for (auto it = m_sensors.constBegin(); it != m_sensors.constEnd(); ++it) {
+        if (it->source == SensorSource::DfiSerial)
+            toRemove.append(it.key());
+    }
+    for (const QString &key : toRemove)
+        m_sensors.remove(key);
+
+    SensorEntry dfiGear;
+    dfiGear.key = QStringLiteral("DfiSerialGear");
+    dfiGear.displayName = QStringLiteral("DFI Serial Gear");
+    dfiGear.category = QStringLiteral("DFI Serial");
+    dfiGear.unit = QString();
+    dfiGear.source = SensorSource::DfiSerial;
+    dfiGear.active = false;
+    dfiGear.decimals = 0;
+    dfiGear.maxValue = 6.0;
+    dfiGear.stepSize = 1.0;
+    m_sensors.insert(dfiGear.key, dfiGear);
+
+    SensorEntry dfiCodes;
+    dfiCodes.key = QStringLiteral("DfiSerialCodes");
+    dfiCodes.displayName = QStringLiteral("DFI Serial Active Codes");
+    dfiCodes.category = QStringLiteral("DFI Serial");
+    dfiCodes.unit = QString();
+    dfiCodes.source = SensorSource::DfiSerial;
+    dfiCodes.active = false;
+    dfiCodes.decimals = 0;
+    m_sensors.insert(dfiCodes.key, dfiCodes);
+
+    SensorEntry dfiCksumErr;
+    dfiCksumErr.key = QStringLiteral("DfiSerialChecksumErrors");
+    dfiCksumErr.displayName = QStringLiteral("DFI Serial Checksum Errors");
+    dfiCksumErr.category = QStringLiteral("DFI Serial");
+    dfiCksumErr.unit = QString();
+    dfiCksumErr.source = SensorSource::DfiSerial;
+    dfiCksumErr.active = false;
+    dfiCksumErr.decimals = 0;
+    m_sensors.insert(dfiCksumErr.key, dfiCksumErr);
+
+    SensorEntry dfiGroupsRx;
+    dfiGroupsRx.key = QStringLiteral("DfiSerialGroupsRx");
+    dfiGroupsRx.displayName = QStringLiteral("DFI Serial Groups Received");
+    dfiGroupsRx.category = QStringLiteral("DFI Serial");
+    dfiGroupsRx.unit = QString();
+    dfiGroupsRx.source = SensorSource::DfiSerial;
+    dfiGroupsRx.active = false;
+    dfiGroupsRx.decimals = 0;
+    m_sensors.insert(dfiGroupsRx.key, dfiGroupsRx);
+
+    scheduleSensorsChanged();
+}
+
 void SensorRegistry::refreshAll()
 {
     const bool priorSuppress = m_suppressEmit;
     m_suppressEmit = true;
     refreshExtenderAnalogInputs();
     refreshExtenderDigitalInputs();
+    refreshDfiSerialSensors();
     m_suppressEmit = priorSuppress;
     if (m_sensorsChangedPending)
         scheduleSensorsChanged();

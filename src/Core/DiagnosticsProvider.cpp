@@ -11,6 +11,7 @@
 #include "DiagnosticsProvider.h"
 
 #include "../Can/Protocols/PTExtenderCan.h"
+#include "../DFI/DfiSerialReader.h"
 #include "PropertyRouter.h"
 #include "SensorRegistry.h"
 #include "AppSettings.h"
@@ -134,6 +135,11 @@ void DiagnosticsProvider::setPropertyRouter(PropertyRouter *router)
 void DiagnosticsProvider::setAppSettings(AppSettings *settings)
 {
     m_appSettings = settings;
+}
+
+void DiagnosticsProvider::setDfiSerialReader(DfiSerialReader *reader)
+{
+    m_dfiSerialReader = reader;
 }
 
 
@@ -819,6 +825,44 @@ QVariantList DiagnosticsProvider::getPTExtenderDiagnostics() const
             entry[QStringLiteral("key")] = QStringLiteral("DFI %1").arg(code);
             entry[QStringLiteral("value")] = PTExtenderCan::dfiCodeDescription(code);
             result.append(entry);
+        }
+    }
+
+    return result;
+}
+
+QVariantList DiagnosticsProvider::getDfiSerialDiagnostics() const
+{
+    QVariantList result;
+    if (!m_dfiSerialReader)
+        return result;
+
+    auto add = [&](const QString &key, const QVariant &value) {
+        QVariantMap entry;
+        entry[QStringLiteral("key")] = key;
+        entry[QStringLiteral("value")] = value;
+        result.append(entry);
+    };
+
+    add(QStringLiteral("Port"), m_dfiSerialReader->portPath());
+    add(QStringLiteral("Connected"), m_dfiSerialReader->connected() ? QStringLiteral("Yes") : QStringLiteral("No"));
+    add(QStringLiteral("Signal"), m_dfiSerialReader->hasSignal() ? QStringLiteral("Active") : QStringLiteral("None"));
+    add(QStringLiteral("Gear"), m_dfiSerialReader->gearString());
+    add(QStringLiteral("Active Codes"), m_dfiSerialReader->activeCodes().isEmpty()
+            ? QStringLiteral("none") : m_dfiSerialReader->activeCodes());
+    add(QStringLiteral("Groups Received"), m_dfiSerialReader->groupsReceived());
+    add(QStringLiteral("Checksum Errors"), m_dfiSerialReader->checksumErrors());
+    add(QStringLiteral("Suppressed Codes"), m_dfiSerialReader->suppressedCodeList().join(QStringLiteral(", ")));
+
+    const QString codesCsv = m_dfiSerialReader->activeCodes();
+    if (!codesCsv.isEmpty()) {
+        const QStringList codes = codesCsv.split(',', Qt::SkipEmptyParts);
+        for (const QString &codeStr : codes) {
+            bool ok = false;
+            const int code = codeStr.trimmed().toInt(&ok);
+            if (!ok || code <= 0)
+                continue;
+            add(QStringLiteral("DFI %1").arg(code), DfiSerialReader::dfiCodeDescription(code));
         }
     }
 

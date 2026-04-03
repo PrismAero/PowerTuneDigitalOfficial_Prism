@@ -16,6 +16,7 @@ IMAGE_INSTALL = " \
     qt5compat \
     qt5compat-qmlplugins \
     qtserialbus \
+    qtserialport \
     qtsvg \
     qtsvg-plugins \
     qtshadertools \

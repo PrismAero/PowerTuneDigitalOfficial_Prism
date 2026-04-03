@@ -55,6 +55,7 @@ class CanTransport;
 class CanManager;
 class PTExtenderCan;
 class PTExtenderConfigManager;
+class DfiSerialReader;
 
 class Connect : public QObject
 {
@@ -162,6 +163,7 @@ private:
     CanManager *m_canManager;
     PTExtenderCan *m_ptExtenderCan;
     PTExtenderConfigManager *m_ptExtenderConfigManager;
+    DfiSerialReader *m_dfiSerialReader;
     BrightnessMethod m_brightnessMethod = BrightnessMethod::None;
     int m_logging = 0;
     int m_connectClicked = 0;
