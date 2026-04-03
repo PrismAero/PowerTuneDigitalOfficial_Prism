@@ -59,8 +59,10 @@ void AppSettings::setValue(const QString &key, const QVariant &value)
 
     m_cache.insert(key, value);
     m_settings.setValue(key, value);
-    m_dirty = true;
-    scheduleSync();
+    // Persist immediately to avoid losing settings during abrupt reboots/power cycles.
+    m_settings.sync();
+    m_dirty = false;
+    m_syncTimer.stop();
 }
 
 QVariant AppSettings::getValue(const QString &key, const QVariant &defaultValue) const

@@ -85,3 +85,34 @@ bool ShiftIndicatorHelper::isPillLit(int index, int activeCount, const QVariantL
     }
     return false;
 }
+
+QString ShiftIndicatorHelper::gearMainText(double gearValue) const
+{
+    const int rounded = static_cast<int>(qRound(gearValue));
+    if (rounded <= -90)
+        return QStringLiteral("ERR");
+    if (rounded < 0)
+        return QStringLiteral("R");
+    if (rounded <= 0)
+        return QStringLiteral("N");
+    if (rounded > 8)
+        return QStringLiteral("ERR");
+    return QString::number(rounded);
+}
+
+QString ShiftIndicatorHelper::gearSuffixText(double gearValue) const
+{
+    const int rounded = static_cast<int>(qRound(gearValue));
+    if (rounded <= 0 || rounded > 8)
+        return QString();
+
+    const int mod10 = rounded % 10;
+    const int mod100 = rounded % 100;
+    if (mod10 == 1 && mod100 != 11)
+        return QStringLiteral("st");
+    if (mod10 == 2 && mod100 != 12)
+        return QStringLiteral("nd");
+    if (mod10 == 3 && mod100 != 13)
+        return QStringLiteral("rd");
+    return QStringLiteral("th");
+}

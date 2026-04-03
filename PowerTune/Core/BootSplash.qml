@@ -9,6 +9,9 @@ Rectangle {
     anchors.fill: parent
     color: "black"
     property bool finishStarted: false
+    property string primaryVideoSource: "file:///home/pi/bootvideo.mp4"
+    property string fallbackVideoSource: "file:///home/pi/bootsplash.mp4"
+    property bool triedFallback: false
 
     function beginFinish() {
         if (finishStarted)
@@ -29,12 +32,18 @@ Rectangle {
     MediaPlayer {
         id: mediaPlayer
         videoOutput: videoOutput
-        source: "file:///home/root/bootsplash.mp4"
+        source: splash.primaryVideoSource
 
         onMediaStatusChanged: {
             if (mediaStatus === MediaPlayer.InvalidMedia
                     || mediaStatus === MediaPlayer.NoMedia) {
-                splash.beginFinish();
+                if (!splash.triedFallback && source !== splash.fallbackVideoSource) {
+                    splash.triedFallback = true;
+                    source = splash.fallbackVideoSource;
+                    play();
+                } else {
+                    splash.beginFinish();
+                }
             } else if ((mediaStatus === MediaPlayer.LoadedMedia
                         || mediaStatus === MediaPlayer.BufferedMedia)
                        && duration > 0) {

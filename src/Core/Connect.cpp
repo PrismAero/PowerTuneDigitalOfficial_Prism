@@ -249,7 +249,6 @@ Connect::Connect(QObject *parent)
     m_dfiSerialReader->setVehicleData(m_vehicleData);
     m_dfiSerialReader->setDiagnosticsProvider(m_diagnosticsProvider);
     m_dfiSerialReader->setSensorRegistry(m_sensorRegistry);
-    m_propertyRouter->aliasProperty(QStringLiteral("gear"), QStringLiteral("DfiSerialGear"));
     m_diagnosticsProvider->setDfiSerialReader(m_dfiSerialReader);
     if (m_dfiSerialReader->enabled())
         m_dfiSerialReader->start();

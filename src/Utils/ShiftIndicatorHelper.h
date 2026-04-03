@@ -18,6 +18,8 @@ public:
     Q_INVOKABLE QVariantList activationOrder(int pillCount, const QString &pattern) const;
     Q_INVOKABLE int activeLightCount(double rpmValue, double rpmMax, double shiftPoint, int pillCount) const;
     Q_INVOKABLE bool isPillLit(int index, int activeCount, const QVariantList &order) const;
+    Q_INVOKABLE QString gearMainText(double gearValue) const;
+    Q_INVOKABLE QString gearSuffixText(double gearValue) const;
 };
 
 #endif  // SHIFTINDICATORHELPER_H

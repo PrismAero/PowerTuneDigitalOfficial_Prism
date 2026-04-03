@@ -27,27 +27,16 @@ ApplicationWindow {
         return raceDashSource;
     }
 
-    function normalizeDashSettings() {
-        var count = AppSettings.getValue("ui/dashCount", AppSettings.getValue("Number of Dashes", 0));
-        if (count !== 0)
-            AppSettings.setValue("ui/dashCount", 0);
-
-        var firstSelection = AppSettings.getValue("ui/dashSelect1", 0);
-        if (firstSelection !== 0)
-            AppSettings.setValue("ui/dashSelect1", 0);
-
-        firstPageLoader.source = dashSourceFromSelection(firstSelection);
-        if (UI.Visibledashes !== 1)
-            UI.Visibledashes = 1;
-    }
-
     function ensureDashboardPageIfNavigationDisabled() {
         if (!dashView.interactive && dashView.currentIndex > 0)
             dashView.currentIndex = 0;
     }
 
     Component.onCompleted: {
-        normalizeDashSettings();
+        var firstSelection = AppSettings.getValue("ui/dashSelect1", 0);
+        firstPageLoader.source = dashSourceFromSelection(firstSelection);
+        if (UI.Visibledashes !== 1)
+            UI.Visibledashes = 1;
         ensureDashboardPageIfNavigationDisabled();
         if (popUpLoader.active)
             popUpLoader.visible = true;

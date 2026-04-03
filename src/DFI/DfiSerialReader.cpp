@@ -266,8 +266,13 @@ void DfiSerialReader::publishStatus(const dfi_status_t *status)
 
     if (gearDirty) {
         emit gearChanged(m_gear);
-        if (m_vehicleData && m_gear >= 0)
-            m_vehicleData->setGear(m_gear);
+        if (m_vehicleData) {
+            if (m_gear >= 0)
+                m_vehicleData->setGear(m_gear);
+            // Expose a dedicated DFI gear property for dashboard bindings.
+            // Invalid frames map to a sentinel so UI helpers can render "ERR".
+            m_vehicleData->setDfiSerialGear(m_gear >= 0 ? m_gear : -99);
+        }
     }
     if (codesDirty)
         emit activeCodesChanged(m_activeCodes);

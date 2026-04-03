@@ -15,6 +15,14 @@ void VehicleData::setGear(int Gear)
     }
 }
 
+void VehicleData::setDfiSerialGear(int Gear)
+{
+    if (m_DfiSerialGear != Gear) {
+        m_DfiSerialGear = Gear;
+        emit DfiSerialGearChanged(Gear);
+    }
+}
+
 void VehicleData::setGearCalculation(int GearCalculation)
 {
     if (m_GearCalculation != GearCalculation) {

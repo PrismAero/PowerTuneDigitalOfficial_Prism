@@ -128,6 +128,14 @@ QVariantMap OverlayConfigService::migrateAndLoadConfigs(const QString &dashboard
             continue;
 
         bool changed = false;
+        if (def.id == QLatin1String("tachCluster")) {
+            const QString gearKey = loaded.value(QStringLiteral("gearKey")).toString();
+            const bool dfiEnabled = m_appSettings->getValue(QStringLiteral("ui/dfiSerial/enabled"), false).toBool();
+            if (dfiEnabled && gearKey == QLatin1String("EXGear")) {
+                loaded[QStringLiteral("gearKey")] = QStringLiteral("DfiSerialGear");
+                changed = true;
+            }
+        }
         if (loaded.contains(QStringLiteral("sensorKey"))) {
             const QString normalized = normalizeAnalogSensorKey(loaded.value(QStringLiteral("sensorKey")).toString());
             if (normalized != loaded.value(QStringLiteral("sensorKey")).toString()) {
