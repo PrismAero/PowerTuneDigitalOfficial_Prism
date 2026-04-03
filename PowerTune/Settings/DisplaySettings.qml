@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import QtMultimedia
 import PowerTune.Settings 1.0
 import PowerTune.UI 1.0
 import PowerTune.Utils 1.0
@@ -9,6 +10,7 @@ SettingsPage {
     id: root
 
     property bool settingsLoaded: false
+    readonly property string bootLoopVideoSource: "file:///home/pi/bootvideo.mp4"
 
     function adjustBrightness(delta) {
         var next = ScreenControl.currentBrightnessPercent + (delta * 5);
@@ -239,8 +241,46 @@ SettingsPage {
                 font.pixelSize: SettingsTheme.fontStatus
                 text: DemoMode.active
                       ? Translator.translate("Demo mode is locked for this boot session. Reboot to exit.", Settings.language)
-                      : Translator.translate("Demo mode hides all normal UI and loops the intro video.", Settings.language)
+                      : Translator.translate("Demo mode hides all normal UI and loops the same boot splash video.", Settings.language)
                 wrapMode: Text.WordWrap
+            }
+
+            Rectangle {
+                Layout.fillWidth: true
+                Layout.preferredHeight: 180
+                border.color: SettingsTheme.border
+                border.width: SettingsTheme.borderWidth
+                color: SettingsTheme.surfaceElevated
+                radius: SettingsTheme.radiusMedium
+
+                VideoOutput {
+                    id: previewOutput
+                    anchors.fill: parent
+                    anchors.margins: 1
+                    fillMode: VideoOutput.PreserveAspectCrop
+                    visible: previewPlayer.mediaStatus !== MediaPlayer.InvalidMedia
+                             && previewPlayer.mediaStatus !== MediaPlayer.NoMedia
+                    z: 1
+                }
+
+                MediaPlayer {
+                    id: previewPlayer
+                    autoPlay: true
+                    loops: MediaPlayer.Infinite
+                    source: root.bootLoopVideoSource
+                    videoOutput: previewOutput
+                }
+
+                Text {
+                    anchors.centerIn: parent
+                    color: SettingsTheme.textSecondary
+                    font.family: SettingsTheme.fontFamily
+                    font.pixelSize: SettingsTheme.fontStatus
+                    text: Translator.translate("Boot splash video preview unavailable", Settings.language)
+                    visible: previewPlayer.mediaStatus === MediaPlayer.InvalidMedia
+                             || previewPlayer.mediaStatus === MediaPlayer.NoMedia
+                    z: 2
+                }
             }
         }
     }

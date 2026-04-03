@@ -43,6 +43,9 @@ bool CanStartupManager::prepareInterface(const QString &interfaceName, int bitra
         setLastError(QStringLiteral("Failed to bring %1 up").arg(interfaceName));
         return false;
     }
+
+    runIpCommand({QStringLiteral("link"), QStringLiteral("set"), interfaceName,
+                  QStringLiteral("txqueuelen"), QStringLiteral("256")});
 #else
     Q_UNUSED(interfaceName)
     Q_UNUSED(bitrate)

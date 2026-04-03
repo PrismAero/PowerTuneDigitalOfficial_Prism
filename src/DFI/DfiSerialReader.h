@@ -108,6 +108,7 @@ private:
     int m_gear = -1;
     QString m_activeCodes;
     QSet<int> m_suppressedCodes;
+    qint64 m_lastStatusEmitMs = 0;
 
     static constexpr int SIGNAL_TIMEOUT_MS = 5000;
 };

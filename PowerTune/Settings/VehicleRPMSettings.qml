@@ -2,6 +2,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import PowerTune.Core 1.0
 import PowerTune.Settings 1.0
 import PowerTune.UI 1.0
 import PowerTune.Utils 1.0
@@ -168,6 +169,86 @@ SettingsPage {
                             VehicleRpmSettingsModel.applySpeed();
                         }
                     }
+                }
+            }
+
+            SettingsSection {
+                Layout.fillWidth: true
+                title: "DFI Serial"
+
+                SettingsRow {
+                    label: "Enabled"
+                    description: "Read Kawasaki DFI codes via UART"
+
+                    StyledSwitch {
+                        checked: DfiSerial ? DfiSerial.enabled : false
+                        label: checked ? "On" : "Off"
+                        onCheckedChanged: {
+                            if (DfiSerial)
+                                DfiSerial.enabled = checked;
+                        }
+                    }
+                }
+
+                SettingsRow {
+                    label: "Port"
+
+                    StyledTextField {
+                        Layout.fillWidth: true
+                        height: parent.height
+                        text: DfiSerial ? DfiSerial.portPath : "/dev/ttyAMA0"
+                        onEditingFinished: {
+                            if (DfiSerial)
+                                DfiSerial.portPath = text;
+                        }
+                    }
+                }
+
+                SettingsRow {
+                    label: "Status"
+
+                    ConnectionStatusIndicator {
+                        Layout.fillWidth: true
+                        height: parent.height
+                        status: {
+                            if (!DfiSerial)
+                                return "disconnected";
+                            if (DfiSerial.hasSignal)
+                                return "connected";
+                            if (DfiSerial.connected)
+                                return "pending";
+                            return "disconnected";
+                        }
+                        statusText: {
+                            if (!DfiSerial)
+                                return "Unavailable";
+                            if (DfiSerial.hasSignal)
+                                return "Receiving";
+                            if (DfiSerial.connected)
+                                return "Connected (no signal)";
+                            return "Disconnected";
+                        }
+                    }
+                }
+
+                SettingsRow {
+                    label: "Gear / Codes"
+
+                    Text {
+                        color: SettingsTheme.textSecondary
+                        font.family: SettingsTheme.fontFamilyMono
+                        font.pixelSize: SettingsTheme.fontStatus
+                        text: DfiSerial ? ("Gear: " + DfiSerial.gearString + "  Codes: " + (DfiSerial.activeCodes || "none")) : "-"
+                    }
+                }
+
+                StyledButton {
+                    text: "DFI Code Filters"
+                    onClicked: dfiCodeFilterPopup.open()
+                }
+
+                DfiCodeFilterPopup {
+                    id: dfiCodeFilterPopup
                 }
             }
         }

@@ -7,7 +7,7 @@ cmake_minimum_required(VERSION 3.16)
 project(PowerTuneQMLGui
     VERSION 1.0.0
     DESCRIPTION "PowerTune Digital Dashboard for automotive ECU monitoring"
-    LANGUAGES CXX
+    LANGUAGES C CXX
 )
 
 option(POWERTUNE_ENABLE_WINDEPLOYQT "Run windeployqt as a post-build step on Windows" ON)

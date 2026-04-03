@@ -11,7 +11,7 @@ Popup {
     closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
     modal: true
     padding: SettingsTheme.sectionPadding
-    width: Math.min(parent.width * 0.85, 640)
+    width: Math.min((parent ? parent.width : 800) * 0.85, 700)
 
     readonly property var knownCodes: [
         11, 12, 13, 14, 15, 21, 23, 24, 25, 31, 32, 33, 34, 35,
@@ -43,6 +43,7 @@ Popup {
             font.family: SettingsTheme.fontFamily
             font.pixelSize: SettingsTheme.fontStatus
             text: "Suppressed codes are hidden from the dashboard and diagnostics display."
+            wrapMode: Text.WordWrap
         }
 
         RowLayout {
@@ -70,42 +71,63 @@ Popup {
             Layout.fillWidth: true
             Layout.preferredHeight: Math.min(codeColumn.implicitHeight, 400)
             clip: true
+            ScrollBar.vertical.policy: ScrollBar.AsNeeded
+
+            background: Rectangle {
+                border.color: SettingsTheme.border
+                border.width: SettingsTheme.borderWidth
+                color: SettingsTheme.surfaceElevated
+                radius: SettingsTheme.radiusMedium
+            }
 
             ColumnLayout {
                 id: codeColumn
-                width: parent.width
-                spacing: 4
+                width: parent ? parent.width : 0
+                spacing: SettingsTheme.controlGap
 
                 Repeater {
                     model: root.knownCodes
-                    delegate: RowLayout {
+                    delegate: Rectangle {
                         Layout.fillWidth: true
+                        border.color: SettingsTheme.border
+                        border.width: SettingsTheme.borderWidth
+                        color: index % 2 === 0 ? SettingsTheme.controlBg : SettingsTheme.surface
+                        implicitHeight: Math.max(SettingsTheme.controlHeight + 8, codeRow.implicitHeight + 8)
+                        radius: SettingsTheme.radiusSmall
 
-                        Text {
-                            Layout.preferredWidth: 60
-                            color: SettingsTheme.textPrimary
-                            font.family: SettingsTheme.fontFamilyMono
-                            font.pixelSize: SettingsTheme.fontLabel
-                            text: "DFI " + modelData
-                        }
+                        RowLayout {
+                            id: codeRow
 
-                        Text {
-                            Layout.fillWidth: true
-                            color: SettingsTheme.textSecondary
-                            font.family: SettingsTheme.fontFamily
-                            font.pixelSize: SettingsTheme.fontCaption
-                            text: DfiSerial.dfiCodeDescription(modelData)
-                            elide: Text.ElideRight
-                        }
+                            anchors.fill: parent
+                            anchors.margins: 6
+                            spacing: SettingsTheme.controlGap
 
-                        StyledSwitch {
-                            checked: !DfiSerial.isCodeSuppressed(modelData)
-                            text: checked ? "Enabled" : "Suppressed"
-                            onCheckedChanged: {
-                                if (checked)
-                                    DfiSerial.unsuppressCode(modelData);
-                                else
-                                    DfiSerial.suppressCode(modelData);
+                            Text {
+                                Layout.preferredWidth: 70
+                                color: SettingsTheme.textPrimary
+                                font.family: SettingsTheme.fontFamilyMono
+                                font.pixelSize: SettingsTheme.fontLabel
+                                text: "DFI " + modelData
+                            }
+
+                            Text {
+                                Layout.fillWidth: true
+                                color: SettingsTheme.textPrimary
+                                font.family: SettingsTheme.fontFamily
+                                font.pixelSize: SettingsTheme.fontCaption
+                                text: DfiSerial.dfiCodeDescription(modelData)
+                                wrapMode: Text.WordWrap
+                            }
+
+                            StyledSwitch {
+                                checked: !DfiSerial.isCodeSuppressed(modelData)
+                                label: checked ? "Enabled" : "Suppressed"
+                                onCheckedChanged: {
+                                    if (checked)
+                                        DfiSerial.unsuppressCode(modelData);
+                                    else
+                                        DfiSerial.suppressCode(modelData);
+                                }
                             }
                         }
                     }

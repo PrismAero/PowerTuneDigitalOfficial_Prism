@@ -345,6 +345,7 @@ The build is configured in `build-powertune/conf/local.conf`:
 |----------|-------|
 | Host (LAN) | `192.168.15.183` |
 | Host (direct-link/ICS) | `192.168.137.251` |
+| Host (USB-C gadget) | `192.168.7.2` |
 | User | `root` (passwordless SSH) |
 | Board | Raspberry Pi 4 Model B (BCM2711, ARMv7 32-bit) |
 | OS | Poky (Yocto) with SysVinit |
@@ -383,6 +384,25 @@ interface and share it to the Pi adapter:
 - ICS sets the host adapter to `192.168.137.1`
 - Windows provides DHCP on that segment
 - Pi receives a lease in `192.168.137.x` (example validated: `192.168.137.251`)
+
+#### 3.1.3 USB-C Gadget Link (Direct Cable)
+
+The Pi can be connected directly via its USB-C port using USB Ethernet gadget
+mode. This requires `dtoverlay=dwc2` in config.txt and the `dwc2`+`g_ether`
+kernel modules (both included in the Yocto image).
+
+- Pi address: `192.168.7.2` (static, on `usb0`)
+- PC address: `192.168.7.1/24` (set manually on the RNDIS/USB Ethernet adapter)
+
+Windows setup:
+1. Connect USB-C cable from PC to Pi USB-C port
+2. Windows should auto-detect an RNDIS/Ethernet Gadget adapter
+3. Open Network Connections, find the new adapter (USB Ethernet/RNDIS)
+4. Set IPv4: Address `192.168.7.1`, Mask `255.255.255.0`
+5. SSH: `ssh root@192.168.7.2`
+
+The Pi USB-C port also supplies power, so no separate power cable is needed for
+short development sessions (the PC USB port provides limited current).
 
 ### 3.2 Mac-Driven Deployment Scripts
 

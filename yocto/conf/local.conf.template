@@ -76,6 +76,9 @@ boot_delay=0\n\
 \n\
 # Disable overscan\n\
 disable_overscan=1\n\
+\n\
+# USB-C gadget mode (USB Ethernet for direct PC connection)\n\
+dtoverlay=dwc2\n\
 "
 
 # --- Silent boot, IPv6 disabled at kernel level ---
@@ -100,6 +103,9 @@ PACKAGECONFIG:append:pn-qtmultimedia = " gstreamer"
 
 # --- CAN bus kernel modules ---
 KERNEL_MODULE_AUTOLOAD:append = " can can-raw can-bcm mcp251x spi-bcm2835"
+
+# --- USB-C gadget Ethernet (dwc2 + g_ether for direct PC link via USB-C) ---
+KERNEL_MODULE_AUTOLOAD:append = " dwc2 g_ether"
 
 # =============================================================================
 # Performance Optimizations

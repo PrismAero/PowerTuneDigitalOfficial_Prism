@@ -156,6 +156,7 @@ void DfiSerialReader::start()
     dfi_init(&m_decoder);
     dfi_set_status_callback(&m_decoder, &DfiSerialReader::statusCallback, this);
     m_elapsedTimer.start();
+    m_lastStatusEmitMs = 0;
 
     bool wasConnected = m_connected;
     m_connected = true;
@@ -191,6 +192,8 @@ void DfiSerialReader::onReadyRead()
         return;
 
     const QByteArray data = m_serial->readAll();
+    if (data.isEmpty())
+        return;
     const quint64 now_us = static_cast<quint64>(m_elapsedTimer.nsecsElapsed() / 1000);
 
     for (int i = 0; i < data.size(); ++i) {
@@ -200,6 +203,21 @@ void DfiSerialReader::onReadyRead()
 
     if (!m_hasSignal) {
         m_hasSignal = true;
+        emit statusUpdated();
+    }
+
+    if (m_sensorRegistry) {
+        m_sensorRegistry->markCanSensorActive(QStringLiteral("DfiSerialGear"));
+        m_sensorRegistry->markCanSensorActive(QStringLiteral("DfiSerialCodes"));
+        m_sensorRegistry->markCanSensorActive(QStringLiteral("DfiSerialChecksumErrors"));
+        m_sensorRegistry->markCanSensorActive(QStringLiteral("DfiSerialGroupsRx"));
+    }
+
+    // Decoder callbacks only fire when gear/code set changes; emit a throttled
+    // status update here so counters and activity stay fresh during steady data.
+    const qint64 nowMs = m_elapsedTimer.elapsed();
+    if ((nowMs - m_lastStatusEmitMs) >= 200) {
+        m_lastStatusEmitMs = nowMs;
         emit statusUpdated();
     }
     m_signalTimer.start();
