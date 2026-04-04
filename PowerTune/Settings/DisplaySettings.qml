@@ -226,7 +226,7 @@ SettingsPage {
                 primary: !DemoMode.active
                 text: DemoMode.active
                       ? Translator.translate("Demo Mode Active (until reboot)", Settings.language)
-                      : Translator.translate("Enter Demo Mode", Settings.language)
+                      : Translator.translate("Enter Demo Mode (session only)", Settings.language)
 
                 onClicked: {
                     if (root.settingsLoaded && !DemoMode.active)
@@ -240,8 +240,8 @@ SettingsPage {
                 font.family: SettingsTheme.fontFamily
                 font.pixelSize: SettingsTheme.fontStatus
                 text: DemoMode.active
-                      ? Translator.translate("Demo mode is locked for this boot session. Reboot to exit.", Settings.language)
-                      : Translator.translate("Demo mode hides all normal UI and loops the same boot splash video.", Settings.language)
+                      ? Translator.translate("Demo mode is session-only and never saved. Reboot to exit.", Settings.language)
+                      : Translator.translate("Demo mode hides all normal UI, loops the boot splash video, and is not persisted between boots.", Settings.language)
                 wrapMode: Text.WordWrap
             }
 

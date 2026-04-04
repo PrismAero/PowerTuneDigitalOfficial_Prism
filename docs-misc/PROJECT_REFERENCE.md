@@ -269,13 +269,23 @@ Canonical runtime settings path on the target device:
 `Core/appsettings.cpp` currently handles:
 
 - generic key/value storage
+- schema versioning and legacy key migration
 - RPM, speed, warning, and unit settings
+- dashboard count and selected dashboard persistence
+- vehicle weight, odometer, and trip persistence
+- CAN auto-connect, speed source, bitrate, and logger preferences
 - display brightness persistence
 - dashboard background config
 - overlay config save/load/remove
 - dashboard lock persistence
 - ex-board gear and speed sensor config
 - extender calibration and Steinhart settings restore
+
+Current behavior notes:
+
+- `AppSettings::setValue()` persists immediately with `QSettings::sync()` to reduce power-loss risk
+- startup hydration now belongs in `Connect` + `AppSettings::readandApplySettings()`, not lazy settings-page initialization
+- Demo Mode is intentionally session-only and is not restored from persisted settings
 
 ### 11.2 Current settings tabs
 
@@ -311,7 +321,7 @@ Canonical runtime settings path on the target device:
 - merges legacy IDs where needed
 - renders each overlay through `DraggableOverlay.qml`
 
-Overlay positions are stored separately through `OverlayConfigManager`.
+Overlay positions are stored separately through `OverlayPositionManager`.
 
 ### 12.3 Current race dash overlays
 

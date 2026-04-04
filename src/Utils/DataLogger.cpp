@@ -33,21 +33,36 @@ void datalogger::startLog(QString logFilename)
     if (m_updatetimer.isActive())
         stopLog();
 
-    m_logBasePath = std::move(logFilename);
+    logFilename = logFilename.trimmed();
+    if (logFilename.isEmpty())
+        logFilename = QStringLiteral("DataLog");
+
+    if (m_logBasePath != logFilename) {
+        m_logBasePath = std::move(logFilename);
+        emit logBasePathChanged(m_logBasePath);
+    }
+
     m_loggerStartTime = QTime::currentTime();
     createHeader();
     m_logFile.setFileName(m_logBasePath + ".csv");
-    if (!m_logFile.open(QFile::Append | QFile::Text))
+    if (!m_logFile.open(QFile::Append | QFile::Text)) {
+        emit activeChanged(false);
         return;
+    }
+
     connect(&m_updatetimer, &QTimer::timeout, this, &datalogger::updateLog, Qt::UniqueConnection);
     m_updatetimer.start(200);
+    emit activeChanged(true);
 }
 
 void datalogger::stopLog()
 {
+    const bool wasActive = m_updatetimer.isActive();
     m_updatetimer.stop();
     if (m_logFile.isOpen())
         m_logFile.close();
+    if (wasActive)
+        emit activeChanged(false);
 }
 
 void datalogger::createHeader()

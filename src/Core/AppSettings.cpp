@@ -11,6 +11,31 @@
 #include <iterator>
 #include <utility>
 
+namespace {
+constexpr auto kSettingsSchemaVersionKey = "ui/settingsSchemaVersion";
+constexpr auto kLegacyAutoConnectKey = "ui/connectAtStartup";
+constexpr auto kCanAutoConnectKey = "ui/canAutoConnect";
+constexpr auto kDashCountKey = "ui/dashCount";
+constexpr auto kLoggerEnabledKey = "ui/logger/enabled";
+constexpr auto kLoggerFilenameKey = "ui/logger/filename";
+
+int clampDashboardCount(int count)
+{
+    return qBound(1, count, 4);
+}
+
+QString dashSelectionKey(int slot)
+{
+    return QStringLiteral("ui/dashSelect%1").arg(qBound(1, slot, 4));
+}
+
+QString normalizedLogFilename(QString filename)
+{
+    filename = filename.trimmed();
+    return filename.isEmpty() ? QStringLiteral("DataLog") : filename;
+}
+}
+
 AppSettings::AppSettings(QObject *parent)
     : QObject(parent),
       m_settingsData(nullptr),
@@ -23,9 +48,7 @@ AppSettings::AppSettings(QObject *parent)
       m_digitalInputs(nullptr),
       m_settings(AppConstants::ORG_NAME, AppConstants::APP_NAME)
 {
-    m_syncTimer.setSingleShot(true);
-    m_syncTimer.setInterval(500);
-    connect(&m_syncTimer, &QTimer::timeout, this, &AppSettings::flushToDisk);
+    migrateSchema();
     preloadCache();
 }
 
@@ -43,9 +66,7 @@ AppSettings::AppSettings(SettingsData *settingsData, UIState *uiState, VehicleDa
       m_digitalInputs(digitalInputs),
       m_settings(AppConstants::ORG_NAME, AppConstants::APP_NAME)
 {
-    m_syncTimer.setSingleShot(true);
-    m_syncTimer.setInterval(500);
-    connect(&m_syncTimer, &QTimer::timeout, this, &AppSettings::flushToDisk);
+    migrateSchema();
     preloadCache();
 }
 
@@ -61,8 +82,6 @@ void AppSettings::setValue(const QString &key, const QVariant &value)
     m_settings.setValue(key, value);
     // Persist immediately to avoid losing settings during abrupt reboots/power cycles.
     m_settings.sync();
-    m_dirty = false;
-    m_syncTimer.stop();
 }
 
 QVariant AppSettings::getValue(const QString &key, const QVariant &defaultValue) const
@@ -78,8 +97,124 @@ QVariant AppSettings::getValue(const QString &key, const QVariant &defaultValue)
 
 void AppSettings::sync()
 {
-    m_syncTimer.stop();
-    flushToDisk();
+    m_settings.sync();
+}
+
+int AppSettings::readSettingsSchemaVersion() const
+{
+    return getValue(kSettingsSchemaVersionKey, 0).toInt();
+}
+
+int AppSettings::readDashboardCount() const
+{
+    return clampDashboardCount(getValue(kDashCountKey, 1).toInt());
+}
+
+void AppSettings::writeDashboardCount(int count)
+{
+    const int normalizedCount = clampDashboardCount(count);
+    setValue(kDashCountKey, normalizedCount);
+
+    if (m_uiState) {
+        m_uiState->setDashboardCount(normalizedCount);
+        m_uiState->setVisibledashes(normalizedCount);
+    }
+}
+
+int AppSettings::readSelectedDash(int slot) const
+{
+    return getValue(dashSelectionKey(slot), 0).toInt();
+}
+
+void AppSettings::writeSelectedDash(int slot, int selection)
+{
+    setValue(dashSelectionKey(slot), qMax(0, selection));
+}
+
+bool AppSettings::readCanAutoConnect() const
+{
+    return getValue(kCanAutoConnectKey, false).toBool();
+}
+
+void AppSettings::writeCanAutoConnect(bool enabled)
+{
+    setValue(kCanAutoConnectKey, enabled);
+}
+
+QString AppSettings::readVehicleWeight() const
+{
+    return getValue(QStringLiteral("ui/vehicleWeight"), QStringLiteral("0")).toString();
+}
+
+void AppSettings::writeVehicleWeight(const QString &weight)
+{
+    setValue(QStringLiteral("ui/vehicleWeight"), weight);
+    if (m_vehicleData)
+        m_vehicleData->setWeight(weight.toInt());
+}
+
+QString AppSettings::readOdometer() const
+{
+    return getValue(QStringLiteral("ui/odometer"), QStringLiteral("0")).toString();
+}
+
+void AppSettings::writeOdometer(const QString &odometer)
+{
+    setValue(QStringLiteral("ui/odometer"), odometer);
+    if (m_vehicleData)
+        m_vehicleData->setOdo(odometer.toDouble());
+}
+
+QString AppSettings::readTripmeter() const
+{
+    return getValue(QStringLiteral("ui/tripmeter"), QStringLiteral("0")).toString();
+}
+
+void AppSettings::writeTripmeter(const QString &tripmeter)
+{
+    setValue(QStringLiteral("ui/tripmeter"), tripmeter);
+    if (m_vehicleData)
+        m_vehicleData->setTrip(tripmeter.toDouble());
+}
+
+int AppSettings::readLanguage() const
+{
+    return getValue(QStringLiteral("Language"), 0).toInt();
+}
+
+int AppSettings::readMainSpeedSourceIndex() const
+{
+    return getValue(QStringLiteral("ui/mainSpeedSource"), getValue(QStringLiteral("ExternalSpeed"), 0)).toInt();
+}
+
+int AppSettings::readCanBitrateSelection() const
+{
+    return getValue(QStringLiteral("ui/bitrateSelect"), 0).toInt();
+}
+
+void AppSettings::writeCanBitrateSelection(int selection)
+{
+    setValue(QStringLiteral("ui/bitrateSelect"), selection);
+}
+
+bool AppSettings::readLoggerEnabled() const
+{
+    return getValue(kLoggerEnabledKey, false).toBool();
+}
+
+void AppSettings::writeLoggerEnabled(bool enabled)
+{
+    setValue(kLoggerEnabledKey, enabled);
+}
+
+QString AppSettings::readLoggerFilename() const
+{
+    return normalizedLogFilename(getValue(kLoggerFilenameKey, QStringLiteral("DataLog")).toString());
+}
+
+void AppSettings::writeLoggerFilename(const QString &filename)
+{
+    setValue(kLoggerFilenameKey, normalizedLogFilename(filename));
 }
 
 void AppSettings::preloadCache()
@@ -93,17 +228,62 @@ void AppSettings::preloadCache()
     m_cacheLoaded = true;
 }
 
-void AppSettings::scheduleSync()
+void AppSettings::applyUnitSettings()
 {
-    m_syncTimer.start();
+    setTempUnitIndex(getValue(QStringLiteral("ui/unitSelector"), 0).toInt());
+    setSpeedUnitIndex(getValue(QStringLiteral("ui/unitSelector1"), 0).toInt());
+    setPressureUnitIndex(getValue(QStringLiteral("ui/unitSelector2"), 0).toInt());
 }
 
-void AppSettings::flushToDisk()
+void AppSettings::applyVehicleSettings()
 {
-    if (!m_dirty)
+    if (!m_vehicleData)
         return;
+
+    m_vehicleData->setWeight(readVehicleWeight().toInt());
+    m_vehicleData->setOdo(readOdometer().toDouble());
+    m_vehicleData->setTrip(readTripmeter().toDouble());
+}
+
+void AppSettings::applyDashboardSettings()
+{
+    if (!m_uiState)
+        return;
+
+    const int dashboardCount = readDashboardCount();
+    m_uiState->setDashboardCount(dashboardCount);
+    m_uiState->setVisibledashes(dashboardCount);
+}
+
+void AppSettings::migrateSchema()
+{
+    const int schemaVersion = m_settings.value(kSettingsSchemaVersionKey, 0).toInt();
+    if (schemaVersion >= kCurrentSettingsSchemaVersion)
+        return;
+
+    if (schemaVersion < 1) {
+        if (m_settings.contains(kLegacyAutoConnectKey) && !m_settings.contains(kCanAutoConnectKey))
+            m_settings.setValue(kCanAutoConnectKey, m_settings.value(kLegacyAutoConnectKey));
+
+        if (m_settings.contains(kDashCountKey)) {
+            const int storedDashCount = m_settings.value(kDashCountKey).toInt();
+            if (storedDashCount >= 0 && storedDashCount <= 3)
+                m_settings.setValue(kDashCountKey, storedDashCount + 1);
+        }
+
+        if (!m_settings.contains(QStringLiteral("ui/mainSpeedSource")) && m_settings.contains(QStringLiteral("ExternalSpeed")))
+            m_settings.setValue(QStringLiteral("ui/mainSpeedSource"), m_settings.value(QStringLiteral("ExternalSpeed")));
+
+        if (!m_settings.contains(kLoggerFilenameKey))
+            m_settings.setValue(kLoggerFilenameKey, QStringLiteral("DataLog"));
+        if (!m_settings.contains(kLoggerEnabledKey))
+            m_settings.setValue(kLoggerEnabledKey, false);
+    }
+
+    m_settings.setValue(kSettingsSchemaVersionKey, kCurrentSettingsSchemaVersion);
     m_settings.sync();
-    m_dirty = false;
+    m_cache.clear();
+    m_cacheLoaded = false;
 }
 
 void AppSettings::setSpeedUnitIndex(int index)
@@ -191,7 +371,6 @@ void AppSettings::setEcuIndex(int index)
 
 void AppSettings::setMainSpeedSourceIndex(int index)
 {
-    setValue(QStringLiteral("ui/mainSpeedSource"), index);
     writeStartupSettings(index);
 }
 
@@ -281,7 +460,7 @@ void AppSettings::setLogging(const int &arg)
 
 void AppSettings::writeSelectedDashSettings(int numberofdashes)
 {
-    setValue("ui/dashCount", numberofdashes);
+    writeDashboardCount(numberofdashes);
 }
 
 void AppSettings::externalspeedconnectionstatus(int connected)
@@ -615,6 +794,7 @@ void AppSettings::writeDashboardLockEnabled(bool enabled)
 
 void AppSettings::writeStartupSettings(const int &ExternalSpeed)
 {
+    setValue("ui/mainSpeedSource", ExternalSpeed);
     setValue("ExternalSpeed", ExternalSpeed);
     if (m_settingsData) {
         m_settingsData->setExternalSpeed(ExternalSpeed);
@@ -734,33 +914,37 @@ void AppSettings::setSteinhartCalculator(SteinhartCalculator *calc)
 
 void AppSettings::readandApplySettings()
 {
+    applyUnitSettings();
+    applyVehicleSettings();
+    applyDashboardSettings();
+
     if (m_settingsData) {
-        m_settingsData->setmaxRPM(getValue("Max RPM").toInt());
-        m_settingsData->setrpmStage1(getValue("Shift Light1").toInt());
-        m_settingsData->setrpmStage2(getValue("Shift Light2").toInt());
-        m_settingsData->setrpmStage3(getValue("Shift Light3").toInt());
-        m_settingsData->setrpmStage4(getValue("Shift Light4").toInt());
+        m_settingsData->setmaxRPM(getValue("Max RPM", 10000).toInt());
+        m_settingsData->setrpmStage1(getValue("Shift Light1", 3000).toInt());
+        m_settingsData->setrpmStage2(getValue("Shift Light2", 5500).toInt());
+        m_settingsData->setrpmStage3(getValue("Shift Light3", 5500).toInt());
+        m_settingsData->setrpmStage4(getValue("Shift Light4", 7500).toInt());
         m_settingsData->setsmootexAnalogInput7(getValue("AN7Damping").toInt());
     }
 
     if (m_settingsData) {
-        qreal waterwarn = getValue("waterwarn").toReal();
-        m_settingsData->setwaterwarn(static_cast<int>(waterwarn <= 0 ? 400 : waterwarn));
+        qreal waterwarn = getValue("waterwarn", 110).toReal();
+        m_settingsData->setwaterwarn(static_cast<int>(waterwarn <= 0 ? 110 : waterwarn));
 
-        qreal boostwarn = getValue("boostwarn").toReal();
-        m_settingsData->setboostwarn(boostwarn <= 0 ? 999 : boostwarn);
+        qreal boostwarn = getValue("boostwarn", 0.9).toReal();
+        m_settingsData->setboostwarn(boostwarn <= 0 ? 0.9 : boostwarn);
 
-        qreal rpmwarn = getValue("rpmwarn").toReal();
-        m_settingsData->setrpmwarn(static_cast<int>(rpmwarn <= 0 ? 99999 : rpmwarn));
+        qreal rpmwarn = getValue("rpmwarn", 10000).toReal();
+        m_settingsData->setrpmwarn(static_cast<int>(rpmwarn <= 0 ? 10000 : rpmwarn));
 
-        qreal knockwarn = getValue("knockwarn").toReal();
-        m_settingsData->setknockwarn(static_cast<int>(knockwarn <= 0 ? 99999 : knockwarn));
+        qreal knockwarn = getValue("knockwarn", 80).toReal();
+        m_settingsData->setknockwarn(static_cast<int>(knockwarn <= 0 ? 80 : knockwarn));
 
         m_settingsData->setgearcalcactivation(getValue("gercalactive").toInt());
     }
 
     if (m_engineData) {
-        m_engineData->setLambdamultiply(getValue("lambdamultiply").toReal());
+        m_engineData->setLambdamultiply(getValue("lambdamultiply", 14.7).toReal());
     }
 
     if (m_settingsData) {
@@ -773,17 +957,17 @@ void AppSettings::readandApplySettings()
     }
 
     if (m_engineData) {
-        m_engineData->setCylinders(getValue("Cylinders").toReal());
+        m_engineData->setCylinders(getValue("Cylinders", 4).toReal());
     }
 
     if (m_settingsData) {
-        m_settingsData->setExternalSpeed(getValue("ExternalSpeed").toInt());
+        m_settingsData->setExternalSpeed(readMainSpeedSourceIndex());
     }
 
     if (m_settingsData) {
         m_settingsData->setCBXCountrysave(getValue("Country").toString());
         m_settingsData->setCBXTracksave(getValue("Track").toString());
-        m_settingsData->setlanguage(getValue("Language", 0).toInt());
+        m_settingsData->setlanguage(readLanguage());
     }
 
     if (m_uiState) {
@@ -796,10 +980,10 @@ void AppSettings::readandApplySettings()
     }
 
     if (m_settingsData) {
-        qreal speedPercent = getValue("Speedcorrection").toReal();
+        qreal speedPercent = getValue("Speedcorrection", 1.0).toReal();
         m_settingsData->setspeedpercent(speedPercent <= 0 ? 1 : speedPercent);
 
-        qreal pulsesPerMile = getValue("Pulsespermile").toReal();
+        qreal pulsesPerMile = getValue("Pulsespermile", 100000).toReal();
         m_settingsData->setpulsespermile(pulsesPerMile <= 0 ? 100000 : pulsesPerMile);
     }
 
@@ -814,6 +998,7 @@ void AppSettings::readandApplySettings()
     if (m_connectionData) {
         m_connectionData->setexternalspeedconnectionrequest(getValue("externalspeedconnect").toInt());
         m_connectionData->setexternalspeedport(getValue("externalspeedport").toString());
+        m_connectionData->setecu(getECU());
     }
 
     // Restore per-channel linear calibration values and NTC flags into the Extender

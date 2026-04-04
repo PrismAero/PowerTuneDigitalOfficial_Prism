@@ -327,6 +327,8 @@ Connect::Connect(QObject *parent)
     m_appSettings->setExtender(m_extender);
     m_appSettings->setSteinhartCalculator(m_steinhartCalc);
     m_appSettings->readandApplySettings();
+    if (m_datalogger && m_appSettings->readLoggerEnabled())
+        m_datalogger->startLog(m_appSettings->readLoggerFilename());
     const auto applyDifferentialConfig = [this]() {
         if (!m_exBoardConfigManager || !m_differentialSensorCalc)
             return;
@@ -559,7 +561,7 @@ void Connect::clear() const
 void Connect::canbitratesetup(const int &cansetting)
 {
     if (m_appSettings)
-        m_appSettings->setValue(QStringLiteral("ui/bitrateSelect"), cansetting);
+        m_appSettings->writeCanBitrateSelection(cansetting);
 
     const int bitrate = canBitrateForSelection(cansetting);
     if (bitrate <= 0) {

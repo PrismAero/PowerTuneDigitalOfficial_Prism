@@ -94,13 +94,18 @@ SettingsPage {
     }
 
     function toggleDataLogger() {
+        var filename = logfilenameSelect.text.trim();
+        if (filename === "")
+            filename = "DataLog";
+        logfilenameSelect.text = filename;
+        AppSettings.writeLoggerFilename(filename);
+        AppSettings.writeLoggerEnabled(loggerswitch.checked);
         if (loggerswitch.checked) {
-            loggerActive = true;
-            Logger.startLog(logfilenameSelect.text);
+            Logger.startLog(filename);
         } else {
-            loggerActive = false;
             Logger.stopLog();
         }
+        loggerActive = Logger.active;
     }
 
     function triggerWarning() {
@@ -118,27 +123,25 @@ SettingsPage {
             return;
         connectButton.enabled = true;
         disconnectButton.enabled = false;
-        autoConnectEnabled = AppSettings.getValue("ui/canAutoConnect", AppSettings.getValue("ui/connectAtStartup", false));
-        AppSettings.setValue("ui/canAutoConnect", autoConnectEnabled);
-        weight.text = AppSettings.getValue("ui/vehicleWeight", "0");
+        autoConnectEnabled = AppSettings.readCanAutoConnect();
+        weight.text = AppSettings.readVehicleWeight();
         unitSelect1.currentIndex = AppSettings.getValue("ui/unitSelector1", 0);
         unitSelect.currentIndex = AppSettings.getValue("ui/unitSelector", 0);
         unitSelect2.currentIndex = AppSettings.getValue("ui/unitSelector2", 0);
-        odometer.text = AppSettings.getValue("ui/odometer", "0");
-        tripmeter.text = AppSettings.getValue("ui/tripmeter", "0");
+        odometer.text = AppSettings.readOdometer();
+        tripmeter.text = AppSettings.readTripmeter();
         exboardEnabledSwitch.checked = AppSettings.getValue("ui/exboard/enabled", true);
         ptEnabledSwitch.checked = AppSettings.getValue("ui/ptextender/enabled", true);
         baseadresstext.text = AppSettings.getValue("ui/extenderCanBase", "");
         shiftlightbaseadresstext.text = AppSettings.getValue("ui/shiftLightCanBase", "");
         ptextenderbaseadresstext.text = AppSettings.getValue("ui/ptextender/canBase", "");
-        languageselect.currentIndex = AppSettings.getValue("Language", 0);
-        mainspeedsource.currentIndex = AppSettings.getValue("ui/mainSpeedSource", 0);
-        canbitrateselect.currentIndex = AppSettings.getValue("ui/bitrateSelect", 0);
-        Vehicle.setTrip(tripmeter.text);
-        AppSettings.setSpeedUnitIndex(unitSelect1.currentIndex);
-        AppSettings.setTempUnitIndex(unitSelect.currentIndex);
-        AppSettings.setPressureUnitIndex(unitSelect2.currentIndex);
-        AppSettings.setMainSpeedSourceIndex(mainspeedsource.currentIndex);
+        languageselect.currentIndex = AppSettings.readLanguage();
+        mainspeedsource.currentIndex = AppSettings.readMainSpeedSourceIndex();
+        canbitrateselect.currentIndex = AppSettings.readCanBitrateSelection();
+        logfilenameSelect.text = AppSettings.readLoggerFilename();
+        loggerActive = Logger.active || AppSettings.readLoggerEnabled();
+        loggerswitch.checked = loggerActive;
+        updateWeightLabel();
         settingsLoaded = true;
         autoConnect();
     }
@@ -153,6 +156,20 @@ SettingsPage {
         }
 
         target: Connect
+    }
+
+    Connections {
+        function onActiveChanged(active) {
+            loggerActive = active;
+            loggerswitch.checked = active;
+        }
+
+        function onLogBasePathChanged(logBasePath) {
+            if (logBasePath !== "")
+                logfilenameSelect.text = logBasePath;
+        }
+
+        target: Logger
     }
 
     Connections {
@@ -324,7 +341,7 @@ SettingsPage {
                         onCheckedChanged: {
                             autoConnectEnabled = checked;
                             if (settingsLoaded)
-                                AppSettings.setValue("ui/canAutoConnect", checked);
+                                AppSettings.writeCanAutoConnect(checked);
                         }
                     }
                 }
@@ -383,7 +400,7 @@ SettingsPage {
                         model: ["250 kbit/s", "500 kbit/s", "1 Mbit/s"]
 
                         onCurrentIndexChanged: if (settingsLoaded)
-                                                   AppSettings.setValue("ui/bitrateSelect", currentIndex)
+                                                   AppSettings.writeCanBitrateSelection(currentIndex)
                     }
                 }
 
@@ -673,7 +690,7 @@ SettingsPage {
                         Layout.preferredHeight: SettingsTheme.controlHeight
                         inputMethodHints: Qt.ImhFormattedNumbersOnly
 
-                        onEditingFinished: AppSettings.setValue("ui/vehicleWeight", text)
+                        onEditingFinished: AppSettings.writeVehicleWeight(text)
                     }
                 }
 
@@ -689,7 +706,7 @@ SettingsPage {
                         text: "0"
 
                         onTextChanged: if (settingsLoaded)
-                                           AppSettings.setValue("ui/odometer", text)
+                                           AppSettings.writeOdometer(text)
                     }
                 }
 
@@ -709,7 +726,7 @@ SettingsPage {
                             text: "0"
 
                             onTextChanged: if (settingsLoaded)
-                                               AppSettings.setValue("ui/tripmeter", text)
+                                               AppSettings.writeTripmeter(text)
                         }
 
                         StyledButton {
@@ -798,8 +815,6 @@ SettingsPage {
                         onCurrentIndexChanged: {
                             applyLanguage();
                             updateWeightLabel();
-                            if (settingsLoaded)
-                                AppSettings.setValue("Language", currentIndex);
                         }
                     }
                 }
@@ -820,6 +835,12 @@ SettingsPage {
                         inputMethodHints: Qt.ImhNoAutoUppercase | Qt.ImhPreferLowercase | Qt.ImhSensitiveData
                                           | Qt.ImhNoPredictiveText
                         text: "DataLog"
+
+                        onEditingFinished: {
+                            AppSettings.writeLoggerFilename(text);
+                            if (Logger.active)
+                                toggleDataLogger();
+                        }
                     }
                 }
 
@@ -829,8 +850,8 @@ SettingsPage {
                     StyledSwitch {
                         id: loggerswitch
 
-                        Component.onCompleted: toggleDataLogger()
-                        onClicked: toggleDataLogger()
+                        onToggled: if (settingsLoaded)
+                                       toggleDataLogger()
                     }
                 }
             }

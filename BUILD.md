@@ -20,12 +20,14 @@ an Ubuntu 22.04 build server.
                            + full image build            PowerTuneQMLGui
 ```
 
-## Architecture Changes (Settings Performance Overhaul)
+## Architecture Changes (Settings Persistence Overhaul)
 
-### QSettings Caching (Phase 1)
-- AppSettings now uses an in-memory `QHash<QString, QVariant>` cache with deferred disk writes via a 500ms single-shot QTimer
-- All getValue() calls are O(1) hash lookups; all keys are preloaded at startup
-- Single `m_settings` QSettings member replaces per-call construction
+### Central Settings Contract
+- `AppSettings` remains the canonical `QSettings("PowerTune", "PowerTune")` owner
+- normal `AppSettings::setValue()` writes now persist immediately via `QSettings::sync()`
+- all keys are still preloaded into an in-memory `QHash<QString, QVariant>` cache for fast reads
+- startup hydration belongs to `Connect` + `AppSettings::readandApplySettings()`, not settings-page `Component.onCompleted` side effects
+- schema versioning now lives under `ui/settingsSchemaVersion`, with legacy key migration handled during `AppSettings` construction
 
 ### Lazy Tab Loading (Phase 4)
 - SettingsManager.qml uses Loader components for on-demand tab loading
@@ -65,6 +67,13 @@ an Ubuntu 22.04 build server.
 ### OverlayConfigManager -> OverlayPositionManager
 - Renamed to reflect reduced responsibility (positions and lock state only)
 - 7 unused methods removed (~200 lines of dead code)
+- overlay semantic config remains under `overlay/<dashboard>/<overlay>/...`
+- overlay positions remain under `overlayPos/<overlay>/...` and are intentionally separate from `AppSettings`
+
+### Persisted vs Session-Only State
+- Demo Mode is intentionally session-only and must not survive restart
+- boot splash media paths remain fixed assets, not user-configurable settings
+- Wi-Fi credentials remain OS-managed; only non-secret UI metadata belongs in app settings
 
 ### Shared Constants
 - `Core/AppConstants.h` created with ORG_NAME/APP_NAME constants

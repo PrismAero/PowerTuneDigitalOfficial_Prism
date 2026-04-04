@@ -118,7 +118,7 @@ private:
     int m_Brightness = 255;
     int m_Visibledashes = 1;
     bool m_screen = false;
-    int m_dashboardCount = 3;
+    int m_dashboardCount = 1;
     QStringList m_maindashsetup;
     QStringList m_dashfiles;
     QStringList m_backroundpictures;

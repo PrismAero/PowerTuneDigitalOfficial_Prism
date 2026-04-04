@@ -9,22 +9,22 @@ void VehicleRpmSettingsModel::load()
     if (!m_appSettings)
         return;
 
-    setWaterTempWarn(m_appSettings->getValue(QStringLiteral("waterwarn"), QStringLiteral("110")).toString());
-    setBoostWarn(m_appSettings->getValue(QStringLiteral("boostwarn"), QStringLiteral("0.9")).toString());
-    setRpmWarn(m_appSettings->getValue(QStringLiteral("rpmwarn"), QStringLiteral("10000")).toString());
-    setKnockWarn(m_appSettings->getValue(QStringLiteral("knockwarn"), QStringLiteral("80")).toString());
-    setLambdaMultiply(m_appSettings->getValue(QStringLiteral("lambdamultiply"), QStringLiteral("14.7")).toString());
+    setWaterTempWarn(QString::number(m_appSettings->getValue(QStringLiteral("waterwarn"), 110).toDouble()));
+    setBoostWarn(QString::number(m_appSettings->getValue(QStringLiteral("boostwarn"), 0.9).toDouble()));
+    setRpmWarn(QString::number(m_appSettings->getValue(QStringLiteral("rpmwarn"), 10000).toInt()));
+    setKnockWarn(QString::number(m_appSettings->getValue(QStringLiteral("knockwarn"), 80).toInt()));
+    setLambdaMultiply(QString::number(m_appSettings->getValue(QStringLiteral("lambdamultiply"), 14.7).toDouble()));
     setGearCalcEnabled(m_appSettings->getValue(QStringLiteral("gercalactive"), 0).toInt() > 0);
-    setMaxRpm(m_appSettings->getValue(QStringLiteral("Max RPM"), QStringLiteral("10000")).toString());
-    setShiftStageText(0, m_appSettings->getValue(QStringLiteral("Shift Light1"), QStringLiteral("3000")).toString());
-    setShiftStageText(1, m_appSettings->getValue(QStringLiteral("Shift Light2"), QStringLiteral("5500")).toString());
-    setShiftStageText(2, m_appSettings->getValue(QStringLiteral("Shift Light3"), QStringLiteral("5500")).toString());
-    setShiftStageText(3, m_appSettings->getValue(QStringLiteral("Shift Light4"), QStringLiteral("7500")).toString());
-    setGearValueText(0, m_appSettings->getValue(QStringLiteral("valgear1"), QStringLiteral("120")).toString());
-    setGearValueText(1, m_appSettings->getValue(QStringLiteral("valgear2"), QStringLiteral("74")).toString());
-    setGearValueText(2, m_appSettings->getValue(QStringLiteral("valgear3"), QStringLiteral("54")).toString());
-    setGearValueText(3, m_appSettings->getValue(QStringLiteral("valgear4"), QStringLiteral("37")).toString());
-    setGearValueText(4, m_appSettings->getValue(QStringLiteral("valgear5"), QStringLiteral("28")).toString());
+    setMaxRpm(QString::number(m_appSettings->getValue(QStringLiteral("Max RPM"), 10000).toInt()));
+    setShiftStageText(0, QString::number(m_appSettings->getValue(QStringLiteral("Shift Light1"), 3000).toInt()));
+    setShiftStageText(1, QString::number(m_appSettings->getValue(QStringLiteral("Shift Light2"), 5500).toInt()));
+    setShiftStageText(2, QString::number(m_appSettings->getValue(QStringLiteral("Shift Light3"), 5500).toInt()));
+    setShiftStageText(3, QString::number(m_appSettings->getValue(QStringLiteral("Shift Light4"), 7500).toInt()));
+    setGearValueText(0, QString::number(m_appSettings->getValue(QStringLiteral("valgear1"), 120).toInt()));
+    setGearValueText(1, QString::number(m_appSettings->getValue(QStringLiteral("valgear2"), 74).toInt()));
+    setGearValueText(2, QString::number(m_appSettings->getValue(QStringLiteral("valgear3"), 54).toInt()));
+    setGearValueText(3, QString::number(m_appSettings->getValue(QStringLiteral("valgear4"), 37).toInt()));
+    setGearValueText(4, QString::number(m_appSettings->getValue(QStringLiteral("valgear5"), 28).toInt()));
     setGearValueText(5, m_appSettings->getValue(QStringLiteral("valgear6"), QString()).toString());
 
     const double speedCorrection = m_appSettings->getValue(QStringLiteral("Speedcorrection"), 1).toDouble();
@@ -55,7 +55,8 @@ void VehicleRpmSettingsModel::applySpeed()
 {
     if (!m_appSettings)
         return;
-    m_appSettings->writeSpeedSettings(m_speedPercent.toDouble() / 100.0, 100000);
+    const double pulsesPerMile = m_appSettings->getValue(QStringLiteral("Pulsespermile"), 100000).toDouble();
+    m_appSettings->writeSpeedSettings(m_speedPercent.toDouble() / 100.0, pulsesPerMile);
 }
 
 QString VehicleRpmSettingsModel::shiftStageText(int index) const

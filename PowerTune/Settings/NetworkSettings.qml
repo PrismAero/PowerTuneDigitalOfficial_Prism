@@ -129,6 +129,8 @@ SettingsPage {
                         enabled: !Connection.wifiBusy
 
                         onClicked: {
+                            AppSettings.setValue("ui/wifiCountryCode", wificountrynames.get(wificountrycbx.currentIndex).countryname);
+                            AppSettings.setValue("ui/wifiLastSsid", wifilistbox.textAt(wifilistbox.currentIndex));
                             Wifiscanner.setwifi(wificountrynames.get(wificountrycbx.currentIndex).countryname,
                                                 wifilistbox.textAt(wifilistbox.currentIndex), pw1.text, "placeholder",
                                                 "placeholder");

@@ -33,10 +33,8 @@ ApplicationWindow {
     }
 
     Component.onCompleted: {
-        var firstSelection = AppSettings.getValue("ui/dashSelect1", 0);
+        var firstSelection = AppSettings.readSelectedDash(1);
         firstPageLoader.source = dashSourceFromSelection(firstSelection);
-        if (UI.Visibledashes !== 1)
-            UI.Visibledashes = 1;
         ensureDashboardPageIfNavigationDisabled();
         if (popUpLoader.active)
             popUpLoader.visible = true;

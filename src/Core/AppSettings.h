@@ -3,7 +3,6 @@
 
 #include <QObject>
 #include <QSettings>
-#include <QTimer>
 #include <QVariant>
 #include <QVariantMap>
 #include <QHash>
@@ -38,6 +37,27 @@ public:
     Q_INVOKABLE void setPressureUnitIndex(int index);
     Q_INVOKABLE void setEcuIndex(int index);
     Q_INVOKABLE void setMainSpeedSourceIndex(int index);
+    Q_INVOKABLE int readSettingsSchemaVersion() const;
+    Q_INVOKABLE int readDashboardCount() const;
+    Q_INVOKABLE void writeDashboardCount(int count);
+    Q_INVOKABLE int readSelectedDash(int slot) const;
+    Q_INVOKABLE void writeSelectedDash(int slot, int selection);
+    Q_INVOKABLE bool readCanAutoConnect() const;
+    Q_INVOKABLE void writeCanAutoConnect(bool enabled);
+    Q_INVOKABLE QString readVehicleWeight() const;
+    Q_INVOKABLE void writeVehicleWeight(const QString &weight);
+    Q_INVOKABLE QString readOdometer() const;
+    Q_INVOKABLE void writeOdometer(const QString &odometer);
+    Q_INVOKABLE QString readTripmeter() const;
+    Q_INVOKABLE void writeTripmeter(const QString &tripmeter);
+    Q_INVOKABLE int readLanguage() const;
+    Q_INVOKABLE int readMainSpeedSourceIndex() const;
+    Q_INVOKABLE int readCanBitrateSelection() const;
+    Q_INVOKABLE void writeCanBitrateSelection(int selection);
+    Q_INVOKABLE bool readLoggerEnabled() const;
+    Q_INVOKABLE void writeLoggerEnabled(bool enabled);
+    Q_INVOKABLE QString readLoggerFilename() const;
+    Q_INVOKABLE void writeLoggerFilename(const QString &filename);
 
     Q_INVOKABLE int getBaudRate();
     Q_INVOKABLE void setBaudRate(const int &arg);
@@ -133,9 +153,13 @@ public:
     Q_INVOKABLE void removeOverlayConfig(const QString &dashboardId, const QString &overlayId);
 
 private:
+    static constexpr int kCurrentSettingsSchemaVersion = 1;
+
+    void migrateSchema();
     void preloadCache();
-    void scheduleSync();
-    void flushToDisk();
+    void applyUnitSettings();
+    void applyVehicleSettings();
+    void applyDashboardSettings();
 
     SettingsData *m_settingsData;
     UIState *m_uiState;
@@ -149,9 +173,7 @@ private:
     SteinhartCalculator *m_steinhartCalc = nullptr;
     mutable QSettings m_settings;
     mutable QHash<QString, QVariant> m_cache;
-    QTimer m_syncTimer;
     bool m_cacheLoaded = false;
-    bool m_dirty = false;
 };
 
 #endif  // APPSETTINGS_H

@@ -25,8 +25,6 @@ void AppSettings::saveOverlayConfig(const QString &dashboardId, const QString &o
         m_cache.insert(fullKey, it.value());
     }
     m_settings.sync();
-    m_dirty = false;
-    m_syncTimer.stop();
 }
 
 QVariantMap AppSettings::loadOverlayConfig(const QString &dashboardId, const QString &overlayId)
@@ -79,6 +77,4 @@ void AppSettings::removeOverlayConfig(const QString &dashboardId, const QString 
     }
 
     m_settings.sync();
-    m_dirty = false;
-    m_syncTimer.stop();
 }

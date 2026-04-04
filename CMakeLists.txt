@@ -67,6 +67,7 @@ find_package(Qt6 REQUIRED COMPONENTS
     SerialBus
     SerialPort
     Multimedia
+    Test
 )
 
 # * Optional ShaderTools - kept available for future Qt 6 effects
@@ -598,6 +599,7 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 
 # * Installation rules
 include(GNUInstallDirs)
+include(CTest)
 install(TARGETS ${PROJECT_NAME}
     BUNDLE DESTINATION .
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
@@ -607,6 +609,10 @@ install(TARGETS ${PROJECT_NAME}
 # * Qt6 finalization
 if(QT_VERSION_MAJOR EQUAL 6)
     qt_finalize_executable(${PROJECT_NAME})
+endif()
+
+if(BUILD_TESTING)
+    add_subdirectory(tests)
 endif()
 
 # * Export compile_commands.json for clangd and other tools
